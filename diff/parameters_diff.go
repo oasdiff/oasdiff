@@ -31,8 +31,8 @@ func newParametersDiff() *ParametersDiff {
 	}
 }
 
-func getParametersDiff(config *Config, state *state, params1, params2 openapi3.ParametersMap, pathParamsMap PathParamsMap) (*ParametersDiff, error) {
-	diff, err := getParametersDiffInternal(config, state, params1, params2, pathParamsMap)
+func getParametersDiff(config *Config, state *state, params1, params2 openapi3.ParametersMap) (*ParametersDiff, error) {
+	diff, err := getParametersDiffInternal(config, state, params1, params2)
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +44,7 @@ func getParametersDiff(config *Config, state *state, params1, params2 openapi3.P
 	return diff, nil
 }
 
-func getParametersDiffInternal(config *Config, state *state, params1, params2 openapi3.ParametersMap, pathParamsMap PathParamsMap) (*ParametersDiff, error) {
+func getParametersDiffInternal(config *Config, state *state, params1, params2 openapi3.ParametersMap) (*ParametersDiff, error) {
 
 	result := newParametersDiff()
 

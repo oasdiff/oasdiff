@@ -34,8 +34,8 @@ func (tagsDiff *TagsDiff) Empty() bool {
 		len(tagsDiff.Modified) == 0
 }
 
-func getTagsDiff(config *Config, state *state, tags1, tags2 openapi3.Tags) *TagsDiff {
-	diff := getTagsDiffInternal(config, state, tags1, tags2)
+func getTagsDiff(config *Config, tags1, tags2 openapi3.Tags) *TagsDiff {
+	diff := getTagsDiffInternal(config, tags1, tags2)
 
 	if diff.Empty() {
 		return nil
@@ -44,13 +44,13 @@ func getTagsDiff(config *Config, state *state, tags1, tags2 openapi3.Tags) *Tags
 	return diff
 }
 
-func getTagsDiffInternal(config *Config, state *state, tags1, tags2 openapi3.Tags) *TagsDiff {
+func getTagsDiffInternal(config *Config, tags1, tags2 openapi3.Tags) *TagsDiff {
 
 	result := newTagsDiff()
 
 	for _, tag1 := range tags1 {
 		if tag2 := tags2.Get(tag1.Name); tag2 != nil {
-			if diff := getTagDiff(config, state, tag1, tag2); !diff.Empty() {
+			if diff := getTagDiff(config, tag1, tag2); !diff.Empty() {
 				result.Modified[tag1.Name] = diff
 			}
 		} else {

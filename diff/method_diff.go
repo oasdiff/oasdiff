@@ -56,7 +56,7 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	result := newMethodDiff()
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, operation1.Extensions, operation2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, operation1.Extensions, operation2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -84,9 +84,9 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 		return nil, err
 	}
 	result.DeprecatedDiff = getValueDiff(operation1.Deprecated, operation2.Deprecated)
-	result.SecurityDiff = getSecurityRequirementsDiff(config, state, operation1.Security, operation2.Security)
-	result.ServersDiff = getServersDiff(config, state, operation1.Servers, operation2.Servers)
-	result.ExternalDocsDiff, err = getExternalDocsDiff(config, state, operation1.ExternalDocs, operation2.ExternalDocs)
+	result.SecurityDiff = getSecurityRequirementsDiff(operation1.Security, operation2.Security)
+	result.ServersDiff = getServersDiff(config, operation1.Servers, operation2.Servers)
+	result.ExternalDocsDiff, err = getExternalDocsDiff(config, operation1.ExternalDocs, operation2.ExternalDocs)
 	if err != nil {
 		return nil, err
 	}

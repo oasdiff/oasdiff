@@ -18,8 +18,8 @@ func (diff *ExampleDiff) Empty() bool {
 	return diff == nil || *diff == ExampleDiff{}
 }
 
-func getExampleDiff(config *Config, state *state, value1, value2 *openapi3.Example) (*ExampleDiff, error) {
-	diff, err := getExampleDiffInternal(config, state, value1, value2)
+func getExampleDiff(config *Config, value1, value2 *openapi3.Example) (*ExampleDiff, error) {
+	diff, err := getExampleDiffInternal(config, value1, value2)
 	if err != nil {
 		return nil, err
 	}
@@ -31,11 +31,11 @@ func getExampleDiff(config *Config, state *state, value1, value2 *openapi3.Examp
 	return diff, nil
 }
 
-func getExampleDiffInternal(config *Config, state *state, value1, value2 *openapi3.Example) (*ExampleDiff, error) {
+func getExampleDiffInternal(config *Config, value1, value2 *openapi3.Example) (*ExampleDiff, error) {
 	result := ExampleDiff{}
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, value1.Extensions, value2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, value1.Extensions, value2.Extensions)
 	if err != nil {
 		return nil, err
 	}

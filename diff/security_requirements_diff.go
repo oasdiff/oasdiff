@@ -36,8 +36,8 @@ func newSecurityRequirementsDiff() *SecurityRequirementsDiff {
 	}
 }
 
-func getSecurityRequirementsDiff(config *Config, state *state, securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
-	diff := getSecurityRequirementsDiffInternal(config, state, securityRequirements1, securityRequirements2)
+func getSecurityRequirementsDiff(securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
+	diff := getSecurityRequirementsDiffInternal(securityRequirements1, securityRequirements2)
 
 	if diff.Empty() {
 		return nil
@@ -46,7 +46,7 @@ func getSecurityRequirementsDiff(config *Config, state *state, securityRequireme
 	return diff
 }
 
-func getSecurityRequirementsDiffInternal(config *Config, state *state, securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
+func getSecurityRequirementsDiffInternal(securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
 
 	result := newSecurityRequirementsDiff()
 

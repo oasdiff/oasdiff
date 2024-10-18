@@ -265,12 +265,12 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 	result := newDiff()
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, s1.Extensions, s2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, s1.Extensions, s2.Extensions)
 	if err != nil {
 		return nil, err
 	}
 	result.OpenAPIDiff = getValueDiff(s1.OpenAPI, s2.OpenAPI)
-	result.InfoDiff, err = getInfoDiff(config, state, s1.Info, s2.Info)
+	result.InfoDiff, err = getInfoDiff(config, s1.Info, s2.Info)
 	if err != nil {
 		return nil, err
 	}
@@ -283,10 +283,10 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 		return nil, err
 	}
 
-	result.SecurityDiff = getSecurityRequirementsDiff(config, state, &s1.Security, &s2.Security)
-	result.ServersDiff = getServersDiff(config, state, &s1.Servers, &s2.Servers)
-	result.TagsDiff = getTagsDiff(config, state, s1.Tags, s2.Tags)
-	result.ExternalDocsDiff, err = getExternalDocsDiff(config, state, s1.ExternalDocs, s2.ExternalDocs)
+	result.SecurityDiff = getSecurityRequirementsDiff(&s1.Security, &s2.Security)
+	result.ServersDiff = getServersDiff(config, &s1.Servers, &s2.Servers)
+	result.TagsDiff = getTagsDiff(config, s1.Tags, s2.Tags)
+	result.ExternalDocsDiff, err = getExternalDocsDiff(config, s1.ExternalDocs, s2.ExternalDocs)
 	if err != nil {
 		return nil, err
 	}

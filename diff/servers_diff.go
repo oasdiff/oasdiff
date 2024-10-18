@@ -34,8 +34,8 @@ func newServersDiff() *ServersDiff {
 	}
 }
 
-func getServersDiff(config *Config, state *state, pServers1, pServers2 *openapi3.Servers) *ServersDiff {
-	diff := getServersDiffInternal(config, state, pServers1, pServers2)
+func getServersDiff(config *Config, pServers1, pServers2 *openapi3.Servers) *ServersDiff {
+	diff := getServersDiffInternal(config, pServers1, pServers2)
 
 	if diff.Empty() {
 		return nil
@@ -44,7 +44,7 @@ func getServersDiff(config *Config, state *state, pServers1, pServers2 *openapi3
 	return diff
 }
 
-func getServersDiffInternal(config *Config, state *state, pServers1, pServers2 *openapi3.Servers) *ServersDiff {
+func getServersDiffInternal(config *Config, pServers1, pServers2 *openapi3.Servers) *ServersDiff {
 
 	result := newServersDiff()
 
@@ -53,7 +53,7 @@ func getServersDiffInternal(config *Config, state *state, pServers1, pServers2 *
 
 	for _, server1 := range servers1 {
 		if server2 := findServer(server1, servers2); server2 != nil {
-			diff, err := getServerDiff(config, state, server1, server2)
+			diff, err := getServerDiff(config, server1, server2)
 			if err != nil {
 				return nil
 			}

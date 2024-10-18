@@ -22,8 +22,8 @@ func (diff *ExternalDocsDiff) Empty() bool {
 	return diff == nil || *diff == ExternalDocsDiff{}
 }
 
-func getExternalDocsDiff(config *Config, state *state, docs1, docs2 *openapi3.ExternalDocs) (*ExternalDocsDiff, error) {
-	diff, err := getExternalDocsDiffInternal(config, state, docs1, docs2)
+func getExternalDocsDiff(config *Config, docs1, docs2 *openapi3.ExternalDocs) (*ExternalDocsDiff, error) {
+	diff, err := getExternalDocsDiffInternal(config, docs1, docs2)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func getExternalDocsDiff(config *Config, state *state, docs1, docs2 *openapi3.Ex
 	return diff, nil
 }
 
-func getExternalDocsDiffInternal(config *Config, state *state, docs1, docs2 *openapi3.ExternalDocs) (*ExternalDocsDiff, error) {
+func getExternalDocsDiffInternal(config *Config, docs1, docs2 *openapi3.ExternalDocs) (*ExternalDocsDiff, error) {
 	result := newExternalDocsDiff()
 	var err error
 
@@ -53,7 +53,7 @@ func getExternalDocsDiffInternal(config *Config, state *state, docs1, docs2 *ope
 		return result, nil
 	}
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, docs1.Extensions, docs2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, docs1.Extensions, docs2.Extensions)
 	if err != nil {
 		return nil, err
 	}

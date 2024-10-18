@@ -23,8 +23,8 @@ func newDiscriminatorDiff() *DiscriminatorDiff {
 
 }
 
-func getDiscriminatorDiff(config *Config, state *state, discriminator1, discriminator2 *openapi3.Discriminator) (*DiscriminatorDiff, error) {
-	diff, err := getDiscriminatorDiffInternal(config, state, discriminator1, discriminator2)
+func getDiscriminatorDiff(config *Config, discriminator1, discriminator2 *openapi3.Discriminator) (*DiscriminatorDiff, error) {
+	diff, err := getDiscriminatorDiffInternal(config, discriminator1, discriminator2)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func getDiscriminatorDiff(config *Config, state *state, discriminator1, discrimi
 	return diff, nil
 }
 
-func getDiscriminatorDiffInternal(config *Config, state *state, discriminator1, discriminator2 *openapi3.Discriminator) (*DiscriminatorDiff, error) {
+func getDiscriminatorDiffInternal(config *Config, discriminator1, discriminator2 *openapi3.Discriminator) (*DiscriminatorDiff, error) {
 
 	result := newDiscriminatorDiff()
 	var err error
@@ -55,7 +55,7 @@ func getDiscriminatorDiffInternal(config *Config, state *state, discriminator1, 
 		return result, nil
 	}
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, discriminator1.Extensions, discriminator2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, discriminator1.Extensions, discriminator2.Extensions)
 	if err != nil {
 		return nil, err
 	}

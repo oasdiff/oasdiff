@@ -22,8 +22,8 @@ func (diff *SecuritySchemeDiff) Empty() bool {
 	return diff == nil || *diff == SecuritySchemeDiff{}
 }
 
-func getSecuritySchemeDiff(config *Config, state *state, scheme1, scheme2 *openapi3.SecurityScheme) (*SecuritySchemeDiff, error) {
-	diff, err := getSecuritySchemeDiffInternal(config, state, scheme1, scheme2)
+func getSecuritySchemeDiff(config *Config, scheme1, scheme2 *openapi3.SecurityScheme) (*SecuritySchemeDiff, error) {
+	diff, err := getSecuritySchemeDiffInternal(config, scheme1, scheme2)
 	if err != nil {
 		return nil, err
 	}
@@ -35,11 +35,11 @@ func getSecuritySchemeDiff(config *Config, state *state, scheme1, scheme2 *opena
 	return diff, nil
 }
 
-func getSecuritySchemeDiffInternal(config *Config, state *state, scheme1, scheme2 *openapi3.SecurityScheme) (*SecuritySchemeDiff, error) {
+func getSecuritySchemeDiffInternal(config *Config, scheme1, scheme2 *openapi3.SecurityScheme) (*SecuritySchemeDiff, error) {
 	result := SecuritySchemeDiff{}
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, scheme1.Extensions, scheme2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, scheme1.Extensions, scheme2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func getSecuritySchemeDiffInternal(config *Config, state *state, scheme1, scheme
 	result.InDiff = getValueDiff(scheme1.In, scheme2.In)
 	result.SchemeDiff = getValueDiff(scheme1.Scheme, scheme2.Scheme)
 	result.BearerFormatDiff = getValueDiff(scheme1.BearerFormat, scheme2.BearerFormat)
-	result.OAuthFlowsDiff, err = getOAuthFlowsDiff(config, state, scheme1.Flows, scheme2.Flows)
+	result.OAuthFlowsDiff, err = getOAuthFlowsDiff(config, scheme1.Flows, scheme2.Flows)
 	if err != nil {
 		return nil, err
 	}

@@ -20,8 +20,8 @@ func (diff *LinkDiff) Empty() bool {
 	return diff == nil || *diff == LinkDiff{}
 }
 
-func getLinkDiff(config *Config, state *state, link1, link2 *openapi3.Link) (*LinkDiff, error) {
-	diff, err := getLinkDiffInternal(config, state, link1, link2)
+func getLinkDiff(config *Config, link1, link2 *openapi3.Link) (*LinkDiff, error) {
+	diff, err := getLinkDiffInternal(config, link1, link2)
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +33,11 @@ func getLinkDiff(config *Config, state *state, link1, link2 *openapi3.Link) (*Li
 	return diff, nil
 }
 
-func getLinkDiffInternal(config *Config, state *state, link1, link2 *openapi3.Link) (*LinkDiff, error) {
+func getLinkDiffInternal(config *Config, link1, link2 *openapi3.Link) (*LinkDiff, error) {
 	result := LinkDiff{}
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, link1.Extensions, link2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, link1.Extensions, link2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func getLinkDiffInternal(config *Config, state *state, link1, link2 *openapi3.Li
 	if err != nil {
 		return nil, err
 	}
-	result.ServerDiff, err = getServerDiff(config, state, link1.Server, link2.Server)
+	result.ServerDiff, err = getServerDiff(config, link1.Server, link2.Server)
 	if err != nil {
 		return nil, err
 	}

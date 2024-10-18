@@ -38,7 +38,7 @@ func getHeaderDiffInternal(config *Config, state *state, header1, header2 *opena
 	result := HeaderDiff{}
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, header1.Extensions, header2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, header1.Extensions, header2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func getHeaderDiffInternal(config *Config, state *state, header1, header2 *opena
 	result.DeprecatedDiff = getValueDiff(header1.Deprecated, header2.Deprecated)
 	result.RequiredDiff = getValueDiff(header1.Required, header2.Required)
 
-	result.ExamplesDiff, err = getExamplesDiff(config, state, header1.Examples, header2.Examples)
+	result.ExamplesDiff, err = getExamplesDiff(config, header1.Examples, header2.Examples)
 	if err != nil {
 		return nil, err
 	}

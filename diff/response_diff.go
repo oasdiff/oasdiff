@@ -37,7 +37,7 @@ func diffResponseValuesInternal(config *Config, state *state, response1, respons
 	result := ResponseDiff{}
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, response1.Extensions, response2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, response1.Extensions, response2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func diffResponseValuesInternal(config *Config, state *state, response1, respons
 		return nil, err
 	}
 
-	result.LinksDiff, err = getLinksDiff(config, state, response1.Links, response2.Links)
+	result.LinksDiff, err = getLinksDiff(config, response1.Links, response2.Links)
 	if err != nil {
 		return nil, err
 	}

@@ -18,8 +18,8 @@ func (diff *LicenseDiff) Empty() bool {
 	return diff == nil || *diff == LicenseDiff{}
 }
 
-func getLicenseDiff(config *Config, state *state, license1, license2 *openapi3.License) (*LicenseDiff, error) {
-	diff, err := getLicenseDiffInternal(config, state, license1, license2)
+func getLicenseDiff(config *Config, license1, license2 *openapi3.License) (*LicenseDiff, error) {
+	diff, err := getLicenseDiffInternal(config, license1, license2)
 
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func getLicenseDiff(config *Config, state *state, license1, license2 *openapi3.L
 	return diff, nil
 }
 
-func getLicenseDiffInternal(config *Config, state *state, license1, license2 *openapi3.License) (*LicenseDiff, error) {
+func getLicenseDiffInternal(config *Config, license1, license2 *openapi3.License) (*LicenseDiff, error) {
 
 	result := LicenseDiff{}
 	var err error
@@ -51,7 +51,7 @@ func getLicenseDiffInternal(config *Config, state *state, license1, license2 *op
 		return &result, nil
 	}
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, license1.Extensions, license2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, license1.Extensions, license2.Extensions)
 	if err != nil {
 		return nil, err
 	}

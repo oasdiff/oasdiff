@@ -17,7 +17,7 @@ const (
 
 const ComponentSecuritySchemes = "securitySchemes"
 
-func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, config *Config, updatedSecurityName string) Changes {
+func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string) Changes {
 	result := make(Changes, 0)
 
 	if updatedSecurity.OAuthFlowsDiff == nil {
@@ -104,7 +104,7 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	}
 
 	for updatedSecurityName, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Modified {
-		result = append(result, checkOAuthUpdates(updatedSecurity, config, updatedSecurityName)...)
+		result = append(result, checkOAuthUpdates(updatedSecurity, updatedSecurityName)...)
 
 		if updatedSecurity.TypeDiff != nil {
 			result = append(result, ComponentChange{

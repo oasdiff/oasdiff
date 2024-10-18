@@ -20,8 +20,8 @@ func (diff *OAuthFlowsDiff) Empty() bool {
 	return diff == nil || *diff == OAuthFlowsDiff{}
 }
 
-func getOAuthFlowsDiff(config *Config, state *state, flows1, flows2 *openapi3.OAuthFlows) (*OAuthFlowsDiff, error) {
-	diff, err := getOAuthFlowsDiffInternal(config, state, flows1, flows2)
+func getOAuthFlowsDiff(config *Config, flows1, flows2 *openapi3.OAuthFlows) (*OAuthFlowsDiff, error) {
+	diff, err := getOAuthFlowsDiffInternal(config, flows1, flows2)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func getOAuthFlowsDiff(config *Config, state *state, flows1, flows2 *openapi3.OA
 	return diff, nil
 }
 
-func getOAuthFlowsDiffInternal(config *Config, state *state, flows1, flows2 *openapi3.OAuthFlows) (*OAuthFlowsDiff, error) {
+func getOAuthFlowsDiffInternal(config *Config, flows1, flows2 *openapi3.OAuthFlows) (*OAuthFlowsDiff, error) {
 
 	if flows1 == nil && flows2 == nil {
 		return nil, nil
@@ -54,27 +54,27 @@ func getOAuthFlowsDiffInternal(config *Config, state *state, flows1, flows2 *ope
 	result := OAuthFlowsDiff{}
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, flows1.Extensions, flows2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, flows1.Extensions, flows2.Extensions)
 	if err != nil {
 		return nil, err
 	}
 
-	result.ImplicitDiff, err = getOAuthFlowDiff(config, state, flows1.Implicit, flows2.Implicit)
+	result.ImplicitDiff, err = getOAuthFlowDiff(config, flows1.Implicit, flows2.Implicit)
 	if err != nil {
 		return nil, err
 	}
 
-	result.PasswordDiff, err = getOAuthFlowDiff(config, state, flows1.Password, flows2.Password)
+	result.PasswordDiff, err = getOAuthFlowDiff(config, flows1.Password, flows2.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	result.ClientCredentialsDiff, err = getOAuthFlowDiff(config, state, flows1.ClientCredentials, flows2.ClientCredentials)
+	result.ClientCredentialsDiff, err = getOAuthFlowDiff(config, flows1.ClientCredentials, flows2.ClientCredentials)
 	if err != nil {
 		return nil, err
 	}
 
-	result.AuthorizationCodeDiff, err = getOAuthFlowDiff(config, state, flows1.AuthorizationCode, flows2.AuthorizationCode)
+	result.AuthorizationCodeDiff, err = getOAuthFlowDiff(config, flows1.AuthorizationCode, flows2.AuthorizationCode)
 	if err != nil {
 		return nil, err
 	}

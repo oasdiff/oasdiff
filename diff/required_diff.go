@@ -19,7 +19,7 @@ func (diff *RequiredPropertiesDiff) Empty() bool {
 	return diff.StringsDiff.Empty()
 }
 
-func getRequiredPropertiesDiff(config *Config, state *state, schema1, schema2 *openapi3.Schema) *RequiredPropertiesDiff {
+func getRequiredPropertiesDiff(schema1, schema2 *openapi3.Schema) *RequiredPropertiesDiff {
 	diff := getRequiredPropertiesDiffInternal(schema1.Required, schema2.Required)
 
 	if diff.Empty() {

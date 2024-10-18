@@ -36,7 +36,7 @@ func getComponentsDiffInternal(config *Config, state *state, s1, s2 openapi3.Com
 		return result, err
 	}
 
-	result.ParametersDiff, err = getParametersDiff(config, state, s1.Parameters, s2.Parameters, PathParamsMap{})
+	result.ParametersDiff, err = getParametersDiff(config, state, s1.Parameters, s2.Parameters)
 	if err != nil {
 		return result, err
 	}
@@ -56,17 +56,17 @@ func getComponentsDiffInternal(config *Config, state *state, s1, s2 openapi3.Com
 		return result, err
 	}
 
-	result.SecuritySchemesDiff, err = getSecuritySchemesDiff(config, state, s1.SecuritySchemes, s2.SecuritySchemes)
+	result.SecuritySchemesDiff, err = getSecuritySchemesDiff(config, s1.SecuritySchemes, s2.SecuritySchemes)
 	if err != nil {
 		return result, err
 	}
 
-	result.ExamplesDiff, err = getExamplesDiff(config, state, s1.Examples, s2.Examples)
+	result.ExamplesDiff, err = getExamplesDiff(config, s1.Examples, s2.Examples)
 	if err != nil {
 		return result, err
 	}
 
-	result.LinksDiff, err = getLinksDiff(config, state, s1.Links, s2.Links)
+	result.LinksDiff, err = getLinksDiff(config, s1.Links, s2.Links)
 	if err != nil {
 		return result, err
 	}

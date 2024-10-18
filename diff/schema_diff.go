@@ -125,7 +125,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 
 	var err error
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, value1.Extensions, value2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, value1.Extensions, value2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -149,10 +149,10 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)
-	result.EnumDiff = getEnumDiff(config, state, value1.Enum, value2.Enum)
+	result.EnumDiff = getEnumDiff(value1.Enum, value2.Enum)
 	result.DefaultDiff = getValueDiff(value1.Default, value2.Default)
 	result.ExampleDiff = getValueDiffConditional(config.IsExcludeExamples(), value1.Example, value2.Example)
-	result.ExternalDocsDiff, err = getExternalDocsDiff(config, state, value1.ExternalDocs, value2.ExternalDocs)
+	result.ExternalDocsDiff, err = getExternalDocsDiff(config, value1.ExternalDocs, value2.ExternalDocs)
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 
 	// Object
-	result.RequiredDiff = getRequiredPropertiesDiff(config, state, value1, value2)
+	result.RequiredDiff = getRequiredPropertiesDiff(value1, value2)
 	result.PropertiesDiff, err = getSchemasDiff(config, state, value1.Properties, value2.Properties)
 	if err != nil {
 		return nil, err
@@ -194,7 +194,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 		return nil, err
 	}
 
-	result.DiscriminatorDiff, err = getDiscriminatorDiff(config, state, value1.Discriminator, value2.Discriminator)
+	result.DiscriminatorDiff, err = getDiscriminatorDiff(config, value1.Discriminator, value2.Discriminator)
 	if err != nil {
 		return nil, err
 	}

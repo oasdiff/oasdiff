@@ -15,8 +15,8 @@ func (diff *TagDiff) Empty() bool {
 	return diff == nil || *diff == TagDiff{}
 }
 
-func getTagDiff(config *Config, state *state, tag1, tag2 *openapi3.Tag) *TagDiff {
-	diff := getTagDiffInternal(config, state, tag1, tag2)
+func getTagDiff(config *Config, tag1, tag2 *openapi3.Tag) *TagDiff {
+	diff := getTagDiffInternal(config, tag1, tag2)
 
 	if diff.Empty() {
 		return nil
@@ -25,7 +25,7 @@ func getTagDiff(config *Config, state *state, tag1, tag2 *openapi3.Tag) *TagDiff
 	return diff
 }
 
-func getTagDiffInternal(config *Config, state *state, tag1, tag2 *openapi3.Tag) *TagDiff {
+func getTagDiffInternal(config *Config, tag1, tag2 *openapi3.Tag) *TagDiff {
 	result := TagDiff{}
 
 	result.NameDiff = getValueDiff(tag1.Name, tag2.Name)

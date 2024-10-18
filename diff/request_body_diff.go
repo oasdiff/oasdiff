@@ -68,7 +68,7 @@ func getRequestBodyDiffInternal(config *Config, state *state, requestBodyRef1, r
 		return nil, err
 	}
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, requestBody1.Extensions, requestBody2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, requestBody1.Extensions, requestBody2.Extensions)
 	if err != nil {
 		return nil, err
 	}

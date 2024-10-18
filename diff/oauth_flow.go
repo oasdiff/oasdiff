@@ -20,8 +20,8 @@ func (diff *OAuthFlowDiff) Empty() bool {
 	return diff == nil || *diff == OAuthFlowDiff{}
 }
 
-func getOAuthFlowDiff(config *Config, state *state, flow1, flow2 *openapi3.OAuthFlow) (*OAuthFlowDiff, error) {
-	diff, err := getOAuthFlowDiffInternal(config, state, flow1, flow2)
+func getOAuthFlowDiff(config *Config, flow1, flow2 *openapi3.OAuthFlow) (*OAuthFlowDiff, error) {
+	diff, err := getOAuthFlowDiffInternal(config, flow1, flow2)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func getOAuthFlowDiff(config *Config, state *state, flow1, flow2 *openapi3.OAuth
 	return diff, nil
 }
 
-func getOAuthFlowDiffInternal(config *Config, state *state, flow1, flow2 *openapi3.OAuthFlow) (*OAuthFlowDiff, error) {
+func getOAuthFlowDiffInternal(config *Config, flow1, flow2 *openapi3.OAuthFlow) (*OAuthFlowDiff, error) {
 
 	if flow1 == nil && flow2 == nil {
 		return nil, nil
@@ -52,7 +52,7 @@ func getOAuthFlowDiffInternal(config *Config, state *state, flow1, flow2 *openap
 		return &result, nil
 	}
 
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, flow1.Extensions, flow2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, flow1.Extensions, flow2.Extensions)
 	if err != nil {
 		return nil, err
 	}

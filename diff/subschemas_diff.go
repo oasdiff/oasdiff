@@ -207,7 +207,7 @@ func isSingleModifiedCase(schemaRefs1, schemaRefs2 openapi3.SchemaRefs, addedIdx
 
 func compareByTitle(config *Config, state *state, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, []int, ModifiedSubschemas, error) {
 
-	addedMatched, deletedMatched := matchByTitle(config, state, addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
+	addedMatched, deletedMatched := matchByTitle(addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
 
 	modifiedSchemas := ModifiedSubschemas{}
 	for _, addedId := range addedIdx {
@@ -236,7 +236,7 @@ func deleteMatched(idx []int, addedMatched map[int]int) []int {
 	return addedIdxRemaining
 }
 
-func matchByTitle(config *Config, state *state, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) (map[int]int, map[int]int) {
+func matchByTitle(addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) (map[int]int, map[int]int) {
 
 	addedMatched := map[int]int{}
 	deletedMatched := map[int]int{}

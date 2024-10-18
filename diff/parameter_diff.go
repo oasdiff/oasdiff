@@ -49,7 +49,7 @@ func getParameterDiffInternal(config *Config, state *state, param1, param2 *open
 
 	result.NameDiff = getValueDiff(param1.Name, param2.Name)
 	result.InDiff = getValueDiff(param1.In, param2.In)
-	result.ExtensionsDiff, err = getExtensionsDiff(config, state, param1.Extensions, param2.Extensions)
+	result.ExtensionsDiff, err = getExtensionsDiff(config, param1.Extensions, param2.Extensions)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func getParameterDiffInternal(config *Config, state *state, param1, param2 *open
 
 	result.ExampleDiff = getValueDiffConditional(config.IsExcludeExamples(), param1.Example, param2.Example)
 
-	result.ExamplesDiff, err = getExamplesDiff(config, state, param1.Examples, param2.Examples)
+	result.ExamplesDiff, err = getExamplesDiff(config, param1.Examples, param2.Examples)
 	if err != nil {
 		return nil, err
 	}

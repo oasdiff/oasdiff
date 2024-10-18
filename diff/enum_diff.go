@@ -32,7 +32,7 @@ func (enumDiff *EnumDiff) Empty() bool {
 		len(enumDiff.Deleted) == 0
 }
 
-func getEnumDiff(config *Config, state *state, enum1, enum2 EnumValues) *EnumDiff {
+func getEnumDiff(enum1, enum2 EnumValues) *EnumDiff {
 
 	diff := getEnumDiffInternal(enum1, enum2)
 
