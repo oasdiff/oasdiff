@@ -21,11 +21,13 @@ func GroupChanges(changes checker.Changes, l checker.Localizer) ChangesByEndpoin
 				*c = append(*c, Change{
 					IsBreaking: change.IsBreaking(),
 					Text:       change.GetUncolorizedText(l),
+					Level:      change.GetLevel(),
 				})
 			} else {
 				apiChanges[ep] = &Changes{Change{
 					IsBreaking: change.IsBreaking(),
 					Text:       change.GetUncolorizedText(l),
+					Level:      change.GetLevel(),
 				}}
 			}
 		}
