@@ -5,7 +5,7 @@ go 1.24
 require (
 	cloud.google.com/go v0.119.0
 	github.com/TwiN/go-color v1.4.1
-	github.com/getkin/kin-openapi v0.129.0
+	github.com/getkin/kin-openapi v0.130.0
 	github.com/spf13/pflag v1.0.6
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
