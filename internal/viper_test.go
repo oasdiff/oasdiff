@@ -58,6 +58,7 @@ func TestViper_BindPFlagErr(t *testing.T) {
 func TestViper_InvalidLang(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("lang: invalid")))
 
 	cmd := cobra.Command{}
@@ -68,6 +69,7 @@ func TestViper_InvalidLang(t *testing.T) {
 func TestViper_InvalidColor(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("color: invalid")))
 
 	cmd := cobra.Command{}
@@ -78,6 +80,7 @@ func TestViper_InvalidColor(t *testing.T) {
 func TestViper_InvalidFormat(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("format: invalid")))
 
 	cmd := cobra.Command{}
@@ -88,6 +91,7 @@ func TestViper_InvalidFormat(t *testing.T) {
 func TestViper_InvalidFailOn(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("fail-on: invalid")))
 
 	cmd := cobra.Command{}
@@ -98,6 +102,7 @@ func TestViper_InvalidFailOn(t *testing.T) {
 func TestViper_InvalidLevel(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("level: invalid")))
 
 	cmd := cobra.Command{}
@@ -108,6 +113,7 @@ func TestViper_InvalidLevel(t *testing.T) {
 func TestViper_InvalidExcludeElements(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("exclude-elements: invalid")))
 
 	cmd := cobra.Command{}
@@ -118,6 +124,7 @@ func TestViper_InvalidExcludeElements(t *testing.T) {
 func TestViper_InvalidSeverity(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("severity: invalid")))
 
 	cmd := cobra.Command{}
@@ -128,6 +135,7 @@ func TestViper_InvalidSeverity(t *testing.T) {
 func TestViper_InvalidTags(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("tags: invalid")))
 
 	cmd := cobra.Command{}
@@ -138,6 +146,7 @@ func TestViper_InvalidTags(t *testing.T) {
 func TestViper_ValidTags(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("tags: request")))
 
 	cmd := cobra.Command{}
@@ -148,9 +157,10 @@ func TestViper_ValidTags(t *testing.T) {
 func TestViper_InvalidFlag(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
+	v.SetConfigType("yaml")
 	require.NoError(t, v.ReadConfig(strings.NewReader("invalid: value")))
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: validation error: 1 error(s) decoding:\n\n* '' has invalid keys: invalid \n")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: validation error: decoding failed due to the following error(s):\n\n'' has invalid keys: invalid \n")
 }
