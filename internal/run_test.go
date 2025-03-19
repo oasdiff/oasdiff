@@ -361,3 +361,8 @@ func Test_Changelog_WithUnmatchPath(t *testing.T) {
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &bc))
 	require.Len(t, bc, 1)
 }
+
+// Test_JsonWithExcludeElements replicates https://github.com/oasdiff/oasdiff/issues/674
+func Test_JsonWithExcludeElements(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff --format json --exclude-elements=description,title,summary ../data/description/spec1.yml ../data/description/spec2.yml --fail-on-diff"), io.Discard, io.Discard))
+}

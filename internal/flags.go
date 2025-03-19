@@ -125,7 +125,7 @@ func (flags *Flags) setRevision(source *load.Source) {
 }
 
 func (flags *Flags) addExcludeElements(element string) {
-	flags.v.Set("exclude-elements", append(flags.v.GetStringSlice("exclude-elements"), element))
+	flags.v.Set("exclude-elements", append(flags.getExcludeElements(), element))
 }
 
 func (flags *Flags) getSeverity() []string {
