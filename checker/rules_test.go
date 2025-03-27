@@ -8,5 +8,5 @@ import (
 )
 
 func TestGetOptionalRuleIds(t *testing.T) {
-	require.Len(t, checker.GetOptionalRuleIds(), 7)
+	require.Len(t, checker.GetOptionalRuleIds(), 10)
 }
