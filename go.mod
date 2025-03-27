@@ -7,7 +7,7 @@ require (
 	github.com/TwiN/go-color v1.4.1
 	github.com/getkin/kin-openapi v0.131.0
 	github.com/spf13/pflag v1.0.6
-	github.com/spf13/viper v1.20.0
+	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 	github.com/yargevad/filepathx v1.0.0
 	github.com/yuin/goldmark v1.7.8
