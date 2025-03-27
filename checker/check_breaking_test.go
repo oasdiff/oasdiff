@@ -743,3 +743,83 @@ func TestBreaking_RequestPropertyAllOfRemoved(t *testing.T) {
 	require.Equal(t, checker.WARN, errs[1].GetLevel())
 	require.Equal(t, "removed '#/components/schemas/Breed3' from the '/allOf[#/components/schemas/Dog]/breed' request property 'allOf' list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
+
+// BC: removing an optional field from the request body is breaking (optional)
+func TestBreaking_RequestPropertyRemoved(t *testing.T) {
+	s1, err := open("../data/checker/request_property_removed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_removed_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	checks := allChecksConfig().WithOptionalCheck(checker.RequestPropertyRemovedId)
+	errs := checker.CheckBackwardCompatibility(checks, d, osm)
+
+	require.Len(t, errs, 1)
+
+	require.Equal(t, checker.RequestPropertyRemovedId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+	require.Equal(t, "removed the request property 'breed'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+
+	d, osm, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	checks = allChecksConfig()
+	errs = checker.CheckBackwardCompatibility(checks, d, osm)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.WARN, errs[0].GetLevel())
+}
+
+// BC: removing an optional field from the response body is breaking (optional)
+func TestBreaking_ResponsePropertyRemoved(t *testing.T) {
+	s1, err := open("../data/checker/response_property_removed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_removed_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	checks := allChecksConfig().WithOptionalCheck(checker.ResponseOptionalPropertyRemovedId)
+	errs := checker.CheckBackwardCompatibility(checks, d, osm)
+
+	require.Len(t, errs, 1)
+
+	require.Equal(t, checker.ResponseOptionalPropertyRemovedId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+	require.Equal(t, "removed the optional property 'breed' from the response with the '200' status", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+
+	d, osm, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	checks = allChecksConfig()
+	errs = checker.CheckBackwardCompatibility(checks, d, osm)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.WARN, errs[0].GetLevel())
+}
+
+// BC: removing an optional field from the response body is breaking (optional)
+func TestBreaking_ResponseWriteOnlyPropertyRemoved(t *testing.T) {
+	s1, err := open("../data/checker/response_property_removed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_removed_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	checks := allChecksConfig().WithOptionalCheck(checker.ResponseOptionalWriteOnlyPropertyRemovedId)
+	errs := checker.CheckBackwardCompatibility(checks, d, osm)
+
+	require.Len(t, errs, 2)
+
+	require.Equal(t, checker.ResponseOptionalWriteOnlyPropertyRemovedId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+	require.Equal(t, "removed the optional write-only property 'other' from the response with the '200' status", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+
+	d, osm, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	checks = allChecksConfig()
+	errs = checker.CheckBackwardCompatibility(checks, d, osm)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.WARN, errs[0].GetLevel())
+}

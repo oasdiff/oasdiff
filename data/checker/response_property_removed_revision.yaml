@@ -1,0 +1,18 @@
+penapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+components: {}
