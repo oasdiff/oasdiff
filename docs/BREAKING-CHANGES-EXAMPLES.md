@@ -100,6 +100,7 @@ These examples are automatically generated from unit tests.
 [removing an existing response with non-successful status is breaking (optional)](../checker/check_breaking_test.go?plain=1#L246)  
 [removing an existing response with successful status is breaking](../checker/check_breaking_test.go?plain=1#L227)  
 [removing an schema object from components is breaking (optional)](../checker/check_breaking_test.go?plain=1#L619)  
+[removing request body is breaking](../checker/check_request_body_removed_test.go?plain=1#L12)  
 [removing the default value of an optional request parameter is breaking](../checker/check_breaking_test.go?plain=1#L582)  
 [removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level](../checker/check_api_removed_test.go?plain=1#L125)  
 [removing/updating a property enum in response is breaking (optional)](../checker/check_breaking_test.go?plain=1#L309)  

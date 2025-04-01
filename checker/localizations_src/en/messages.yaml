@@ -248,6 +248,8 @@ response-property-any-of-added: added %s to the %s response property 'anyOf' lis
 response-property-any-of-removed: removed %s from the %s response property 'anyOf' list for the response status %s
 request-body-one-of-added: added %s to the request body 'oneOf' list
 request-body-one-of-removed: removed %s from the request body 'oneOf' list
+request-body-removed: removed the request body
+request-body-removed-description: request body removed
 request-property-one-of-added: added %s to the %s request property 'oneOf' list
 request-property-one-of-removed: removed %s from the %s request property 'oneOf' list
 response-body-one-of-added: added %s to the response body 'oneOf' list for the response status %s

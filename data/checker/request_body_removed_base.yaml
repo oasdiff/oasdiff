@@ -1,0 +1,20 @@
+openapi: 3.0.1
+info:
+  title: Test API
+  version: "1.0"
+paths:
+  /api/v1.0/test:
+    post:
+      operationId: testOp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                test:
+                  type: string
+      responses:
+        '200':
+          description: OK 

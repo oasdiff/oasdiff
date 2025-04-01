@@ -135,6 +135,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestBodyMediaTypeChangedCheck
 		newBackwardCompatibilityRule(RequestBodyMediaTypeAddedId, INFO, RequestBodyMediaTypeChangedCheck, DirectionRequest, LocationBody, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyMediaTypeRemovedId, ERR, RequestBodyMediaTypeChangedCheck, DirectionRequest, LocationBody, ActionRemove),
+		// RequestBodyRemovedCheck
+		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, LocationBody, ActionRemove),
 		// RequestBodyRequiredUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyBecameOptionalId, INFO, RequestBodyRequiredUpdatedCheck, DirectionRequest, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(RequestBodyBecameRequiredId, ERR, RequestBodyRequiredUpdatedCheck, DirectionRequest, LocationBody, ActionChange),
