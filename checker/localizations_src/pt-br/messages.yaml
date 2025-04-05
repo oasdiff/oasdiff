@@ -5,7 +5,7 @@ request-body-added-optional: corpo da requisição opcional adicionado
 request-parameter-removed: parâmetro de requisição %s %s removido
 request-parameter-removed-comment: "Este é um aviso porque alguns aplicativos podem retornar um erro ao receber um parâmetro que não esperam. Recomenda-se descontinuar o parâmetro primeiro."
 request-parameter-removed-with-deprecation: parâmetro de requisição %s %s removido com depreciação
-request-parameter-sunset-parse: "falha ao analisar a data de depreciação para o parâmetro de requisição %s %s: %v"
+request-parameter-sunset-parse: "falha ao analisar a data de depreciação no parâmetro de requisição %s, o campo %s: %v"
 request-parameter-removed-before-sunset: parâmetro de requisição %s %s removido antes da data de depreciação %s
 total-errors: "%d alterações críticas: %d %s, %d %s\\n"
 total-changes: "%d alterações: %d %s, %d %s, %d %s\\n"
@@ -59,35 +59,35 @@ request-parameter-enum-value-removed: valor enum %s removido do parâmetro de re
 request-parameter-enum-value-added: valor enum %s adicionado ao parâmetro de requisição %s %s
 pattern-changed-warn-comment: "Este é um aviso porque é difícil analisar automaticamente se o novo padrão é um superconjunto do padrão anterior (por exemplo, alterado de '[0-9]+' para '[0-9]*')"
 request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição %s %s
-request-parameter-max-decreased: para o parâmetro de requisição %s %s, o valor máximo foi reduzido de %s para %s
-request-parameter-max-increased: para o parâmetro de requisição %s %s, o valor máximo foi aumentado de %s para %s
-request-parameter-default-value-added: para o parâmetro de requisição %s %s, o valor padrão %s foi adicionado
-request-parameter-default-value-changed: para o parâmetro de requisição %s %s, o valor padrão foi alterado de %s para %s
-request-parameter-default-value-removed: para o parâmetro de requisição %s %s, o valor padrão %s foi removido
-request-parameter-max-length-decreased: para o parâmetro de requisição %s %s, o comprimento máximo foi reduzido de %s para %s
-request-parameter-max-length-increased: para o parâmetro de requisição %s %s, o comprimento máximo foi aumentado de %s para %s
-request-parameter-min-length-increased: para o parâmetro de requisição %s %s, o comprimento mínimo foi aumentado de %s para %s
-request-parameter-min-length-decreased: para o parâmetro de requisição %s %s, o comprimento mínimo foi reduzido de %s para %s
-request-parameter-max-length-set: para o parâmetro de requisição %s %s, o comprimento máximo foi definido como %s
+request-parameter-max-decreased: no parâmetro de requisição %s, o campo %s teve seu valor máximo foi reduzido de %s para %s
+request-parameter-max-increased: no parâmetro de requisição %s, o campo %s teve seu valor máximo foi aumentado de %s para %s
+request-parameter-default-value-added: no parâmetro de requisição %s, o campo %s o valor padrão %s foi adicionado
+request-parameter-default-value-changed: no parâmetro de requisição %s, o campo %s teve seu valor padrão foi alterado de %s para %s
+request-parameter-default-value-removed: no parâmetro de requisição %s, o campo %s teve o valor padrão %s foi removido
+request-parameter-max-length-decreased: no parâmetro de requisição %s, o campo %s teve seu comprimento máximo reduzido de %s para %s
+request-parameter-max-length-increased: no parâmetro de requisição %s, o campo %s teve seu comprimento máximo aumentado de %s para %s
+request-parameter-min-length-increased: no parâmetro de requisição %s, o campo %s teve seu comprimento mínimo aumentado de %s para %s
+request-parameter-min-length-decreased: no parâmetro de requisição %s, o campo %s teve seu comprimento mínimo reduzido de %s para %s
+request-parameter-max-length-set: no parâmetro de requisição %s, o campo %s, o comprimento máximo foi definido como %s
 request-parameter-max-length-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
-request-parameter-max-set: para o parâmetro de requisição %s %s, o valor máximo foi definido como %s
+request-parameter-max-set: no parâmetro de requisição %s, o campo %s, o valor máximo foi definido como %s
 request-parameter-max-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
-request-parameter-min-increased: para o parâmetro de requisição %s %s, o valor mínimo foi aumentado de %s para %s
-request-parameter-min-decreased: para o parâmetro de requisição %s %s, o valor mínimo foi reduzido de %s para %s
-request-parameter-max-items-decreased: para o parâmetro de requisição %s %s, o número máximo de itens foi reduzido de %s para %s
-request-parameter-max-items-increased: para o parâmetro de requisição %s %s, o número máximo de itens foi aumentado de %s para %s
-request-parameter-min-items-increased: para o parâmetro de requisição %s %s, o número mínimo de itens foi aumentado de %s para %s
-request-parameter-min-items-decreased: para o parâmetro de requisição %s %s, o número mínimo de itens foi reduzido de %s para %s
-request-parameter-min-items-set: para o parâmetro de requisição %s %s, o número mínimo de itens foi definido como %s
+request-parameter-min-increased: no parâmetro de requisição %s, o campo %s, o valor mínimo foi aumentado de %s para %s
+request-parameter-min-decreased: no parâmetro de requisição %s, o campo %s, o valor mínimo foi reduzido de %s para %s
+request-parameter-max-items-decreased: no parâmetro de requisição %s, o campo %s, o número máximo de itens foi reduzido de %s para %s
+request-parameter-max-items-increased: no parâmetro de requisição %s, o campo %s, o número máximo de itens foi aumentado de %s para %s
+request-parameter-min-items-increased: no parâmetro de requisição %s, o campo %s, o número mínimo de itens foi aumentado de %s para %s
+request-parameter-min-items-decreased: no parâmetro de requisição %s, o campo %s, o número mínimo de itens foi reduzido de %s para %s
+request-parameter-min-items-set: no parâmetro de requisição %s, o campo %s, o número mínimo de itens foi definido como %s
 request-parameter-min-items-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
-request-parameter-min-set: para o parâmetro de requisição %s %s, o valor mínimo foi definido como %s
+request-parameter-min-set: no parâmetro de requisição %s, o campo %s, o valor mínimo foi definido como %s
 request-parameter-min-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
-request-parameter-type-changed: para o parâmetro de requisição %s %s, o tipo/formato foi alterado de %s/%s para %s/%s
-request-parameter-type-generalized: para o parâmetro de requisição %s %s, o tipo/formato foi generalizado de %s/%s para %s/%s
-request-parameter-property-type-changed: para o parâmetro de requisição %s %s, o tipo/formato da propriedade %s foi alterado de %s/%s para %s/%s
+request-parameter-type-changed: no parâmetro de requisição %s, o campo %s, o tipo/formato foi alterado de %s/%s para %s/%s
+request-parameter-type-generalized: no parâmetro de requisição %s, o campo %s, o tipo/formato foi generalizado de %s/%s para %s/%s
+request-parameter-property-type-changed: no parâmetro de requisição %s, o campo %s, o tipo/formato da propriedade %s foi alterado de %s/%s para %s/%s
 request-parameter-property-type-changed-warn-comment: "Este é um aviso porque objetos de parâmetro podem ser passados de diferentes maneiras, algumas das quais permitem essa alteração de tipo e outras não."
-request-parameter-property-type-generalized: para o parâmetro de requisição %s %s, o tipo/formato da propriedade %s foi generalizado de %s/%s para %s/%s
-request-parameter-property-type-specialized: para o parâmetro de requisição %s %s, o tipo/formato da propriedade %s foi especializado de %s/%s para %s/%s
+request-parameter-property-type-generalized: no parâmetro de requisição %s, o campo %s, o tipo/formato da propriedade %s foi generalizado de %s/%s para %s/%s
+request-parameter-property-type-specialized: no parâmetro de requisição %s, o campo %s, o tipo/formato da propriedade %s foi especializado de %s/%s para %s/%s
 request-parameter-reactivated: "o parâmetro de requisição %s %s foi reativado"
 request-parameter-deprecated-sunset-missing: "o parâmetro de requisição %s %s foi descontinuado sem data de depreciação"
 request-parameter-sunset-date-too-small: "a data de depreciação %s do parâmetro de requisição %s %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
