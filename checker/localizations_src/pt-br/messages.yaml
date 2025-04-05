@@ -198,8 +198,8 @@ api-security-scope-removed: o escopo de segurança %s foi removido do esquema de
 api-stability-decreased-description: o nível de estabilidade do endpoint foi reduzido
 api-security-scope-added: o escopo de segurança %s foi adicionado ao esquema de segurança do endpoint %s
 api-security-component-type-changed: o tipo do esquema de segurança %s foi alterado de %s para %s
-api-security-component-oauth-url-changed: a URL OAuth do esquema de segurança %s foi alterada de %s para %s
-api-security-component-oauth-token-url-changed: a URL do token OAuth do esquema de segurança %s foi alterada de %s para %s
+api-security-component-oauth-url-changed: a url OAuth do esquema de segurança %s foi alterada de %s para %s
+api-security-component-oauth-token-url-changed: a url do token OAuth do esquema de segurança %s foi alterada de %s para %s
 api-security-component-added: o esquema de segurança %s foi adicionado
 api-security-component-removed: o esquema de segurança %s foi removido
 api-security-component-oauth-scope-added: o escopo OAuth %s foi adicionado ao esquema de segurança %s
@@ -319,8 +319,8 @@ api-security-component-added-description: esquema de segurança adicionado em co
 api-security-component-oauth-scope-added-description: escopo adicionado ao fluxo OAuth em components/securitySchemes
 api-security-component-oauth-scope-changed-description: escopo modificado no fluxo OAuth em components/securitySchemes
 api-security-component-oauth-scope-removed-description: escopo removido do fluxo OAuth em components/securitySchemes
-api-security-component-oauth-token-url-changed-description: URL do token modificada no fluxo OAuth em components/securitySchemes
-api-security-component-oauth-url-changed-description: URL de autenticação modificada no fluxo OAuth em components/securitySchemes
+api-security-component-oauth-token-url-changed-description: url do token modificada no fluxo OAuth em components/securitySchemes
+api-security-component-oauth-url-changed-description: url de autenticação modificada no fluxo OAuth em components/securitySchemes
 api-security-component-removed-description: esquema de segurança removido em components/securitySchemes
 api-security-component-type-changed-description: tipo do esquema de segurança modificado em components/securitySchemes
 api-security-removed-description: requisitos de segurança removidos do endpoint
