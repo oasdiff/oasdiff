@@ -2,17 +2,17 @@ at: em
 in: em
 request-body-added-required: corpo da requisição obrigatório adicionado
 request-body-added-optional: corpo da requisição opcional adicionado
-request-parameter-removed: parâmetro de requisição %s %s removido
-request-parameter-removed-comment: "Este é um aviso porque alguns aplicativos podem retornar um erro ao receber um parâmetro que não esperam. Recomenda-se descontinuar o parâmetro primeiro."
-request-parameter-removed-with-deprecation: parâmetro de requisição %s %s removido com depreciação
-request-parameter-sunset-parse: "falha ao analisar a data de depreciação no parâmetro de requisição %s, o campo %s: %v"
-request-parameter-removed-before-sunset: parâmetro de requisição %s %s removido antes da data de depreciação %s
+request-parameter-removed: parâmetro de requisição do tipo %s e nome %s removido
+request-parameter-removed-comment: "Este é um aviso porque alguns aplicativos podem retornar um erro ao receber um parâmetro que não esperam. Recomenda-se depreciar o parâmetro primeiro."
+request-parameter-removed-with-deprecation: parâmetro de requisição do tipo %s e nome %s removido com depreciação
+request-parameter-sunset-parse: "falha ao analisar a data de depreciação no parâmetro de requisição do tipo %s e nome %s: %v"
+request-parameter-removed-before-sunset: parâmetro de requisição do tipo %s e nome %s removido antes da data de depreciação %s
 total-errors: "%d alterações críticas: %d %s, %d %s\\n"
 total-changes: "%d alterações: %d %s, %d %s, %d %s\\n"
-request-parameter-pattern-added: "adicionado o padrão %s ao parâmetro de requisição %s %s"
-request-parameter-pattern-removed: "removido o padrão %s do parâmetro de requisição %s %s"
-request-parameter-pattern-changed: "alterado o padrão do parâmetro de requisição %s %s de %s para %s"
-request-parameter-pattern-generalized: "alterado o padrão do parâmetro de requisição %s %s de %s para um padrão mais geral %s"
+request-parameter-pattern-added: "adicionado o padrão %s ao parâmetro de requisição do tipo %s e nome %s"
+request-parameter-pattern-removed: "removido o padrão %s do parâmetro de requisição do tipo %s e nome %s"
+request-parameter-pattern-changed: "alterado o padrão do parâmetro de requisição do tipo %s e nome %s de %s para %s"
+request-parameter-pattern-generalized: "alterado o padrão do parâmetro de requisição do tipo %s e nome %s de %s para um padrão mais geral %s"
 request-property-pattern-added: "adicionado o padrão %s à propriedade de requisição %s"
 request-property-pattern-removed: "removido o padrão %s da propriedade de requisição %s"
 request-property-pattern-changed: "alterado o padrão da propriedade de requisição %s de %s para %s"
@@ -21,24 +21,24 @@ api-deprecated-sunset-parse: "falha ao analisar a data de depreciação: %v"
 api-path-sunset-parse: "falha ao analisar a data de depreciação: %v"
 api-stability-decreased: "nível de estabilidade do endpoint reduzido de %s para %s"
 api-invalid-stability-level: "falha ao analisar o nível de estabilidade: %v"
-api-deprecated-sunset-missing: "data de depreciação ausente para API descontinuada"
+api-deprecated-sunset-missing: "data de depreciação ausente para api descontinuada"
 api-sunset-date-too-small: "data de depreciação %s muito próxima, deve ser pelo menos %s dias a partir de agora"
 endpoint-added: endpoint adicionado
 endpoint-deprecated: endpoint descontinuado
 endpoint-reactivated: endpoint reativado
-api-path-removed-without-deprecation: caminho da API removido sem depreciação
-api-path-removed-with-deprecation: caminho da API removido com depreciação
-api-path-removed-before-sunset: caminho da API removido antes da data de depreciação %s
-api-removed-without-deprecation: API removida sem depreciação
-api-removed-with-deprecation: API removida com depreciação
-api-removed-before-sunset: API removida antes da data de depreciação %s
-api-operation-id-removed: ID de operação da API %s removido e substituído por %s
-api-operation-id-added: ID de operação da API %s adicionado
-api-tag-removed: tag da API %s removida
-api-tag-added: tag da API %s adicionada
+api-path-removed-without-deprecation: caminho da api removido sem depreciação
+api-path-removed-with-deprecation: caminho da api removido com depreciação
+api-path-removed-before-sunset: caminho da api removido antes da data de depreciação %s
+api-removed-without-deprecation: api removida sem depreciação
+api-removed-with-deprecation: api removida com depreciação
+api-removed-before-sunset: api removida antes da data de depreciação %s
+api-operation-id-removed: id de operação da api %s removido e substituído por %s
+api-operation-id-added: id de operação da api %s adicionado
+api-tag-removed: tag da api %s removida
+api-tag-added: tag da api %s adicionada
 api-schema-removed: esquema %s removido
-sunset-deleted: data de depreciação da API excluída, mas deprecated=true mantido
-api-sunset-date-changed-too-small: data de depreciação da API alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora
+sunset-deleted: data de depreciação da api excluída, mas deprecated=true mantido
+api-sunset-date-changed-too-small: data de depreciação da api alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora
 new-required-request-parameter: adicionado o novo parâmetro de requisição obrigatório %s %s
 new-optional-request-parameter: adicionado o novo parâmetro de requisição opcional %s %s
 new-required-request-property: adicionada a nova propriedade de requisição obrigatória %s
@@ -52,13 +52,13 @@ request-body-enum-value-removed: valor enum %s removido do corpo da requisição
 response-mediatype-enum-value-removed: valor enum %s removido do esquema de resposta %s
 request-header-property-became-required: a propriedade %s do cabeçalho de requisição %s tornou-se obrigatória
 request-header-property-became-enum: a propriedade %s do cabeçalho de requisição %s foi restrita a uma lista de valores enum
-request-parameter-became-required: o parâmetro de requisição %s %s tornou-se obrigatório
-request-parameter-became-optional: o parâmetro de requisição %s %s tornou-se opcional
-request-parameter-became-enum: o parâmetro de requisição %s %s foi restrito a uma lista de valores enum
-request-parameter-enum-value-removed: valor enum %s removido do parâmetro de requisição %s %s
-request-parameter-enum-value-added: valor enum %s adicionado ao parâmetro de requisição %s %s
+request-parameter-became-required: o parâmetro de requisição do tipo %s e nome %s tornou-se obrigatório
+request-parameter-became-optional: o parâmetro de requisição do tipo %s e nome %s tornou-se opcional
+request-parameter-became-enum: o parâmetro de requisição do tipo %s e nome %s foi restrito a uma lista de valores enum
+request-parameter-enum-value-removed: valor enum %s removido do parâmetro de requisição do tipo %s e nome %s
+request-parameter-enum-value-added: valor enum %s adicionado ao parâmetro de requisição do tipo %s e nome %s
 pattern-changed-warn-comment: "Este é um aviso porque é difícil analisar automaticamente se o novo padrão é um superconjunto do padrão anterior (por exemplo, alterado de '[0-9]+' para '[0-9]*')"
-request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição %s %s
+request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-max-decreased: no parâmetro de requisição %s, o campo %s teve seu valor máximo foi reduzido de %s para %s
 request-parameter-max-increased: no parâmetro de requisição %s, o campo %s teve seu valor máximo foi aumentado de %s para %s
 request-parameter-default-value-added: no parâmetro de requisição %s, o campo %s o valor padrão %s foi adicionado
@@ -88,12 +88,12 @@ request-parameter-property-type-changed: no parâmetro de requisição %s, o cam
 request-parameter-property-type-changed-warn-comment: "Este é um aviso porque objetos de parâmetro podem ser passados de diferentes maneiras, algumas das quais permitem essa alteração de tipo e outras não."
 request-parameter-property-type-generalized: no parâmetro de requisição %s, o campo %s, o tipo/formato da propriedade %s foi generalizado de %s/%s para %s/%s
 request-parameter-property-type-specialized: no parâmetro de requisição %s, o campo %s, o tipo/formato da propriedade %s foi especializado de %s/%s para %s/%s
-request-parameter-reactivated: "o parâmetro de requisição %s %s foi reativado"
-request-parameter-deprecated-sunset-missing: "o parâmetro de requisição %s %s foi descontinuado sem data de depreciação"
-request-parameter-sunset-date-too-small: "a data de depreciação %s do parâmetro de requisição %s %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
-request-parameter-deprecated: "o parâmetro de requisição %s %s foi descontinuado"
-request-parameter-sunset-deleted: "a data de depreciação do parâmetro de requisição %s %s foi excluída, mas deprecated=true foi mantido"
-request-parameter-sunset-date-changed-too-small: "a data de depreciação do parâmetro de requisição %s %s foi alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora"
+request-parameter-reactivated: "o parâmetro de requisição do tipo %s e nome %s foi reativado"
+request-parameter-deprecated-sunset-missing: "o parâmetro de requisição do tipo %s e nome %s foi descontinuado sem data de depreciação"
+request-parameter-sunset-date-too-small: "a data de depreciação %s do parâmetro de requisição do tipo %s e nome %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
+request-parameter-deprecated: "o parâmetro de requisição do tipo %s e nome %s foi descontinuado"
+request-parameter-sunset-deleted: "a data de depreciação do parâmetro de requisição do tipo %s e nome %s foi excluída, mas deprecated=true foi mantido"
+request-parameter-sunset-date-changed-too-small: "a data de depreciação do parâmetro de requisição do tipo %s e nome %s foi alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora"
 new-request-path-parameter: adicionado o novo parâmetro de caminho da requisição %s
 request-property-became-required: a propriedade de requisição %s tornou-se obrigatória
 request-property-became-required-with-default: a propriedade de requisição %s com um valor padrão tornou-se obrigatória
@@ -187,11 +187,11 @@ response-body-max-increased: o valor máximo do corpo da resposta foi aumentado 
 response-property-max-increased: o valor máximo da propriedade de resposta %s foi aumentado de %s para %s para o status %s
 response-body-min-decreased: o valor mínimo do corpo da resposta foi reduzido de %s para %s
 response-property-min-decreased: o valor mínimo da propriedade de resposta %s foi reduzido de %s para %s para o status %s
-api-security-added: o esquema de segurança %s foi adicionado ao endpoint da API
-api-security-removed: o esquema de segurança %s foi removido do endpoint da API
+api-security-added: o esquema de segurança %s foi adicionado ao endpoint da api
+api-security-removed: o esquema de segurança %s foi removido do endpoint da api
 api-security-updated: o esquema de segurança %s foi atualizado de %s para %s
-api-global-security-added: o esquema de segurança %s foi adicionado à API
-api-global-security-removed: o esquema de segurança %s foi removido da API
+api-global-security-added: o esquema de segurança %s foi adicionado à api
+api-global-security-removed: o esquema de segurança %s foi removido da api
 api-global-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança global %s
 api-global-security-scope-added: o escopo de segurança %s foi adicionado ao esquema de segurança global %s
 api-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança do endpoint %s
@@ -306,8 +306,8 @@ api-global-security-added-description: esquema de segurança adicionado na segur
 api-global-security-removed-description: esquema de segurança removido na segurança
 api-global-security-scope-added-description: escopo adicionado a um esquema de segurança na segurança
 api-global-security-scope-removed-description: escopo removido de um esquema de segurança na segurança
-api-operation-id-added-description: ID de operação adicionado a um endpoint
-api-operation-id-removed-description: ID de operação removido de um endpoint
+api-operation-id-added-description: id de operação adicionado a um endpoint
+api-operation-id-removed-description: id de operação removido de um endpoint
 api-path-removed-before-sunset-description: caminho e endpoint removidos antes da data de depreciação
 api-path-removed-without-deprecation-description: caminho e endpoint removidos sem depreciação
 api-path-sunset-parse-description: caminho e endpoint removidos com data de depreciação inválida ou ausente

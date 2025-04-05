@@ -8,5 +8,5 @@ import (
 )
 
 func TestLang_Exists(t *testing.T) {
-	require.Equal(t, []string{localizations.LangEn, localizations.LangRu}, localizations.GetSupportedLanguages())
+	require.Equal(t, []string{localizations.LangEn, localizations.LangRu, localizations.LangPtBr}, localizations.GetSupportedLanguages())
 }

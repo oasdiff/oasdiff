@@ -4,7 +4,7 @@ const (
 	LangDefault = LangEn
 	LangEn      = "en"
 	LangRu      = "ru"
-	LangPtBr 	= "pt-br"
+	LangPtBr    = "pt-br"
 )
 
 func GetSupportedLanguages() []string {
