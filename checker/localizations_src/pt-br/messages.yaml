@@ -4,9 +4,9 @@ request-body-added-required: corpo da requisição obrigatório adicionado
 request-body-added-optional: corpo da requisição opcional adicionado
 request-parameter-removed: parâmetro de requisição %s %s removido
 request-parameter-removed-comment: "Este é um aviso porque alguns aplicativos podem retornar um erro ao receber um parâmetro que não esperam. Recomenda-se descontinuar o parâmetro primeiro."
-request-parameter-removed-with-deprecation: parâmetro de requisição %s %s removido com descontinuação
-request-parameter-sunset-parse: "falha ao analisar a data de descontinuação para o parâmetro de requisição %s %s: %v"
-request-parameter-removed-before-sunset: parâmetro de requisição %s %s removido antes da data de descontinuação %s
+request-parameter-removed-with-deprecation: parâmetro de requisição %s %s removido com depreciação
+request-parameter-sunset-parse: "falha ao analisar a data de depreciação para o parâmetro de requisição %s %s: %v"
+request-parameter-removed-before-sunset: parâmetro de requisição %s %s removido antes da data de depreciação %s
 total-errors: "%d alterações críticas: %d %s, %d %s\\n"
 total-changes: "%d alterações: %d %s, %d %s, %d %s\\n"
 request-parameter-pattern-added: "adicionado o padrão %s ao parâmetro de requisição %s %s"
@@ -17,28 +17,28 @@ request-property-pattern-added: "adicionado o padrão %s à propriedade de requi
 request-property-pattern-removed: "removido o padrão %s da propriedade de requisição %s"
 request-property-pattern-changed: "alterado o padrão da propriedade de requisição %s de %s para %s"
 request-property-pattern-generalized: "alterado o padrão da propriedade de requisição %s de %s para um padrão mais geral %s"
-api-deprecated-sunset-parse: "falha ao analisar a data de descontinuação: %v"
-api-path-sunset-parse: "falha ao analisar a data de descontinuação: %v"
+api-deprecated-sunset-parse: "falha ao analisar a data de depreciação: %v"
+api-path-sunset-parse: "falha ao analisar a data de depreciação: %v"
 api-stability-decreased: "nível de estabilidade do endpoint reduzido de %s para %s"
 api-invalid-stability-level: "falha ao analisar o nível de estabilidade: %v"
-api-deprecated-sunset-missing: "data de descontinuação ausente para API descontinuada"
-api-sunset-date-too-small: "data de descontinuação %s muito próxima, deve ser pelo menos %s dias a partir de agora"
+api-deprecated-sunset-missing: "data de depreciação ausente para API descontinuada"
+api-sunset-date-too-small: "data de depreciação %s muito próxima, deve ser pelo menos %s dias a partir de agora"
 endpoint-added: endpoint adicionado
 endpoint-deprecated: endpoint descontinuado
 endpoint-reactivated: endpoint reativado
-api-path-removed-without-deprecation: caminho da API removido sem descontinuação
-api-path-removed-with-deprecation: caminho da API removido com descontinuação
-api-path-removed-before-sunset: caminho da API removido antes da data de descontinuação %s
-api-removed-without-deprecation: API removida sem descontinuação
-api-removed-with-deprecation: API removida com descontinuação
-api-removed-before-sunset: API removida antes da data de descontinuação %s
+api-path-removed-without-deprecation: caminho da API removido sem depreciação
+api-path-removed-with-deprecation: caminho da API removido com depreciação
+api-path-removed-before-sunset: caminho da API removido antes da data de depreciação %s
+api-removed-without-deprecation: API removida sem depreciação
+api-removed-with-deprecation: API removida com depreciação
+api-removed-before-sunset: API removida antes da data de depreciação %s
 api-operation-id-removed: ID de operação da API %s removido e substituído por %s
 api-operation-id-added: ID de operação da API %s adicionado
 api-tag-removed: tag da API %s removida
 api-tag-added: tag da API %s adicionada
 api-schema-removed: esquema %s removido
-sunset-deleted: data de descontinuação da API excluída, mas deprecated=true mantido
-api-sunset-date-changed-too-small: data de descontinuação da API alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora
+sunset-deleted: data de depreciação da API excluída, mas deprecated=true mantido
+api-sunset-date-changed-too-small: data de depreciação da API alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora
 new-required-request-parameter: adicionado o novo parâmetro de requisição obrigatório %s %s
 new-optional-request-parameter: adicionado o novo parâmetro de requisição opcional %s %s
 new-required-request-property: adicionada a nova propriedade de requisição obrigatória %s
@@ -89,11 +89,11 @@ request-parameter-property-type-changed-warn-comment: "Este é um aviso porque o
 request-parameter-property-type-generalized: para o parâmetro de requisição %s %s, o tipo/formato da propriedade %s foi generalizado de %s/%s para %s/%s
 request-parameter-property-type-specialized: para o parâmetro de requisição %s %s, o tipo/formato da propriedade %s foi especializado de %s/%s para %s/%s
 request-parameter-reactivated: "o parâmetro de requisição %s %s foi reativado"
-request-parameter-deprecated-sunset-missing: "o parâmetro de requisição %s %s foi descontinuado sem data de descontinuação"
-request-parameter-sunset-date-too-small: "a data de descontinuação %s do parâmetro de requisição %s %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
+request-parameter-deprecated-sunset-missing: "o parâmetro de requisição %s %s foi descontinuado sem data de depreciação"
+request-parameter-sunset-date-too-small: "a data de depreciação %s do parâmetro de requisição %s %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
 request-parameter-deprecated: "o parâmetro de requisição %s %s foi descontinuado"
-request-parameter-sunset-deleted: "a data de descontinuação do parâmetro de requisição %s %s foi excluída, mas deprecated=true foi mantido"
-request-parameter-sunset-date-changed-too-small: "a data de descontinuação do parâmetro de requisição %s %s foi alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora"
+request-parameter-sunset-deleted: "a data de depreciação do parâmetro de requisição %s %s foi excluída, mas deprecated=true foi mantido"
+request-parameter-sunset-date-changed-too-small: "a data de depreciação do parâmetro de requisição %s %s foi alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora"
 new-request-path-parameter: adicionado o novo parâmetro de caminho da requisição %s
 request-property-became-required: a propriedade de requisição %s tornou-se obrigatória
 request-property-became-required-with-default: a propriedade de requisição %s com um valor padrão tornou-se obrigatória
@@ -238,30 +238,30 @@ request-property-default-value-removed: o valor padrão %s foi removido da propr
 request-body-default-value-added: o valor padrão %s foi adicionado ao corpo da requisição
 request-body-default-value-changed: o valor padrão do corpo da requisição %s foi alterado de %s para %s
 request-body-default-value-removed: o valor padrão %s foi removido do corpo da requisição
-request-body-any-of-added: %s foi adicionado à lista 'anyOf' do corpo da requisição
-request-body-any-of-removed: %s foi removido da lista 'anyOf' do corpo da requisição
-request-property-any-of-added: %s foi adicionado à lista 'anyOf' da propriedade de requisição %s
-request-property-any-of-removed: %s foi removido da lista 'anyOf' da propriedade de requisição %s
-response-body-any-of-added: %s foi adicionado à lista 'anyOf' do corpo da resposta para o status %s
-response-body-any-of-removed: %s foi removido da lista 'anyOf' do corpo da resposta para o status %s
-response-property-any-of-added: %s foi adicionado à lista 'anyOf' da propriedade de resposta %s para o status %s
-response-property-any-of-removed: %s foi removido da lista 'anyOf' da propriedade de resposta %s para o status %s
-request-body-one-of-added: %s foi adicionado à lista 'oneOf' do corpo da requisição
-request-body-one-of-removed: %s foi removido da lista 'oneOf' do corpo da requisição
-request-property-one-of-added: %s foi adicionado à lista 'oneOf' da propriedade de requisição %s
-request-property-one-of-removed: %s foi removido da lista 'oneOf' da propriedade de requisição %s
-response-body-one-of-added: %s foi adicionado à lista 'oneOf' do corpo da resposta para o status %s
-response-body-one-of-removed: %s foi removido da lista 'oneOf' do corpo da resposta para o status %s
-response-property-one-of-added: %s foi adicionado à lista 'oneOf' da propriedade de resposta %s para o status %s
-response-property-one-of-removed: %s foi removido da lista 'oneOf' da propriedade de resposta %s para o status %s
-request-body-all-of-added: %s foi adicionado à lista 'allOf' do corpo da requisição
-request-body-all-of-removed: %s foi removido da lista 'allOf' do corpo da requisição
-request-property-all-of-added: %s foi adicionado à lista 'allOf' da propriedade de requisição %s
-request-property-all-of-removed: %s foi removido da lista 'allOf' da propriedade de requisição %s
-response-body-all-of-added: %s foi adicionado à lista 'allOf' do corpo da resposta para o status %s
-response-body-all-of-removed: %s foi removido da lista 'allOf' do corpo da resposta para o status %s
-response-property-all-of-added: %s foi adicionado à lista 'allOf' da propriedade de resposta %s para o status %s
-response-property-all-of-removed: %s foi removido da lista 'allOf' da propriedade de resposta %s para o status %s
+request-body-any-of-added: "%s foi  à lista 'anyOf' do corpo da requisição"
+request-body-any-of-removed: "%s foi removido da lista 'anyOf' do corpo da requisição"
+request-property-any-of-added: "%s foi adicionado à lista 'anyOf' da propriedade de requisição %s"
+request-property-any-of-removed: "%s foi removido da lista 'anyOf' da propriedade de requisição %s"
+response-body-any-of-added: "%s foi adicionado à lista 'anyOf' do corpo da resposta para o status %s"
+response-body-any-of-removed: "%s foi removido da lista 'anyOf' do corpo da resposta para o status %s"
+response-property-any-of-added: "%s foi adicionado à lista 'anyOf' da propriedade de resposta %s para o status %s"
+response-property-any-of-removed: "%s foi removido da lista 'anyOf' da propriedade de resposta %s para o status %s"
+request-body-one-of-added: "%s foi adicionado à lista 'oneOf' do corpo da requisição"
+request-body-one-of-removed: "%s foi removido da lista 'oneOf' do corpo da requisição"
+request-property-one-of-added: "%s foi adicionado à lista 'oneOf' da propriedade de requisição %s"
+request-property-one-of-removed: "%s foi removido da lista 'oneOf' da propriedade de requisição %s"
+response-body-one-of-added: "%s foi adicionado à lista 'oneOf' do corpo da resposta para o status %s"
+response-body-one-of-removed: "%s foi removido da lista 'oneOf' do corpo da resposta para o status %s"
+response-property-one-of-added: "%s foi adicionado à lista 'oneOf' da propriedade de resposta %s para o status %s"
+response-property-one-of-removed: "%s foi removido da lista 'oneOf' da propriedade de resposta %s para o status %s"
+request-body-all-of-added: "%s foi adicionado à lista 'allOf' do corpo da requisição"
+request-body-all-of-removed: "%s foi removido da lista 'allOf' do corpo da requisição"
+request-property-all-of-added: "%s foi adicionado à lista 'allOf' da propriedade de requisição %s"
+request-property-all-of-removed: "%s foi removido da lista 'allOf' da propriedade de requisição %s"
+response-body-all-of-added: "%s foi adicionado à lista 'allOf' do corpo da resposta para o status %s"
+response-body-all-of-removed: "%s foi removido da lista 'allOf' do corpo da resposta para o status %s"
+response-property-all-of-added: "%s foi adicionado à lista 'allOf' da propriedade de resposta %s para o status %s"
+response-property-all-of-removed: "%s foi removido da lista 'allOf' da propriedade de resposta %s para o status %s"
 response-body-discriminator-added: discriminador de resposta adicionado para o status %s
 response-property-discriminator-added: discriminador adicionado à propriedade de resposta %s para o status %s
 response-body-discriminator-removed: discriminador de resposta removido para o status %s
@@ -299,8 +299,8 @@ new-optional-request-default-parameter-to-existing-path: o novo parâmetro opcio
 # descrições
 request-body-added-required-description: corpo de requisição obrigatório adicionado
 request-body-added-optional-description: corpo de requisição opcional adicionado
-api-deprecated-sunset-parse-description: endpoint descontinuado com data de descontinuação inválida
-api-deprecated-sunset-missing-description: endpoint descontinuado sem data de descontinuação
+api-deprecated-sunset-parse-description: endpoint descontinuado com data de depreciação inválida
+api-deprecated-sunset-missing-description: endpoint descontinuado sem data de depreciação
 endpoint-added-description: endpoint adicionado
 api-global-security-added-description: esquema de segurança adicionado na segurança
 api-global-security-removed-description: esquema de segurança removido na segurança
@@ -308,11 +308,11 @@ api-global-security-scope-added-description: escopo adicionado a um esquema de s
 api-global-security-scope-removed-description: escopo removido de um esquema de segurança na segurança
 api-operation-id-added-description: ID de operação adicionado a um endpoint
 api-operation-id-removed-description: ID de operação removido de um endpoint
-api-path-removed-before-sunset-description: caminho e endpoint removidos antes da data de descontinuação
-api-path-removed-without-deprecation-description: caminho e endpoint removidos sem descontinuação
-api-path-sunset-parse-description: caminho e endpoint removidos com data de descontinuação inválida ou ausente
-api-removed-before-sunset-description: endpoint removido antes da data de descontinuação
-api-removed-without-deprecation-description: endpoint removido sem descontinuação
+api-path-removed-before-sunset-description: caminho e endpoint removidos antes da data de depreciação
+api-path-removed-without-deprecation-description: caminho e endpoint removidos sem depreciação
+api-path-sunset-parse-description: caminho e endpoint removidos com data de depreciação inválida ou ausente
+api-removed-before-sunset-description: endpoint removido antes da data de depreciação
+api-removed-without-deprecation-description: endpoint removido sem depreciação
 api-schema-removed-description: esquema removido de components/schemas
 api-security-added-description: requisitos de segurança adicionados ao endpoint
 api-security-component-added-description: esquema de segurança adicionado em components/securitySchemes
@@ -326,12 +326,12 @@ api-security-component-type-changed-description: tipo do esquema de segurança m
 api-security-removed-description: requisitos de segurança removidos do endpoint
 api-security-scope-added-description: escopo adicionado ao esquema de segurança de um endpoint
 api-security-scope-removed-description: escopo removido do esquema de segurança de um endpoint
-api-sunset-date-changed-too-small-description: a data de descontinuação modificada não atende ao número mínimo de dias exigidos
+api-sunset-date-changed-too-small-description: a data de depreciação modificada não atende ao número mínimo de dias exigidos
 api-sunset-date-too-small-description: endpoint descontinuado antes do número mínimo de dias exigidos
 api-tag-added-description: tag do endpoint adicionada
 api-tag-removed-description: tag do endpoint removida
 endpoint-deprecated-description: endpoint descontinuado
-endpoint-reactivated-description: endpoint reativado (descontinuação definida como falsa)
+endpoint-reactivated-description: endpoint reativado (depreciação definida como falsa)
 new-optional-request-default-parameter-to-existing-path-description: parâmetro opcional de requisição adicionado no nível do caminho
 new-optional-request-parameter-description: parâmetro opcional de requisição adicionado ao endpoint
 new-optional-request-property-description: propriedade opcional adicionada à requisição
@@ -557,4 +557,4 @@ response-success-status-removed-description: status de sucesso da resposta remov
 response-write-only-property-became-optional-description: propriedade somente escrita da resposta tornou-se opcional
 response-write-only-property-became-required-description: propriedade somente escrita da resposta tornou-se obrigatória
 response-write-only-property-enum-value-added-description: valor enum da propriedade somente escrita da resposta adicionado
-sunset-deleted-description: data de descontinuação removida
+sunset-deleted-description: data de depreciação removida
