@@ -6,8 +6,6 @@
 [![Docker Image Version](https://img.shields.io/docker/v/tufin/oasdiff?sort=semver)](https://hub.docker.com/r/tufin/oasdiff/tags)
 [![Slack](https://img.shields.io/badge/slack-&#64;oasdiff-green.svg?logo=slack)](https://join.slack.com/t/oasdiff/shared_invite/zt-1wvo7wois-ttncNBmyjyRXqBzyg~P6oA)
 
-# NOTE: oasdiff recently moved from the Tufin org to the oasdiff org. Please submit an issue if you encounter any issues.
-
 ![oasdiff banner](https://github.com/yonatanmgr/oasdiff/assets/31913495/ac9b154e-72d1-4969-bc3b-f527bbe7751d)
 
 
@@ -72,7 +70,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Tracking changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
 - [Filtering endpoints](FILTERING-ENDPOINTS.md)
 - [Extending breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
-- Localization: view breaking changes and changelog messages in local languages 
+- Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br
 - [Customize with configuration files](CONFIG-FILES.md)
 - [Run from Docker](DOCKER.md)
 - [Integrate in GitHub](https://github.com/oasdiff/github-demo/tree/main)
