@@ -1,0 +1,11 @@
+openapi: 3.0.1
+info:
+  title: Test API
+  version: "1.0"
+paths:
+  /api/v1.0/test:
+    post:
+      operationId: testOp
+      responses:
+        '200':
+          description: OK 
