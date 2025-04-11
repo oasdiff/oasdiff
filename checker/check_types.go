@@ -107,8 +107,8 @@ func isStronglyTyped(mediaType string) bool {
 }
 
 func isJsonMediaType(mediaType string) bool {
-	return mediaType == "application/json" ||
-		(strings.HasPrefix(mediaType, "application/vnd.") && strings.HasSuffix(mediaType, "+json"))
+	// Structured Syntax Suffixes: https://www.rfc-editor.org/rfc/rfc6838#section-4.2.8
+	return mediaType == "application/json" || strings.HasSuffix(mediaType, "+json")
 }
 
 // isFormatContained checks if from is contained in to
