@@ -132,3 +132,14 @@ func TestFormatAdded(t *testing.T) {
 	}
 	breaking(t, typeDiff, formatDiff, false, revisionType)
 }
+
+func TestIsJsonMediaType(t *testing.T) {
+	require.True(t, isJsonMediaType("application/json"))
+	require.True(t, isJsonMediaType("application/problem+json"))
+	require.True(t, isJsonMediaType("application/vnd.api+json"))
+	require.True(t, isJsonMediaType("application/any-string+json"))
+	require.False(t, isJsonMediaType("application/xml"))
+	require.False(t, isJsonMediaType("text/plain"))
+	require.False(t, isJsonMediaType("application/json-patch")) // Note: Differs from application/json-patch+json
+	require.False(t, isJsonMediaType(""))
+}
