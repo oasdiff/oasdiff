@@ -5,7 +5,7 @@
 2. Add any accompanying OpenAPI specs under [data](../data)
 
 ## Localized Messages
-1. Add localized texts under [checker/localizations_src](../checker/localizations_src) (you can use Google Translate for Russian)
+1. Add localized texts under [checker/localizations_src](../checker/localizations_src)
 2. Update [localization source file](../checker/localizations/localizations.go):
     ```
     go-localize -input checker/localizations_src -output checker/localizations

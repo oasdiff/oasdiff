@@ -104,7 +104,7 @@ If you don't use the `x-extensible-enum` in your OpenAPI specifications, nothing
 
 ### Localization
 To display changes in other languages, use the `--lang` flag.  
-Currently English and Russian are supported.  
+Currently English, Russian and Brazilian Portuguese are supported.  
 [Please improve oasdiff by adding your own language](https://github.com/oasdiff/oasdiff/issues/383).
 
 ### Customizing Severity Levels

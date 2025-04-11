@@ -63,7 +63,7 @@ func TestViper_InvalidLang(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid lang \"invalid\", allowed values: en, ru")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br")
 }
 
 func TestViper_InvalidColor(t *testing.T) {
