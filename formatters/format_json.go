@@ -30,7 +30,7 @@ func (f JSONFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 }
 
 func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
-	return printJSON(NewChanges(changes, f.Localizer))
+	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts.WrapInObject))
 }
 
 func (f JSONFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
@@ -56,4 +56,12 @@ func printJSON(output interface{}) ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+func adaptStructure(output any, wrapInObject bool) any {
+	if wrapInObject {
+		output = map[string]any{"changes": output}
+	}
+
+	return output
 }

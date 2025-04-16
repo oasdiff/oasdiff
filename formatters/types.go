@@ -39,7 +39,8 @@ type FormatterOpts struct {
 
 // RenderOpts can be used to pass properties to the renderer method
 type RenderOpts struct {
-	ColorMode checker.ColorMode
+	ColorMode    checker.ColorMode
+	WrapInObject bool // wrap the output in a JSON object with the key "changes"
 }
 
 func NewRenderOpts() RenderOpts {

@@ -30,7 +30,7 @@ func (f YAMLFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 }
 
 func (f YAMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
-	return printYAML(NewChanges(changes, f.Localizer))
+	return printYAML(adaptStructure(NewChanges(changes, f.Localizer), opts.WrapInObject))
 }
 
 func (f YAMLFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
