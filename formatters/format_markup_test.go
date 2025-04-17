@@ -38,7 +38,8 @@ func TestMarkupFormatter_RenderChangelog_NoVersions(t *testing.T) {
 
 	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	require.NoError(t, err)
-	require.Contains(t, string(out), "# API Changelog \n")
+	require.Contains(t, string(out), "# API Changelog")
+	require.NotContains(t, string(out), "vs.")
 }
 
 func TestMarkupFormatter_RenderChangelog_NoBaseVersion(t *testing.T) {
@@ -53,7 +54,8 @@ func TestMarkupFormatter_RenderChangelog_NoBaseVersion(t *testing.T) {
 
 	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "2.0.0")
 	require.NoError(t, err)
-	require.Contains(t, string(out), "# API Changelog \n")
+	require.Contains(t, string(out), "# API Changelog")
+	require.NotContains(t, string(out), "vs.")
 }
 
 func TestMarkupFormatter_RenderChangelog_WithVersions(t *testing.T) {
