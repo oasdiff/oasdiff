@@ -8,7 +8,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/oasdiff/oasdiff/report"
 )
 
@@ -30,14 +29,14 @@ func (f MarkupFormatter) RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, e
 //go:embed templates/changelog.md
 var changelogMarkdown string
 
-func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error) {
 	tmpl := template.Must(template.New("changelog").Parse(changelogMarkdown))
-	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), specInfoPair)
+	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion)
 }
 
-func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByEndpoint, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByEndpoint, baseVersion, revisionVersion string) ([]byte, error) {
 	var out bytes.Buffer
-	if err := tmpl.Execute(&out, TemplateData{changes, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion()}); err != nil {
+	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion}); err != nil {
 		return nil, err
 	}
 	return out.Bytes(), nil

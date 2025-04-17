@@ -23,7 +23,7 @@ func TestJUnitFormatter_RenderChangelog_Success(t *testing.T) {
 	testChanges := checker.Changes{}
 
 	// check output
-	output, err := jUnitFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := jUnitFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	expectedOutput := `<?xml version="1.0" encoding="UTF-8"?>
 <testsuites>

@@ -34,7 +34,7 @@ func TestGitHubActionsFormatter_RenderChangelog_OneFailure(t *testing.T) {
 	}
 
 	// check output
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	expectedOutput := "::error title=change_id,file=openapi.yaml::in API GET /api/test This is a breaking change.\n"
 	assert.Equal(t, expectedOutput, string(output))
@@ -66,7 +66,7 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 	}
 
 	// check output
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	expectedOutput := "::error title=change_id,file=openapi.yaml::in API GET /api/test This is a breaking change.\n::warning title=warning_id,file=openapi.yaml::in API GET /api/test This is a warning.\n::notice title=notice_id,file=openapi.yaml::in API GET /api/test This is a notice.\n"
 	assert.Equal(t, expectedOutput, string(output))
@@ -84,7 +84,7 @@ func TestGitHubActionsFormatter_DontRenderHttpSource(t *testing.T) {
 	}
 
 	// check output
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	expectedOutput := "::error title=change_id::in API GET /api/test This is a breaking change.\n"
 	assert.Equal(t, expectedOutput, string(output))
@@ -102,7 +102,7 @@ func TestGitHubActionsFormatter_RenderChangelog_MultilineText(t *testing.T) {
 	}
 
 	// check output
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	expectedOutput := "::error title=change_two_lines_id,file=openapi.yaml::in API GET /api/test This is a breaking change.%0AThis is a second line.\n"
 	assert.Equal(t, expectedOutput, string(output))
@@ -125,7 +125,7 @@ func TestGitHubActionsFormatter_RenderChangelog_FileLocation(t *testing.T) {
 	}
 
 	// check output
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	expectedOutput := "::error title=change_id,file=openapi.json,col=6,endColumn=11,line=21,endLine=26::in API GET /api/test This is a breaking change.\n"
 	assert.Equal(t, expectedOutput, string(output))
@@ -170,7 +170,7 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 	}
 
 	// check output
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
 	_ = os.Unsetenv("GITHUB_OUTPUT")
 	expectedOutput := "::error title=change_id,file=openapi.yaml::in API GET /api/test This is a breaking change.\n::error title=change_id,file=openapi.yaml::in API GET /api/test This is a breaking change.\n::warning title=warning_id,file=openapi.yaml::in API GET /api/test This is a warning.\n::notice title=notice_id,file=openapi.yaml::in API GET /api/test This is a notice.\n"

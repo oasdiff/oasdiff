@@ -28,7 +28,7 @@ func TestTextFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := textFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	out, err := textFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	require.NoError(t, err)
 	require.Equal(t, "1 changes: 1 error, 0 warning, 0 info\nerror\t[change_id] \t\n\tin components/test\n\t\tThis is a breaking change.\n\n", string(out))
 }

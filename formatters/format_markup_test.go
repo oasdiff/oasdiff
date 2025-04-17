@@ -26,7 +26,7 @@ func TestMarkupFormatter_RenderDiff(t *testing.T) {
 	require.Equal(t, string(out), "No changes\n")
 }
 
-func TestMarkupFormatter_RenderChangelog(t *testing.T) {
+func TestMarkupFormatter_RenderChangelog_NoVersions(t *testing.T) {
 	testChanges := checker.Changes{
 		checker.ApiChange{
 			Path:      "/test",
@@ -36,9 +36,39 @@ func TestMarkupFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	require.NoError(t, err)
-	require.NotEmpty(t, string(out))
+	require.Contains(t, string(out), "# API Changelog \n")
+}
+
+func TestMarkupFormatter_RenderChangelog_NoBaseVersion(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Path:      "/test",
+			Operation: "GET",
+			Id:        "change_id",
+			Level:     checker.ERR,
+		},
+	}
+
+	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "2.0.0")
+	require.NoError(t, err)
+	require.Contains(t, string(out), "# API Changelog \n")
+}
+
+func TestMarkupFormatter_RenderChangelog_WithVersions(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Path:      "/test",
+			Operation: "GET",
+			Id:        "change_id",
+			Level:     checker.ERR,
+		},
+	}
+
+	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "1.0.0", "2.0.0")
+	require.NoError(t, err)
+	require.Contains(t, string(out), "# API Changelog 1.0.0 vs. 2.0.0")
 }
 
 func TestMarkupFormatter_NotImplemented(t *testing.T) {
@@ -55,6 +85,6 @@ func TestMarkupFormatter_NotImplemented(t *testing.T) {
 }
 
 func TestExecuteMarkupTemplate_Err(t *testing.T) {
-	_, err := formatters.ExecuteTextTemplate(&template.Template{}, nil, nil)
+	_, err := formatters.ExecuteTextTemplate(&template.Template{}, nil, "", "")
 	assert.Error(t, err)
 }

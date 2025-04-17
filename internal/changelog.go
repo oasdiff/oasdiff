@@ -122,7 +122,7 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 		return getErrInvalidColorMode(err)
 	}
 
-	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode}, specInfoPair)
+	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode}, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion())
 	if err != nil {
 		return getErrFailedPrint(changelogCmd+" "+flags.getFormat(), err)
 	}

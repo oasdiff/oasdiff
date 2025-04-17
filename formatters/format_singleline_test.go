@@ -28,7 +28,7 @@ func TestSingleLineFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := singleLineFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	out, err := singleLineFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	require.NoError(t, err)
 	require.Equal(t, "1 changes: 1 error, 0 warning, 0 info\nerror, in components/test This is a breaking change. [change_id]. \n\n", string(out))
 }

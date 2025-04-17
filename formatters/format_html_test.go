@@ -48,7 +48,7 @@ func TestHtmlFormatter_RenderDiff(t *testing.T) {
 	require.Equal(t, string(out), "<p>No changes</p>\n")
 }
 
-func TestHtmlFormatter_RenderChangelog(t *testing.T) {
+func TestHtmlFormatter_RenderChangelog_NoBaseVersion(t *testing.T) {
 	testChanges := checker.Changes{
 		checker.ApiChange{
 			Path:      "/test",
@@ -58,9 +58,24 @@ func TestHtmlFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), nil)
+	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "2.0.0")
 	require.NoError(t, err)
-	require.NotEmpty(t, string(out))
+	require.Contains(t, string(out), "<div class=\"title\">API Changelog </div>")
+}
+
+func TestHtmlFormatter_RenderChangelog_WithBaseAndRevisionVersion(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Path:      "/test",
+			Operation: "GET",
+			Id:        "change_id",
+			Level:     checker.ERR,
+		},
+	}
+
+	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "1.0.0", "2.0.0")
+	require.NoError(t, err)
+	require.Contains(t, string(out), "<div class=\"title\">API Changelog 1.0.0 vs. 2.0.0</div>")
 }
 
 func TestHtmlFormatter_NotImplemented(t *testing.T) {
@@ -82,6 +97,6 @@ var changelogHtml string
 func TestExecuteHtmlTemplate_Err(t *testing.T) {
 	tmpl := template.Must(template.New("changelog").Parse(changelogHtml))
 	tmpl.Tree = nil
-	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, nil)
+	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, "", "")
 	assert.Error(t, err)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 type JUnitTestSuites struct {
@@ -47,7 +46,7 @@ func newJUnitFormatter(l checker.Localizer) JUnitFormatter {
 	}
 }
 
-func (f JUnitFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func (f JUnitFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
 	var testSuite = JUnitTestSuite{
 		Package:   "com.oasdiff",
 		Time:      "0",

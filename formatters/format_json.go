@@ -8,7 +8,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 type JSONFormatter struct {
@@ -29,7 +28,7 @@ func (f JSONFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 	return printJSON(diff.GetSummary())
 }
 
-func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
 	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts.WrapInObject))
 }
 

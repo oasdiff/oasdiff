@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 var githubActionsSeverity = map[checker.Level]string{
@@ -28,7 +27,7 @@ func newGitHubActionsFormatter(l checker.Localizer) GitHubActionsFormatter {
 	}
 }
 
-func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
 	var buf bytes.Buffer
 
 	// add error, warning and notice count to job output parameters

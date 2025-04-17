@@ -101,7 +101,7 @@
 </head>
 
 <body>
-    <div class="title">API Changelog {{ .BaseVersion }} vs. {{ .RevisionVersion }} </div>
+    <div class="title">API Changelog {{ .GetVersionTitle }}</div>
     {{ range $endpoint, $changes := .APIChanges }}
     <div class="endpoint">
         <div class="endpoint-header">

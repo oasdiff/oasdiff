@@ -8,7 +8,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"golang.org/x/exp/slices"
 )
 
@@ -16,7 +15,7 @@ import (
 type Formatter interface {
 	RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, error)
 	RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, error)
-	RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error)
+	RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error)
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
 	SupportedOutputs() []Output

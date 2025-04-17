@@ -9,7 +9,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/oasdiff/oasdiff/report"
 )
 
@@ -42,14 +41,22 @@ type TemplateData struct {
 	RevisionVersion string
 }
 
-func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
-	tmpl := template.Must(template.New("changelog").Parse(changelogHtml))
-	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), specInfoPair)
+func (t TemplateData) GetVersionTitle() string {
+	if t.BaseVersion == "" || t.RevisionVersion == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s vs. %s", t.BaseVersion, t.RevisionVersion)
 }
 
-func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByEndpoint, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error) {
+	tmpl := template.Must(template.New("changelog").Parse(changelogHtml))
+	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion)
+}
+
+func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByEndpoint, baseVersion, revisionVersion string) ([]byte, error) {
 	var out bytes.Buffer
-	if err := tmpl.Execute(&out, TemplateData{changes, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion()}); err != nil {
+	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion}); err != nil {
 		return nil, err
 	}
 	return out.Bytes(), nil

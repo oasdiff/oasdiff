@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 type SingleLineFormatter struct {
@@ -19,7 +18,7 @@ func newSingleLineFormatter(l checker.Localizer) SingleLineFormatter {
 	}
 }
 
-func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, specInfoPair *load.SpecInfoPair) ([]byte, error) {
+func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
 	if len(changes) > 0 {
