@@ -7,18 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSplitMediaType(t *testing.T) {
+func TestParseMediaType(t *testing.T) {
 	mediaType := "image/png;charset=utf-8"
-	parts, err := diff.SplitMediaType(mediaType)
+	parts, err := diff.ParseMediaType(mediaType)
 	require.NoError(t, err)
 	require.Equal(t, "image", parts.Type)
 	require.Equal(t, "png", parts.Subtype)
 	require.Equal(t, "utf-8", parts.Parameters["charset"])
 }
 
-func TestSplitMediaTypeWithMultipleParameters(t *testing.T) {
+func TestParseMediaTypeWithMultipleParameters(t *testing.T) {
 	mediaType := "image/png;charset=utf-8;boundary=123"
-	parts, err := diff.SplitMediaType(mediaType)
+	parts, err := diff.ParseMediaType(mediaType)
 	require.NoError(t, err)
 	require.Equal(t, "image", parts.Type)
 	require.Equal(t, "png", parts.Subtype)
@@ -26,20 +26,19 @@ func TestSplitMediaTypeWithMultipleParameters(t *testing.T) {
 	require.Equal(t, "123", parts.Parameters["boundary"])
 }
 
-func TestSplitMediaTypeWithSuffix(t *testing.T) {
+func TestParseMediaTypeWithSuffix(t *testing.T) {
 	mediaType := "image/png+json"
-	parts, err := diff.SplitMediaType(mediaType)
+	parts, err := diff.ParseMediaType(mediaType)
 	require.NoError(t, err)
 	require.Equal(t, "image", parts.Type)
 	require.Equal(t, "png", parts.Subtype)
 	require.Equal(t, "json", parts.Suffix)
 }
 
-func TestSplitMediaTypeWithInvalidMediaType(t *testing.T) {
+func TestParseMediaTypeWithInvalidMediaType(t *testing.T) {
 	mediaType := "image/png+json+"
-	parts, err := diff.SplitMediaType(mediaType)
+	_, err := diff.ParseMediaType(mediaType)
 	require.Error(t, err)
-	require.Equal(t, diff.MediaTypeParts{}, parts)
 }
 
 func getMediaTypeContained(t *testing.T, mediaType1, mediaType2 string) bool {

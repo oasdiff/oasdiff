@@ -6,25 +6,25 @@ import (
 	"strings"
 )
 
-type MediaTypeParts struct {
+type MediaType struct {
 	Type       string
 	Subtype    string
 	Suffix     string
 	Parameters map[string]string
 }
 
-func SplitMediaType(mediaType string) (MediaTypeParts, error) {
+func ParseMediaType(mediaType string) (*MediaType, error) {
 	mediaType, params, err := mime.ParseMediaType(mediaType)
 	if err != nil {
-		return MediaTypeParts{}, err
+		return nil, err
 	}
 
 	parts := strings.Split(mediaType, "/")
 	if len(parts) != 2 {
-		return MediaTypeParts{}, fmt.Errorf("invalid media type: %s", mediaType)
+		return nil, fmt.Errorf("invalid media type: %s", mediaType)
 	}
 
-	result := MediaTypeParts{
+	result := MediaType{
 		Type:       parts[0],
 		Subtype:    parts[1],
 		Parameters: params,
@@ -33,7 +33,7 @@ func SplitMediaType(mediaType string) (MediaTypeParts, error) {
 	subTypeParts := strings.Split(result.Subtype, "+")
 	switch len(subTypeParts) {
 	case 0:
-		return MediaTypeParts{}, fmt.Errorf("invalid media subtype: %s", mediaType)
+		return nil, fmt.Errorf("invalid media subtype: %s", mediaType)
 	case 1:
 		result.Subtype = subTypeParts[0]
 		result.Suffix = ""
@@ -41,21 +41,21 @@ func SplitMediaType(mediaType string) (MediaTypeParts, error) {
 		result.Subtype = subTypeParts[0]
 		result.Suffix = subTypeParts[1]
 	default:
-		return MediaTypeParts{}, fmt.Errorf("multiple suffixes not supported: %s", mediaType)
+		return nil, fmt.Errorf("multiple suffixes not supported: %s", mediaType)
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 // IsMediaTypeContained checks if mediaType1 contains mediaType2
 // e.g., application/json contains application/problem+json
 func IsMediaTypeContained(mediaType1, mediaType2 string) (bool, error) {
-	parts1, err := SplitMediaType(mediaType1)
+	parts1, err := ParseMediaType(mediaType1)
 	if err != nil {
 		return false, err
 	}
 
-	parts2, err := SplitMediaType(mediaType2)
+	parts2, err := ParseMediaType(mediaType2)
 	if err != nil {
 		return false, err
 	}
