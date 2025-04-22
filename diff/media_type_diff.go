@@ -6,8 +6,11 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// MediaTypeDiff describes the changes between a pair of media type objects
+// MediaTypeDiff describes the changes between a pair of media type objects: https://swagger.io/specification/#media-type-object
 type MediaTypeDiff struct {
+	// additional fields to describe changes to media type name
+	NameDiff *ValueDiff `json:"name,omitempty" yaml:"name,omitempty"`
+	// fields from openapi media type object
 	ExtensionsDiff *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	SchemaDiff     *SchemaDiff     `json:"schema,omitempty" yaml:"schema,omitempty"`
 	ExampleDiff    *ValueDiff      `json:"example,omitempty" yaml:"example,omitempty"`
@@ -20,8 +23,8 @@ func (diff *MediaTypeDiff) Empty() bool {
 	return diff == nil || *diff == MediaTypeDiff{}
 }
 
-func getMediaTypeDiff(config *Config, state *state, mediaType1 *openapi3.MediaType, mediaType2 *openapi3.MediaType) (*MediaTypeDiff, error) {
-	diff, err := getMediaTypeDiffInternal(config, state, mediaType1, mediaType2)
+func getMediaTypeDiff(config *Config, state *state, name1, name2 string, mediaType1, mediaType2 *openapi3.MediaType) (*MediaTypeDiff, error) {
+	diff, err := getMediaTypeDiffInternal(config, state, name1, name2, mediaType1, mediaType2)
 	if err != nil {
 		return nil, err
 	}
@@ -33,13 +36,15 @@ func getMediaTypeDiff(config *Config, state *state, mediaType1 *openapi3.MediaTy
 	return diff, nil
 }
 
-func getMediaTypeDiffInternal(config *Config, state *state, mediaType1 *openapi3.MediaType, mediaType2 *openapi3.MediaType) (*MediaTypeDiff, error) {
+func getMediaTypeDiffInternal(config *Config, state *state, name1, name2 string, mediaType1, mediaType2 *openapi3.MediaType) (*MediaTypeDiff, error) {
 	result := MediaTypeDiff{}
 	var err error
 
 	if mediaType1 == nil || mediaType2 == nil {
 		return nil, fmt.Errorf("media type is nil")
 	}
+
+	result.NameDiff = getValueDiff(name1, name2)
 
 	result.ExtensionsDiff, err = getExtensionsDiff(config, mediaType1.Extensions, mediaType2.Extensions)
 	if err != nil {

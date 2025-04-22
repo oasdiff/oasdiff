@@ -596,9 +596,9 @@ func (r *report) printContent(d *diff.ContentDiff) {
 		r.print("Deleted media type:", name)
 	}
 
-	for _, name := range getKeys(d.MediaTypeModified) {
+	for name, mediaTypeWrapperDiff := range d.MediaTypeModified {
 		r.print("Modified media type:", name)
-		r.indent().printMediaType(d.MediaTypeModified[name])
+		r.indent().printMediaType(mediaTypeWrapperDiff)
 	}
 }
 
@@ -606,6 +606,8 @@ func (r *report) printMediaType(d *diff.MediaTypeDiff) {
 	if d.Empty() {
 		return
 	}
+
+	r.printValue(d.NameDiff, "Name")
 
 	if !d.ExtensionsDiff.Empty() {
 		r.print("Extensions changed")
