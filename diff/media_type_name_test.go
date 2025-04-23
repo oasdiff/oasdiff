@@ -32,7 +32,7 @@ func TestParseMediaTypeNameWithSuffix(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, "image", parts.Type)
 	require.Equal(t, "png", parts.Subtype)
-	require.Equal(t, "json", parts.Suffixes[0])
+	require.Equal(t, "json", parts.Suffix)
 }
 
 func TestParseMediaTypeNameWithInvalidMediaType(t *testing.T) {
@@ -54,8 +54,9 @@ func TestIsMediaTypeNameContainedWithSuffix(t *testing.T) {
 	require.True(t, diff.IsMediaTypeNameContained("application/problem+json", "application/problem+json"))
 }
 
-// multiple suffixes
+
+// multiple suffixes are not supported
 func TestIsMediaTypeNameContainedWithMultipleSuffixes(t *testing.T) {
-	require.True(t, diff.IsMediaTypeNameContained("image/png+json", "image/png+json+xml"))
+	require.False(t, diff.IsMediaTypeNameContained("image/png+json", "image/png+json+xml"))
 	require.False(t, diff.IsMediaTypeNameContained("image/png+json+xml", "image/png+json"))
 }
