@@ -5,11 +5,11 @@ import (
 )
 
 const (
-	ResponseMediaTypeRemovedId = "response-media-type-removed"
-	ResponseMediaTypeAddedId   = "response-media-type-added"
+	ResponseMediaTypeNameGeneralizedId = "response-media-type-name-generalized"
+	ResponseMediaTypeNameSpecializedId = "response-media-type-name-specialized"
 )
 
-func ResponseMediaTypeUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
 		return result
@@ -29,23 +29,23 @@ func ResponseMediaTypeUpdatedCheck(diffReport *diff.Diff, operationsSources *dif
 				if responsesDiff.ContentDiff == nil {
 					continue
 				}
-				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeDeleted {
+				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeModified {
+					if mediaType.NameDiff.Empty() {
+						continue
+					}
+
+					name1 := mediaType.NameDiff.From.(string)
+					name2 := mediaType.NameDiff.To.(string)
+
+					id := ResponseMediaTypeNameGeneralizedId
+					if diff.IsMediaTypeNameContained(name1, name2) {
+						id = ResponseMediaTypeNameSpecializedId
+					}
+
 					result = append(result, NewApiChange(
-						ResponseMediaTypeRemovedId,
+						id,
 						config,
-						[]any{mediaType, responseStatus},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					))
-				}
-				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeAdded {
-					result = append(result, NewApiChange(
-						ResponseMediaTypeAddedId,
-						config,
-						[]any{mediaType, responseStatus},
+						[]any{name1, name2, responseStatus},
 						"",
 						operationsSources,
 						operationItem.Revision,

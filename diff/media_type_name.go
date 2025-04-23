@@ -65,7 +65,7 @@ func ParseMediaTypeName(mediaType string) (*MediaTypeName, error) {
 	return &result, nil
 }
 
-// IsMediaTypeNameContained checks if mediaType2 can be safely used where mediaType1 was expected.
+// IsMediaTypeNameContained checks if mediaType2 is a specific sub-type of mediaType1
 // Examples:
 // - "application/json" contains "application/problem+json" -> true (JSON exception)
 // - "application/problem+json" contains "application/json" -> false

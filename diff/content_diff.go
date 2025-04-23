@@ -94,14 +94,12 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 				// Found an equivalent pair: addedName <-> deletedName
 
 				// Calculate diff (wrapper1=new, wrapper2=old)
-				diff, err := getMediaTypeDiff(config, state, addedName, deletedName, content1[deletedName], content2[addedName])
+				diff, err := getMediaTypeDiff(config, state, deletedName, addedName, content1[deletedName], content2[addedName])
 				if err != nil {
 					return nil, err
 				}
 
 				// Add to modified, using the *new* name as the key seems more logical here,
-				// assuming MediaTypeWrapperDiff holds enough context or getMediaTypeWrapperDiff uses it.
-				// Sticking to user's previous pattern: key is addedName (name1 in user code)
 				finalModified[addedName] = diff
 
 				processedDeleted[deletedName] = true // Mark this deleted item as paired

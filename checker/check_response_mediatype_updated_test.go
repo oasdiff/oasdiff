@@ -31,7 +31,7 @@ func TestAddNewMediaType(t *testing.T) {
 	}, errs[0])
 }
 
-// CL: removing a new media type to response
+// CL: removing a media type from response
 func TestDeleteNewMediaType(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)

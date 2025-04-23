@@ -156,6 +156,8 @@ required-response-header-removed: the mandatory response header %s removed for t
 optional-response-header-removed: the optional response header %s removed for the status %s
 response-media-type-removed: removed the media type %s for the response with the status %s
 response-media-type-added: added the media type %s for the response with the status %s
+response-media-type-name-generalized: media type %s was changed to a more general media type %s for the response status %s
+response-media-type-name-specialized: media type %s was changed to a more specific media type %s for the response status %s
 response-optional-property-removed: removed the optional property %s from the response with the %s status
 response-property-became-optional: the response property %s became optional for the status %s
 response-property-became-nullable: the response property %s became nullable for the status %s
