@@ -41,6 +41,20 @@ func TestParseMediaTypeNameWithInvalidMediaType(t *testing.T) {
 	require.Error(t, err)
 }
 
+// multiple suffixes are not supported
+func TestParseMediaTypeNameWithMultipleSuffixes(t *testing.T) {
+	_, err := diff.ParseMediaTypeName("image/png+json+xml")
+	require.Error(t, err)
+}
+
+func TestParseMediaTypeNameWithParams(t *testing.T) {
+	name, err := diff.ParseMediaTypeName("application/xml;q=0.9")
+	require.NoError(t, err)
+	require.Equal(t, "application", name.Type)
+	require.Equal(t, "xml", name.Subtype)
+	require.Equal(t, "0.9", name.Parameters["q"])
+}
+
 func TestIsMediaTypeNameContained(t *testing.T) {
 	require.True(t, diff.IsMediaTypeNameContained("application/xml", "application/xml"))
 	require.False(t, diff.IsMediaTypeNameContained("application/xml", "application/json"))
@@ -54,9 +68,8 @@ func TestIsMediaTypeNameContainedWithSuffix(t *testing.T) {
 	require.True(t, diff.IsMediaTypeNameContained("application/problem+json", "application/problem+json"))
 }
 
-
-// multiple suffixes are not supported
-func TestIsMediaTypeNameContainedWithMultipleSuffixes(t *testing.T) {
-	require.False(t, diff.IsMediaTypeNameContained("image/png+json", "image/png+json+xml"))
-	require.False(t, diff.IsMediaTypeNameContained("image/png+json+xml", "image/png+json"))
+// Parameter values are ignored when determining if one media type contains another.
+func TestIsMediaTypeNameContainedWithParams(t *testing.T) {
+	require.True(t, diff.IsMediaTypeNameContained("application/xml;q=0.9", "application/xml;q=0.9"))
+	require.True(t, diff.IsMediaTypeNameContained("application/xml;q=0.9", "application/xml;q=0.8"))
 }
