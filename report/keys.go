@@ -15,7 +15,8 @@ type DiffT interface {
 		*diff.MediaTypeDiff |
 		*diff.HeaderDiff |
 		diff.SecurityScopesDiff |
-		*diff.StringsDiff
+		*diff.StringsDiff |
+		*diff.ValueDiff
 }
 
 func getKeys[diff DiffT](m map[string]diff) utils.StringList {

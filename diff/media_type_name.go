@@ -26,14 +26,7 @@ func ParseMediaTypeName(mediaType string) (*MediaTypeName, error) {
 	}
 
 	typeName := strings.TrimSpace(parts[0])
-	if typeName == "" {
-		return nil, fmt.Errorf("invalid media type: empty type in '%s'", mediaTypeNoParams)
-	}
-
 	subTypeString := strings.TrimSpace(parts[1])
-	if subTypeString == "" {
-		return nil, fmt.Errorf("invalid media type: empty subtype in '%s'", mediaTypeNoParams)
-	}
 
 	result := MediaTypeName{
 		Name:       mediaType,
@@ -43,9 +36,6 @@ func ParseMediaTypeName(mediaType string) (*MediaTypeName, error) {
 
 	subTypeParts := strings.Split(subTypeString, "+")
 	result.Subtype = strings.TrimSpace(subTypeParts[0])
-	if result.Subtype == "" {
-		return nil, fmt.Errorf("invalid media type: empty base subtype in '%s'", mediaTypeNoParams)
-	}
 
 	// Handle suffix (only one allowed)
 	switch len(subTypeParts) {
@@ -65,8 +55,11 @@ func ParseMediaTypeName(mediaType string) (*MediaTypeName, error) {
 	return &result, nil
 }
 
-// IsMediaTypeNameContained checks if mediaType2 can be safely used where mediaType1 was expected.
-// Assumes single suffix only.
+// IsMediaTypeNameContained checks if mediaType2 is a specialization of mediaType1.
+// For example:
+// - "application/xml" contains "application/atom+xml" (base type contains suffixed type)
+// - "application/json" contains "application/problem+json" (base type contains suffixed type)
+// - "application/xml;q=0.9" contains "application/xml;q=0.8" (parameter values are ignored)
 func IsMediaTypeNameContained(mediaType1, mediaType2 string) bool {
 	parts1, err := ParseMediaTypeName(mediaType1) // Expected/Old
 	if err != nil {

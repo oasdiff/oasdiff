@@ -8,14 +8,15 @@ import (
 
 // MediaTypeDiff describes the changes between a pair of media type objects: https://swagger.io/specification/#media-type-object
 type MediaTypeDiff struct {
-	// additional fields to describe changes to media type name
-	NameDiff *ValueDiff `json:"name,omitempty" yaml:"name,omitempty"`
 	// fields from openapi media type object
 	ExtensionsDiff *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	SchemaDiff     *SchemaDiff     `json:"schema,omitempty" yaml:"schema,omitempty"`
 	ExampleDiff    *ValueDiff      `json:"example,omitempty" yaml:"example,omitempty"`
 	ExamplesDiff   *ExamplesDiff   `json:"examples,omitempty" yaml:"examples,omitempty"`
 	EncodingsDiff  *EncodingsDiff  `json:"encoding,omitempty" yaml:"encoding,omitempty"`
+
+	// additional fields to describe changes to media type name
+	NameDiff *MediaTypeNameDiff `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -37,14 +38,17 @@ func getMediaTypeDiff(config *Config, state *state, name1, name2 string, mediaTy
 }
 
 func getMediaTypeDiffInternal(config *Config, state *state, name1, name2 string, mediaType1, mediaType2 *openapi3.MediaType) (*MediaTypeDiff, error) {
-	result := MediaTypeDiff{}
-	var err error
-
 	if mediaType1 == nil || mediaType2 == nil {
 		return nil, fmt.Errorf("media type is nil")
 	}
 
-	result.NameDiff = getValueDiff(name1, name2)
+	result := MediaTypeDiff{}
+	var err error
+
+	result.NameDiff, err = getMediaTypeNameDiff(name1, name2)
+	if err != nil {
+		return nil, err
+	}
 
 	result.ExtensionsDiff, err = getExtensionsDiff(config, mediaType1.Extensions, mediaType2.Extensions)
 	if err != nil {

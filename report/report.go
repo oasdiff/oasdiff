@@ -607,7 +607,9 @@ func (r *report) printMediaType(d *diff.MediaTypeDiff) {
 		return
 	}
 
-	r.printValue(d.NameDiff, "Name")
+	if !d.NameDiff.Empty() {
+		r.printValue(d.NameDiff.NameDiff, "Name")
+	}
 
 	if !d.ExtensionsDiff.Empty() {
 		r.print("Extensions changed")
