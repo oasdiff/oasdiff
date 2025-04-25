@@ -5,6 +5,7 @@ import (
 )
 
 const (
+	ResponseMediaTypeNameChangedId     = "response-media-type-name-changed"
 	ResponseMediaTypeNameGeneralizedId = "response-media-type-name-generalized"
 	ResponseMediaTypeNameSpecializedId = "response-media-type-name-specialized"
 )
@@ -30,22 +31,35 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					continue
 				}
 				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeModified {
-					if mediaType.NameDiff.Empty() {
+					if mediaType.NameDiff == nil {
 						continue
 					}
 
-					name1 := mediaType.NameDiff.From.(string)
-					name2 := mediaType.NameDiff.To.(string)
+					// If parameters changed, this is a changed media type
+					if !mediaType.NameDiff.ParametersDiff.Empty() {
+						result = append(result, NewApiChange(
+							ResponseMediaTypeNameChangedId,
+							config,
+							[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
+						continue
+					}
 
+					// If params didn't change, check if the media type is a generalization or specialization
 					id := ResponseMediaTypeNameGeneralizedId
-					if diff.IsMediaTypeNameContained(name1, name2) {
+					if mediaType.NameDiff.IsContained() {
 						id = ResponseMediaTypeNameSpecializedId
 					}
 
 					result = append(result, NewApiChange(
 						id,
 						config,
-						[]any{name1, name2, responseStatus},
+						[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
 						"",
 						operationsSources,
 						operationItem.Revision,
