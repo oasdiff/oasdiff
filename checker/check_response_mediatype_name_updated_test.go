@@ -12,7 +12,7 @@ import (
 func TestChangeMediaTypeParameters(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)
-	s2, err := open("../data/checker/add_new_media_type_modified_params.yaml")
+	s2, err := open("../data/checker/add_new_media_type_params_modified.yaml")
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -27,7 +27,7 @@ func TestChangeMediaTypeParameters(t *testing.T) {
 func TestSpecializeMediaTypeName(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)
-	s2, err := open("../data/checker/add_new_media_type_modified.yaml")
+	s2, err := open("../data/checker/add_new_media_type_name_modified.yaml")
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -40,7 +40,7 @@ func TestSpecializeMediaTypeName(t *testing.T) {
 
 // BC: modifying a media type name in response to make it more general is breaking
 func TestGeneralizeMediaTypeName(t *testing.T) {
-	s1, err := open("../data/checker/add_new_media_type_modified.yaml")
+	s1, err := open("../data/checker/add_new_media_type_name_modified.yaml")
 	require.NoError(t, err)
 	s2, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)
