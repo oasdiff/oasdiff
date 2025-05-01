@@ -88,7 +88,8 @@ jobs:
       run: |
         ! git grep -InE 'json:"' | grep -v _test.go | grep -v yaml:
 
-    - uses: codecov/codecov-action@v5
+    - name: Codecov
+      uses: codecov/codecov-action@v5
       with:
         files: ./coverage.txt
         flags: unittests # optional
