@@ -93,7 +93,7 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 			if isMediaTypeNamesEquivalent(addedName, deletedName) {
 				// Found an equivalent pair: addedName <-> deletedName
 
-				// Calculate diff (wrapper1=new, wrapper2=old)
+				// Calculate diff
 				diff, err := getMediaTypeDiff(config, state, deletedName, addedName, content1[deletedName], content2[addedName])
 				if err != nil {
 					return nil, err
