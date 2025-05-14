@@ -3,7 +3,7 @@ module github.com/oasdiff/oasdiff
 go 1.24
 
 require (
-	cloud.google.com/go v0.121.0
+	cloud.google.com/go v0.121.1
 	github.com/TwiN/go-color v1.4.1
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/spf13/pflag v1.0.6
