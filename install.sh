@@ -127,7 +127,7 @@ main() {
     exit 1
   fi
 
-  if [ "$os" == "darwin" ]; then
+  if [ "$os" = "darwin" ]; then
     machine="all"
   else
     machine=$(get_machine)
