@@ -3,7 +3,7 @@ module github.com/oasdiff/oasdiff
 go 1.24
 
 require (
-	cloud.google.com/go v0.121.2
+	cloud.google.com/go v0.121.3
 	github.com/TwiN/go-color v1.4.1
 	github.com/getkin/kin-openapi v0.132.0
 	github.com/spf13/pflag v1.0.6
@@ -33,8 +33,8 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 )
 
 require (
