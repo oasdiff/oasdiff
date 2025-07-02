@@ -58,6 +58,7 @@ request-parameter-became-enum: o parâmetro de requisição do tipo %s e nome %s
 request-parameter-enum-value-removed: valor %s do enum removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-enum-value-added: valor %s do enum adicionado ao parâmetro de requisição do tipo %s e nome %s
 pattern-changed-warn-comment: "Este é um aviso porque é difícil analisar automaticamente se o novo padrão é um superconjunto do padrão anterior (por exemplo, alterado de '[0-9]+' para '[0-9]*')"
+pattern-added-error-comment: "Esta é uma alteração crítica porque adicionar uma restrição de padrão a um parâmetro anteriormente irrestrito rejeitará valores que eram aceitos anteriormente, quebrando clientes existentes"
 request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-max-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu valor máximo foi reduzido de %s para %s
 request-parameter-max-increased: no parâmetro de requisição do tipo %s e nome %s teve seu valor máximo foi aumentado de %s para %s
