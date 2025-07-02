@@ -31,7 +31,7 @@ func TestRequestPropertyPatternChanged(t *testing.T) {
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
 		Comment:   checker.PatternChangedCommentId,
 	}, errs[0])
-	require.Equal(t, "This is a warning because it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
 // CL: generalizing request property pattern
@@ -66,18 +66,18 @@ func TestRequestPropertyPatternAdded(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternAddedId,
 		Args:      []any{"^\\w+$", "name"},
-		Level:     checker.WARN,
+		Level:     checker.ERR,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_base.yaml"),
-		Comment:   checker.PatternChangedCommentId,
+		Comment:   checker.PatternAddedCommentId,
 	}, errs[0])
-	require.Equal(t, "This is a warning because it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
 // CL: removing request property pattern
