@@ -55,6 +55,7 @@ request-parameter-enum-value-removed: удалено значение enum %s у
 request-parameter-enum-value-added: добавлено значение enum %s у %s параметра запроса %s
 pattern-changed-warn-comment: Это предупреждение, потому что сложно автоматически проанализировать, является ли новый шаблон надмножеством предыдущего шаблона (например, изменен с '[0-9]+' на '[0-9]*').
 request-parameter-x-extensible-enum-value-removed: удалено из x-extensible-enum значение %s у %s параметра запроса %s
+pattern-added-error-comment: Это критическое изменение, потому что добавление ограничения шаблона к ранее неограниченному параметру отклонит значения, которые ранее принимались, сломав существующих клиентов
 request-parameter-max-decreased: в %s параметре запроса %s, max уменьшен с %s до %s
 request-parameter-max-increased: в %s параметре запроса %s, max увеличен с %s до %s
 request-parameter-default-value-added: для параметра запроса %s добавлено значение по умолчанию %s

@@ -54,7 +54,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								RequestPropertyPatternAddedId,
 								config,
 								[]any{patternDiff.To, propName},
-								PatternChangedCommentId,
+								PatternAddedCommentId,
 								operationsSources,
 								operationItem.Revision,
 								operation,
