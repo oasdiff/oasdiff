@@ -59,6 +59,7 @@ request-parameter-enum-value-removed: removed the enum value %s from the %s requ
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
 pattern-changed-warn-comment: "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')"
 pattern-added-error-comment: "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients"
+request-parameter-x-extensible-enum-value-removed: removed the x-extensible-enum value %s from the %s request parameter %s
 request-parameter-max-decreased: for the %s request parameter %s, the max was decreased from %s to %s
 request-parameter-max-increased: for the %s request parameter %s, the max was increased from %s to %s
 request-parameter-default-value-added: for the %s request parameter %s, default value %s was added

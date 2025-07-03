@@ -21,4 +21,5 @@ func TestRequestParameterXExtensibleEnumValueRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterXExtensibleEnumValueRemovedCheck), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterXExtensibleEnumValueRemovedId, errs[0].GetId())
+	require.Equal(t, "removed the x-extensible-enum value '2' from the 'path' request parameter 'groupId'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
