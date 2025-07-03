@@ -194,7 +194,6 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterMinDecreasedId, INFO, RequestParameterMinUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
 		// RequestParameterPatternAddedOrChangedCheck
 		newBackwardCompatibilityRule(RequestParameterPatternAddedId, ERR, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
-		newBackwardCompatibilityRule(RequestParameterPatternAddedId, WARN, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
 		newBackwardCompatibilityRule(RequestParameterPatternRemovedId, INFO, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
 		newBackwardCompatibilityRule(RequestParameterPatternChangedId, WARN, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionChange),
 		newBackwardCompatibilityRule(RequestParameterPatternGeneralizedId, INFO, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionGeneralize),
@@ -288,7 +287,6 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestPropertyPatternUpdatedCheck
 		newBackwardCompatibilityRule(RequestPropertyPatternRemovedId, INFO, RequestPropertyPatternUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
 		newBackwardCompatibilityRule(RequestPropertyPatternAddedId, ERR, RequestPropertyPatternUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
-		newBackwardCompatibilityRule(RequestPropertyPatternAddedId, WARN, RequestPropertyPatternUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
 		newBackwardCompatibilityRule(RequestPropertyPatternChangedId, WARN, RequestPropertyPatternUpdatedCheck, DirectionRequest, LocationProperties, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyPatternGeneralizedId, INFO, RequestPropertyPatternUpdatedCheck, DirectionRequest, LocationProperties, ActionGeneralize),
 		// RequestPropertyRequiredUpdatedCheck
