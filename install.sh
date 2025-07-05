@@ -117,8 +117,12 @@ do_install() {
 }
 
 main() {
-  latest_tag=$(get_latest_release $REPO_NAME)
-  version=$(echo $latest_tag | sed 's/v//')
+  if [ -n "$version" ]; then
+    version="$version"
+  else
+    latest_tag=$(get_latest_release $REPO_NAME)
+    version=$(echo $latest_tag | sed 's/v//')
+  fi
 
   os=$(get_os)
   if test -z "$os"; then
@@ -142,7 +146,6 @@ main() {
   do_install
   
   echo "oasdiff is now installed! type 'oasdiff -h' to see a list of commands"
-
 }
 
 main
