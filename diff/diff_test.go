@@ -361,13 +361,13 @@ func TestParamDeletedFromPathItem(t *testing.T) {
 
 func TestHeaderAdded(t *testing.T) {
 	require.Contains(t,
-		d(t, diff.NewConfig(), 5, 1).HeadersDiff.Added,
+		d(t, diff.NewConfig(), 5, 1).ComponentsDiff.HeadersDiff.Added,
 		"new")
 }
 
 func TestHeaderDeleted(t *testing.T) {
 	require.Contains(t,
-		d(t, diff.NewConfig(), 1, 5).HeadersDiff.Deleted,
+		d(t, diff.NewConfig(), 1, 5).ComponentsDiff.HeadersDiff.Deleted,
 		"new")
 }
 
@@ -375,11 +375,11 @@ func TestRequestBodyModified(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 1, 3)
 
 	require.True(t,
-		dd.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Deleted.Is("number"),
+		dd.ComponentsDiff.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Deleted.Is("number"),
 	)
 
 	require.True(t,
-		dd.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Added.Is("integer"),
+		dd.ComponentsDiff.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Added.Is("integer"),
 	)
 }
 
@@ -388,21 +388,21 @@ func TestHeaderModifiedSchema(t *testing.T) {
 
 	require.Equal(t,
 		false,
-		dd.HeadersDiff.Modified["test"].SchemaDiff.AdditionalPropertiesAllowedDiff.From)
+		dd.ComponentsDiff.HeadersDiff.Modified["test"].SchemaDiff.AdditionalPropertiesAllowedDiff.From)
 
 	require.Equal(t,
 		true,
-		dd.HeadersDiff.Modified["test"].SchemaDiff.AdditionalPropertiesAllowedDiff.To)
+		dd.ComponentsDiff.HeadersDiff.Modified["test"].SchemaDiff.AdditionalPropertiesAllowedDiff.To)
 }
 
 func TestHeaderModifiedContent(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 5, 1)
 
 	require.True(t,
-		dd.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Deleted.Is("string"))
+		dd.ComponentsDiff.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Deleted.Is("string"))
 
 	require.True(t,
-		dd.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Added.Is("object"))
+		dd.ComponentsDiff.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Added.Is("object"))
 }
 
 func TestResponseContentModified(t *testing.T) {
@@ -449,13 +449,13 @@ func TestSchemaDiff_AddedRequestBody(t *testing.T) {
 
 func TestSchemaDiff_AddedSchemas(t *testing.T) {
 	require.Contains(t,
-		d(t, diff.NewConfig(), 1, 5).SchemasDiff.Added,
+		d(t, diff.NewConfig(), 1, 5).ComponentsDiff.SchemasDiff.Added,
 		"requests")
 }
 
 func TestSchemaDiff_DeletedSchemas(t *testing.T) {
 	require.Contains(t,
-		d(t, diff.NewConfig(), 5, 1).SchemasDiff.Deleted,
+		d(t, diff.NewConfig(), 5, 1).ComponentsDiff.SchemasDiff.Deleted,
 		"requests")
 }
 
@@ -464,11 +464,11 @@ func TestSchemaDiff_ModifiedSchemas(t *testing.T) {
 
 	require.Equal(t,
 		true,
-		dd.SchemasDiff.Modified["network-policies"].AdditionalPropertiesAllowedDiff.From)
+		dd.ComponentsDiff.SchemasDiff.Modified["network-policies"].AdditionalPropertiesAllowedDiff.From)
 
 	require.Equal(t,
 		false,
-		dd.SchemasDiff.Modified["network-policies"].AdditionalPropertiesAllowedDiff.To)
+		dd.ComponentsDiff.SchemasDiff.Modified["network-policies"].AdditionalPropertiesAllowedDiff.To)
 }
 
 func TestSchemaDiff_ModifiedSchemasOldNil(t *testing.T) {
@@ -476,11 +476,11 @@ func TestSchemaDiff_ModifiedSchemasOldNil(t *testing.T) {
 
 	require.Equal(t,
 		nil,
-		dd.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.From)
+		dd.ComponentsDiff.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.From)
 
 	require.Equal(t,
 		false,
-		dd.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.To)
+		dd.ComponentsDiff.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.To)
 }
 
 func TestSchemaDiff_ModifiedSchemasNewNil(t *testing.T) {
@@ -488,10 +488,10 @@ func TestSchemaDiff_ModifiedSchemasNewNil(t *testing.T) {
 
 	require.Equal(t,
 		false,
-		dd.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.From)
+		dd.ComponentsDiff.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.From)
 
 	require.Nil(t,
-		dd.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.To)
+		dd.ComponentsDiff.SchemasDiff.Modified["rules"].AdditionalPropertiesAllowedDiff.To)
 }
 
 func TestSummary(t *testing.T) {
@@ -657,12 +657,12 @@ func TestCircularSchemaRefs(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	require.Contains(t, dd.SchemasDiff.Modified, "circular1")
-	require.NotContains(t, dd.SchemasDiff.Modified, "circular2")
-	require.Contains(t, dd.SchemasDiff.Modified, "circular3")
-	require.NotContains(t, dd.SchemasDiff.Modified, "circular4")
-	require.Contains(t, dd.SchemasDiff.Modified, "circular5")
-	require.Contains(t, dd.SchemasDiff.Modified, "circular6")
+	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular1")
+	require.NotContains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular2")
+	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular3")
+	require.NotContains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular4")
+	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular5")
+	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular6")
 }
 
 func TestCallbacks(t *testing.T) {

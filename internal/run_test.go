@@ -366,3 +366,9 @@ func Test_Changelog_WithUnmatchPath(t *testing.T) {
 func Test_JsonWithExcludeElements(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff --format json --exclude-elements=description,title,summary ../data/description/spec1.yml ../data/description/spec2.yml --fail-on-diff"), io.Discard, io.Discard))
 }
+
+func Test_EmptyComponentsOmitted(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/version/base.yaml ../data/version/revision.yaml -f json"), &stdout, io.Discard))
+	require.Equal(t, "{\"info\":{\"version\":{\"from\":\"0.0.0\",\"to\":\"0.0.1\"}}}\n", stdout.String())
+}

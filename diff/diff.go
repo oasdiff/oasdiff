@@ -27,8 +27,7 @@ type Diff struct {
 	ServersDiff      *ServersDiff              `json:"servers,omitempty" yaml:"servers,omitempty"`
 	TagsDiff         *TagsDiff                 `json:"tags,omitempty" yaml:"tags,omitempty"`
 	ExternalDocsDiff *ExternalDocsDiff         `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
-
-	ComponentsDiff `json:"components,omitempty" yaml:"components,omitempty"`
+	ComponentsDiff   *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
 }
 
 type OperationsSourcesMap map[*openapi3.Operation]string
@@ -291,7 +290,8 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 		return nil, err
 	}
 
-	if result.ComponentsDiff, err = getComponentsDiff(config, state, s1.Components, s2.Components); err != nil {
+	result.ComponentsDiff, err = getComponentsDiff(config, state, s1.Components, s2.Components)
+	if err != nil {
 		return nil, err
 	}
 
@@ -316,15 +316,17 @@ func (diff *Diff) GetSummary() *Summary {
 	summary.add(diff.TagsDiff, TagsDetail)
 
 	// components
-	summary.add(diff.SchemasDiff, SchemasDetail)
-	summary.add(diff.ParametersDiff, ParametersDetail)
-	summary.add(diff.HeadersDiff, HeadersDetail)
-	summary.add(diff.RequestBodiesDiff, RequestBodiesDetail)
-	summary.add(diff.ResponsesDiff, ResponsesDetail)
-	summary.add(diff.SecuritySchemesDiff, SecuritySchemesDetail)
-	summary.add(diff.ExamplesDiff, ExamplesDetail)
-	summary.add(diff.LinksDiff, LinksDetail)
-	summary.add(diff.CallbacksDiff, CallbacksDetail)
+	if diff.ComponentsDiff != nil {
+		summary.add(diff.ComponentsDiff.SchemasDiff, SchemasDetail)
+		summary.add(diff.ComponentsDiff.ParametersDiff, ParametersDetail)
+		summary.add(diff.ComponentsDiff.HeadersDiff, HeadersDetail)
+		summary.add(diff.ComponentsDiff.RequestBodiesDiff, RequestBodiesDetail)
+		summary.add(diff.ComponentsDiff.ResponsesDiff, ResponsesDetail)
+		summary.add(diff.ComponentsDiff.SecuritySchemesDiff, SecuritySchemesDetail)
+		summary.add(diff.ComponentsDiff.ExamplesDiff, ExamplesDetail)
+		summary.add(diff.ComponentsDiff.LinksDiff, LinksDetail)
+		summary.add(diff.ComponentsDiff.CallbacksDiff, CallbacksDetail)
+	}
 
 	// special
 	summary.add(diff.EndpointsDiff, EndpointsDetail)
