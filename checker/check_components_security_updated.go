@@ -81,6 +81,11 @@ func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurity
 
 func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
+
+	if diffReport.ComponentsDiff == nil {
+		return result
+	}
+
 	if diffReport.ComponentsDiff.SecuritySchemesDiff == nil {
 		return result
 	}

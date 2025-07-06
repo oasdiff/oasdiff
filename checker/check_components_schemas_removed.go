@@ -11,6 +11,11 @@ const (
 
 func APIComponentsSchemaRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
+
+	if diffReport.ComponentsDiff == nil {
+		return result
+	}
+
 	if diffReport.ComponentsDiff.SchemasDiff == nil {
 		return result
 	}

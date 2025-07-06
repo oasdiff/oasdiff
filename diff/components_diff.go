@@ -17,66 +17,78 @@ type ComponentsDiff struct {
 	CallbacksDiff       *CallbacksDiff       `json:"callbacks,omitempty" yaml:"callbacks,omitempty"`
 }
 
-func getComponentsDiff(config *Config, state *state, pComponents1, pComponents2 *openapi3.Components) (ComponentsDiff, error) {
-	if pComponents1 == nil && pComponents2 == nil {
-		return ComponentsDiff{}, nil
-	}
-	components1 := derefComponents(pComponents1)
-	components2 := derefComponents(pComponents2)
-	return getComponentsDiffInternal(config, state, components1, components2)
+// Empty indicates whether a change was found in this element
+func (diff *ComponentsDiff) Empty() bool {
+	return diff == nil || *diff == ComponentsDiff{}
 }
 
-func getComponentsDiffInternal(config *Config, state *state, s1, s2 openapi3.Components) (ComponentsDiff, error) {
+func getComponentsDiff(config *Config, state *state, pComponents1, pComponents2 *openapi3.Components) (*ComponentsDiff, error) {
+	if pComponents1 == nil && pComponents2 == nil {
+		return nil, nil
+	}
 
+	diff, err := getComponentsDiffInternal(config, state, derefComponents(pComponents1), derefComponents(pComponents2))
+	if err != nil {
+		return nil, err
+	}
+
+	if diff.Empty() {
+		return nil, nil
+	}
+
+	return diff, nil
+}
+
+func getComponentsDiffInternal(config *Config, state *state, s1, s2 openapi3.Components) (*ComponentsDiff, error) {
 	result := ComponentsDiff{}
 	var err error
 
 	result.SchemasDiff, err = getSchemasDiff(config, state, s1.Schemas, s2.Schemas)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.ParametersDiff, err = getParametersDiff(config, state, s1.Parameters, s2.Parameters)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.HeadersDiff, err = getHeadersDiff(config, state, s1.Headers, s2.Headers)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.RequestBodiesDiff, err = getRequestBodiesDiff(config, state, s1.RequestBodies, s2.RequestBodies)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.ResponsesDiff, err = getResponsesDiff(config, state, responseBodiesToResponses(s1.Responses), responseBodiesToResponses(s2.Responses))
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.SecuritySchemesDiff, err = getSecuritySchemesDiff(config, s1.SecuritySchemes, s2.SecuritySchemes)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.ExamplesDiff, err = getExamplesDiff(config, s1.Examples, s2.Examples)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.LinksDiff, err = getLinksDiff(config, s1.Links, s2.Links)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	result.CallbacksDiff, err = getCallbacksDiff(config, state, s1.Callbacks, s2.Callbacks)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 func derefComponents(components *openapi3.Components) openapi3.Components {
