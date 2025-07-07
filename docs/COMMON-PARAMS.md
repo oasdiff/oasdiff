@@ -97,7 +97,7 @@ paths:
 But if you add the `--flatten-params` flag which merges common parameters from the path level into the operation level before running the diff, it will be reported as a breaking change:
 
 ```
-oasdiff changelog data/common-params/request_parameter_max_items_updated_revision.yaml data/common-params/request_parameter_max_items_updated_base.yaml --flatten-params
+oasdiff changelog data/checker/common_request_parameter_max_items_updated_revision.yaml data/checker/common_request_parameter_max_items_updated_base.yaml --flatten-params
 ```
 
 Outout:
