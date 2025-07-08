@@ -292,6 +292,7 @@ These examples are automatically generated from unit tests.
 [changing required response property to write-only](../checker/check_response_required_property_write_only_read_only_test.go?plain=1#L12)  
 [changing response body default value](../checker/check_response_property_default_value_changed_test.go?plain=1#L41)  
 [changing response body property default value](../checker/check_response_property_default_value_changed_test.go?plain=1#L12)  
+[changing response field type from oneOf: string, number to string is not breaking](../checker/check_response_property_one_of_updated_test.go?plain=1#L98)  
 [changing response property pattern](../checker/check_response_pattern_added_or_changed_test.go?plain=1#L12)  
 [changing security component oauth's url](../checker/check_components_security_updated_test.go?plain=1#L11)  
 [changing security component token url](../checker/check_components_security_updated_test.go?plain=1#L33)  

@@ -244,6 +244,7 @@ response-body-one-of-added: добавлено %s в список 'oneOf' тел
 response-body-one-of-removed: удалён %s из списка 'oneOf' тела ответа для статуса ответа %s
 response-property-one-of-added: добавлено %s в список 'oneOf' свойства ответа %s для статуса ответа %s
 response-property-one-of-removed: удалён %s из списка 'oneOf' свойства ответа %s для статуса ответа %s
+response-property-one-of-specialized: список 'oneOf' свойства ответа %s был специализирован для статуса ответа %s
 request-body-all-of-added: добавлено %s в список 'allOf' тела запроса
 request-body-all-of-removed: удалён %s из списка 'allOf' тела запроса
 request-property-all-of-added: добавлено %s в список 'allOf' свойства запроса %s

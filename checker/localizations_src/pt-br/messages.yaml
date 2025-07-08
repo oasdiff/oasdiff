@@ -255,6 +255,7 @@ response-body-one-of-added: "%s foi adicionado à lista 'oneOf' do corpo da resp
 response-body-one-of-removed: "%s foi removido da lista 'oneOf' do corpo da resposta para o status %s"
 response-property-one-of-added: "%s foi adicionado à lista 'oneOf' da propriedade de resposta %s para o status %s"
 response-property-one-of-removed: "%s foi removido da lista 'oneOf' da propriedade de resposta %s para o status %s"
+response-property-one-of-specialized: a lista 'oneOf' da propriedade de resposta %s foi especializada para o status de resposta %s
 request-body-all-of-added: "%s foi adicionado à lista 'allOf' do corpo da requisição"
 request-body-all-of-removed: "%s foi removido da lista 'allOf' do corpo da requisição"
 request-property-all-of-added: "%s foi adicionado à lista 'allOf' da propriedade de requisição %s"
