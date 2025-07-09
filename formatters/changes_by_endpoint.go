@@ -1,6 +1,8 @@
 package formatters
 
-import "github.com/oasdiff/oasdiff/checker"
+import (
+	"github.com/oasdiff/oasdiff/checker"
+)
 
 type Endpoint struct {
 	Path      string
