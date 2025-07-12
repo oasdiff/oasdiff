@@ -129,7 +129,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 // typeSpecialized checks for a specific use case of oneOf:
 // the original schema has a list of types under oneOf, and the new schema has a single type that is a subset of the original list
 func typeSpecialized(propertyDiff *diff.SchemaDiff) bool {
-	
+
 	// check that all base schamas have a type only
 	for _, schema := range propertyDiff.Base.OneOf {
 		if !typeOnlySchema(schema.Value) {
