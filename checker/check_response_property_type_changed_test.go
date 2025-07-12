@@ -190,3 +190,40 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 		OperationId: "get_value",
 	}, errs[0])
 }
+
+// CL: specializing type from oneOf: {string, number} to string is not reported as type-changed
+func TestResponseSchemaTypeSpecialized(t *testing.T) {
+	s1, err := open("../data/checker/response_property_one_of_specialized_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_one_of_specialized_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.Empty(t, errs)
+}
+
+// CL: changing response field type while also modifying oneOf (not specialized) is still reported as type-changed
+func TestResponseSchemaTypeNotSpecialized(t *testing.T) {
+	s1, err := open("../data/checker/response_property_one_of_specialized_base2.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_one_of_specialized_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
+
+	require.Len(t, errs, 1)
+
+	require.ElementsMatch(t, []checker.ApiChange{
+		{
+			Id:        checker.ResponsePropertyTypeChangedId,
+			Args:      []any{"id", utils.StringList{"string"}, "", utils.StringList{"integer"}, "", "201"},
+			Level:     checker.ERR,
+			Operation: "POST",
+			Path:      "/users",
+			Source:    load.NewSource("../data/checker/response_property_one_of_specialized_revision.yaml"),
+		}}, errs)
+}

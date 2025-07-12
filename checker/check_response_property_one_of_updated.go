@@ -42,6 +42,8 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 						continue
 					}
 
+					// TODO: handle the case where the new schema is a subset of the old schema
+
 					if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Added) > 0 {
 						result = append(result, NewApiChange(
 							ResponseBodyOneOfAddedId,
@@ -77,8 +79,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 
 							propName := propertyFullName(propertyPath, propertyName)
 
-							// if new schema is a subset of the old schema, it's not a breaking change
-							if oneOfContains(propertyDiff) {
+							if typeSpecialized(propertyDiff) {
 								result = append(result, NewApiChange(
 									ResponsePropertyOneOfSpecializedId,
 									config,
@@ -125,85 +126,33 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 	return result
 }
 
-// oneOfContains checks if the new schema is a subset of oneOf in the old schema
-func oneOfContains(propertyDiff *diff.SchemaDiff) bool {
-	newOneOf := propertyDiff.Revision.OneOf
-	// if the new schema isn't a oneOf, use the single schema
-	if propertyDiff.Revision.OneOf == nil {
-		newOneOf = []*openapi3.SchemaRef{openapi3.NewSchemaRef("", propertyDiff.Revision)}
-	}
-
-	// for each schema in the new oneOf, check if it exists in the old oneOf
-	for _, newSchema := range newOneOf {
-		if !findEquivalentSchema(newSchema, propertyDiff.Base.OneOf) {
+// typeSpecialized checks for a specific use case of oneOf:
+// the original schema has a list of types under oneOf, and the new schema has a single type that is a subset of the original list
+func typeSpecialized(propertyDiff *diff.SchemaDiff) bool {
+	
+	// check that all base schamas have a type only
+	for _, schema := range propertyDiff.Base.OneOf {
+		if !typeOnlySchema(schema.Value) {
 			return false
 		}
 	}
 
-	return true
-}
+	// check if revision type exists in the base oneOf
+	if !typeOnlySchema(propertyDiff.Revision) {
+		return false
+	}
 
-func findEquivalentSchema(newSchema *openapi3.SchemaRef, oldOneOf []*openapi3.SchemaRef) bool {
-	for _, oldSchema := range oldOneOf {
-		if schemasEquivalent(newSchema, oldSchema) {
+	for _, baseSchema := range propertyDiff.Base.OneOf {
+		if slices.Equal(baseSchema.Value.Type.Slice(), propertyDiff.Revision.Type.Slice()) {
 			return true
 		}
 	}
 	return false
 }
 
-func schemasEquivalent(newSchema, oldSchema *openapi3.SchemaRef) bool {
-	// if both schemas have a type only, compare the types
-	if typeOnlySchema(newSchema) && typeOnlySchema(oldSchema) {
-		return slices.Equal(newSchema.Value.Type.Slice(), oldSchema.Value.Type.Slice())
-	}
-
-	// TODO: identify other kinds of equivalence
-
-	return false
-}
-
-func typeOnlySchema(schemaRef *openapi3.SchemaRef) bool {
-	schema := *schemaRef.Value
-
-	return schema.Extensions == nil &&
-		schema.OneOf == nil &&
-		schema.AnyOf == nil &&
-		schema.AllOf == nil &&
-		schema.Not == nil &&
-		schema.Type != nil && // type is required
-		schema.Title == "" &&
-		schema.Format == "" &&
-		schema.Description == "" &&
-		schema.Enum == nil &&
-		schema.Default == nil &&
-		schema.Example == nil &&
-		schema.ExternalDocs == nil &&
-		!schema.UniqueItems &&
-		!schema.ExclusiveMin &&
-		!schema.ExclusiveMax &&
-		!schema.Nullable &&
-		!schema.ReadOnly &&
-		!schema.WriteOnly &&
-		!schema.AllowEmptyValue &&
-		!schema.Deprecated &&
-		schema.XML == nil &&
-		schema.Min == nil &&
-		schema.Max == nil &&
-		schema.MultipleOf == nil &&
-		schema.MinLength == 0 &&
-		schema.MaxLength == nil &&
-		schema.Pattern == "" &&
-		schema.MinItems == 0 &&
-		schema.MaxItems == nil &&
-		schema.Items == nil &&
-		schema.Required == nil &&
-		schema.Properties == nil &&
-		schema.MinProps == 0 &&
-		schema.MaxProps == nil &&
-		schema.AdditionalProperties == (openapi3.AdditionalProperties{
-			Has:    nil,
-			Schema: nil,
-		}) &&
-		schema.Discriminator == nil
+// typeOnlySchema checks if the schema has a type definition and no other properties
+func typeOnlySchema(schema *openapi3.Schema) bool {
+	copy := *schema
+	copy.Type = nil
+	return copy.IsEmpty()
 }

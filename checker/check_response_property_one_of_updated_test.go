@@ -95,7 +95,7 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: changing response field type from oneOf: string, number to string is not breaking
+// CL: specializing type from oneOf: {string, number} to string
 func TestResponsePropertyOneOfSpecialized(t *testing.T) {
 	s1, err := open("../data/checker/response_property_one_of_specialized_base.yaml")
 	require.NoError(t, err)

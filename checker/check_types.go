@@ -11,7 +11,7 @@ import (
 // breakingTypeFormatChangedInResponseProperty checks if the type or format of a response property was changed in a breaking way
 func breakingTypeFormatChangedInResponseProperty(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
 
-	if schemaDiff.OneOfDiff != nil {
+	if typeSpecialized(schemaDiff) {
 		// handled by ResponsePropertyOneOfUpdated
 		return false
 	}
