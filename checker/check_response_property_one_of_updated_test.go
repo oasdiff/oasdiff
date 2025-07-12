@@ -95,7 +95,7 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: specializing type from oneOf: {string, number} to string
+// CL: specializing property type from oneOf: {string, number} to string
 func TestResponsePropertyOneOfSpecialized(t *testing.T) {
 	s1, err := open("../data/checker/response_property_one_of_specialized_base.yaml")
 	require.NoError(t, err)
@@ -111,11 +111,36 @@ func TestResponsePropertyOneOfSpecialized(t *testing.T) {
 	require.ElementsMatch(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponsePropertyOneOfSpecializedId,
-			Args:        []any{"id", "201"},
+			Args:        []any{"id", "integer, string", "integer", "201"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/users",
 			Source:      load.NewSource("../data/checker/response_property_one_of_specialized_revision.yaml"),
+			OperationId: "",
+		}}, errs)
+}
+
+// CL: specializing body type from oneOf: {string, number} to string
+func TestResponseBodyOneOfSpecialized(t *testing.T) {
+	s1, err := open("../data/checker/response_body_one_of_specialized_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_body_one_of_specialized_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyOneOfUpdated), d, osm, checker.INFO)
+
+	require.Len(t, errs, 1)
+
+	require.ElementsMatch(t, []checker.ApiChange{
+		{
+			Id:          checker.ResponseBodyOneOfSpecializedId,
+			Args:        []any{"integer, string", "integer", "201"},
+			Level:       checker.INFO,
+			Operation:   "POST",
+			Path:        "/users",
+			Source:      load.NewSource("../data/checker/response_body_one_of_specialized_revision.yaml"),
 			OperationId: "",
 		}}, errs)
 }

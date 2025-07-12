@@ -2,6 +2,7 @@ package checker
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
@@ -10,6 +11,7 @@ import (
 const (
 	ResponseBodyOneOfAddedId           = "response-body-one-of-added"
 	ResponseBodyOneOfRemovedId         = "response-body-one-of-removed"
+	ResponseBodyOneOfSpecializedId     = "response-body-one-of-specialized"
 	ResponsePropertyOneOfAddedId       = "response-property-one-of-added"
 	ResponsePropertyOneOfRemovedId     = "response-property-one-of-removed"
 	ResponsePropertyOneOfSpecializedId = "response-property-one-of-specialized"
@@ -42,7 +44,19 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 						continue
 					}
 
-					// TODO: handle the case where the new schema is a subset of the old schema
+					if oneOfTypesSpecialized(mediaTypeDiff.SchemaDiff) {
+						result = append(result, NewApiChange(
+							ResponseBodyOneOfSpecializedId,
+							config,
+							[]any{getOneOfTypes(mediaTypeDiff.SchemaDiff.Base.OneOf), getSchemaType(mediaTypeDiff.SchemaDiff.Revision), responseStatus},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
+						continue
+					}
 
 					if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Added) > 0 {
 						result = append(result, NewApiChange(
@@ -79,11 +93,12 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 
 							propName := propertyFullName(propertyPath, propertyName)
 
-							if typeSpecialized(propertyDiff) {
+							if oneOfTypesSpecialized(propertyDiff) {
+
 								result = append(result, NewApiChange(
 									ResponsePropertyOneOfSpecializedId,
 									config,
-									[]any{propName, responseStatus},
+									[]any{propName, getOneOfTypes(propertyDiff.Base.OneOf), getSchemaType(propertyDiff.Revision), responseStatus},
 									"",
 									operationsSources,
 									operationItem.Revision,
@@ -126,9 +141,9 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 	return result
 }
 
-// typeSpecialized checks for a specific use case of oneOf:
+// oneOfTypesSpecialized checks for a specific use case of oneOf:
 // the original schema has a list of types under oneOf, and the new schema has a single type that is a subset of the original list
-func typeSpecialized(propertyDiff *diff.SchemaDiff) bool {
+func oneOfTypesSpecialized(propertyDiff *diff.SchemaDiff) bool {
 
 	// check that all base schamas have a type only
 	for _, schema := range propertyDiff.Base.OneOf {
@@ -155,4 +170,19 @@ func typeOnlySchema(schema *openapi3.Schema) bool {
 	copy := *schema
 	copy.Type = nil
 	return copy.IsEmpty()
+}
+
+func getOneOfTypes(oneOf []*openapi3.SchemaRef) string {
+	types := []string{}
+	for _, schema := range oneOf {
+		types = append(types, schema.Value.Type.Slice()...)
+	}
+	return strings.Join(types, ", ")
+}
+
+func getSchemaType(schema *openapi3.Schema) string {
+	if schema.Type == nil {
+		return ""
+	}
+	return strings.Join(schema.Type.Slice(), ", ")
 }

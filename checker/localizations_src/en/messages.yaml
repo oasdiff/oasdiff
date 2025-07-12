@@ -258,9 +258,10 @@ request-property-one-of-added: added %s to the %s request property 'oneOf' list
 request-property-one-of-removed: removed %s from the %s request property 'oneOf' list
 response-body-one-of-added: added %s to the response body 'oneOf' list for the response status %s
 response-body-one-of-removed: removed %s from the response body 'oneOf' list for the response status %s
+response-body-one-of-specialized: the response body type was changed from oneOf %s to %s for the response status %s
 response-property-one-of-added: added %s to the %s response property 'oneOf' list for the response status %s
 response-property-one-of-removed: removed %s from the %s response property 'oneOf' list for the response status %s
-response-property-one-of-specialized: the %s response property 'oneOf' list was specialized for the response status %s
+response-property-one-of-specialized: the %s response property type was changed from oneOf %s to %s for the response status %s
 request-body-all-of-added: added %s to the request body 'allOf' list
 request-body-all-of-removed: removed %s from the request body 'allOf' list
 request-property-all-of-added: added %s to the %s request property 'allOf' list

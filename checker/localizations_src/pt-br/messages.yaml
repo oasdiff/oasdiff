@@ -253,9 +253,10 @@ request-property-one-of-added: "%s foi adicionado à lista 'oneOf' da propriedad
 request-property-one-of-removed: "%s foi removido da lista 'oneOf' da propriedade de requisição %s"
 response-body-one-of-added: "%s foi adicionado à lista 'oneOf' do corpo da resposta para o status %s"
 response-body-one-of-removed: "%s foi removido da lista 'oneOf' do corpo da resposta para o status %s"
+response-body-one-of-specialized: o tipo do corpo da resposta foi alterado de oneOf %s para %s para o status %s
 response-property-one-of-added: "%s foi adicionado à lista 'oneOf' da propriedade de resposta %s para o status %s"
 response-property-one-of-removed: "%s foi removido da lista 'oneOf' da propriedade de resposta %s para o status %s"
-response-property-one-of-specialized: a lista 'oneOf' da propriedade de resposta %s foi especializada para o status de resposta %s
+response-property-one-of-specialized: o tipo da propriedade de resposta %s foi alterado de oneOf %s para %s para o status %s
 request-body-all-of-added: "%s foi adicionado à lista 'allOf' do corpo da requisição"
 request-body-all-of-removed: "%s foi removido da lista 'allOf' do corpo da requisição"
 request-property-all-of-added: "%s foi adicionado à lista 'allOf' da propriedade de requisição %s"
