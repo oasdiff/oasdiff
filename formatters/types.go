@@ -1,6 +1,9 @@
 package formatters
 
-import "github.com/oasdiff/oasdiff/checker"
+import (
+	"fmt"
+	"github.com/oasdiff/oasdiff/checker"
+)
 
 type Format string
 
@@ -40,11 +43,26 @@ type FormatterOpts struct {
 // RenderOpts can be used to pass properties to the renderer method
 type RenderOpts struct {
 	ColorMode    checker.ColorMode
-	WrapInObject bool // wrap the output in a JSON object with the key "changes"
+	WrapInObject bool   // wrap the output in a JSON object with the key "changes"
+	TemplatePath string // path to custom template file for changelog generation
 }
 
 func NewRenderOpts() RenderOpts {
 	return RenderOpts{
 		ColorMode: checker.ColorAuto,
 	}
+}
+
+type TemplateData struct {
+	APIChanges      ChangesByEndpoint
+	BaseVersion     string
+	RevisionVersion string
+}
+
+func (t TemplateData) GetVersionTitle() string {
+	if t.BaseVersion == "" || t.RevisionVersion == "" {
+		return ""
+	}
+
+	return fmt.Sprintf("%s vs. %s", t.BaseVersion, t.RevisionVersion)
 }

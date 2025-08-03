@@ -63,4 +63,5 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	enumWithOptions(cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChangelog), string(formatters.FormatText)), "format", "f", "output format")
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
+	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
 }

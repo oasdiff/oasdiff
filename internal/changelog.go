@@ -116,13 +116,18 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 		return getErrUnsupportedFormat(flags.getFormat(), changelogCmd)
 	}
 
+	// validate template usage
+	if flags.getTemplate() != "" && !formatter.SupportsTemplate() {
+		return getErrTemplateNotSupported(flags.getFormat())
+	}
+
 	// render
 	colorMode, err := checker.NewColorMode(flags.getColor())
 	if err != nil {
 		return getErrInvalidColorMode(err)
 	}
 
-	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode}, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion())
+	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode, TemplatePath: flags.getTemplate()}, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion())
 	if err != nil {
 		return getErrFailedPrint(changelogCmd+" "+flags.getFormat(), err)
 	}

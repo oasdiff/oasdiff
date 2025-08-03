@@ -19,6 +19,7 @@ type Formatter interface {
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
 	SupportedOutputs() []Output
+	SupportsTemplate() bool
 }
 
 var formatters = map[Format]Formatter{
@@ -69,6 +70,27 @@ func SupportedFormatsByContentType(output Output) []string {
 	}
 	sort.Strings(formats)
 	return formats
+}
+
+func GetSupportedTemplateFormats() []string {
+	var supported []string
+
+	// Get all supported formats and check which ones support templates
+	allFormats := GetSupportedFormats()
+
+	for _, format := range allFormats {
+		formatter, err := Lookup(format, DefaultFormatterOpts())
+		if err != nil {
+			continue // Skip formats that can't be looked up
+		}
+
+		if formatter.SupportsTemplate() {
+			supported = append(supported, format)
+		}
+	}
+
+	sort.Strings(supported)
+	return supported
 }
 
 // DefaultFormatterOpts returns the default formatter options (e.g. colors, CI mode, etc.)

@@ -2,7 +2,9 @@ package internal
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 )
 
@@ -66,6 +68,14 @@ func getErrUnsupportedFormat(format, cmd string) *ReturnError {
 	return getError(
 		fmt.Errorf("format %q is not supported by %q", format, cmd),
 		110,
+	)
+}
+
+func getErrTemplateNotSupported(format string) *ReturnError {
+	supportedFormats := formatters.GetSupportedTemplateFormats()
+	return getError(
+		fmt.Errorf("template flag is not supported for format %q. Supported formats for templates are: %s", format, strings.Join(supportedFormats, ", ")),
+		111,
 	)
 }
 

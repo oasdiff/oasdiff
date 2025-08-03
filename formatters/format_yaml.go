@@ -11,6 +11,7 @@ import (
 )
 
 type YAMLFormatter struct {
+	notImplementedFormatter
 	Localizer checker.Localizer
 }
 
