@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -371,4 +372,33 @@ func Test_EmptyComponentsOmitted(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/version/base.yaml ../data/version/revision.yaml -f json"), &stdout, io.Discard))
 	require.Equal(t, "{\"info\":{\"version\":{\"from\":\"0.0.0\",\"to\":\"0.0.1\"}}}\n", stdout.String())
+}
+
+func Test_Changelog_WithCustomTemplate(t *testing.T) {
+	// Create a custom template file
+	customTemplate := `### API Changes {{ .GetVersionTitle }}
+{{ range $endpoint, $changes := .APIChanges }}
+#### {{ $endpoint.Operation }} {{ $endpoint.Path }}
+{{ range $changes }}* {{ if .IsBreaking }}[BREAKING] {{ end }}{{ .Text }}
+{{ end }}
+{{ end }}`
+
+	tempDir := t.TempDir()
+	templatePath := filepath.Join(tempDir, "custom-template.md")
+	err := os.WriteFile(templatePath, []byte(customTemplate), 0644)
+	require.NoError(t, err)
+
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/run_test/changelog_base.yaml ../data/run_test/changelog_revision.yaml --format markdown --template "+templatePath), &stdout, io.Discard))
+
+	result := stdout.String()
+	require.Contains(t, result, "### API Changes")
+	require.Contains(t, result, "#### ")
+	require.Contains(t, result, "* ")
+}
+
+func Test_Changelog_WithInvalidCustomTemplate(t *testing.T) {
+	var stderr bytes.Buffer
+	require.Equal(t, 105, internal.Run(cmdToArgs("oasdiff changelog ../data/run_test/changelog_base.yaml ../data/run_test/changelog_revision.yaml --format markdown --template /nonexistent/template.md"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "failed to load custom template")
 }

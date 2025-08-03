@@ -2,6 +2,8 @@ package formatters
 
 import (
 	"bytes"
+	"fmt"
+	"os"
 	"text/template"
 
 	_ "embed"
@@ -30,8 +32,33 @@ func (f MarkupFormatter) RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, e
 var changelogMarkdown string
 
 func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error) {
-	tmpl := template.Must(template.New("changelog").Parse(changelogMarkdown))
+	var tmpl *template.Template
+	var err error
+
+	if opts.TemplatePath != "" {
+		tmpl, err = f.loadCustomTemplate(opts.TemplatePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load custom template: %w", err)
+		}
+	} else {
+		tmpl = template.Must(template.New("changelog").Parse(changelogMarkdown))
+	}
+
 	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion)
+}
+
+func (f MarkupFormatter) loadCustomTemplate(templatePath string) (*template.Template, error) {
+	templateContent, err := os.ReadFile(templatePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read template file %s: %w", templatePath, err)
+	}
+
+	tmpl, err := template.New("custom-changelog").Parse(string(templateContent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse template: %w", err)
+	}
+
+	return tmpl, nil
 }
 
 func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByEndpoint, baseVersion, revisionVersion string) ([]byte, error) {

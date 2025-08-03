@@ -35,20 +35,6 @@ func (f HTMLFormatter) RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, err
 //go:embed templates/changelog.html
 var changelogHtml string
 
-type TemplateData struct {
-	APIChanges      ChangesByEndpoint
-	BaseVersion     string
-	RevisionVersion string
-}
-
-func (t TemplateData) GetVersionTitle() string {
-	if t.BaseVersion == "" || t.RevisionVersion == "" {
-		return ""
-	}
-
-	return fmt.Sprintf("%s vs. %s", t.BaseVersion, t.RevisionVersion)
-}
-
 func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error) {
 	tmpl := template.Must(template.New("changelog").Parse(changelogHtml))
 	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion)

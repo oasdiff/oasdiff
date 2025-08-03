@@ -135,3 +135,7 @@ func (flags *Flags) getSeverity() []string {
 func (flags *Flags) getTags() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("tags"))
 }
+
+func (flags *Flags) getTemplate() string {
+	return flags.v.GetString("template")
+}
