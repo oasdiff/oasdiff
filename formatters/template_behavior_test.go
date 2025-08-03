@@ -17,6 +17,7 @@ func TestSupportsTemplateMethod(t *testing.T) {
 		{"json", false},
 		{"yaml", false},
 		{"markdown", true},
+		{"markup", true},
 		{"html", true},
 		{"singleline", false},
 		{"githubactions", false},
@@ -31,5 +32,19 @@ func TestSupportsTemplateMethod(t *testing.T) {
 			actual := f.SupportsTemplate()
 			require.Equal(t, tc.supportsTemplate, actual, "SupportsTemplate() for %s should return %v", tc.format, tc.supportsTemplate)
 		})
+	}
+}
+
+func TestGetSupportedTemplateFormats(t *testing.T) {
+	supportedFormats := formatters.GetSupportedTemplateFormats()
+	
+	expectedFormats := []string{"html", "markdown", "markup"}
+	require.Equal(t, expectedFormats, supportedFormats, "GetSupportedTemplateFormats should return sorted list of template-supporting formats")
+	
+	// Verify all returned formats actually support templates
+	for _, format := range supportedFormats {
+		f, err := formatters.Lookup(format, formatters.DefaultFormatterOpts())
+		require.NoError(t, err, "should be able to lookup format %s", format)
+		require.True(t, f.SupportsTemplate(), "format %s should support templates", format)
 	}
 }

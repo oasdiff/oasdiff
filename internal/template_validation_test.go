@@ -37,6 +37,11 @@ func TestTemplateValidationInChangelog(t *testing.T) {
 			expectError: false,
 		},
 		{
+			name:        "markup with template should work",
+			format:      "markup",
+			expectError: false,
+		},
+		{
 			name:        "html with template should work",
 			format:      "html",
 			expectError: false,
