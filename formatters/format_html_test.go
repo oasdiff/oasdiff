@@ -3,6 +3,8 @@ package formatters_test
 import (
 	"fmt"
 	"html/template"
+	"os"
+	"path/filepath"
 	"testing"
 
 	_ "embed"
@@ -99,4 +101,85 @@ func TestExecuteHtmlTemplate_Err(t *testing.T) {
 	tmpl.Tree = nil
 	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, "", "")
 	assert.Error(t, err)
+}
+
+func TestHtmlFormatter_RenderChangelog_WithCustomTemplate(t *testing.T) {
+	// Create a temporary custom template file
+	customTemplate := `<h3>Changes for {{ .GetVersionTitle }}</h3>
+{{ range $endpoint, $changes := .APIChanges }}
+<h4><code>{{ $endpoint.Operation }} {{ $endpoint.Path }}</code></h4>
+<ul>
+{{ range $changes }}<li>{{ if .IsBreaking }}<strong>BREAKING</strong> {{ end }}{{ .Text }}</li>
+{{ end }}
+</ul>
+{{ end }}`
+
+	tempDir := t.TempDir()
+	templatePath := filepath.Join(tempDir, "custom-changelog.html")
+	err := os.WriteFile(templatePath, []byte(customTemplate), 0644)
+	require.NoError(t, err)
+
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Path:      "/test",
+			Operation: "GET",
+			Id:        "change_id",
+			Level:     checker.ERR,
+		},
+	}
+
+	opts := formatters.NewRenderOpts()
+	opts.TemplatePath = templatePath
+
+	out, err := htmlFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	require.NoError(t, err)
+
+	result := string(out)
+	require.Contains(t, result, "<h3>Changes for 1.0.0 vs. 2.0.0</h3>")
+	require.Contains(t, result, "<h4><code>GET /test</code></h4>")
+	require.Contains(t, result, "<li>")
+}
+
+func TestHtmlFormatter_RenderChangelog_CustomTemplateNotFound(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Path:      "/test",
+			Operation: "GET",
+			Id:        "change_id",
+			Level:     checker.ERR,
+		},
+	}
+
+	opts := formatters.NewRenderOpts()
+	opts.TemplatePath = "/nonexistent/template.html"
+
+	_, err := htmlFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to load custom template")
+}
+
+func TestHtmlFormatter_RenderChangelog_InvalidCustomTemplate(t *testing.T) {
+	// Create a temporary invalid template file
+	invalidTemplate := `{{ .InvalidField `
+
+	tempDir := t.TempDir()
+	templatePath := filepath.Join(tempDir, "invalid-template.html")
+	err := os.WriteFile(templatePath, []byte(invalidTemplate), 0644)
+	require.NoError(t, err)
+
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Path:      "/test",
+			Operation: "GET",
+			Id:        "change_id",
+			Level:     checker.ERR,
+		},
+	}
+
+	opts := formatters.NewRenderOpts()
+	opts.TemplatePath = templatePath
+
+	_, err = htmlFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to load custom template")
 }

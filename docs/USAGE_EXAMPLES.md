@@ -59,11 +59,12 @@ oasdiff diff https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi
 oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
 ```
 
-### OpenAPI changelog with custom template (markdown format only)
+### OpenAPI changelog with custom template
 ```bash
 oasdiff changelog base.yaml revision.yaml --template my-template.md -f markdown
+oasdiff changelog base.yaml revision.yaml --template my-template.html -f html
 ```
-You can customize the changelog output format by providing a custom template file when using markdown format.  
+You can customize the changelog output format by providing a custom template file when using markdown or html format.  
 The template uses Go's text/template format and has access to the following data:
 - `.APIChanges` - map of endpoints to their changes
 - `.BaseVersion` - base spec version
