@@ -31,6 +31,10 @@ func (f notImplementedFormatter) RenderFlatten(*openapi3.T, RenderOpts) ([]byte,
 	return notImplemented()
 }
 
+func (f notImplementedFormatter) SupportsTemplate() bool {
+	return false
+}
+
 func notImplemented() ([]byte, error) {
 	return nil, fmt.Errorf("not implemented")
 }

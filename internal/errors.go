@@ -69,6 +69,13 @@ func getErrUnsupportedFormat(format, cmd string) *ReturnError {
 	)
 }
 
+func getErrTemplateNotSupported(format string) *ReturnError {
+	return getError(
+		fmt.Errorf("template flag is not supported for format %q. Supported formats for templates are: markdown, html", format),
+		111,
+	)
+}
+
 func getErrInvalidColorMode(err error) *ReturnError {
 	return getError(
 		err,

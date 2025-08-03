@@ -77,3 +77,7 @@ func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByEndpoint, bas
 func (f HTMLFormatter) SupportedOutputs() []Output {
 	return []Output{OutputDiff, OutputChangelog}
 }
+
+func (f HTMLFormatter) SupportsTemplate() bool {
+	return true
+}

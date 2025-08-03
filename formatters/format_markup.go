@@ -72,3 +72,7 @@ func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByEndpoint, bas
 func (f MarkupFormatter) SupportedOutputs() []Output {
 	return []Output{OutputDiff, OutputChangelog}
 }
+
+func (f MarkupFormatter) SupportsTemplate() bool {
+	return true
+}

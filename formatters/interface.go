@@ -19,6 +19,7 @@ type Formatter interface {
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
 	SupportedOutputs() []Output
+	SupportsTemplate() bool
 }
 
 var formatters = map[Format]Formatter{

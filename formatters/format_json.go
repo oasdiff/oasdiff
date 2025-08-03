@@ -11,6 +11,7 @@ import (
 )
 
 type JSONFormatter struct {
+	notImplementedFormatter
 	Localizer checker.Localizer
 }
 

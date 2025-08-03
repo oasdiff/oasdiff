@@ -116,6 +116,11 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 		return getErrUnsupportedFormat(flags.getFormat(), changelogCmd)
 	}
 
+	// validate template usage
+	if flags.getTemplate() != "" && !formatter.SupportsTemplate() {
+		return getErrTemplateNotSupported(flags.getFormat())
+	}
+
 	// render
 	colorMode, err := checker.NewColorMode(flags.getColor())
 	if err != nil {
