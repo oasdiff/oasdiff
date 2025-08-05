@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /edge:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  emptyOneOf:
+                    type: string
+                  complexOneOf:
+                    oneOf:
+                      - type: integer
+                      - type: object
+                        properties:
+                          nested: 
+                            type: number
+                  mixedBoth:
+                    anyOf:
+                      - type: string
+                      - type: number
