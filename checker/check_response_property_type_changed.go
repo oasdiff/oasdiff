@@ -32,6 +32,11 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 					if mediaTypeDiff.SchemaDiff != nil {
+						// Check for suppression by ListOfTypes checker
+						if shouldSuppressTypeChangedForListOfTypes(mediaTypeDiff.SchemaDiff) {
+							continue
+						}
+
 						schemaDiff := mediaTypeDiff.SchemaDiff
 						typeDiff := schemaDiff.TypeDiff
 						formatDiff := schemaDiff.FormatDiff
@@ -54,6 +59,11 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							if propertyDiff == nil || propertyDiff.Revision == nil {
+								return
+							}
+
+							// Check for suppression by ListOfTypes checker
+							if shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff) {
 								return
 							}
 

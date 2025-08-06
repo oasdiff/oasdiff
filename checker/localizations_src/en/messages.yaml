@@ -564,3 +564,15 @@ response-write-only-property-became-optional-description: response write-only pr
 response-write-only-property-became-required-description: response write-only property became required
 response-write-only-property-enum-value-added-description: response write-only property enum value added
 sunset-deleted-description: sunset deleted
+request-body-list-of-types-widened: "request body list-of-types was widened by adding types %s to media type %s"
+request-body-list-of-types-narrowed: "request body list-of-types was narrowed by removing types %s from media type %s"
+request-property-list-of-types-widened: "request property %s list-of-types was widened by adding types %s to media type %s"
+request-property-list-of-types-narrowed: "request property %s list-of-types was narrowed by removing types %s from media type %s"
+response-body-list-of-types-widened: "response body list-of-types was widened by adding types %s to media type %s of response %s"
+response-body-list-of-types-narrowed: "response body list-of-types was narrowed by removing types %s from media type %s of response %s"
+response-property-list-of-types-widened: "response property %s list-of-types was widened by adding types %s to media type %s of response %s"
+response-property-list-of-types-narrowed: "response property %s list-of-types was narrowed by removing types %s from media type %s of response %s"
+request-parameter-list-of-types-widened: "%s request parameter %s list-of-types was widened by adding types %s"
+request-parameter-list-of-types-narrowed: "%s request parameter %s list-of-types was narrowed by removing types %s"
+request-parameter-property-list-of-types-widened: "property %s of %s request parameter %s list-of-types was widened by adding types %s"
+request-parameter-property-list-of-types-narrowed: "property %s of %s request parameter %s list-of-types was narrowed by removing types %s"
