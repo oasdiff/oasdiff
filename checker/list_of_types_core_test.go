@@ -175,7 +175,7 @@ func TestListOfTypesIntegration_SuppressionBehavior(t *testing.T) {
 		// We expect fewer or no oneOf/anyOf changes due to suppression
 		// The exact behavior depends on the implementation, but the important thing is that
 		// both types of changes shouldn't be reported for the same schema modifications
-		t.Logf("ListOfTypes changes found: %d, OneOf/AnyOf changes found: %d", 
+		t.Logf("ListOfTypes changes found: %d, OneOf/AnyOf changes found: %d",
 			len(listOfTypesChanges), len(oneOfAnyOfChanges))
 		// Note: The specific assertion depends on the suppression logic implementation
 	}
