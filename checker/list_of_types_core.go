@@ -199,16 +199,6 @@ func shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff *diff.SchemaDi
 	return propertyDiff != nil && !propertyDiff.ListOfTypesDiff.Empty()
 }
 
-// shouldSuppressParameterTypeChangedForListOfTypes checks if a parameter type change should be suppressed because it's handled by ListOfTypes checker
-func shouldSuppressParameterTypeChangedForListOfTypes(paramDiff *diff.ParameterDiff) bool {
-	return paramDiff != nil && paramDiff.SchemaDiff != nil && !paramDiff.SchemaDiff.ListOfTypesDiff.Empty()
-}
-
-// shouldSuppressParameterPropertyTypeChangedForListOfTypes checks if a parameter property type change should be suppressed because it's handled by ListOfTypes checker
-func shouldSuppressParameterPropertyTypeChangedForListOfTypes(propertyDiff *diff.SchemaDiff) bool {
-	return propertyDiff != nil && !propertyDiff.ListOfTypesDiff.Empty()
-}
-
 // shouldSuppressOneOfSchemaChangedForListOfTypes checks if oneOf schema changes should be suppressed because they're handled by ListOfTypes checker
 func shouldSuppressOneOfSchemaChangedForListOfTypes(schemaDiff *diff.SchemaDiff) bool {
 	return schemaDiff != nil && !schemaDiff.ListOfTypesDiff.Empty()

@@ -122,7 +122,7 @@ func TestUnchanged(t *testing.T) {
 
 func TestFormatAdded(t *testing.T) {
 	var typeDiff *diff.StringsDiff
-	var formatDiff *diff.ValueDiff = &diff.ValueDiff{
+	var formatDiff = &diff.ValueDiff{
 		From: nil,
 		To:   "int64",
 	}
