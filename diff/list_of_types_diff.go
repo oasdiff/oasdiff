@@ -40,12 +40,15 @@ func getListOfTypesDiff(base, revision *openapi3.Schema) *ListOfTypesDiff {
 		return nil
 	}
 
-	// Only create ListOfTypesDiff when at least one side involves a list pattern (oneOf/anyOf)
-	// This ensures we only handle transitions between single types and list patterns,
-	// or between different list patterns, not arbitrary schema changes
-	hasListPattern := (basePattern != nil && basePattern.Source == "list") ||
-		(revisionPattern != nil && revisionPattern.Source == "list")
+	// Only create ListOfTypesDiff when:
+	// 1. Both patterns are valid (non-nil) - all schemas must have exactly one type
+	// 2. At least one side involves a list pattern (oneOf/anyOf)
+	// This ensures we only handle transitions between valid type patterns
+	if basePattern == nil || revisionPattern == nil {
+		return nil // Invalid pattern - contains schema without type
+	}
 
+	hasListPattern := (basePattern.Source == "list") || (revisionPattern.Source == "list")
 	if !hasListPattern {
 		return nil
 	}
@@ -80,7 +83,7 @@ func detectTypePattern(schema *openapi3.Schema) *typePattern {
 	}
 
 	// Check for list-of-types patterns (oneOf/anyOf)
-	// oneOf takes precedence over anyOf, but empty oneOf should not block anyOf
+	// Only analyze as list-of-types if ALL schemas have exactly one type
 	oneOfPattern := checkSchemaList(schema.OneOf, "oneOf")
 	anyOfPattern := checkSchemaList(schema.AnyOf, "anyOf")
 
@@ -91,14 +94,8 @@ func detectTypePattern(schema *openapi3.Schema) *typePattern {
 	if anyOfPattern != nil && len(anyOfPattern.Types) > 0 {
 		return &typePattern{Types: anyOfPattern.Types, Source: "list"}
 	}
-	// If we have empty patterns, prefer oneOf (for precedence)
-	if oneOfPattern != nil {
-		return &typePattern{Types: oneOfPattern.Types, Source: "list"}
-	}
-	if anyOfPattern != nil {
-		return &typePattern{Types: anyOfPattern.Types, Source: "list"}
-	}
 
+	// No list-of-types pattern found
 	return nil
 }
 
@@ -109,14 +106,11 @@ type listOfTypesPattern struct {
 }
 
 // checkSchemaList determines if a oneOf/anyOf schema list represents the list-of-types pattern.
-// Returns non-nil only if ALL schemas in the list are simple type schemas (no complex objects).
+// Returns non-nil only if ALL schemas in the list are simple type schemas with exactly one type.
 func checkSchemaList(schemas []*openapi3.SchemaRef, source string) *listOfTypesPattern {
 	if len(schemas) == 0 {
-		// Empty oneOf/anyOf is still a valid list pattern, just with no types
-		return &listOfTypesPattern{
-			Types:  []string{},
-			Source: source,
-		}
+		// Empty oneOf/anyOf is not a valid list-of-types pattern
+		return nil
 	}
 
 	var types []string
@@ -127,12 +121,17 @@ func checkSchemaList(schemas []*openapi3.SchemaRef, source string) *listOfTypesP
 
 		schema := schemaRef.Value
 
-		// Must be simple type (single type, no complex properties)
+		// Must be simple type schema with exactly one type
 		if !isSimpleTypeSchema(schema) {
 			return nil
 		}
 
-		types = append(types, getSchemaType(schema))
+		schemaType := getSchemaType(schema)
+		if schemaType == "" {
+			return nil // Schema has no type - not supported
+		}
+
+		types = append(types, schemaType)
 	}
 
 	return &listOfTypesPattern{
@@ -209,9 +208,9 @@ func areTypePatternsEqual(base, revision *typePattern) bool {
 }
 
 // isSimpleTypeSchema checks if schema represents a simple type suitable for list-of-types pattern.
-// Simple types have exactly one type and no complex properties, oneOf, anyOf, or allOf.
+// Simple types must have exactly one type and no complex properties, oneOf, anyOf, or allOf.
 func isSimpleTypeSchema(schema *openapi3.Schema) bool {
-	// Must have exactly one type
+	// Must have exactly one type (no Any type support)
 	if schema.Type == nil || len(*schema.Type) != 1 {
 		return false
 	}

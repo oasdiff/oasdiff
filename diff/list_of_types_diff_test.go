@@ -166,11 +166,9 @@ func TestListOfTypesDiff_EdgeCases(t *testing.T) {
 		ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].
 		SchemaDiff.PropertiesDiff.Modified
 
-	// Test 'emptyOneOf': oneOf[] -> string (should be detected as adding string type)
+	// Test 'emptyOneOf': oneOf[] -> string (should NOT be detected as list-of-types)
 	emptyDiff := schemaDiffs["emptyOneOf"].ListOfTypesDiff
-	require.NotNil(t, emptyDiff) // Empty oneOf -> single type should create diff
-	require.Equal(t, []string{"string"}, emptyDiff.Added)
-	require.Empty(t, emptyDiff.Deleted)
+	require.Nil(t, emptyDiff) // Empty oneOf should not be analyzed as list-of-types
 
 	// Test 'complexOneOf': should not be detected due to complex object
 	complexDiff := schemaDiffs["complexOneOf"].ListOfTypesDiff
@@ -327,4 +325,37 @@ func TestListOfTypesDiff_EdgeCaseSchemas(t *testing.T) {
 	require.Len(t, precedenceSchema.OneOf, 1)
 	require.Len(t, precedenceSchema.AnyOf, 1)
 	// OneOf should take precedence in detection logic
+}
+
+// Test that schemas with no type are NOT analyzed as list-of-types (integration test)
+func TestListOfTypesDiff_NoTypeNotSupported(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+
+	base, err := loader.LoadFromFile("../data/list-of-types/no-type-base.yaml")
+	require.NoError(t, err)
+
+	revision, err := loader.LoadFromFile("../data/list-of-types/no-type-revision.yaml")
+	require.NoError(t, err)
+
+	diffReport, err := diff.Get(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+
+	// Check that properties with no-type schemas do NOT have list-of-types diffs
+	require.NotNil(t, diffReport.PathsDiff)
+	require.Contains(t, diffReport.PathsDiff.Modified, "/test")
+
+	getDiff := diffReport.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"]
+	require.NotNil(t, getDiff)
+
+	schemaDiffs := getDiff.ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].
+		SchemaDiff.PropertiesDiff.Modified
+
+	// oneOfWithNoType should NOT have list-of-types diff
+	oneOfDiff := schemaDiffs["oneOfWithNoType"].ListOfTypesDiff
+	require.Nil(t, oneOfDiff, "oneOf with no-type schema should not be analyzed as list-of-types")
+
+	// anyOfWithNoType should NOT have list-of-types diff
+	anyOfDiff := schemaDiffs["anyOfWithNoType"].ListOfTypesDiff
+	require.Nil(t, anyOfDiff, "anyOf with no-type schema should not be analyzed as list-of-types")
 }
