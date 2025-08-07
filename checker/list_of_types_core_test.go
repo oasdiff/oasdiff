@@ -398,24 +398,24 @@ func TestListOfTypesCoreScenarios(t *testing.T) {
 func TestListOfTypesSpecificPaths(t *testing.T) {
 	t.Run("all_variance_combinations", func(t *testing.T) {
 		// Test all 4 variance code paths:
-		// 1. Request with deleted (breaking)  
+		// 1. Request with deleted (breaking)
 		// 2. Request with added (non-breaking)
 		// 3. Response with added (breaking)
 		// 4. Response with deleted (non-breaking)
-		
+
 		// Test request property narrowing (removing types - breaking)
 		s1, err := openSpec("../data/list-of-types/list-to-single-base.yaml")
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/list-to-single-revision.yaml")
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		requestErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestPropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find narrowed changes (types were removed)
 		foundNarrowed := false
 		for _, err := range requestErrs {
@@ -424,20 +424,20 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 			}
 		}
 		require.True(t, foundNarrowed, "Expected request narrowed changes")
-		
+
 		// Test response property widening (adding types - breaking for responses)
 		s3, err := openSpec("../data/list-of-types/single-to-list-base.yaml")
 		require.NoError(t, err)
 		s4, err := openSpec("../data/list-of-types/single-to-list-revision.yaml")
 		require.NoError(t, err)
-		
+
 		d2, osm2, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s3, s4)
 		require.NoError(t, err)
-		
+
 		responseErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.ResponsePropertyListOfTypesChangedCheck),
 			d2, osm2, checker.INFO)
-			
+
 		// Should find widened changes (types were added)
 		foundWidened := false
 		for _, err := range responseErrs {
@@ -447,21 +447,21 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		}
 		require.True(t, foundWidened, "Expected response widened changes")
 	})
-	
+
 	t.Run("joinTypes_with_various_lengths", func(t *testing.T) {
 		// Exercise joinTypes with different numbers of types through real scenarios
 		s1, err := openSpec("../data/list-of-types/list-to-single-base.yaml")
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/list-to-single-revision.yaml")
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestPropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Examine error messages to verify joinTypes worked
 		for _, err := range errs {
 			args := err.GetArgs()
@@ -477,21 +477,21 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 			}
 		}
 	})
-	
+
 	t.Run("parameter_list_of_types_changes", func(t *testing.T) {
 		// Test parameter list-of-types changes with custom test data
 		s1, err := openSpec("../data/list-of-types/param-test-base.yaml")
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/param-test-revision.yaml")
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestParameterListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find parameter changes (narrowing from multiple types to single)
 		foundParamChanges := false
 		for _, err := range errs {
@@ -507,22 +507,22 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		}
 		require.True(t, foundParamChanges, "Expected parameter list-of-types changes")
 	})
-	
+
 	t.Run("body_list_of_types_changes", func(t *testing.T) {
 		// Test request and response body changes with custom test data
 		s1, err := openSpec("../data/list-of-types/body-test-base.yaml")
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/body-test-revision.yaml")
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		// Test response body changes (should detect widening from string to anyOf)
 		responseErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.ResponsePropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find response body widening (adding integer type)
 		foundResponseBodyChanges := false
 		for _, err := range responseErrs {
@@ -533,7 +533,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 				foundResponseBodyChanges = true
 			}
 		}
-		
+
 		// Also check if we can find property-level changes
 		foundResponsePropertyChanges := false
 		for _, err := range responseErrs {
@@ -544,40 +544,40 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 				foundResponsePropertyChanges = true
 			}
 		}
-		
+
 		// At least one type should be found
-		require.True(t, foundResponseBodyChanges || foundResponsePropertyChanges, 
+		require.True(t, foundResponseBodyChanges || foundResponsePropertyChanges,
 			"Expected response body or property list-of-types changes")
 	})
-	
+
 	t.Run("edge_cases_and_boundary_conditions", func(t *testing.T) {
 		// Test various edge cases to improve coverage
-		
+
 		// Test with identical specs (should find no changes)
 		s1, err := openSpec("../data/list-of-types/param-test-base.yaml")
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 		require.NoError(t, err)
-		
+
 		// Test all checkers with identical data
 		requestPropertyErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestPropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		responsePropertyErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.ResponsePropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-			
+
 		parameterErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestParameterListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should all return non-nil but likely empty results
 		require.NotNil(t, requestPropertyErrs)
 		require.NotNil(t, responsePropertyErrs)
 		require.NotNil(t, parameterErrs)
-		
+
 		// Count list-of-types specific changes (should be 0 for identical specs)
 		listOfTypesChanges := 0
 		for _, err := range append(append(requestPropertyErrs, responsePropertyErrs...), parameterErrs...) {
@@ -594,40 +594,40 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		}
 		require.Equal(t, 0, listOfTypesChanges, "No list-of-types changes expected for identical specs")
 	})
-	
+
 	t.Run("comprehensive_coverage_with_complex_scenarios", func(t *testing.T) {
 		// Test complex scenarios that might hit different code paths
-		
+
 		// Test with edge cases data
 		s1, err := openSpec("../data/list-of-types/edge-cases-base.yaml")
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/edge-cases-revision.yaml")
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		// Run all checkers to exercise as many code paths as possible
-		checkers := []struct{
-			name string
+		checkers := []struct {
+			name    string
 			checker func(*diff.Diff, *diff.OperationsSourcesMap, *checker.Config) checker.Changes
 		}{
 			{"RequestProperty", checker.RequestPropertyListOfTypesChangedCheck},
 			{"ResponseProperty", checker.ResponsePropertyListOfTypesChangedCheck},
 			{"RequestParameter", checker.RequestParameterListOfTypesChangedCheck},
 		}
-		
+
 		totalChanges := 0
 		for _, c := range checkers {
 			errs := checker.CheckBackwardCompatibilityUntilLevel(
 				listOfTypesSingleCheckConfig(c.checker), d, osm, checker.INFO)
 			totalChanges += len(errs)
-			
+
 			// Verify we can process each result without errors
 			for _, err := range errs {
 				require.NotEmpty(t, err.GetId(), "Change ID should not be empty")
 				require.NotNil(t, err.GetArgs(), "Change args should not be nil")
-				
+
 				// If it's a list-of-types change, verify args format
 				if containsString([]string{
 					checker.RequestPropertyListOfTypesNarrowedId,
@@ -639,7 +639,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 				}, err.GetId()) {
 					args := err.GetArgs()
 					require.True(t, len(args) >= 2, "List-of-types changes should have sufficient args")
-					
+
 					// Second arg should be the types string (result of joinTypes)
 					if len(args) >= 2 {
 						if typesStr, ok := args[1].(string); ok && len(typesStr) > 0 {
@@ -650,7 +650,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 				}
 			}
 		}
-		
+
 		// Should have processed some changes or at least run without errors
 		require.True(t, totalChanges >= 0, "Should process changes without error")
 	})
@@ -665,14 +665,14 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/list-to-single-base.yaml") // multiple types
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestPropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find widening (adding types to request - non-breaking)
 		foundWidened := false
 		for _, err := range errs {
@@ -683,7 +683,7 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		}
 		require.True(t, foundWidened, "Expected request property widening")
 	})
-	
+
 	t.Run("request_body_deleted_types", func(t *testing.T) {
 		// Target lines 78-86: Request body deleted types case
 		// Need body-level changes where types are removed
@@ -691,37 +691,37 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/body-test-revision.yaml") // single type
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		// Try to find request body changes by using a theoretical body checker
 		// Since we don't have direct body checkers, this tests the core function indirectly
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestPropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// The core function should be exercised even if not directly detected
 		require.NotNil(t, errs)
 	})
-	
+
 	t.Run("response_body_deleted_types", func(t *testing.T) {
 		// Target lines 92-95: Response body deleted types case
 		// Need response body where types are removed (non-breaking for responses)
 		s1, err := openSpec("../data/list-of-types/body-test-revision.yaml") // has anyOf with 2 types
 		require.NoError(t, err)
-		
+
 		// Create a version with fewer types in response
 		s2, err := openSpec("../data/list-of-types/body-test-base.yaml") // has single string
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.ResponsePropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find narrowing (removing types from response - non-breaking)
 		foundNarrowed := false
 		for _, err := range errs {
@@ -735,7 +735,7 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		_ = foundNarrowed // Suppress unused variable warning
 		require.NotNil(t, errs)
 	})
-	
+
 	t.Run("parameter_deleted_types", func(t *testing.T) {
 		// Target lines 132-135: Parameter deleted types case
 		// Need parameter where types are removed (breaking for parameters)
@@ -743,14 +743,14 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/param-test-revision.yaml") // single type
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestParameterListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find narrowing (removing types from parameter - breaking)
 		foundNarrowed := false
 		for _, err := range errs {
@@ -761,7 +761,7 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		}
 		require.True(t, foundNarrowed, "Expected parameter narrowing")
 	})
-	
+
 	t.Run("parameter_property_list_of_types_changes", func(t *testing.T) {
 		// Target lines 152-187: checkParameterPropertyListOfTypesChange function
 		// Need parameter with property that has list-of-types changes
@@ -769,14 +769,14 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/param-property-revision.yaml") // parameter property with single type
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestParameterListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find parameter property changes (narrowing - removing types from parameter property)
 		foundParamPropertyChanges := false
 		for _, err := range errs {
@@ -792,11 +792,11 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		}
 		require.True(t, foundParamPropertyChanges, "Expected parameter property list-of-types changes")
 	})
-	
+
 	t.Run("joinTypes_edge_cases", func(t *testing.T) {
 		// Target lines 214-216: joinTypes empty array case
 		// Target lines 226-228: joinTypes else case for commas
-		
+
 		// Test through scenarios that would generate different type counts
 		testCases := []struct {
 			base     string
@@ -807,20 +807,20 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 			{"../data/list-of-types/list-to-single-base.yaml", "../data/list-of-types/list-to-single-revision.yaml", checker.RequestPropertyListOfTypesChangedCheck},
 			{"../data/list-of-types/param-test-base.yaml", "../data/list-of-types/param-test-revision.yaml", checker.RequestParameterListOfTypesChangedCheck},
 		}
-		
+
 		for i, tc := range testCases {
 			t.Run(fmt.Sprintf("case_%d", i), func(t *testing.T) {
 				s1, err := openSpec(tc.base)
 				require.NoError(t, err)
 				s2, err := openSpec(tc.revision)
 				require.NoError(t, err)
-				
+
 				d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 				require.NoError(t, err)
-				
+
 				errs := checker.CheckBackwardCompatibilityUntilLevel(
 					listOfTypesSingleCheckConfig(tc.checker), d, osm, checker.INFO)
-				
+
 				// Look for changes that would exercise joinTypes with multiple types
 				for _, err := range errs {
 					args := err.GetArgs()
@@ -830,7 +830,7 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 							if len(typesStr) > 0 {
 								// Exercises lines 217-232 (various cases)
 								require.NotEmpty(t, typesStr)
-								
+
 								// Check for specific formatting that exercises different paths
 								if strings.Contains(typesStr, ",") {
 									// This exercises the comma case (lines 226-228)
@@ -857,24 +857,24 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/body-narrowing-revision.yaml") // single type in body
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		// Test request body changes (narrowing - should be breaking)
 		requestErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestPropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Test response body changes (narrowing - should be non-breaking for responses)
 		responseErrs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.ResponsePropertyListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Look for body-level changes (should hit checkBodyListOfTypesChange)
 		foundRequestBodyChanges := false
 		foundResponseBodyChanges := false
-		
+
 		for _, err := range requestErrs {
 			if containsString([]string{
 				checker.RequestBodyListOfTypesNarrowedId,
@@ -884,7 +884,7 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 				// This should hit lines 78-86 (request body deleted types)
 			}
 		}
-		
+
 		for _, err := range responseErrs {
 			if containsString([]string{
 				checker.ResponseBodyListOfTypesNarrowedId,
@@ -894,20 +894,20 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 				// This should hit lines 92-95 (response body deleted types)
 			}
 		}
-		
+
 		// At minimum, the functions should be executed even if specific changes aren't detected
 		require.NotNil(t, requestErrs)
 		require.NotNil(t, responseErrs)
-		
+
 		// Log findings for debugging
 		t.Logf("Request body changes found: %v", foundRequestBodyChanges)
 		t.Logf("Response body changes found: %v", foundResponseBodyChanges)
-		
+
 		// Count total changes to ensure some activity
 		totalChanges := len(requestErrs) + len(responseErrs)
 		t.Logf("Total changes detected: %d", totalChanges)
 	})
-	
+
 	t.Run("parameter_widening_case", func(t *testing.T) {
 		// Target line 132-135 else case (parameter widening)
 		// Reverse the parameter test data to get widening instead of narrowing
@@ -915,14 +915,14 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/param-test-base.yaml") // multiple types
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestParameterListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find widening (adding types to parameter - non-breaking)
 		foundWidened := false
 		for _, err := range errs {
@@ -933,21 +933,21 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 		}
 		require.True(t, foundWidened, "Expected parameter widening")
 	})
-	
+
 	t.Run("parameter_property_widening_case", func(t *testing.T) {
-		// Target parameter property widening case  
+		// Target parameter property widening case
 		s1, err := openSpec("../data/list-of-types/param-property-revision.yaml") // single type
 		require.NoError(t, err)
 		s2, err := openSpec("../data/list-of-types/param-property-base.yaml") // multiple types
 		require.NoError(t, err)
-		
+
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 		require.NoError(t, err)
-		
+
 		errs := checker.CheckBackwardCompatibilityUntilLevel(
 			listOfTypesSingleCheckConfig(checker.RequestParameterListOfTypesChangedCheck),
 			d, osm, checker.INFO)
-		
+
 		// Should find parameter property widening
 		foundParamPropertyWidened := false
 		for _, err := range errs {
