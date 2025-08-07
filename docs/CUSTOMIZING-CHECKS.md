@@ -25,7 +25,7 @@
 1. Optionally, add additional unit tests and comment them with "BC: \<use-case\> is breaking" or "BC: \<use-case\> is not breaking"
 2. Update [BREAKING-CHANGES-EXAMPLES.md](BREAKING-CHANGES-EXAMPLES.md):
     ```
-    ./scripts/test.sh
+    make doc-breaking-changes
     ```
 3. Make sure that [BREAKING-CHANGES-EXAMPLES.md](BREAKING-CHANGES-EXAMPLES.md) was updated with your use-cases
 
