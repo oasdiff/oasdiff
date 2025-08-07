@@ -41,6 +41,11 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 
 					id := RequestBodyTypeGeneralizedId
 
+					// Check for suppression by ListOfTypes checker
+					if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
+						continue
+					}
+
 					if breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
 						id = RequestBodyTypeChangedId
 					}
@@ -66,6 +71,12 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 						if propertyDiff.Revision.ReadOnly {
 							return
 						}
+
+						// Check for suppression by ListOfTypes checker
+						if shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff) {
+							return
+						}
+
 						schemaDiff := propertyDiff
 						typeDiff := schemaDiff.TypeDiff
 						formatDiff := schemaDiff.FormatDiff

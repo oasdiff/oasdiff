@@ -76,3 +76,81 @@ func TestRequestPropertyAnyOfRemoved(t *testing.T) {
 			OperationId: "updatePets",
 		}}, errs)
 }
+
+// CL: no changes when paths diff is nil
+func TestRequestPropertyAnyOfNoPathsDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when operations diff is nil
+func TestRequestPropertyAnyOfNoOperationsDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/test": &diff.PathDiff{},
+			},
+		},
+	}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when request body diff is nil
+func TestRequestPropertyAnyOfNoRequestBodyDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/test": &diff.PathDiff{
+					OperationsDiff: &diff.OperationsDiff{
+						Modified: diff.ModifiedOperations{
+							"POST": &diff.MethodDiff{},
+						},
+					},
+				},
+			},
+		},
+	}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when schema diff is nil
+func TestRequestPropertyAnyOfNoSchemaDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/test": &diff.PathDiff{
+					OperationsDiff: &diff.OperationsDiff{
+						Modified: diff.ModifiedOperations{
+							"POST": &diff.MethodDiff{
+								RequestBodyDiff: &diff.RequestBodyDiff{
+									ContentDiff: &diff.ContentDiff{
+										MediaTypeModified: diff.ModifiedMediaTypes{
+											"application/json": &diff.MediaTypeDiff{},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}

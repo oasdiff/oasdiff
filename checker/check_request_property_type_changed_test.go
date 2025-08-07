@@ -198,3 +198,99 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 		OperationId: "addPet",
 	}, errs[0])
 }
+
+// CL: no changes when paths diff is nil
+func TestRequestPropertyTypeChangedNoPathsDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when operations diff is nil
+func TestRequestPropertyTypeChangedNoOperationsDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/test": &diff.PathDiff{},
+			},
+		},
+	}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when request body diff is nil
+func TestRequestPropertyTypeChangedNoRequestBodyDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/test": &diff.PathDiff{
+					OperationsDiff: &diff.OperationsDiff{
+						Modified: diff.ModifiedOperations{
+							"POST": &diff.MethodDiff{},
+						},
+					},
+				},
+			},
+		},
+	}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when schema diff is nil
+func TestRequestPropertyTypeChangedNoSchemaDiff(t *testing.T) {
+	config := &checker.Config{}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/test": &diff.PathDiff{
+					OperationsDiff: &diff.OperationsDiff{
+						Modified: diff.ModifiedOperations{
+							"POST": &diff.MethodDiff{
+								RequestBodyDiff: &diff.RequestBodyDiff{
+									ContentDiff: &diff.ContentDiff{
+										MediaTypeModified: diff.ModifiedMediaTypes{
+											"application/json": &diff.MediaTypeDiff{},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	osm := &diff.OperationsSourcesMap{}
+
+	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
+	require.Len(t, errs, 0)
+}
+
+// CL: no changes when property is read-only
+func TestRequestPropertyTypeChangedReadOnlyProperty(t *testing.T) {
+	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	// Make property read-only and change its type
+	s2.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.ReadOnly = true
+	s2.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Type = &openapi3.Types{"string"}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.RequestPropertyTypeChangedCheck(d, osm, &checker.Config{})
+	require.Len(t, errs, 0)
+}

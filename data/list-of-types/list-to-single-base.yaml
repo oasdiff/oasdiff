@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  oneOf:
+                    - type: string
+                    - type: integer
+                value:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean

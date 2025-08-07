@@ -441,6 +441,21 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, LocationBody, ActionRemove), // optional
 		// RequestBodyEnumValueRemovedCheck
 		newBackwardCompatibilityRule(RequestBodyEnumValueRemovedId, INFO, RequestBodyEnumValueRemovedCheck, DirectionRequest, LocationBody, ActionRemove), // optional
+		// RequestPropertyListOfTypesChangedCheck
+		newBackwardCompatibilityRule(RequestBodyListOfTypesWidenedId, INFO, RequestPropertyListOfTypesChangedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyListOfTypesNarrowedId, ERR, RequestPropertyListOfTypesChangedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyListOfTypesWidenedId, INFO, RequestPropertyListOfTypesChangedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyListOfTypesNarrowedId, ERR, RequestPropertyListOfTypesChangedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyListOfTypesChangedCheck
+		newBackwardCompatibilityRule(ResponseBodyListOfTypesWidenedId, ERR, ResponsePropertyListOfTypesChangedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyListOfTypesNarrowedId, INFO, ResponsePropertyListOfTypesChangedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyListOfTypesWidenedId, ERR, ResponsePropertyListOfTypesChangedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyListOfTypesNarrowedId, INFO, ResponsePropertyListOfTypesChangedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestParameterListOfTypesChangedCheck
+		newBackwardCompatibilityRule(RequestParameterListOfTypesWidenedId, INFO, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
+		newBackwardCompatibilityRule(RequestParameterListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
+		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesWidenedId, INFO, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
+		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
 	}
 }
 

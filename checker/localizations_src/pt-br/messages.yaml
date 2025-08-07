@@ -559,3 +559,15 @@ response-write-only-property-became-optional-description: propriedade somente es
 response-write-only-property-became-required-description: propriedade somente escrita da resposta tornou-se obrigatória
 response-write-only-property-enum-value-added-description: valor do enum da propriedade somente escrita da resposta adicionado
 sunset-deleted-description: data de expiração removida
+request-body-list-of-types-widened: "lista de tipos do corpo da requisição foi expandida adicionando tipos %s ao tipo de mídia %s"
+request-body-list-of-types-narrowed: "lista de tipos do corpo da requisição foi restringida removendo tipos %s do tipo de mídia %s"
+request-property-list-of-types-widened: "lista de tipos da propriedade %s da requisição foi expandida adicionando tipos %s ao tipo de mídia %s"
+request-property-list-of-types-narrowed: "lista de tipos da propriedade %s da requisição foi restringida removendo tipos %s do tipo de mídia %s"
+response-body-list-of-types-widened: "lista de tipos do corpo da resposta foi expandida adicionando tipos %s ao tipo de mídia %s da resposta %s"
+response-body-list-of-types-narrowed: "lista de tipos do corpo da resposta foi restringida removendo tipos %s do tipo de mídia %s da resposta %s"
+response-property-list-of-types-widened: "lista de tipos da propriedade %s da resposta foi expandida adicionando tipos %s ao tipo de mídia %s da resposta %s"
+response-property-list-of-types-narrowed: "lista de tipos da propriedade %s da resposta foi restringida removendo tipos %s do tipo de mídia %s da resposta %s"
+request-parameter-list-of-types-widened: "lista de tipos do parâmetro %s %s da requisição foi expandida adicionando tipos %s"
+request-parameter-list-of-types-narrowed: "lista de tipos do parâmetro %s %s da requisição foi restringida removendo tipos %s"
+request-parameter-property-list-of-types-widened: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi expandida adicionando tipos %s"
+request-parameter-property-list-of-types-narrowed: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi restringida removendo tipos %s"

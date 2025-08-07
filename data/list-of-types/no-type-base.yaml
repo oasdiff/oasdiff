@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: No Type Test API  
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  oneOfWithNoType:
+                    oneOf:
+                      - type: string
+                      - {} # No type - should prevent list-of-types analysis
+                  anyOfWithNoType:
+                    anyOf:
+                      - type: string
+                      - {} # No type - should prevent list-of-types analysis

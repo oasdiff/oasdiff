@@ -38,6 +38,11 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 						continue
 					}
 
+					// Check for suppression by ListOfTypes checker
+					if shouldSuppressOneOfSchemaChangedForListOfTypes(mediaTypeDiff.SchemaDiff) {
+						continue
+					}
+
 					if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Added) > 0 {
 						result = append(result, NewApiChange(
 							ResponseBodyOneOfAddedId,
@@ -68,6 +73,11 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							if propertyDiff.OneOfDiff == nil {
+								return
+							}
+
+							// Check for suppression by ListOfTypes checker
+							if shouldSuppressPropertyOneOfSchemaChangedForListOfTypes(propertyDiff) {
 								return
 							}
 
