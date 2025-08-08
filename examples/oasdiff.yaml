@@ -1,3 +1,6 @@
+# oasdiff configuration file
+# This file is used to customize the behavior of oasdiff.
+# Place in the directory where the command is run
 format: json
 color: never
 attributes: 

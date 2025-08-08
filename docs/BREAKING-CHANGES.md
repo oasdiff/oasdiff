@@ -48,8 +48,8 @@ Additional formats can be generated using the `--format` flag:
 - yaml
 - githubactions: suitable for integration with github
 - junit: suitable for integration with gitlab
-- html: [see example](https://html-preview.github.io/?url=https://github.com/oasdiff/oasdiff/blob/main/docs/changelog.html)
-- markdown: [see example](changelog.md)
+- html: [see example](../examples/changelog.html)
+- markdown: [see example](../examples/changelog.md)
 - text: the default, human-readable, format
 - singleline: displays each change on a single line, this can be useful to prepare [ignore files](#ignoring-specific-breaking-changes)
 
