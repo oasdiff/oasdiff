@@ -1,0 +1,578 @@
+at: en
+in: en
+request-body-added-required: cuerpo de solicitud obligatorio agregado
+request-body-added-optional: cuerpo de solicitud opcional agregado
+request-parameter-removed: eliminado el parámetro de solicitud %s %s
+request-parameter-removed-comment: "Esta es una advertencia porque algunas aplicaciones pueden devolver un error al recibir un parámetro que no esperan. Se recomienda deprecar primero el parámetro."
+request-parameter-removed-with-deprecation: eliminado el parámetro de solicitud %s %s con depreciación
+request-parameter-sunset-parse: "falló al analizar la fecha de expiración para el parámetro de solicitud %s %s: %v"
+request-parameter-removed-before-sunset: eliminado el parámetro de solicitud %s %s antes de la fecha de expiración %s
+total-errors: "%d cambios críticos: %d %s, %d %s\\n"
+total-changes: "%d cambios: %d %s, %d %s, %d %s\\n"
+request-parameter-pattern-added: "agregado el patrón %s al parámetro de solicitud %s %s"
+request-parameter-pattern-removed: "eliminado el patrón %s del parámetro de solicitud %s %s"
+request-parameter-pattern-changed: "cambiado el patrón del parámetro de solicitud %s %s de %s a %s"
+request-parameter-pattern-generalized: "cambiado el patrón del parámetro de solicitud %s %s de %s a un patrón más general %s"
+request-property-pattern-added: "agregado el patrón %s a la propiedad de solicitud %s"
+request-property-pattern-removed: "eliminado el patrón %s de la propiedad de solicitud %s"
+request-property-pattern-changed: "cambiado el patrón de la propiedad de solicitud %s de %s a %s"
+request-property-pattern-generalized: "cambiado el patrón de la propiedad de solicitud %s de %s a un patrón más general %s"
+api-deprecated-sunset-parse: "falló al analizar la fecha de expiración: %v"
+api-path-sunset-parse: "falló al analizar la fecha de expiración: %v"
+api-stability-decreased: "nivel de estabilidad del endpoint disminuido de %s a %s"
+api-invalid-stability-level: "falló al analizar el nivel de estabilidad: %v"
+api-deprecated-sunset-missing: "falta la fecha de expiración para el API depreciado"
+api-sunset-date-too-small: "la fecha de expiración %s es demasiado pequeña, debe ser al menos %s días desde ahora"
+endpoint-added: endpoint agregado
+endpoint-deprecated: endpoint depreciado
+endpoint-reactivated: endpoint reactivado
+api-path-removed-without-deprecation: ruta del api eliminada sin depreciación
+api-path-removed-with-deprecation: ruta del api eliminada con depreciación
+api-path-removed-before-sunset: ruta del api eliminada antes de la fecha de expiración %s
+api-removed-without-deprecation: api eliminado sin depreciación
+api-removed-with-deprecation: api eliminado con depreciación
+api-removed-before-sunset: api eliminado antes de la fecha de expiración %s
+api-operation-id-removed: id de operación del api %s eliminado y reemplazado con %s
+api-operation-id-added: id de operación del api %s agregado
+api-tag-removed: etiqueta del api %s eliminada
+api-tag-added: etiqueta del api %s agregada
+api-schema-removed: eliminado el esquema %s
+sunset-deleted: fecha de expiración del api eliminada, pero deprecated=true mantenido
+api-sunset-date-changed-too-small: fecha de expiración del api cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora
+new-required-request-parameter: agregado el nuevo parámetro de solicitud obligatorio %s %s
+new-optional-request-parameter: agregado el nuevo parámetro de solicitud opcional %s %s
+new-required-request-property: agregada la nueva propiedad de solicitud obligatoria %s
+new-required-request-property-with-default: agregada la nueva propiedad de solicitud obligatoria %s con un valor por defecto
+new-optional-request-property: agregada la nueva propiedad de solicitud opcional %s
+new-required-request-header-property: agregada la nueva propiedad obligatoria del encabezado de solicitud %s %s
+request-body-became-required: el cuerpo de solicitud se volvió obligatorio
+request-body-became-optional: el cuerpo de solicitud se volvió opcional
+request-body-became-enum: el cuerpo de solicitud fue restringido a una lista de valores enum
+request-body-enum-value-removed: valor enum del cuerpo de solicitud eliminado %s
+response-mediatype-enum-value-removed: valor enum del esquema de respuesta %s eliminado %s
+request-header-property-became-required: la propiedad %s del encabezado de solicitud %s se volvió obligatoria
+request-header-property-became-enum: la propiedad %s del encabezado de solicitud %s fue restringida a una lista de valores enum
+request-parameter-became-required: el parámetro de solicitud %s %s se volvió obligatorio
+request-parameter-became-optional: el parámetro de solicitud %s %s se volvió opcional
+request-parameter-became-enum: el parámetro de solicitud %s %s fue restringido a una lista de valores enum
+request-parameter-enum-value-removed: eliminado el valor enum %s del parámetro de solicitud %s %s
+request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro de solicitud %s %s
+pattern-changed-warn-comment: "Esta es una advertencia porque agregar o cambiar un patrón puede restringir los valores aceptados y romper clientes existentes. Para cambios de patrón, es difícil analizar automáticamente si el nuevo patrón es un superconjunto del patrón anterior (ej. cambió de '[0-9]+' a '[0-9]*')"
+pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro anteriormente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
+request-parameter-x-extensible-enum-value-removed: eliminado el valor x-extensible-enum %s del parámetro de solicitud %s %s
+request-parameter-max-decreased: para el parámetro de solicitud %s %s, el máximo fue disminuido de %s a %s
+request-parameter-max-increased: para el parámetro de solicitud %s %s, el máximo fue aumentado de %s a %s
+request-parameter-default-value-added: para el parámetro de solicitud %s %s, el valor por defecto %s fue agregado
+request-parameter-default-value-changed: para el parámetro de solicitud %s %s, el valor por defecto fue cambiado de %s a %s
+request-parameter-default-value-removed: para el parámetro de solicitud %s %s, el valor por defecto %s fue eliminado
+request-parameter-max-length-decreased: para el parámetro de solicitud %s %s, el maxLength fue disminuido de %s a %s
+request-parameter-max-length-increased: para el parámetro de solicitud %s %s, el maxLength fue aumentado de %s a %s
+request-parameter-min-length-increased: para el parámetro de solicitud %s %s, el minLength fue aumentado de %s a %s
+request-parameter-min-length-decreased: para el parámetro de solicitud %s %s, el minLength fue disminuido de %s a %s
+request-parameter-max-length-set: para el parámetro de solicitud %s %s, el maxLength fue establecido en %s
+request-parameter-max-length-set-comment: "Esta es una advertencia porque a veces es necesario establecerlo por razones de seguridad o error actual en la especificación. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación."
+request-parameter-max-set: para el parámetro de solicitud %s %s, el máximo fue establecido en %s
+request-parameter-max-set-comment: "Esta es una advertencia porque a veces es necesario establecerlo por razones de seguridad o error actual en la especificación. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación."
+request-parameter-min-increased: para el parámetro de solicitud %s %s, el mínimo fue aumentado de %s a %s
+request-parameter-min-decreased: para el parámetro de solicitud %s %s, el mínimo fue disminuido de %s a %s
+request-parameter-max-items-decreased: para el parámetro de solicitud %s %s, el maxItems fue disminuido de %s a %s
+request-parameter-max-items-increased: para el parámetro de solicitud %s %s, el maxItems fue aumentado de %s a %s
+request-parameter-min-items-increased: para el parámetro de solicitud %s %s, el minItems fue aumentado de %s a %s
+request-parameter-min-items-decreased: para el parámetro de solicitud %s %s, el minItems fue disminuido de %s a %s
+request-parameter-min-items-set: para el parámetro de solicitud %s %s, el minItems fue establecido en %s
+request-parameter-min-items-set-comment: Esta es una advertencia porque a veces es necesario establecerlo por razones de seguridad o error actual en la especificación. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-parameter-min-set: para el parámetro de solicitud %s %s, el mínimo fue establecido en %s
+request-parameter-min-set-comment: Esta es una advertencia porque a veces es necesario establecerlo por razones de seguridad o error actual en la especificación. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-parameter-type-changed: para el parámetro de solicitud %s %s, el tipo/formato fue cambiado de %s/%s a %s/%s
+request-parameter-type-generalized: para el parámetro de solicitud %s %s, el tipo/formato fue generalizado de %s/%s a %s/%s
+request-parameter-property-type-changed: para el parámetro de solicitud %s %s, el tipo/formato de la propiedad %s fue cambiado de %s/%s a %s/%s
+request-parameter-property-type-changed-warn-comment: Esta es una advertencia porque los objetos de parámetros pueden pasarse de diferentes maneras, algunas de las cuales permiten este cambio de tipo y otras no.
+request-parameter-property-type-generalized: para el parámetro de solicitud %s %s, el tipo/formato de la propiedad %s fue generalizado de %s/%s a %s/%s
+request-parameter-property-type-specialized: para el parámetro de solicitud %s %s, el tipo/formato de la propiedad %s fue especializado de %s/%s a %s/%s
+request-parameter-reactivated: "el parámetro de solicitud %s %s fue reactivado"
+request-parameter-deprecated-sunset-missing: "el parámetro de solicitud %s %s fue depreciado sin fecha de expiración"
+request-parameter-sunset-date-too-small: "la fecha de expiración %s del parámetro de solicitud %s %s es demasiado pequeña, debe ser al menos %s días desde ahora"
+request-parameter-deprecated: "el parámetro de solicitud %s %s fue depreciado"
+request-parameter-sunset-deleted: "fecha de expiración del parámetro de solicitud %s %s eliminada, pero deprecated=true mantenido"
+request-parameter-sunset-date-changed-too-small: "fecha de expiración del parámetro de solicitud %s %s cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora"
+new-request-path-parameter: agregado el nuevo parámetro de ruta de solicitud %s
+request-property-became-required: la propiedad de solicitud %s se volvió obligatoria
+request-property-became-required-with-default: la propiedad de solicitud %s con un valor por defecto se volvió obligatoria
+request-property-became-optional: la propiedad de solicitud %s se volvió opcional
+request-property-became-not-nullable: la propiedad de solicitud %s se volvió no anulable
+request-body-became-not-nullable: el cuerpo de la solicitud se volvió no anulable
+request-property-became-nullable: la propiedad de solicitud %s se volvió anulable
+request-body-became-nullable: el cuerpo de la solicitud se volvió anulable
+request-property-became-enum: la propiedad de solicitud %s fue restringida a una lista de valores enum
+request-property-enum-value-removed: eliminado el valor enum %s de la propiedad de solicitud %s
+request-read-only-property-enum-value-removed: eliminado el valor enum %s de la propiedad de solicitud de solo lectura %s
+request-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de solicitud %s
+request-body-max-decreased: el máximo del cuerpo de la solicitud fue disminuido a %s
+request-property-max-decreased: el máximo de la propiedad de solicitud %s fue disminuido a %s
+request-read-only-property-max-decreased: el máximo de la propiedad de solicitud de solo lectura %s fue disminuido a %s
+request-body-max-length-decreased: el maxLength del cuerpo de la solicitud fue disminuido a %s
+request-property-max-length-decreased: el maxLength de la propiedad de solicitud %s fue disminuido a %s
+request-read-only-property-max-length-decreased: el maxLength de la propiedad de solicitud de solo lectura %s fue disminuido a %s
+request-body-min-length-increased: el minLength del cuerpo de la solicitud fue aumentado de %s a %s
+request-property-min-length-increased: el minLength de la propiedad de solicitud %s fue aumentado de %s a %s
+request-body-min-length-decreased: el minLength del cuerpo de la solicitud fue disminuido de %s a %s
+request-property-min-length-decreased: el minLength de la propiedad de solicitud %s fue disminuido de %s a %s
+request-body-max-increased: el máximo del cuerpo de la solicitud fue aumentado de %s a %s
+request-property-max-increased: el máximo de la propiedad de solicitud %s fue aumentado de %s a %s
+request-body-max-length-increased: el maxLength del cuerpo de la solicitud fue aumentado de %s a %s
+request-property-max-length-increased: el maxLength de la propiedad de solicitud %s fue aumentado de %s a %s
+request-body-max-length-set: el maxLength del cuerpo de la solicitud fue establecido en %s
+request-body-max-length-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-property-max-length-set: el maxLength de la propiedad de solicitud %s fue establecido en %s
+request-property-max-length-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-body-max-set: el máximo del cuerpo de la solicitud fue establecido en %s
+request-body-max-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-property-max-set: el máximo de la propiedad de solicitud %s fue establecido en %s
+request-property-max-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-body-min-increased: el mínimo del cuerpo de la solicitud fue aumentado a %s
+request-property-min-increased: el mínimo de la propiedad de solicitud %s fue aumentado a %s
+request-read-only-property-min-increased: el mínimo de la propiedad de solicitud de solo lectura %s fue aumentado a %s
+request-body-min-items-increased: el minItems del cuerpo de la solicitud fue aumentado a %s
+request-property-min-items-increased: el minItems de la propiedad de solicitud %s fue aumentado a %s
+request-body-min-decreased: el mínimo del cuerpo de la solicitud fue disminuido de %s a %s
+request-property-min-decreased: el mínimo de la propiedad de solicitud %s fue disminuido de %s a %s
+request-body-min-items-decreased: el minItems del cuerpo de la solicitud fue disminuido de %s a %s
+request-property-min-items-decreased: el minItems de la propiedad de solicitud %s fue disminuido de %s a %s
+request-body-min-items-set: el minItems del cuerpo de la solicitud fue establecido en %s
+request-body-min-items-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-property-min-items-set: el minItems de la propiedad de solicitud %s fue establecido en %s
+request-property-min-items-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-body-min-set: el mínimo del cuerpo de la solicitud fue establecido en %s
+request-body-min-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-property-min-set: el mínimo de la propiedad de solicitud %s fue establecido en %s
+request-property-min-set-comment: Esta es una advertencia porque a veces es necesario establecerlo. Pero los buenos clientes deben ser verificados para soportar esta restricción antes de tal cambio en la especificación.
+request-property-removed: eliminada la propiedad de solicitud %s
+request-body-type-changed: el tipo/formato del cuerpo de la solicitud cambió de %s/%s a %s/%s
+request-body-type-generalized: el tipo/formato del cuerpo de la solicitud fue generalizado de %s/%s a %s/%s
+request-property-type-changed: el tipo/formato de la propiedad de solicitud %s cambió de %s/%s a %s/%s
+request-property-type-generalized: el tipo/formato de la propiedad de solicitud %s fue generalizado de %s/%s a %s/%s
+request-property-x-extensible-enum-value-removed: eliminado el valor x-extensible-enum %s de la propiedad de solicitud %s
+response-header-became-optional: el encabezado de respuesta %s se volvió opcional para el estado %s
+required-response-header-removed: el encabezado de respuesta obligatorio %s fue eliminado para el estado %s
+optional-response-header-removed: el encabezado de respuesta opcional %s fue eliminado para el estado %s
+response-media-type-removed: eliminado el tipo de media %s para la respuesta con el estado %s
+response-media-type-added: agregado el tipo de media %s para la respuesta con el estado %s
+response-media-type-name-changed: el tipo de media %s fue cambiado a %s para el estado de respuesta %s
+response-media-type-name-generalized: el tipo de media %s fue cambiado a un tipo de media más general %s para el estado de respuesta %s
+response-media-type-name-specialized: el tipo de media %s fue cambiado a un tipo de media más específico %s para el estado de respuesta %s
+response-optional-property-removed: eliminada la propiedad opcional %s de la respuesta con el estado %s
+response-property-became-optional: la propiedad de respuesta %s se volvió opcional para el estado %s
+response-property-became-nullable: la propiedad de respuesta %s se volvió anulable para el estado %s
+response-body-became-nullable: el cuerpo de la respuesta se volvió anulable
+response-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de respuesta %s para el estado de respuesta %s
+response-property-enum-value-added-comment: Agregar nuevos valores enum a la respuesta podría ser inesperado para los clientes, use x-extensible-enum en su lugar.
+response-property-enum-value-removed: eliminado el valor enum %s de la propiedad de respuesta %s para el estado de respuesta %s
+response-body-max-length-increased: el maxLength del cuerpo de la respuesta fue aumentado de %s a %s
+response-property-max-length-increased: el maxLength de la propiedad de respuesta %s fue aumentado de %s a %s para el estado de respuesta %s
+response-body-max-length-unset: el maxLength del cuerpo de la respuesta fue removido de %s
+response-property-max-length-unset: el maxLength de la propiedad de respuesta %s fue removido de %s para el estado de respuesta %s
+response-body-min-items-decreased: el minItems del cuerpo de la respuesta fue disminuido de %s a %s
+response-property-min-items-decreased: el minItems de la propiedad de respuesta %s fue disminuido de %s a %s para el estado de respuesta %s
+response-body-min-items-unset: el minItems del cuerpo de la respuesta fue removido de %s
+response-property-min-items-unset: el minItems de la propiedad de respuesta %s fue removido de %s para el estado de respuesta %s
+response-body-min-length-decreased: el minLength del cuerpo de la respuesta fue disminuido de %s a %s
+response-property-min-length-decreased: el minLength de la propiedad de respuesta %s fue disminuido de %s a %s para el estado de respuesta %s
+response-body-type-changed: el tipo/formato del cuerpo de la respuesta cambió de %s/%s a %s/%s para el estado %s
+response-property-type-changed: el tipo/formato de la propiedad de respuesta %s cambió de %s/%s a %s/%s para el estado %s
+response-required-property-became-not-write-only: la propiedad obligatoria de respuesta %s dejó de ser de solo escritura para el estado %s
+response-required-property-became-not-write-only-comment: Es válido solo si la propiedad siempre fue devuelta antes de que la especificación fuera cambiada
+response-required-property-removed: eliminada la propiedad obligatoria %s de la respuesta con el estado %s
+response-required-property-added: agregada la propiedad obligatoria %s a la respuesta con el estado %s
+response-success-status-removed: eliminada la respuesta exitosa con el estado %s
+response-non-success-status-removed: eliminada la respuesta no exitosa con el estado %s
+response-success-status-added: agregada la respuesta exitosa con el estado %s
+response-non-success-status-added: agregada la respuesta no exitosa con el estado %s
+response-body-max-increased: el máximo del cuerpo de la respuesta fue aumentado de %s a %s
+response-property-max-increased: el máximo de la propiedad de respuesta %s fue aumentado de %s a %s para el estado de respuesta %s
+response-body-min-decreased: el mínimo del cuerpo de la respuesta fue disminuido de %s a %s
+response-property-min-decreased: el mínimo de la propiedad de respuesta %s fue disminuido de %s a %s para el estado de respuesta %s
+api-security-added: la seguridad del esquema del endpoint %s fue agregada al API
+api-security-removed: la seguridad del esquema del endpoint %s fue eliminada del API
+api-security-updated: la seguridad del esquema del endpoint %s fue actualizada de %s a %s
+api-global-security-added: el esquema de seguridad %s fue agregado al API
+api-global-security-removed: el esquema de seguridad %s fue eliminado del API
+api-global-security-scope-removed: el ámbito de seguridad %s fue eliminado del esquema de seguridad global %s
+api-global-security-scope-added: el ámbito de seguridad %s fue agregado al esquema de seguridad global %s
+api-security-scope-removed: el ámbito de seguridad %s fue eliminado del esquema de seguridad del endpoint %s
+api-stability-decreased-description: nivel de estabilidad del endpoint disminuido
+api-security-scope-added: el ámbito de seguridad %s fue agregado al esquema de seguridad del endpoint %s
+api-security-component-type-changed: el tipo del esquema de seguridad del componente %s cambió de %s a %s
+api-security-component-oauth-url-changed: la url oauth del esquema de seguridad del componente %s cambió de %s a %s
+api-security-component-oauth-token-url-changed: la url del token oauth del esquema de seguridad del componente %s cambió de %s a %s
+api-security-component-added: el esquema de seguridad del componente %s fue agregado
+api-security-component-removed: el esquema de seguridad del componente %s fue eliminado
+api-security-component-oauth-scope-added: el ámbito oauth %s del esquema de seguridad del componente %s fue agregado
+api-security-component-oauth-scope-removed: el ámbito oauth %s del esquema de seguridad del componente %s fue eliminado
+api-security-component-oauth-scope-changed: el ámbito oauth %s del esquema de seguridad del componente %s fue actualizado de %s a %s
+response-optional-property-added: agregada la propiedad opcional %s a la respuesta con el estado %s
+response-optional-write-only-property-added: agregada la propiedad opcional de solo escritura %s a la respuesta con el estado %s
+response-optional-write-only-property-removed: eliminada la propiedad opcional de solo escritura %s de la respuesta con el estado %s
+response-required-write-only-property-added: agregada la propiedad obligatoria de solo escritura %s a la respuesta con el estado %s
+response-required-write-only-property-removed: eliminada la propiedad obligatoria de solo escritura %s de la respuesta con el estado %s
+response-write-only-property-became-optional: la propiedad de solo escritura %s se volvió opcional para el estado %s
+response-property-became-required: la propiedad de respuesta %s se volvió obligatoria para el estado %s
+response-write-only-property-became-required: la propiedad de solo escritura %s se volvió obligatoria para el estado %s
+request-body-media-type-removed: eliminado el tipo de media %s del cuerpo de solicitud
+request-body-media-type-added: agregado el tipo de media %s al cuerpo de solicitud
+response-write-only-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de solo escritura %s para el estado de respuesta %s
+response-required-property-became-write-only: la propiedad obligatoria de respuesta %s se volvió de solo escritura para el estado %s
+response-required-property-became-read-only: la propiedad obligatoria de respuesta %s se volvió de solo lectura para el estado %s
+response-required-property-became-not-read-only: la propiedad obligatoria de respuesta %s dejó de ser de solo lectura para el estado %s
+response-optional-property-became-write-only: la propiedad opcional de respuesta %s se volvió de solo escritura para el estado %s
+response-optional-property-became-read-only: la propiedad opcional de respuesta %s se volvió de solo lectura para el estado %s
+response-optional-property-became-not-write-only: la propiedad opcional de respuesta %s dejó de ser de solo escritura para el estado %s
+response-optional-property-became-not-read-only: la propiedad opcional de respuesta %s dejó de ser de solo lectura para el estado %s
+response-property-pattern-changed: el patrón de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
+response-property-pattern-added: el patrón %s de la propiedad de respuesta %s fue agregado para el estado %s
+response-property-pattern-removed: el patrón %s de la propiedad de respuesta %s fue eliminado para el estado %s
+response-property-default-value-added: el valor por defecto %s de la propiedad de respuesta %s fue agregado para el estado %s
+response-property-default-value-changed: el valor por defecto de la propiedad de respuesta %s cambió de %s a %s para el estado %s
+response-property-default-value-removed: el valor por defecto %s de la propiedad de respuesta %s fue eliminado para el estado %s
+response-body-default-value-added: el valor por defecto %s del cuerpo de respuesta %s fue agregado para el estado %s
+response-body-default-value-changed: el valor por defecto del cuerpo de respuesta %s cambió de %s a %s para el estado %s
+response-body-default-value-removed: el valor por defecto %s del cuerpo de respuesta %s fue eliminado para el estado %s
+request-property-default-value-added: el valor por defecto %s de la propiedad de solicitud %s fue agregado
+request-property-default-value-changed: el valor por defecto de la propiedad de solicitud %s cambió de %s a %s
+request-property-default-value-removed: el valor por defecto %s de la propiedad de solicitud %s fue eliminado
+request-body-default-value-added: el valor por defecto %s del cuerpo de solicitud %s fue agregado
+request-body-default-value-changed: el valor por defecto del cuerpo de solicitud %s cambió de %s a %s
+request-body-default-value-removed: el valor por defecto %s del cuerpo de solicitud %s fue eliminado
+request-body-any-of-added: agregado %s a la lista 'anyOf' del cuerpo de solicitud
+request-body-any-of-removed: eliminado %s de la lista 'anyOf' del cuerpo de solicitud
+request-property-any-of-added: agregado %s a la lista 'anyOf' de la propiedad de solicitud %s
+request-property-any-of-removed: eliminado %s de la lista 'anyOf' de la propiedad de solicitud %s
+response-body-any-of-added: agregado %s a la lista 'anyOf' del cuerpo de respuesta para el estado de respuesta %s
+response-body-any-of-removed: eliminado %s de la lista 'anyOf' del cuerpo de respuesta para el estado de respuesta %s
+response-property-any-of-added: agregado %s a la lista 'anyOf' de la propiedad de respuesta %s para el estado de respuesta %s
+response-property-any-of-removed: eliminado %s de la lista 'anyOf' de la propiedad de respuesta %s para el estado de respuesta %s
+request-body-one-of-added: agregado %s a la lista 'oneOf' del cuerpo de solicitud
+request-body-one-of-removed: eliminado %s de la lista 'oneOf' del cuerpo de solicitud
+request-body-removed: eliminado el cuerpo de solicitud
+request-body-removed-description: cuerpo de solicitud eliminado
+request-property-one-of-added: agregado %s a la lista 'oneOf' de la propiedad de solicitud %s
+request-property-one-of-removed: eliminado %s de la lista 'oneOf' de la propiedad de solicitud %s
+response-body-one-of-added: agregado %s a la lista 'oneOf' del cuerpo de respuesta para el estado de respuesta %s
+response-body-one-of-removed: eliminado %s de la lista 'oneOf' del cuerpo de respuesta para el estado de respuesta %s
+response-property-one-of-added: agregado %s a la lista 'oneOf' de la propiedad de respuesta %s para el estado de respuesta %s
+response-property-one-of-removed: eliminado %s de la lista 'oneOf' de la propiedad de respuesta %s para el estado de respuesta %s
+request-body-all-of-added: agregado %s a la lista 'allOf' del cuerpo de solicitud
+request-body-all-of-removed: eliminado %s de la lista 'allOf' del cuerpo de solicitud
+request-property-all-of-added: agregado %s a la lista 'allOf' de la propiedad de solicitud %s
+request-property-all-of-removed: eliminado %s de la lista 'allOf' de la propiedad de solicitud %s
+response-body-all-of-added: agregado %s a la lista 'allOf' del cuerpo de respuesta para el estado de respuesta %s
+response-body-all-of-removed: eliminado %s de la lista 'allOf' del cuerpo de respuesta para el estado de respuesta %s
+response-property-all-of-added: agregado %s a la lista 'allOf' de la propiedad de respuesta %s para el estado de respuesta %s
+response-property-all-of-removed: eliminado %s de la lista 'allOf' de la propiedad de respuesta %s para el estado de respuesta %s
+response-body-discriminator-added: agregado discriminador de respuesta para el estado de respuesta %s
+response-property-discriminator-added: agregado discriminador a la propiedad de respuesta %s para el estado de respuesta %s
+response-body-discriminator-removed: eliminado discriminador de respuesta para el estado de respuesta %s
+response-property-discriminator-removed: eliminado discriminador de la propiedad de respuesta %s para el estado de respuesta %s
+response-body-discriminator-property-name-changed: nombre de propiedad del discriminador de respuesta cambiado de %s a %s para el estado de respuesta %s
+response-property-discriminator-property-name-changed: nombre de propiedad del discriminador de respuesta cambiado para la propiedad de respuesta %s de %s a %s para el estado de respuesta %s
+response-body-discriminator-mapping-added: agregadas claves de mapeo %s al discriminador de respuesta para el estado de respuesta %s
+response-property-discriminator-mapping-added: agregadas claves de mapeo del discriminador %s a la propiedad de respuesta %s para el estado de respuesta %s
+response-body-discriminator-mapping-deleted: eliminadas claves de mapeo %s del discriminador de respuesta para el estado de respuesta %s
+response-property-discriminator-mapping-deleted: eliminadas claves de mapeo del discriminador %s de la propiedad de respuesta %s para el estado de respuesta %s
+response-body-discriminator-mapping-changed: valor mapeado para la clave %s cambiado de %s a %s del discriminador de respuesta para el estado de respuesta %s
+response-property-discriminator-mapping-changed: valor mapeado para la clave del discriminador %s cambiado de %s a %s para la propiedad de respuesta %s para el estado de respuesta %s
+request-body-discriminator-added: agregado discriminador de solicitud
+request-property-discriminator-added: agregado discriminador a la propiedad de solicitud %s
+request-body-discriminator-removed: eliminado discriminador de solicitud
+request-property-discriminator-removed: eliminado discriminador de la propiedad de solicitud %s
+request-body-discriminator-property-name-changed: nombre de propiedad del discriminador de solicitud cambiado de %s a %s
+request-property-discriminator-property-name-changed: nombre de propiedad del discriminador de solicitud cambiado para la propiedad de solicitud %s de %s a %s
+request-body-discriminator-mapping-added: agregadas claves de mapeo %s al discriminador de solicitud
+request-property-discriminator-mapping-added: agregadas claves de mapeo del discriminador %s a la propiedad de solicitud %s
+request-body-discriminator-mapping-deleted: eliminadas claves de mapeo %s del discriminador de solicitud
+request-property-discriminator-mapping-deleted: eliminadas claves de mapeo del discriminador %s de la propiedad de solicitud %s
+request-body-discriminator-mapping-changed: valor mapeado para la clave %s cambiado de %s a %s del discriminador de solicitud
+request-property-discriminator-mapping-changed: valor mapeado para la clave del discriminador %s cambiado de %s a %s para la propiedad de solicitud %s
+request-required-property-became-read-only: la propiedad obligatoria de solicitud %s se volvió de solo lectura
+request-required-property-became-not-read-only: la propiedad obligatoria de solicitud %s dejó de ser de solo lectura
+request-optional-property-became-write-only: la propiedad opcional de solicitud %s se volvió de solo escritura
+request-optional-property-became-read-only: la propiedad opcional de solicitud %s se volvió de solo lectura
+request-optional-property-became-not-write-only: la propiedad opcional de solicitud %s dejó de ser de solo escritura
+request-optional-property-became-not-read-only: la propiedad opcional de solicitud %s dejó de ser de solo lectura
+request-required-property-became-write-only: la propiedad obligatoria de solicitud %s se volvió de solo escritura
+request-required-property-became-not-write-only: la propiedad obligatoria de solicitud %s dejó de ser de solo escritura
+new-required-request-default-parameter-to-existing-path: agregado el nuevo parámetro de solicitud obligatorio %s %s a todas las operaciones de la ruta
+new-optional-request-default-parameter-to-existing-path: agregado el nuevo parámetro de solicitud opcional %s %s a todas las operaciones de la ruta
+# descriptions
+request-body-added-required-description: cuerpo de solicitud obligatorio agregado
+request-body-added-optional-description: cuerpo de solicitud opcional agregado
+api-deprecated-sunset-parse-description: endpoint depreciado con fecha de expiración inválida
+api-deprecated-sunset-missing-description: endpoint depreciado sin fecha de expiración
+endpoint-added-description: endpoint agregado
+api-global-security-added-description: esquema de seguridad agregado en security
+api-global-security-removed-description: esquema de seguridad eliminado en security
+api-global-security-scope-added-description: ámbito agregado a un esquema de seguridad en security
+api-global-security-scope-removed-description: ámbito eliminado de un esquema de seguridad en security
+api-operation-id-added-description: ID de operación agregado a un endpoint
+api-operation-id-removed-description: ID de operación eliminado de un endpoint
+api-path-removed-before-sunset-description: ruta y endpoint eliminados antes de la fecha de expiración
+api-path-removed-without-deprecation-description: ruta y endpoint eliminados sin depreciación
+api-path-sunset-parse-description: ruta y endpoint eliminados con fecha de expiración inválida o faltante
+api-removed-before-sunset-description: endpoint eliminado antes de la fecha de expiración
+api-removed-without-deprecation-description: endpoint eliminado sin depreciación
+api-schema-removed-description: esquema eliminado de components/schemas
+api-security-added-description: requisitos de seguridad agregados al endpoint
+api-security-component-added-description: esquema de seguridad agregado en components/securitySchemes
+api-security-component-oauth-scope-added-description: ámbito agregado al flujo OAuth en components/securitySchemes
+api-security-component-oauth-scope-changed-description: ámbito modificado en el flujo OAuth en components/securitySchemes
+api-security-component-oauth-scope-removed-description: ámbito eliminado del flujo OAuth en components/securitySchemes
+api-security-component-oauth-token-url-changed-description: URL del token modificada en el flujo OAuth en components/securitySchemes
+api-security-component-oauth-url-changed-description: URL de autenticación modificada en el flujo OAuth en components/securitySchemes
+api-security-component-removed-description: esquema de seguridad eliminado en components/securitySchemes
+api-security-component-type-changed-description: tipo de esquema de seguridad modificado en components/securitySchemes
+api-security-removed-description: requisitos de seguridad eliminados del endpoint
+api-security-scope-added-description: ámbito agregado al esquema de seguridad de un endpoint
+api-security-scope-removed-description: ámbito eliminado del esquema de seguridad de un endpoint
+api-sunset-date-changed-too-small-description: fecha de expiración modificada no cumple los días mínimos requeridos de depreciación
+api-sunset-date-too-small-description: endpoint depreciado antes de los días mínimos requeridos de depreciación
+api-tag-added-description: etiqueta de endpoint agregada
+api-tag-removed-description: etiqueta de endpoint eliminada
+endpoint-deprecated-description: endpoint depreciado
+endpoint-reactivated-description: endpoint reactivado (depreciación establecida en falso)
+new-optional-request-default-parameter-to-existing-path-description: parámetro de solicitud opcional agregado a nivel de ruta
+new-optional-request-parameter-description: parámetro de solicitud opcional agregado al endpoint
+new-optional-request-property-description: propiedad opcional agregada a la solicitud
+new-request-path-parameter-description: nuevo parámetro de ruta de solicitud
+new-required-request-default-parameter-to-existing-path-description: parámetro de solicitud obligatorio agregado a nivel de ruta
+new-required-request-header-property-description: nuevo encabezado de solicitud obligatorio
+new-required-request-parameter-description: parámetro de solicitud obligatorio agregado al endpoint
+new-required-request-property-description: propiedad obligatoria agregada a la solicitud
+new-required-request-property-with-default-description: propiedad obligatoria con valor por defecto agregada a la solicitud
+optional-response-header-removed-description: encabezado de respuesta opcional eliminado
+api-invalid-stability-level-description: nivel de estabilidad inválido
+request-body-all-of-added-description: sub-esquema agregado a allOf en el cuerpo de solicitud
+request-body-all-of-removed-description: sub-esquema eliminado de allOf en el cuerpo de solicitud
+request-body-any-of-added-description: sub-esquema agregado a anyOf en el cuerpo de solicitud
+request-body-any-of-removed-description: sub-esquema eliminado de anyOf en el cuerpo de solicitud
+request-body-became-enum-description: cuerpo de solicitud restringido a enum
+request-body-became-not-nullable-description: null excluido como valor posible en el cuerpo de solicitud
+request-body-became-nullable-description: null agregado como valor posible en el cuerpo de solicitud
+request-body-became-optional-description: el cuerpo de solicitud se volvió opcional
+request-body-became-required-description: el cuerpo de solicitud se volvió obligatorio
+request-body-default-value-added-description: valor por defecto del cuerpo de solicitud establecido
+request-body-default-value-changed-description: valor por defecto del cuerpo de solicitud modificado
+request-body-default-value-removed-description: valor por defecto del cuerpo de solicitud removido
+request-body-discriminator-added-description: discriminador del cuerpo de solicitud agregado
+request-body-discriminator-mapping-added-description: mapeo del discriminador del cuerpo de solicitud agregado
+request-body-discriminator-mapping-changed-description: mapeo del discriminador del cuerpo de solicitud cambiado
+request-body-discriminator-mapping-deleted-description: mapeo del discriminador del cuerpo de solicitud eliminado
+request-body-discriminator-property-name-changed-description: nombre de propiedad del discriminador del cuerpo de solicitud cambiado
+request-body-discriminator-removed-description: discriminador del cuerpo de solicitud eliminado
+request-body-enum-value-removed-description: valor enum del cuerpo de solicitud eliminado
+request-body-max-decreased-description: máximo del cuerpo de solicitud disminuido
+request-body-max-increased-description: máximo del cuerpo de solicitud aumentado
+request-body-max-length-decreased-description: longitud máxima del cuerpo de solicitud disminuida
+request-body-max-length-increased-description: longitud máxima del cuerpo de solicitud aumentada
+request-body-max-length-set-description: longitud máxima del cuerpo de solicitud establecida
+request-body-max-set-description: máximo del cuerpo de solicitud establecido
+request-body-media-type-added-description: tipo de media del cuerpo de solicitud agregado
+request-body-media-type-removed-description: tipo de media del cuerpo de solicitud eliminado
+request-body-min-decreased-description: mínimo del cuerpo de solicitud disminuido
+request-body-min-increased-description: mínimo del cuerpo de solicitud aumentado
+request-body-min-items increased-description: elementos mínimos del cuerpo de solicitud aumentados
+request-body-min-items set-description: elementos mínimos del cuerpo de solicitud establecidos
+request-body-min-length-decreased-description: longitud mínima del cuerpo de solicitud disminuida
+request-body-min-length-increased-description: longitud mínima del cuerpo de solicitud aumentada
+request-body-min-set-description: mínimo del cuerpo de solicitud establecido
+request-body-one-of-added-description: sub-esquema agregado a oneOf en el cuerpo de solicitud
+request-body-one-of-removed-description: sub-esquema eliminado de oneOf en el cuerpo de solicitud
+request-body-type-changed-description: tipo del cuerpo de solicitud cambiado
+request-body-type-generalized-description: tipo del cuerpo de solicitud generalizado
+request-header-property-became-enum-description: propiedad del encabezado de solicitud restringida a enum
+request-header-property-became-required-description: propiedad del encabezado de solicitud se volvió obligatoria
+request-optional-property-became-not-read-only-description: propiedad opcional de solicitud dejó de ser de solo lectura
+request-optional-property-became-not-write-only-description: propiedad opcional de solicitud dejó de ser de solo escritura
+request-optional-property-became-read-only-description: propiedad opcional de solicitud se volvió de solo lectura
+request-optional-property-became-write-only-description: propiedad opcional de solicitud se volvió de solo escritura
+request-parameter-became-enum-description: parámetro de solicitud restringido a enum
+request-parameter-became-optional-description: parámetro de solicitud se volvió opcional
+request-parameter-became-required-description: parámetro de solicitud se volvió obligatorio
+request-parameter-default-value-added-description: valor por defecto del parámetro de solicitud establecido
+request-parameter-default-value-changed-description: valor por defecto del parámetro de solicitud cambiado
+request-parameter-default-value-removed-description:  valor por defecto del parámetro de solicitud removido
+request-parameter-enum-value-added-description: valor enum del parámetro de solicitud agregado
+request-parameter-enum-value-removed-description: valor enum del parámetro de solicitud eliminado
+request-parameter-max-decreased-description: máximo del parámetro de solicitud disminuido
+request-parameter-max-increased-description: máximo del parámetro de solicitud aumentado
+request-parameter-max-items-decreased-description: elementos máximos del parámetro de solicitud disminuidos
+request-parameter-max-items-increased-description: elementos máximos del parámetro de solicitud aumentados
+request-parameter-max-length-decreased-description: longitud máxima del parámetro de solicitud disminuida
+request-parameter-max-length-increased-description: longitud máxima del parámetro de solicitud aumentada
+request-parameter-max-length-set-description: longitud máxima del parámetro de solicitud establecida
+request-parameter-max-set-description: máximo del parámetro de solicitud establecido
+request-parameter-min-decreased-description: mínimo del parámetro de solicitud disminuido
+request-parameter-min-increased-description: mínimo del parámetro de solicitud aumentado
+request-parameter-min-items-decreased-description: elementos mínimos del parámetro de solicitud disminuidos
+request-parameter-min-items-increased-description: elementos mínimos del parámetro de solicitud aumentados
+request-parameter-min-items-set-description: elementos mínimos del parámetro de solicitud establecidos
+request-parameter-min-length-decreased-description: longitud mínima del parámetro de solicitud disminuida
+request-parameter-min-length-increased-description: longitud mínima del parámetro de solicitud aumentada
+request-parameter-min-set-description: mínimo del parámetro de solicitud establecido
+request-parameter-pattern-added-description: patrón del parámetro de solicitud establecido
+request-parameter-pattern-changed-description: patrón del parámetro de solicitud cambiado
+request-parameter-pattern-generalized-description: patrón del parámetro de solicitud generalizado
+request-parameter-pattern-removed-description: patrón del parámetro de solicitud removido
+request-parameter-removed-description: parámetro de solicitud eliminado
+request-parameter-type-changed-description: tipo del parámetro de solicitud cambiado
+request-parameter-type-generalized-description: tipo del parámetro de solicitud generalizado
+request-parameter-property-type-changed-description: tipo de propiedad del parámetro de solicitud cambiado
+request-parameter-property-type-generalized-description: tipo de propiedad del parámetro de solicitud generalizado
+request-parameter-property-type-specialized-description: tipo de propiedad del parámetro de solicitud especializado
+request-parameter-x-extensible-enum-value-removed-description: valor x-extensible-enum del parámetro de solicitud eliminado
+request-property-all-of-added-description: sub-esquema agregado a allOf en la propiedad de solicitud 
+request-property-all-of-removed-description: sub-esquema eliminado de allOf en la propiedad de solicitud 
+request-property-any-of-added-description: sub-esquema agregado a anyOf en la propiedad de solicitud
+request-property-any-of-removed-description: sub-esquema eliminado de anyOf en la propiedad de solicitud
+request-property-became-enum-description: propiedad de solicitud restringida a enum
+request-property-became-not-nullable-description: propiedad de solicitud se volvió no anulable
+request-property-became-nullable-description: propiedad de solicitud se volvió anulable
+request-property-became-optional-description: propiedad de solicitud se volvió opcional
+request-property-became-required-description: propiedad de solicitud se volvió obligatoria
+request-property-became-required-with-default-description: propiedad de solicitud con valor por defecto se volvió obligatoria
+request-property-default-value-added-description: valor por defecto de la propiedad de solicitud establecido
+request-property-default-value-changed-description: valor por defecto de la propiedad de solicitud cambiado
+request-property-default-value-removed-description: valor por defecto de la propiedad de solicitud removido
+request-property-discriminator-added-description: discriminador de la propiedad de solicitud agregado
+request-property-discriminator-mapping-added-description: mapeo del discriminador de la propiedad de solicitud agregado
+request-property-discriminator-mapping-changed-description: mapeo del discriminador de la propiedad de solicitud cambiado
+request-property-discriminator-mapping-deleted-description: mapeo del discriminador de la propiedad de solicitud eliminado
+request-property-discriminator-property-name-changed-description: nombre de propiedad del discriminador de la propiedad de solicitud cambiado
+request-property-discriminator-removed-description: discriminador de la propiedad de solicitud eliminado
+request-property-enum-value-added-description: valor enum de la propiedad de solicitud agregado
+request-property-enum-value-removed-description: valor enum de la propiedad de solicitud eliminado
+request-read-only-property-enum-value-removed-description: valor enum de la propiedad de solicitud de solo lectura eliminado
+request-property-max-decreased-description: máximo de la propiedad de solicitud disminuido
+request-read-only-property-max-decreased-description: máximo de la propiedad de solicitud de solo lectura disminuido
+request-property-max-increased-description: máximo de la propiedad de solicitud aumentado
+request-property-max-length-decreased-description: longitud máxima de la propiedad de solicitud disminuida
+request-read-only-property-max-length-decreased-description: longitud máxima de la propiedad de solicitud de solo lectura disminuida
+request-property-max-length-increased-description: longitud máxima de la propiedad de solicitud aumentada
+request-property-max-length-set-description: longitud máxima de la propiedad de solicitud establecida
+request-property-max-set-description: máximo de la propiedad de solicitud establecido
+request-property-min-decreased-description: mínimo de la propiedad de solicitud disminuido
+request-property-min-increased-description: mínimo de la propiedad de solicitud aumentado
+request-read-only-property-min-increased-description: mínimo de la propiedad de solicitud de solo lectura aumentado
+request-property-min-items-increased-description: elementos mínimos de la propiedad de solicitud aumentados
+request-property-min-items-set-description: elementos mínimos de la propiedad de solicitud establecidos
+request-property-min-length-decreased-description: longitud mínima de la propiedad de solicitud disminuida
+request-property-min-length-increased-description: longitud mínima de la propiedad de solicitud aumentada
+request-property-min-set-description: mínimo de la propiedad de solicitud establecido
+request-property-one-of-added-description: sub-esquema agregado a oneOf en la propiedad de solicitud
+request-property-one-of-removed-description: sub-esquema eliminado de oneOf en la propiedad de solicitud
+request-property-pattern-added-description: patrón de la propiedad de solicitud establecido
+request-property-pattern-changed-description: patrón de la propiedad de solicitud cambiado
+request-property-pattern-generalized-description: patrón de la propiedad de solicitud generalizado
+request-property-pattern-removed-description: patrón de la propiedad de solicitud removido
+request-property-removed-description: propiedad de solicitud eliminada
+request-property-type-changed-description: tipo de la propiedad de solicitud cambiado
+request-property-type-generalized-description: tipo de la propiedad de solicitud generalizado
+request-property-x-extensible-enum-value-removed-description: valor x-extensible-enum de la propiedad de solicitud eliminado
+request-required-property-became-not-read-only-description: propiedad obligatoria de solicitud dejó de ser de solo lectura
+request-required-property-became-not-write-only-description: propiedad obligatoria de solicitud dejó de ser de solo escritura
+request-required-property-became-read-only-description: propiedad obligatoria de solicitud se volvió de solo lectura
+request-required-property-became-write-only-description: propiedad obligatoria de solicitud se volvió de solo escritura
+required-response-header-removed-description: encabezado de respuesta obligatorio eliminado
+response-body-all-of-added-description: sub-esquema agregado a allOf en el cuerpo de respuesta
+response-body-all-of-removed-description: sub-esquema eliminado de allOf en el cuerpo de respuesta
+response-body-any-of-added-description: sub-esquema agregado a anyOf en el cuerpo de respuesta
+response-body-any-of-removed-description: sub-esquema eliminado de anyOf en el cuerpo de respuesta
+response-body-became-nullable-description: cuerpo de respuesta se volvió anulable
+response-body-default-value-added-description: valor por defecto del cuerpo de respuesta establecido
+response-body-default-value-changed-description: valor por defecto del cuerpo de respuesta cambiado
+response-body-default-value-removed-description: valor por defecto del cuerpo de respuesta removido
+response-body-discriminator-added-description: discriminador del cuerpo de respuesta agregado
+response-body-discriminator-mapping-added-description: mapeo del discriminador del cuerpo de respuesta agregado
+response-body-discriminator-mapping-changed-description: mapeo del discriminador del cuerpo de respuesta cambiado
+response-body-discriminator-mapping-deleted-description: mapeo del discriminador del cuerpo de respuesta eliminado
+response-body-discriminator-property-name-changed-description: nombre de propiedad del discriminador del cuerpo de respuesta cambiado
+response-body-discriminator-removed-description: discriminador del cuerpo de respuesta eliminado
+response-body-max-increased-description: máximo del cuerpo de respuesta aumentado
+response-body-max-length-increased-description: longitud máxima del cuerpo de respuesta aumentada
+response-body-max-length-unset-description: longitud máxima del cuerpo de respuesta removida
+response-body-min-decreased-description: mínimo del cuerpo de respuesta disminuido
+response-body-min-items-decreased-description: elementos mínimos del cuerpo de respuesta disminuidos
+response-body-min-items-unset-description: elementos mínimos del cuerpo de respuesta removidos
+response-body-min-length-decreased-description: longitud mínima del cuerpo de respuesta disminuida
+response-body-one-of-added-description: sub-esquema agregado a oneOf en el cuerpo de respuesta
+response-body-one-of-removed-description: sub-esquema eliminado de oneOf en el cuerpo de respuesta
+response-body-type-changed-description: tipo del cuerpo de respuesta cambiado
+response-header-became-optional-description: encabezado de respuesta se volvió opcional
+response-media-type-added-description: tipo de media de respuesta agregado
+response-media-type-removed-description: tipo de media de respuesta eliminado
+response-mediatype-enum-value-removed-description: valor enum del tipo de media de respuesta eliminado
+response-non-success-status-added-description: estado de respuesta no exitosa agregado
+response-non-success-status-removed-description: estado de respuesta no exitosa eliminado
+response-optional-property-added-description: propiedad opcional de respuesta agregada
+response-optional-property-became-not-read-only-description: propiedad opcional de respuesta dejó de ser de solo lectura
+response-optional-property-became-not-write-only-description: propiedad opcional de respuesta dejó de ser de solo escritura
+response-optional-property-became-read-only-description: propiedad opcional de respuesta se volvió de solo lectura
+response-optional-property-became-write-only-description: propiedad opcional de respuesta se volvió de solo escritura
+response-optional-property-removed-description: propiedad opcional de respuesta eliminada
+response-optional-write-only-property-added-description: propiedad opcional de solo escritura de respuesta agregada
+response-optional-write-only-property-removed-description: propiedad opcional de solo escritura de respuesta eliminada
+response-property-all-of-added-description: sub-esquema agregado a allOf en la propiedad de respuesta
+response-property-all-of-removed-description: sub-esquema eliminado de allOf en la propiedad de respuesta
+response-property-any-of-added-description: sub-esquema agregado a anyOf en la propiedad de respuesta
+response-property-any-of-removed-description: sub-esquema eliminado de anyOf en la propiedad de respuesta
+response-property-became-nullable-description: propiedad de respuesta se volvió anulable
+response-property-became-optional-description: propiedad de respuesta se volvió opcional
+response-property-became-required-description: propiedad de respuesta se volvió obligatoria
+response-property-default-value-added-description: valor por defecto de la propiedad de respuesta establecido
+response-property-default-value-changed-description: valor por defecto de la propiedad de respuesta cambiado
+response-property-default-value-removed-description: valor por defecto de la propiedad de respuesta removido
+response-property-discriminator-added-description: discriminador de la propiedad de respuesta agregado
+response-property-discriminator-mapping-added-description: mapeo del discriminador de la propiedad de respuesta agregado
+response-property-discriminator-mapping-changed-description: mapeo del discriminador de la propiedad de respuesta cambiado
+response-property-discriminator-mapping-deleted-description: mapeo del discriminador de la propiedad de respuesta eliminado
+response-property-discriminator-property-name-changed-description: nombre de propiedad del discriminador de la propiedad de respuesta cambiado
+response-property-discriminator-removed-description: discriminador de la propiedad de respuesta eliminado
+response-property-enum-value-added-description: valor enum de la propiedad de respuesta agregado
+response-property-enum-value-removed-description: valor enum de la propiedad de respuesta eliminado
+response-property-max-increased-description: máximo de la propiedad de respuesta aumentado
+response-property-max-length-increased-description: longitud máxima de la propiedad de respuesta aumentada
+response-property-max-length-unset-description: longitud máxima de la propiedad de respuesta removida
+response-property-min-decreased-description: mínimo de la propiedad de respuesta disminuido
+response-property-min-items-decreased-description: elementos mínimos de la propiedad de respuesta disminuidos
+response-property-min-items-unset-description: elementos mínimos de la propiedad de respuesta removidos
+response-property-min-length-decreased-description: longitud mínima de la propiedad de respuesta disminuida
+response-property-one-of-added-description: sub-esquema agregado a oneOf en la propiedad de respuesta
+response-property-one-of-removed-description: sub-esquema eliminado de oneOf en la propiedad de respuesta
+response-property-pattern-added-description: patrón de la propiedad de respuesta establecido
+response-property-pattern-changed-description: patrón de la propiedad de respuesta cambiado
+response-property-pattern-removed-description: patrón de la propiedad de respuesta removido
+response-property-type-changed-description: tipo de la propiedad de respuesta cambiado
+response-required-property-added-description: propiedad obligatoria de respuesta agregada
+response-required-property-became-not-read-only-description: propiedad obligatoria de respuesta dejó de ser de solo lectura
+response-required-property-became-not-write-only-description: propiedad obligatoria de respuesta dejó de ser de solo escritura
+response-required-property-became-read-only-description: propiedad obligatoria de respuesta se volvió de solo lectura
+response-required-property-became-write-only-description: propiedad obligatoria de respuesta se volvió de solo escritura
+response-required-property-removed-description: propiedad obligatoria de respuesta eliminada
+response-required-write-only-property-added-description: propiedad obligatoria de solo escritura de respuesta agregada
+response-required-write-only-property-removed-description: propiedad obligatoria de solo escritura de respuesta eliminada
+response-success-status-added-description: estado de respuesta exitosa agregado
+response-success-status-removed-description: estado de respuesta exitosa eliminado
+response-write-only-property-became-optional-description: propiedad de solo escritura de respuesta se volvió opcional
+response-write-only-property-became-required-description: propiedad de solo escritura de respuesta se volvió obligatoria
+response-write-only-property-enum-value-added-description: valor enum de la propiedad de solo escritura de respuesta agregado
+sunset-deleted-description: fecha de expiración eliminada
+request-body-list-of-types-widened: "lista de tipos del cuerpo de solicitud fue ampliada agregando tipos %s al tipo de media %s"
+request-body-list-of-types-narrowed: "lista de tipos del cuerpo de solicitud fue restringida eliminando tipos %s del tipo de media %s"
+request-property-list-of-types-widened: "lista de tipos de la propiedad de solicitud %s fue ampliada agregando tipos %s al tipo de media %s"
+request-property-list-of-types-narrowed: "lista de tipos de la propiedad de solicitud %s fue restringida eliminando tipos %s del tipo de media %s"
+response-body-list-of-types-widened: "lista de tipos del cuerpo de respuesta fue ampliada agregando tipos %s al tipo de media %s de la respuesta %s"
+response-body-list-of-types-narrowed: "lista de tipos del cuerpo de respuesta fue restringida eliminando tipos %s del tipo de media %s de la respuesta %s"
+response-property-list-of-types-widened: "lista de tipos de la propiedad de respuesta %s fue ampliada agregando tipos %s al tipo de media %s de la respuesta %s"
+response-property-list-of-types-narrowed: "lista de tipos de la propiedad de respuesta %s fue restringida eliminando tipos %s del tipo de media %s de la respuesta %s"
+request-parameter-list-of-types-widened: "lista de tipos del parámetro de solicitud %s %s fue ampliada agregando tipos %s"
+request-parameter-list-of-types-narrowed: "lista de tipos del parámetro de solicitud %s %s fue restringida eliminando tipos %s"
+request-parameter-property-list-of-types-widened: "lista de tipos de la propiedad %s del parámetro de solicitud %s %s fue ampliada agregando tipos %s"
+request-parameter-property-list-of-types-narrowed: "lista de tipos de la propiedad %s del parámetro de solicitud %s %s fue restringida eliminando tipos %s"
