@@ -59,10 +59,10 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
 - Output reports in YAML, JSON, Text, Markdown, HTML, JUnit XML or the [github actions annotation format](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-a-warning-message)
 - [Customize HTML and Markdown changelog reports](USAGE_EXAMPLES.md#openapi-changelog-with-custom-template)
-- Compare local files or remote files over http/s
+- Compare local specs or remote specs over http/s
 - Compare specs in YAML or JSON format
 - [Compare two collections of specs](COMPOSED.md)
-- [Deprecating APIs and Parameters](DEPRECATION.md)
+- [Deprecate APIs and Parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md)
 - [Multiple versions of the same endpoint](MATCHING-ENDPOINTS.md#duplicate-endpoints)
 - [Merge allOf schemas](ALLOF.md)
@@ -70,16 +70,16 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Case-insensitive header comparison](HEADER-DIFF.md)
 - [Path prefix modification](PATH-PREFIX.md)
 - [Path parameter renaming](PATH-PARAM-RENAME.md)
-- [Excluding certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes)
-- [Tracking changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
-- [Filtering endpoints](FILTERING-ENDPOINTS.md)
-- [Extending breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
+- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes)
+- [Track changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
+- [Filter endpoints](FILTERING-ENDPOINTS.md)
+- [Extend breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
 - Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br
-- [Customize with configuration files](CONFIG-FILES.md)
+- [Run with configuration file](CONFIG-FILES.md)
 - [Run from Docker](DOCKER.md)
 - [Integrate in GitHub](https://github.com/oasdiff/github-demo/tree/main)
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action)
-- [Cloud Service](OASDIFF-SERVICE.md)
+- [Run as a Service](OASDIFF-SERVICE.md)
 - [OpenAPI Sync: Get notified when an API provider breaks the API](https://github.com/oasdiff/sync/)
 - [Embed in your go program](GO.md)
 
