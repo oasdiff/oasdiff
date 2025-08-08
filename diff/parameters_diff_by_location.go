@@ -107,6 +107,9 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 
 	result := newParametersDiffByLocation()
 
+	// Track which exploded parameters have been matched to avoid multiple matches
+	explodedParamsMatched := make(map[*openapi3.Parameter]bool)
+
 	for _, paramRef1 := range params1 {
 		param1, err := derefParam(paramRef1)
 		if err != nil {
@@ -119,13 +122,30 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 		}
 
 		if param2 != nil {
-			diff, err := getParameterDiff(config, state, param1, param2)
-			if err != nil {
-				return nil, err
+			// Check if this is an exploded parameter match
+			isExplodedMatch := false
+			if isExplodedObjectParam(param2) {
+				isEquivalent, err := isParamInExplodedObject(param1, param2)
+				if err != nil {
+					return nil, err
+				}
+				if isEquivalent {
+					isExplodedMatch = true
+					// Mark this exploded parameter as matched
+					explodedParamsMatched[param2] = true
+				}
 			}
 
-			if !diff.Empty() {
-				result.addModifiedParam(param1, diff)
+			// Skip diff generation for exploded matches to avoid type change warnings
+			if !isExplodedMatch {
+				diff, err := getParameterDiff(config, state, param1, param2)
+				if err != nil {
+					return nil, err
+				}
+
+				if !diff.Empty() {
+					result.addModifiedParam(param1, diff)
+				}
 			}
 		} else {
 			result.addDeletedParam(param1)
@@ -144,6 +164,10 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 			return nil, err
 		}
 		if param == nil {
+			// Don't flag exploded parameters as added if they were matched to simple parameters
+			if explodedParamsMatched[param2] {
+				continue
+			}
 			result.addAddedParam(param2)
 		}
 	}
@@ -192,7 +216,13 @@ func equalParams(param1 *openapi3.Parameter, param2 *openapi3.Parameter, pathPar
 	}
 
 	if param1.In != openapi3.ParameterInPath {
-		return param1.Name == param2.Name, nil
+		// Simple name comparison for non-path parameters
+		if param1.Name == param2.Name {
+			return true, nil
+		}
+
+		// Check for semantic equivalence with exploded parameters
+		return isSemanticEquivalent(param1, param2)
 	}
 
 	return pathParamsMap.find(param1.Name, param2.Name), nil
@@ -223,4 +253,55 @@ func (diff *ParametersDiffByLocation) Patch(parameters openapi3.Parameters) erro
 	}
 
 	return nil
+}
+
+// isSemanticEquivalent checks if two parameters are semantically equivalent,
+// considering the case where separate parameters are consolidated into an exploded object parameter
+func isSemanticEquivalent(param1, param2 *openapi3.Parameter) (bool, error) {
+	// Check if param1 is a simple parameter and param2 is an exploded object
+	if isExplodedObjectParam(param2) {
+		return isParamInExplodedObject(param1, param2)
+	}
+
+	// Check if param2 is a simple parameter and param1 is an exploded object
+	if isExplodedObjectParam(param1) {
+		return isParamInExplodedObject(param2, param1)
+	}
+
+	return false, nil
+}
+
+// isExplodedObjectParam checks if a parameter is an exploded object parameter
+// (style=form, explode=true, object schema)
+func isExplodedObjectParam(param *openapi3.Parameter) bool {
+	if param == nil || param.Schema == nil || param.Schema.Value == nil {
+		return false
+	}
+
+	// Must be explode=true and style=form (or default)
+	explode := param.Explode != nil && *param.Explode
+	isFormStyle := param.Style == "" || param.Style == "form" // form is default for query params
+
+	// Must have object schema with properties
+	schema := param.Schema.Value
+	isObjectWithProps := schema.Type != nil && len(*schema.Type) == 1 && (*schema.Type)[0] == "object" && len(schema.Properties) > 0
+
+	return explode && isFormStyle && isObjectWithProps
+}
+
+// isParamInExplodedObject checks if a simple parameter corresponds to a property
+// in an exploded object parameter
+func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) (bool, error) {
+	if !isExplodedObjectParam(explodedParam) {
+		return false, nil
+	}
+
+	schema := explodedParam.Schema.Value
+	if schema == nil || schema.Properties == nil {
+		return false, nil
+	}
+
+	// Check if the simple parameter's name matches a property in the object
+	_, exists := schema.Properties[simpleParam.Name]
+	return exists, nil
 }

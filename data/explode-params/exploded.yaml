@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      parameters:
+        - name: PageParams
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: object
+            properties:
+              PageNumber:
+                type: integer
+              PageSize:
+                type: integer
+      responses:
+        '200':
+          description: OK
