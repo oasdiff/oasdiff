@@ -571,3 +571,8 @@ request-parameter-list-of-types-widened: "lista de tipos do parâmetro %s %s da 
 request-parameter-list-of-types-narrowed: "lista de tipos do parâmetro %s %s da requisição foi restringida removendo tipos %s"
 request-parameter-property-list-of-types-widened: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi expandida adicionando tipos %s"
 request-parameter-property-list-of-types-narrowed: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi restringida removendo tipos %s"
+response-media-type-name-changed: o tipo de mídia %s foi alterado para %s para o status de resposta %s
+response-media-type-name-generalized: o tipo de mídia %s foi alterado para um tipo de mídia mais geral %s para o status de resposta %s
+response-media-type-name-specialized: o tipo de mídia %s foi alterado para um tipo de mídia mais específico %s para o status de resposta %s
+request-body-removed: removido o corpo da requisição
+request-body-removed-description: corpo da requisição removido
