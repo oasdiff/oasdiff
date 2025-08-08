@@ -5,8 +5,9 @@ const (
 	LangEn      = "en"
 	LangRu      = "ru"
 	LangPtBr    = "pt-br"
+	LangEs      = "es"
 )
 
 func GetSupportedLanguages() []string {
-	return []string{LangEn, LangRu, LangPtBr}
+	return []string{LangEn, LangRu, LangPtBr, LangEs}
 }

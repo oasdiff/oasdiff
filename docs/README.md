@@ -74,7 +74,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Track changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
 - [Filter endpoints](FILTERING-ENDPOINTS.md)
 - [Extend breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
-- Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br
+- Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br, es
 - [Run with configuration file](CONFIG-FILES.md)
 - [Run from Docker](DOCKER.md)
 - [Integrate in GitHub](https://github.com/oasdiff/github-demo/tree/main)
