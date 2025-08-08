@@ -298,3 +298,281 @@ request-parameter-list-of-types-widened: "список типов %s парам�
 request-parameter-list-of-types-narrowed: "список типов %s параметра запроса %s был сужен удалением типов %s"
 request-parameter-property-list-of-types-widened: "список типов свойства %s %s параметра запроса %s был расширен добавлением типов %s"
 request-parameter-property-list-of-types-narrowed: "список типов свойства %s %s параметра запроса %s был сужен удалением типов %s"
+# descriptions - начинаем добавление отсутствующих описаний
+api-deprecated-sunset-missing-description: эндпоинт устарел без даты прекращения действия
+api-deprecated-sunset-parse-description: эндпоинт устарел с неверной датой прекращения действия
+api-global-security-added-description: схема безопасности добавлена в security
+api-global-security-removed-description: схема безопасности удалена из security
+api-global-security-scope-added-description: разрешение добавлено к схеме безопасности в security
+api-global-security-scope-removed-description: разрешение удалено из схемы безопасности в security
+api-invalid-stability-level-description: неверный уровень стабильности
+api-operation-id-added-description: идентификатор операции добавлен к эндпоинту
+api-operation-id-removed-description: идентификатор операции удален из эндпоинта
+api-path-removed-before-sunset-description: путь и эндпоинт удалены до даты прекращения действия
+api-path-removed-without-deprecation-description: путь и эндпоинт удалены без объявления устаревшими
+api-path-sunset-parse-description: путь и эндпоинт удалены с неверной или отсутствующей датой прекращения действия
+api-removed-before-sunset-description: эндпоинт удален до даты прекращения действия
+api-removed-without-deprecation-description: эндпоинт удален без объявления устаревшим
+api-schema-removed-description: схема удалена из components/schemas
+api-security-added-description: требования безопасности добавлены к эндпоинту
+api-security-component-added-description: схема безопасности добавлена в components/securitySchemes
+api-security-component-oauth-scope-added-description: разрешение добавлено к OAuth потоку в components/securitySchemes
+api-security-component-oauth-scope-changed-description: разрешение изменено в OAuth потоке в components/securitySchemes
+api-security-component-oauth-scope-removed-description: разрешение удалено из OAuth потока в components/securitySchemes
+api-security-component-oauth-token-url-changed-description: URL токена изменен в OAuth потоке в components/securitySchemes
+api-security-component-oauth-url-changed-description: URL аутентификации изменен в OAuth потоке в components/securitySchemes
+api-security-component-removed-description: схема безопасности удалена в components/securitySchemes
+api-security-component-type-changed-description: тип схемы безопасности изменен в components/securitySchemes
+api-security-removed-description: требования безопасности удалены из эндпоинта
+api-security-scope-added-description: разрешение добавлено к схеме безопасности эндпоинта
+api-security-scope-removed-description: разрешение удалено из схемы безопасности эндпоинта
+api-stability-decreased-description: уровень стабильности эндпоинта уменьшен
+api-sunset-date-changed-too-small-description: измененная дата прекращения действия не соответствует минимальному требуемому количеству дней устаревания
+api-sunset-date-too-small-description: эндпоинт устарел до минимального требуемого количества дней устаревания
+api-tag-added-description: тег эндпоинта добавлен
+api-tag-removed-description: тег эндпоинта удален
+endpoint-added-description: эндпоинт добавлен
+endpoint-deprecated-description: эндпоинт объявлен устаревшим
+endpoint-reactivated-description: эндпоинт реактивирован (устаревание установлено в false)
+new-optional-request-default-parameter-to-existing-path-description: необязательный параметр запроса добавлен на уровне пути
+new-optional-request-parameter-description: необязательный параметр запроса добавлен к эндпоинту
+new-optional-request-property-description: необязательное свойство добавлено к запросу
+new-request-path-parameter-description: новый параметр пути запроса
+new-required-request-default-parameter-to-existing-path-description: обязательный параметр запроса добавлен на уровне пути
+new-required-request-header-property-description: новый обязательный заголовок запроса
+new-required-request-parameter-description: обязательный параметр запроса добавлен к эндпоинту
+new-required-request-property-description: обязательное свойство добавлено к запросу
+new-required-request-property-with-default-description: обязательное свойство со значением по умолчанию добавлено к запросу
+optional-response-header-removed-description: необязательный заголовок ответа удален
+request-body-added-optional-description: добавлено необязательное тело запроса
+request-body-added-required-description: добавлено обязательное тело запроса
+request-body-all-of-added-description: подсхема добавлена к allOf в теле запроса
+request-body-all-of-removed-description: подсхема удалена из allOf в теле запроса
+request-body-any-of-added-description: подсхема добавлена к anyOf в теле запроса
+request-body-any-of-removed-description: подсхема удалена из anyOf в теле запроса
+request-body-became-enum-description: тело запроса ограничено enum
+request-body-became-not-nullable-description: null исключен как возможное значение в теле запроса
+request-body-became-nullable-description: null добавлен как возможное значение в теле запроса
+request-body-became-optional-description: тело запроса стало необязательным
+request-body-became-required-description: тело запроса стало обязательным
+request-body-default-value-added-description: установлено значение по умолчанию тела запроса
+request-body-default-value-changed-description: изменено значение по умолчанию тела запроса
+request-body-default-value-removed-description: удалено значение по умолчанию тела запроса
+request-body-discriminator-added-description: добавлен дискриминатор тела запроса
+request-body-discriminator-mapping-added-description: добавлено сопоставление дискриминатора тела запроса
+request-body-discriminator-mapping-changed-description: изменено сопоставление дискриминатора тела запроса
+request-body-discriminator-mapping-deleted-description: удалено сопоставление дискриминатора тела запроса
+request-body-discriminator-property-name-changed-description: изменено имя свойства дискриминатора тела запроса
+request-body-discriminator-removed-description: удален дискриминатор тела запроса
+request-body-enum-value-removed-description: удалено enum значение тела запроса
+request-body-max-decreased-description: уменьшено максимальное значение тела запроса
+request-body-max-increased-description: увеличено максимальное значение тела запроса
+request-body-max-length-decreased-description: уменьшена максимальная длина тела запроса
+request-body-max-length-increased-description: увеличена максимальная длина тела запроса
+request-body-max-length-set-description: установлена максимальная длина тела запроса
+request-body-max-set-description: установлено максимальное значение тела запроса
+request-body-media-type-added-description: добавлен медиа-тип тела запроса
+request-body-media-type-removed-description: удален медиа-тип тела запроса
+request-body-min-decreased-description: уменьшено минимальное значение тела запроса
+request-body-min-increased-description: увеличено минимальное значение тела запроса
+request-body-min-items-increased-description: увеличено минимальное количество элементов тела запроса
+request-body-min-items-set-description: установлено минимальное количество элементов тела запроса
+request-body-min-length-decreased-description: уменьшена минимальная длина тела запроса
+request-body-min-length-increased-description: увеличена минимальная длина тела запроса
+request-body-min-set-description: установлено минимальное значение тела запроса
+request-body-one-of-added-description: подсхема добавлена к oneOf в теле запроса
+request-body-one-of-removed-description: подсхема удалена из oneOf в теле запроса
+request-body-removed-description: удалено тело запроса
+request-body-type-changed-description: изменен тип тела запроса
+request-body-type-generalized-description: обобщен тип тела запроса
+request-header-property-became-enum-description: свойство заголовка запроса ограничено enum
+request-header-property-became-required-description: свойство заголовка запроса стало обязательным
+request-optional-property-became-not-read-only-description: необязательное свойство запроса перестало быть только для чтения
+request-optional-property-became-not-write-only-description: необязательное свойство запроса перестало быть только для записи
+request-optional-property-became-read-only-description: необязательное свойство запроса стало только для чтения
+request-optional-property-became-write-only-description: необязательное свойство запроса стало только для записи
+request-parameter-became-enum-description: параметр запроса ограничен enum
+request-parameter-became-optional-description: параметр запроса стал необязательным
+request-parameter-became-required-description: параметр запроса стал обязательным
+request-parameter-default-value-added-description: установлено значение по умолчанию параметра запроса
+request-parameter-default-value-changed-description: изменено значение по умолчанию параметра запроса
+request-parameter-default-value-removed-description: удалено значение по умолчанию параметра запроса
+request-parameter-deprecated-sunset-missing: "%s параметр запроса %s объявлен устаревшим без даты прекращения действия"
+request-parameter-deprecated: "%s параметр запроса %s объявлен устаревшим"
+request-parameter-enum-value-added-description: добавлено enum значение параметра запроса
+request-parameter-enum-value-removed-description: удалено enum значение параметра запроса
+request-parameter-max-decreased-description: уменьшено максимальное значение параметра запроса
+request-parameter-max-increased-description: увеличено максимальное значение параметра запроса
+request-parameter-max-items-decreased-description: уменьшено максимальное количество элементов параметра запроса
+request-parameter-max-items-increased-description: увеличено максимальное количество элементов параметра запроса
+request-parameter-max-length-decreased-description: уменьшена максимальная длина параметра запроса
+request-parameter-max-length-increased-description: увеличена максимальная длина параметра запроса
+request-parameter-max-length-set-description: установлена максимальная длина параметра запроса
+request-parameter-max-set-description: установлено максимальное значение параметра запроса
+request-parameter-min-decreased-description: уменьшено минимальное значение параметра запроса
+request-parameter-min-increased-description: увеличено минимальное значение параметра запроса
+request-parameter-min-items-decreased-description: уменьшено минимальное количество элементов параметра запроса
+request-parameter-min-items-increased-description: увеличено минимальное количество элементов параметра запроса
+request-parameter-min-items-set-description: установлено минимальное количество элементов параметра запроса
+request-parameter-min-length-decreased-description: уменьшена минимальная длина параметра запроса
+request-parameter-min-length-increased-description: увеличена минимальная длина параметра запроса
+request-parameter-min-set-description: установлено минимальное значение параметра запроса
+request-parameter-pattern-added-description: установлен паттерн параметра запроса
+request-parameter-pattern-changed-description: изменен паттерн параметра запроса
+request-parameter-pattern-generalized-description: обобщен паттерн параметра запроса
+request-parameter-pattern-removed-description: удален паттерн параметра запроса
+request-parameter-property-type-changed-description: изменен тип свойства параметра запроса
+request-parameter-property-type-generalized-description: обобщен тип свойства параметра запроса
+request-parameter-property-type-specialized-description: специализирован тип свойства параметра запроса
+request-parameter-reactivated: "%s параметр запроса %s был реактивирован"
+request-parameter-removed-before-sunset: удален %s параметр запроса %s до даты прекращения действия %s
+request-parameter-removed-comment: "Это предупреждение, поскольку некоторые приложения могут возвращать ошибку при получении неожиданного параметра. Рекомендуется сначала объявить параметр устаревшим."
+request-parameter-removed-description: удален параметр запроса
+request-parameter-removed-with-deprecation: удален %s параметр запроса %s с объявлением устаревшим
+request-parameter-sunset-date-changed-too-small: дата прекращения действия %s параметра запроса %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента
+request-parameter-sunset-date-too-small: "дата прекращения действия %s параметра запроса %s %s слишком ранняя, должно быть минимум %s дней от текущего момента"
+request-parameter-sunset-deleted: "дата прекращения действия %s параметра запроса %s удалена, но deprecated=true сохранено"
+request-parameter-sunset-parse: "не удалось проанализировать дату прекращения действия для %s параметра запроса %s: %v"
+request-parameter-type-changed-description: изменен тип параметра запроса
+request-parameter-type-generalized-description: обобщен тип параметра запроса
+request-parameter-x-extensible-enum-value-removed-description: удалено x-extensible-enum значение параметра запроса
+request-property-all-of-added-description: подсхема добавлена к allOf в свойстве запроса
+request-property-all-of-removed-description: подсхема удалена из allOf в свойстве запроса
+request-property-any-of-added-description: подсхема добавлена к anyOf в свойстве запроса
+request-property-any-of-removed-description: подсхема удалена из anyOf в свойстве запроса
+request-property-became-enum-description: свойство запроса ограничено enum
+request-property-became-not-nullable-description: свойство запроса стало не обнуляемым
+request-property-became-nullable-description: свойство запроса стало обнуляемым
+request-property-became-optional-description: свойство запроса стало необязательным
+request-property-became-required-description: свойство запроса стало обязательным
+request-property-became-required-with-default-description: свойство запроса со значением по умолчанию стало обязательным
+request-property-default-value-added-description: установлено значение по умолчанию свойства запроса
+request-property-default-value-changed-description: изменено значение по умолчанию свойства запроса
+request-property-default-value-removed-description: удалено значение по умолчанию свойства запроса
+request-property-discriminator-added-description: добавлен дискриминатор свойства запроса
+request-property-discriminator-mapping-added-description: добавлено сопоставление дискриминатора свойства запроса
+request-property-discriminator-mapping-changed-description: изменено сопоставление дискриминатора свойства запроса
+request-property-discriminator-mapping-deleted-description: удалено сопоставление дискриминатора свойства запроса
+request-property-discriminator-property-name-changed-description: изменено имя свойства дискриминатора свойства запроса
+request-property-discriminator-removed-description: удален дискриминатор свойства запроса
+request-property-enum-value-added-description: добавлено enum значение свойства запроса
+request-property-enum-value-removed-description: удалено enum значение свойства запроса
+request-property-max-decreased-description: уменьшено максимальное значение свойства запроса
+request-property-max-increased-description: увеличено максимальное значение свойства запроса
+request-property-max-length-decreased-description: уменьшена максимальная длина свойства запроса
+request-property-max-length-increased-description: увеличена максимальная длина свойства запроса
+request-property-max-length-set-description: установлена максимальная длина свойства запроса
+request-property-max-set-description: установлено максимальное значение свойства запроса
+request-property-min-decreased-description: уменьшено минимальное значение свойства запроса
+request-property-min-increased-description: увеличено минимальное значение свойства запроса
+request-property-min-items-increased-description: увеличено минимальное количество элементов свойства запроса
+request-property-min-items-set-description: установлено минимальное количество элементов свойства запроса
+request-property-min-length-decreased-description: уменьшена минимальная длина свойства запроса
+request-property-min-length-increased-description: увеличена минимальная длина свойства запроса
+request-property-min-set-description: установлено минимальное значение свойства запроса
+request-property-one-of-added-description: подсхема добавлена к oneOf в свойстве запроса
+request-property-one-of-removed-description: подсхема удалена из oneOf в свойстве запроса
+request-property-pattern-added-description: установлен паттерн свойства запроса
+request-property-pattern-changed-description: изменен паттерн свойства запроса
+request-property-pattern-generalized-description: обобщен паттерн свойства запроса
+request-property-pattern-removed-description: удален паттерн свойства запроса
+request-property-removed-description: удалено свойство запроса
+request-property-type-changed-description: изменен тип свойства запроса
+request-property-type-generalized-description: обобщен тип свойства запроса
+request-property-x-extensible-enum-value-removed-description: удалено x-extensible-enum значение свойства запроса
+request-read-only-property-enum-value-removed-description: удалено enum значение свойства запроса только для чтения
+request-read-only-property-max-decreased-description: уменьшено максимальное значение свойства запроса только для чтения
+request-read-only-property-max-length-decreased-description: уменьшена максимальная длина свойства запроса только для чтения
+request-read-only-property-min-increased-description: увеличено минимальное значение свойства запроса только для чтения
+request-required-property-became-not-read-only-description: обязательное свойство запроса перестало быть только для чтения
+request-required-property-became-not-write-only-description: обязательное свойство запроса перестало быть только для записи
+request-required-property-became-read-only-description: обязательное свойство запроса стало только для чтения
+request-required-property-became-write-only-description: обязательное свойство запроса стало только для записи
+required-response-header-removed-description: удален обязательный заголовок ответа
+response-body-all-of-added-description: подсхема добавлена к allOf в теле ответа
+response-body-all-of-removed-description: подсхема удалена из allOf в теле ответа
+response-body-any-of-added-description: подсхема добавлена к anyOf в теле ответа
+response-body-any-of-removed-description: подсхема удалена из anyOf в теле ответа
+response-body-became-nullable-description: тело ответа стало обнуляемым
+response-body-default-value-added-description: установлено значение по умолчанию тела ответа
+response-body-default-value-changed-description: изменено значение по умолчанию тела ответа
+response-body-default-value-removed-description: удалено значение по умолчанию тела ответа
+response-body-discriminator-added-description: добавлен дискриминатор тела ответа
+response-body-discriminator-mapping-added-description: добавлено сопоставление дискриминатора тела ответа
+response-body-discriminator-mapping-changed-description: изменено сопоставление дискриминатора тела ответа
+response-body-discriminator-mapping-deleted-description: удалено сопоставление дискриминатора тела ответа
+response-body-discriminator-property-name-changed-description: изменено имя свойства дискриминатора тела ответа
+response-body-discriminator-removed-description: удален дискриминатор тела ответа
+response-body-max-increased-description: увеличено максимальное значение тела ответа
+response-body-max-length-increased-description: увеличена максимальная длина тела ответа
+response-body-max-length-unset-description: удалена максимальная длина тела ответа
+response-body-min-decreased-description: уменьшено минимальное значение тела ответа
+response-body-min-items-decreased-description: уменьшено минимальное количество элементов тела ответа
+response-body-min-items-unset-description: удалено минимальное количество элементов тела ответа
+response-body-min-length-decreased-description: уменьшена минимальная длина тела ответа
+response-body-one-of-added-description: подсхема добавлена к oneOf в теле ответа
+response-body-one-of-removed-description: подсхема удалена из oneOf в теле ответа
+response-body-type-changed-description: изменен тип тела ответа
+response-header-became-optional-description: заголовок ответа стал необязательным
+response-media-type-added-description: добавлен медиа-тип ответа
+response-media-type-name-changed: медиа-тип %s изменен на %s для ответа со статусом %s
+response-media-type-name-generalized: медиа-тип %s изменен на более общий медиа-тип %s для ответа со статусом %s
+response-media-type-name-specialized: медиа-тип %s изменен на более специфичный медиа-тип %s для ответа со статусом %s
+response-media-type-removed-description: удален медиа-тип ответа
+response-mediatype-enum-value-removed-description: удалено enum значение медиа-типа ответа
+response-non-success-status-added-description: добавлен статус неуспешного ответа
+response-non-success-status-removed-description: удален статус неуспешного ответа
+response-optional-property-added-description: добавлено необязательное свойство ответа
+response-optional-property-became-not-read-only-description: необязательное свойство ответа перестало быть только для чтения
+response-optional-property-became-not-write-only-description: необязательное свойство ответа перестало быть только для записи
+response-optional-property-became-read-only-description: необязательное свойство ответа стало только для чтения
+response-optional-property-became-write-only-description: необязательное свойство ответа стало только для записи
+response-optional-property-removed-description: удалено необязательное свойство ответа
+response-optional-write-only-property-added-description: добавлено необязательное свойство ответа только для записи
+response-optional-write-only-property-removed-description: удалено необязательное свойство ответа только для записи
+response-property-all-of-added-description: подсхема добавлена к allOf в свойстве ответа
+response-property-all-of-removed-description: подсхема удалена из allOf в свойстве ответа
+response-property-any-of-added-description: подсхема добавлена к anyOf в свойстве ответа
+response-property-any-of-removed-description: подсхема удалена из anyOf в свойстве ответа
+response-property-became-nullable-description: свойство ответа стало обнуляемым
+response-property-became-optional-description: свойство ответа стало необязательным
+response-property-became-required-description: свойство ответа стало обязательным
+response-property-default-value-added-description: установлено значение по умолчанию свойства ответа
+response-property-default-value-changed-description: изменено значение по умолчанию свойства ответа
+response-property-default-value-removed-description: удалено значение по умолчанию свойства ответа
+response-property-discriminator-added-description: добавлен дискриминатор свойства ответа
+response-property-discriminator-mapping-added-description: добавлено сопоставление дискриминатора свойства ответа
+response-property-discriminator-mapping-changed-description: изменено сопоставление дискриминатора свойства ответа
+response-property-discriminator-mapping-deleted-description: удалено сопоставление дискриминатора свойства ответа
+response-property-discriminator-property-name-changed-description: изменено имя свойства дискриминатора свойства ответа
+response-property-discriminator-removed-description: удален дискриминатор свойства ответа
+response-property-enum-value-added-description: добавлено enum значение свойства ответа
+response-property-enum-value-removed-description: удалено enum значение свойства ответа
+response-property-max-increased-description: увеличено максимальное значение свойства ответа
+response-property-max-length-increased-description: увеличена максимальная длина свойства ответа
+response-property-max-length-unset-description: удалена максимальная длина свойства ответа
+response-property-min-decreased-description: уменьшено минимальное значение свойства ответа
+response-property-min-items-decreased-description: уменьшено минимальное количество элементов свойства ответа
+response-property-min-items-unset-description: удалено минимальное количество элементов свойства ответа
+response-property-min-length-decreased-description: уменьшена минимальная длина свойства ответа
+response-property-one-of-added-description: подсхема добавлена к oneOf в свойстве ответа
+response-property-one-of-removed-description: подсхема удалена из oneOf в свойстве ответа
+response-property-pattern-added-description: установлен паттерн свойства ответа
+response-property-pattern-changed-description: изменен паттерн свойства ответа
+response-property-pattern-removed-description: удален паттерн свойства ответа
+response-property-type-changed-description: изменен тип свойства ответа
+response-required-property-added-description: добавлено обязательное свойство ответа
+response-required-property-became-not-read-only-description: обязательное свойство ответа перестало быть только для чтения
+response-required-property-became-not-write-only-description: обязательное свойство ответа перестало быть только для записи
+response-required-property-became-read-only-description: обязательное свойство ответа стало только для чтения
+response-required-property-became-write-only-description: обязательное свойство ответа стало только для записи
+response-required-property-became-write-only: обязательное свойство ответа %s стало только для записи для статуса %s
+response-required-property-removed-description: удалено обязательное свойство ответа
+response-required-write-only-property-added-description: добавлено обязательное свойство ответа только для записи
+response-required-write-only-property-removed-description: удалено обязательное свойство ответа только для записи
+response-success-status-added-description: добавлен статус успешного ответа
+response-success-status-removed-description: удален статус успешного ответа
+response-write-only-property-became-optional-description: свойство ответа только для записи стало необязательным
+response-write-only-property-became-required-description: свойство ответа только для записи стало обязательным
+response-write-only-property-enum-value-added-description: добавлено enum значение свойства ответа только для записи
+sunset-deleted-description: дата прекращения действия удалена
