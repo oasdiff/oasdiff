@@ -346,55 +346,19 @@ func getPropertyDiff(config *Config, state *state, simpleParam *openapi3.Paramet
 	}
 }
 
-// handleExplodedParameterMatching handles bidirectional equivalence between exploded parameters and simple parameters
-func handleExplodedParameterMatching(config *Config, state *state, params1, params2 openapi3.Parameters, result *ParametersDiffByLocation, processedParams1, processedParams2 map[*openapi3.Parameter]bool) error {
-	
-	// Handle case 1: Simple parameters (params1) -> Exploded parameter (params2)
-	err := handleParameterMatching(config, state, params1, params2, result, processedParams1, processedParams2, true)
-	if err != nil {
-		return err
-	}
-	
-	// Handle case 2: Exploded parameter (params1) -> Simple parameters (params2)  
-	err = handleParameterMatching(config, state, params1, params2, result, processedParams1, processedParams2, false)
-	if err != nil {
-		return err
-	}
-	
-	return nil
-}
 
-// handleParameterMatching handles bidirectional parameter matching between exploded and simple parameters.
-// The direction parameter controls which direction to process:
-// - true: simple → exploded (find exploded parameters in params2 that match simple parameters in params1)
-// - false: exploded → simple (find exploded parameters in params1 that match simple parameters in params2)
-func handleParameterMatching(config *Config, state *state, params1, params2 openapi3.Parameters, result *ParametersDiffByLocation, processedParams1, processedParams2 map[*openapi3.Parameter]bool, simpleToExploded bool) error {
+// matchExplodedWithSimple finds exploded parameters in explodedParams and matches them with 
+// corresponding simple parameters in simpleParams, processing the diffs accordingly.
+func matchExplodedWithSimple(config *Config, state *state, simpleParams, explodedParams openapi3.Parameters, result *ParametersDiffByLocation, processedSimple, processedExploded map[*openapi3.Parameter]bool, simpleToExploded bool) error {
 	
-	var explodedParams, simpleParams openapi3.Parameters
-	var explodedProcessed, simpleProcessed map[*openapi3.Parameter]bool
-	
-	if simpleToExploded {
-		// Simple → Exploded: look for exploded params in params2, simple params in params1
-		explodedParams = params2
-		simpleParams = params1
-		explodedProcessed = processedParams2
-		simpleProcessed = processedParams1
-	} else {
-		// Exploded → Simple: look for exploded params in params1, simple params in params2
-		explodedParams = params1
-		simpleParams = params2
-		explodedProcessed = processedParams1
-		simpleProcessed = processedParams2
-	}
-	
-	// Find exploded parameters
+	// Look for exploded parameters in explodedParams
 	for _, explodedParamRef := range explodedParams {
 		explodedParam, err := derefParam(explodedParamRef)
 		if err != nil {
 			return err
 		}
 		
-		if !isExplodedObjectParam(explodedParam) || explodedProcessed[explodedParam] {
+		if !isExplodedObjectParam(explodedParam) || processedExploded[explodedParam] {
 			continue
 		}
 		
@@ -406,7 +370,7 @@ func handleParameterMatching(config *Config, state *state, params1, params2 open
 				return err
 			}
 			
-			if simpleProcessed[simpleParam] {
+			if processedSimple[simpleParam] {
 				continue
 			}
 			
@@ -423,7 +387,7 @@ func handleParameterMatching(config *Config, state *state, params1, params2 open
 		// If we found matching simple parameters, process them
 		if len(matchingParams) > 0 {
 			for _, simpleParam := range matchingParams {
-				// Generate property-level diff in the appropriate direction
+				// Generate property-level diff based on direction
 				propertyDiff, err := getPropertyDiff(config, state, simpleParam, explodedParam, simpleToExploded)
 				if err != nil {
 					return err
@@ -435,11 +399,31 @@ func handleParameterMatching(config *Config, state *state, params1, params2 open
 				}
 				
 				// Mark simple parameter as processed
-				simpleProcessed[simpleParam] = true
+				processedSimple[simpleParam] = true
 			}
 			// Mark exploded parameter as processed
-			explodedProcessed[explodedParam] = true
+			processedExploded[explodedParam] = true
 		}
+	}
+	
+	return nil
+}
+
+// handleExplodedParameterMatching handles parameter matching between two parameter sets.
+// The function automatically detects which parameters are exploded and processes accordingly.
+func handleExplodedParameterMatching(config *Config, state *state, params1, params2 openapi3.Parameters, result *ParametersDiffByLocation, processedParams1, processedParams2 map[*openapi3.Parameter]bool) error {
+	
+	// Case 1: Simple parameters (params1) → Exploded parameters (params2)
+	err := matchExplodedWithSimple(config, state, params1, params2, result, processedParams1, processedParams2, true)
+	if err != nil {
+		return err
+	}
+	
+	// Case 2: Exploded parameters (params1) → Simple parameters (params2)
+	// Reverse the parameter order to swap the direction
+	err = matchExplodedWithSimple(config, state, params2, params1, result, processedParams2, processedParams1, false)
+	if err != nil {
+		return err
 	}
 	
 	return nil
