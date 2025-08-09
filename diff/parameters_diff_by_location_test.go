@@ -78,7 +78,7 @@ func TestExplodedParameterEquivalenceReverse(t *testing.T) {
 					if operationItem != nil && operationItem.ParametersDiff != nil {
 						// Should not have deleted parameters - the exploded parameter should map to simple parameters
 						require.Empty(t, operationItem.ParametersDiff.Deleted, "Simple parameters should not be flagged as deleted when equivalent exploded parameter exists")
-						// Should not have added parameters - the simple parameters should map to exploded parameter  
+						// Should not have added parameters - the simple parameters should map to exploded parameter
 						require.Empty(t, operationItem.ParametersDiff.Added, "Simple parameters should not be flagged as added when equivalent exploded parameter exists")
 					}
 				}
