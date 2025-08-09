@@ -109,6 +109,8 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 
 	// Track which exploded parameters have been matched to avoid multiple matches
 	explodedParamsMatched := make(map[*openapi3.Parameter]bool)
+	// Track which simple parameters have been matched to exploded parameters
+	simpleParamsMatched := make(map[*openapi3.Parameter]bool)
 
 	for _, paramRef1 := range params1 {
 		param1, err := derefParam(paramRef1)
@@ -131,12 +133,22 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 				}
 				if isEquivalent {
 					isExplodedMatch = true
-					// Mark this exploded parameter as matched
 					explodedParamsMatched[param2] = true
+					simpleParamsMatched[param1] = true
+
+					// Generate diff for the individual property vs exploded object property
+					propertyDiff, err := getExplodedPropertyDiff(config, state, param1, param2)
+					if err != nil {
+						return nil, err
+					}
+
+					if !propertyDiff.Empty() {
+						result.addModifiedParam(param1, propertyDiff)
+					}
 				}
 			}
 
-			// Skip diff generation for exploded matches to avoid type change warnings
+			// Generate normal diff for non-exploded matches
 			if !isExplodedMatch {
 				diff, err := getParameterDiff(config, state, param1, param2)
 				if err != nil {
@@ -304,4 +316,44 @@ func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) (bo
 	// Check if the simple parameter's name matches a property in the object
 	_, exists := schema.Properties[simpleParam.Name]
 	return exists, nil
+}
+
+// getExplodedPropertyDiff compares a simple parameter with its corresponding property
+// in an exploded object parameter
+func getExplodedPropertyDiff(config *Config, state *state, simpleParam *openapi3.Parameter, explodedParam *openapi3.Parameter) (*ParameterDiff, error) {
+	if !isExplodedObjectParam(explodedParam) {
+		return nil, fmt.Errorf("exploded parameter is not a valid exploded object parameter")
+	}
+
+	// Get the property schema from the exploded object
+	propertyName := simpleParam.Name
+	explodedSchema := explodedParam.Schema.Value
+	propertySchemaRef, exists := explodedSchema.Properties[propertyName]
+	if !exists {
+		return nil, fmt.Errorf("property %s not found in exploded parameter", propertyName)
+	}
+
+	// Create a virtual parameter representing what the exploded property would look like
+	// as a standalone parameter. We want to compare the essential API contract elements.
+	virtualParam := &openapi3.Parameter{
+		Name:              simpleParam.Name,        // Must match for comparison
+		In:                simpleParam.In,          // Must match for comparison  
+		Schema:            propertySchemaRef,       // The key thing we're comparing
+		Required:          simpleParam.Required,    // Preserve original required status
+		Style:             explodedParam.Style,     // Inherit serialization style
+		Explode:           explodedParam.Explode,   // Inherit explode setting
+		
+		// Copy other fields from exploded param (these represent the "new" version)
+		Description:       explodedParam.Description,
+		Deprecated:        explodedParam.Deprecated, 
+		AllowEmptyValue:   explodedParam.AllowEmptyValue,
+		AllowReserved:     explodedParam.AllowReserved,
+		Example:           explodedParam.Example,
+		Examples:          explodedParam.Examples,
+		Content:           explodedParam.Content,
+		Extensions:        explodedParam.Extensions,
+	}
+
+	// Generate diff between the simple parameter and the virtual property parameter
+	return getParameterDiff(config, state, simpleParam, virtualParam)
 }
