@@ -336,22 +336,22 @@ func getExplodedPropertyDiff(config *Config, state *state, simpleParam *openapi3
 	// Create a virtual parameter representing what the exploded property would look like
 	// as a standalone parameter. We want to compare the essential API contract elements.
 	virtualParam := &openapi3.Parameter{
-		Name:              simpleParam.Name,        // Must match for comparison
-		In:                simpleParam.In,          // Must match for comparison  
-		Schema:            propertySchemaRef,       // The key thing we're comparing
-		Required:          simpleParam.Required,    // Preserve original required status
-		Style:             explodedParam.Style,     // Inherit serialization style
-		Explode:           explodedParam.Explode,   // Inherit explode setting
-		
+		Name:     simpleParam.Name,      // Must match for comparison
+		In:       simpleParam.In,        // Must match for comparison
+		Schema:   propertySchemaRef,     // The key thing we're comparing
+		Required: simpleParam.Required,  // Preserve original required status
+		Style:    explodedParam.Style,   // Inherit serialization style
+		Explode:  explodedParam.Explode, // Inherit explode setting
+
 		// Copy other fields from exploded param (these represent the "new" version)
-		Description:       explodedParam.Description,
-		Deprecated:        explodedParam.Deprecated, 
-		AllowEmptyValue:   explodedParam.AllowEmptyValue,
-		AllowReserved:     explodedParam.AllowReserved,
-		Example:           explodedParam.Example,
-		Examples:          explodedParam.Examples,
-		Content:           explodedParam.Content,
-		Extensions:        explodedParam.Extensions,
+		Description:     explodedParam.Description,
+		Deprecated:      explodedParam.Deprecated,
+		AllowEmptyValue: explodedParam.AllowEmptyValue,
+		AllowReserved:   explodedParam.AllowReserved,
+		Example:         explodedParam.Example,
+		Examples:        explodedParam.Examples,
+		Content:         explodedParam.Content,
+		Extensions:      explodedParam.Extensions,
 	}
 
 	// Generate diff between the simple parameter and the virtual property parameter
