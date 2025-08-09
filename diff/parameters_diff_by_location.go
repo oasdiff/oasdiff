@@ -107,15 +107,26 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 
 	result := newParametersDiffByLocation()
 
-	// Track which exploded parameters have been matched to avoid multiple matches
-	explodedParamsMatched := make(map[*openapi3.Parameter]bool)
-	// Track which simple parameters have been matched to exploded parameters
-	simpleParamsMatched := make(map[*openapi3.Parameter]bool)
+	// Track which parameters have been handled by exploded parameter matching
+	processedParams1 := make(map[*openapi3.Parameter]bool)
+	processedParams2 := make(map[*openapi3.Parameter]bool)
 
+	// First pass: Handle exploded parameter equivalences
+	err := handleExplodedParameterMatching(config, state, params1, params2, result, processedParams1, processedParams2)
+	if err != nil {
+		return nil, err
+	}
+
+	// Second pass: Handle regular parameter matching for remaining parameters
 	for _, paramRef1 := range params1 {
 		param1, err := derefParam(paramRef1)
 		if err != nil {
 			return nil, err
+		}
+
+		// Skip if already processed by exploded parameter matching
+		if processedParams1[param1] {
+			continue
 		}
 
 		param2, err := findParam(param1, params2, pathParamsMap)
@@ -123,65 +134,34 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 			return nil, err
 		}
 
-		if param2 != nil {
-			// Check if this is an exploded parameter match
-			isExplodedMatch := false
-			if isExplodedObjectParam(param2) {
-				isEquivalent, err := isParamInExplodedObject(param1, param2)
-				if err != nil {
-					return nil, err
-				}
-				if isEquivalent {
-					isExplodedMatch = true
-					explodedParamsMatched[param2] = true
-					simpleParamsMatched[param1] = true
-
-					// Generate diff for the individual property vs exploded object property
-					propertyDiff, err := getExplodedPropertyDiff(config, state, param1, param2)
-					if err != nil {
-						return nil, err
-					}
-
-					if !propertyDiff.Empty() {
-						result.addModifiedParam(param1, propertyDiff)
-					}
-				}
+		if param2 != nil && !processedParams2[param2] {
+			diff, err := getParameterDiff(config, state, param1, param2)
+			if err != nil {
+				return nil, err
 			}
 
-			// Generate normal diff for non-exploded matches
-			if !isExplodedMatch {
-				diff, err := getParameterDiff(config, state, param1, param2)
-				if err != nil {
-					return nil, err
-				}
-
-				if !diff.Empty() {
-					result.addModifiedParam(param1, diff)
-				}
+			if !diff.Empty() {
+				result.addModifiedParam(param1, diff)
 			}
+			processedParams2[param2] = true
 		} else {
 			result.addDeletedParam(param1)
 		}
 	}
 
-	pathParamsMapInversed := pathParamsMap.Inverse()
+	// Third pass: Handle added parameters
 	for _, paramRef2 := range params2 {
 		param2, err := derefParam(paramRef2)
 		if err != nil {
 			return nil, err
 		}
 
-		param, err := findParam(param2, params1, pathParamsMapInversed)
-		if err != nil {
-			return nil, err
+		// Skip if already processed
+		if processedParams2[param2] {
+			continue
 		}
-		if param == nil {
-			// Don't flag exploded parameters as added if they were matched to simple parameters
-			if explodedParamsMatched[param2] {
-				continue
-			}
-			result.addAddedParam(param2)
-		}
+
+		result.addAddedParam(param2)
 	}
 
 	return result, nil
@@ -318,9 +298,11 @@ func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) (bo
 	return exists, nil
 }
 
-// getExplodedPropertyDiff compares a simple parameter with its corresponding property
-// in an exploded object parameter
-func getExplodedPropertyDiff(config *Config, state *state, simpleParam *openapi3.Parameter, explodedParam *openapi3.Parameter) (*ParameterDiff, error) {
+// getPropertyDiff compares a simple parameter with its corresponding property in an exploded object parameter.
+// The direction parameter controls the diff direction:
+// - true: simple → exploded (shows changes from simple to exploded parameter style)
+// - false: exploded → simple (shows changes from exploded to simple parameter style)
+func getPropertyDiff(config *Config, state *state, simpleParam *openapi3.Parameter, explodedParam *openapi3.Parameter, simpleToExploded bool) (*ParameterDiff, error) {
 	if !isExplodedObjectParam(explodedParam) {
 		return nil, fmt.Errorf("exploded parameter is not a valid exploded object parameter")
 	}
@@ -334,16 +316,16 @@ func getExplodedPropertyDiff(config *Config, state *state, simpleParam *openapi3
 	}
 
 	// Create a virtual parameter representing what the exploded property would look like
-	// as a standalone parameter. We want to compare the essential API contract elements.
-	virtualParam := &openapi3.Parameter{
+	// as a standalone parameter
+	virtualExplodedParam := &openapi3.Parameter{
 		Name:     simpleParam.Name,      // Must match for comparison
 		In:       simpleParam.In,        // Must match for comparison
 		Schema:   propertySchemaRef,     // The key thing we're comparing
-		Required: simpleParam.Required,  // Preserve original required status
-		Style:    explodedParam.Style,   // Inherit serialization style
-		Explode:  explodedParam.Explode, // Inherit explode setting
+		Required: explodedParam.Required, // Use exploded param's required status
+		Style:    explodedParam.Style,   // Use exploded param's style
+		Explode:  explodedParam.Explode, // Use exploded param's explode
 
-		// Copy other fields from exploded param (these represent the "new" version)
+		// Copy other fields from exploded param
 		Description:     explodedParam.Description,
 		Deprecated:      explodedParam.Deprecated,
 		AllowEmptyValue: explodedParam.AllowEmptyValue,
@@ -354,6 +336,111 @@ func getExplodedPropertyDiff(config *Config, state *state, simpleParam *openapi3
 		Extensions:      explodedParam.Extensions,
 	}
 
-	// Generate diff between the simple parameter and the virtual property parameter
-	return getParameterDiff(config, state, simpleParam, virtualParam)
+	// Generate diff in the appropriate direction
+	if simpleToExploded {
+		// Simple → Exploded: compare simple parameter with virtual exploded parameter
+		return getParameterDiff(config, state, simpleParam, virtualExplodedParam)
+	} else {
+		// Exploded → Simple: compare virtual exploded parameter with simple parameter
+		return getParameterDiff(config, state, virtualExplodedParam, simpleParam)
+	}
+}
+
+// handleExplodedParameterMatching handles bidirectional equivalence between exploded parameters and simple parameters
+func handleExplodedParameterMatching(config *Config, state *state, params1, params2 openapi3.Parameters, result *ParametersDiffByLocation, processedParams1, processedParams2 map[*openapi3.Parameter]bool) error {
+	
+	// Handle case 1: Simple parameters (params1) -> Exploded parameter (params2)
+	err := handleParameterMatching(config, state, params1, params2, result, processedParams1, processedParams2, true)
+	if err != nil {
+		return err
+	}
+	
+	// Handle case 2: Exploded parameter (params1) -> Simple parameters (params2)  
+	err = handleParameterMatching(config, state, params1, params2, result, processedParams1, processedParams2, false)
+	if err != nil {
+		return err
+	}
+	
+	return nil
+}
+
+// handleParameterMatching handles bidirectional parameter matching between exploded and simple parameters.
+// The direction parameter controls which direction to process:
+// - true: simple → exploded (find exploded parameters in params2 that match simple parameters in params1)
+// - false: exploded → simple (find exploded parameters in params1 that match simple parameters in params2)
+func handleParameterMatching(config *Config, state *state, params1, params2 openapi3.Parameters, result *ParametersDiffByLocation, processedParams1, processedParams2 map[*openapi3.Parameter]bool, simpleToExploded bool) error {
+	
+	var explodedParams, simpleParams openapi3.Parameters
+	var explodedProcessed, simpleProcessed map[*openapi3.Parameter]bool
+	
+	if simpleToExploded {
+		// Simple → Exploded: look for exploded params in params2, simple params in params1
+		explodedParams = params2
+		simpleParams = params1
+		explodedProcessed = processedParams2
+		simpleProcessed = processedParams1
+	} else {
+		// Exploded → Simple: look for exploded params in params1, simple params in params2
+		explodedParams = params1
+		simpleParams = params2
+		explodedProcessed = processedParams1
+		simpleProcessed = processedParams2
+	}
+	
+	// Find exploded parameters
+	for _, explodedParamRef := range explodedParams {
+		explodedParam, err := derefParam(explodedParamRef)
+		if err != nil {
+			return err
+		}
+		
+		if !isExplodedObjectParam(explodedParam) || explodedProcessed[explodedParam] {
+			continue
+		}
+		
+		// Find all simple parameters that match properties of this exploded parameter
+		var matchingParams []*openapi3.Parameter
+		for _, simpleParamRef := range simpleParams {
+			simpleParam, err := derefParam(simpleParamRef)
+			if err != nil {
+				return err
+			}
+			
+			if simpleProcessed[simpleParam] {
+				continue
+			}
+			
+			equivalent, err := isParamInExplodedObject(simpleParam, explodedParam)
+			if err != nil {
+				return err
+			}
+			
+			if equivalent {
+				matchingParams = append(matchingParams, simpleParam)
+			}
+		}
+		
+		// If we found matching simple parameters, process them
+		if len(matchingParams) > 0 {
+			for _, simpleParam := range matchingParams {
+				// Generate property-level diff in the appropriate direction
+				propertyDiff, err := getPropertyDiff(config, state, simpleParam, explodedParam, simpleToExploded)
+				if err != nil {
+					return err
+				}
+				
+				if !propertyDiff.Empty() {
+					// Use the simple parameter name for reporting
+					result.addModifiedParam(simpleParam, propertyDiff)
+				}
+				
+				// Mark simple parameter as processed
+				simpleProcessed[simpleParam] = true
+			}
+			// Mark exploded parameter as processed
+			explodedProcessed[explodedParam] = true
+		}
+	}
+	
+	return nil
 }
