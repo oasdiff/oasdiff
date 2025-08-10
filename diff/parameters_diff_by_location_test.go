@@ -86,3 +86,45 @@ func TestExplodedParameterEquivalenceReverse(t *testing.T) {
 		}
 	}
 }
+
+// Test for partial exploded parameter conversion - where only some parameters are converted to exploded
+func TestPartialExplodedParameterConversion(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	// Load the partial conversion test specs
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/partial-base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/partial-exploded.yaml"))
+	require.NoError(t, err)
+
+	// Get the diff
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	// Check that only the exploded parameters are flagged as modified, not deleted/added
+	if d != nil && d.PathsDiff != nil {
+		for _, pathItem := range d.PathsDiff.Modified {
+			if pathItem != nil && pathItem.OperationsDiff != nil {
+				for _, operationItem := range pathItem.OperationsDiff.Modified {
+					if operationItem != nil && operationItem.ParametersDiff != nil {
+						// Should not have any deleted parameters - exploded equivalence should be recognized
+						require.Empty(t, operationItem.ParametersDiff.Deleted, "No parameters should be flagged as deleted in partial exploded conversion")
+						// Should not have any added parameters - exploded equivalence should be recognized
+						require.Empty(t, operationItem.ParametersDiff.Added, "No parameters should be flagged as added in partial exploded conversion")
+
+						// Should have modifications for the converted parameters (PageNumber, PageSize)
+						require.Contains(t, operationItem.ParametersDiff.Modified, "query")
+						queryMods := operationItem.ParametersDiff.Modified["query"]
+						require.Contains(t, queryMods, "PageNumber", "PageNumber should be flagged as modified (style change)")
+						require.Contains(t, queryMods, "PageSize", "PageSize should be flagged as modified (style change)")
+
+						// Should NOT have modifications for the unchanged parameters (SortBy, Order)
+						require.NotContains(t, queryMods, "SortBy", "SortBy should not be flagged as modified")
+						require.NotContains(t, queryMods, "Order", "Order should not be flagged as modified")
+					}
+				}
+			}
+		}
+	}
+}
