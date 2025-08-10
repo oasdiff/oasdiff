@@ -385,6 +385,12 @@ func GetAllRules() BackwardCompatibilityRules {
 		// ResponsePropertyMaxIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, LocationBody, ActionIncrease),
 		newBackwardCompatibilityRule(ResponsePropertyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		// ResponsePropertyExclusiveMaxUpdatedCheck
+		newBackwardCompatibilityRule(ResponsePropertyExclusiveMaxIncreasedId, ERR, ResponsePropertyExclusiveMaxUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyExclusiveMaxDecreasedId, INFO, ResponsePropertyExclusiveMaxUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		// ResponsePropertyExclusiveMinUpdatedCheck
+		newBackwardCompatibilityRule(ResponsePropertyExclusiveMinIncreasedId, ERR, ResponsePropertyExclusiveMinUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyExclusiveMinDecreasedId, INFO, ResponsePropertyExclusiveMinUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
 		// ResponsePropertyMaxLengthIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxLengthIncreasedId, ERR, ResponsePropertyMaxLengthIncreasedCheck, DirectionResponse, LocationBody, ActionIncrease),
 		newBackwardCompatibilityRule(ResponsePropertyMaxLengthIncreasedId, ERR, ResponsePropertyMaxLengthIncreasedCheck, DirectionResponse, LocationProperties, ActionIncrease),
