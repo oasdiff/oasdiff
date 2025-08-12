@@ -1,0 +1,23 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test/{pathParam}:
+    get:
+      parameters:
+        - name: pathParam
+          in: path
+          required: true
+          # No explicit style - should default to "simple", not "form"
+          explode: false
+          schema:
+            type: object
+            properties:
+              PageNumber:
+                type: integer
+              PageSize:  
+                type: integer
+      responses:
+        '200':
+          description: OK

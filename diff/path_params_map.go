@@ -26,14 +26,6 @@ func NewPathParamsMap(pathParams1, pathParams2 []string) (PathParamsMap, bool) {
 	return result, true
 }
 
-func (pathParamsMap PathParamsMap) Inverse() PathParamsMap {
-	result := make(PathParamsMap, len(pathParamsMap))
-	for k, v := range pathParamsMap {
-		result[v] = k
-	}
-	return result
-}
-
 func (pathParamsMap PathParamsMap) find(pathParam1, pathParam2 string) bool {
 	if len(pathParamsMap) == 0 {
 		return pathParam1 == pathParam2
