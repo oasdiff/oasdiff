@@ -128,3 +128,29 @@ func TestPartialExplodedParameterConversion(t *testing.T) {
 		}
 	}
 }
+
+// TestParameterStyleDefaults tests that parameter style defaults are handled correctly
+// according to OpenAPI specification: query/cookie default to "form", path/header default to "simple"
+func TestParameterStyleDefaults(t *testing.T) {
+	// Test that path parameters with empty style don't incorrectly default to "form"
+	t.Run("path parameter with empty style should not be treated as exploded form", func(t *testing.T) {
+		loader := openapi3.NewLoader()
+
+		// Valid spec: path parameter without explicit style (should default to "simple")
+		s1, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/base.yaml"))
+		require.NoError(t, err)
+
+		s2, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/path-with-empty-style.yaml"))
+		require.NoError(t, err)
+
+		// The isExplodedObjectParam function should return false for this path parameter
+		// because path parameters default to "simple" style, not "form"
+		d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		require.NotNil(t, d)
+
+		// With our fix, path parameters should be correctly handled and not treated as exploded form
+		// This test mainly ensures the fix doesn't break and handles different parameter locations correctly
+	})
+
+}

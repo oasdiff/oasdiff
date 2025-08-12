@@ -270,9 +270,20 @@ func isExplodedObjectParam(param *openapi3.Parameter) bool {
 		return false
 	}
 
-	// Must be explode=true and style=form (or default)
+	// Must be explode=true and style=form (or default for query/cookie params)
 	explode := param.Explode != nil && *param.Explode
-	isFormStyle := param.Style == "" || param.Style == "form" // form is default for query params
+
+	// Check if style is form, or if it's empty and this is a query/cookie parameter
+	// where form is the default style according to OpenAPI spec
+	var isFormStyle bool
+	switch param.Style {
+	case openapi3.SerializationForm:
+		isFormStyle = true
+	case "":
+		// Empty style defaults to "form" only for query and cookie parameters
+		// Path and header parameters default to "simple"
+		isFormStyle = isQueryOrCookieParam(param)
+	}
 
 	// Must have object schema with properties
 	schema := param.Schema.Value
@@ -361,6 +372,12 @@ func matchExplodedWithSimple(config *Config, state *state, simpleParams, explode
 			continue
 		}
 
+		// Only apply exploded parameter matching to query and cookie parameters
+		// Path and header parameters don't support form style with explode
+		if !isQueryOrCookieParam(explodedParam) {
+			continue
+		}
+
 		// Find all simple parameters that match properties of this exploded parameter
 		var matchingParams []*openapi3.Parameter
 		for _, simpleParamRef := range simpleParams {
@@ -370,6 +387,12 @@ func matchExplodedWithSimple(config *Config, state *state, simpleParams, explode
 			}
 
 			if processedSimple[simpleParam] {
+				continue
+			}
+
+			// Only match simple parameters that are in query or cookie locations
+			// to ensure both simple and exploded params are in compatible locations
+			if !isQueryOrCookieParam(simpleParam) {
 				continue
 			}
 
@@ -406,6 +429,10 @@ func matchExplodedWithSimple(config *Config, state *state, simpleParams, explode
 	}
 
 	return nil
+}
+
+func isQueryOrCookieParam(param *openapi3.Parameter) bool {
+	return param.In == openapi3.ParameterInQuery || param.In == openapi3.ParameterInCookie
 }
 
 // handleExplodedParameterMatching handles parameter matching between two parameter sets.
