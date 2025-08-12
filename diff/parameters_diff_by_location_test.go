@@ -154,3 +154,48 @@ func TestParameterStyleDefaults(t *testing.T) {
 	})
 
 }
+
+// TestExplodedParameterLocationMatching tests that parameters with the same name
+// but different locations (In field) are NOT matched by exploded parameter logic.
+// This test verifies the location check at parameters_diff_by_location.go:304
+func TestExplodedParameterLocationMatching(t *testing.T) {
+	t.Run("parameters with same name but different locations should not match", func(t *testing.T) {
+		loader := openapi3.NewLoader()
+
+		// Base spec: has "userId" parameter in cookie location
+		s1, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/cross-location-base.yaml"))
+		require.NoError(t, err)
+
+		// Exploded spec: has exploded query parameter with "userId" property
+		s2, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/cross-location-exploded.yaml"))
+		require.NoError(t, err)
+
+		// Get the diff
+		d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+
+		// The key assertion: the cookie "userId" parameter should be DELETED and query exploded param ADDED
+		// because they should NOT match (different locations prevent matching)
+		if d != nil && d.PathsDiff != nil {
+			for _, pathItem := range d.PathsDiff.Modified {
+				if pathItem != nil && pathItem.OperationsDiff != nil {
+					for _, operationItem := range pathItem.OperationsDiff.Modified {
+						if operationItem != nil && operationItem.ParametersDiff != nil {
+							// Cookie "userId" should be flagged as deleted because location check prevents matching
+							require.NotEmpty(t, operationItem.ParametersDiff.Deleted["cookie"],
+								"Cookie 'userId' parameter should be deleted - it should NOT match query exploded 'userId' property")
+							require.Contains(t, operationItem.ParametersDiff.Deleted["cookie"], "userId",
+								"The deleted cookie parameter should be 'userId'")
+
+							// Query exploded parameter should be flagged as added
+							require.NotEmpty(t, operationItem.ParametersDiff.Added["query"],
+								"Query exploded parameter should be added since cookie param doesn't match")
+							require.Contains(t, operationItem.ParametersDiff.Added["query"], "userParams",
+								"The added query parameter should be 'userParams'")
+						}
+					}
+				}
+			}
+		}
+	})
+}

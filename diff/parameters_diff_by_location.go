@@ -299,6 +299,11 @@ func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) (bo
 		return false, nil
 	}
 
+	// Parameters must be in the same location (query, header, etc.)
+	if simpleParam.In != explodedParam.In {
+		return false, nil
+	}
+
 	schema := explodedParam.Schema.Value
 	if schema == nil || schema.Properties == nil {
 		return false, nil

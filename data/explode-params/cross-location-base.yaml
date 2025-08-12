@@ -1,0 +1,15 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      parameters:
+        - name: userId
+          in: cookie
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
