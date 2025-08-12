@@ -214,7 +214,7 @@ func equalParams(param1 *openapi3.Parameter, param2 *openapi3.Parameter, pathPar
 		}
 
 		// Check for semantic equivalence with exploded parameters
-		return isSemanticEquivalent(param1, param2)
+		return isSemanticEquivalent(param1, param2), nil
 	}
 
 	return pathParamsMap.find(param1.Name, param2.Name), nil
@@ -249,7 +249,7 @@ func (diff *ParametersDiffByLocation) Patch(parameters openapi3.Parameters) erro
 
 // isSemanticEquivalent checks if two parameters are semantically equivalent,
 // considering the case where separate parameters are consolidated into an exploded object parameter
-func isSemanticEquivalent(param1, param2 *openapi3.Parameter) (bool, error) {
+func isSemanticEquivalent(param1, param2 *openapi3.Parameter) bool {
 	// Check if param1 is a simple parameter and param2 is an exploded object
 	if isExplodedObjectParam(param2) {
 		return isParamInExplodedObject(param1, param2)
@@ -260,7 +260,7 @@ func isSemanticEquivalent(param1, param2 *openapi3.Parameter) (bool, error) {
 		return isParamInExplodedObject(param2, param1)
 	}
 
-	return false, nil
+	return false
 }
 
 // isExplodedObjectParam checks if a parameter is an exploded object parameter
@@ -294,24 +294,24 @@ func isExplodedObjectParam(param *openapi3.Parameter) bool {
 
 // isParamInExplodedObject checks if a simple parameter corresponds to a property
 // in an exploded object parameter
-func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) (bool, error) {
+func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) bool {
 	if !isExplodedObjectParam(explodedParam) {
-		return false, nil
+		return false
 	}
 
 	// Parameters must be in the same location (query, header, etc.)
 	if simpleParam.In != explodedParam.In {
-		return false, nil
+		return false
 	}
 
 	schema := explodedParam.Schema.Value
 	if schema == nil || schema.Properties == nil {
-		return false, nil
+		return false
 	}
 
 	// Check if the simple parameter's name matches a property in the object
 	_, exists := schema.Properties[simpleParam.Name]
-	return exists, nil
+	return exists
 }
 
 // getPropertyDiff compares a simple parameter with its corresponding property in an exploded object parameter.
@@ -401,12 +401,7 @@ func matchExplodedWithSimple(config *Config, state *state, simpleParams, explode
 				continue
 			}
 
-			equivalent, err := isParamInExplodedObject(simpleParam, explodedParam)
-			if err != nil {
-				return err
-			}
-
-			if equivalent {
+			if isParamInExplodedObject(simpleParam, explodedParam) {
 				matchingParams = append(matchingParams, simpleParam)
 			}
 		}
