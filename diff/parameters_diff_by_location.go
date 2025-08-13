@@ -228,25 +228,6 @@ func (diff *ParametersDiffByLocation) getSummary() *SummaryDetails {
 	}
 }
 
-// Patch applies the patch to parameters
-func (diff *ParametersDiffByLocation) Patch(parameters openapi3.Parameters) error {
-
-	if diff.Empty() {
-		return nil
-	}
-
-	for location, paramDiffs := range diff.Modified {
-		for name, parameterDiff := range paramDiffs {
-			err := parameterDiff.Patch(parameters.GetByInAndName(location, name))
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 // isSemanticEquivalent checks if two parameters are semantically equivalent,
 // considering the case where separate parameters are consolidated into an exploded object parameter
 func isSemanticEquivalent(param1, param2 *openapi3.Parameter) bool {

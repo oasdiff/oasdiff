@@ -145,20 +145,3 @@ func filterOperationsByExtensionInternal(pathItem *openapi3.PathItem, r *regexp.
 		}
 	}
 }
-
-// Patch applies the patch to operations
-func (operationsDiff *OperationsDiff) Patch(operations map[string]*openapi3.Operation) error {
-
-	if operationsDiff.Empty() {
-		return nil
-	}
-
-	for method, methodDiff := range operationsDiff.Modified {
-		err := methodDiff.Patch(operations[method])
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
