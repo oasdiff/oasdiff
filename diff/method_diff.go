@@ -95,21 +95,3 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 
 	return result, nil
 }
-
-// Patch applies the patch to a method
-func (methodDiff *MethodDiff) Patch(operation *openapi3.Operation) error {
-
-	if methodDiff.Empty() {
-		return nil
-	}
-
-	if err := methodDiff.DescriptionDiff.patchString(&operation.Description); err != nil {
-		return err
-	}
-
-	if err := methodDiff.ParametersDiff.Patch(operation.Parameters); err != nil {
-		return err
-	}
-
-	return nil
-}

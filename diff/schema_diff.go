@@ -211,39 +211,3 @@ func derefSchema(ref *openapi3.SchemaRef) (*openapi3.Schema, error) {
 
 	return ref.Value, nil
 }
-
-// Patch applies the patch to a schema
-func (diff *SchemaDiff) Patch(schema *openapi3.Schema) error {
-	if diff.Empty() {
-		return nil
-	}
-
-	if err := diff.TitleDiff.patchString(&schema.Title); err != nil {
-		return err
-	}
-
-	if err := diff.FormatDiff.patchString(&schema.Format); err != nil {
-		return err
-	}
-
-	if err := diff.DescriptionDiff.patchString(&schema.Description); err != nil {
-		return err
-	}
-
-	diff.EnumDiff.Patch(&schema.Enum)
-
-	if err := diff.MaxLengthDiff.patchUInt64Ref(&schema.MaxLength); err != nil {
-		return err
-	}
-
-	if err := patchPattern(diff.PatternDiff, schema); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// patchPattern uses "Schema.WithPattern" to ensure that schema.compiledPattern is updated too
-func patchPattern(valueDiff *ValueDiff, schema *openapi3.Schema) error {
-	return valueDiff.patchStringCB(func(s string) { schema.WithPattern(valueDiff.To.(string)) })
-}

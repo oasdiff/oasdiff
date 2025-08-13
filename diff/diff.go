@@ -332,18 +332,3 @@ func (diff *Diff) GetSummary() *Summary {
 	summary.add(diff.EndpointsDiff, EndpointsDetail)
 	return summary
 }
-
-// Patch applies the patch to a spec
-func (diff *Diff) Patch(s *openapi3.T) error {
-
-	if diff.Empty() {
-		return nil
-	}
-
-	err := diff.PathsDiff.Patch(s.Paths)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
