@@ -9,3 +9,6 @@ coverage.html
 
 # vscode files
 .vscode/*
+
+# Claude
+.claude/*
