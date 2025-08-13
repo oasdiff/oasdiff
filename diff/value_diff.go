@@ -1,7 +1,6 @@
 package diff
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -92,49 +91,4 @@ func derefUInt64(ref *uint64) interface{} {
 	}
 
 	return *ref
-}
-
-func (diff *ValueDiff) patchStringCB(cb func(string)) error {
-	if diff.Empty() {
-		return nil
-	}
-
-	if diff.To == nil {
-		return fmt.Errorf("diff value is nil instead of string")
-	}
-
-	switch diff.To.(type) {
-	case string:
-		cb(diff.To.(string))
-	default:
-		return fmt.Errorf("diff value type mismatch: string vs. %q", reflect.TypeOf(diff.To))
-	}
-
-	return nil
-}
-
-// patchString applies the patch to a string value
-func (diff *ValueDiff) patchString(value *string) error {
-	return diff.patchStringCB(func(s string) { *value = s })
-}
-
-// patchUInt64Ref applies the patch to a *unit64 value
-func (diff *ValueDiff) patchUInt64Ref(value **uint64) error {
-	if diff.Empty() {
-		return nil
-	}
-
-	if diff.To == nil {
-		*value = nil
-		return nil
-	}
-
-	switch t := diff.To.(type) {
-	case uint64:
-		*value = &t
-	default:
-		return fmt.Errorf("diff value type mismatch: uint64 vs. %q", reflect.TypeOf(diff.To))
-	}
-
-	return nil
 }

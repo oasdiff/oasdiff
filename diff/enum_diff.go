@@ -78,25 +78,3 @@ func findValue(value interface{}, enum EnumValues) bool {
 	}
 	return false
 }
-
-// Patch applies the patch to an enum
-func (enumDiff *EnumDiff) Patch(enum *[]interface{}) {
-
-	if enumDiff.Empty() {
-		return
-	}
-
-	result := []interface{}{}
-
-	for _, value := range *enum {
-		if !findValue(value, enumDiff.Deleted) {
-			result = append(result, value)
-		}
-	}
-
-	for _, value := range enumDiff.Added {
-		result = append(result, value)
-	}
-
-	*enum = result
-}
