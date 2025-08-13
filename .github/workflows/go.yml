@@ -27,6 +27,9 @@ jobs:
     name: ${{ matrix.go }} on ${{ matrix.os }}
     steps:
 
+    - name: Check out code
+      uses: actions/checkout@v4
+
     - uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go }}
@@ -47,11 +50,8 @@ jobs:
     - name: Go Mod Cache
       uses: actions/cache@v4
       with:
-        path: ${{ steps.go-cache-paths.outputs.go-build }}
-        key: ${{ runner.os }}-go-${{ matrix.go }}-build-${{ hashFiles('**/go.sum') }}
-
-    - name: Check out code
-      uses: actions/checkout@v4
+        path: ${{ steps.go-cache-paths.outputs.go-mod }}
+        key: ${{ runner.os }}-go-${{ matrix.go }}-mod-${{ hashFiles('**/go.sum') }}
 
     - run: go mod download && go mod tidy && go mod verify
     - run: git --no-pager diff --exit-code
