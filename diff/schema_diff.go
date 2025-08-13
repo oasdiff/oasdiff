@@ -203,11 +203,3 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 
 	return &result, nil
 }
-
-func derefSchema(ref *openapi3.SchemaRef) (*openapi3.Schema, error) {
-	if ref == nil || ref.Value == nil {
-		return nil, errors.New("schema reference is nil")
-	}
-
-	return ref.Value, nil
-}
