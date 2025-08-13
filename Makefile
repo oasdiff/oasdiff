@@ -42,6 +42,7 @@ deps:  ## Download go module dependencies
 
 .PHONY: lint
 lint: ## Run linter
+	go fmt ./...
 	go vet ./...
 	golangci-lint run --enable=unused
 	
