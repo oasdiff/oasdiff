@@ -8,6 +8,8 @@ GOLANGCILINT_VERSION=v1.52.2
 test: ## Run tests
 	@echo "==> Running tests..."
 	go test ./...
+	@echo "==> Updating breaking changes documentation..."
+	make doc-breaking-changes
 
 .PHONY: coverage
 coverage: ## Run tests with coverage
@@ -31,7 +33,7 @@ install: deps ## Install oasdiff binary
 
 .PHONY: doc-breaking-changes
 doc-breaking-changes: ## Generate documentation for breaking changes
-	@echo "==> Generating documentation for breaking changes..."
+	@echo "==> Updating breaking changes documentation..."
 	./scripts/doc_breaking_changes.sh > docs/BREAKING-CHANGES-EXAMPLES.md
 
 .PHONY: deps
