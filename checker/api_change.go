@@ -23,6 +23,7 @@ type ApiChange struct {
 	Path        string
 	Source      *load.Source
 
+	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
 	SourceLineEnd   int
@@ -44,6 +45,25 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 		Source:      load.NewSource((*operationsSources)[operation]),
 		CommonChange: CommonChange{
 			Attributes: getAttributes(config, operation),
+		},
+	}
+}
+
+// NewApiChangeWithSources creates a new ApiChange with BaseSource and RevisionSource populated
+func NewApiChangeWithSources(id string, config *Config, args []any, comment string, operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string, baseSource, revisionSource *Source) ApiChange {
+	return ApiChange{
+		Id:          id,
+		Level:       config.getLogLevel(id),
+		Args:        args,
+		Comment:     comment,
+		OperationId: operation.OperationID,
+		Operation:   method,
+		Path:        path,
+		Source:      load.NewSource((*operationsSources)[operation]),
+		CommonChange: CommonChange{
+			BaseSource:     baseSource,
+			RevisionSource: revisionSource,
+			Attributes:     getAttributes(config, operation),
 		},
 	}
 }

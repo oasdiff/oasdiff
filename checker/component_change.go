@@ -17,6 +17,7 @@ type ComponentChange struct {
 	Level     Level
 	Component string
 
+	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
 	SourceLineEnd   int

@@ -6,6 +6,7 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -75,4 +76,40 @@ func TestYamlFormatter_RenderSummary(t *testing.T) {
 	out, err := yamlFormatter.RenderSummary(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Equal(t, string(out), "diff: false\n")
+}
+
+func TestYamlFormatter_RenderChangelog_WithSources(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Id:        "change_id", // Use ID that MockLocalizer recognizes
+			Level:     checker.ERR,
+			Operation: "POST",
+			Path:      "/api/test",
+			Source:    &load.Source{}, // Need this to avoid nil pointer dereference
+			CommonChange: checker.CommonChange{
+				BaseSource:     checker.NewSource("base.yaml", 10, 5),
+				RevisionSource: checker.NewSource("revision.yaml", 12, 7),
+			},
+		},
+	}
+
+	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	require.NoError(t, err)
+
+	expected := `- id: change_id
+  text: This is a breaking change.
+  level: 3
+  operation: POST
+  path: /api/test
+  section: paths
+  baseSource:
+    file: base.yaml
+    line: 10
+    column: 5
+  revisionSource:
+    file: revision.yaml
+    line: 12
+    column: 7
+`
+	require.Equal(t, expected, string(out))
 }

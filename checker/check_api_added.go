@@ -16,7 +16,7 @@ func APIAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSour
 	}
 
 	appendErr := func(path, method string, operation *openapi3.Operation) {
-		result = append(result, NewApiChange(
+		result = append(result, NewApiChangeWithSources(
 			EndpointAddedId,
 			config,
 			nil,
@@ -25,6 +25,8 @@ func APIAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSour
 			operation,
 			method,
 			path,
+			NewEmptySource(),
+			NewSourceFromOrigin(operationsSources, operation, operation.Origin),
 		))
 	}
 

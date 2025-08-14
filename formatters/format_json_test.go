@@ -5,6 +5,7 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -61,4 +62,27 @@ func TestJsonFormatter_RenderSummary(t *testing.T) {
 	out, err := jsonFormatter.RenderSummary(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Equal(t, `{"diff":false}`, string(out))
+}
+
+func TestJsonFormatter_RenderChangelog_WithSources(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Id:        "change_id", // Use ID that MockLocalizer recognizes
+			Level:     checker.ERR,
+			Operation: "GET",
+			Path:      "/test",
+			Source:    &load.Source{}, // Need this to avoid nil pointer dereference
+			CommonChange: checker.CommonChange{
+				BaseSource:     checker.NewSource("base.yaml", 10, 5),
+				RevisionSource: checker.NewEmptySource(), // Empty - API was removed
+			},
+		},
+	}
+
+	out, err := jsonFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	require.NoError(t, err)
+
+	// Parse and check that baseSource is included but revisionSource is not (due to omitempty)
+	expected := `[{"id":"change_id","text":"This is a breaking change.","level":3,"operation":"GET","path":"/test","section":"paths","baseSource":{"file":"base.yaml","line":10,"column":5}}]`
+	require.Equal(t, expected, string(out))
 }
