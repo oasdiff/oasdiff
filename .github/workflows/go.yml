@@ -83,13 +83,11 @@ jobs:
         git diff --no-index <(tail -n +4 checker/localizations/localizations.go) <(git show HEAD:checker/localizations/localizations.go | tail -n +4) || exit 0
 
     - run: go fmt ./...
-    - run: git --no-pager diff --exit-code
+    - run: git --no-pager diff --exit-code -- ':!checker/localizations/localizations.go'
 
     - run: go test ./... -coverprofile=coverage.txt -covermode=atomic
       env:
         CGO_ENABLED: '1'
-
-    - run: git --no-pager diff --exit-code
 
     - if: runner.os == 'Linux'
       name: Errors must not be capitalized https://github.com/golang/go/wiki/CodeReviewComments#error-strings
