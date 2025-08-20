@@ -64,11 +64,23 @@ jobs:
     - run: git --no-pager diff --exit-code
 
     - if: runner.os == 'Linux'
-      name: Generate breaking-changes examples and localized messages
+      name: Generate breaking-changes examples
+      run: make doc-breaking-changes
+    
+    - if: runner.os == 'Linux'
+      name: Check breaking-changes examples are up to date
+      run: git --no-pager diff --exit-code docs/BREAKING-CHANGES-EXAMPLES.md
+
+    - if: runner.os == 'Linux'
+      name: Generate localized messages
       run: |
-        go install github.com/m1/go-localize@latest
         make localize
-        sh scripts/doc_breaking_changes.sh > docs/BREAKING-CHANGES-EXAMPLES.md
+    
+    - if: runner.os == 'Linux'
+      name: Check localized messages are up to date (excluding timestamp)
+      run: |
+        # Compare from line 4 onwards (skipping the timestamp on line 3)
+        git diff --no-index <(tail -n +4 checker/localizations/localizations.go) <(git show HEAD:checker/localizations/localizations.go | tail -n +4) || exit 0
 
     - run: go fmt ./...
     - run: git --no-pager diff --exit-code
