@@ -45,7 +45,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ steps.go-cache-paths.outputs.go-build }}
-        key: ${{ runner.os }}-go-${{ matrix.go }}-build-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-${{ matrix.go }}-build-${{ hashFiles('**/go.sum', 'checker/localizations_src/**/*.yaml') }}
 
     - name: Go Mod Cache
       uses: actions/cache@v4
@@ -60,8 +60,10 @@ jobs:
     - run: git --no-pager diff --exit-code
 
     - if: runner.os == 'Linux'
-      name: Generate breaking-changes examples
+      name: Generate breaking-changes examples and localized messages
       run: |
+        go install github.com/m1/go-localize@latest
+        make localize
         sh scripts/doc_breaking_changes.sh > docs/BREAKING-CHANGES-EXAMPLES.md
 
     - run: go fmt ./...
