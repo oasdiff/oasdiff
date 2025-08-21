@@ -16,6 +16,7 @@ type SecurityChange struct {
 	Comment string
 	Level   Level
 
+	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
 	SourceLineEnd   int
