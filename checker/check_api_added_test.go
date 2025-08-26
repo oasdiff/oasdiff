@@ -28,12 +28,18 @@ func TestApiAdded_DetectsNewPathsAndNewOperations(t *testing.T) {
 	require.Equal(t, "endpoint-added", e0.Id)
 	require.Equal(t, "POST", e0.Operation)
 	require.Equal(t, "/api/test2", e0.Path)
+	require.Empty(t, e0.GetBaseSource())
+	require.Equal(t, e0.GetRevisionSource().File, "../data/new_endpoints/revision.yaml")
+	require.Equal(t, e0.GetRevisionSource().Line, 21)
+	require.Equal(t, e0.GetRevisionSource().Column, 5)
 
 	require.IsType(t, checker.ApiChange{}, errs[1])
 	e1 := errs[1].(checker.ApiChange)
 	require.Equal(t, "endpoint-added", e1.Id)
 	require.Equal(t, "GET", e1.Operation)
 	require.Equal(t, "/api/test3", e1.Path)
+	require.Empty(t, e1.GetBaseSource())
+	require.Equal(t, checker.NewSource("../data/new_endpoints/revision.yaml", 27, 5), e1.GetRevisionSource())
 }
 
 // CL: new paths or path operations
@@ -56,4 +62,6 @@ func TestApiAdded_DetectsModifiedPathsWithPathParam(t *testing.T) {
 	require.Equal(t, "endpoint-added", e0.Id)
 	require.Equal(t, "POST", e0.Operation)
 	require.Equal(t, "/api/test/{id}", e0.Path)
+	require.Empty(t, e0.GetBaseSource())
+	require.Equal(t, checker.NewSource("../data/new_endpoints/revision_with_path_param.yaml", 15, 5), e0.GetRevisionSource())
 }
