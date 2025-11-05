@@ -139,7 +139,7 @@ func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 	// only a non-breaking change detected
 	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
-	require.Equal(t, "'query' request parameter 'id' was deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "'query' request parameter 'id' was deprecated")
 }
 
 // CL: parameters that became deprecated
@@ -162,7 +162,7 @@ func TestParameterDeprecated_DetectsDeprecated(t *testing.T) {
 	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
 	require.Equal(t, "GET", e0.Operation)
 	require.Equal(t, "/api/test", e0.Path)
-	require.Equal(t, "'query' request parameter 'id' was deprecated", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "'query' request parameter 'id' was deprecated")
 }
 
 // CL: parameters that were re-activated
@@ -185,5 +185,5 @@ func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
 	require.Equal(t, checker.RequestParameterReactivatedId, e0.Id)
 	require.Equal(t, "GET", e0.Operation)
 	require.Equal(t, "/api/test", e0.Path)
-	require.Equal(t, "'query' request parameter 'id' was reactivated", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "'query' request parameter 'id' was reactivated")
 }

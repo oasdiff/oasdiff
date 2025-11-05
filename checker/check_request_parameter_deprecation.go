@@ -44,11 +44,13 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 
 					if paramItem.DeprecatedDiff.To == nil || paramItem.DeprecatedDiff.To == false {
 						// not breaking changes
+						stability, _ := getStabilityLevel(op.Extensions)
+						details := formatDeprecationDetails(nil, stability)
 						result = append(result, NewApiChange(
 							RequestParameterReactivatedId,
 							config,
 							[]any{paramLocation, paramName},
-							"",
+							details,
 							operationsSources,
 							op,
 							operation,
@@ -70,6 +72,19 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 						// if deprecation policy is defined and sunset is missing, it's a breaking change
 						if deprecationDays > 0 {
 							result = append(result, getParameterDeprecatedSunsetMissing(opInfo, param))
+						} else {
+							// no policy, report deprecation without sunset as INFO
+							details := formatDeprecationDetails(nil, stability)
+							result = append(result, NewApiChange(
+								RequestParameterDeprecatedId,
+								config,
+								[]any{paramLocation, paramName},
+								details,
+								operationsSources,
+								op,
+								operation,
+								path,
+							))
 						}
 						continue
 					}
@@ -106,11 +121,12 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					}
 
 					// not breaking changes
+					details := formatDeprecationDetails(date, stability)
 					result = append(result, NewApiChange(
 						RequestParameterDeprecatedId,
 						config,
 						[]any{paramLocation, paramName},
-						"",
+						details,
 						operationsSources,
 						op,
 						operation,

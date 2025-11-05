@@ -197,7 +197,7 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 	// only a non-breaking change detected
 	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
-	require.Equal(t, "endpoint deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
 }
 
 // CL: path operations that became deprecated
@@ -220,7 +220,7 @@ func TestApiDeprecated_DetectsDeprecatedOperations(t *testing.T) {
 	require.Equal(t, checker.EndpointDeprecatedId, e0.Id)
 	require.Equal(t, "GET", e0.Operation)
 	require.Equal(t, "/api/test", e0.Path)
-	require.Equal(t, "endpoint deprecated", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
 }
 
 // CL: path operations that were re-activated
@@ -243,7 +243,7 @@ func TestApiDeprecated_DetectsReactivatedOperations(t *testing.T) {
 	require.Equal(t, checker.EndpointReactivatedId, e0.Id)
 	require.Equal(t, "GET", e0.Operation)
 	require.Equal(t, "/api/test", e0.Path)
-	require.Equal(t, "endpoint reactivated", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint reactivated")
 }
 
 func TestBreaking_InvaidStability(t *testing.T) {

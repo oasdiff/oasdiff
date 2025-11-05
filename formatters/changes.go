@@ -23,11 +23,19 @@ type Changes []Change
 func NewChanges(originalChanges checker.Changes, l checker.Localizer) Changes {
 	changes := make(Changes, len(originalChanges))
 	for i, change := range originalChanges {
+		comment := change.GetComment(l)
+		// If comment looks like formatted details (starts with " ("), don't localize it
+		// Just use the raw comment string from the change
+		if apiChange, ok := change.(checker.ApiChange); ok {
+			if len(apiChange.Comment) > 0 && apiChange.Comment[0] == ' ' {
+				comment = apiChange.Comment
+			}
+		}
 		changes[i] = Change{
 			Section:     change.GetSection(),
 			Id:          change.GetId(),
 			Text:        change.GetUncolorizedText(l),
-			Comment:     change.GetComment(l),
+			Comment:     comment,
 			Level:       change.GetLevel(),
 			Operation:   change.GetOperation(),
 			OperationId: change.GetOperationId(),
