@@ -20,7 +20,6 @@ go install github.com/oasdiff/oasdiff@latest
 
 ### Install on macOS with Brew
 ```bash
-brew tap oasdiff/homebrew-oasdiff
 brew install oasdiff
 ```
 
