@@ -19,6 +19,20 @@ type Source struct {
 	Type SourceType
 }
 
+// NewSource creates a Source by categorizing the input path as stdin, URL, or file.
+// This function is intentionally infallible (does not return an error) to allow
+// clean usage in struct literal initialization and avoid error handling boilerplate
+// in hundreds of call sites throughout the codebase.
+//
+// Design rationale:
+//   - Valid http/https URLs are categorized as SourceTypeURL
+//   - "-" is categorized as SourceTypeStdin
+//   - Everything else (including URLs with invalid schemes like ftp://) is categorized as SourceTypeFile
+//   - Actual validation and error handling occurs later when the Loader interface methods
+//     (LoadFromURI, LoadFromFile, LoadFromStdin) are called
+//
+// This design provides clean separation of concerns: NewSource categorizes inputs,
+// while Loader implementations handle validation and produce appropriate error messages.
 func NewSource(path string) *Source {
 	if path == "-" {
 		return &Source{
@@ -27,7 +41,8 @@ func NewSource(path string) *Source {
 		}
 	}
 
-	if uri, err := getURL(path); err == nil {
+	uri, err := getURL(path)
+	if err == nil {
 		return &Source{
 			Path: path,
 			Type: SourceTypeURL,
