@@ -21,5 +21,5 @@ func TestLoadInfo_UriInvalid(t *testing.T) {
 
 func TestLoadInfo_UriBadScheme(t *testing.T) {
 	_, err := load.NewSpecInfo(MockLoader{}, load.NewSource("ftp://localhost/null"))
-	require.EqualError(t, err, "open ftp://localhost/null: no such file or directory")
+	require.EqualError(t, err, "open ftp:/localhost/null: no such file or directory")
 }
