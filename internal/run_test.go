@@ -13,7 +13,7 @@ import (
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/internal"
 	"github.com/stretchr/testify/require"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 func cmdToArgs(cmd string) []string {
