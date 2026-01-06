@@ -52,7 +52,7 @@ get_machine() {
     "i386"|"i86pc"|"x86"|"i686")
       echo "i386" ;;
     "arm64"|"armv6l"|"aarch64")
-      echo "arm64"
+      echo "arm64" ;;
   esac
 }
 
@@ -63,7 +63,6 @@ get_tmp_dir() {
 do_checksum() {
   echo "Validating checksum"
   checksum_url=$(get_checksum_url $version)
-  get_checksum_url $version
   expected_checksum=$(curl -sL $checksum_url | grep $asset_name | awk '{print $1}')
 
   if command_exists sha256sum; then
@@ -122,6 +121,18 @@ main() {
   else
     latest_tag=$(get_latest_release $REPO_NAME)
     version=$(echo $latest_tag | sed 's/v//')
+  fi
+
+  if test -z "$version"; then
+    echo "Error: Failed to get oasdiff version."
+    echo "This could be due to GitHub API rate limiting or network issues."
+    echo ""
+    echo "You can specify a version manually by setting the 'version' environment variable:"
+    echo "  curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=1.11.7 sh"
+    echo ""
+    echo "Or install directly from a release:"
+    echo "  https://github.com/oasdiff/oasdiff/releases"
+    exit 1
   fi
 
   os=$(get_os)
