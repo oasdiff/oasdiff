@@ -1,6 +1,6 @@
 module github.com/oasdiff/oasdiff
 
-go 1.24.0
+go 1.25
 
 require (
 	cloud.google.com/go v0.123.0
