@@ -155,6 +155,30 @@ func TestParameterStyleDefaults(t *testing.T) {
 
 }
 
+// TestIssue767_ExplodedParamWithSameNameProperty tests that an exploded object parameter
+// is not mistakenly matched with a property inside its own schema.
+// Regression test for issue #767 where a parameter named "query" with a property named "query"
+// inside its schema was incorrectly matched as semantically equivalent to itself.
+func TestIssue767_ExplodedParamWithSameNameProperty(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	// Load the same spec twice - should result in no diff
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/issue-767.yml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/issue-767.yml"))
+	require.NoError(t, err)
+
+	// Get the diff
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	// The key assertion: identical specs should have no diff
+	// Before the fix, this incorrectly reported modifications because the "query" parameter
+	// was matched with its own "query" property
+	require.Nil(t, d, "Identical specs should result in no diff")
+}
+
 // TestExplodedParameterLocationMatching tests that parameters with the same name
 // but different locations (In field) are NOT matched by exploded parameter logic.
 // This test verifies the location check at parameters_diff_by_location.go:304
