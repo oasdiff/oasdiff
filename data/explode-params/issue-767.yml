@@ -1,0 +1,21 @@
+openapi: 3.0.3
+paths:
+    /test:
+        parameters:
+            - $ref: '#/components/parameters/QueryParam'
+
+components:
+    parameters:
+        QueryParam:
+            name: query
+            in: query
+            required: false
+            explode: true
+            schema:
+                $ref: '#/components/schemas/QuerySchema'
+    schemas:
+        QuerySchema:
+            type: object
+            properties:
+                query:
+                    type: string
