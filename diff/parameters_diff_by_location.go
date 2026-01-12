@@ -376,6 +376,12 @@ func matchExplodedWithSimple(config *Config, state *state, simpleParams, explode
 				continue
 			}
 
+			// Skip if this parameter is itself an exploded object parameter
+			// We only want to match truly simple parameters with exploded parameters
+			if isExplodedObjectParam(simpleParam) {
+				continue
+			}
+
 			// Only match simple parameters that are in query or cookie locations
 			// to ensure both simple and exploded params are in compatible locations
 			if !isQueryOrCookieParam(simpleParam) {
