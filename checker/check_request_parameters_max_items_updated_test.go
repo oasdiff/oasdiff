@@ -94,3 +94,25 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 		OperationId: "createOneGroup",
 	}, errs[0])
 }
+
+// BC: decreasing maxItems on array parameter schema itself (issue #760)
+func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_array_max_items_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_array_max_items_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ApiChange{
+		Id:          checker.RequestParameterMaxItemsDecreasedId,
+		Args:        []any{"query", "ids", uint64(50), uint64(10)},
+		Level:       checker.ERR,
+		Operation:   "GET",
+		Path:        "/test",
+		Source:      load.NewSource("../data/checker/request_parameter_array_max_items_revision.yaml"),
+		OperationId: "testOperation",
+	}, errs[0])
+}

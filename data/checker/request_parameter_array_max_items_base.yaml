@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      operationId: testOperation
+      parameters:
+        - name: ids
+          in: query
+          schema:
+            type: array
+            maxItems: 50
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
