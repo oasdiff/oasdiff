@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 
 	"cloud.google.com/go/civil"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -30,6 +31,7 @@ type Diff struct {
 	ComponentsDiff   *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
 }
 
+// OperationsSourcesMap maps OpenAPI operations to their source file paths
 type OperationsSourcesMap map[*openapi3.Operation]string
 
 func newDiff() *Diff {
@@ -79,9 +81,8 @@ func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, 
 	}
 
 	operationsSources := *operationsSources1
-	for k, v := range *operationsSources2 {
-		operationsSources[k] = v
-	}
+	maps.Copy(operationsSources, *operationsSources2)
+
 	return diff, &operationsSources, nil
 }
 

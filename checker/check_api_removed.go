@@ -75,8 +75,12 @@ func checkRemovedOperations(pathsDiff *diff.PathsDiff, operationsSources *diff.O
 }
 
 func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
+
+	baseSource := NewSourceFromOrigin(opInfo.operationsSources, opInfo.operation, opInfo.operation.Origin)
+	revisionSource := NewEmptySource()
+
 	if !opInfo.operation.Deprecated {
-		return NewApiChange(
+		return NewApiChangeWithSources(
 			getWithoutDeprecationId(isPath),
 			opInfo.config,
 			nil,
@@ -85,11 +89,13 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
+			baseSource,
+			revisionSource,
 		)
 	}
 	sunset, ok := getSunset(opInfo.operation.Extensions)
 	if !ok {
-		return NewApiChange(
+		return NewApiChangeWithSources(
 			getWithDeprecationId(isPath),
 			opInfo.config,
 			nil,
@@ -98,16 +104,18 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
+			baseSource,
+			revisionSource,
 		)
 	}
 
 	date, err := getSunsetDate(sunset)
 	if err != nil {
-		return getAPIPathSunsetParse(opInfo, err)
+		return getAPIPathSunsetParseWithSources(opInfo, err, baseSource, nil)
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {
-		return NewApiChange(
+		return NewApiChangeWithSources(
 			getBeforeSunsetId(isPath),
 			opInfo.config,
 			[]any{date},
@@ -116,6 +124,8 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
+			baseSource,
+			revisionSource,
 		)
 	}
 	return nil
@@ -131,6 +141,21 @@ func getAPIPathSunsetParse(opInfo opInfo, err error) Change {
 		opInfo.operation,
 		opInfo.method,
 		opInfo.path,
+	)
+}
+
+func getAPIPathSunsetParseWithSources(opInfo opInfo, err error, baseSource, revisionSource *Source) Change {
+	return NewApiChangeWithSources(
+		APIPathSunsetParseId,
+		opInfo.config,
+		[]any{err},
+		"",
+		opInfo.operationsSources,
+		opInfo.operation,
+		opInfo.method,
+		opInfo.path,
+		baseSource,
+		revisionSource,
 	)
 }
 
