@@ -195,6 +195,12 @@ These examples are automatically generated from unit tests.
 [renaming a path parameter is not breaking](../checker/check_breaking_test.go?plain=1#L112)  
 
 ## Examples of info-level changes for changelog
+[Comment field contains both sunset and stability when endpoint deprecated with both](../checker/check_api_deprecation_test.go?plain=1#L292)  
+[Comment field contains both sunset and stability when parameter deprecated with both](../checker/check_request_parameter_deprecation_test.go?plain=1#L212)  
+[Comment field contains sunset details when endpoint deprecated with sunset date](../checker/check_api_deprecation_test.go?plain=1#L271)  
+[Comment field contains sunset details when parameter deprecated with sunset date](../checker/check_request_parameter_deprecation_test.go?plain=1#L191)  
+[Comment field is empty when endpoint deprecated without sunset or stability](../checker/check_api_deprecation_test.go?plain=1#L313)  
+[Comment field is empty when parameter deprecated without sunset or stability](../checker/check_request_parameter_deprecation_test.go?plain=1#L233)  
 [adding 'allOf' subschema to the request body or request body property](../checker/check_request_property_all_of_updated_test.go?plain=1#L12)  
 [adding 'allOf' subschema to the response body or response body property](../checker/check_response_property_all_of_updated_test.go?plain=1#L12)  
 [adding 'anyOf' schema to the request body or request body property](../checker/check_request_property_any_of_updated_test.go?plain=1#L12)  
