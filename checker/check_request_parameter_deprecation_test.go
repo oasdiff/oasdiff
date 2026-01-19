@@ -187,3 +187,66 @@ func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
 	require.Equal(t, "/api/test", e0.Path)
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "'query' request parameter 'id' was reactivated")
 }
+
+// CL: Comment field contains sunset details when parameter deprecated with sunset date
+func TestParameterDeprecated_CommentContainsSunsetDetails(t *testing.T) {
+	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDeprecationCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.Len(t, errs, 1)
+
+	require.IsType(t, checker.ApiChange{}, errs[0])
+	e0 := errs[0].(checker.ApiChange)
+	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
+	require.Equal(t, " (sunset: 9999-08-10)", e0.Comment)
+}
+
+// CL: Comment field contains both sunset and stability when parameter deprecated with both
+func TestParameterDeprecated_CommentContainsBothSunsetAndStability(t *testing.T) {
+	s1, err := open(getParameterDeprecationFile("base-beta-stability.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getParameterDeprecationFile("deprecated-future-beta-stability.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDeprecationCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.Len(t, errs, 1)
+
+	require.IsType(t, checker.ApiChange{}, errs[0])
+	e0 := errs[0].(checker.ApiChange)
+	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
+	require.Equal(t, " (sunset: 9999-08-10, stability: beta)", e0.Comment)
+}
+
+// CL: Comment field is empty when parameter deprecated without sunset or stability
+func TestParameterDeprecated_CommentEmptyWithoutDetails(t *testing.T) {
+	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDeprecationCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.Len(t, errs, 1)
+
+	require.IsType(t, checker.ApiChange{}, errs[0])
+	e0 := errs[0].(checker.ApiChange)
+	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
+	require.Equal(t, "", e0.Comment)
+}
