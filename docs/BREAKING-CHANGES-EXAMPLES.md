@@ -336,6 +336,8 @@ These examples are automatically generated from unit tests.
 [message has no details when parameter deprecated without sunset or stability](../checker/check_request_parameter_deprecation_test.go?plain=1#L229)  
 [message includes both sunset and stability when endpoint deprecated with both](../checker/check_api_deprecation_test.go?plain=1#L290)  
 [message includes both sunset and stability when parameter deprecated with both](../checker/check_request_parameter_deprecation_test.go?plain=1#L210)  
+[message includes stability when endpoint deprecated with stability but no sunset](../checker/check_api_deprecation_test.go?plain=1#L328)  
+[message includes stability when parameter deprecated with stability but no sunset](../checker/check_request_parameter_deprecation_test.go?plain=1#L248)  
 [message includes sunset details when endpoint deprecated with sunset date](../checker/check_api_deprecation_test.go?plain=1#L271)  
 [message includes sunset details when parameter deprecated with sunset date](../checker/check_request_parameter_deprecation_test.go?plain=1#L191)  
 [new header, query and cookie request params](../checker/check_new_request_non_path_parameter_test.go?plain=1#L11)  
