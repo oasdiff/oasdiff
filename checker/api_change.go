@@ -108,10 +108,6 @@ func (c ApiChange) GetComment(l Localizer) string {
 	return l(c.Comment)
 }
 
-func (c ApiChange) GetDetails() string {
-	return c.Details
-}
-
 func (c ApiChange) getDetailsSuffix() string {
 	if c.Details == "" {
 		return ""
