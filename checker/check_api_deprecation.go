@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/civil"
@@ -17,40 +18,28 @@ const (
 	EndpointDeprecatedId         = "endpoint-deprecated"
 )
 
-// formatDeprecationDetails formats optional deprecation details (sunset date and stability level)
-// Returns empty string if neither is set, otherwise returns formatted string like " (sunset: X, stability: Y)"
-func formatDeprecationDetails(sunset interface{}, stability string) string {
+// formatDeprecationDetails formats optional deprecation details (stability level only)
+// Returns empty string if stability is not set or invalid, otherwise returns formatted string like "(stability: X)"
+func formatDeprecationDetails(extensions map[string]interface{}) string {
+	stability, err := getStabilityLevel(extensions)
+	if err != nil || stability == "" {
+		return ""
+	}
+	return "(stability: " + stability + ")"
+}
+
+// formatDeprecationDetailsWithSunset formats deprecation details with sunset date and optional stability level
+// Returns formatted string like "(sunset: X)" or "(sunset: X, stability: Y)"
+func formatDeprecationDetailsWithSunset(sunset civil.Date, extensions map[string]interface{}) string {
 	var parts []string
+	parts = append(parts, fmt.Sprintf("sunset: %s", sunset.String()))
 
-	sunsetStr := ""
-	if sunset != nil {
-		if s, ok := sunset.(string); ok && s != "" {
-			sunsetStr = s
-		} else if date, ok := sunset.(civil.Date); ok {
-			sunsetStr = date.String()
-		}
-	}
-
-	if sunsetStr != "" {
-		parts = append(parts, fmt.Sprintf("sunset: %s", sunsetStr))
-	}
-
-	if stability != "" {
+	stability, err := getStabilityLevel(extensions)
+	if err == nil && stability != "" {
 		parts = append(parts, fmt.Sprintf("stability: %s", stability))
 	}
 
-	if len(parts) == 0 {
-		return ""
-	}
-
-	result := ""
-	for i, part := range parts {
-		if i > 0 {
-			result += ", "
-		}
-		result += part
-	}
-	return " (" + result + ")"
+	return "(" + strings.Join(parts, ", ") + ")"
 }
 
 func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -72,18 +61,16 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 
 			if operationDiff.DeprecatedDiff.To == nil || operationDiff.DeprecatedDiff.To == false {
 				// not breaking changes
-				stability, _ := getStabilityLevel(op.Extensions)
-				details := formatDeprecationDetails(nil, stability)
 				result = append(result, NewApiChange(
 					EndpointReactivatedId,
 					config,
 					nil,
-					details,
+					"",
 					operationsSources,
 					op,
 					operation,
 					path,
-				))
+				).WithDetails(formatDeprecationDetails(op.Extensions)))
 				continue
 			}
 
@@ -102,17 +89,16 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					result = append(result, getAPIDeprecatedSunsetMissing(newOpInfo(config, op, operationsSources, operation, path)))
 				} else {
 					// no policy, report deprecation without sunset as INFO
-					details := formatDeprecationDetails(nil, stability)
 					result = append(result, NewApiChange(
 						EndpointDeprecatedId,
 						config,
 						nil,
-						details,
+						"",
 						operationsSources,
 						op,
 						operation,
 						path,
-					))
+					).WithDetails(formatDeprecationDetails(op.Extensions)))
 				}
 				continue
 			}
@@ -149,17 +135,16 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 			}
 
 			// not breaking changes
-			details := formatDeprecationDetails(date, stability)
 			result = append(result, NewApiChange(
 				EndpointDeprecatedId,
 				config,
 				nil,
-				details,
+				"",
 				operationsSources,
 				op,
 				operation,
 				path,
-			))
+			).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
 		}
 	}
 

@@ -268,8 +268,8 @@ func TestBreaking_InvaidStability(t *testing.T) {
 	require.Equal(t, "../data/deprecation/invalid-stability.yaml", errs[0].GetSource())
 }
 
-// CL: Comment field contains sunset details when endpoint deprecated with sunset date
-func TestApiDeprecated_CommentContainsSunsetDetails(t *testing.T) {
+// CL: message includes sunset details when endpoint deprecated with sunset date
+func TestApiDeprecated_MessageIncludesSunset(t *testing.T) {
 	s1, err := open(getDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
@@ -283,14 +283,12 @@ func TestApiDeprecated_CommentContainsSunsetDetails(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.IsType(t, checker.ApiChange{}, errs[0])
-	e0 := errs[0].(checker.ApiChange)
-	require.Equal(t, checker.EndpointDeprecatedId, e0.Id)
-	require.Equal(t, " (sunset: 9999-08-10)", e0.Comment)
+	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
+	require.Equal(t, "endpoint deprecated (sunset: 9999-08-10)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: Comment field contains both sunset and stability when endpoint deprecated with both
-func TestApiDeprecated_CommentContainsBothSunsetAndStability(t *testing.T) {
+// CL: message includes both sunset and stability when endpoint deprecated with both
+func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	s1, err := open(getDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
@@ -304,14 +302,12 @@ func TestApiDeprecated_CommentContainsBothSunsetAndStability(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.IsType(t, checker.ApiChange{}, errs[0])
-	e0 := errs[0].(checker.ApiChange)
-	require.Equal(t, checker.EndpointDeprecatedId, e0.Id)
-	require.Equal(t, " (sunset: 9999-08-10, stability: beta)", e0.Comment)
+	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
+	require.Equal(t, "endpoint deprecated (sunset: 9999-08-10, stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: Comment field is empty when endpoint deprecated without sunset or stability
-func TestApiDeprecated_CommentEmptyWithoutDetails(t *testing.T) {
+// CL: message has no details when endpoint deprecated without sunset or stability
+func TestApiDeprecated_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(getDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
@@ -325,8 +321,25 @@ func TestApiDeprecated_CommentEmptyWithoutDetails(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.IsType(t, checker.ApiChange{}, errs[0])
-	e0 := errs[0].(checker.ApiChange)
-	require.Equal(t, checker.EndpointDeprecatedId, e0.Id)
-	require.Equal(t, "", e0.Comment)
+	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
+	require.Equal(t, "endpoint deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// CL: message includes stability when endpoint deprecated with stability but no sunset
+func TestApiDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
+	s1, err := open(getDeprecationFile("base-beta-stability.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getDeprecationFile("deprecated-no-sunset-beta-stability.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIDeprecationCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.Len(t, errs, 1)
+
+	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
+	require.Equal(t, "endpoint deprecated (stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

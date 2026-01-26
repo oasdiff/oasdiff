@@ -17,6 +17,7 @@ type ApiChange struct {
 	Id          string
 	Args        []any
 	Comment     string
+	Details     string
 	Level       Level
 	Operation   string
 	OperationId string
@@ -46,6 +47,12 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 			Attributes: getAttributes(config, operation),
 		},
 	}
+}
+
+// WithDetails returns a copy of the ApiChange with Details set
+func (c ApiChange) WithDetails(details string) ApiChange {
+	c.Details = details
+	return c
 }
 
 func getAttributes(config *Config, operation *openapi3.Operation) map[string]any {
@@ -86,7 +93,7 @@ func (c ApiChange) GetId() string {
 }
 
 func (c ApiChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...)
+	return l(c.Id, colorizedValues(c.Args)...) + c.getDetailsSuffix()
 }
 
 func (c ApiChange) GetArgs() []any {
@@ -94,11 +101,18 @@ func (c ApiChange) GetArgs() []any {
 }
 
 func (c ApiChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...)
+	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix()
 }
 
 func (c ApiChange) GetComment(l Localizer) string {
 	return l(c.Comment)
+}
+
+func (c ApiChange) getDetailsSuffix() string {
+	if c.Details == "" {
+		return ""
+	}
+	return " " + c.Details
 }
 
 func (c ApiChange) GetLevel() Level {
