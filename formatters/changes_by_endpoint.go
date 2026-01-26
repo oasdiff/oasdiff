@@ -14,21 +14,14 @@ func GroupChanges(changes checker.Changes, l checker.Localizer) ChangesByEndpoin
 	apiChanges := ChangesByEndpoint{}
 
 	for _, change := range changes {
-		switch apiChange := change.(type) {
+		switch change.(type) {
 		case checker.ApiChange:
 			ep := Endpoint{Path: change.GetPath(), Operation: change.GetOperation()}
-			// Get comment directly from ApiChange to avoid localization
-			comment := ""
-			if len(apiChange.Comment) > 0 && apiChange.Comment[0] == ' ' {
-				comment = apiChange.Comment
-			} else {
-				comment = change.GetComment(l)
-			}
 
 			changeEntry := Change{
 				IsBreaking: change.IsBreaking(),
 				Text:       change.GetUncolorizedText(l),
-				Comment:    comment,
+				Comment:    change.GetComment(l),
 			}
 
 			if c, ok := apiChanges[ep]; ok {

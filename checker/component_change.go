@@ -57,6 +57,10 @@ func (c ComponentChange) GetComment(l Localizer) string {
 	return l(c.Comment)
 }
 
+func (c ComponentChange) GetDetails() string {
+	return ""
+}
+
 func (c ComponentChange) GetLevel() Level {
 	return c.Level
 }

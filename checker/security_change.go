@@ -56,6 +56,10 @@ func (c SecurityChange) GetComment(l Localizer) string {
 	return l(c.Comment)
 }
 
+func (c SecurityChange) GetDetails() string {
+	return ""
+}
+
 func (c SecurityChange) GetLevel() Level {
 	return c.Level
 }

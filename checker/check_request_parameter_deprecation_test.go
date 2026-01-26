@@ -188,8 +188,8 @@ func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "'query' request parameter 'id' was reactivated")
 }
 
-// CL: Comment field contains sunset details when parameter deprecated with sunset date
-func TestParameterDeprecated_CommentContainsSunsetDetails(t *testing.T) {
+// CL: message includes sunset details when parameter deprecated with sunset date
+func TestParameterDeprecated_MessageIncludesSunset(t *testing.T) {
 	s1, err := open(getParameterDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
@@ -203,14 +203,12 @@ func TestParameterDeprecated_CommentContainsSunsetDetails(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.IsType(t, checker.ApiChange{}, errs[0])
-	e0 := errs[0].(checker.ApiChange)
-	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
-	require.Equal(t, " (sunset: 9999-08-10)", e0.Comment)
+	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
+	require.Equal(t, "'query' request parameter 'id' was deprecated (sunset: 9999-08-10)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: Comment field contains both sunset and stability when parameter deprecated with both
-func TestParameterDeprecated_CommentContainsBothSunsetAndStability(t *testing.T) {
+// CL: message includes both sunset and stability when parameter deprecated with both
+func TestParameterDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	s1, err := open(getParameterDeprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
 
@@ -224,14 +222,12 @@ func TestParameterDeprecated_CommentContainsBothSunsetAndStability(t *testing.T)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.IsType(t, checker.ApiChange{}, errs[0])
-	e0 := errs[0].(checker.ApiChange)
-	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
-	require.Equal(t, " (sunset: 9999-08-10, stability: beta)", e0.Comment)
+	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
+	require.Equal(t, "'query' request parameter 'id' was deprecated (sunset: 9999-08-10, stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: Comment field is empty when parameter deprecated without sunset or stability
-func TestParameterDeprecated_CommentEmptyWithoutDetails(t *testing.T) {
+// CL: message has no details when parameter deprecated without sunset or stability
+func TestParameterDeprecated_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(getParameterDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
@@ -245,8 +241,6 @@ func TestParameterDeprecated_CommentEmptyWithoutDetails(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.IsType(t, checker.ApiChange{}, errs[0])
-	e0 := errs[0].(checker.ApiChange)
-	require.Equal(t, checker.RequestParameterDeprecatedId, e0.Id)
-	require.Equal(t, "", e0.Comment)
+	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
+	require.Equal(t, "'query' request parameter 'id' was deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

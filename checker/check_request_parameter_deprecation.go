@@ -48,12 +48,12 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							RequestParameterReactivatedId,
 							config,
 							[]any{paramLocation, paramName},
-							formatDeprecationDetails(op.Extensions),
+							"",
 							operationsSources,
 							op,
 							operation,
 							path,
-						))
+						).WithDetails(formatDeprecationDetails(op.Extensions)))
 						continue
 					}
 
@@ -76,12 +76,12 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								RequestParameterDeprecatedId,
 								config,
 								[]any{paramLocation, paramName},
-								formatDeprecationDetails(op.Extensions),
+								"",
 								operationsSources,
 								op,
 								operation,
 								path,
-							))
+							).WithDetails(formatDeprecationDetails(op.Extensions)))
 						}
 						continue
 					}
@@ -122,12 +122,12 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 						RequestParameterDeprecatedId,
 						config,
 						[]any{paramLocation, paramName},
-						formatDeprecationDetailsWithSunset(date, op.Extensions),
+						"",
 						operationsSources,
 						op,
 						operation,
 						path,
-					))
+					).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
 				}
 			}
 		}
