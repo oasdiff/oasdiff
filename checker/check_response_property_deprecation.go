@@ -1,6 +1,9 @@
 package checker
 
 import (
+	"time"
+
+	"cloud.google.com/go/civil"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -8,6 +11,8 @@ const (
 	ResponsePropertyDeprecatedId              = "response-property-deprecated"
 	ResponsePropertyDeprecatedSunsetMissingId = "response-property-deprecated-sunset-missing"
 	ResponsePropertyDeprecatedInvalidId       = "response-property-deprecated-sunset-invalid"
+	ResponsePropertyReactivatedId             = "response-property-reactivated"
+	ResponsePropertySunsetDateTooSmallId      = "response-property-sunset-date-too-small"
 )
 
 // ResponsePropertyDeprecationCheck detects deprecated properties in response bodies
@@ -25,10 +30,20 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
+			op := operationItem.Revision
+
+			stability, err := getStabilityLevel(op.Extensions)
+			if err != nil {
+				// handled in CheckBackwardCompatibility
+				continue
+			}
+
+			deprecationDays := getDeprecationDays(config, stability)
+
 			// Track reported properties to avoid duplicates per operation
 			reportedProperties := make(map[string]bool)
 
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
+			for _, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff == nil ||
 					responseDiff.ContentDiff == nil ||
 					responseDiff.ContentDiff.MediaTypeModified == nil {
@@ -39,14 +54,8 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							// Check if property was newly deprecated
+							// Check if deprecation status changed
 							if propertyDiff.DeprecatedDiff == nil {
-								return
-							}
-							if propertyDiff.DeprecatedDiff.To != true {
-								return
-							}
-							if propertyDiff.DeprecatedDiff.From != nil && propertyDiff.DeprecatedDiff.From != false {
 								return
 							}
 
@@ -58,14 +67,83 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							}
 							reportedProperties[propName] = true
 
-							changeId, args := getResponsePropertyDeprecationId(propName, propertyDiff, responseStatus)
+							// Check if property was reactivated (un-deprecated)
+							if propertyDiff.DeprecatedDiff.To == nil || propertyDiff.DeprecatedDiff.To == false {
+								result = append(result, NewApiChange(
+									ResponsePropertyReactivatedId,
+									config,
+									[]any{propName},
+									"",
+									operationsSources,
+									op,
+									operation,
+									path,
+								))
+								return
+							}
+
+							// Property was newly deprecated
+							if propertyDiff.DeprecatedDiff.From != nil && propertyDiff.DeprecatedDiff.From != false {
+								return
+							}
+
+							sunset, ok := getSunset(propertyDiff.Revision.Extensions)
+							if !ok {
+								// if deprecation policy is defined and sunset is missing, it's a breaking change
+								if deprecationDays > 0 {
+									result = append(result, NewApiChange(
+										ResponsePropertyDeprecatedSunsetMissingId,
+										config,
+										[]any{propName},
+										"",
+										operationsSources,
+										op,
+										operation,
+										path,
+									))
+								}
+								return
+							}
+
+							date, err := getSunsetDate(sunset)
+							if err != nil {
+								result = append(result, NewApiChange(
+									ResponsePropertyDeprecatedInvalidId,
+									config,
+									[]any{propName, err},
+									"",
+									operationsSources,
+									op,
+									operation,
+									path,
+								))
+								return
+							}
+
+							days := date.DaysSince(civil.DateOf(time.Now()))
+
+							if days < int(deprecationDays) {
+								result = append(result, NewApiChange(
+									ResponsePropertySunsetDateTooSmallId,
+									config,
+									[]any{propName, date, deprecationDays},
+									"",
+									operationsSources,
+									op,
+									operation,
+									path,
+								))
+								return
+							}
+
+							// not breaking changes
 							result = append(result, NewApiChange(
-								changeId,
+								ResponsePropertyDeprecatedId,
 								config,
-								args,
+								[]any{propName, date},
 								"",
 								operationsSources,
-								operationItem.Revision,
+								op,
 								operation,
 								path,
 							))
@@ -75,19 +153,4 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 		}
 	}
 	return result
-}
-
-func getResponsePropertyDeprecationId(propName string, propertyDiff *diff.SchemaDiff, responseStatus string) (string, []any) {
-	if propertyDiff == nil || propertyDiff.Revision == nil {
-		return ResponsePropertyDeprecatedSunsetMissingId, []any{propName, responseStatus}
-	}
-	sunset, ok := getSunset(propertyDiff.Revision.Extensions)
-	if !ok {
-		return ResponsePropertyDeprecatedSunsetMissingId, []any{propName, responseStatus}
-	}
-	date, err := getSunsetDate(sunset)
-	if err != nil {
-		return ResponsePropertyDeprecatedInvalidId, []any{propName, responseStatus, err}
-	}
-	return ResponsePropertyDeprecatedId, []any{propName, responseStatus, date}
 }

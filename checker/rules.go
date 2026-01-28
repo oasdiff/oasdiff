@@ -71,12 +71,16 @@ func GetAllRules() BackwardCompatibilityRules {
 	return BackwardCompatibilityRules{
 		// Request property deprecation checks
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
-		newBackwardCompatibilityRule(RequestPropertyDeprecatedSunsetMissingId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
-		newBackwardCompatibilityRule(RequestPropertyDeprecatedInvalidId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyDeprecatedSunsetMissingId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyDeprecatedInvalidId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyReactivatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertySunsetDateTooSmallId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		// Response property deprecation checks
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
-		newBackwardCompatibilityRule(ResponsePropertyDeprecatedSunsetMissingId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
-		newBackwardCompatibilityRule(ResponsePropertyDeprecatedInvalidId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyDeprecatedSunsetMissingId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyDeprecatedInvalidId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyReactivatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertySunsetDateTooSmallId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
 		// APIAddedCheck
 		newBackwardCompatibilityRule(EndpointAddedId, INFO, APIAddedCheck, DirectionNone, LocationNone, ActionAdd),
 		// APIComponentsSecurityUpdatedCheck
