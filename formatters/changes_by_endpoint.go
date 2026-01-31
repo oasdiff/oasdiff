@@ -17,16 +17,17 @@ func GroupChanges(changes checker.Changes, l checker.Localizer) ChangesByEndpoin
 		switch change.(type) {
 		case checker.ApiChange:
 			ep := Endpoint{Path: change.GetPath(), Operation: change.GetOperation()}
+
+			changeEntry := Change{
+				IsBreaking: change.IsBreaking(),
+				Text:       change.GetUncolorizedText(l),
+				Comment:    change.GetComment(l),
+			}
+
 			if c, ok := apiChanges[ep]; ok {
-				*c = append(*c, Change{
-					IsBreaking: change.IsBreaking(),
-					Text:       change.GetUncolorizedText(l),
-				})
+				*c = append(*c, changeEntry)
 			} else {
-				apiChanges[ep] = &Changes{Change{
-					IsBreaking: change.IsBreaking(),
-					Text:       change.GetUncolorizedText(l),
-				}}
+				apiChanges[ep] = &Changes{changeEntry}
 			}
 		}
 	}
