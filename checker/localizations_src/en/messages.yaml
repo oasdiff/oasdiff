@@ -26,6 +26,16 @@ api-sunset-date-too-small: "sunset date %s is too small, must be at least %s day
 endpoint-added: endpoint added
 endpoint-deprecated: endpoint deprecated
 endpoint-reactivated: endpoint reactivated
+request-property-deprecated: "request property %s deprecated"
+request-property-deprecated-sunset-missing: "request property %s deprecated without sunset date"
+request-property-deprecated-sunset-invalid: "request property %s deprecated with invalid sunset date: %s"
+request-property-reactivated: "request property %s reactivated"
+request-property-sunset-date-too-small: "request property %s sunset date %s is too small, must be at least %s days from now"
+response-property-deprecated: "response property %s deprecated"
+response-property-deprecated-sunset-missing: "response property %s deprecated without sunset date"
+response-property-deprecated-sunset-invalid: "response property %s deprecated with invalid sunset date: %s"
+response-property-reactivated: "response property %s reactivated"
+response-property-sunset-date-too-small: "response property %s sunset date %s is too small, must be at least %s days from now"
 api-path-removed-without-deprecation: api path removed without deprecation
 api-path-removed-with-deprecation: api path removed with deprecation
 api-path-removed-before-sunset: api path removed before the sunset date %s
