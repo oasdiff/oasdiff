@@ -14,6 +14,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TestResponse'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
 components:
   schemas:
     BaseSchema:

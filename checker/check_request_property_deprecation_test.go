@@ -188,3 +188,40 @@ func TestRequestPropertyDeprecation_DetectsReactivated(t *testing.T) {
 	require.Equal(t, "POST", e0.Operation)
 	require.Equal(t, "/test", e0.Path)
 }
+
+// BC: deprecating a property with an invalid sunset date format is breaking
+func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
+	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getPropertyDeprecationFile("property_deprecated_invalid_sunset.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck)
+	errs := checker.CheckBackwardCompatibility(c, d, osm)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestPropertyDeprecatedInvalidId, errs[0].GetId())
+}
+
+// CL: deprecating a request property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
+func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
+	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+
+	// Set invalid stability level on the operation
+	s2.Spec.Paths.Value("/test").Post.Extensions[diff.XStabilityLevelExtension] = toJson(t, "invalid-stability")
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	config := checker.NewConfig(nil)
+	changes := checker.RequestPropertyDeprecationCheck(d, osm, config)
+
+	// Should return no changes because invalid stability causes continue
+	require.Empty(t, changes)
+}

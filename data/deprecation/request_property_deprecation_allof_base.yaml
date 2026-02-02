@@ -13,6 +13,9 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/TestRequest'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/TestRequest'
       responses:
         '200':
           description: Success

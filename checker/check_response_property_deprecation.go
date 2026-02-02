@@ -82,11 +82,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								return
 							}
 
-							// Property was newly deprecated
-							if propertyDiff.DeprecatedDiff.From != nil && propertyDiff.DeprecatedDiff.From != false {
-								return
-							}
-
+							// Property was newly deprecated (To=true means deprecated now)
 							sunset, ok := getSunset(propertyDiff.Revision.Extensions)
 							if !ok {
 								// if deprecation policy is defined and sunset is missing, it's a breaking change
