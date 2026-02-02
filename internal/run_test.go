@@ -46,14 +46,14 @@ func Test_InvalidFlag(t *testing.T) {
 func Test_BasicDiff(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml --exclude-elements endpoints"), &stdout, io.Discard))
-	var bc interface{}
+	var bc any
 	require.Nil(t, yaml.Unmarshal(stdout.Bytes(), &bc))
 }
 
 func Test_DiffJson(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml -f json --exclude-elements endpoints"), &stdout, io.Discard))
-	var bc interface{}
+	var bc any
 	require.Nil(t, json.Unmarshal(stdout.Bytes(), &bc))
 }
 
@@ -115,21 +115,21 @@ func Test_BasicBreakingChanges(t *testing.T) {
 func Test_BreakingChangesYaml(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml --format yaml"), &stdout, io.Discard))
-	var bc interface{}
+	var bc any
 	require.Nil(t, yaml.Unmarshal(stdout.Bytes(), &bc))
 }
 
 func Test_BreakingChangesJson(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml --format json"), &stdout, io.Discard))
-	var bc interface{}
+	var bc any
 	require.Nil(t, json.Unmarshal(stdout.Bytes(), &bc))
 }
 
 func Test_BreakingChangesText(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml"), &stdout, io.Discard))
-	var bc interface{}
+	var bc any
 	require.Error(t, json.Unmarshal(stdout.Bytes(), &bc))
 	require.Error(t, yaml.Unmarshal(stdout.Bytes(), &bc))
 }
@@ -193,9 +193,9 @@ func Test_BreakingChangesInvalidIgnoreFile(t *testing.T) {
 func Test_ComposedMode(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/composed/base/*.yaml ../data/composed/revision/*.yaml --composed --exclude-elements endpoints,extensions"), &stdout, io.Discard))
-	var bc interface{}
+	var bc any
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &bc))
-	require.Equal(t, map[string]interface{}{"paths": map[string]interface{}{"deleted": []interface{}{"/api/old-test"}}}, bc)
+	require.Equal(t, map[string]any{"paths": map[string]any{"deleted": []any{"/api/old-test"}}}, bc)
 }
 
 func Test_ComposedModeStdin(t *testing.T) {
@@ -248,7 +248,7 @@ func Test_ChangelogWithAttributes(t *testing.T) {
 	cl := formatters.Changes{}
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &cl))
 	require.Len(t, cl, 21)
-	require.Equal(t, map[string]interface{}{"x-beta": true, "x-extension-test": interface{}(nil)}, cl[12].Attributes)
+	require.Equal(t, map[string]any{"x-beta": true, "x-extension-test": any(nil)}, cl[12].Attributes)
 }
 
 func Test_BreakingChangesChangelogOptionalCheckersAreInfoLevel(t *testing.T) {

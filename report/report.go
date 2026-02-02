@@ -22,24 +22,24 @@ func (r *report) indent() *report {
 	}
 }
 
-func (r *report) print(output ...interface{}) (n int, err error) {
+func (r *report) print(output ...any) (n int, err error) {
 	return fmt.Fprintln(r.Writer, addPrefix(r.level, output)...)
 }
 
-func addPrefix(level int, output []interface{}) []interface{} {
+func addPrefix(level int, output []any) []any {
 	return append(getPrefix(level), output...)
 }
 
-func getPrefix(level int) []interface{} {
+func getPrefix(level int) []any {
 	if level == 1 {
-		return []interface{}{"-"}
+		return []any{"-"}
 	}
 
 	if level > 1 {
-		return []interface{}{strings.Repeat("  ", level-1) + "-"}
+		return []any{strings.Repeat("  ", level-1) + "-"}
 	}
 
-	return []interface{}{}
+	return []any{}
 }
 
 // output prints the diff
@@ -509,7 +509,7 @@ func (r *report) printProperties(d *diff.SchemasDiff) {
 	}
 }
 
-func quote(value interface{}) interface{} {
+func quote(value any) any {
 	if value == nil {
 		return "null"
 	}
@@ -741,11 +741,11 @@ func (r *report) printTitle(title string, count int) {
 	r.print(strings.Repeat("-", len(text)))
 }
 
-func (r *report) printMessage(d diff.IDiff, output ...interface{}) {
+func (r *report) printMessage(d diff.IDiff, output ...any) {
 	r.printConditional(!d.Empty(), output...)
 }
 
-func (r *report) printConditional(b bool, output ...interface{}) {
+func (r *report) printConditional(b bool, output ...any) {
 	if b {
 		r.print(output...)
 	}

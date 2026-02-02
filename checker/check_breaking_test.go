@@ -291,7 +291,7 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	s2, err := open("../data/enums/request-body-enum.yaml")
 	require.NoError(t, err)
 
-	s2.Spec.Paths.Value("/api/v2/changeOfRequestFieldValueTiedToEnumTest").Get.RequestBody.Value.Content["application/json"].Schema.Value.Enum = []interface{}{}
+	s2.Spec.Paths.Value("/api/v2/changeOfRequestFieldValueTiedToEnumTest").Get.RequestBody.Value.Content["application/json"].Schema.Value.Enum = []any{}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)

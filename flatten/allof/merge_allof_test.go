@@ -985,19 +985,19 @@ func TestMerge_EnumContained(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"1", nil, 1},
+							Enum: []any{"1", nil, 1},
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"1"},
+							Enum: []any{"1"},
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.ElementsMatch(t, []interface{}{"1"}, merged.Enum)
+	require.ElementsMatch(t, []any{"1"}, merged.Enum)
 }
 
 // enum merge fails if the intersection of enum values is empty.
@@ -1009,13 +1009,13 @@ func TestMerge_EnumNoIntersection(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"1", nil},
+							Enum: []any{"1", nil},
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"2"},
+							Enum: []any{"2"},
 						},
 					},
 				},
@@ -1618,9 +1618,9 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 	apFalse := false
 	apTrue := true
 
-	var firstPropEnum []interface{}
-	var secondPropEnum []interface{}
-	var thirdPropEnum []interface{}
+	var firstPropEnum []any
+	var secondPropEnum []any
+	var thirdPropEnum []any
 
 	firstPropEnum = append(firstPropEnum, "1", "5", "3")
 	secondPropEnum = append(secondPropEnum, "1", "8", "7")
@@ -1689,9 +1689,9 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 func TestMerge_AdditionalProperties_True(t *testing.T) {
 	apTrue := true
 
-	var firstPropEnum []interface{}
-	var secondPropEnum []interface{}
-	var thirdPropEnum []interface{}
+	var firstPropEnum []any
+	var secondPropEnum []any
+	var thirdPropEnum []any
 
 	firstPropEnum = append(firstPropEnum, "1", "5", "3")
 	secondPropEnum = append(secondPropEnum, "1", "8", "7")

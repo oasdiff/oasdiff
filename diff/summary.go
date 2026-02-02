@@ -69,6 +69,6 @@ func (summary *Summary) add(detail detailWithSummary, detailName DetailName) {
 	}
 }
 
-func isNilPointer(i interface{}) bool {
+func isNilPointer(i any) bool {
 	return reflect.ValueOf(i).Kind() == reflect.Ptr && reflect.ValueOf(i).IsNil()
 }

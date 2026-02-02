@@ -146,7 +146,7 @@ func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, 
 	)
 }
 
-func getStabilityLevel(i map[string]interface{}) (string, error) {
+func getStabilityLevel(i map[string]any) (string, error) {
 	if i == nil || i[diff.XStabilityLevelExtension] == nil {
 		return "", nil
 	}

@@ -25,7 +25,7 @@ func propertyFullName(propertyPath string, propertyNames ...string) string {
 	return propertyFullName
 }
 
-func interfaceToString(arg interface{}) string {
+func interfaceToString(arg any) string {
 	if arg == nil {
 		return "undefined"
 	}
@@ -207,7 +207,7 @@ func processDeletedPropertiesDiff(propertyPath string, propertyName string, sche
 	}
 }
 
-func IsIncreased(from interface{}, to interface{}) bool {
+func IsIncreased(from any, to any) bool {
 	fromUint64, ok := from.(uint64)
 	toUint64, okTo := to.(uint64)
 	if ok && okTo {
@@ -229,7 +229,7 @@ func IsDecreasedValue(diff *diff.ValueDiff) bool {
 	return IsDecreased(diff.From, diff.To)
 }
 
-func IsDecreased(from interface{}, to interface{}) bool {
+func IsDecreased(from any, to any) bool {
 	fromUint64, ok := from.(uint64)
 	toUint64, okTo := to.(uint64)
 	if ok && okTo {

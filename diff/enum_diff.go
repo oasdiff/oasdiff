@@ -13,7 +13,7 @@ type EnumDiff struct {
 }
 
 // EnumValues is a list of enum values
-type EnumValues []interface{}
+type EnumValues []any
 
 func newEnumDiff() *EnumDiff {
 	return &EnumDiff{
@@ -70,7 +70,7 @@ func getEnumDiffInternal(enum1, enum2 EnumValues) *EnumDiff {
 	return diff
 }
 
-func findValue(value interface{}, enum EnumValues) bool {
+func findValue(value any, enum EnumValues) bool {
 	for _, other := range enum {
 		if reflect.DeepEqual(value, other) {
 			return true

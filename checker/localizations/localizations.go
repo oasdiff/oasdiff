@@ -2335,7 +2335,7 @@ var localizations = map[string]string{
 	"ru.messages.total-errors":                                                        "%d критические изменения: %d %s, %d %s\n",
 }
 
-type Replacements map[string]interface{}
+type Replacements map[string]any
 
 type Localizer struct {
 	Locale         string

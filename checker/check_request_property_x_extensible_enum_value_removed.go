@@ -39,11 +39,11 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 						if propertyDiff.ExtensionsDiff.Modified[diff.XExtensibleEnumExtension] == nil {
 							return
 						}
-						from, ok := propertyDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]interface{})
+						from, ok := propertyDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]any)
 						if !ok {
 							return
 						}
-						to, ok := propertyDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]interface{})
+						to, ok := propertyDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]any)
 						if !ok {
 							return
 						}

@@ -16,7 +16,7 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 	s2, err := open("../data/checker/response_property_enum_added_base.yaml")
 	require.NoError(t, err)
 
-	s2.Spec.Components.Schemas["GroupView"].Value.Properties["data"].Value.Properties["typeEnum"].Value.Enum = []interface{}{"Test"}
+	s2.Spec.Components.Schemas["GroupView"].Value.Properties["data"].Value.Properties["typeEnum"].Value.Enum = []any{"Test"}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestResponseWriteOnlyPropertyEnumValueAdded(t *testing.T) {
 	s2, err := open("../data/checker/response_property_enum_added_base.yaml")
 	require.NoError(t, err)
 
-	s2.Spec.Components.Schemas["GroupView"].Value.Properties["data"].Value.Properties["writeOnlyEnum"].Value.Enum = []interface{}{"Test"}
+	s2.Spec.Components.Schemas["GroupView"].Value.Properties["data"].Value.Properties["writeOnlyEnum"].Value.Enum = []any{"Test"}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
