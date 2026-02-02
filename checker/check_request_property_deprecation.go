@@ -93,6 +93,18 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 									operation,
 									path,
 								))
+							} else {
+								// no policy, report deprecation without sunset as INFO
+								result = append(result, NewApiChange(
+									RequestPropertyDeprecatedId,
+									config,
+									[]any{propName},
+									"",
+									operationsSources,
+									op,
+									operation,
+									path,
+								).WithDetails(formatDeprecationDetails(op.Extensions)))
 							}
 							return
 						}
@@ -132,13 +144,13 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 						result = append(result, NewApiChange(
 							RequestPropertyDeprecatedId,
 							config,
-							[]any{propName, date},
+							[]any{propName},
 							"",
 							operationsSources,
 							op,
 							operation,
 							path,
-						))
+						).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
 					})
 			}
 		}
