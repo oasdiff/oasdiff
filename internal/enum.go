@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type enumVal interface {

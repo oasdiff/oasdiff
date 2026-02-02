@@ -2,7 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/diff"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (
