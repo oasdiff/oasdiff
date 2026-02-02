@@ -1,6 +1,9 @@
 package report
 
 import (
+	"maps"
+	"slices"
+
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/utils"
 )
@@ -19,11 +22,5 @@ type DiffT interface {
 }
 
 func getKeys[diff DiffT](m map[string]diff) utils.StringList {
-	keys := make(utils.StringList, len(m))
-	i := 0
-	for k := range m {
-		keys[i] = k
-		i++
-	}
-	return keys.Sort()
+	return utils.StringList(slices.Sorted(maps.Keys(m)))
 }

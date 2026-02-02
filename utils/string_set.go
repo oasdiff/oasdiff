@@ -1,16 +1,15 @@
 package utils
 
+import (
+	"maps"
+	"slices"
+)
+
 // StringSet is a set of string values
 type StringSet map[string]struct{}
 
 func (stringSet StringSet) ToStringList() StringList {
-	result := make(StringList, len(stringSet))
-	i := 0
-	for s := range stringSet {
-		result[i] = s
-		i++
-	}
-	return result
+	return StringList(slices.Collect(maps.Keys(stringSet)))
 }
 
 func (stringSet StringSet) Add(s string) {
