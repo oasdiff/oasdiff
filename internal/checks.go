@@ -3,13 +3,12 @@ package internal
 import (
 	"fmt"
 	"io"
-	"sort"
+	"slices"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
 )
 
 const checksCmd = "checks"
@@ -79,7 +78,7 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 	}
 
 	// render
-	sort.Sort(checks)
+	slices.SortFunc(checks, checks.SortFunc)
 	bytes, err := formatter.RenderChecks(checks, formatters.NewRenderOpts())
 	if err != nil {
 		return getErrFailedPrint("checks "+format, err)

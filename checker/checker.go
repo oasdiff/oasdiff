@@ -4,7 +4,7 @@ package checker
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
@@ -44,7 +44,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		}
 	}
 
-	sort.Sort(filteredResult)
+	slices.SortFunc(filteredResult, CompareChanges)
 	return filteredResult
 }
 

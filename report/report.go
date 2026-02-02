@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/oasdiff/oasdiff/diff"
@@ -90,14 +90,14 @@ func (r *report) output(d *diff.Diff) {
 func (r *report) printEndpoints(d *diff.EndpointsDiff) {
 
 	r.printTitle("New Endpoints", len(d.Added))
-	sort.Sort(d.Added)
+	slices.SortFunc(d.Added, d.Added.SortFunc)
 	for _, added := range d.Added {
 		r.print(added.Method, added.Path, " ")
 	}
 	r.print("")
 
 	r.printTitle("Deleted Endpoints", len(d.Deleted))
-	sort.Sort(d.Deleted)
+	slices.SortFunc(d.Deleted, d.Deleted.SortFunc)
 	for _, deleted := range d.Deleted {
 		r.print(deleted.Method, deleted.Path, " ")
 	}
@@ -105,7 +105,7 @@ func (r *report) printEndpoints(d *diff.EndpointsDiff) {
 
 	r.printTitle("Modified Endpoints", len(d.Modified))
 	keys := d.Modified.ToEndpoints()
-	sort.Sort(keys)
+	slices.SortFunc(keys, keys.SortFunc)
 	for _, endpoint := range keys {
 		r.print(endpoint.Method, endpoint.Path)
 		r.indent().printMethod(d.Modified[endpoint])
@@ -118,12 +118,12 @@ func (r *report) printServers(d *diff.ServersDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, added := range d.Added {
 		r.print("New server:", added)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
 		r.print("Deleted server:", deleted)
 	}
@@ -181,7 +181,7 @@ func (r *report) printParams(d *diff.ParametersDiffByLocation) {
 
 	for _, location := range diff.ParamLocations {
 		params := d.Added[location]
-		sort.Strings(params)
+		slices.Sort(params)
 		for _, param := range params {
 			r.print("New", location, "param:", param)
 		}
@@ -189,7 +189,7 @@ func (r *report) printParams(d *diff.ParametersDiffByLocation) {
 
 	for _, location := range diff.ParamLocations {
 		params := d.Deleted[location]
-		sort.Strings(params)
+		slices.Sort(params)
 		for _, param := range params {
 			r.print("Deleted", location, "param:", param)
 		}
@@ -244,12 +244,12 @@ func (r *report) printExamples(d *diff.ExamplesDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, example := range d.Added {
 		r.print("New example:", example)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, example := range d.Deleted {
 		r.print("Deleted example:", example)
 	}
@@ -281,12 +281,12 @@ func (r *report) printRequiredProperties(d *diff.RequiredPropertiesDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, added := range d.Added {
 		r.print("New required property:", added)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
 		r.print("Deleted required property:", deleted)
 	}
@@ -318,12 +318,12 @@ func (r *report) printVariables(d *diff.VariablesDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, variable := range d.Added {
 		r.print("New variable:", variable)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, variable := range d.Deleted {
 		r.print("Deleted variable:", variable)
 	}
@@ -357,12 +357,12 @@ func (r *report) printExtensions(d *diff.ExtensionsDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, added := range d.Added {
 		r.print("New extension:", added)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
 		r.print("Deleted extension:", deleted)
 	}
@@ -493,12 +493,12 @@ func (r *report) printProperties(d *diff.SchemasDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, property := range d.Added {
 		r.print("New property:", property)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, property := range d.Deleted {
 		r.print("Deleted property:", property)
 	}
@@ -524,12 +524,12 @@ func (r *report) printResponses(d *diff.ResponsesDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, added := range d.Added {
 		r.print("New response:", added)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
 		r.print("Deleted response:", deleted)
 	}
@@ -586,12 +586,12 @@ func (r *report) printContent(d *diff.ContentDiff) {
 		return
 	}
 
-	sort.Sort(d.MediaTypeAdded)
+	slices.Sort(d.MediaTypeAdded)
 	for _, name := range d.MediaTypeAdded {
 		r.print("New media type:", name)
 	}
 
-	sort.Sort(d.MediaTypeDeleted)
+	slices.Sort(d.MediaTypeDeleted)
 	for _, name := range d.MediaTypeDeleted {
 		r.print("Deleted media type:", name)
 	}
@@ -652,12 +652,12 @@ func (r *report) printHeaders(d *diff.HeadersDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, added := range d.Added {
 		r.print("New header:", added)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
 		r.print("Deleted header:", deleted)
 	}
@@ -705,12 +705,12 @@ func (r *report) printSecurityRequirements(d *diff.SecurityRequirementsDiff) {
 		return
 	}
 
-	sort.Sort(d.Added)
+	slices.Sort(d.Added)
 	for _, added := range d.Added {
 		r.print("New security requirements:", added)
 	}
 
-	sort.Sort(d.Deleted)
+	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
 		r.print("Deleted security requirements:", deleted)
 	}

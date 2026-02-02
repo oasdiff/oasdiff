@@ -1,7 +1,7 @@
 package checker_test
 
 import (
-	"sort"
+	"slices"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -32,7 +32,7 @@ var changes = checker.Changes{
 }
 
 func TestChanges_Sort(t *testing.T) {
-	sort.Sort(changes)
+	slices.SortFunc(changes, checker.CompareChanges)
 }
 
 func TestChanges_IsBreaking(t *testing.T) {

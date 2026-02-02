@@ -2,7 +2,6 @@ package utils
 
 import (
 	"slices"
-	"sort"
 	"strings"
 )
 
@@ -57,23 +56,12 @@ func (list StringList) ToStringSet() StringSet {
 }
 
 func (list StringList) Sort() StringList {
-	sort.Sort(list)
+	slices.Sort(list)
 	return list
 }
 
-// Len implements the sort.Interface interface
 func (list StringList) Len() int {
 	return len(list)
-}
-
-// Less implements the sort.Interface interface
-func (list StringList) Less(i, j int) bool {
-	return list[i] < list[j]
-}
-
-// Swap implements the sort.Interface interface
-func (list StringList) Swap(i, j int) {
-	list[i], list[j] = list[j], list[i]
 }
 
 func (stringList *StringList) Is(s string) bool {

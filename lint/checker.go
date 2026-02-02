@@ -1,7 +1,8 @@
 package lint
 
 import (
-	"sort"
+	"cmp"
+	"slices"
 
 	"github.com/oasdiff/oasdiff/load"
 )
@@ -23,31 +24,6 @@ type Error struct {
 
 type Errors []*Error
 
-func (e Errors) Len() int {
-	return len(e)
-}
-
-func (e Errors) Less(i, j int) bool {
-	iv, jv := e[i], e[j]
-
-	switch {
-	case iv.Level != jv.Level:
-		return iv.Level < jv.Level
-	case iv.Source != jv.Source:
-		return iv.Source < jv.Source
-	case iv.Id != jv.Id:
-		return iv.Id < jv.Id
-	case iv.Text != jv.Text:
-		return iv.Text < jv.Text
-	default:
-		return iv.Comment < jv.Comment
-	}
-}
-
-func (e Errors) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
-
 func Run(config *Config, source string, spec *load.SpecInfo) Errors {
 	result := make(Errors, 0)
 
@@ -60,6 +36,20 @@ func Run(config *Config, source string, spec *load.SpecInfo) Errors {
 		result = append(result, errs...)
 	}
 
-	sort.Sort(result)
+	slices.SortFunc(result, func(a, b *Error) int {
+		if c := cmp.Compare(a.Level, b.Level); c != 0 {
+			return c
+		}
+		if c := cmp.Compare(a.Source, b.Source); c != 0 {
+			return c
+		}
+		if c := cmp.Compare(a.Id, b.Id); c != 0 {
+			return c
+		}
+		if c := cmp.Compare(a.Text, b.Text); c != 0 {
+			return c
+		}
+		return cmp.Compare(a.Comment, b.Comment)
+	})
 	return result
 }
