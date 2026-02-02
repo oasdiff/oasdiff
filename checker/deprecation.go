@@ -23,7 +23,7 @@ func getSunsetDate(sunset any) (civil.Date, error) {
 			return civil.Date{}, errors.New("sunset value isn't a string nor valid json")
 		}
 		if err := json.Unmarshal(sunsetJson, &sunsetStr); err != nil {
-			return civil.Date{}, fmt.Errorf("failed to unmarshal sunset json: %v", sunset)
+			return civil.Date{}, fmt.Errorf("failed to unmarshal sunset json: %w", err)
 		}
 	}
 

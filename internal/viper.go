@@ -61,7 +61,7 @@ func bindFlags(cmd *cobra.Command, v IViper) error {
 	persitentFlags.VisitAll(func(flag *pflag.Flag) {
 		name := flag.Name
 		if err := v.BindPFlag(name, persitentFlags.Lookup(name)); err != nil {
-			result = fmt.Errorf("error binding flag %q to viper: %v", name, err)
+			result = fmt.Errorf("error binding flag %q to viper: %w", name, err)
 			return
 		}
 	})
