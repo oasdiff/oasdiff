@@ -28,7 +28,9 @@ func ResponseParameterEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 					responseDiff.ContentDiff.MediaTypeModified == nil {
 					continue
 				}
-				for _, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
+				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
@@ -47,7 +49,7 @@ func ResponseParameterEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

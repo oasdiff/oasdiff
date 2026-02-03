@@ -31,6 +31,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff != nil {
 						// Check for suppression by ListOfTypes checker
 						if shouldSuppressTypeChangedForListOfTypes(mediaTypeDiff.SchemaDiff) {
@@ -51,7 +52,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -82,7 +83,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 							}
 						})
 				}
