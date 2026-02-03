@@ -157,7 +157,7 @@ func TestDiff_ModifiedParam(t *testing.T) {
 	require.Equal(t,
 		&diff.ValueDiff{
 			From: true,
-			To:   (interface{})(nil),
+			To:   (any)(nil),
 		},
 		d(t, diff.NewConfig(), 2, 1).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["image"].ExplodeDiff)
 }
@@ -424,7 +424,7 @@ func TestResponseDespcriptionNil(t *testing.T) {
 
 	require.Equal(t,
 		&diff.ValueDiff{
-			From: interface{}(nil),
+			From: any(nil),
 			To:   "Tufin1",
 		},
 		d.PathsDiff.Modified[installCommandPath].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["default"].DescriptionDiff)
@@ -878,7 +878,7 @@ func TestDiff_ExtensionsInvalid(t *testing.T) {
 
 	// Add invalid extension
 	newPathItem := s1.Spec.Paths.Find("/example/callback")
-	newPathItem.Post.Extensions["x-amazon-apigateway-integration"] = interface{}(make(chan int))
+	newPathItem.Post.Extensions["x-amazon-apigateway-integration"] = any(make(chan int))
 	s1.Spec.Paths.Set("/example/callback", newPathItem)
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
@@ -890,7 +890,7 @@ func TestDiff_ExtensionsInvalidSecuritySchemes(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add invalid extension
-	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Extensions = map[string]interface{}{"invalid": interface{}(make(chan int))}
+	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Extensions = map[string]any{"invalid": any(make(chan int))}
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.EqualError(t, err, "json: unsupported type: chan int")
@@ -901,7 +901,7 @@ func TestDiff_ExtensionsInvalidFlows(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add invalid extension
-	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Extensions = map[string]interface{}{"invalid": interface{}(make(chan int))}
+	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Extensions = map[string]any{"invalid": any(make(chan int))}
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.EqualError(t, err, "json: unsupported type: chan int")
@@ -912,7 +912,7 @@ func TestDiff_ExtensionsInvalidImplicit(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add invalid extension
-	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Implicit.Extensions = map[string]interface{}{"invalid": interface{}(make(chan int))}
+	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Implicit.Extensions = map[string]any{"invalid": any(make(chan int))}
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.EqualError(t, err, "json: unsupported type: chan int")
@@ -927,4 +927,48 @@ func TestDiff_ExtensionsIssue519(t *testing.T) {
 	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.NoError(t, err)
 	require.Empty(t, d)
+}
+
+func TestGetPathsDiff_BasicDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/simple1.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/simple2.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1}, []*load.SpecInfo{s2})
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	require.NotNil(t, osm)
+	require.NotNil(t, d.PathsDiff)
+}
+
+func TestGetPathsDiff_NoDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/simple1.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1}, []*load.SpecInfo{s1})
+	require.NoError(t, err)
+	require.Nil(t, d)
+	require.Nil(t, osm)
+}
+
+func TestGetPathsDiff_WithSinceDate(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/composed/base/spec1.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/composed/base/spec2.yaml"))
+	require.NoError(t, err)
+
+	// Test with multiple specs that have x-since-date extensions
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1, s2}, []*load.SpecInfo{s1, s2})
+	require.NoError(t, err)
+	require.Nil(t, d)
+	require.Nil(t, osm)
 }

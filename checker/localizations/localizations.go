@@ -2335,7 +2335,7 @@ var localizations = map[string]string{
 	"ru.messages.total-errors":                                                        "%d критические изменения: %d %s, %d %s\n",
 }
 
-type Replacements map[string]interface{}
+type Replacements map[string]any
 
 type Localizer struct {
 	Locale         string
@@ -2376,7 +2376,7 @@ func (t Localizer) GetWithLocale(locale, key string, replacements ...*Replacemen
 
 	// If the str doesn't have any substitutions, no need to
 	// template.Execute.
-	if strings.Index(str, "}}") == -1 {
+	if !strings.Contains(str, "}}") {
 		return str
 	}
 

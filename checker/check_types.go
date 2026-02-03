@@ -112,7 +112,7 @@ func isJsonMediaType(mediaType string) bool {
 }
 
 // isFormatContained checks if from is contained in to
-func isFormatContained(revisionType *openapi3.Types, to, from interface{}) bool {
+func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 
 	if revisionType == nil || len(*revisionType) > 1 {
 		return false

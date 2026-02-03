@@ -1,7 +1,7 @@
 package checker_test
 
 import (
-	"sort"
+	"slices"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -32,7 +32,7 @@ var changes = checker.Changes{
 }
 
 func TestChanges_Sort(t *testing.T) {
-	sort.Sort(changes)
+	slices.SortFunc(changes, checker.CompareChanges)
 }
 
 func TestChanges_IsBreaking(t *testing.T) {
@@ -84,4 +84,61 @@ func TestIsEmpty_OneWarnExcludeWarns(t *testing.T) {
 		checker.ApiChange{Level: checker.WARN},
 	}
 	require.False(t, bcErrors.HasLevelOrHigher(checker.ERR))
+}
+
+func TestCompareChanges_ByArgsLength(t *testing.T) {
+	a := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	b := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a", "b"},
+	}
+	result := checker.CompareChanges(a, b)
+	require.Less(t, result, 0)
+}
+
+func TestCompareChanges_ByArgsValue(t *testing.T) {
+	a := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	b := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"b"},
+	}
+	result := checker.CompareChanges(a, b)
+	require.Less(t, result, 0)
+}
+
+func TestCompareChanges_Equal(t *testing.T) {
+	a := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	b := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	result := checker.CompareChanges(a, b)
+	require.Equal(t, 0, result)
 }

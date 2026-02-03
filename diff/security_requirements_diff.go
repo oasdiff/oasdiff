@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -97,13 +99,7 @@ func getSecuritySchemes(securityRequirement openapi3.SecurityRequirement) utils.
 }
 
 func getSecurityRequirementID(securityRequirement openapi3.SecurityRequirement) string {
-	results := make([]string, len(securityRequirement))
-	i := 0
-	for name := range securityRequirement {
-		results[i] = name
-		i++
-	}
-	return strings.Join(results, " AND ")
+	return strings.Join(slices.Collect(maps.Keys(securityRequirement)), " AND ")
 }
 
 func (diff *SecurityRequirementsDiff) getSummary() *SummaryDetails {

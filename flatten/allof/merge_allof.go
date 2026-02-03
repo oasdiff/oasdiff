@@ -30,7 +30,7 @@ type SchemaCollection struct {
 	Type                 []string
 	Format               []string
 	Description          []string
-	Enum                 [][]interface{}
+	Enum                 [][]any
 	UniqueItems          []bool
 	ExclusiveMin         []bool
 	ExclusiveMax         []bool
@@ -51,7 +51,7 @@ type SchemaCollection struct {
 	Nullable             []bool
 	ReadOnly             []bool
 	WriteOnly            []bool
-	Default              []interface{}
+	Default              []any
 }
 
 type state struct {
@@ -686,14 +686,14 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	return schema, nil
 }
 
-func resolveEnum(values [][]interface{}) ([]interface{}, error) {
-	var nonEmptyEnum [][]interface{}
+func resolveEnum(values [][]any) ([]any, error) {
+	var nonEmptyEnum [][]any
 	for _, enum := range values {
 		if len(enum) > 0 {
 			nonEmptyEnum = append(nonEmptyEnum, enum)
 		}
 	}
-	var intersection []interface{}
+	var intersection []any
 	if len(nonEmptyEnum) == 0 {
 		return intersection, nil
 	}
@@ -872,9 +872,9 @@ func allStringsEqual(values []string) bool {
 	return true
 }
 
-func getIntersection(arr1, arr2 []interface{}) []interface{} {
-	intersectionMap := make(map[interface{}]bool)
-	result := []interface{}{}
+func getIntersection(arr1, arr2 []any) []any {
+	intersectionMap := make(map[any]bool)
+	result := []any{}
 
 	// Mark elements in the first array
 	for _, val := range arr1 {
@@ -891,7 +891,7 @@ func getIntersection(arr1, arr2 []interface{}) []interface{} {
 	return result
 }
 
-func findIntersectionOfArrays(arrays [][]interface{}) []interface{} {
+func findIntersectionOfArrays(arrays [][]any) []any {
 	if len(arrays) == 0 {
 		return nil
 	}
@@ -1105,8 +1105,8 @@ func findIntersection(arrays ...[]string) []string {
 	return intersection
 }
 
-func resolveDefault(collection *SchemaCollection) (interface{}, error) {
-	values := make([]interface{}, 0)
+func resolveDefault(collection *SchemaCollection) (any, error) {
+	values := make([]any, 0)
 	for _, v := range collection.Default {
 		if v != nil {
 			values = append(values, v)

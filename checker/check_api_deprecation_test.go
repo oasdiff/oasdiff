@@ -343,3 +343,46 @@ func TestApiDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
 	require.Equal(t, "endpoint deprecated (stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
+
+// CL: deprecating an operation with a sunset date in RFC3339 format is properly parsed
+func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
+	s1, err := open(getDeprecationFile("base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+
+	// Use RFC3339 format (with time) instead of just date
+	sunsetDate := civil.DateOf(time.Now()).AddDays(10)
+	sunsetRFC3339 := time.Date(sunsetDate.Year, sunsetDate.Month, sunsetDate.Day, 12, 0, 0, 0, time.UTC).Format(time.RFC3339)
+	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, sunsetRFC3339)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	// only a non-breaking change detected
+	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+}
+
+// BC: deprecating an operation with invalid JSON sunset date is breaking
+func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
+	s1, err := open(getDeprecationFile("base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+
+	// Use invalid JSON that can't be unmarshaled to a string
+	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = json.RawMessage(`{"invalid": "object"}`)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	errs := checker.CheckBackwardCompatibility(c, d, osm)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.APIDeprecatedSunsetParseId, errs[0].GetId())
+	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "failed to unmarshal sunset json")
+}

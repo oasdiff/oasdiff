@@ -4,7 +4,7 @@ package checker
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
@@ -44,7 +44,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		}
 	}
 
-	sort.Sort(filteredResult)
+	slices.SortFunc(filteredResult, CompareChanges)
 	return filteredResult
 }
 
@@ -146,7 +146,7 @@ func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, 
 	)
 }
 
-func getStabilityLevel(i map[string]interface{}) (string, error) {
+func getStabilityLevel(i map[string]any) (string, error) {
 	if i == nil || i[diff.XStabilityLevelExtension] == nil {
 		return "", nil
 	}

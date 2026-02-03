@@ -12,7 +12,6 @@ require (
 	github.com/yargevad/filepathx v1.0.0
 	github.com/yuin/goldmark v1.7.16
 	go.yaml.in/yaml/v3 v3.0.4
-	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394
 )
 
 require (

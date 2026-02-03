@@ -1,5 +1,7 @@
 package formatters
 
+import "cmp"
+
 type Check struct {
 	Id          string `json:"id" yaml:"id"`
 	Level       string `json:"level" yaml:"level"`
@@ -8,14 +10,6 @@ type Check struct {
 
 type Checks []Check
 
-func (checks Checks) Len() int {
-	return len(checks)
-}
-
-func (checks Checks) Less(i, j int) bool {
-	return checks[i].Id < checks[j].Id
-}
-
-func (checks Checks) Swap(i, j int) {
-	checks[i], checks[j] = checks[j], checks[i]
+func (checks Checks) SortFunc(a, b Check) int {
+	return cmp.Compare(a.Id, b.Id)
 }

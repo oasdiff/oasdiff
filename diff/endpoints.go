@@ -1,22 +1,13 @@
 package diff
 
+import "cmp"
+
 // Endpoints is a list of endpoints
 type Endpoints []Endpoint
 
-// Len implements the sort.Interface interface
-func (endpoints Endpoints) Len() int {
-	return len(endpoints)
-}
-
-// Less implements the sort.Interface interface
-func (endpoints Endpoints) Less(i, j int) bool {
-	if endpoints[i].Path == endpoints[j].Path {
-		return endpoints[i].Method < endpoints[j].Method
+func (endpoints Endpoints) SortFunc(a, b Endpoint) int {
+	if c := cmp.Compare(a.Path, b.Path); c != 0 {
+		return c
 	}
-	return endpoints[i].Path < endpoints[j].Path
-}
-
-// Swap implements the sort.Interface interface
-func (endpoints Endpoints) Swap(i, j int) {
-	endpoints[i], endpoints[j] = endpoints[j], endpoints[i]
+	return cmp.Compare(a.Method, b.Method)
 }

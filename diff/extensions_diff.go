@@ -8,7 +8,7 @@ func (diff *ExtensionsDiff) Empty() bool {
 	return (*InterfaceMapDiff)(diff).Empty()
 }
 
-func getExtensionsDiff(config *Config, extensions1, extensions2 map[string]interface{}) (*ExtensionsDiff, error) {
+func getExtensionsDiff(config *Config, extensions1, extensions2 map[string]any) (*ExtensionsDiff, error) {
 	if config.IsExcludeExtensions() {
 		return nil, nil
 	}
@@ -25,6 +25,6 @@ func getExtensionsDiff(config *Config, extensions1, extensions2 map[string]inter
 	return (*ExtensionsDiff)(diff), nil
 }
 
-func getExtensionsDiffInternal(extensions1, extensions2 map[string]interface{}) (*InterfaceMapDiff, error) {
+func getExtensionsDiffInternal(extensions1, extensions2 map[string]any) (*InterfaceMapDiff, error) {
 	return getInterfaceMapDiff(extensions1, extensions2)
 }

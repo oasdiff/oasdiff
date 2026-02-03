@@ -20,7 +20,7 @@ const (
 
 // formatDeprecationDetails formats optional deprecation details (stability level only)
 // Returns empty string if stability is not set or invalid, otherwise returns formatted string like "(stability: X)"
-func formatDeprecationDetails(extensions map[string]interface{}) string {
+func formatDeprecationDetails(extensions map[string]any) string {
 	stability, err := getStabilityLevel(extensions)
 	if err != nil || stability == "" {
 		return ""
@@ -30,7 +30,7 @@ func formatDeprecationDetails(extensions map[string]interface{}) string {
 
 // formatDeprecationDetailsWithSunset formats deprecation details with sunset date and optional stability level
 // Returns formatted string like "(sunset: X)" or "(sunset: X, stability: Y)"
-func formatDeprecationDetailsWithSunset(sunset civil.Date, extensions map[string]interface{}) string {
+func formatDeprecationDetailsWithSunset(sunset civil.Date, extensions map[string]any) string {
 	var parts []string
 	parts = append(parts, fmt.Sprintf("sunset: %s", sunset.String()))
 

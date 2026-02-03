@@ -2,13 +2,12 @@ package formatters
 
 import (
 	"fmt"
-	"sort"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/diff"
-	"golang.org/x/exp/slices"
 )
 
 // Formatter is a common interface for output formatters
@@ -68,7 +67,7 @@ func SupportedFormatsByContentType(output Output) []string {
 			formats = append(formats, string(k))
 		}
 	}
-	sort.Strings(formats)
+	slices.Sort(formats)
 	return formats
 }
 
@@ -89,7 +88,7 @@ func GetSupportedTemplateFormats() []string {
 		}
 	}
 
-	sort.Strings(supported)
+	slices.Sort(supported)
 	return supported
 }
 

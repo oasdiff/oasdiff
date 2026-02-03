@@ -5,7 +5,7 @@ import (
 )
 
 // InterfaceMap is a map of string to interface
-type InterfaceMap map[string]interface{}
+type InterfaceMap map[string]any
 
 // InterfaceMapDiff describes the changes between a pair of InterfaceMap
 type InterfaceMapDiff struct {
