@@ -25,7 +25,8 @@ func RequestPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources *di
 				continue
 			}
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for _, mediaTypeDiff := range modifiedMediaTypes {
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 				if mediaTypeDiff.SchemaDiff == nil {
 					continue
 				}
@@ -47,7 +48,7 @@ func RequestPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources *di
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

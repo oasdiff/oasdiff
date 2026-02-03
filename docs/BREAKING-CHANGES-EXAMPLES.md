@@ -400,7 +400,7 @@ These examples are automatically generated from unit tests.
 [removing discriminator from the response body or response property](../checker/check_response_discriminator_updated_test.go?plain=1#L47)  
 [removing media type from request body](../checker/check_request_body_mediatype_updated_test.go?plain=1#L34)  
 [removing pattern from request parameters](../checker/check_request_parameter_pattern_added_or_changed_test.go?plain=1#L83)  
-[removing request body default value or request property default value](../checker/check_request_property_default_value_changed_test.go?plain=1#L91)  
+[removing request body default value or request property default value](../checker/check_request_property_default_value_changed_test.go?plain=1#L93)  
 [removing request parameter default value](../checker/check_request_parameters_default_value_changed_test.go?plain=1#L80)  
 [removing request property enum values](../checker/check_request_property_enum_value_updated_test.go?plain=1#L12)  
 [removing request property pattern](../checker/check_request_property_pattern_added_or_changed_test.go?plain=1#L83)  
