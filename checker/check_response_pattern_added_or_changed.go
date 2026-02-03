@@ -32,7 +32,8 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 				}
 
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff == nil {
 						continue
 					}
@@ -66,7 +67,7 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

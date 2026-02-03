@@ -40,9 +40,6 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 
 			deprecationDays := getDeprecationDays(config, stability)
 
-			// Track reported properties to avoid duplicates per operation
-			reportedProperties := make(map[string]bool)
-
 			for _, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff == nil ||
 					responseDiff.ContentDiff == nil ||
@@ -50,7 +47,8 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					continue
 				}
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
@@ -60,12 +58,6 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							}
 
 							propName := propertyFullName(propertyPath, propertyName)
-
-							// Skip if already reported
-							if reportedProperties[propName] {
-								return
-							}
-							reportedProperties[propName] = true
 
 							// Check if property was reactivated (un-deprecated)
 							if propertyDiff.DeprecatedDiff.To == nil || propertyDiff.DeprecatedDiff.To == false {
@@ -78,7 +70,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -96,7 +88,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 										op,
 										operation,
 										path,
-									))
+									).WithDetails(mediaTypeDetails))
 								} else {
 									// no policy, report deprecation without sunset as INFO
 									result = append(result, NewApiChange(
@@ -108,7 +100,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 										op,
 										operation,
 										path,
-									).WithDetails(formatDeprecationDetails(op.Extensions)))
+									).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 								}
 								return
 							}
@@ -124,7 +116,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -140,7 +132,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -154,7 +146,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								op,
 								operation,
 								path,
-							).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
+							).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
 						})
 				}
 			}

@@ -37,20 +37,21 @@ func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
-			appendResultItem := func(messageId string, a ...any) {
-				result = append(result, NewApiChange(
-					messageId,
-					config,
-					a,
-					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
-				))
-			}
-
-			for _, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
+			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
+				appendResultItem := func(messageId string, a ...any) {
+					result = append(result, NewApiChange(
+						messageId,
+						config,
+						a,
+						"",
+						operationsSources,
+						operationItem.Revision,
+						operation,
+						path,
+					).WithDetails(mediaTypeDetails))
+				}
 				if mediaTypeDiff.SchemaDiff == nil {
 					continue
 				}

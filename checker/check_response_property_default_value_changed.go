@@ -27,19 +27,6 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 				continue
 			}
 
-			appendResultItem := func(messageId string, a ...any) {
-				result = append(result, NewApiChange(
-					messageId,
-					config,
-					a,
-					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
-				))
-			}
-
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.ContentDiff == nil ||
 					responseDiff.ContentDiff.MediaTypeModified == nil {
@@ -48,6 +35,19 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
+					appendResultItem := func(messageId string, a ...any) {
+						result = append(result, NewApiChange(
+							messageId,
+							config,
+							a,
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithDetails(mediaTypeDetails))
+					}
 					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
 						defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff
 						if defaultValueDiff.From == nil {

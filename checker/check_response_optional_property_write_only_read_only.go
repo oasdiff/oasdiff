@@ -34,7 +34,8 @@ func ResponseOptionalPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 				}
 
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff == nil {
 						continue
 					}
@@ -70,7 +71,7 @@ func ResponseOptionalPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						})
 
 					CheckModifiedPropertiesDiff(
@@ -104,7 +105,7 @@ func ResponseOptionalPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

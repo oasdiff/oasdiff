@@ -29,7 +29,8 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 					continue
 				}
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MinItemsDiff != nil {
 						minItemsDiff := mediaTypeDiff.SchemaDiff.MinItemsDiff
 						if minItemsDiff.From != nil &&
@@ -43,7 +44,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -71,7 +72,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						})
 				}
 

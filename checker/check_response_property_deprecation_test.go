@@ -2,6 +2,7 @@ package checker_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -27,7 +28,7 @@ func TestResponsePropertyDeprecationCheck(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "response property 'legacyField' deprecated")
 }
 
-// CL: detecting deprecated response properties in allOf schemas
+// CL: detecting deprecated response properties in allOf schemas with multiple media types
 func TestResponsePropertyDeprecationCheck_AllOf(t *testing.T) {
 	s1, err := open(getPropertyDeprecationFile("response_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
@@ -38,12 +39,21 @@ func TestResponsePropertyDeprecationCheck_AllOf(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDeprecationCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
+	// With multiple media types (json and xml), we get one report per media type with distinct details
+	require.Len(t, errs, 2)
 	require.Equal(t, checker.ResponsePropertyDeprecatedId, errs[0].GetId())
+	require.Equal(t, checker.ResponsePropertyDeprecatedId, errs[1].GetId())
+	// Each message should include media type context
+	msg0 := errs[0].GetUncolorizedText(checker.NewDefaultLocalizer())
+	msg1 := errs[1].GetUncolorizedText(checker.NewDefaultLocalizer())
+	require.Contains(t, msg0, "media type:")
+	require.Contains(t, msg1, "media type:")
+	// Messages should be distinct (different media types)
+	require.NotEqual(t, msg0, msg1)
 }
 
-// CL: ensuring no duplicate deprecation reports for the same response property
-func TestResponsePropertyDeprecationCheck_NoDuplicates(t *testing.T) {
+// CL: each media type gets its own report with distinct details (issue #594)
+func TestResponsePropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
 	s1, err := open(getPropertyDeprecationFile("response_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
 	s2, err := open(getPropertyDeprecationFile("response_property_deprecation_allof_spec.yaml"))
@@ -53,7 +63,20 @@ func TestResponsePropertyDeprecationCheck_NoDuplicates(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDeprecationCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
+	// Multiple media types should result in multiple reports with media type context
+	require.Len(t, errs, 2)
+	mediaTypes := make(map[string]bool)
+	for _, err := range errs {
+		msg := err.GetUncolorizedText(checker.NewDefaultLocalizer())
+		if strings.Contains(msg, "application/json") {
+			mediaTypes["application/json"] = true
+		}
+		if strings.Contains(msg, "application/xml") {
+			mediaTypes["application/xml"] = true
+		}
+	}
+	require.True(t, mediaTypes["application/json"], "should have application/json media type")
+	require.True(t, mediaTypes["application/xml"], "should have application/xml media type")
 }
 
 // BC: deprecating a response property with a deprecation policy but without specifying sunset date is breaking

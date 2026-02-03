@@ -29,7 +29,8 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 					continue
 				}
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MaxDiff != nil {
 						maxDiff := mediaTypeDiff.SchemaDiff.MaxDiff
 						if maxDiff.From != nil &&
@@ -44,7 +45,7 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 							}
 						}
 					}
@@ -77,7 +78,7 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						})
 				}
 

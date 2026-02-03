@@ -31,7 +31,8 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 				}
 
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff == nil {
 						continue
 					}
@@ -56,7 +57,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -93,7 +94,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

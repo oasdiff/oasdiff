@@ -77,6 +77,7 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
 		OperationId: "createProduct",
+		Details:     "(media type: text/plain)",
 	}, {
 		Id:          checker.RequestPropertyDefaultValueAddedId,
 		Args:        []any{"price", 10.0},
@@ -85,6 +86,7 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
 		OperationId: "createProduct",
+		Details:     "(media type: application/json)",
 	}}, errs)
 }
 
@@ -110,6 +112,7 @@ func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
 		OperationId: "createProduct",
+		Details:     "(media type: text/plain)",
 	}, {
 		Id:          checker.RequestPropertyDefaultValueRemovedId,
 		Args:        []any{"price", 10.0},
@@ -118,5 +121,6 @@ func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
 		OperationId: "createProduct",
+		Details:     "(media type: application/json)",
 	}}, errs)
 }
