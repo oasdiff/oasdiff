@@ -80,6 +80,7 @@ These examples are automatically generated from unit tests.
 [deprecating an operation with a deprecation policy and an invalid sunset date is breaking](../checker/check_api_deprecation_test.go?plain=1#L33)  
 [deprecating an operation with a deprecation policy and sunset date before required deprecation period is breaking](../checker/check_api_deprecation_test.go?plain=1#L161)  
 [deprecating an operation with a deprecation policy but without specifying sunset date is breaking](../checker/check_api_deprecation_test.go?plain=1#L88)  
+[deprecating an operation with invalid JSON sunset date is breaking](../checker/check_api_deprecation_test.go?plain=1#L370)  
 [inclreasing request body min items is breaking](../checker/check_request_property_min_items_increased_test.go?plain=1#L12)  
 [increasing max length in response is breaking](../checker/check_breaking_min_max_test.go?plain=1#L93)  
 [increasing min items in request is breaking](../checker/check_breaking_min_max_test.go?plain=1#L236)  
