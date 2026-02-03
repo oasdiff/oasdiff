@@ -1928,3 +1928,186 @@ func loadSpec(t *testing.T, path string) *openapi3.T {
 	require.NoError(t, err)
 	return doc
 }
+
+// Test for issue #710: identical oneOf groups in allOf should be deduplicated
+// instead of producing a cartesian product
+func TestMerge_IdenticalOneOfGroups(t *testing.T) {
+	// Create two allOf subschemas with identical oneOf groups
+	oneOfA := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/A",
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propA"},
+		},
+	}
+	oneOfB := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/B",
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propB"},
+		},
+	}
+
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfA,
+								oneOfB,
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfA,
+								oneOfB,
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Without the fix, this would produce 4 oneOf items (cartesian product)
+	// With the fix, identical oneOf groups are deduplicated, resulting in 2 items
+	require.Len(t, merged.OneOf, 2, "identical oneOf groups should be deduplicated, not produce cartesian product")
+}
+
+// Test that oneOf groups with same pointer references are deduplicated
+func TestMerge_SamePointerOneOfGroups(t *testing.T) {
+	// Create shared inline schemas (same pointer)
+	inlineA := &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propA"},
+		},
+	}
+	inlineB := &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propB"},
+		},
+	}
+
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								inlineA,
+								inlineB,
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								inlineA,
+								inlineB,
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Same pointer references should be deduplicated
+	require.Len(t, merged.OneOf, 2, "oneOf groups with same pointer references should be deduplicated")
+}
+
+// Test that oneOf groups with refs in different order are still deduplicated (tests sorting)
+func TestMerge_OneOfGroupsReversedOrder(t *testing.T) {
+	oneOfA := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/A",
+		Value: &openapi3.Schema{
+			Type: &openapi3.Types{"object"},
+		},
+	}
+	oneOfB := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/B",
+		Value: &openapi3.Schema{
+			Type: &openapi3.Types{"object"},
+		},
+	}
+
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfA, // A first
+								oneOfB,
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfB, // B first (reversed order)
+								oneOfA,
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Groups with same refs in different order should be deduplicated after sorting
+	require.Len(t, merged.OneOf, 2, "oneOf groups with same refs in different order should be deduplicated")
+}
+
+// Test different oneOf groups are not deduplicated
+func TestMerge_DifferentOneOfGroups(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								&openapi3.SchemaRef{
+									Ref: "#/components/schemas/A",
+									Value: &openapi3.Schema{
+										Type:     &openapi3.Types{"object"},
+										Required: []string{"propA"},
+									},
+								},
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								&openapi3.SchemaRef{
+									Ref: "#/components/schemas/B",
+									Value: &openapi3.Schema{
+										Type:     &openapi3.Types{"object"},
+										Required: []string{"propB"},
+									},
+								},
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Different oneOf groups should produce cartesian product (1 * 1 = 1 in this case)
+	require.Len(t, merged.OneOf, 1)
+}
