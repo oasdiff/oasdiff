@@ -928,3 +928,31 @@ func TestDiff_ExtensionsIssue519(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, d)
 }
+
+func TestGetPathsDiff_BasicDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/simple1.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/simple2.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1}, []*load.SpecInfo{s2})
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	require.NotNil(t, osm)
+	require.NotNil(t, d.PathsDiff)
+}
+
+func TestGetPathsDiff_NoDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/simple1.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1}, []*load.SpecInfo{s1})
+	require.NoError(t, err)
+	require.Nil(t, d)
+	require.Nil(t, osm)
+}

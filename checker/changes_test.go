@@ -85,3 +85,60 @@ func TestIsEmpty_OneWarnExcludeWarns(t *testing.T) {
 	}
 	require.False(t, bcErrors.HasLevelOrHigher(checker.ERR))
 }
+
+func TestCompareChanges_ByArgsLength(t *testing.T) {
+	a := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	b := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a", "b"},
+	}
+	result := checker.CompareChanges(a, b)
+	require.Less(t, result, 0)
+}
+
+func TestCompareChanges_ByArgsValue(t *testing.T) {
+	a := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	b := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"b"},
+	}
+	result := checker.CompareChanges(a, b)
+	require.Less(t, result, 0)
+}
+
+func TestCompareChanges_Equal(t *testing.T) {
+	a := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	b := checker.ApiChange{
+		Id:        "test",
+		Level:     checker.ERR,
+		Operation: "GET",
+		Path:      "/test",
+		Args:      []any{"a"},
+	}
+	result := checker.CompareChanges(a, b)
+	require.Equal(t, 0, result)
+}

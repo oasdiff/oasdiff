@@ -324,6 +324,7 @@ These examples are automatically generated from unit tests.
 [decreasing request read-only property maximum value](../checker/check_request_property_max_updated_test.go?plain=1#L38)  
 [deprecating a request property with invalid stability level is skipped (handled in CheckBackwardCompatibility)](../checker/check_request_property_deprecation_test.go?plain=1#L174)  
 [deprecating a response property with invalid stability level is skipped (handled in CheckBackwardCompatibility)](../checker/check_response_property_deprecation_test.go?plain=1#L169)  
+[deprecating an operation with a sunset date in RFC3339 format is properly parsed](../checker/check_api_deprecation_test.go?plain=1#L347)  
 [deprecating an operation with sunset greater than min](../checker/check_not_breaking_test.go?plain=1#L198)  
 [detecting deprecated request properties in allOf schemas](../checker/check_request_property_deprecation_test.go?plain=1#L34)  
 [detecting deprecated request properties with sunset date](../checker/check_request_property_deprecation_test.go?plain=1#L18)  
