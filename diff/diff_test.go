@@ -956,3 +956,19 @@ func TestGetPathsDiff_NoDiff(t *testing.T) {
 	require.Nil(t, d)
 	require.Nil(t, osm)
 }
+
+func TestGetPathsDiff_WithSinceDate(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/composed/base/spec1.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/composed/base/spec2.yaml"))
+	require.NoError(t, err)
+
+	// Test with multiple specs that have x-since-date extensions
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1, s2}, []*load.SpecInfo{s1, s2})
+	require.NoError(t, err)
+	require.Nil(t, d)
+	require.Nil(t, osm)
+}
