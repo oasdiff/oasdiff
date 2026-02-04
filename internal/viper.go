@@ -97,6 +97,7 @@ type Config struct {
 	FailOnDiff             bool     `mapstructure:"fail-on-diff"`
 	SeverityLevels         string   `mapstructure:"severity-levels"`
 	ExcludeElements        []string `mapstructure:"exclude-elements"`
+	ExcludeExtensions      []string `mapstructure:"exclude-extensions"`
 	Severity               []string `mapstructure:"severity"`
 	Tags                   []string `mapstructure:"tags"`
 	MatchPath              string   `mapstructure:"match-path"`

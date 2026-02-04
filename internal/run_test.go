@@ -368,6 +368,18 @@ func Test_JsonWithExcludeElements(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff --format json --exclude-elements=description,title,summary ../data/description/spec1.yml ../data/description/spec2.yml --fail-on-diff"), io.Discard, io.Discard))
 }
 
+// Test_ExcludeExtensions tests the --exclude-extensions flag (issue #765)
+func Test_ExcludeExtensions(t *testing.T) {
+	// With --exclude-extensions flag, the x-amazon-apigateway-integration changes should be excluded
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/extensions/base.yaml ../data/extensions/revision.yaml --exclude-extensions x-amazon-apigateway-integration --fail-on-diff"), io.Discard, io.Discard))
+}
+
+// Test_ExcludeExtensionsMultiple tests excluding multiple extension names
+func Test_ExcludeExtensionsMultiple(t *testing.T) {
+	// Should work with comma-separated values
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/extensions/base.yaml ../data/extensions/revision.yaml --exclude-extensions x-amazon-apigateway-integration,x-other-extension --fail-on-diff"), io.Discard, io.Discard))
+}
+
 func Test_EmptyComponentsOmitted(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/version/base.yaml ../data/version/revision.yaml -f json"), &stdout, io.Discard))

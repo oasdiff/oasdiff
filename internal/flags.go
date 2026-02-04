@@ -19,7 +19,9 @@ func NewFlags() *Flags {
 }
 
 func (flags *Flags) toConfig() *diff.Config {
-	config := diff.NewConfig().WithExcludeElements(flags.getExcludeElements())
+	config := diff.NewConfig().
+		WithExcludeElements(flags.getExcludeElements()).
+		WithExcludeExtensions(flags.getExcludeExtensions())
 	config.MatchPath = flags.v.GetString("match-path")
 	config.UnmatchPath = flags.v.GetString("unmatch-path")
 	config.FilterExtension = flags.v.GetString("filter-extension")
@@ -114,6 +116,10 @@ func (flags *Flags) getSeverityLevelsFile() string {
 
 func (flags *Flags) getExcludeElements() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("exclude-elements"))
+}
+
+func (flags *Flags) getExcludeExtensions() []string {
+	return fixViperStringSlice(flags.v.GetStringSlice("exclude-extensions"))
 }
 
 func (flags *Flags) setBase(source *load.Source) {
