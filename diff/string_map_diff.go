@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // StringMapDiff describes the changes between a pair of string maps
 type StringMapDiff struct {
-	Added    utils.StringList `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedKeys     `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -17,8 +16,8 @@ type ModifiedKeys map[string]*ValueDiff
 
 func newStringMapDiffDiff() *StringMapDiff {
 	return &StringMapDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedKeys{},
 	}
 }

@@ -6,14 +6,13 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParamNamesByLocation_Len(t *testing.T) {
 	require.Equal(t, 3, diff.ParamNamesByLocation{
-		"query":  utils.StringList{"name"},
-		"header": utils.StringList{"id", "organization"},
+		"query":  []string{"name"},
+		"header": []string{"id", "organization"},
 	}.Len())
 }
 

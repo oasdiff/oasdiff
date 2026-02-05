@@ -8,8 +8,17 @@ import (
 // StringSet is a set of string values
 type StringSet map[string]struct{}
 
-func (stringSet StringSet) ToStringList() StringList {
-	return StringList(slices.Collect(maps.Keys(stringSet)))
+func (stringSet StringSet) ToStringList() []string {
+	return slices.Collect(maps.Keys(stringSet))
+}
+
+// StringSetFromSlice creates a StringSet from a string slice
+func StringSetFromSlice(list []string) StringSet {
+	result := make(StringSet, len(list))
+	for _, s := range list {
+		result[s] = struct{}{}
+	}
+	return result
 }
 
 func (stringSet StringSet) Add(s string) {

@@ -644,7 +644,7 @@ func (r *report) printStrings(d *diff.StringsDiff, title string) {
 		return
 	}
 
-	r.print(title, "changed from", quote(d.Deleted.String()), "to", quote(d.Added.String()))
+	r.print(title, "changed from", quote(strings.Join(d.Deleted, ", ")), "to", quote(strings.Join(d.Added, ", ")))
 }
 
 func (r *report) printHeaders(d *diff.HeadersDiff) {

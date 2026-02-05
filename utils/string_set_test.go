@@ -22,7 +22,7 @@ func TestMinus_Partial(t *testing.T) {
 	s2 := utils.StringSet{}
 	s2.Add("x")
 
-	require.Equal(t, utils.StringList{"y"}, s1.Minus(s2).ToStringList())
+	require.Equal(t, []string{"y"}, s1.Minus(s2).ToStringList())
 	require.Empty(t, s2.Minus(s1))
 }
 

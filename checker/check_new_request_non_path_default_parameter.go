@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"slices"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -25,7 +27,7 @@ func NewRequestNonPathDefaultParameterCheck(diffReport *diff.Diff, operationsSou
 			}
 
 			for _, param := range pathItem.Revision.Parameters {
-				if !paramNameList.Contains(param.Value.Name) {
+				if !slices.Contains(paramNameList, param.Value.Name) {
 					continue
 				}
 				id := NewRequiredRequestDefaultParameterToExistingPathId

@@ -46,7 +46,7 @@ func PathParamsCheck(source string, s *load.SpecInfo) []*Error {
 
 func getPathParamsFromURL(path string) utils.StringSet {
 	_, _, pathParams := utils.NormalizeTemplatedPath(path)
-	return utils.StringList(pathParams).ToStringSet()
+	return utils.StringSetFromSlice(pathParams)
 }
 
 func checkOperationPathParams(pathParamsFromURL, pathParams utils.StringSet, path, method string, op *openapi3.Operation, source string) []*Error {

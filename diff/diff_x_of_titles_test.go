@@ -91,8 +91,8 @@ func TestXOfTitles_TitlesModified(t *testing.T) {
 		},
 		anyOfDiff.Modified[0].Revision,
 	)
-	require.True(t, anyOfDiff.Modified[0].Diff.TypeDiff.Deleted.Is("string"))
-	require.True(t, anyOfDiff.Modified[0].Diff.TypeDiff.Added.Is("boolean"))
+	require.Equal(t, []string{"string"}, anyOfDiff.Modified[0].Diff.TypeDiff.Deleted)
+	require.Equal(t, []string{"boolean"}, anyOfDiff.Modified[0].Diff.TypeDiff.Added)
 
 	require.Equal(t,
 		diff.Subschema{
@@ -108,8 +108,8 @@ func TestXOfTitles_TitlesModified(t *testing.T) {
 		},
 		anyOfDiff.Modified[1].Revision,
 	)
-	require.True(t, anyOfDiff.Modified[1].Diff.TypeDiff.Deleted.Is("string"))
-	require.True(t, anyOfDiff.Modified[1].Diff.TypeDiff.Added.Is("number"))
+	require.Equal(t, []string{"string"}, anyOfDiff.Modified[1].Diff.TypeDiff.Deleted)
+	require.Equal(t, []string{"number"}, anyOfDiff.Modified[1].Diff.TypeDiff.Added)
 }
 
 func TestXOfTitles_TitlesModifiedAndAdded(t *testing.T) {
@@ -148,12 +148,8 @@ func TestXOfTitles_TitlesModifiedAndAdded(t *testing.T) {
 		},
 		anyOfDiff.Modified[0].Revision,
 	)
-	require.True(t,
-		anyOfDiff.Modified[0].Diff.TypeDiff.Deleted.Is("boolean"),
-	)
-	require.True(t,
-		anyOfDiff.Modified[0].Diff.TypeDiff.Added.Is("string"),
-	)
+	require.Equal(t, []string{"boolean"}, anyOfDiff.Modified[0].Diff.TypeDiff.Deleted)
+	require.Equal(t, []string{"string"}, anyOfDiff.Modified[0].Diff.TypeDiff.Added)
 }
 
 func TestXOfTitles_DuplicateTitles(t *testing.T) {
@@ -220,10 +216,6 @@ func TestXOfTitles_EmptyTitle(t *testing.T) {
 		},
 		anyOfDiff.Modified[0].Revision,
 	)
-	require.True(t,
-		anyOfDiff.Modified[0].Diff.TypeDiff.Deleted.Is("string"),
-	)
-	require.True(t,
-		anyOfDiff.Modified[0].Diff.TypeDiff.Added.Is("number"),
-	)
+	require.Equal(t, []string{"string"}, anyOfDiff.Modified[0].Diff.TypeDiff.Deleted)
+	require.Equal(t, []string{"number"}, anyOfDiff.Modified[0].Diff.TypeDiff.Added)
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // breakingTypeFormatChangedInResponseProperty checks if the type or format of a response property was changed in a breaking way
@@ -51,15 +50,15 @@ func breakingTypeFormatChangedInRequest(typeDiff *diff.StringsDiff, formatDiff *
 isTypeContained checks if type2 is contained in type1
 note that we don't support multiple types currenty
 */
-func isTypeContained(to, from utils.StringList, stronglyTyped bool) bool {
+func isTypeContained(to, from []string, stronglyTyped bool) bool {
 
-	if to.Is("number") && from.Is("integer") {
+	if len(to) == 1 && to[0] == "number" && len(from) == 1 && from[0] == "integer" {
 		return true
 	}
 
 	// anything can be changed to string, unless it's "strongly typed"
 	if !stronglyTyped {
-		return to.Empty() || to.Is("string")
+		return len(to) == 0 || (len(to) == 1 && to[0] == "string")
 	}
 
 	return false
@@ -142,11 +141,11 @@ func getSingleType(types *openapi3.Types) string {
 	return (*types)[0]
 }
 
-func getBaseType(schemaDiff *diff.SchemaDiff) utils.StringList {
+func getBaseType(schemaDiff *diff.SchemaDiff) []string {
 	return schemaDiff.Base.Type.Slice()
 }
 
-func getRevisionType(schemaDiff *diff.SchemaDiff) utils.StringList {
+func getRevisionType(schemaDiff *diff.SchemaDiff) []string {
 	return schemaDiff.Revision.Type.Slice()
 }
 

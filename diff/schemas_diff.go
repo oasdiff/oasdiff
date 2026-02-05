@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // SchemasDiff describes the changes between a pair of maps of schema objects like the components.schemas object
 type SchemasDiff struct {
-	Added    utils.StringList   `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string   `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSchemasMap `json:"modified,omitempty" yaml:"modified,omitempty"`
 	Base     openapi3.Schemas   `json:"-" yaml:"-"`
 	Revision openapi3.Schemas   `json:"-" yaml:"-"`
@@ -27,8 +26,8 @@ func (schemasDiff *SchemasDiff) Empty() bool {
 
 func newSchemasDiff() *SchemasDiff {
 	return &SchemasDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedSchemasMap{},
 	}
 }

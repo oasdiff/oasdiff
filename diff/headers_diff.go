@@ -4,13 +4,12 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // HeadersDiff describes the changes between a pair of sets of header objects: https://swagger.io/specification/#header-object
 type HeadersDiff struct {
-	Added    utils.StringList `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedHeaders  `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -30,8 +29,8 @@ type ModifiedHeaders map[string]*HeaderDiff
 
 func newHeadersDiff() *HeadersDiff {
 	return &HeadersDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedHeaders{},
 	}
 }

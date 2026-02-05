@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // RequestBodiesDiff describes the changes between a pair of sets of request body objects: https://swagger.io/specification/#request-body-object
 type RequestBodiesDiff struct {
-	Added    utils.StringList      `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList      `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string      `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string      `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedRequestBodies `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -28,8 +27,8 @@ type ModifiedRequestBodies map[string]*RequestBodyDiff
 
 func newRequestBodiesDiff() *RequestBodiesDiff {
 	return &RequestBodiesDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedRequestBodies{},
 	}
 }

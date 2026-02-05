@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // ContentDiff describes the changes between content properties each containing media type objects: https://swagger.io/specification/#media-type-object
 type ContentDiff struct {
-	MediaTypeAdded    utils.StringList   `json:"added,omitempty" yaml:"added,omitempty"`
-	MediaTypeDeleted  utils.StringList   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	MediaTypeAdded    []string   `json:"added,omitempty" yaml:"added,omitempty"`
+	MediaTypeDeleted  []string   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	MediaTypeModified ModifiedMediaTypes `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -17,8 +16,8 @@ type ModifiedMediaTypes map[string]*MediaTypeDiff
 
 func newContentDiff() *ContentDiff {
 	return &ContentDiff{
-		MediaTypeAdded:    utils.StringList{},
-		MediaTypeDeleted:  utils.StringList{},
+		MediaTypeAdded:    []string{},
+		MediaTypeDeleted:  []string{},
 		MediaTypeModified: ModifiedMediaTypes{},
 	}
 }
@@ -80,7 +79,7 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 	}
 
 	// 3. Iteratively find equivalent pairs from initial Added/Deleted lists
-	finalAdded := make(utils.StringList, 0, len(initialResult.MediaTypeAdded))
+	finalAdded := make([]string, 0, len(initialResult.MediaTypeAdded))
 	finalModified := initialResult.MediaTypeModified // Start with exact matches
 
 	for _, addedName := range initialResult.MediaTypeAdded {
@@ -115,7 +114,7 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 	}
 
 	// 4. Collect final deletions (those not marked as processed)
-	finalDeleted := make(utils.StringList, 0, len(initialResult.MediaTypeDeleted))
+	finalDeleted := make([]string, 0, len(initialResult.MediaTypeDeleted))
 	for _, deletedName := range initialResult.MediaTypeDeleted {
 		if !processedDeleted[deletedName] {
 			finalDeleted = append(finalDeleted, deletedName)

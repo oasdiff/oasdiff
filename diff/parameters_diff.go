@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // ParametersDiff describes the changes between a pair of lists of parameter objects: https://swagger.io/specification/#parameter-object
 type ParametersDiff struct {
-	Added    utils.StringList `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ParamDiffs       `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -25,8 +24,8 @@ func (diff *ParametersDiff) Empty() bool {
 
 func newParametersDiff() *ParametersDiff {
 	return &ParametersDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ParamDiffs{},
 	}
 }

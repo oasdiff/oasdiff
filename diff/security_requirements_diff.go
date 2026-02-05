@@ -11,8 +11,8 @@ import (
 
 // SecurityRequirementsDiff describes the changes between a pair of sets of security requirement objects: https://swagger.io/specification/#security-requirement-object
 type SecurityRequirementsDiff struct {
-	Added    utils.StringList             `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList             `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string             `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string             `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSecurityRequirements `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -32,8 +32,8 @@ type ModifiedSecurityRequirements map[string]SecurityScopesDiff
 
 func newSecurityRequirementsDiff() *SecurityRequirementsDiff {
 	return &SecurityRequirementsDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedSecurityRequirements{},
 	}
 }

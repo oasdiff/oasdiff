@@ -7,7 +7,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +27,7 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{utils.StringList{"object"}, "", utils.StringList{"array"}, ""},
+		Args:        []any{[]string{"object"}, "", []string{"array"}, ""},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
@@ -53,7 +52,7 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{utils.StringList{"object"}, "", utils.StringList{"object"}, "uuid"},
+		Args:        []any{[]string{"object"}, "", []string{"object"}, "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
@@ -76,7 +75,7 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{"age", utils.StringList{"integer"}, "int32", utils.StringList{"string"}, "string"},
+		Args:        []any{"age", []string{"integer"}, "int32", []string{"string"}, "string"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_revision.yaml"),
@@ -99,7 +98,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{"colors", utils.StringList{"array"}, "", utils.StringList{"object"}, ""},
+		Args:        []any{"colors", []string{"array"}, "", []string{"object"}, ""},
 		Operation:   "POST",
 		Path:        "/dogs",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
@@ -108,7 +107,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{utils.StringList{"array"}, "", utils.StringList{"object"}, ""},
+		Args:        []any{[]string{"array"}, "", []string{"object"}, ""},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
@@ -131,7 +130,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{"colors", utils.StringList{"object"}, "", utils.StringList{"array"}, ""},
+		Args:        []any{"colors", []string{"object"}, "", []string{"array"}, ""},
 		Operation:   "POST",
 		Path:        "/dogs",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
@@ -140,7 +139,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{utils.StringList{"object"}, "", utils.StringList{"array"}, ""},
+		Args:        []any{[]string{"object"}, "", []string{"array"}, ""},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
@@ -165,7 +164,7 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{"age", utils.StringList{"integer"}, "int32", utils.StringList{"integer"}, "uuid"},
+		Args:        []any{"age", []string{"integer"}, "int32", []string{"integer"}, "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
@@ -191,7 +190,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeGeneralizedId,
 		Level:       checker.INFO,
-		Args:        []any{"age", utils.StringList{"integer"}, "int32", utils.StringList{"number"}, "int32"},
+		Args:        []any{"age", []string{"integer"}, "int32", []string{"number"}, "int32"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),

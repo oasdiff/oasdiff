@@ -6,7 +6,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -35,7 +34,7 @@ func TestAllOf_SingleRef(t *testing.T) {
 		Index:     0,
 		Component: "ProductDto",
 	}, allOfDiff.Modified[0].Revision)
-	require.Equal(t, utils.StringList{"sku"}, allOfDiff.Modified[0].Diff.PropertiesDiff.Added)
+	require.Equal(t, []string{"sku"}, allOfDiff.Modified[0].Diff.PropertiesDiff.Added)
 }
 
 func TestOneOf_TwoRefs(t *testing.T) {
@@ -60,7 +59,7 @@ func TestOneOf_TwoRefs(t *testing.T) {
 		Component: "Dog",
 	}, oneOfDiff.Modified[0].Revision)
 	require.Equal(t, 1, oneOfDiff.Modified[0].Diff.AllOfDiff.Modified[0].Base.Index)
-	require.Equal(t, utils.StringList{"guard"}, oneOfDiff.Modified[0].Diff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Added)
+	require.Equal(t, []string{"guard"}, oneOfDiff.Modified[0].Diff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Added)
 }
 
 func TestOneOf_ChangeBoth(t *testing.T) {
@@ -86,7 +85,7 @@ func TestOneOf_ChangeBoth(t *testing.T) {
 		Component: "Cat",
 	}, oneOfDiff.Modified[0].Revision)
 	require.Equal(t, 1, oneOfDiff.Modified[0].Diff.AllOfDiff.Modified[0].Base.Index)
-	require.Equal(t, utils.StringList{"miao"}, oneOfDiff.Modified[0].Diff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Added)
+	require.Equal(t, []string{"miao"}, oneOfDiff.Modified[0].Diff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Added)
 
 	require.Equal(t, diff.Subschema{
 		Index:     1,
@@ -97,7 +96,7 @@ func TestOneOf_ChangeBoth(t *testing.T) {
 		Component: "Dog",
 	}, oneOfDiff.Modified[1].Revision)
 	require.Equal(t, 1, oneOfDiff.Modified[1].Diff.AllOfDiff.Modified[0].Base.Index)
-	require.Equal(t, utils.StringList{"guard"}, oneOfDiff.Modified[1].Diff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Added)
+	require.Equal(t, []string{"guard"}, oneOfDiff.Modified[1].Diff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Added)
 }
 
 func TestOneOf_TwoInlineDuplicate(t *testing.T) {
