@@ -70,6 +70,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Path prefix modification](PATH-PREFIX.md)
 - [Path parameter renaming](PATH-PARAM-RENAME.md)
 - [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes)
+- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names)
 - [Track changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
 - [Filter endpoints](FILTERING-ENDPOINTS.md)
 - [Extend breaking changes with custom checks](CUSTOMIZING-CHECKS.md)

@@ -83,7 +83,7 @@ endpoints:
                           path: /uri
 ```
 
-### Excluding Specific Kinds of Changes 
+### Excluding Specific Kinds of Changes
 You can use the `--exclude-elements` flag with to exclude one or more of the following:
 - Use `--exclude-elements examples` to exclude [Examples](https://swagger.io/specification/#example-object)
 - Use `--exclude-elements extensions` to exclude [Extensions](https://swagger.io/specification/#specification-extensions)
@@ -96,6 +96,17 @@ For example, this diff excludes descriptions and examples:
 ```
 oasdiff diff data/openapi-test1.yaml data/openapi-test3.yaml --exclude-elements description,examples -f text
 ```
+
+### Excluding Specific Extension Names
+If you want to exclude specific [OpenAPI extensions](https://swagger.io/docs/specification/openapi-extensions/) by name while keeping others, use the `--exclude-extensions` flag.
+This is different from `--exclude-elements extensions` which excludes ALL extensions.
+
+For example, to exclude only `x-internal` and `x-ignore` extensions while keeping all others:
+```
+oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
+```
+
+This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
 ### Additional Options
 - [Merging AllOf Schemas](ALLOF.md)

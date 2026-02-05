@@ -872,6 +872,37 @@ func TestDiff_ExtensionsExcluded(t *testing.T) {
 	require.Empty(t, d)
 }
 
+func TestDiff_ExtensionsExcludeSpecificName(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/revision.yaml"))
+	require.NoError(t, err)
+
+	// Exclude the specific extension that has changes
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig().WithExcludeExtensions([]string{"x-amazon-apigateway-integration"}), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, d)
+}
+
+func TestDiff_ExtensionsExcludeUnrelatedName(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/revision.yaml"))
+	require.NoError(t, err)
+
+	// Exclude a different extension name - should still show the diff for x-amazon-apigateway-integration
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig().WithExcludeExtensions([]string{"x-unrelated"}), s1, s2)
+	require.NoError(t, err)
+	dd := d.PathsDiff.Modified["/example/callback"].OperationsDiff.Modified["POST"].ExtensionsDiff.Modified["x-amazon-apigateway-integration"]
+	require.Len(t, dd, 2)
+}
+
 func TestDiff_ExtensionsInvalid(t *testing.T) {
 	s1, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/extensions/base.yaml"))
 	require.NoError(t, err)

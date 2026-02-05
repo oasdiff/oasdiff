@@ -20,6 +20,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
 	cmd.PersistentFlags().Bool("case-insensitive-headers", false, "case-insensitive header name comparison")
+	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
 
 	addHiddenFlattenFlag(cmd)
 	addHiddenCircularDepFlag(cmd)

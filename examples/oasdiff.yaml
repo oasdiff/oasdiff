@@ -3,9 +3,9 @@
 # Place in the directory where the command is run
 format: json
 color: never
-attributes: 
+attributes:
 - x-beta
-- x-extension-test 
+- x-extension-test
 composed: false
 flatten-allof: true
 err-ignore: ignore-err-example.txt
@@ -14,3 +14,8 @@ fail-on: ERR
 level: INFO
 exclude-elements:
 - endpoints
+# exclude-extensions allows excluding specific extension names from diff
+# (unlike exclude-elements extensions which excludes ALL extensions)
+# exclude-extensions:
+# - x-internal
+# - x-codegen-ignore
