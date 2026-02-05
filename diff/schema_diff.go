@@ -50,8 +50,20 @@ type SchemaDiff struct {
 	MaxPropsDiff                    *ValueDiff              `json:"maxProps,omitempty" yaml:"maxProps,omitempty"`
 	AdditionalPropertiesDiff        *SchemaDiff             `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	DiscriminatorDiff               *DiscriminatorDiff      `json:"discriminatorDiff,omitempty" yaml:"discriminatorDiff,omitempty"`
-	Base                            *openapi3.Schema        `json:"-" yaml:"-"`
-	Revision                        *openapi3.Schema        `json:"-" yaml:"-"`
+	// OpenAPI 3.1 / JSON Schema 2020-12 fields
+	ConstDiff                 *ValueDiff       `json:"const,omitempty" yaml:"const,omitempty"`
+	ExamplesDiff              *ValueDiff       `json:"examples,omitempty" yaml:"examples,omitempty"`
+	PrefixItemsDiff           *SubschemasDiff  `json:"prefixItems,omitempty" yaml:"prefixItems,omitempty"`
+	ContainsDiff              *SchemaDiff      `json:"contains,omitempty" yaml:"contains,omitempty"`
+	MinContainsDiff           *ValueDiff       `json:"minContains,omitempty" yaml:"minContains,omitempty"`
+	MaxContainsDiff           *ValueDiff       `json:"maxContains,omitempty" yaml:"maxContains,omitempty"`
+	PatternPropertiesDiff     *SchemasDiff     `json:"patternProperties,omitempty" yaml:"patternProperties,omitempty"`
+	DependentSchemasDiff      *SchemasDiff     `json:"dependentSchemas,omitempty" yaml:"dependentSchemas,omitempty"`
+	PropertyNamesDiff         *SchemaDiff      `json:"propertyNames,omitempty" yaml:"propertyNames,omitempty"`
+	UnevaluatedItemsDiff      *SchemaDiff      `json:"unevaluatedItems,omitempty" yaml:"unevaluatedItems,omitempty"`
+	UnevaluatedPropertiesDiff *SchemaDiff      `json:"unevaluatedProperties,omitempty" yaml:"unevaluatedProperties,omitempty"`
+	Base                      *openapi3.Schema `json:"-" yaml:"-"`
+	Revision                  *openapi3.Schema `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -197,6 +209,40 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 
 	result.DiscriminatorDiff, err = getDiscriminatorDiff(config, value1.Discriminator, value2.Discriminator)
+	if err != nil {
+		return nil, err
+	}
+
+	// OpenAPI 3.1 / JSON Schema 2020-12 fields
+	result.ConstDiff = getValueDiff(value1.Const, value2.Const)
+	result.ExamplesDiff = getValueDiff(value1.Examples, value2.Examples)
+	result.PrefixItemsDiff, err = getSubschemasDiff(config, state, value1.PrefixItems, value2.PrefixItems)
+	if err != nil {
+		return nil, err
+	}
+	result.ContainsDiff, err = getSchemaDiff(config, state, value1.Contains, value2.Contains)
+	if err != nil {
+		return nil, err
+	}
+	result.MinContainsDiff = getUInt64RefDiff(value1.MinContains, value2.MinContains)
+	result.MaxContainsDiff = getUInt64RefDiff(value1.MaxContains, value2.MaxContains)
+	result.PatternPropertiesDiff, err = getSchemasDiff(config, state, value1.PatternProperties, value2.PatternProperties)
+	if err != nil {
+		return nil, err
+	}
+	result.DependentSchemasDiff, err = getSchemasDiff(config, state, value1.DependentSchemas, value2.DependentSchemas)
+	if err != nil {
+		return nil, err
+	}
+	result.PropertyNamesDiff, err = getSchemaDiff(config, state, value1.PropertyNames, value2.PropertyNames)
+	if err != nil {
+		return nil, err
+	}
+	result.UnevaluatedItemsDiff, err = getSchemaDiff(config, state, value1.UnevaluatedItems, value2.UnevaluatedItems)
+	if err != nil {
+		return nil, err
+	}
+	result.UnevaluatedPropertiesDiff, err = getSchemaDiff(config, state, value1.UnevaluatedProperties, value2.UnevaluatedProperties)
 	if err != nil {
 		return nil, err
 	}
