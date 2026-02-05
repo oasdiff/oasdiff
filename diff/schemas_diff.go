@@ -6,8 +6,8 @@ import (
 
 // SchemasDiff describes the changes between a pair of maps of schema objects like the components.schemas object
 type SchemasDiff struct {
-	Added    []string   `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string           `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSchemasMap `json:"modified,omitempty" yaml:"modified,omitempty"`
 	Base     openapi3.Schemas   `json:"-" yaml:"-"`
 	Revision openapi3.Schemas   `json:"-" yaml:"-"`

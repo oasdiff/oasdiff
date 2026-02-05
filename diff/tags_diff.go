@@ -6,9 +6,9 @@ import (
 
 // TagsDiff describes the changes between a pair of lists of tag objects: https://swagger.io/specification/#tag-object
 type TagsDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedTags     `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string     `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string     `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedTags `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
 func newTagsDiff() *TagsDiff {

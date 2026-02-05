@@ -5,8 +5,8 @@ type InterfaceMap map[string]any
 
 // InterfaceMapDiff describes the changes between a pair of InterfaceMap
 type InterfaceMapDiff struct {
-	Added    []string   `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string           `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedInterfaces `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 

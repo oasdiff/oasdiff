@@ -8,9 +8,9 @@ import (
 
 // LinksDiff describes the changes between a pair of sets of link objects: https://swagger.io/specification/#link-object
 type LinksDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedLinks    `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string      `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string      `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedLinks `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element

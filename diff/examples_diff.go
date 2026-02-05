@@ -8,8 +8,8 @@ import (
 
 // ExamplesDiff describes the changes between a pair of sets of example objects: https://swagger.io/specification/#example-object
 type ExamplesDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string         `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string         `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedExamples `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 

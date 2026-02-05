@@ -8,8 +8,8 @@ import (
 
 // CallbacksDiff describes the changes between a pair of callback objects: https://swagger.io/specification/#callback-object
 type CallbacksDiff struct {
-	Added    []string  `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string  `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string          `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string          `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedCallbacks `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 

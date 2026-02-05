@@ -6,8 +6,8 @@ import (
 
 // ContentDiff describes the changes between content properties each containing media type objects: https://swagger.io/specification/#media-type-object
 type ContentDiff struct {
-	MediaTypeAdded    []string   `json:"added,omitempty" yaml:"added,omitempty"`
-	MediaTypeDeleted  []string   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	MediaTypeAdded    []string           `json:"added,omitempty" yaml:"added,omitempty"`
+	MediaTypeDeleted  []string           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	MediaTypeModified ModifiedMediaTypes `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 

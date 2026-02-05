@@ -6,9 +6,9 @@ import (
 
 // StringMapDiff describes the changes between a pair of string maps
 type StringMapDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedKeys     `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string     `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string     `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedKeys `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
 // ModifiedKeys maps keys to their respective diffs

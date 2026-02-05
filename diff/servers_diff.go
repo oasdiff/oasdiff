@@ -6,9 +6,9 @@ import (
 
 // ServersDiff describes the changes between a pair of sets of encoding objects: https://swagger.io/specification/#server-object
 type ServersDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedServers  `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string        `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string        `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedServers `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
 // ModifiedServers is map of server names to their respective diffs

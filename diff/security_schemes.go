@@ -8,8 +8,8 @@ import (
 
 // SecuritySchemesDiff describes the changes between a pair of sets of security scheme objects: https://swagger.io/specification/#security-scheme-object
 type SecuritySchemesDiff struct {
-	Added    []string        `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string        `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string                `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string                `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSecuritySchemes `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 

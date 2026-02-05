@@ -8,9 +8,9 @@ import (
 
 // HeadersDiff describes the changes between a pair of sets of header objects: https://swagger.io/specification/#header-object
 type HeadersDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedHeaders  `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string        `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string        `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedHeaders `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element

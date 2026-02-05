@@ -6,8 +6,8 @@ import (
 
 // EncodingsDiff describes the changes between a pair of sets of encoding objects: https://swagger.io/specification/#encoding-object
 type EncodingsDiff struct {
-	Added    []string  `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string  `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string          `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string          `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedEncodings `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 

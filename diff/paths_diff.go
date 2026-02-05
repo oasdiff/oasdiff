@@ -9,11 +9,11 @@ import (
 
 // PathsDiff describes the changes between a pair of Paths objects: https://swagger.io/specification/#paths-object
 type PathsDiff struct {
-	Added    []string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedPaths    `json:"modified,omitempty" yaml:"modified,omitempty"`
-	Base     *openapi3.Paths  `json:"-" yaml:"-"`
-	Revision *openapi3.Paths  `json:"-" yaml:"-"`
+	Added    []string        `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string        `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedPaths   `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Base     *openapi3.Paths `json:"-" yaml:"-"`
+	Revision *openapi3.Paths `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element

@@ -10,8 +10,8 @@ import (
 
 // OperationsDiff describes the changes between a pair of operation objects (https://swagger.io/specification/#operation-object) of two path item objects
 type OperationsDiff struct {
-	Added    []string   `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string           `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedOperations `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
