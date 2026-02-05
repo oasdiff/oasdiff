@@ -1,7 +1,5 @@
 package diff
 
-import "github.com/oasdiff/oasdiff/utils"
-
 type direction int
 
 const (
@@ -10,16 +8,16 @@ const (
 )
 
 type state struct {
-	visitedSchemasBase     utils.VisitedRefs
-	visitedSchemasRevision utils.VisitedRefs
+	visitedSchemasBase     map[string]struct{}
+	visitedSchemasRevision map[string]struct{}
 	cache                  directionalSchemaDiffCache
 	direction              direction
 }
 
 func newState() *state {
 	return &state{
-		visitedSchemasBase:     utils.VisitedRefs{},
-		visitedSchemasRevision: utils.VisitedRefs{},
+		visitedSchemasBase:     map[string]struct{}{},
+		visitedSchemasRevision: map[string]struct{}{},
 		cache:                  newDirectionalSchemaDiffCache(),
 		direction:              directionRequest,
 	}

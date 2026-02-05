@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 type pathItemPair struct {
@@ -68,9 +67,9 @@ findNormalizedEndpoint finds a corresponding path ignoring differences in templa
 This implementation is based on Paths.Find in openapi3
 */
 func findNormalizedEndpoint(key string, paths *openapi3.Paths) (*openapi3.PathItem, PathParamsMap, bool) {
-	normalizedPath, expected, pathParams1 := utils.NormalizeTemplatedPath(key)
+	normalizedPath, expected, pathParams1 := normalizeTemplatedPath(key)
 	for path, pathItem := range paths.Map() {
-		pathNormalized, got, pathParams2 := utils.NormalizeTemplatedPath(path)
+		pathNormalized, got, pathParams2 := normalizeTemplatedPath(path)
 		if got == expected && pathNormalized == normalizedPath {
 			if pathParamsMap, ok := NewPathParamsMap(pathParams1, pathParams2); ok {
 				return pathItem, pathParamsMap, true

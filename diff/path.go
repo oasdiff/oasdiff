@@ -1,9 +1,9 @@
-package utils
+package diff
 
 import "strings"
 
 /*
-NormalizeTemplatedPath converts a path to its normalized form, without parameter names
+normalizeTemplatedPath converts a path to its normalized form, without parameter names
 
 For example:
 /person/{personName} -> /person/{}
@@ -15,7 +15,7 @@ Return values:
 
 This implementation is based on Paths.normalizeTemplatedPath in openapi3
 */
-func NormalizeTemplatedPath(path string) (string, uint, []string) {
+func normalizeTemplatedPath(path string) (string, uint, []string) {
 	if strings.IndexByte(path, '{') < 0 {
 		return path, 0, nil
 	}
