@@ -94,10 +94,14 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - checks: displays the different checks that oasdiff runs to detect changes
 
 ## Roadmap
-I am currently working on the ability to correlate breaking changes and changelog messages with the underlying changes in the original YAML spec.  
-This will allow users to see changes in their original context, investigate, and determine how to handle them.  
-Specifically, github users will be able to click annotations and see the diff at the relevant line as discussed [here](https://github.com/oasdiff/oasdiff/issues/574).  
-[Please help us prioritize the roadmap](https://github.com/oasdiff/oasdiff/discussions/631).
+- **OpenAPI 3.1**  
+  See https://github.com/oasdiff/oasdiff/issues/52  
+- **Inline visualization of breaking changes in the OpenAPI document**  
+  I am working on the ability to correlate breaking changes and changelog messages with the underlying edits in the original YAML specification.  
+  This will allow users to review changes in their original context, investigate their impact, and decide how to handle them.  
+  I am considering offering this capability under a separate license and would appreciate feedback from the community.
+  
+👉 [Please help prioritize the roadmap](https://github.com/oasdiff/oasdiff/discussions/631).
 
 ## Credits
 This project relies on the excellent implementation of OpenAPI 3.0 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
