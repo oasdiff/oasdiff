@@ -1,0 +1,116 @@
+openapi: 3.1.0
+jsonSchemaDialect: "https://json-schema.org/draft/2020-12/schema#"
+info:
+  title: OpenAPI 3.1 Test API
+  summary: Revised API for testing OpenAPI 3.1 features
+  description: Testing new OpenAPI 3.1 and JSON Schema 2020-12 features
+  version: 1.0.0
+  license:
+    name: Apache 2.0
+    identifier: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+webhooks:
+  newUser:
+    post:
+      summary: New user webhook - modified
+      operationId: newUserWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+        '201':
+          description: Created
+
+  paymentReceived:
+    post:
+      summary: Payment received webhook
+      operationId: paymentReceivedWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paymentId:
+                  type: string
+      responses:
+        '200':
+          description: OK
+
+paths:
+  /test:
+    get:
+      summary: Test endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestSchema'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: number
+
+    TestSchema:
+      type: object
+      properties:
+        status:
+          const: "inactive"
+        tags:
+          type: array
+          prefixItems:
+            - type: string
+            - type: integer
+          items:
+            type: string
+          contains:
+            type: string
+            minLength: 2
+          minContains: 2
+          maxContains: 10
+        metadata:
+          type: object
+          patternProperties:
+            "^y-":
+              type: number
+          propertyNames:
+            pattern: "^[A-Z]"
+          dependentSchemas:
+            debit_card:
+              properties:
+                bank_name:
+                  type: string
+              required:
+                - bank_name
+          unevaluatedProperties:
+            type: number
+        items:
+          type: array
+          unevaluatedItems:
+            type: number
+      examples:
+        - status: "inactive"
+          tags: ["different"]
