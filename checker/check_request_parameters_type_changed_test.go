@@ -7,7 +7,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,7 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"path", "groupId", utils.StringList{"string"}, "", utils.StringList{"integer"}, ""},
+		Args:        []any{"path", "groupId", []string{"string"}, "", []string{"integer"}, ""},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -50,7 +49,7 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"query", "token", utils.StringList{"string"}, "uuid", utils.StringList{"integer"}, "uuid"},
+		Args:        []any{"query", "token", []string{"string"}, "uuid", []string{"integer"}, "uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -74,7 +73,7 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"header", "X-Request-ID", utils.StringList{"string"}, "uuid", utils.StringList{"integer"}, "uuid"},
+		Args:        []any{"header", "X-Request-ID", []string{"string"}, "uuid", []string{"integer"}, "uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -98,7 +97,7 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"path", "groupId", utils.StringList{"string"}, "", utils.StringList{"string"}, "uuid"},
+		Args:        []any{"path", "groupId", []string{"string"}, "", []string{"string"}, "uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -122,7 +121,7 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"query", "token", utils.StringList{"string"}, "uuid", utils.StringList{"string"}, "uri"},
+		Args:        []any{"query", "token", []string{"string"}, "uuid", []string{"string"}, "uri"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -146,7 +145,7 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"header", "X-Request-ID", utils.StringList{"string"}, "uuid", utils.StringList{"string"}, "uri"},
+		Args:        []any{"header", "X-Request-ID", []string{"string"}, "uuid", []string{"string"}, "uri"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -171,7 +170,7 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", utils.StringList{"integer"}, "", utils.StringList{"integer", "string"}, ""},
+		Args:        []any{"path", "groupId", []string{"integer"}, "", []string{"integer", "string"}, ""},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -196,7 +195,7 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", utils.StringList{"integer", "string"}, "", utils.StringList{"number", "string"}, ""},
+		Args:        []any{"path", "groupId", []string{"integer", "string"}, "", []string{"number", "string"}, ""},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",

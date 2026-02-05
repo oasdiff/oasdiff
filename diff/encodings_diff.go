@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // EncodingsDiff describes the changes between a pair of sets of encoding objects: https://swagger.io/specification/#encoding-object
 type EncodingsDiff struct {
-	Added    utils.StringList  `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList  `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string          `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string          `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedEncodings `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -28,8 +27,8 @@ func (diff *EncodingsDiff) Empty() bool {
 
 func newEncodingsDiff() *EncodingsDiff {
 	return &EncodingsDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedEncodings{},
 	}
 }

@@ -2,13 +2,12 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // VariablesDiff describes the changes between a pair of sets of server variable objects: https://swagger.io/specification/#server-variable-object
 type VariablesDiff struct {
-	Added    utils.StringList  `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList  `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string          `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string          `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedVariables `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -28,8 +27,8 @@ func (diff *VariablesDiff) Empty() bool {
 
 func newVariablesDiff() *VariablesDiff {
 	return &VariablesDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedVariables{},
 	}
 }

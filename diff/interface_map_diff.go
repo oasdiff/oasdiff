@@ -1,16 +1,12 @@
 package diff
 
-import (
-	"github.com/oasdiff/oasdiff/utils"
-)
-
 // InterfaceMap is a map of string to interface
 type InterfaceMap map[string]any
 
 // InterfaceMapDiff describes the changes between a pair of InterfaceMap
 type InterfaceMapDiff struct {
-	Added    utils.StringList   `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList   `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string           `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string           `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedInterfaces `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -27,8 +23,8 @@ func (diff *InterfaceMapDiff) Empty() bool {
 
 func newInterfaceMapDiff() *InterfaceMapDiff {
 	return &InterfaceMapDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedInterfaces{},
 	}
 }

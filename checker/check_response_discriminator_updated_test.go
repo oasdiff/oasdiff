@@ -6,7 +6,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -128,7 +127,7 @@ func TestResponseDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 	require.ElementsMatch(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyDiscriminatorMappingAddedId,
-			Args:        []any{utils.StringList{"cats"}, "200"},
+			Args:        []any{[]string{"cats"}, "200"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -137,7 +136,7 @@ func TestResponseDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponseBodyDiscriminatorMappingDeletedId,
-			Args:        []any{utils.StringList{"cat"}, "200"},
+			Args:        []any{[]string{"cat"}, "200"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -146,7 +145,7 @@ func TestResponseDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyDiscriminatorMappingAddedId,
-			Args:        []any{utils.StringList{"breed1Code"}, "/oneOf[#/components/schemas/Dog]/breed", "200"},
+			Args:        []any{[]string{"breed1Code"}, "/oneOf[#/components/schemas/Dog]/breed", "200"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -164,7 +163,7 @@ func TestResponseDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyDiscriminatorMappingDeletedId,
-			Args:        []any{utils.StringList{"breed1"}, "/oneOf[#/components/schemas/Dog]/breed", "200"},
+			Args:        []any{[]string{"breed1"}, "/oneOf[#/components/schemas/Dog]/breed", "200"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",

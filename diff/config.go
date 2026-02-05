@@ -47,12 +47,12 @@ func NewConfig() *Config {
 }
 
 func (config *Config) WithExcludeElements(excludeElements []string) *Config {
-	config.ExcludeElements = utils.StringList(excludeElements).ToStringSet()
+	config.ExcludeElements = utils.StringSetFromSlice(excludeElements)
 	return config
 }
 
 func (config *Config) WithExcludeExtensions(excludeExtensions []string) *Config {
-	config.ExcludeExtensions = utils.StringList(excludeExtensions).ToStringSet()
+	config.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)
 	return config
 }
 

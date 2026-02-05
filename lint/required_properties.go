@@ -12,7 +12,7 @@ func checkRequireProperties(schema *openapi3.Schema, s *state) *Error {
 		return nil
 	}
 
-	requiredProps := utils.StringList(schema.Required).ToStringSet()
+	requiredProps := utils.StringSetFromSlice(schema.Required)
 	props := utils.StringSet{}
 	for name := range schema.Properties {
 		props.Add(name)

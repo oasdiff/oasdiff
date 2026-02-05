@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 type DiffT interface {
@@ -21,6 +20,6 @@ type DiffT interface {
 		*diff.StringsDiff
 }
 
-func getKeys[diff DiffT](m map[string]diff) utils.StringList {
-	return utils.StringList(slices.Sorted(maps.Keys(m)))
+func getKeys[diff DiffT](m map[string]diff) []string {
+	return slices.Sorted(maps.Keys(m))
 }

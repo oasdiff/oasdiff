@@ -1,15 +1,11 @@
 package diff
 
-import (
-	"github.com/oasdiff/oasdiff/utils"
-)
-
 // PathParamsMap handles path param renaming
 // for example:
 // person/{personName} -> /person/{name}
 // in such cases, PathParamsMap stores the param mapping:
 // personName -> name
-type PathParamsMap utils.StringMap
+type PathParamsMap map[string]string
 
 func NewPathParamsMap(pathParams1, pathParams2 []string) (PathParamsMap, bool) {
 	len1 := len(pathParams1)

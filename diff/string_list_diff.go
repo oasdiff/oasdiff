@@ -4,14 +4,14 @@ import "github.com/oasdiff/oasdiff/utils"
 
 // StringsDiff describes the changes between a pair of lists of strings
 type StringsDiff struct {
-	Added   utils.StringList `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted utils.StringList `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added   []string `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted []string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 }
 
 func newStringsDiff() *StringsDiff {
 	return &StringsDiff{
-		Added:   utils.StringList{},
-		Deleted: utils.StringList{},
+		Added:   []string{},
+		Deleted: []string{},
 	}
 }
 
@@ -25,7 +25,7 @@ func (stringsDiff *StringsDiff) Empty() bool {
 		len(stringsDiff.Deleted) == 0
 }
 
-func getStringsDiff(strings1, strings2 utils.StringList) *StringsDiff {
+func getStringsDiff(strings1, strings2 []string) *StringsDiff {
 	diff := getStringsDiffInternal(strings1, strings2)
 
 	if diff.Empty() {
@@ -35,11 +35,11 @@ func getStringsDiff(strings1, strings2 utils.StringList) *StringsDiff {
 	return diff
 }
 
-func getStringsDiffInternal(strings1, strings2 utils.StringList) *StringsDiff {
+func getStringsDiffInternal(strings1, strings2 []string) *StringsDiff {
 	result := newStringsDiff()
 
-	s1 := strings1.ToStringSet()
-	s2 := strings2.ToStringSet()
+	s1 := utils.StringSetFromSlice(strings1)
+	s2 := utils.StringSetFromSlice(strings2)
 
 	result.Added = s2.Minus(s1).ToStringList()
 	result.Deleted = s1.Minus(s2).ToStringList()
