@@ -140,7 +140,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							result = append(result, NewApiChange(
 								ResponsePropertyDeprecatedId,
 								config,
-								[]any{propName},
+								[]any{propName, date},
 								"",
 								operationsSources,
 								op,
