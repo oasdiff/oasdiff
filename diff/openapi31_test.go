@@ -202,3 +202,31 @@ func TestOpenAPI31_SchemaUnevaluatedItems(t *testing.T) {
 	require.NotNil(t, itemsDiff)
 	require.NotNil(t, itemsDiff.UnevaluatedItemsDiff)
 }
+
+func TestOpenAPI31_ExclusiveMinMax(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	require.NotNil(t, d.ComponentsDiff)
+	require.NotNil(t, d.ComponentsDiff.SchemasDiff)
+
+	orderSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["Order"]
+	require.NotNil(t, orderSchemaDiff)
+	require.NotNil(t, orderSchemaDiff.PropertiesDiff)
+	require.NotNil(t, orderSchemaDiff.PropertiesDiff.Modified)
+
+	scoreDiff := orderSchemaDiff.PropertiesDiff.Modified["score"]
+	require.NotNil(t, scoreDiff)
+
+	// OpenAPI 3.1 style: exclusiveMinimum/exclusiveMaximum as numbers
+	require.NotNil(t, scoreDiff.ExclusiveMinDiff)
+	require.Equal(t, float64(0), scoreDiff.ExclusiveMinDiff.From)
+	require.Equal(t, float64(10), scoreDiff.ExclusiveMinDiff.To)
+
+	require.NotNil(t, scoreDiff.ExclusiveMaxDiff)
+	require.Equal(t, float64(100), scoreDiff.ExclusiveMaxDiff.From)
+	require.Equal(t, float64(90), scoreDiff.ExclusiveMaxDiff.To)
+}

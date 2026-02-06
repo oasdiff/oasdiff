@@ -66,6 +66,11 @@ components:
           type: string
         amount:
           type: number
+        # OpenAPI 3.1 style: exclusiveMinimum/exclusiveMaximum as numbers
+        score:
+          type: number
+          exclusiveMinimum: 0
+          exclusiveMaximum: 100
 
     TestSchema:
       type: object

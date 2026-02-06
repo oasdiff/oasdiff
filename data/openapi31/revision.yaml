@@ -73,6 +73,11 @@ components:
           type: string
         amount:
           type: number
+        # OpenAPI 3.1 style: exclusiveMinimum/exclusiveMaximum as numbers (changed values)
+        score:
+          type: number
+          exclusiveMinimum: 10
+          exclusiveMaximum: 90
 
     TestSchema:
       type: object
