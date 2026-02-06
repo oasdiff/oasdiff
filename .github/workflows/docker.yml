@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'feat/openapi-3.1-support'
     tags:
       - 'v*'
 jobs:
