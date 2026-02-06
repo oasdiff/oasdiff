@@ -10,6 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// exclusiveBoundBool creates an ExclusiveBound with a boolean value (OpenAPI 3.0 style)
+func exclusiveBoundBool(b bool) openapi3.ExclusiveBound {
+	return openapi3.ExclusiveBound{Bool: &b}
+}
+
 // identical Default fields are merged successfully
 func TestMerge_Default(t *testing.T) {
 	merged, err := allof.Merge(
@@ -570,21 +575,21 @@ func TestMerge_ExclusiveMaxIsTrue(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: true,
+							ExclusiveMax: exclusiveBoundBool(true),
 							Max:          openapi3.Ptr(1.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: false,
+							ExclusiveMax: exclusiveBoundBool(false),
 							Max:          openapi3.Ptr(2.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, true, merged.ExclusiveMax)
+	require.True(t, merged.ExclusiveMax.IsTrue())
 }
 
 // if ExclusiveMax is false on the minimum Max value, then ExclusiveMax is false in the merged schema.
@@ -596,21 +601,21 @@ func TestMerge_ExclusiveMaxIsFalse(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: false,
+							ExclusiveMax: exclusiveBoundBool(false),
 							Max:          openapi3.Ptr(1.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: true,
+							ExclusiveMax: exclusiveBoundBool(true),
 							Max:          openapi3.Ptr(2.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, false, merged.ExclusiveMax)
+	require.False(t, merged.ExclusiveMax.IsTrue())
 }
 
 // if ExclusiveMin is false on the highest Min value, then ExclusiveMin is false in the merged schema.
@@ -622,21 +627,21 @@ func TestMerge_ExclusiveMinIsFalse(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: false,
+							ExclusiveMin: exclusiveBoundBool(false),
 							Min:          openapi3.Ptr(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: true,
+							ExclusiveMin: exclusiveBoundBool(true),
 							Min:          openapi3.Ptr(5.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, false, merged.ExclusiveMin)
+	require.False(t, merged.ExclusiveMin.IsTrue())
 }
 
 // if ExclusiveMin is true on the highest Min value, then ExclusiveMin is true in the merged schema.
@@ -648,21 +653,21 @@ func TestMerge_ExclusiveMinIsTrue(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: true,
+							ExclusiveMin: exclusiveBoundBool(true),
 							Min:          openapi3.Ptr(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: false,
+							ExclusiveMin: exclusiveBoundBool(false),
 							Min:          openapi3.Ptr(5.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, true, merged.ExclusiveMin)
+	require.True(t, merged.ExclusiveMin.IsTrue())
 }
 
 // merge multiple Not inside AllOf

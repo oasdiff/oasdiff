@@ -172,8 +172,8 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 	result.AdditionalPropertiesAllowedDiff = getBoolRefDiff(value1.AdditionalProperties.Has, value2.AdditionalProperties.Has)
 	result.UniqueItemsDiff = getValueDiff(value1.UniqueItems, value2.UniqueItems)
-	result.ExclusiveMinDiff = getValueDiff(value1.ExclusiveMin, value2.ExclusiveMin)
-	result.ExclusiveMaxDiff = getValueDiff(value1.ExclusiveMax, value2.ExclusiveMax)
+	result.ExclusiveMinDiff = getExclusiveBoundDiff(value1.ExclusiveMin, value2.ExclusiveMin)
+	result.ExclusiveMaxDiff = getExclusiveBoundDiff(value1.ExclusiveMax, value2.ExclusiveMax)
 	result.NullableDiff = getValueDiff(value1.Nullable, value2.Nullable)
 	result.ReadOnlyDiff = getValueDiff(value1.ReadOnly, value2.ReadOnly)
 	result.WriteOnlyDiff = getValueDiff(value1.WriteOnly, value2.WriteOnly)
