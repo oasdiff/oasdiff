@@ -18,16 +18,18 @@ var (
 
 // Diff describes the changes between a pair of OpenAPI objects: https://swagger.io/specification/#schema
 type Diff struct {
-	ExtensionsDiff   *ExtensionsDiff           `json:"extensions,omitempty" yaml:"extensions,omitempty"`
-	OpenAPIDiff      *ValueDiff                `json:"openAPI,omitempty" yaml:"openAPI,omitempty"`
-	InfoDiff         *InfoDiff                 `json:"info,omitempty" yaml:"info,omitempty"`
-	PathsDiff        *PathsDiff                `json:"paths,omitempty" yaml:"paths,omitempty"`
-	EndpointsDiff    *EndpointsDiff            `json:"endpoints,omitempty" yaml:"endpoints,omitempty"`
-	SecurityDiff     *SecurityRequirementsDiff `json:"security,omitempty" yaml:"security,omitempty"`
-	ServersDiff      *ServersDiff              `json:"servers,omitempty" yaml:"servers,omitempty"`
-	TagsDiff         *TagsDiff                 `json:"tags,omitempty" yaml:"tags,omitempty"`
-	ExternalDocsDiff *ExternalDocsDiff         `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
-	ComponentsDiff   *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
+	ExtensionsDiff        *ExtensionsDiff           `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	OpenAPIDiff           *ValueDiff                `json:"openAPI,omitempty" yaml:"openAPI,omitempty"`
+	InfoDiff              *InfoDiff                 `json:"info,omitempty" yaml:"info,omitempty"`
+	PathsDiff             *PathsDiff                `json:"paths,omitempty" yaml:"paths,omitempty"`
+	WebhooksDiff          *WebhooksDiff             `json:"webhooks,omitempty" yaml:"webhooks,omitempty"`
+	EndpointsDiff         *EndpointsDiff            `json:"endpoints,omitempty" yaml:"endpoints,omitempty"`
+	SecurityDiff          *SecurityRequirementsDiff `json:"security,omitempty" yaml:"security,omitempty"`
+	ServersDiff           *ServersDiff              `json:"servers,omitempty" yaml:"servers,omitempty"`
+	TagsDiff              *TagsDiff                 `json:"tags,omitempty" yaml:"tags,omitempty"`
+	ExternalDocsDiff      *ExternalDocsDiff         `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
+	ComponentsDiff        *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
+	JSONSchemaDialectDiff *ValueDiff                `json:"jsonSchemaDialect,omitempty" yaml:"jsonSchemaDialect,omitempty"`
 }
 
 type OperationsSourcesMap map[*openapi3.Operation]string
@@ -278,6 +280,10 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 		return nil, err
 	}
 
+	if result.WebhooksDiff, err = getWebhooksDiff(config, state, s1.Webhooks, s2.Webhooks); err != nil {
+		return nil, err
+	}
+
 	if result.EndpointsDiff, err = getEndpointsDiff(config, state, s1.Paths, s2.Paths); err != nil {
 		return nil, err
 	}
@@ -295,6 +301,8 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 		return nil, err
 	}
 
+	result.JSONSchemaDialectDiff = getValueDiff(s1.JSONSchemaDialect, s2.JSONSchemaDialect)
+
 	return result, nil
 }
 
@@ -311,6 +319,7 @@ func (diff *Diff) GetSummary() *Summary {
 
 	// swagger
 	summary.add(diff.PathsDiff, PathsDetail)
+	summary.add(diff.WebhooksDiff, WebhooksDetail)
 	summary.add(diff.SecurityDiff, SecurityDetail)
 	summary.add(diff.ServersDiff, ServersDetail)
 	summary.add(diff.TagsDiff, TagsDetail)
