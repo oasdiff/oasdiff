@@ -80,6 +80,7 @@ components:
           exclusiveMaximum: 90
 
     TestSchema:
+      $id: "https://example.com/schemas/test-revision"
       type: object
       properties:
         status:
@@ -110,12 +111,36 @@ components:
                   type: string
               required:
                 - bank_name
+          dependentRequired:
+            name:
+              - email
           unevaluatedProperties:
             type: number
         items:
           type: array
           unevaluatedItems:
             type: number
+        conditional:
+          type: object
+          if:
+            properties:
+              kind:
+                const: "standard"
+          then:
+            required:
+              - price
+          else:
+            required:
+              - explanation
+        encoded:
+          type: string
+          contentMediaType: text/plain
+          contentEncoding: quoted-printable
+          contentSchema:
+            type: object
+            properties:
+              data:
+                type: integer
       examples:
         - status: "inactive"
           tags: ["different"]

@@ -73,6 +73,7 @@ components:
           exclusiveMaximum: 100
 
     TestSchema:
+      $id: "https://example.com/schemas/test-base"
       type: object
       properties:
         status:
@@ -103,12 +104,36 @@ components:
                   type: string
               required:
                 - billing_address
+          dependentRequired:
+            name:
+              - age
           unevaluatedProperties:
             type: string
         items:
           type: array
           unevaluatedItems:
             type: string
+        conditional:
+          type: object
+          if:
+            properties:
+              kind:
+                const: "premium"
+          then:
+            required:
+              - discount
+          else:
+            required:
+              - reason
+        encoded:
+          type: string
+          contentMediaType: application/json
+          contentEncoding: base64
+          contentSchema:
+            type: object
+            properties:
+              data:
+                type: string
       examples:
         - status: "active"
           tags: ["tag1", 42, true]

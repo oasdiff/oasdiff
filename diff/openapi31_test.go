@@ -203,6 +203,77 @@ func TestOpenAPI31_SchemaUnevaluatedItems(t *testing.T) {
 	require.NotNil(t, itemsDiff.UnevaluatedItemsDiff)
 }
 
+func TestOpenAPI31_SchemaIfThenElse(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+
+	conditionalDiff := testSchemaDiff.PropertiesDiff.Modified["conditional"]
+	require.NotNil(t, conditionalDiff)
+	require.NotNil(t, conditionalDiff.IfDiff)
+	require.NotNil(t, conditionalDiff.ThenDiff)
+	require.NotNil(t, conditionalDiff.ElseDiff)
+}
+
+func TestOpenAPI31_SchemaDependentRequired(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+
+	metadataDiff := testSchemaDiff.PropertiesDiff.Modified["metadata"]
+	require.NotNil(t, metadataDiff)
+	require.NotNil(t, metadataDiff.DependentRequiredDiff)
+}
+
+func TestOpenAPI31_SchemaID(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+	require.NotNil(t, testSchemaDiff.SchemaIDDiff)
+	require.Equal(t, "https://example.com/schemas/test-base", testSchemaDiff.SchemaIDDiff.From)
+	require.Equal(t, "https://example.com/schemas/test-revision", testSchemaDiff.SchemaIDDiff.To)
+}
+
+func TestOpenAPI31_SchemaContentEncoding(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+
+	encodedDiff := testSchemaDiff.PropertiesDiff.Modified["encoded"]
+	require.NotNil(t, encodedDiff)
+	require.NotNil(t, encodedDiff.ContentMediaTypeDiff)
+	require.Equal(t, "application/json", encodedDiff.ContentMediaTypeDiff.From)
+	require.Equal(t, "text/plain", encodedDiff.ContentMediaTypeDiff.To)
+	require.NotNil(t, encodedDiff.ContentEncodingDiff)
+	require.Equal(t, "base64", encodedDiff.ContentEncodingDiff.From)
+	require.Equal(t, "quoted-printable", encodedDiff.ContentEncodingDiff.To)
+	require.NotNil(t, encodedDiff.ContentSchemaDiff)
+}
+
 func TestOpenAPI31_ExclusiveMinMax(t *testing.T) {
 	s1 := loadSpec(t, "../data/openapi31/base.yaml")
 	s2 := loadSpec(t, "../data/openapi31/revision.yaml")

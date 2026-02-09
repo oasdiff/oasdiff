@@ -62,6 +62,17 @@ type SchemaDiff struct {
 	PropertyNamesDiff         *SchemaDiff      `json:"propertyNames,omitempty" yaml:"propertyNames,omitempty"`
 	UnevaluatedItemsDiff      *SchemaDiff      `json:"unevaluatedItems,omitempty" yaml:"unevaluatedItems,omitempty"`
 	UnevaluatedPropertiesDiff *SchemaDiff      `json:"unevaluatedProperties,omitempty" yaml:"unevaluatedProperties,omitempty"`
+	IfDiff                    *SchemaDiff      `json:"if,omitempty" yaml:"if,omitempty"`
+	ThenDiff                  *SchemaDiff      `json:"then,omitempty" yaml:"then,omitempty"`
+	ElseDiff                  *SchemaDiff      `json:"else,omitempty" yaml:"else,omitempty"`
+	DependentRequiredDiff     *ValueDiff       `json:"dependentRequired,omitempty" yaml:"dependentRequired,omitempty"`
+	SchemaIDDiff              *ValueDiff       `json:"$id,omitempty" yaml:"$id,omitempty"`
+	AnchorDiff                *ValueDiff       `json:"$anchor,omitempty" yaml:"$anchor,omitempty"`
+	DynamicRefDiff            *ValueDiff       `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
+	DynamicAnchorDiff         *ValueDiff       `json:"$dynamicAnchor,omitempty" yaml:"$dynamicAnchor,omitempty"`
+	ContentMediaTypeDiff      *ValueDiff       `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
+	ContentEncodingDiff       *ValueDiff       `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
+	ContentSchemaDiff         *SchemaDiff      `json:"contentSchema,omitempty" yaml:"contentSchema,omitempty"`
 	Base                      *openapi3.Schema `json:"-" yaml:"-"`
 	Revision                  *openapi3.Schema `json:"-" yaml:"-"`
 }
@@ -243,6 +254,29 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 		return nil, err
 	}
 	result.UnevaluatedPropertiesDiff, err = getSchemaDiff(config, state, value1.UnevaluatedProperties, value2.UnevaluatedProperties)
+	if err != nil {
+		return nil, err
+	}
+	result.IfDiff, err = getSchemaDiff(config, state, value1.If, value2.If)
+	if err != nil {
+		return nil, err
+	}
+	result.ThenDiff, err = getSchemaDiff(config, state, value1.Then, value2.Then)
+	if err != nil {
+		return nil, err
+	}
+	result.ElseDiff, err = getSchemaDiff(config, state, value1.Else, value2.Else)
+	if err != nil {
+		return nil, err
+	}
+	result.DependentRequiredDiff = getValueDiff(value1.DependentRequired, value2.DependentRequired)
+	result.SchemaIDDiff = getValueDiff(value1.SchemaID, value2.SchemaID)
+	result.AnchorDiff = getValueDiff(value1.Anchor, value2.Anchor)
+	result.DynamicRefDiff = getValueDiff(value1.DynamicRef, value2.DynamicRef)
+	result.DynamicAnchorDiff = getValueDiff(value1.DynamicAnchor, value2.DynamicAnchor)
+	result.ContentMediaTypeDiff = getValueDiff(value1.ContentMediaType, value2.ContentMediaType)
+	result.ContentEncodingDiff = getValueDiff(value1.ContentEncoding, value2.ContentEncoding)
+	result.ContentSchemaDiff, err = getSchemaDiff(config, state, value1.ContentSchema, value2.ContentSchema)
 	if err != nil {
 		return nil, err
 	}
