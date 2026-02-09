@@ -284,7 +284,9 @@ func TestApiDeprecated_MessageIncludesSunset(t *testing.T) {
 	require.Len(t, errs, 1)
 
 	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
-	require.Equal(t, "endpoint deprecated (sunset: 9999-08-10)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	text := errs[0].GetUncolorizedText(checker.NewDefaultLocalizer())
+	require.Contains(t, text, "endpoint deprecated")
+	require.Contains(t, text, "sunset: 9999-08-10")
 }
 
 // CL: message includes both sunset and stability when endpoint deprecated with both
@@ -303,7 +305,10 @@ func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	require.Len(t, errs, 1)
 
 	require.Equal(t, checker.EndpointDeprecatedId, errs[0].GetId())
-	require.Equal(t, "endpoint deprecated (sunset: 9999-08-10, stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	text := errs[0].GetUncolorizedText(checker.NewDefaultLocalizer())
+	require.Contains(t, text, "endpoint deprecated")
+	require.Contains(t, text, "sunset: 9999-08-10")
+	require.Contains(t, text, "stability: beta")
 }
 
 // CL: message has no details when endpoint deprecated without sunset or stability

@@ -92,7 +92,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					result = append(result, NewApiChange(
 						EndpointDeprecatedId,
 						config,
-						[]any{""},
+						nil,
 						"",
 						operationsSources,
 						op,
