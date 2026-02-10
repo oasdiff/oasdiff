@@ -73,6 +73,9 @@ type SchemaDiff struct {
 	ContentMediaTypeDiff      *ValueDiff       `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
 	ContentEncodingDiff       *ValueDiff       `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
 	ContentSchemaDiff         *SchemaDiff      `json:"contentSchema,omitempty" yaml:"contentSchema,omitempty"`
+	DefsDiff                  *SchemasDiff     `json:"$defs,omitempty" yaml:"$defs,omitempty"`
+	SchemaDialectDiff         *ValueDiff       `json:"$schema,omitempty" yaml:"$schema,omitempty"`
+	CommentDiff               *ValueDiff       `json:"$comment,omitempty" yaml:"$comment,omitempty"`
 	Base                      *openapi3.Schema `json:"-" yaml:"-"`
 	Revision                  *openapi3.Schema `json:"-" yaml:"-"`
 }
@@ -280,6 +283,12 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	if err != nil {
 		return nil, err
 	}
+	result.DefsDiff, err = getSchemasDiff(config, state, value1.Defs, value2.Defs)
+	if err != nil {
+		return nil, err
+	}
+	result.SchemaDialectDiff = getValueDiff(value1.SchemaDialect, value2.SchemaDialect)
+	result.CommentDiff = getValueDiff(value1.Comment, value2.Comment)
 
 	return &result, nil
 }

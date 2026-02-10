@@ -74,6 +74,8 @@ components:
 
     TestSchema:
       $id: "https://example.com/schemas/test-base"
+      $schema: "https://json-schema.org/draft/2020-12/schema"
+      $comment: "Base test schema"
       type: object
       properties:
         status:
@@ -134,6 +136,11 @@ components:
             properties:
               data:
                 type: string
+      $defs:
+        StringDef:
+          type: string
+        NumberDef:
+          type: number
       examples:
         - status: "active"
           tags: ["tag1", 42, true]

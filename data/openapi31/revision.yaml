@@ -81,6 +81,8 @@ components:
 
     TestSchema:
       $id: "https://example.com/schemas/test-revision"
+      $schema: "https://json-schema.org/draft/2020-12/schema#"
+      $comment: "Revised test schema"
       type: object
       properties:
         status:
@@ -141,6 +143,12 @@ components:
             properties:
               data:
                 type: integer
+      $defs:
+        StringDef:
+          type: string
+          minLength: 1
+        IntegerDef:
+          type: integer
       examples:
         - status: "inactive"
           tags: ["different"]

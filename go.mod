@@ -52,4 +52,4 @@ require (
 	github.com/wI2L/jsondiff v0.7.0
 )
 
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260209102210-1da407895d1b
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260210100147-da004e9a862b

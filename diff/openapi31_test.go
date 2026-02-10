@@ -274,6 +274,49 @@ func TestOpenAPI31_SchemaContentEncoding(t *testing.T) {
 	require.NotNil(t, encodedDiff.ContentSchemaDiff)
 }
 
+func TestOpenAPI31_SchemaDefs(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+	require.NotNil(t, testSchemaDiff.DefsDiff)
+}
+
+func TestOpenAPI31_SchemaDialect(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+	require.NotNil(t, testSchemaDiff.SchemaDialectDiff)
+	require.Equal(t, "https://json-schema.org/draft/2020-12/schema", testSchemaDiff.SchemaDialectDiff.From)
+	require.Equal(t, "https://json-schema.org/draft/2020-12/schema#", testSchemaDiff.SchemaDialectDiff.To)
+}
+
+func TestOpenAPI31_SchemaComment(t *testing.T) {
+	s1 := loadSpec(t, "../data/openapi31/base.yaml")
+	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	testSchemaDiff := d.ComponentsDiff.SchemasDiff.Modified["TestSchema"]
+	require.NotNil(t, testSchemaDiff)
+	require.NotNil(t, testSchemaDiff.CommentDiff)
+	require.Equal(t, "Base test schema", testSchemaDiff.CommentDiff.From)
+	require.Equal(t, "Revised test schema", testSchemaDiff.CommentDiff.To)
+}
+
 func TestOpenAPI31_ExclusiveMinMax(t *testing.T) {
 	s1 := loadSpec(t, "../data/openapi31/base.yaml")
 	s2 := loadSpec(t, "../data/openapi31/revision.yaml")
