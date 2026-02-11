@@ -1,5 +1,5 @@
 
-[![CI](https://github.com/oasdiff/oasdiff/workflows/go/badge.svg?branch=main)](https://github.com/oasdiff/oasdiff/actions)
+[![CI](https://github.com/oasdiff/oasdiff/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/oasdiff/oasdiff/actions)
 [![codecov](https://codecov.io/gh/oasdiff/oasdiff/branch/main/graph/badge.svg?token=Y8BM6X77JY)](https://codecov.io/gh/oasdiff/oasdiff)
 [![Go Report Card](https://goreportcard.com/badge/github.com/oasdiff/oasdiff)](https://goreportcard.com/report/github.com/oasdiff/oasdiff)
 [![GoDoc](https://godoc.org/github.com/oasdiff/oasdiff?status.svg)](https://godoc.org/github.com/oasdiff/oasdiff)
