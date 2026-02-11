@@ -90,7 +90,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								result = append(result, NewApiChange(
 									RequestPropertyDeprecatedId,
 									config,
-									[]any{propName},
+									[]any{propName, ""},
 									"",
 									operationsSources,
 									op,
