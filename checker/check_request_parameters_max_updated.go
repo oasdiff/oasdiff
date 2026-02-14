@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	RequestParameterMaxDecreasedId = "request-parameter-max-decreased"
-	RequestParameterMaxIncreasedId = "request-parameter-max-increased"
+	RequestParameterMaxDecreasedId          = "request-parameter-max-decreased"
+	RequestParameterMaxIncreasedId          = "request-parameter-max-increased"
+	RequestParameterExclusiveMaxDecreasedId = "request-parameter-exclusive-max-decreased"
+	RequestParameterExclusiveMaxIncreasedId = "request-parameter-exclusive-max-increased"
 )
 
 func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -28,30 +30,50 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						continue
 					}
 					maxDiff := paramDiff.SchemaDiff.MaxDiff
-					if maxDiff == nil {
-						continue
-					}
-					if maxDiff.From == nil ||
-						maxDiff.To == nil {
-						continue
+					if maxDiff != nil &&
+						maxDiff.From != nil &&
+						maxDiff.To != nil {
+
+						id := RequestParameterMaxDecreasedId
+
+						if !IsDecreasedValue(maxDiff) {
+							id = RequestParameterMaxIncreasedId
+						}
+
+						result = append(result, NewApiChange(
+							id,
+							config,
+							[]any{paramLocation, paramName, maxDiff.From, maxDiff.To},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
 					}
 
-					id := RequestParameterMaxDecreasedId
+					exMaxDiff := paramDiff.SchemaDiff.ExclusiveMaxDiff
+					if exMaxDiff != nil &&
+						exMaxDiff.From != nil &&
+						exMaxDiff.To != nil {
 
-					if !IsDecreasedValue(maxDiff) {
-						id = RequestParameterMaxIncreasedId
+						id := RequestParameterExclusiveMaxDecreasedId
+
+						if !IsDecreasedValue(exMaxDiff) {
+							id = RequestParameterExclusiveMaxIncreasedId
+						}
+
+						result = append(result, NewApiChange(
+							id,
+							config,
+							[]any{paramLocation, paramName, exMaxDiff.From, exMaxDiff.To},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
 					}
-
-					result = append(result, NewApiChange(
-						id,
-						config,
-						[]any{paramLocation, paramName, maxDiff.From, maxDiff.To},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					))
 				}
 			}
 		}

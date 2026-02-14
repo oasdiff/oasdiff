@@ -188,9 +188,12 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterMaxLengthDecreasedId, ERR, RequestParameterMaxLengthUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
 		// RequestParameterMaxSetCheck
 		newBackwardCompatibilityRule(RequestParameterMaxSetId, WARN, RequestParameterMaxSetCheck, DirectionRequest, LocationParameters, ActionSet),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMaxSetId, WARN, RequestParameterMaxSetCheck, DirectionRequest, LocationParameters, ActionSet),
 		// RequestParameterMaxUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMaxIncreasedId, INFO, RequestParameterMaxUpdatedCheck, DirectionRequest, LocationParameters, ActionIncrease),
 		newBackwardCompatibilityRule(RequestParameterMaxDecreasedId, ERR, RequestParameterMaxUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMaxIncreasedId, INFO, RequestParameterMaxUpdatedCheck, DirectionRequest, LocationParameters, ActionIncrease),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMaxDecreasedId, ERR, RequestParameterMaxUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
 		// RequestParameterMinItemsSetCheck
 		newBackwardCompatibilityRule(RequestParameterMinItemsSetId, WARN, RequestParameterMinItemsSetCheck, DirectionRequest, LocationParameters, ActionSet),
 		// RequestParameterMinItemsUpdatedCheck
@@ -201,9 +204,12 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterMinLengthDecreasedId, INFO, RequestParameterMinLengthUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
 		// RequestParameterMinSetCheck
 		newBackwardCompatibilityRule(RequestParameterMinSetId, WARN, RequestParameterMinSetCheck, DirectionRequest, LocationParameters, ActionSet),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMinSetId, WARN, RequestParameterMinSetCheck, DirectionRequest, LocationParameters, ActionSet),
 		// RequestParameterMinUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMinIncreasedId, ERR, RequestParameterMinUpdatedCheck, DirectionRequest, LocationParameters, ActionIncrease),
 		newBackwardCompatibilityRule(RequestParameterMinDecreasedId, INFO, RequestParameterMinUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMinIncreasedId, ERR, RequestParameterMinUpdatedCheck, DirectionRequest, LocationParameters, ActionIncrease),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMinDecreasedId, INFO, RequestParameterMinUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),
 		// RequestParameterPatternAddedOrChangedCheck
 		newBackwardCompatibilityRule(RequestParameterPatternAddedId, ERR, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
 		newBackwardCompatibilityRule(RequestParameterPatternRemovedId, INFO, RequestParameterPatternAddedOrChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
@@ -249,6 +255,13 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyDefaultValueAddedId, INFO, RequestPropertyDefaultValueChangedCheck, DirectionRequest, LocationProperties, ActionAdd),
 		newBackwardCompatibilityRule(RequestPropertyDefaultValueRemovedId, INFO, RequestPropertyDefaultValueChangedCheck, DirectionRequest, LocationProperties, ActionRemove),
 		newBackwardCompatibilityRule(RequestPropertyDefaultValueChangedId, INFO, RequestPropertyDefaultValueChangedCheck, DirectionRequest, LocationProperties, ActionChange),
+		// RequestPropertyConstChangedCheck
+		newBackwardCompatibilityRule(RequestBodyConstAddedId, ERR, RequestPropertyConstChangedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyConstRemovedId, INFO, RequestPropertyConstChangedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyConstChangedId, ERR, RequestPropertyConstChangedCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyConstAddedId, ERR, RequestPropertyConstChangedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyConstRemovedId, INFO, RequestPropertyConstChangedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyConstChangedId, ERR, RequestPropertyConstChangedCheck, DirectionRequest, LocationProperties, ActionChange),
 		// RequestPropertyEnumValueUpdatedCheck
 		newBackwardCompatibilityRule(RequestPropertyEnumValueRemovedId, ERR, RequestPropertyEnumValueUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyEnumValueRemovedId, INFO, RequestPropertyEnumValueUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
@@ -259,6 +272,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyMaxDecreasedId, ERR, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationProperties, ActionDecrease),
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyMaxDecreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationProperties, ActionDecrease),
 		newBackwardCompatibilityRule(RequestPropertyMaxIncreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMaxDecreasedId, ERR, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMaxIncreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMaxDecreasedId, ERR, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyExclusiveMaxDecreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMaxIncreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
 		// RequestPropertyMaxLengthSetCheck
 		newBackwardCompatibilityRule(RequestBodyMaxLengthSetId, WARN, RequestPropertyMaxLengthSetCheck, DirectionRequest, LocationBody, ActionSet),
 		newBackwardCompatibilityRule(RequestPropertyMaxLengthSetId, WARN, RequestPropertyMaxLengthSetCheck, DirectionRequest, LocationProperties, ActionSet),
@@ -271,12 +289,19 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestPropertyMaxSetCheck
 		newBackwardCompatibilityRule(RequestBodyMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, LocationBody, ActionSet),
 		newBackwardCompatibilityRule(RequestPropertyMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, LocationProperties, ActionSet),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, LocationBody, ActionSet),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, LocationProperties, ActionSet),
 		// RequestPropertyMinIncreasedCheck
 		newBackwardCompatibilityRule(RequestBodyMinIncreasedId, ERR, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationBody, ActionIncrease),
 		newBackwardCompatibilityRule(RequestBodyMinDecreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationBody, ActionDecrease),
 		newBackwardCompatibilityRule(RequestPropertyMinIncreasedId, ERR, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyMinIncreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
 		newBackwardCompatibilityRule(RequestPropertyMinDecreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMinIncreasedId, ERR, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMinDecreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMinIncreasedId, ERR, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyExclusiveMinIncreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMinDecreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, LocationProperties, ActionDecrease),
 		// RequestPropertyMinItemsIncreasedCheck
 		newBackwardCompatibilityRule(RequestBodyMinItemsIncreasedId, ERR, RequestPropertyMinItemsIncreasedCheck, DirectionRequest, LocationBody, ActionIncrease),
 		newBackwardCompatibilityRule(RequestPropertyMinItemsIncreasedId, ERR, RequestPropertyMinItemsIncreasedCheck, DirectionRequest, LocationProperties, ActionIncrease),
@@ -291,6 +316,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestPropertyMinSetCheck
 		newBackwardCompatibilityRule(RequestBodyMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, LocationBody, ActionSet),
 		newBackwardCompatibilityRule(RequestPropertyMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, LocationProperties, ActionSet),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, LocationBody, ActionSet),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, LocationProperties, ActionSet),
 		// RequestPropertyOneOfUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyOneOfAddedId, INFO, RequestPropertyOneOfUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyOneOfRemovedId, ERR, RequestPropertyOneOfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
@@ -391,12 +418,21 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyDefaultValueAddedId, INFO, ResponsePropertyDefaultValueChangedCheck, DirectionResponse, LocationProperties, ActionAdd),
 		newBackwardCompatibilityRule(ResponsePropertyDefaultValueRemovedId, INFO, ResponsePropertyDefaultValueChangedCheck, DirectionResponse, LocationProperties, ActionRemove),
 		newBackwardCompatibilityRule(ResponsePropertyDefaultValueChangedId, INFO, ResponsePropertyDefaultValueChangedCheck, DirectionResponse, LocationProperties, ActionChange),
+		// ResponsePropertyConstChangedCheck
+		newBackwardCompatibilityRule(ResponseBodyConstAddedId, INFO, ResponsePropertyConstChangedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyConstRemovedId, ERR, ResponsePropertyConstChangedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyConstChangedId, ERR, ResponsePropertyConstChangedCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyConstAddedId, INFO, ResponsePropertyConstChangedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyConstRemovedId, ERR, ResponsePropertyConstChangedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyConstChangedId, ERR, ResponsePropertyConstChangedCheck, DirectionResponse, LocationProperties, ActionChange),
 		// ResponsePropertyEnumValueAddedCheck
 		newBackwardCompatibilityRule(ResponsePropertyEnumValueAddedId, WARN, ResponsePropertyEnumValueAddedCheck, DirectionResponse, LocationProperties, ActionAdd),
 		newBackwardCompatibilityRule(ResponseWriteOnlyPropertyEnumValueAddedId, INFO, ResponsePropertyEnumValueAddedCheck, DirectionResponse, LocationProperties, ActionAdd),
 		// ResponsePropertyMaxIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, LocationBody, ActionIncrease),
 		newBackwardCompatibilityRule(ResponsePropertyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponseBodyExclusiveMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyExclusiveMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, LocationProperties, ActionIncrease),
 		// ResponsePropertyMaxLengthIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxLengthIncreasedId, ERR, ResponsePropertyMaxLengthIncreasedCheck, DirectionResponse, LocationBody, ActionIncrease),
 		newBackwardCompatibilityRule(ResponsePropertyMaxLengthIncreasedId, ERR, ResponsePropertyMaxLengthIncreasedCheck, DirectionResponse, LocationProperties, ActionIncrease),
@@ -406,6 +442,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// ResponsePropertyMinDecreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMinDecreasedId, ERR, ResponsePropertyMinDecreasedCheck, DirectionResponse, LocationBody, ActionDecrease),
 		newBackwardCompatibilityRule(ResponsePropertyMinDecreasedId, ERR, ResponsePropertyMinDecreasedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(ResponseBodyExclusiveMinDecreasedId, ERR, ResponsePropertyMinDecreasedCheck, DirectionResponse, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyExclusiveMinDecreasedId, ERR, ResponsePropertyMinDecreasedCheck, DirectionResponse, LocationProperties, ActionDecrease),
 		// ResponsePropertyMinItemsDecreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMinItemsDecreasedId, ERR, ResponsePropertyMinItemsDecreasedCheck, DirectionResponse, LocationBody, ActionDecrease),
 		newBackwardCompatibilityRule(ResponsePropertyMinItemsDecreasedId, ERR, ResponsePropertyMinItemsDecreasedCheck, DirectionResponse, LocationProperties, ActionDecrease),
@@ -445,6 +483,9 @@ func GetAllRules() BackwardCompatibilityRules {
 		// APITagUpdatedCheck
 		newBackwardCompatibilityRule(APITagRemovedId, INFO, APITagUpdatedCheck, DirectionNone, LocationNone, ActionRemove), // optional
 		newBackwardCompatibilityRule(APITagAddedId, INFO, APITagUpdatedCheck, DirectionNone, LocationNone, ActionAdd),
+		// WebhookUpdatedCheck
+		newBackwardCompatibilityRule(WebhookAddedId, INFO, WebhookUpdatedCheck, DirectionNone, LocationComponents, ActionAdd),
+		newBackwardCompatibilityRule(WebhookRemovedId, ERR, WebhookUpdatedCheck, DirectionNone, LocationComponents, ActionRemove),
 		// APIComponentsSchemaRemovedCheck
 		newBackwardCompatibilityRule(APISchemasRemovedId, INFO, APIComponentsSchemaRemovedCheck, DirectionNone, LocationComponents, ActionRemove), // optional
 		// ResponseParameterEnumValueRemovedCheck
@@ -468,6 +509,148 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
 		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesWidenedId, INFO, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
 		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
+		// RequestPropertyPrefixItemsUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyPrefixItemsAddedId, INFO, RequestPropertyPrefixItemsUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyPrefixItemsRemovedId, ERR, RequestPropertyPrefixItemsUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyPrefixItemsAddedId, INFO, RequestPropertyPrefixItemsUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyPrefixItemsRemovedId, ERR, RequestPropertyPrefixItemsUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyPrefixItemsUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyPrefixItemsAddedId, ERR, ResponsePropertyPrefixItemsUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyPrefixItemsRemovedId, INFO, ResponsePropertyPrefixItemsUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyPrefixItemsAddedId, ERR, ResponsePropertyPrefixItemsUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyPrefixItemsRemovedId, INFO, ResponsePropertyPrefixItemsUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestPropertyIfUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyIfAddedId, ERR, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyIfRemovedId, INFO, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyThenAddedId, ERR, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyThenRemovedId, INFO, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyElseAddedId, ERR, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyElseRemovedId, INFO, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyIfAddedId, ERR, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyIfRemovedId, INFO, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyThenAddedId, ERR, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyThenRemovedId, INFO, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyElseAddedId, ERR, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyElseRemovedId, INFO, RequestPropertyIfUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyIfUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyIfAddedId, INFO, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyIfRemovedId, ERR, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyThenAddedId, INFO, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyThenRemovedId, ERR, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyElseAddedId, INFO, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyElseRemovedId, ERR, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyIfAddedId, INFO, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyIfRemovedId, ERR, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyThenAddedId, INFO, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyThenRemovedId, ERR, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyElseAddedId, INFO, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyElseRemovedId, ERR, ResponsePropertyIfUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestPropertyContainsUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyContainsAddedId, ERR, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyContainsRemovedId, INFO, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyMinContainsIncreasedId, ERR, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(RequestBodyMinContainsDecreasedId, INFO, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(RequestBodyMaxContainsIncreasedId, INFO, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(RequestBodyMaxContainsDecreasedId, ERR, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyContainsAddedId, ERR, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyContainsRemovedId, INFO, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyMinContainsIncreasedId, ERR, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyMinContainsDecreasedId, INFO, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyMaxContainsIncreasedId, INFO, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyMaxContainsDecreasedId, ERR, RequestPropertyContainsUpdatedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		// ResponsePropertyContainsUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyContainsAddedId, INFO, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyContainsRemovedId, ERR, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyMinContainsIncreasedId, INFO, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(ResponseBodyMinContainsDecreasedId, ERR, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(ResponseBodyMaxContainsIncreasedId, ERR, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationBody, ActionIncrease),
+		newBackwardCompatibilityRule(ResponseBodyMaxContainsDecreasedId, INFO, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationBody, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyContainsAddedId, INFO, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyContainsRemovedId, ERR, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyMinContainsIncreasedId, INFO, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyMinContainsDecreasedId, ERR, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyMaxContainsIncreasedId, ERR, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyMaxContainsDecreasedId, INFO, ResponsePropertyContainsUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		// RequestPropertyDependentRequiredChangedCheck
+		newBackwardCompatibilityRule(RequestBodyDependentRequiredAddedId, ERR, RequestPropertyDependentRequiredChangedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyDependentRequiredRemovedId, INFO, RequestPropertyDependentRequiredChangedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyDependentRequiredChangedId, ERR, RequestPropertyDependentRequiredChangedCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyDependentRequiredAddedId, ERR, RequestPropertyDependentRequiredChangedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyDependentRequiredRemovedId, INFO, RequestPropertyDependentRequiredChangedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyDependentRequiredChangedId, ERR, RequestPropertyDependentRequiredChangedCheck, DirectionRequest, LocationProperties, ActionChange),
+		// ResponsePropertyDependentRequiredChangedCheck
+		newBackwardCompatibilityRule(ResponseBodyDependentRequiredAddedId, INFO, ResponsePropertyDependentRequiredChangedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyDependentRequiredRemovedId, ERR, ResponsePropertyDependentRequiredChangedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyDependentRequiredChangedId, ERR, ResponsePropertyDependentRequiredChangedCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyDependentRequiredAddedId, INFO, ResponsePropertyDependentRequiredChangedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyDependentRequiredRemovedId, ERR, ResponsePropertyDependentRequiredChangedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyDependentRequiredChangedId, ERR, ResponsePropertyDependentRequiredChangedCheck, DirectionResponse, LocationProperties, ActionChange),
+		// RequestPropertyDependentSchemasUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyDependentSchemaAddedId, ERR, RequestPropertyDependentSchemasUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyDependentSchemaRemovedId, INFO, RequestPropertyDependentSchemasUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyDependentSchemaAddedId, ERR, RequestPropertyDependentSchemasUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyDependentSchemaRemovedId, INFO, RequestPropertyDependentSchemasUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyDependentSchemasUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyDependentSchemaAddedId, INFO, ResponsePropertyDependentSchemasUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyDependentSchemaRemovedId, ERR, ResponsePropertyDependentSchemasUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyDependentSchemaAddedId, INFO, ResponsePropertyDependentSchemasUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyDependentSchemaRemovedId, ERR, ResponsePropertyDependentSchemasUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestPropertyPatternPropertiesUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyPatternPropertyAddedId, ERR, RequestPropertyPatternPropertiesUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyPatternPropertyRemovedId, INFO, RequestPropertyPatternPropertiesUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyPatternPropertyAddedId, ERR, RequestPropertyPatternPropertiesUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyPatternPropertyRemovedId, INFO, RequestPropertyPatternPropertiesUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyPatternPropertiesUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyPatternPropertyAddedId, INFO, ResponsePropertyPatternPropertiesUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyPatternPropertyRemovedId, ERR, ResponsePropertyPatternPropertiesUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyPatternPropertyAddedId, INFO, ResponsePropertyPatternPropertiesUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyPatternPropertyRemovedId, ERR, ResponsePropertyPatternPropertiesUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestPropertyPropertyNamesUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyPropertyNamesAddedId, ERR, RequestPropertyPropertyNamesUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyPropertyNamesRemovedId, INFO, RequestPropertyPropertyNamesUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyPropertyNamesAddedId, ERR, RequestPropertyPropertyNamesUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyPropertyNamesRemovedId, INFO, RequestPropertyPropertyNamesUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyPropertyNamesUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyPropertyNamesAddedId, INFO, ResponsePropertyPropertyNamesUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyPropertyNamesRemovedId, ERR, ResponsePropertyPropertyNamesUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyPropertyNamesAddedId, INFO, ResponsePropertyPropertyNamesUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyPropertyNamesRemovedId, ERR, ResponsePropertyPropertyNamesUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestPropertyUnevaluatedUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyUnevaluatedItemsAddedId, ERR, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyUnevaluatedItemsRemovedId, INFO, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyUnevaluatedPropertiesAddedId, ERR, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyUnevaluatedPropertiesRemovedId, INFO, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyUnevaluatedItemsAddedId, ERR, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyUnevaluatedItemsRemovedId, INFO, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyUnevaluatedPropertiesAddedId, ERR, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyUnevaluatedPropertiesRemovedId, INFO, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		// ResponsePropertyUnevaluatedUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyUnevaluatedItemsAddedId, INFO, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyUnevaluatedItemsRemovedId, ERR, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyUnevaluatedPropertiesAddedId, INFO, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyUnevaluatedPropertiesRemovedId, ERR, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyUnevaluatedItemsAddedId, INFO, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyUnevaluatedItemsRemovedId, ERR, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyUnevaluatedPropertiesAddedId, INFO, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyUnevaluatedPropertiesRemovedId, ERR, ResponsePropertyUnevaluatedUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		// RequestPropertyContentUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyContentSchemaAddedId, ERR, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyContentSchemaRemovedId, INFO, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyContentMediaTypeChangedId, ERR, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestBodyContentEncodingChangedId, ERR, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyContentSchemaAddedId, ERR, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyContentSchemaRemovedId, INFO, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyContentMediaTypeChangedId, ERR, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationProperties, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyContentEncodingChangedId, ERR, RequestPropertyContentUpdatedCheck, DirectionRequest, LocationProperties, ActionChange),
+		// ResponsePropertyContentUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyContentSchemaAddedId, INFO, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyContentSchemaRemovedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyContentMediaTypeChangedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponseBodyContentEncodingChangedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationBody, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyContentSchemaAddedId, INFO, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyContentSchemaRemovedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyContentMediaTypeChangedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationProperties, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyContentEncodingChangedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, LocationProperties, ActionChange),
 	}
 }
 

@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	ResponseBodyMinDecreasedId     = "response-body-min-decreased"
-	ResponsePropertyMinDecreasedId = "response-property-min-decreased"
+	ResponseBodyMinDecreasedId              = "response-body-min-decreased"
+	ResponsePropertyMinDecreasedId          = "response-property-min-decreased"
+	ResponseBodyExclusiveMinDecreasedId     = "response-body-exclusive-min-decreased"
+	ResponsePropertyExclusiveMinDecreasedId = "response-property-exclusive-min-decreased"
 )
 
 func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -49,6 +51,24 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 							}
 						}
 					}
+					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.ExclusiveMinDiff != nil {
+						exMinDiff := mediaTypeDiff.SchemaDiff.ExclusiveMinDiff
+						if exMinDiff.From != nil &&
+							exMinDiff.To != nil {
+							if IsDecreasedValue(exMinDiff) {
+								result = append(result, NewApiChange(
+									ResponseBodyExclusiveMinDecreasedId,
+									config,
+									[]any{exMinDiff.From, exMinDiff.To},
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithDetails(mediaTypeDetails))
+							}
+						}
+					}
 
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
@@ -73,6 +93,37 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 								ResponsePropertyMinDecreasedId,
 								config,
 								[]any{propertyFullName(propertyPath, propertyName), minDiff.From, minDiff.To, responseStatus},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithDetails(mediaTypeDetails))
+						})
+
+					CheckModifiedPropertiesDiff(
+						mediaTypeDiff.SchemaDiff,
+						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+							exMinDiff := propertyDiff.ExclusiveMinDiff
+							if exMinDiff == nil {
+								return
+							}
+							if exMinDiff.To == nil ||
+								exMinDiff.From == nil {
+								return
+							}
+							if !IsDecreasedValue(exMinDiff) {
+								return
+							}
+
+							if propertyDiff.Revision.WriteOnly {
+								return
+							}
+
+							result = append(result, NewApiChange(
+								ResponsePropertyExclusiveMinDecreasedId,
+								config,
+								[]any{propertyFullName(propertyPath, propertyName), exMinDiff.From, exMinDiff.To, responseStatus},
 								"",
 								operationsSources,
 								operationItem.Revision,

@@ -39,6 +39,11 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 					if !typeDiff.Empty() || !formatDiff.Empty() {
 
+						// Suppress null-only type changes (handled by nullable checkers)
+						if isNullTypeChange(typeDiff) && formatDiff.Empty() {
+							continue
+						}
+
 						id := RequestParameterTypeGeneralizedId
 
 						if breakingTypeFormatChangedInRequest(typeDiff, formatDiff, false, schemaDiff) {
@@ -66,6 +71,11 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 							formatDiff := schemaDiff.FormatDiff
 
 							if !typeDiff.Empty() || !formatDiff.Empty() {
+
+								// Suppress null-only type changes (handled by nullable checkers)
+								if isNullTypeChange(typeDiff) && formatDiff.Empty() {
+									return
+								}
 
 								id, comment := checkRequestParameterPropertyTypeChanged(typeDiff, formatDiff, schemaDiff)
 

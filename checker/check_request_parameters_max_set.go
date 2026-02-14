@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	RequestParameterMaxSetId = "request-parameter-max-set"
+	RequestParameterMaxSetId          = "request-parameter-max-set"
+	RequestParameterExclusiveMaxSetId = "request-parameter-exclusive-max-set"
 )
 
 func RequestParameterMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -27,24 +28,38 @@ func RequestParameterMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.
 						continue
 					}
 					maxDiff := paramDiff.SchemaDiff.MaxDiff
-					if maxDiff == nil {
-						continue
-					}
-					if maxDiff.From != nil ||
-						maxDiff.To == nil {
-						continue
+					if maxDiff != nil &&
+						maxDiff.From == nil &&
+						maxDiff.To != nil {
+
+						result = append(result, NewApiChange(
+							RequestParameterMaxSetId,
+							config,
+							[]any{paramLocation, paramName, maxDiff.To},
+							commentId(RequestParameterMaxSetId),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
 					}
 
-					result = append(result, NewApiChange(
-						RequestParameterMaxSetId,
-						config,
-						[]any{paramLocation, paramName, maxDiff.To},
-						commentId(RequestParameterMaxSetId),
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					))
+					exMaxDiff := paramDiff.SchemaDiff.ExclusiveMaxDiff
+					if exMaxDiff != nil &&
+						exMaxDiff.From == nil &&
+						exMaxDiff.To != nil {
+
+						result = append(result, NewApiChange(
+							RequestParameterExclusiveMaxSetId,
+							config,
+							[]any{paramLocation, paramName, exMaxDiff.To},
+							commentId(RequestParameterExclusiveMaxSetId),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
+					}
 				}
 			}
 		}

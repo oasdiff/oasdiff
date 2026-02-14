@@ -92,3 +92,46 @@ func derefUInt64(ref *uint64) any {
 
 	return *ref
 }
+
+// exclusiveBoundToValue extracts the meaningful value from an ExclusiveBound.
+// Returns the numeric value if set (OpenAPI 3.1 style), or the boolean if set (OpenAPI 3.0 style).
+func exclusiveBoundToValue(eb any) any {
+	if eb == nil {
+		return nil
+	}
+
+	// Use reflection to extract the Value or Bool field from ExclusiveBound
+	// This avoids import cycle with openapi3
+	v := reflect.ValueOf(eb)
+
+	// Handle pointer types
+	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return nil
+		}
+		v = v.Elem()
+	}
+
+	// Check if it's a struct with Value field (OpenAPI 3.1 style - number)
+	if v.Kind() == reflect.Struct {
+		valueField := v.FieldByName("Value")
+		if valueField.IsValid() && !valueField.IsNil() {
+			return valueField.Elem().Interface()
+		}
+
+		// Check Bool field (OpenAPI 3.0 style - boolean)
+		boolField := v.FieldByName("Bool")
+		if boolField.IsValid() && !boolField.IsNil() {
+			return boolField.Elem().Interface()
+		}
+	}
+
+	return nil
+}
+
+// getExclusiveBoundDiff compares two ExclusiveBound values
+func getExclusiveBoundDiff(eb1, eb2 any) *ValueDiff {
+	v1 := exclusiveBoundToValue(eb1)
+	v2 := exclusiveBoundToValue(eb2)
+	return getValueDiff(v1, v2)
+}

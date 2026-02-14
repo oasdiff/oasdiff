@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	RequestBodyMaxSetId     = "request-body-max-set"
-	RequestPropertyMaxSetId = "request-property-max-set"
+	RequestBodyMaxSetId              = "request-body-max-set"
+	RequestPropertyMaxSetId          = "request-property-max-set"
+	RequestBodyExclusiveMaxSetId     = "request-body-exclusive-max-set"
+	RequestPropertyExclusiveMaxSetId = "request-property-exclusive-max-set"
 )
 
 func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -44,6 +46,22 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 						).WithDetails(mediaTypeDetails))
 					}
 				}
+				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff != nil {
+					exMaxDiff := mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff
+					if exMaxDiff.From == nil &&
+						exMaxDiff.To != nil {
+						result = append(result, NewApiChange(
+							RequestBodyExclusiveMaxSetId,
+							config,
+							[]any{exMaxDiff.To},
+							commentId(RequestBodyExclusiveMaxSetId),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithDetails(mediaTypeDetails))
+					}
+				}
 
 				CheckModifiedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
@@ -65,6 +83,33 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							config,
 							[]any{propertyFullName(propertyPath, propertyName), maxDiff.To},
 							commentId(RequestPropertyMaxSetId),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithDetails(mediaTypeDetails))
+					})
+
+				CheckModifiedPropertiesDiff(
+					mediaTypeDiff.SchemaDiff,
+					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+						exMaxDiff := propertyDiff.ExclusiveMaxDiff
+						if exMaxDiff == nil {
+							return
+						}
+						if exMaxDiff.From != nil ||
+							exMaxDiff.To == nil {
+							return
+						}
+						if propertyDiff.Revision.ReadOnly {
+							return
+						}
+
+						result = append(result, NewApiChange(
+							RequestPropertyExclusiveMaxSetId,
+							config,
+							[]any{propertyFullName(propertyPath, propertyName), exMaxDiff.To},
+							commentId(RequestPropertyExclusiveMaxSetId),
 							operationsSources,
 							operationItem.Revision,
 							operation,
