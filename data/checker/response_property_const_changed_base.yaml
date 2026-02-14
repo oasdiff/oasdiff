@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /api/v1.0/groups:
+    post:
+      operationId: createOneGroup
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    const: "ok"
+          description: OK
+        "404":
+          content:
+            text/plain:
+              schema:
+                type: string
+                const: "NotFound"
+          description: Error

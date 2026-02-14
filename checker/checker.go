@@ -29,6 +29,8 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	result = removeDraftAndAlphaOperationsDiffs(config, diffReport, result, operationsSources)
 
+	mergeWebhookOperationsIntoPathsDiff(diffReport)
+
 	for _, check := range config.Checks {
 		if check == nil {
 			continue
@@ -144,6 +146,27 @@ func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, 
 		method,
 		path,
 	)
+}
+
+// mergeWebhookOperationsIntoPathsDiff merges modified webhooks into PathsDiff.Modified with a "webhook:" prefix.
+// This allows all existing path/operation checker rules to apply to webhooks without code duplication.
+// Only Modified webhooks are merged because each entry in Modified is self-contained with its own Base/Revision data.
+// Added/Deleted webhooks cannot be merged because PathsDiff.Added/Deleted are just path name strings that require
+// lookup in PathsDiff.Base/Revision (openapi3.Paths objects that don't contain webhooks).
+// Added/Deleted webhooks are handled separately by WebhookUpdatedCheck.
+func mergeWebhookOperationsIntoPathsDiff(diffReport *diff.Diff) {
+	if diffReport.WebhooksDiff == nil || len(diffReport.WebhooksDiff.Modified) == 0 {
+		return
+	}
+	if diffReport.PathsDiff == nil {
+		diffReport.PathsDiff = &diff.PathsDiff{Modified: diff.ModifiedPaths{}}
+	}
+	if diffReport.PathsDiff.Modified == nil {
+		diffReport.PathsDiff.Modified = diff.ModifiedPaths{}
+	}
+	for name, pathDiff := range diffReport.WebhooksDiff.Modified {
+		diffReport.PathsDiff.Modified["webhook:"+name] = pathDiff
+	}
 }
 
 func getStabilityLevel(i map[string]any) (string, error) {

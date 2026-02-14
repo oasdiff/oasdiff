@@ -48,29 +48,54 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 							operation,
 							path,
 						).WithDetails(mediaTypeDetails))
+					} else if nullAddedToTypeArray(mediaTypeDiff.SchemaDiff.TypeDiff) {
+						// OpenAPI 3.1: type changed from "string" to ["string", "null"]
+						result = append(result, NewApiChange(
+							ResponseBodyBecameNullableId,
+							config,
+							nil,
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithDetails(mediaTypeDetails))
 					}
 
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							nullableDiff := propertyDiff.NullableDiff
-							if nullableDiff == nil {
-								return
-							}
-							if nullableDiff.To != true {
+							if nullableDiff != nil {
+								if nullableDiff.To != true {
+									return
+								}
+								result = append(result, NewApiChange(
+									ResponsePropertyBecameNullableId,
+									config,
+									[]any{propertyFullName(propertyPath, propertyName), responseStatus},
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
-							result = append(result, NewApiChange(
-								ResponsePropertyBecameNullableId,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithDetails(mediaTypeDetails))
+							// OpenAPI 3.1: type changed from "string" to ["string", "null"]
+							if nullAddedToTypeArray(propertyDiff.TypeDiff) {
+								result = append(result, NewApiChange(
+									ResponsePropertyBecameNullableId,
+									config,
+									[]any{propertyFullName(propertyPath, propertyName), responseStatus},
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithDetails(mediaTypeDetails))
+							}
 						})
 				}
 			}

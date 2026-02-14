@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	RequestParameterMinSetId = "request-parameter-min-set"
+	RequestParameterMinSetId          = "request-parameter-min-set"
+	RequestParameterExclusiveMinSetId = "request-parameter-exclusive-min-set"
 )
 
 func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -27,24 +28,38 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 						continue
 					}
 					minDiff := paramDiff.SchemaDiff.MinDiff
-					if minDiff == nil {
-						continue
-					}
-					if minDiff.From != nil ||
-						minDiff.To == nil {
-						continue
+					if minDiff != nil &&
+						minDiff.From == nil &&
+						minDiff.To != nil {
+
+						result = append(result, NewApiChange(
+							RequestParameterMinSetId,
+							config,
+							[]any{paramLocation, paramName, minDiff.To},
+							commentId(RequestParameterMinSetId),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
 					}
 
-					result = append(result, NewApiChange(
-						RequestParameterMinSetId,
-						config,
-						[]any{paramLocation, paramName, minDiff.To},
-						commentId(RequestParameterMinSetId),
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					))
+					exMinDiff := paramDiff.SchemaDiff.ExclusiveMinDiff
+					if exMinDiff != nil &&
+						exMinDiff.From == nil &&
+						exMinDiff.To != nil {
+
+						result = append(result, NewApiChange(
+							RequestParameterExclusiveMinSetId,
+							config,
+							[]any{paramLocation, paramName, exMinDiff.To},
+							commentId(RequestParameterExclusiveMinSetId),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
+					}
 				}
 			}
 		}

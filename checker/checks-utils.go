@@ -108,6 +108,57 @@ func processModifiedPropertiesDiff(propertyPath string, propertyName string, sch
 	if schemaDiff.AdditionalPropertiesDiff != nil {
 		processModifiedPropertiesDiff(fmt.Sprintf("%s/additionalProperties", propertyPath), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, processor)
 	}
+
+	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
+	if schemaDiff.PrefixItemsDiff != nil {
+		for _, v := range schemaDiff.PrefixItemsDiff.Modified {
+			processModifiedPropertiesDiff(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, schemaDiff, processor)
+		}
+	}
+
+	if schemaDiff.ContainsDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.PropertyNamesDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.UnevaluatedItemsDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.UnevaluatedPropertiesDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.IfDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.ThenDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.ElseDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.ContentSchemaDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, schemaDiff, processor)
+	}
+
+	if schemaDiff.PatternPropertiesDiff != nil {
+		for i, v := range schemaDiff.PatternPropertiesDiff.Modified {
+			processModifiedPropertiesDiff(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, schemaDiff, processor)
+		}
+	}
+
+	if schemaDiff.DependentSchemasDiff != nil {
+		for i, v := range schemaDiff.DependentSchemasDiff.Modified {
+			processModifiedPropertiesDiff(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, schemaDiff, processor)
+		}
+	}
 }
 
 func CheckAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
@@ -156,6 +207,57 @@ func processAddedPropertiesDiff(propertyPath string, propertyName string, schema
 			processAddedPropertiesDiff(propertyPath, i, v, processor)
 		}
 	}
+
+	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
+	if schemaDiff.PrefixItemsDiff != nil {
+		for _, v := range schemaDiff.PrefixItemsDiff.Modified {
+			processAddedPropertiesDiff(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, processor)
+		}
+	}
+
+	if schemaDiff.ContainsDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, processor)
+	}
+
+	if schemaDiff.PropertyNamesDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, processor)
+	}
+
+	if schemaDiff.UnevaluatedItemsDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, processor)
+	}
+
+	if schemaDiff.UnevaluatedPropertiesDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, processor)
+	}
+
+	if schemaDiff.IfDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, processor)
+	}
+
+	if schemaDiff.ThenDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, processor)
+	}
+
+	if schemaDiff.ElseDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, processor)
+	}
+
+	if schemaDiff.ContentSchemaDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, processor)
+	}
+
+	if schemaDiff.PatternPropertiesDiff != nil {
+		for i, v := range schemaDiff.PatternPropertiesDiff.Modified {
+			processAddedPropertiesDiff(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, processor)
+		}
+	}
+
+	if schemaDiff.DependentSchemasDiff != nil {
+		for i, v := range schemaDiff.DependentSchemasDiff.Modified {
+			processAddedPropertiesDiff(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, processor)
+		}
+	}
 }
 
 func CheckDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
@@ -202,6 +304,57 @@ func processDeletedPropertiesDiff(propertyPath string, propertyName string, sche
 		}
 		for i, v := range schemaDiff.PropertiesDiff.Modified {
 			processDeletedPropertiesDiff(propertyPath, i, v, processor)
+		}
+	}
+
+	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
+	if schemaDiff.PrefixItemsDiff != nil {
+		for _, v := range schemaDiff.PrefixItemsDiff.Modified {
+			processDeletedPropertiesDiff(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, processor)
+		}
+	}
+
+	if schemaDiff.ContainsDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, processor)
+	}
+
+	if schemaDiff.PropertyNamesDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, processor)
+	}
+
+	if schemaDiff.UnevaluatedItemsDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, processor)
+	}
+
+	if schemaDiff.UnevaluatedPropertiesDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, processor)
+	}
+
+	if schemaDiff.IfDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, processor)
+	}
+
+	if schemaDiff.ThenDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, processor)
+	}
+
+	if schemaDiff.ElseDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, processor)
+	}
+
+	if schemaDiff.ContentSchemaDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, processor)
+	}
+
+	if schemaDiff.PatternPropertiesDiff != nil {
+		for i, v := range schemaDiff.PatternPropertiesDiff.Modified {
+			processDeletedPropertiesDiff(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, processor)
+		}
+	}
+
+	if schemaDiff.DependentSchemasDiff != nil {
+		for i, v := range schemaDiff.DependentSchemasDiff.Modified {
+			processDeletedPropertiesDiff(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, processor)
 		}
 	}
 }

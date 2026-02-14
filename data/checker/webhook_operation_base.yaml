@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /products:
+    get:
+      operationId: listProducts
+      responses:
+        "200":
+          description: OK
+webhooks:
+  orderCreated:
+    post:
+      operationId: orderCreatedHandler
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+      responses:
+        "200":
+          description: OK
