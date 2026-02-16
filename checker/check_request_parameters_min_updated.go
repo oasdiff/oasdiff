@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	RequestParameterMinIncreasedId = "request-parameter-min-increased"
-	RequestParameterMinDecreasedId = "request-parameter-min-decreased"
+	RequestParameterMinIncreasedId          = "request-parameter-min-increased"
+	RequestParameterMinDecreasedId          = "request-parameter-min-decreased"
+	RequestParameterExclusiveMinIncreasedId = "request-parameter-exclusive-min-increased"
+	RequestParameterExclusiveMinDecreasedId = "request-parameter-exclusive-min-decreased"
 )
 
 func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -28,29 +30,48 @@ func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						continue
 					}
 					minDiff := paramDiff.SchemaDiff.MinDiff
-					if minDiff == nil {
-						continue
-					}
-					if minDiff.From == nil ||
-						minDiff.To == nil {
-						continue
+					if minDiff != nil &&
+						minDiff.From != nil &&
+						minDiff.To != nil {
+
+						id := RequestParameterMinIncreasedId
+						if !IsIncreasedValue(minDiff) {
+							id = RequestParameterMinDecreasedId
+						}
+
+						result = append(result, NewApiChange(
+							id,
+							config,
+							[]any{paramLocation, paramName, minDiff.From, minDiff.To},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
 					}
 
-					id := RequestParameterMinIncreasedId
-					if !IsIncreasedValue(minDiff) {
-						id = RequestParameterMinDecreasedId
-					}
+					exMinDiff := paramDiff.SchemaDiff.ExclusiveMinDiff
+					if exMinDiff != nil &&
+						exMinDiff.From != nil &&
+						exMinDiff.To != nil {
 
-					result = append(result, NewApiChange(
-						id,
-						config,
-						[]any{paramLocation, paramName, minDiff.From, minDiff.To},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					))
+						id := RequestParameterExclusiveMinIncreasedId
+						if !IsIncreasedValue(exMinDiff) {
+							id = RequestParameterExclusiveMinDecreasedId
+						}
+
+						result = append(result, NewApiChange(
+							id,
+							config,
+							[]any{paramLocation, paramName, exMinDiff.From, exMinDiff.To},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						))
+					}
 				}
 			}
 		}

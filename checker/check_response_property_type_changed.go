@@ -41,6 +41,12 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						schemaDiff := mediaTypeDiff.SchemaDiff
 						typeDiff := schemaDiff.TypeDiff
 						formatDiff := schemaDiff.FormatDiff
+
+						// Suppress null-only type changes (handled by nullable checkers)
+						if isNullTypeChange(typeDiff) && formatDiff.Empty() {
+							continue
+						}
+
 						if breakingTypeFormatChangedInResponseProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
 
 							result = append(result, NewApiChange(
@@ -65,6 +71,11 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 							// Check for suppression by ListOfTypes checker
 							if shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff) {
+								return
+							}
+
+							// Suppress null-only type changes (handled by nullable checkers)
+							if isNullTypeChange(propertyDiff.TypeDiff) && propertyDiff.FormatDiff.Empty() {
 								return
 							}
 

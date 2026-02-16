@@ -1,0 +1,146 @@
+openapi: 3.1.0
+jsonSchemaDialect: "https://json-schema.org/draft/2020-12/schema"
+info:
+  title: OpenAPI 3.1 Test API
+  summary: Base API for testing OpenAPI 3.1 features
+  description: Testing new OpenAPI 3.1 and JSON Schema 2020-12 features
+  version: 1.0.0
+  license:
+    name: MIT
+    identifier: MIT
+    url: https://opensource.org/licenses/MIT
+
+webhooks:
+  newUser:
+    post:
+      summary: New user webhook
+      operationId: newUserWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: OK
+
+  orderCreated:
+    post:
+      summary: Order created webhook
+      operationId: orderCreatedWebhook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+      responses:
+        '200':
+          description: OK
+
+paths:
+  /test:
+    get:
+      summary: Test endpoint
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestSchema'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: string
+        amount:
+          type: number
+        # OpenAPI 3.1 style: exclusiveMinimum/exclusiveMaximum as numbers
+        score:
+          type: number
+          exclusiveMinimum: 0
+          exclusiveMaximum: 100
+
+    TestSchema:
+      $id: "https://example.com/schemas/test-base"
+      $schema: "https://json-schema.org/draft/2020-12/schema"
+      $comment: "Base test schema"
+      type: object
+      properties:
+        status:
+          const: "active"
+        tags:
+          type: array
+          prefixItems:
+            - type: string
+            - type: number
+          items:
+            type: boolean
+          contains:
+            type: string
+            minLength: 1
+          minContains: 1
+          maxContains: 5
+        metadata:
+          type: object
+          patternProperties:
+            "^x-":
+              type: string
+          propertyNames:
+            pattern: "^[a-z]"
+          dependentSchemas:
+            credit_card:
+              properties:
+                billing_address:
+                  type: string
+              required:
+                - billing_address
+          dependentRequired:
+            name:
+              - age
+          unevaluatedProperties:
+            type: string
+        items:
+          type: array
+          unevaluatedItems:
+            type: string
+        conditional:
+          type: object
+          if:
+            properties:
+              kind:
+                const: "premium"
+          then:
+            required:
+              - discount
+          else:
+            required:
+              - reason
+        encoded:
+          type: string
+          contentMediaType: application/json
+          contentEncoding: base64
+          contentSchema:
+            type: object
+            properties:
+              data:
+                type: string
+      $defs:
+        StringDef:
+          type: string
+        NumberDef:
+          type: number
+      examples:
+        - status: "active"
+          tags: ["tag1", 42, true]

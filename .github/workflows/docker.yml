@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'feat/openapi-3.1-support'
     tags:
       - 'v*'
 jobs:
@@ -19,7 +20,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: tufin/oasdiff
-          
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=stable,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -30,29 +36,16 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push main
-        id: docker_build_main
+      - name: Build and push
+        id: docker_build
         uses: docker/build-push-action@v6
         with:
           push: true
           platforms: linux/amd64,linux/arm64
           context: ./
           file: ./Dockerfile
-          tags: tufin/oasdiff:main, tufin/oasdiff:latest
+          tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-
-      - name: Build and push tag
-        id: docker_build_tag
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          platforms: linux/amd64,linux/arm64
-          context: ./
-          file: ./Dockerfile
-          tags: tufin/oasdiff:${{ github.ref_name }}, tufin/oasdiff:stable, tufin/oasdiff:latest
-          labels: ${{ steps.meta.outputs.labels }}
-        if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
