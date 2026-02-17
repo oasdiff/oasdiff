@@ -49,23 +49,11 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 	}
 }
 
-// NewApiChangeWithSources creates a new ApiChange with BaseSource and RevisionSource populated
-func NewApiChangeWithSources(id string, config *Config, args []any, comment string, operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string, baseSource, revisionSource *Source) ApiChange {
-	return ApiChange{
-		Id:          id,
-		Level:       config.getLogLevel(id),
-		Args:        args,
-		Comment:     comment,
-		OperationId: operation.OperationID,
-		Operation:   method,
-		Path:        path,
-		Source:      load.NewSource((*operationsSources)[operation]),
-		CommonChange: CommonChange{
-			BaseSource:     baseSource,
-			RevisionSource: revisionSource,
-			Attributes:     getAttributes(config, operation),
-		},
-	}
+// WithSources returns a copy of the ApiChange with BaseSource and RevisionSource populated
+func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
+	a.BaseSource = baseSource
+	a.RevisionSource = revisionSource
+	return a
 }
 
 func getAttributes(config *Config, operation *openapi3.Operation) map[string]any {

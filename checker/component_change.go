@@ -25,6 +25,13 @@ type ComponentChange struct {
 	SourceColumnEnd int
 }
 
+// WithSources returns a copy of the ComponentChange with BaseSource and RevisionSource populated
+func (c ComponentChange) WithSources(baseSource, revisionSource *Source) ComponentChange {
+	c.BaseSource = baseSource
+	c.RevisionSource = revisionSource
+	return c
+}
+
 func (c ComponentChange) GetSection() string {
 	return "components"
 }

@@ -35,6 +35,25 @@ func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation
 	}
 }
 
+func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string) *Source {
+	file := (*operationsSources)[operation]
+
+	if origin == nil {
+		return &Source{File: file}
+	}
+
+	location, ok := origin.Fields[field]
+	if !ok {
+		return &Source{File: file}
+	}
+
+	return &Source{
+		File:   file,
+		Line:   location.Line,
+		Column: location.Column,
+	}
+}
+
 func NewEmptySource() *Source {
 	return nil
 }

@@ -80,7 +80,7 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 	revisionSource := NewEmptySource()
 
 	if !opInfo.operation.Deprecated {
-		return NewApiChangeWithSources(
+		return NewApiChange(
 			getWithoutDeprecationId(isPath),
 			opInfo.config,
 			nil,
@@ -89,13 +89,11 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
-			baseSource,
-			revisionSource,
-		)
+		).WithSources(baseSource, revisionSource)
 	}
 	sunset, ok := getSunset(opInfo.operation.Extensions)
 	if !ok {
-		return NewApiChangeWithSources(
+		return NewApiChange(
 			getWithDeprecationId(isPath),
 			opInfo.config,
 			nil,
@@ -104,18 +102,25 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
-			baseSource,
-			revisionSource,
-		)
+		).WithSources(baseSource, revisionSource)
 	}
 
 	date, err := getSunsetDate(sunset)
 	if err != nil {
-		return getAPIPathSunsetParseWithSources(opInfo, err, baseSource, nil)
+		return NewApiChange(
+			APIPathSunsetParseId,
+			opInfo.config,
+			[]any{err},
+			"",
+			opInfo.operationsSources,
+			opInfo.operation,
+			opInfo.method,
+			opInfo.path,
+		).WithSources(baseSource, nil)
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {
-		return NewApiChangeWithSources(
+		return NewApiChange(
 			getBeforeSunsetId(isPath),
 			opInfo.config,
 			[]any{date},
@@ -124,9 +129,7 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
-			baseSource,
-			revisionSource,
-		)
+		).WithSources(baseSource, revisionSource)
 	}
 	return nil
 }
@@ -141,21 +144,6 @@ func getAPIPathSunsetParse(opInfo opInfo, err error) Change {
 		opInfo.operation,
 		opInfo.method,
 		opInfo.path,
-	)
-}
-
-func getAPIPathSunsetParseWithSources(opInfo opInfo, err error, baseSource, revisionSource *Source) Change {
-	return NewApiChangeWithSources(
-		APIPathSunsetParseId,
-		opInfo.config,
-		[]any{err},
-		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
-		baseSource,
-		revisionSource,
 	)
 }
 
