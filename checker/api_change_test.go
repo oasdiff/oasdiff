@@ -1,26 +1,12 @@
 package checker_test
 
 import (
-	"os"
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
-
-// TestMain sets up global test configuration for the checker package
-func TestMain(m *testing.M) {
-	// Enable origin tracking in openapi3 for all tests
-	openapi3.IncludeOrigin = true
-
-	// Run tests
-	code := m.Run()
-
-	// Exit with the test result code
-	os.Exit(code)
-}
 
 var apiChange = checker.ApiChange{
 	Id:          "change_id",

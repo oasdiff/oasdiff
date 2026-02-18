@@ -19,8 +19,8 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/oasdiff/yaml v0.0.0-20250309154309-f31be36b4037 // indirect
-	github.com/oasdiff/yaml3 v0.0.0-20250309153720-d2182401db90 // indirect
+	github.com/oasdiff/yaml v0.0.0-20260217201108-4f1c3d02ddd4 // indirect
+	github.com/oasdiff/yaml3 v0.0.0-20260217201013-8a620da6102a // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/sagikazarmark/locafero v0.7.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
@@ -50,3 +50,5 @@ require (
 	github.com/spf13/cobra v1.9.1
 	github.com/wI2L/jsondiff v0.7.0
 )
+
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260217204057-9ec47b3e4f94
