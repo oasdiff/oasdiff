@@ -20,31 +20,35 @@ func NewSource(file string, line int, column int) *Source {
 	}
 }
 func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin) *Source {
-	file := (*operationsSources)[operation]
-
 	if origin == nil || origin.Key == nil {
-		return &Source{File: file}
+		return &Source{File: (*operationsSources)[operation]}
 	}
 
-	line := origin.Key.Line
-	column := origin.Key.Column
+	file := origin.Key.File
+	if file == "" {
+		file = (*operationsSources)[operation]
+	}
+
 	return &Source{
 		File:   file,
-		Line:   line,
-		Column: column,
+		Line:   origin.Key.Line,
+		Column: origin.Key.Column,
 	}
 }
 
 func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string) *Source {
-	file := (*operationsSources)[operation]
-
 	if origin == nil {
-		return &Source{File: file}
+		return &Source{File: (*operationsSources)[operation]}
 	}
 
 	location, ok := origin.Fields[field]
 	if !ok {
-		return &Source{File: file}
+		return &Source{File: (*operationsSources)[operation]}
+	}
+
+	file := location.File
+	if file == "" {
+		file = (*operationsSources)[operation]
 	}
 
 	return &Source{
