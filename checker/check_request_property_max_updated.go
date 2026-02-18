@@ -28,6 +28,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for _, mediaTypeDiff := range modifiedMediaTypes {
 				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MaxDiff != nil {
@@ -44,7 +45,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						} else {
 							result = append(result, NewApiChange(
 								RequestBodyMaxIncreasedId,
@@ -55,7 +56,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						}
 					}
 				}
@@ -89,7 +90,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						} else {
 							result = append(result, NewApiChange(
 								RequestPropertyMaxIncreasedId,
@@ -100,7 +101,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						}
 
 					})

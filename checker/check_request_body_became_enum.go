@@ -25,6 +25,7 @@ func RequestBodyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.O
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 
 			for _, mediaTypeDiff := range modifiedMediaTypes {
@@ -43,7 +44,7 @@ func RequestBodyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.O
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 		}
 	}

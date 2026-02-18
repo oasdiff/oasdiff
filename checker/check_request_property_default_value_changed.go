@@ -30,6 +30,7 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 			}
 
 			appendResultItem := func(messageId string, a ...any) {
+				baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 				result = append(result, NewApiChange(
 					messageId,
 					config,
@@ -39,7 +40,7 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified

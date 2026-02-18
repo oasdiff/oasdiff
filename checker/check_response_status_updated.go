@@ -46,6 +46,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 			if operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for _, responseStatus := range operationItem.ResponsesDiff.Deleted {
 				status, err := strconv.Atoi(responseStatus)
 				if err != nil {
@@ -62,7 +63,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 
@@ -83,7 +84,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

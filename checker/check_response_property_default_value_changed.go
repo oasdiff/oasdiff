@@ -28,6 +28,7 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 			}
 
 			appendResultItem := func(messageId string, a ...any) {
+				baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 				result = append(result, NewApiChange(
 					messageId,
 					config,
@@ -37,7 +38,7 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {

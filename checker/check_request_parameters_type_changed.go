@@ -27,6 +27,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -54,7 +55,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 
 					CheckModifiedPropertiesDiff(
@@ -78,7 +79,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithSources(baseSource, revisionSource))
 							}
 						})
 				}

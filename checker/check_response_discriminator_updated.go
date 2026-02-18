@@ -36,6 +36,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 			}
 
 			appendResultItem := func(messageId string, a ...any) {
+				baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 				result = append(result, NewApiChange(
 					messageId,
 					config,
@@ -45,7 +46,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 
 			for responseStatus, responsesDiff := range operationItem.ResponsesDiff.Modified {

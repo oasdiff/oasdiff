@@ -134,7 +134,7 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 	return nil
 }
 
-func getAPIPathSunsetParse(opInfo opInfo, err error) Change {
+func getAPIPathSunsetParse(opInfo opInfo, err error) ApiChange {
 	return NewApiChange(
 		APIPathSunsetParseId,
 		opInfo.config,

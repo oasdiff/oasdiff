@@ -58,6 +58,25 @@ func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation 
 	}
 }
 
+// operationSources returns the base and revision source locations for a modified operation pair.
+// Returns nil, nil when origin tracking is not enabled (no useful line/column data available).
+func operationSources(operationsSources *diff.OperationsSourcesMap, base, revision *openapi3.Operation) (*Source, *Source) {
+	// Only populate sources when at least one operation has origin data
+	hasOrigin := (base != nil && base.Origin != nil) || (revision != nil && revision.Origin != nil)
+	if !hasOrigin {
+		return nil, nil
+	}
+
+	var baseSource, revisionSource *Source
+	if base != nil {
+		baseSource = NewSourceFromOrigin(operationsSources, base, base.Origin)
+	}
+	if revision != nil {
+		revisionSource = NewSourceFromOrigin(operationsSources, revision, revision.Origin)
+	}
+	return baseSource, revisionSource
+}
+
 func NewEmptySource() *Source {
 	return nil
 }

@@ -26,6 +26,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for _, mediaTypeDiff := range modifiedMediaTypes {
 				CheckModifiedPropertiesDiff(
@@ -48,7 +49,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						} else if patternDiff.From == "" {
 							result = append(result, NewApiChange(
 								RequestPropertyPatternAddedId,
@@ -59,7 +60,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						} else {
 
 							id := RequestPropertyPatternChangedId
@@ -79,7 +80,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						}
 					})
 			}

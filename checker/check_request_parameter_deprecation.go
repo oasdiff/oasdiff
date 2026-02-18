@@ -31,6 +31,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 			}
 
 			op := pathItem.Revision.GetOperation(operation)
+			baseSource, revisionSource := operationSources(operationsSources, operationDiff.Base, operationDiff.Revision)
 			opInfo := newOpInfo(config, op, operationsSources, operation, path)
 
 			for paramLocation, paramItems := range operationDiff.ParametersDiff.Modified {
@@ -53,7 +54,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							op,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
@@ -85,7 +86,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							op,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
@@ -101,7 +102,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							op,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
@@ -115,7 +116,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 						op,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

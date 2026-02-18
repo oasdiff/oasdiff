@@ -22,6 +22,7 @@ func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *d
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Added {
 				if paramLocation == "path" {
 					// it is processed in the separate check NewRequestPathParameterCheck
@@ -44,7 +45,7 @@ func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *d
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 							break
 						}
 					}

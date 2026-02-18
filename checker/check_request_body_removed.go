@@ -25,6 +25,7 @@ func RequestBodyRemovedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			}
 
 			if operationItem.RequestBodyDiff.Deleted {
+				baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 				result = append(result, NewApiChange(
 					RequestBodyRemovedId,
 					config,
@@ -34,7 +35,7 @@ func RequestBodyRemovedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 		}
 	}

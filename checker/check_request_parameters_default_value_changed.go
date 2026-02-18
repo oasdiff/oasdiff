@@ -24,6 +24,7 @@ func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 				continue
 			}
 			appendResultItem := func(messageId string, a ...any) {
+				baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 				result = append(result, NewApiChange(
 					messageId,
 					config,
@@ -33,7 +34,7 @@ func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
