@@ -1,7 +1,7 @@
 package diff_test
 
 import (
-	"sort"
+	"slices"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/diff"
@@ -20,7 +20,7 @@ func TestEndpointsSort(t *testing.T) {
 		},
 	}
 
-	sort.Sort(endpoints)
+	slices.SortFunc(endpoints, endpoints.SortFunc)
 	require.Equal(t, "/a", endpoints[0].Path)
 }
 
@@ -36,6 +36,6 @@ func TestEndpointsSort_Methods(t *testing.T) {
 		},
 	}
 
-	sort.Sort(endpoints)
+	slices.SortFunc(endpoints, endpoints.SortFunc)
 	require.Equal(t, "OPTIONS", endpoints[0].Method)
 }

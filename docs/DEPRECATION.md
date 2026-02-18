@@ -1,4 +1,4 @@
-## Deprecating APIs and Parameters
+## Deprecating APIs, Parameters and Properties
 Sometimes [resources](#supported-resources-for-deprecation) need to be removed from the API, for example, when we replace an API endpoint by a new version, or when a parameter is no longer supported.  
 As API owners, we want a process that will allow us to phase out the old resource smoothly as possible and with minimal disruptions to business.
 
@@ -52,4 +52,4 @@ Notes:
 
 ### Supported Resources for Deprecation
 OpenAPI 3 supports the `deprecation` field for `Operations`, `Parameters`, `Headers` and `Schemas`.  
-Oasdiff currently supports deprecation for `Operations` and `Parameters`.  
+Oasdiff currently supports deprecation for `Operations`, `Parameters` and `Properties` (in request and response bodies).

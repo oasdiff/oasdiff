@@ -25,10 +25,17 @@ func RequestParameterMaxItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil || paramDiff.SchemaDiff.ItemsDiff == nil {
+					if paramDiff.SchemaDiff == nil {
 						continue
 					}
-					maxItemsDiff := paramDiff.SchemaDiff.ItemsDiff.MaxItemsDiff
+
+					// Check for maxItems on the parameter schema itself (for array parameters)
+					maxItemsDiff := paramDiff.SchemaDiff.MaxItemsDiff
+					if maxItemsDiff == nil && paramDiff.SchemaDiff.ItemsDiff != nil {
+						// Fallback: check for maxItems on the items schema (legacy behavior)
+						maxItemsDiff = paramDiff.SchemaDiff.ItemsDiff.MaxItemsDiff
+					}
+
 					if maxItemsDiff == nil {
 						continue
 					}

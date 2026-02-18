@@ -1,5 +1,5 @@
 
-[![CI](https://github.com/oasdiff/oasdiff/workflows/go/badge.svg)](https://github.com/oasdiff/oasdiff/actions)
+[![CI](https://github.com/oasdiff/oasdiff/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/oasdiff/oasdiff/actions)
 [![codecov](https://codecov.io/gh/oasdiff/oasdiff/branch/main/graph/badge.svg?token=Y8BM6X77JY)](https://codecov.io/gh/oasdiff/oasdiff)
 [![Go Report Card](https://goreportcard.com/badge/github.com/oasdiff/oasdiff)](https://goreportcard.com/report/github.com/oasdiff/oasdiff)
 [![GoDoc](https://godoc.org/github.com/oasdiff/oasdiff?status.svg)](https://godoc.org/github.com/oasdiff/oasdiff)
@@ -20,7 +20,6 @@ go install github.com/oasdiff/oasdiff@latest
 
 ### Install on macOS with Brew
 ```bash
-brew tap oasdiff/homebrew-oasdiff
 brew install oasdiff
 ```
 
@@ -53,7 +52,8 @@ oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/op
 docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test5.yaml
 ```
 
-## Features 
+## Features
+- [OpenAPI 3.1 support](OPENAPI-31.md) (beta)
 - Detect [breaking changes](BREAKING-CHANGES.md)
 - Display a user-friendly [changelog](BREAKING-CHANGES.md) of all important API changes
 - Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
@@ -71,6 +71,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Path prefix modification](PATH-PREFIX.md)
 - [Path parameter renaming](PATH-PARAM-RENAME.md)
 - [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes)
+- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names)
 - [Track changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
 - [Filter endpoints](FILTERING-ENDPOINTS.md)
 - [Extend breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
@@ -94,10 +95,14 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - checks: displays the different checks that oasdiff runs to detect changes
 
 ## Roadmap
-I am currently working on the ability to correlate breaking changes and changelog messages with the underlying changes in the original YAML spec.  
-This will allow users to see changes in their original context, investigate, and determine how to handle them.  
-Specifically, github users will be able to click annotations and see the diff at the relevant line as discussed [here](https://github.com/oasdiff/oasdiff/issues/574).  
-[Please help us prioritize the roadmap](https://github.com/oasdiff/oasdiff/discussions/631).
+- **OpenAPI 3.1**  
+  See https://github.com/oasdiff/oasdiff/issues/52  
+- **Inline visualization of breaking changes in the OpenAPI document**  
+  I am working on the ability to correlate breaking changes and changelog messages with the underlying edits in the original YAML specification.  
+  This will allow users to review changes in their original context, investigate their impact, and decide how to handle them.  
+  I am considering offering this capability under a separate license and would appreciate feedback from the community.
+  
+👉 [Please help prioritize the roadmap](https://github.com/oasdiff/oasdiff/discussions/631).
 
 ## Credits
 This project relies on the excellent implementation of OpenAPI 3.0 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).

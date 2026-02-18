@@ -59,7 +59,7 @@ func TestApiChange(t *testing.T) {
 	require.Equal(t, "error at source, in API GET /test This is a breaking change. [change_id]. comment", apiChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }
 
-func MockLocalizer(originalKey string, args ...interface{}) string {
+func MockLocalizer(originalKey string, args ...any) string {
 	switch originalKey {
 	case "change_id":
 		return "This is a breaking change."

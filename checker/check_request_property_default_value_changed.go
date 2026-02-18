@@ -29,22 +29,22 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 				continue
 			}
 
-			appendResultItem := func(messageId string, a ...any) {
-				baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
-				result = append(result, NewApiChange(
-					messageId,
-					config,
-					a,
-					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
-				).WithSources(baseSource, revisionSource))
-			}
-
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
+				appendResultItem := func(messageId string, a ...any) {
+					result = append(result, NewApiChange(
+						messageId,
+						config,
+						a,
+						"",
+						operationsSources,
+						operationItem.Revision,
+						operation,
+						path,
+					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+				}
 				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
 					defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff
 

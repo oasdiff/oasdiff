@@ -2,7 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/diff"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (
@@ -35,7 +35,8 @@ func ResponseOptionalPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 				}
 
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for _, mediaTypeDiff := range modifiedMediaTypes {
+				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 					if mediaTypeDiff.SchemaDiff == nil {
 						continue
 					}
@@ -71,7 +72,7 @@ func ResponseOptionalPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						})
 
 					CheckModifiedPropertiesDiff(
@@ -105,7 +106,7 @@ func ResponseOptionalPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

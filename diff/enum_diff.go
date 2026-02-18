@@ -2,6 +2,7 @@ package diff
 
 import (
 	"reflect"
+	"slices"
 )
 
 // EnumDiff describes the changes between a pair of enums
@@ -13,7 +14,7 @@ type EnumDiff struct {
 }
 
 // EnumValues is a list of enum values
-type EnumValues []interface{}
+type EnumValues []any
 
 func newEnumDiff() *EnumDiff {
 	return &EnumDiff{
@@ -70,11 +71,8 @@ func getEnumDiffInternal(enum1, enum2 EnumValues) *EnumDiff {
 	return diff
 }
 
-func findValue(value interface{}, enum EnumValues) bool {
-	for _, other := range enum {
-		if reflect.DeepEqual(value, other) {
-			return true
-		}
-	}
-	return false
+func findValue(value any, enum EnumValues) bool {
+	return slices.ContainsFunc(enum, func(other any) bool {
+		return reflect.DeepEqual(value, other)
+	})
 }

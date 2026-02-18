@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 type IViper interface {
@@ -61,7 +61,7 @@ func bindFlags(cmd *cobra.Command, v IViper) error {
 	persitentFlags.VisitAll(func(flag *pflag.Flag) {
 		name := flag.Name
 		if err := v.BindPFlag(name, persitentFlags.Lookup(name)); err != nil {
-			result = fmt.Errorf("error binding flag %q to viper: %v", name, err)
+			result = fmt.Errorf("error binding flag %q to viper: %w", name, err)
 			return
 		}
 	})
@@ -97,6 +97,7 @@ type Config struct {
 	FailOnDiff             bool     `mapstructure:"fail-on-diff"`
 	SeverityLevels         string   `mapstructure:"severity-levels"`
 	ExcludeElements        []string `mapstructure:"exclude-elements"`
+	ExcludeExtensions      []string `mapstructure:"exclude-extensions"`
 	Severity               []string `mapstructure:"severity"`
 	Tags                   []string `mapstructure:"tags"`
 	MatchPath              string   `mapstructure:"match-path"`

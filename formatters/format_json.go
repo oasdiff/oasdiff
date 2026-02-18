@@ -45,7 +45,7 @@ func (f JSONFormatter) SupportedOutputs() []Output {
 	return []Output{OutputDiff, OutputSummary, OutputChangelog, OutputChecks, OutputFlatten}
 }
 
-func printJSON(output interface{}) ([]byte, error) {
+func printJSON(output any) ([]byte, error) {
 	if reflect.ValueOf(output).IsNil() {
 		return nil, nil
 	}

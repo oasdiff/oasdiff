@@ -591,7 +591,7 @@ func TestBreaking_Body(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyBecameRequiredId, errs[0].GetId())
-	require.Equal(t, []interface{}{"id"}, errs[0].GetArgs())
+	require.Equal(t, []any{"id"}, errs[0].GetArgs())
 }
 
 // BC: changing an existing property in request body items to required is breaking
@@ -608,7 +608,7 @@ func TestBreaking_Items(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyBecameRequiredId, errs[0].GetId())
-	require.Equal(t, []interface{}{"/items/id"}, errs[0].GetArgs())
+	require.Equal(t, []any{"/items/id"}, errs[0].GetArgs())
 }
 
 // BC: changing an existing property in request body items to required with a default value is not breaking

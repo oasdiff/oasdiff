@@ -7,7 +7,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -85,8 +84,8 @@ func TestDiff_ModifiedOperation(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, &diff.OperationsDiff{
-		Added:    utils.StringList{"GET"},
-		Deleted:  utils.StringList{"POST"},
+		Added:    []string{"GET"},
+		Deleted:  []string{"POST"},
 		Modified: diff.ModifiedOperations{},
 	},
 		d.PathsDiff.Modified["/api/test"].OperationsDiff)
@@ -157,7 +156,7 @@ func TestDiff_ModifiedParam(t *testing.T) {
 	require.Equal(t,
 		&diff.ValueDiff{
 			From: true,
-			To:   (interface{})(nil),
+			To:   (any)(nil),
 		},
 		d(t, diff.NewConfig(), 2, 1).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["image"].ExplodeDiff)
 }
@@ -165,10 +164,10 @@ func TestDiff_ModifiedParam(t *testing.T) {
 func TestSchemaDiff_TypeDiff(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 1, 2)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInPath]["domain"].SchemaDiff.TypeDiff.Deleted.Is("string"))
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInPath]["domain"].SchemaDiff.TypeDiff.Added.Is("integer"))
+	require.Equal(t, []string{"string"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInPath]["domain"].SchemaDiff.TypeDiff.Deleted)
+	require.Equal(t, []string{"integer"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInPath]["domain"].SchemaDiff.TypeDiff.Added)
 }
 
 func TestSchemaDiff_EnumDiff(t *testing.T) {
@@ -201,33 +200,33 @@ func TestSchemaDiff_NotDiff(t *testing.T) {
 func TestSchemaDiff_ContentDiff(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 2, 1)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["filter"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["color"].TypeDiff.Deleted.Is("number"))
+	require.Equal(t, []string{"number"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["filter"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["color"].TypeDiff.Deleted)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["filter"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["color"].TypeDiff.Added.Is("string"))
+	require.Equal(t, []string{"string"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["filter"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["color"].TypeDiff.Added)
 }
 
 func TestSchemaDiff_MediaTypeAdded(t *testing.T) {
 	require.Equal(t,
-		utils.StringList([]string{"application/json"}),
+		[]string{"application/json"},
 		d(t, diff.NewConfig(), 5, 1).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInHeader]["user"].ContentDiff.MediaTypeAdded)
 }
 
 func TestSchemaDiff_MediaTypeDeleted(t *testing.T) {
 	require.Equal(t,
-		utils.StringList([]string{"application/json"}),
+		[]string{"application/json"},
 		d(t, diff.NewConfig(), 1, 5).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInHeader]["user"].ContentDiff.MediaTypeDeleted)
 }
 
 func TestSchemaDiff_MediaTypeModified(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 1, 5)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInCookie]["test"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Deleted.Is("object"))
+	require.Equal(t, []string{"object"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInCookie]["test"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Deleted)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInCookie]["test"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Added.Is("string"))
+	require.Equal(t, []string{"string"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInCookie]["test"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Added)
 }
 
 func TestSchemaDiff_MediaType_MultiEntries(t *testing.T) {
@@ -374,12 +373,12 @@ func TestHeaderDeleted(t *testing.T) {
 func TestRequestBodyModified(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 1, 3)
 
-	require.True(t,
-		dd.ComponentsDiff.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Deleted.Is("number"),
+	require.Equal(t, []string{"number"},
+		dd.ComponentsDiff.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Deleted,
 	)
 
-	require.True(t,
-		dd.ComponentsDiff.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Added.Is("integer"),
+	require.Equal(t, []string{"integer"},
+		dd.ComponentsDiff.RequestBodiesDiff.Modified["reuven"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.PropertiesDiff.Modified["meter_value"].TypeDiff.Added,
 	)
 }
 
@@ -398,21 +397,21 @@ func TestHeaderModifiedSchema(t *testing.T) {
 func TestHeaderModifiedContent(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 5, 1)
 
-	require.True(t,
-		dd.ComponentsDiff.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Deleted.Is("string"))
+	require.Equal(t, []string{"string"},
+		dd.ComponentsDiff.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Deleted)
 
-	require.True(t,
-		dd.ComponentsDiff.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Added.Is("object"))
+	require.Equal(t, []string{"object"},
+		dd.ComponentsDiff.HeadersDiff.Modified["testc"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.TypeDiff.Added)
 }
 
 func TestResponseContentModified(t *testing.T) {
 	dd := d(t, diff.NewConfig(), 5, 1)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["201"].ContentDiff.MediaTypeModified["application/xml"].SchemaDiff.TypeDiff.Deleted.Is("object"))
+	require.Equal(t, []string{"object"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["201"].ContentDiff.MediaTypeModified["application/xml"].SchemaDiff.TypeDiff.Deleted)
 
-	require.True(t,
-		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["201"].ContentDiff.MediaTypeModified["application/xml"].SchemaDiff.TypeDiff.Added.Is("string"))
+	require.Equal(t, []string{"string"},
+		dd.PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["201"].ContentDiff.MediaTypeModified["application/xml"].SchemaDiff.TypeDiff.Added)
 }
 
 func TestResponseDespcriptionNil(t *testing.T) {
@@ -424,7 +423,7 @@ func TestResponseDespcriptionNil(t *testing.T) {
 
 	require.Equal(t,
 		&diff.ValueDiff{
-			From: interface{}(nil),
+			From: any(nil),
 			To:   "Tufin1",
 		},
 		d.PathsDiff.Modified[installCommandPath].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["default"].DescriptionDiff)
@@ -872,13 +871,44 @@ func TestDiff_ExtensionsExcluded(t *testing.T) {
 	require.Empty(t, d)
 }
 
+func TestDiff_ExtensionsExcludeSpecificName(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/revision.yaml"))
+	require.NoError(t, err)
+
+	// Exclude the specific extension that has changes
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig().WithExcludeExtensions([]string{"x-amazon-apigateway-integration"}), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, d)
+}
+
+func TestDiff_ExtensionsExcludeUnrelatedName(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/revision.yaml"))
+	require.NoError(t, err)
+
+	// Exclude a different extension name - should still show the diff for x-amazon-apigateway-integration
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig().WithExcludeExtensions([]string{"x-unrelated"}), s1, s2)
+	require.NoError(t, err)
+	dd := d.PathsDiff.Modified["/example/callback"].OperationsDiff.Modified["POST"].ExtensionsDiff.Modified["x-amazon-apigateway-integration"]
+	require.Len(t, dd, 2)
+}
+
 func TestDiff_ExtensionsInvalid(t *testing.T) {
 	s1, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/extensions/base.yaml"))
 	require.NoError(t, err)
 
 	// Add invalid extension
 	newPathItem := s1.Spec.Paths.Find("/example/callback")
-	newPathItem.Post.Extensions["x-amazon-apigateway-integration"] = interface{}(make(chan int))
+	newPathItem.Post.Extensions["x-amazon-apigateway-integration"] = any(make(chan int))
 	s1.Spec.Paths.Set("/example/callback", newPathItem)
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
@@ -890,7 +920,7 @@ func TestDiff_ExtensionsInvalidSecuritySchemes(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add invalid extension
-	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Extensions = map[string]interface{}{"invalid": interface{}(make(chan int))}
+	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Extensions = map[string]any{"invalid": any(make(chan int))}
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.EqualError(t, err, "json: unsupported type: chan int")
@@ -901,7 +931,7 @@ func TestDiff_ExtensionsInvalidFlows(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add invalid extension
-	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Extensions = map[string]interface{}{"invalid": interface{}(make(chan int))}
+	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Extensions = map[string]any{"invalid": any(make(chan int))}
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.EqualError(t, err, "json: unsupported type: chan int")
@@ -912,7 +942,7 @@ func TestDiff_ExtensionsInvalidImplicit(t *testing.T) {
 	require.NoError(t, err)
 
 	// Add invalid extension
-	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Implicit.Extensions = map[string]interface{}{"invalid": interface{}(make(chan int))}
+	s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Implicit.Extensions = map[string]any{"invalid": any(make(chan int))}
 
 	_, _, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.EqualError(t, err, "json: unsupported type: chan int")
@@ -927,4 +957,48 @@ func TestDiff_ExtensionsIssue519(t *testing.T) {
 	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s1)
 	require.NoError(t, err)
 	require.Empty(t, d)
+}
+
+func TestGetPathsDiff_BasicDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/simple1.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/simple2.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1}, []*load.SpecInfo{s2})
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	require.NotNil(t, osm)
+	require.NotNil(t, d.PathsDiff)
+}
+
+func TestGetPathsDiff_NoDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/simple1.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1}, []*load.SpecInfo{s1})
+	require.NoError(t, err)
+	require.Nil(t, d)
+	require.Nil(t, osm)
+}
+
+func TestGetPathsDiff_WithSinceDate(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/composed/base/spec1.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/composed/base/spec2.yaml"))
+	require.NoError(t, err)
+
+	// Test with multiple specs that have x-since-date extensions
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s1, s2}, []*load.SpecInfo{s1, s2})
+	require.NoError(t, err)
+	require.Nil(t, d)
+	require.Nil(t, osm)
 }

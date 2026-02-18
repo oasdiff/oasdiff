@@ -7,7 +7,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v3"
 )
 
 type YAMLFormatter struct {
@@ -45,7 +45,7 @@ func (f YAMLFormatter) SupportedOutputs() []Output {
 	return []Output{OutputDiff, OutputSummary, OutputChangelog, OutputChecks, OutputFlatten}
 }
 
-func printYAML(output interface{}) ([]byte, error) {
+func printYAML(output any) ([]byte, error) {
 	if reflect.ValueOf(output).IsNil() {
 		return nil, nil
 	}

@@ -22,7 +22,7 @@ func TestMinus_Partial(t *testing.T) {
 	s2 := utils.StringSet{}
 	s2.Add("x")
 
-	require.Equal(t, utils.StringList{"y"}, s1.Minus(s2).ToStringList())
+	require.Equal(t, []string{"y"}, s1.Minus(s2).ToStringList())
 	require.Empty(t, s2.Minus(s1))
 }
 
@@ -44,6 +44,25 @@ func TestStringSet_Plus(t *testing.T) {
 	s := utils.StringSet{}
 	s.Add("x")
 	require.True(t, s.Equals(s.Plus(s)))
+}
+
+func TestStringSetFromSlice(t *testing.T) {
+	s := utils.StringSetFromSlice([]string{"a", "b", "c"})
+	require.True(t, s.Contains("a"))
+	require.True(t, s.Contains("b"))
+	require.True(t, s.Contains("c"))
+	require.False(t, s.Contains("d"))
+	require.Equal(t, 3, len(s))
+}
+
+func TestStringSetFromSlice_Empty(t *testing.T) {
+	s := utils.StringSetFromSlice([]string{})
+	require.True(t, s.Empty())
+}
+
+func TestStringSetFromSlice_Duplicates(t *testing.T) {
+	s := utils.StringSetFromSlice([]string{"a", "a", "b"})
+	require.Equal(t, 2, len(s))
 }
 
 func TestStringSet_Equals(t *testing.T) {

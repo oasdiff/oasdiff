@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func MockLocalizer(id string, args ...interface{}) string {
+func MockLocalizer(id string, args ...any) string {
 	switch id {
 	case "change_id":
 		return "This is a breaking change."

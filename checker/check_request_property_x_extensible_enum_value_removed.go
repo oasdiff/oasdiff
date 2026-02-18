@@ -2,7 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/diff"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (
@@ -27,7 +27,8 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 
 			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for _, mediaTypeDiff := range modifiedMediaTypes {
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 				CheckModifiedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
 					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
@@ -40,11 +41,11 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 						if propertyDiff.ExtensionsDiff.Modified[diff.XExtensibleEnumExtension] == nil {
 							return
 						}
-						from, ok := propertyDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]interface{})
+						from, ok := propertyDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]any)
 						if !ok {
 							return
 						}
-						to, ok := propertyDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]interface{})
+						to, ok := propertyDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]any)
 						if !ok {
 							return
 						}
@@ -79,7 +80,7 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

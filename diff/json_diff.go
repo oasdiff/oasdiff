@@ -58,7 +58,7 @@ func newJsonOperation(op jsondiff.Operation) *JsonOperation {
 	}
 }
 
-func compareJson(source, target interface{}, opts ...jsondiff.Option) (JsonPatch, error) {
+func compareJson(source, target any, opts ...jsondiff.Option) (JsonPatch, error) {
 	patch, err := jsondiff.Compare(source, target, opts...)
 	if err != nil {
 		return nil, err

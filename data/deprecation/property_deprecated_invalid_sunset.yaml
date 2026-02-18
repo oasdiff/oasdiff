@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Property Deprecation Test - Invalid Sunset
+  version: 1.0.1
+paths:
+  /test:
+    post:
+      summary: Test endpoint
+      operationId: createTest
+      x-stability-level: stable
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestRequest'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestResponse'
+components:
+  schemas:
+    TestRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name property
+        oldField:
+          type: string
+          description: Old field that is deprecated with invalid sunset date
+          deprecated: true
+          x-sunset: "invalid-date-format"
+    TestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID property
+        legacyField:
+          type: string
+          description: Legacy field that is deprecated with invalid sunset date
+          deprecated: true
+          x-sunset: "invalid-date-format"

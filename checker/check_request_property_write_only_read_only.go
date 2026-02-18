@@ -2,7 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/diff"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (
@@ -34,7 +34,8 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 			}
 			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for _, mediaTypeDiff := range modifiedMediaTypes {
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 				if mediaTypeDiff.SchemaDiff == nil {
 					continue
 				}
@@ -68,7 +69,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -85,7 +86,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					})
 
 				CheckModifiedPropertiesDiff(
@@ -116,7 +117,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -133,7 +134,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

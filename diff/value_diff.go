@@ -6,8 +6,8 @@ import (
 
 // ValueDiff describes the changes between a pair of values
 type ValueDiff struct {
-	From interface{} `json:"from" yaml:"from"`
-	To   interface{} `json:"to" yaml:"to"`
+	From any `json:"from" yaml:"from"`
+	To   any `json:"to" yaml:"to"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -15,7 +15,7 @@ func (diff *ValueDiff) Empty() bool {
 	return diff == nil
 }
 
-func getValueDiff(value1, value2 interface{}) *ValueDiff {
+func getValueDiff(value1, value2 any) *ValueDiff {
 
 	diff := getValueDiffInternal(value1, value2)
 
@@ -26,7 +26,7 @@ func getValueDiff(value1, value2 interface{}) *ValueDiff {
 	return diff
 }
 
-func getValueDiffInternal(value1, value2 interface{}) *ValueDiff {
+func getValueDiffInternal(value1, value2 any) *ValueDiff {
 	if reflect.DeepEqual(value1, value2) {
 		return nil
 	}
@@ -37,7 +37,7 @@ func getValueDiffInternal(value1, value2 interface{}) *ValueDiff {
 	}
 }
 
-func getValueDiffConditional(exclude bool, value1, value2 interface{}) *ValueDiff {
+func getValueDiffConditional(exclude bool, value1, value2 any) *ValueDiff {
 	if exclude {
 		return nil
 	}
@@ -61,7 +61,7 @@ func getUInt64RefDiff(valueRef1, valueRef2 *uint64) *ValueDiff {
 	return getValueDiff(derefUInt64(valueRef1), derefUInt64(valueRef2))
 }
 
-func derefString(ref *string) interface{} {
+func derefString(ref *string) any {
 	if ref == nil {
 		return nil
 	}
@@ -69,7 +69,7 @@ func derefString(ref *string) interface{} {
 	return *ref
 }
 
-func derefBool(ref *bool) interface{} {
+func derefBool(ref *bool) any {
 	if ref == nil {
 		return nil
 	}
@@ -77,7 +77,7 @@ func derefBool(ref *bool) interface{} {
 	return *ref
 }
 
-func derefFloat64(ref *float64) interface{} {
+func derefFloat64(ref *float64) any {
 	if ref == nil {
 		return nil
 	}
@@ -85,7 +85,7 @@ func derefFloat64(ref *float64) interface{} {
 	return *ref
 }
 
-func derefUInt64(ref *uint64) interface{} {
+func derefUInt64(ref *uint64) any {
 	if ref == nil {
 		return nil
 	}

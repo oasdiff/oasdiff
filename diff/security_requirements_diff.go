@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -9,8 +11,8 @@ import (
 
 // SecurityRequirementsDiff describes the changes between a pair of sets of security requirement objects: https://swagger.io/specification/#security-requirement-object
 type SecurityRequirementsDiff struct {
-	Added    utils.StringList             `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList             `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    []string                     `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string                     `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSecurityRequirements `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
@@ -30,8 +32,8 @@ type ModifiedSecurityRequirements map[string]SecurityScopesDiff
 
 func newSecurityRequirementsDiff() *SecurityRequirementsDiff {
 	return &SecurityRequirementsDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedSecurityRequirements{},
 	}
 }
@@ -97,13 +99,7 @@ func getSecuritySchemes(securityRequirement openapi3.SecurityRequirement) utils.
 }
 
 func getSecurityRequirementID(securityRequirement openapi3.SecurityRequirement) string {
-	results := make([]string, len(securityRequirement))
-	i := 0
-	for name := range securityRequirement {
-		results[i] = name
-		i++
-	}
-	return strings.Join(results, " AND ")
+	return strings.Join(slices.Collect(maps.Keys(securityRequirement)), " AND ")
 }
 
 func (diff *SecurityRequirementsDiff) getSummary() *SummaryDetails {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // ParametersDiffByLocation describes the changes, grouped by param location, between a pair of lists of parameter objects: https://swagger.io/specification/#parameter-object
@@ -29,7 +28,7 @@ func (diff *ParametersDiffByLocation) Empty() bool {
 var ParamLocations = []string{openapi3.ParameterInPath, openapi3.ParameterInQuery, openapi3.ParameterInHeader, openapi3.ParameterInCookie}
 
 // ParamNamesByLocation maps param location (path, query, header or cookie) to the params in this location
-type ParamNamesByLocation map[string]utils.StringList
+type ParamNamesByLocation map[string][]string
 
 // Len returns the number of all params in all locations
 func (params ParamNamesByLocation) Len() int {
@@ -44,7 +43,7 @@ func (params ParamDiffByLocation) Len() int {
 	return lenNested(params)
 }
 
-func lenNested[T utils.StringList | ParamDiffs](mapOfList map[string]T) int {
+func lenNested[T []string | ParamDiffs](mapOfList map[string]T) int {
 	result := 0
 	for _, l := range mapOfList {
 		result += len(l)
@@ -68,7 +67,7 @@ func (diff *ParametersDiffByLocation) addAddedParam(param *openapi3.Parameter) {
 	if paramNames, ok := diff.Added[param.In]; ok {
 		diff.Added[param.In] = append(paramNames, param.Name)
 	} else {
-		diff.Added[param.In] = utils.StringList{param.Name}
+		diff.Added[param.In] = []string{param.Name}
 	}
 }
 
@@ -77,7 +76,7 @@ func (diff *ParametersDiffByLocation) addDeletedParam(param *openapi3.Parameter)
 	if paramNames, ok := diff.Deleted[param.In]; ok {
 		diff.Deleted[param.In] = append(paramNames, param.Name)
 	} else {
-		diff.Deleted[param.In] = utils.StringList{param.Name}
+		diff.Deleted[param.In] = []string{param.Name}
 	}
 }
 
@@ -373,6 +372,12 @@ func matchExplodedWithSimple(config *Config, state *state, simpleParams, explode
 			}
 
 			if processedSimple[simpleParam] {
+				continue
+			}
+
+			// Skip if this parameter is itself an exploded object parameter
+			// We only want to match truly simple parameters with exploded parameters
+			if isExplodedObjectParam(simpleParam) {
 				continue
 			}
 

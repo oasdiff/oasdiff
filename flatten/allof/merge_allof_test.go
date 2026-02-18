@@ -571,14 +571,14 @@ func TestMerge_ExclusiveMaxIsTrue(t *testing.T) {
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMax: true,
-							Max:          openapi3.Float64Ptr(1),
+							Max:          openapi3.Float64Ptr(1.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMax: false,
-							Max:          openapi3.Float64Ptr(2),
+							Max:          openapi3.Float64Ptr(2.0),
 						},
 					},
 				},
@@ -597,14 +597,14 @@ func TestMerge_ExclusiveMaxIsFalse(t *testing.T) {
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMax: false,
-							Max:          openapi3.Float64Ptr(1),
+							Max:          openapi3.Float64Ptr(1.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMax: true,
-							Max:          openapi3.Float64Ptr(2),
+							Max:          openapi3.Float64Ptr(2.0),
 						},
 					},
 				},
@@ -623,14 +623,14 @@ func TestMerge_ExclusiveMinIsFalse(t *testing.T) {
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMin: false,
-							Min:          openapi3.Float64Ptr(40),
+							Min:          openapi3.Float64Ptr(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMin: true,
-							Min:          openapi3.Float64Ptr(5),
+							Min:          openapi3.Float64Ptr(5.0),
 						},
 					},
 				},
@@ -649,14 +649,14 @@ func TestMerge_ExclusiveMinIsTrue(t *testing.T) {
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMin: true,
-							Min:          openapi3.Float64Ptr(40),
+							Min:          openapi3.Float64Ptr(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
 							ExclusiveMin: false,
-							Min:          openapi3.Float64Ptr(5),
+							Min:          openapi3.Float64Ptr(5.0),
 						},
 					},
 				},
@@ -985,19 +985,19 @@ func TestMerge_EnumContained(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"1", nil, 1},
+							Enum: []any{"1", nil, 1},
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"1"},
+							Enum: []any{"1"},
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.ElementsMatch(t, []interface{}{"1"}, merged.Enum)
+	require.ElementsMatch(t, []any{"1"}, merged.Enum)
 }
 
 // enum merge fails if the intersection of enum values is empty.
@@ -1009,13 +1009,13 @@ func TestMerge_EnumNoIntersection(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"1", nil},
+							Enum: []any{"1", nil},
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Enum: []interface{}{"2"},
+							Enum: []any{"2"},
 						},
 					},
 				},
@@ -1086,15 +1086,15 @@ func TestMerge_Range(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Min:  openapi3.Float64Ptr(10),
-							Max:  openapi3.Float64Ptr(40),
+							Min:  openapi3.Float64Ptr(10.0),
+							Max:  openapi3.Float64Ptr(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Min:  openapi3.Float64Ptr(5),
-							Max:  openapi3.Float64Ptr(25),
+							Min:  openapi3.Float64Ptr(5.0),
+							Max:  openapi3.Float64Ptr(25.0),
 						},
 					},
 				},
@@ -1618,9 +1618,9 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 	apFalse := false
 	apTrue := true
 
-	var firstPropEnum []interface{}
-	var secondPropEnum []interface{}
-	var thirdPropEnum []interface{}
+	var firstPropEnum []any
+	var secondPropEnum []any
+	var thirdPropEnum []any
 
 	firstPropEnum = append(firstPropEnum, "1", "5", "3")
 	secondPropEnum = append(secondPropEnum, "1", "8", "7")
@@ -1689,9 +1689,9 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 func TestMerge_AdditionalProperties_True(t *testing.T) {
 	apTrue := true
 
-	var firstPropEnum []interface{}
-	var secondPropEnum []interface{}
-	var thirdPropEnum []interface{}
+	var firstPropEnum []any
+	var secondPropEnum []any
+	var thirdPropEnum []any
 
 	firstPropEnum = append(firstPropEnum, "1", "5", "3")
 	secondPropEnum = append(secondPropEnum, "1", "8", "7")
@@ -1927,4 +1927,187 @@ func loadSpec(t *testing.T, path string) *openapi3.T {
 	err = doc.Validate(ctx)
 	require.NoError(t, err)
 	return doc
+}
+
+// Test for issue #710: identical oneOf groups in allOf should be deduplicated
+// instead of producing a cartesian product
+func TestMerge_IdenticalOneOfGroups(t *testing.T) {
+	// Create two allOf subschemas with identical oneOf groups
+	oneOfA := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/A",
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propA"},
+		},
+	}
+	oneOfB := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/B",
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propB"},
+		},
+	}
+
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfA,
+								oneOfB,
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfA,
+								oneOfB,
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Without the fix, this would produce 4 oneOf items (cartesian product)
+	// With the fix, identical oneOf groups are deduplicated, resulting in 2 items
+	require.Len(t, merged.OneOf, 2, "identical oneOf groups should be deduplicated, not produce cartesian product")
+}
+
+// Test that oneOf groups with same pointer references are deduplicated
+func TestMerge_SamePointerOneOfGroups(t *testing.T) {
+	// Create shared inline schemas (same pointer)
+	inlineA := &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propA"},
+		},
+	}
+	inlineB := &openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			Type:     &openapi3.Types{"object"},
+			Required: []string{"propB"},
+		},
+	}
+
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								inlineA,
+								inlineB,
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								inlineA,
+								inlineB,
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Same pointer references should be deduplicated
+	require.Len(t, merged.OneOf, 2, "oneOf groups with same pointer references should be deduplicated")
+}
+
+// Test that oneOf groups with refs in different order are still deduplicated (tests sorting)
+func TestMerge_OneOfGroupsReversedOrder(t *testing.T) {
+	oneOfA := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/A",
+		Value: &openapi3.Schema{
+			Type: &openapi3.Types{"object"},
+		},
+	}
+	oneOfB := &openapi3.SchemaRef{
+		Ref: "#/components/schemas/B",
+		Value: &openapi3.Schema{
+			Type: &openapi3.Types{"object"},
+		},
+	}
+
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfA, // A first
+								oneOfB,
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								oneOfB, // B first (reversed order)
+								oneOfA,
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Groups with same refs in different order should be deduplicated after sorting
+	require.Len(t, merged.OneOf, 2, "oneOf groups with same refs in different order should be deduplicated")
+}
+
+// Test different oneOf groups are not deduplicated
+func TestMerge_DifferentOneOfGroups(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								&openapi3.SchemaRef{
+									Ref: "#/components/schemas/A",
+									Value: &openapi3.Schema{
+										Type:     &openapi3.Types{"object"},
+										Required: []string{"propA"},
+									},
+								},
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							OneOf: openapi3.SchemaRefs{
+								&openapi3.SchemaRef{
+									Ref: "#/components/schemas/B",
+									Value: &openapi3.Schema{
+										Type:     &openapi3.Types{"object"},
+										Required: []string{"propB"},
+									},
+								},
+							},
+						},
+					},
+				},
+			}})
+
+	require.NoError(t, err)
+	// Different oneOf groups should produce cartesian product (1 * 1 = 1 in this case)
+	require.Len(t, merged.OneOf, 1)
 }

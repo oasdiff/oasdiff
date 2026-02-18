@@ -27,7 +27,8 @@ func RequestPropertyMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *
 
 			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for _, mediaTypeDiff := range modifiedMediaTypes {
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MaxLengthDiff != nil {
 					maxLengthDiff := mediaTypeDiff.SchemaDiff.MaxLengthDiff
 					if maxLengthDiff.From == nil &&
@@ -41,7 +42,7 @@ func RequestPropertyMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *
 							operationItem.Revision,
 							operation,
 							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 				}
 
@@ -69,7 +70,7 @@ func RequestPropertyMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *
 							operationItem.Revision,
 							operation,
 							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

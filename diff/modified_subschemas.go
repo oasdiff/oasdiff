@@ -2,9 +2,9 @@ package diff
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // ModifiedSubschemas is list of modified subschemas with their diffs
@@ -74,8 +74,7 @@ func (schemas Subschemas) String() string {
 	for i, schema := range schemas {
 		names[i] = schema.String()
 	}
-	list := utils.StringList(names)
-	return list.String()
+	return strings.Join(names, ", ")
 }
 
 func (modifiedSchemas ModifiedSubschemas) addSchemaDiff(config *Config, state *state, schemaRef1, schemaRef2 *openapi3.SchemaRef, index1, index2 int) (ModifiedSubschemas, error) {

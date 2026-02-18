@@ -52,7 +52,7 @@ func writeAsCSV(vals []string) (string, error) {
 }
 
 func (s *enumSliceValue) checkAllowedValues(values []string) error {
-	if notAllowed := utils.StringList(values).ToStringSet().Minus(utils.StringList(s.allowedValues).ToStringSet()); !notAllowed.Empty() {
+	if notAllowed := utils.StringSetFromSlice(values).Minus(utils.StringSetFromSlice(s.allowedValues)); !notAllowed.Empty() {
 		verb := "are"
 		if len(notAllowed) == 1 {
 			verb = "is"

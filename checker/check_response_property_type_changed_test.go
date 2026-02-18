@@ -7,7 +7,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,7 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponseBodyTypeChangedId,
-		Args:        []any{utils.StringList{"string"}, "", utils.StringList{"object"}, "", "200"},
+		Args:        []any{[]string{"string"}, "", []string{"object"}, "", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -48,7 +47,7 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", utils.StringList{"string"}, "", utils.StringList{"integer"}, "", "200"},
+		Args:        []any{"data/name", []string{"string"}, "", []string{"integer"}, "", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -72,7 +71,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", utils.StringList{"string"}, "hostname", utils.StringList{"string"}, "uuid", "200"},
+		Args:        []any{"data/name", []string{"string"}, "hostname", []string{"string"}, "uuid", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -96,7 +95,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 	require.ElementsMatch(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"/anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", utils.StringList{"string"}, "", utils.StringList{"number"}, "", "200"},
+			Args:        []any{"/anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", []string{"string"}, "", []string{"number"}, "", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -105,7 +104,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"/anyOf[subschema #3: Rabbit]/", utils.StringList{"string"}, "", utils.StringList{"number"}, "", "200"},
+			Args:        []any{"/anyOf[subschema #3: Rabbit]/", []string{"string"}, "", []string{"number"}, "", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -114,7 +113,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"/anyOf[subschema #4 -> subschema #5]/", utils.StringList{"string"}, "", utils.StringList{"number"}, "", "200"},
+			Args:        []any{"/anyOf[subschema #4 -> subschema #5]/", []string{"string"}, "", []string{"number"}, "", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -138,7 +137,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", utils.StringList{"string"}, "", utils.StringList{"integer", "string"}, "", "200"},
+		Args:        []any{"data/name", []string{"string"}, "", []string{"integer", "string"}, "", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -160,7 +159,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"/additionalProperties/property1", utils.StringList{"integer"}, "", utils.StringList{"string"}, "", "200"},
+		Args:        []any{"/additionalProperties/property1", []string{"integer"}, "", []string{"string"}, "", "200"},
 		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/value",
@@ -182,7 +181,7 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"composite-property/additionalProperties/property1", utils.StringList{"integer"}, "", utils.StringList{"string"}, "", "200"},
+		Args:        []any{"composite-property/additionalProperties/property1", []string{"integer"}, "", []string{"string"}, "", "200"},
 		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/value",

@@ -3,7 +3,7 @@ package checker
 import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 const (
@@ -30,7 +30,8 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 			}
 			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for _, mediaTypeDiff := range modifiedMediaTypes {
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 				CheckDeletedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
 					func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
@@ -45,7 +46,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 				CheckAddedPropertiesDiff(
@@ -68,7 +69,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 									operationItem.Revision,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							} else {
 								result = append(result, NewApiChange(
 									NewRequiredRequestPropertyWithDefaultId,
@@ -79,7 +80,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 									operationItem.Revision,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						} else {
 							result = append(result, NewApiChange(
@@ -91,7 +92,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

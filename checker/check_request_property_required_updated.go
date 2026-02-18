@@ -28,7 +28,8 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 			}
 			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for _, mediaTypeDiff := range modifiedMediaTypes {
+			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
 				if mediaTypeDiff.SchemaDiff == nil {
 					continue
 				}
@@ -50,7 +51,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							} else {
 								// property has a default value, so making it required is not a breaking change
 								result = append(result, NewApiChange(
@@ -62,7 +63,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						}
 						for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Deleted {
@@ -79,7 +80,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					}
 				}

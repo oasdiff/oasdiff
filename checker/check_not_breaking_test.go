@@ -201,7 +201,7 @@ func TestBreaking_DeprecatedOperation(t *testing.T) {
 	s2 := l(t, 1)
 
 	s2.Spec.Paths.Value(installCommandPath).Get.Deprecated = true
-	s2.Spec.Paths.Value(installCommandPath).Get.Extensions = map[string]interface{}{diff.SunsetExtension: toJson(t, civil.DateOf(time.Now()).AddDays(180).String())}
+	s2.Spec.Paths.Value(installCommandPath).Get.Extensions = map[string]any{diff.SunsetExtension: toJson(t, civil.DateOf(time.Now()).AddDays(180).String())}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)

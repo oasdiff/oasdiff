@@ -6,14 +6,13 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/utils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestParamNamesByLocation_Len(t *testing.T) {
 	require.Equal(t, 3, diff.ParamNamesByLocation{
-		"query":  utils.StringList{"name"},
-		"header": utils.StringList{"id", "organization"},
+		"query":  []string{"name"},
+		"header": []string{"id", "organization"},
 	}.Len())
 }
 
@@ -153,6 +152,30 @@ func TestParameterStyleDefaults(t *testing.T) {
 		// This test mainly ensures the fix doesn't break and handles different parameter locations correctly
 	})
 
+}
+
+// TestIssue767_ExplodedParamWithSameNameProperty tests that an exploded object parameter
+// is not mistakenly matched with a property inside its own schema.
+// Regression test for issue #767 where a parameter named "query" with a property named "query"
+// inside its schema was incorrectly matched as semantically equivalent to itself.
+func TestIssue767_ExplodedParamWithSameNameProperty(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	// Load the same spec twice - should result in no diff
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/issue-767.yml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/explode-params/issue-767.yml"))
+	require.NoError(t, err)
+
+	// Get the diff
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	// The key assertion: identical specs should have no diff
+	// Before the fix, this incorrectly reported modifications because the "query" parameter
+	// was matched with its own "query" property
+	require.Nil(t, d, "Identical specs should result in no diff")
 }
 
 // TestExplodedParameterLocationMatching tests that parameters with the same name

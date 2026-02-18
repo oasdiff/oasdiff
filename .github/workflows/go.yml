@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go: ['1.24']
+        go: ['1.25']
         os:
         - ubuntu-latest
         - windows-latest
@@ -28,7 +28,7 @@ jobs:
     steps:
 
     - name: Check out code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - uses: actions/setup-go@v5
       with:
@@ -45,13 +45,17 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ steps.go-cache-paths.outputs.go-build }}
-        key: ${{ runner.os }}-go-${{ matrix.go }}-build-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-${{ matrix.go }}-build-v2-${{ hashFiles('**/go.sum', 'checker/localizations_src/**/*.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-go-${{ matrix.go }}-build-v2-
 
     - name: Go Mod Cache
       uses: actions/cache@v4
       with:
         path: ${{ steps.go-cache-paths.outputs.go-mod }}
-        key: ${{ runner.os }}-go-${{ matrix.go }}-mod-${{ hashFiles('**/go.sum') }}
+        key: ${{ runner.os }}-go-${{ matrix.go }}-mod-v2-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-${{ matrix.go }}-mod-v2-
 
     - run: go mod download && go mod tidy && go mod verify
     - run: git --no-pager diff --exit-code
@@ -61,17 +65,29 @@ jobs:
 
     - if: runner.os == 'Linux'
       name: Generate breaking-changes examples
+      run: make doc-breaking-changes
+    
+    - if: runner.os == 'Linux'
+      name: Check breaking-changes examples are up to date
+      run: git --no-pager diff --exit-code docs/BREAKING-CHANGES-EXAMPLES.md
+
+    - if: runner.os == 'Linux'
+      name: Generate localized messages
       run: |
-        sh scripts/doc_breaking_changes.sh > docs/BREAKING-CHANGES-EXAMPLES.md
+        make localize
+    
+    - if: runner.os == 'Linux'
+      name: Check localized messages are up to date (excluding timestamp)
+      run: |
+        # Compare from line 4 onwards (skipping the timestamp on line 3)
+        git diff --no-index <(tail -n +4 checker/localizations/localizations.go) <(git show HEAD:checker/localizations/localizations.go | tail -n +4) || exit 0
 
     - run: go fmt ./...
-    - run: git --no-pager diff --exit-code
+    - run: git --no-pager diff --exit-code -- ':!checker/localizations/localizations.go'
 
     - run: go test ./... -coverprofile=coverage.txt -covermode=atomic
       env:
         CGO_ENABLED: '1'
-
-    - run: git --no-pager diff --exit-code
 
     - if: runner.os == 'Linux'
       name: Errors must not be capitalized https://github.com/golang/go/wiki/CodeReviewComments#error-strings

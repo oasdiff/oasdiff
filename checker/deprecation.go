@@ -10,12 +10,12 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-func getSunset(Extensions map[string]interface{}) (interface{}, bool) {
+func getSunset(Extensions map[string]any) (any, bool) {
 	value, ok := Extensions[diff.SunsetExtension]
 	return value, ok
 }
 
-func getSunsetDate(sunset interface{}) (civil.Date, error) {
+func getSunsetDate(sunset any) (civil.Date, error) {
 	sunsetStr, ok := sunset.(string)
 	if !ok {
 		sunsetJson, ok := sunset.(json.RawMessage)
@@ -23,7 +23,7 @@ func getSunsetDate(sunset interface{}) (civil.Date, error) {
 			return civil.Date{}, errors.New("sunset value isn't a string nor valid json")
 		}
 		if err := json.Unmarshal(sunsetJson, &sunsetStr); err != nil {
-			return civil.Date{}, fmt.Errorf("failed to unmarshal sunset json: %v", sunset)
+			return civil.Date{}, fmt.Errorf("failed to unmarshal sunset json: %w", err)
 		}
 	}
 

@@ -6,7 +6,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 func commentId(id string) string {
@@ -25,7 +24,7 @@ func propertyFullName(propertyPath string, propertyNames ...string) string {
 	return propertyFullName
 }
 
-func interfaceToString(arg interface{}) string {
+func interfaceToString(arg any) string {
 	if arg == nil {
 		return "undefined"
 	}
@@ -34,8 +33,8 @@ func interfaceToString(arg interface{}) string {
 		return argString
 	}
 
-	if argStringList, ok := arg.(utils.StringList); ok {
-		return argStringList.String()
+	if argStringList, ok := arg.([]string); ok {
+		return strings.Join(argStringList, ", ")
 	}
 
 	if argInt, ok := arg.(int); ok {
@@ -207,7 +206,7 @@ func processDeletedPropertiesDiff(propertyPath string, propertyName string, sche
 	}
 }
 
-func IsIncreased(from interface{}, to interface{}) bool {
+func IsIncreased(from any, to any) bool {
 	fromUint64, ok := from.(uint64)
 	toUint64, okTo := to.(uint64)
 	if ok && okTo {
@@ -229,7 +228,7 @@ func IsDecreasedValue(diff *diff.ValueDiff) bool {
 	return IsDecreased(diff.From, diff.To)
 }
 
-func IsDecreased(from interface{}, to interface{}) bool {
+func IsDecreased(from any, to any) bool {
 	fromUint64, ok := from.(uint64)
 	toUint64, okTo := to.(uint64)
 	if ok && okTo {

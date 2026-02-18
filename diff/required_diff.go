@@ -2,7 +2,6 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // RequiredPropertiesDiff describes the changes between a pair of lists of required properties
@@ -29,7 +28,7 @@ func getRequiredPropertiesDiff(schema1, schema2 *openapi3.Schema) *RequiredPrope
 	return diff
 }
 
-func getRequiredPropertiesDiffInternal(strings1, strings2 utils.StringList) *RequiredPropertiesDiff {
+func getRequiredPropertiesDiffInternal(strings1, strings2 []string) *RequiredPropertiesDiff {
 	if stringsDiff := getStringsDiff(strings1, strings2); stringsDiff != nil {
 		return &RequiredPropertiesDiff{
 			StringsDiff: *stringsDiff,

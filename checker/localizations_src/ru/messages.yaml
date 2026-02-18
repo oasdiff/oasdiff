@@ -3,8 +3,8 @@ in: в
 request-body-added-required: добавлено обязательное тело запроса
 request-body-added-optional: добавлено необязательное тело запроса
 request-parameter-removed: удалён %s параметр запроса %s
-total-errors: "%s критические изменения: %s %s, %s %s\\n"
-total-changes: "%s изменений: %s %s, %s %s, %s %s\\n"
+total-errors: "%d критические изменения: %d %s, %d %s\\n"
+total-changes: "%d изменений: %d %s, %d %s, %d %s\\n"
 request-parameter-pattern-added: добавлен pattern %s у %s параметра запроса %s
 request-parameter-pattern-removed: удалён pattern %s у %s параметра запроса %s
 request-parameter-pattern-changed: изменён pattern у %s параметра запроса %s со значения %s на значение %s
@@ -20,6 +20,9 @@ api-invalid-stability-level: "не удалось разобрать урове�
 api-deprecated-sunset-missing: "API устарел без даты прекращения действия"
 api-sunset-date-too-small: дата API sunset date %s слишком ранняя, должно быть как минимум %s дней от текущего дня
 api-path-added: API path добавлено
+endpoint-added: эндпоинт добавлен
+endpoint-deprecated: эндпоинт устарел
+endpoint-reactivated: эндпоинт реактивирован
 api-path-deprecated: API path deprecated
 api-path-reactivated: API path реактивирован
 api-path-removed-without-deprecation: API path удалён без процедуры deprecation

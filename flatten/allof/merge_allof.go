@@ -30,7 +30,7 @@ type SchemaCollection struct {
 	Type                 []string
 	Format               []string
 	Description          []string
-	Enum                 [][]interface{}
+	Enum                 [][]any
 	UniqueItems          []bool
 	ExclusiveMin         []bool
 	ExclusiveMax         []bool
@@ -51,7 +51,7 @@ type SchemaCollection struct {
 	Nullable             []bool
 	ReadOnly             []bool
 	WriteOnly            []bool
-	Default              []interface{}
+	Default              []any
 }
 
 type state struct {
@@ -686,14 +686,14 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	return schema, nil
 }
 
-func resolveEnum(values [][]interface{}) ([]interface{}, error) {
-	var nonEmptyEnum [][]interface{}
+func resolveEnum(values [][]any) ([]any, error) {
+	var nonEmptyEnum [][]any
 	for _, enum := range values {
 		if len(enum) > 0 {
 			nonEmptyEnum = append(nonEmptyEnum, enum)
 		}
 	}
-	var intersection []interface{}
+	var intersection []any
 	if len(nonEmptyEnum) == 0 {
 		return intersection, nil
 	}
@@ -872,9 +872,9 @@ func allStringsEqual(values []string) bool {
 	return true
 }
 
-func getIntersection(arr1, arr2 []interface{}) []interface{} {
-	intersectionMap := make(map[interface{}]bool)
-	result := []interface{}{}
+func getIntersection(arr1, arr2 []any) []any {
+	intersectionMap := make(map[any]bool)
+	result := []any{}
 
 	// Mark elements in the first array
 	for _, val := range arr1 {
@@ -891,7 +891,7 @@ func getIntersection(arr1, arr2 []interface{}) []interface{} {
 	return result
 }
 
-func findIntersectionOfArrays(arrays [][]interface{}) []interface{} {
+func findIntersectionOfArrays(arrays [][]any) []any {
 	if len(arrays) == 0 {
 		return nil
 	}
@@ -1044,6 +1044,54 @@ func filterEmptySchemaRefs(groups []openapi3.SchemaRefs) []openapi3.SchemaRefs {
 	return result
 }
 
+// deduplicateSchemaRefsGroups removes duplicate groups from the collection.
+// Two groups are considered equivalent if they contain the same set of schema references.
+// This prevents unnecessary cartesian product expansion when multiple allOf subschemas
+// reference the same oneOf/anyOf definition.
+// Note: caller (resolveCombinations) already handles len(groups) <= 1 cases.
+func deduplicateSchemaRefsGroups(groups []openapi3.SchemaRefs) []openapi3.SchemaRefs {
+	seen := make(map[string]bool)
+	result := []openapi3.SchemaRefs{}
+
+	for _, group := range groups {
+		key := schemaRefsGroupKey(group)
+		if !seen[key] {
+			seen[key] = true
+			result = append(result, group)
+		}
+	}
+
+	return result
+}
+
+// schemaRefsGroupKey generates a unique key for a group of SchemaRefs.
+// For referenced schemas, uses the $ref path.
+// For inline schemas, uses a string representation of the schema content.
+// Note: caller ensures refs is non-empty (via filterEmptySchemaRefs).
+func schemaRefsGroupKey(refs openapi3.SchemaRefs) string {
+	keys := make([]string, len(refs))
+	for i, ref := range refs {
+		if ref.Ref != "" {
+			keys[i] = ref.Ref
+		} else {
+			keys[i] = fmt.Sprintf("%v", ref.Value)
+		}
+	}
+
+	// Sort to ensure order-independent comparison
+	sortedKeys := make([]string, len(keys))
+	copy(sortedKeys, keys)
+	for i := 0; i < len(sortedKeys)-1; i++ {
+		for j := i + 1; j < len(sortedKeys); j++ {
+			if sortedKeys[i] > sortedKeys[j] {
+				sortedKeys[i], sortedKeys[j] = sortedKeys[j], sortedKeys[i]
+			}
+		}
+	}
+
+	return strings.Join(sortedKeys, "|")
+}
+
 func resolveAnyOf(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
 	refs, err := resolveCombinations(state, collection.AnyOf)
 	schema.AnyOf = refs
@@ -1063,6 +1111,13 @@ func resolveCombinations(state *state, collection []openapi3.SchemaRefs) (openap
 	}
 
 	// there is only one group of schemas, no need for calculating combinations.
+	if len(groups) == 1 {
+		return groups[0], nil
+	}
+
+	// deduplicate equivalent groups to avoid unnecessary cartesian product expansion
+	// e.g., two identical oneOf: [A, B] should not produce [A,A], [A,B], [B,A], [B,B]
+	groups = deduplicateSchemaRefsGroups(groups)
 	if len(groups) == 1 {
 		return groups[0], nil
 	}
@@ -1105,8 +1160,8 @@ func findIntersection(arrays ...[]string) []string {
 	return intersection
 }
 
-func resolveDefault(collection *SchemaCollection) (interface{}, error) {
-	values := make([]interface{}, 0)
+func resolveDefault(collection *SchemaCollection) (any, error) {
+	values := make([]any, 0)
 	for _, v := range collection.Default {
 		if v != nil {
 			values = append(values, v)

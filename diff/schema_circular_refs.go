@@ -2,7 +2,6 @@ package diff
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 type circularRefStatus int
@@ -13,15 +12,15 @@ const (
 	circularRefStatusNoDiff
 )
 
-func getCircularRefsDiff(visited1, visited2 utils.VisitedRefs, schema1, schema2 *openapi3.SchemaRef) circularRefStatus {
+func getCircularRefsDiff(visited1, visited2 map[string]struct{}, schema1, schema2 *openapi3.SchemaRef) circularRefStatus {
 
 	if schema1 == nil || schema2 == nil ||
 		schema1.Value == nil || schema2.Value == nil {
 		return circularRefStatusNone
 	}
 
-	circular1 := visited1.IsVisited(schema1.Ref)
-	circular2 := visited2.IsVisited(schema2.Ref)
+	_, circular1 := visited1[schema1.Ref]
+	_, circular2 := visited2[schema2.Ref]
 
 	// neither are circular
 	if !circular1 && !circular2 {

@@ -4,14 +4,13 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // LinksDiff describes the changes between a pair of sets of link objects: https://swagger.io/specification/#link-object
 type LinksDiff struct {
-	Added    utils.StringList `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  utils.StringList `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedLinks    `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string      `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string      `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedLinks `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -30,8 +29,8 @@ type ModifiedLinks map[string]*LinkDiff
 
 func newLinksDiff() *LinksDiff {
 	return &LinksDiff{
-		Added:    utils.StringList{},
-		Deleted:  utils.StringList{},
+		Added:    []string{},
+		Deleted:  []string{},
 		Modified: ModifiedLinks{},
 	}
 }

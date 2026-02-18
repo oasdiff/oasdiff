@@ -5,11 +5,9 @@ LINKER_FLAGS=-s -w -X github.com/oasdiff/oasdiff/build.Version=${VERSION}
 GOLANGCILINT_VERSION=v1.52.2
 
 .PHONY: test
-test: ## Run tests
+test: doc-breaking-changes localize ## Run tests
 	@echo "==> Running tests..."
 	go test ./...
-	@echo "==> Updating breaking changes documentation..."
-	make doc-breaking-changes
 
 .PHONY: coverage
 coverage: ## Run tests with coverage
@@ -51,6 +49,7 @@ lint: ## Run linter
 .PHONY: localize
 localize: ## Compile localized changelog messages
 	@echo "==> Compiling localized changelog messages..."
+	go install github.com/m1/go-localize@latest
 	go-localize -input checker/localizations_src -output checker/localizations 
 	go fmt ./checker/localizations
 

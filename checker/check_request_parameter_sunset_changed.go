@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"slices"
 	"time"
 
 	"cloud.google.com/go/civil"
@@ -45,7 +46,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 						continue
 					}
 
-					if paramItem.ExtensionsDiff.Deleted.Contains(diff.SunsetExtension) {
+					if slices.Contains(paramItem.ExtensionsDiff.Deleted, diff.SunsetExtension) {
 						result = append(result, NewApiChange(
 							RequestParameterSunsetDeletedId,
 							config,

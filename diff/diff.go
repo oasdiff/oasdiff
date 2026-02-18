@@ -219,7 +219,7 @@ func sinceDateFrom(pathItem openapi3.PathItem, operation openapi3.Operation) (ci
 	return since, nil
 }
 
-func getSinceDate(extensions map[string]interface{}) (civil.Date, bool, error) {
+func getSinceDate(extensions map[string]any) (civil.Date, bool, error) {
 	var since string
 	since, ok := extensions[SinceDateExtension].(string)
 	if !ok {

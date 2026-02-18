@@ -14,6 +14,7 @@ type Config struct {
 	PathStripPrefixBase     string
 	PathStripPrefixRevision string
 	ExcludeElements         utils.StringSet
+	ExcludeExtensions       utils.StringSet
 	IncludePathParams       bool
 }
 
@@ -40,12 +41,18 @@ func GetExcludeDiffOptions() []string {
 // NewConfig returns a default configuration
 func NewConfig() *Config {
 	return &Config{
-		ExcludeElements: utils.StringSet{},
+		ExcludeElements:   utils.StringSet{},
+		ExcludeExtensions: utils.StringSet{},
 	}
 }
 
 func (config *Config) WithExcludeElements(excludeElements []string) *Config {
-	config.ExcludeElements = utils.StringList(excludeElements).ToStringSet()
+	config.ExcludeElements = utils.StringSetFromSlice(excludeElements)
+	return config
+}
+
+func (config *Config) WithExcludeExtensions(excludeExtensions []string) *Config {
+	config.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)
 	return config
 }
 
@@ -71,6 +78,11 @@ func (config *Config) IsExcludeSummary() bool {
 
 func (config *Config) IsExcludeExtensions() bool {
 	return config.ExcludeElements.Contains(ExcludeExtensionsOption)
+}
+
+// IsExcludedExtension checks if a specific extension name should be excluded from diff
+func (config *Config) IsExcludedExtension(name string) bool {
+	return config.ExcludeExtensions.Contains(name)
 }
 
 const (

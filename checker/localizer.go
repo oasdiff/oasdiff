@@ -6,7 +6,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker/localizations"
 )
 
-type Localizer func(key string, args ...interface{}) string
+type Localizer func(key string, args ...any) string
 
 func NewDefaultLocalizer() Localizer {
 	return NewLocalizer(localizations.LangDefault)
@@ -15,7 +15,7 @@ func NewDefaultLocalizer() Localizer {
 func NewLocalizer(locale string) Localizer {
 	locales := localizations.New(locale, localizations.LangDefault)
 
-	return func(originalKey string, args ...interface{}) string {
+	return func(originalKey string, args ...any) string {
 		key := "messages." + originalKey
 		pattern := locales.Get(key)
 

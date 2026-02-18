@@ -89,7 +89,7 @@ func GetSeverityLevels(source io.Reader) (map[string]Level, error) {
 
 	result := map[string]Level{}
 
-	validIds := utils.StringList(GetAllRuleIds()).ToStringSet()
+	validIds := utils.StringSetFromSlice(GetAllRuleIds())
 
 	scanner := bufio.NewScanner(source)
 
