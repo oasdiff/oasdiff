@@ -35,8 +35,8 @@ github.com/mailru/easyjson v0.9.0 h1:PrnmzHw7262yW8sTBwxi1PdJA3Iw/EKBa8psRf7d9a4
 github.com/mailru/easyjson v0.9.0/go.mod h1:1+xMtQp2MRNVL/V1bOzuP3aP8VNwRW55fQUto+XFtTU=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
-github.com/oasdiff/kin-openapi v0.0.0-20260217204057-9ec47b3e4f94 h1:FislPg2hGkRgT8H0Inm0W1C2P6sanlyXCFouOOa6wo8=
-github.com/oasdiff/kin-openapi v0.0.0-20260217204057-9ec47b3e4f94/go.mod h1:0EQRC2eBN9ejgHXaBXAZRsLDECCHA//lqdm759d4n1E=
+github.com/oasdiff/kin-openapi v0.0.0-20260218123137-ea052d6bec47 h1:IQ6/G5cBXnvUFikw03jCPGKqOrJszq0VbodMADmmqWM=
+github.com/oasdiff/kin-openapi v0.0.0-20260218123137-ea052d6bec47/go.mod h1:POCLgaMNo/FeGd2vl1KyDjKJcni+5+zsOAnW89fckJ4=
 github.com/oasdiff/yaml v0.0.0-20260217201108-4f1c3d02ddd4 h1:WM2g1YIFwlbz3xcGO/RtaT0LBykfe0Cd3seWa4jZELM=
 github.com/oasdiff/yaml v0.0.0-20260217201108-4f1c3d02ddd4/go.mod h1:ZTJR/EwUBsFK7J01Ybq7z/XCz8ioB4TMdr72QTeuqoY=
 github.com/oasdiff/yaml3 v0.0.0-20260217201013-8a620da6102a h1:so9gdCU1AyG+EFCCp6ORLut4MBi/wIh4J3jGrEjNZnI=
@@ -83,6 +83,8 @@ github.com/ugorji/go/codec v1.2.11 h1:BMaWp1Bb6fHwEtbplGBGJ498wD+LKlNSl25MjdZY4d
 github.com/ugorji/go/codec v1.2.11/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
 github.com/wI2L/jsondiff v0.7.0 h1:1lH1G37GhBPqCfp/lrs91rf/2j3DktX6qYAKZkLuCQQ=
 github.com/wI2L/jsondiff v0.7.0/go.mod h1:KAEIojdQq66oJiHhDyQez2x+sRit0vIzC9KeK0yizxM=
+github.com/woodsbury/decimal128 v1.3.0 h1:8pffMNWIlC0O5vbyHWFZAt5yWvWcrHA+3ovIIjVWss0=
+github.com/woodsbury/decimal128 v1.3.0/go.mod h1:C5UTmyTjW3JftjUFzOVhC20BEQa2a4ZKOB5I6Zjb+ds=
 github.com/yargevad/filepathx v1.0.0 h1:SYcT+N3tYGi+NvazubCNlvgIPbzAk7i7y2dwg3I5FYc=
 github.com/yargevad/filepathx v1.0.0/go.mod h1:BprfX/gpYNJHJfc35GjRRpVcwWXS89gGulUIU5tK3tA=
 github.com/yuin/goldmark v1.7.16 h1:n+CJdUxaFMiDUNnWC3dMWCIQJSkxH4uz3ZwQBkAlVNE=

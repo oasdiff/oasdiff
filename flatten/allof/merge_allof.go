@@ -210,17 +210,17 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.Default = base.Value.Default
 	result.Value.Discriminator = base.Value.Discriminator
 	if base.Value.MaxLength != nil {
-		result.Value.MaxLength = openapi3.Uint64Ptr(*base.Value.MaxLength)
+		result.Value.MaxLength = openapi3.Ptr(*base.Value.MaxLength)
 	}
 	result.Value.Pattern = base.Value.Pattern
 	result.Value.MinItems = base.Value.MinItems
 	if base.Value.MaxItems != nil {
-		result.Value.MaxItems = openapi3.Uint64Ptr(*base.Value.MaxItems)
+		result.Value.MaxItems = openapi3.Ptr(*base.Value.MaxItems)
 	}
 	result.Value.Required = base.Value.Required
 	result.Value.MinProps = base.Value.MinProps
 	if base.Value.MaxProps != nil {
-		result.Value.MaxProps = openapi3.Uint64Ptr(*base.Value.MaxProps)
+		result.Value.MaxProps = openapi3.Ptr(*base.Value.MaxProps)
 	}
 
 	// merge all fields of type SchemaRef
@@ -547,7 +547,7 @@ func resolveMultipleOf(schema *openapi3.Schema, collection *SchemaCollection) *o
 	for _, v := range uintValues {
 		lcmValue = lcm(lcmValue, v)
 	}
-	schema.MultipleOf = openapi3.Float64Ptr(float64(lcmValue) / factor)
+	schema.MultipleOf = openapi3.Ptr(float64(lcmValue) / factor)
 	return schema
 }
 
@@ -761,7 +761,7 @@ func findMinValue(values []*uint64) *uint64 {
 			min = num
 		}
 	}
-	return openapi3.Uint64Ptr(min)
+	return openapi3.Ptr(min)
 }
 
 func resolveType(schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {

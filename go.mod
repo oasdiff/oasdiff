@@ -31,6 +31,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
+	github.com/woodsbury/decimal128 v1.3.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -50,4 +51,4 @@ require (
 	github.com/wI2L/jsondiff v0.7.0
 )
 
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260217204057-9ec47b3e4f94
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260218123137-ea052d6bec47
