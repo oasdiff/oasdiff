@@ -77,6 +77,46 @@ func operationSources(operationsSources *diff.OperationsSourcesMap, base, revisi
 	return baseSource, revisionSource
 }
 
+// operationSource returns the source location for a single operation.
+// Returns nil when the operation is nil or has no origin data.
+func operationSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation) *Source {
+	if op == nil || op.Origin == nil {
+		return nil
+	}
+	return NewSourceFromOrigin(operationsSources, op, op.Origin)
+}
+
+// NewSourceFromSequenceItem returns the source location of a specific item
+// in a sequence-valued field (e.g. type: [string, null]).
+// It looks up the item by value in Origin.Sequences[field].
+// If multiple items share the same value, it returns the first match.
+func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string, value string) *Source {
+	if origin == nil || origin.Sequences == nil {
+		return &Source{File: (*operationsSources)[operation]}
+	}
+
+	items, ok := origin.Sequences[field]
+	if !ok {
+		return &Source{File: (*operationsSources)[operation]}
+	}
+
+	for _, item := range items {
+		if item.Name == value {
+			file := item.File
+			if file == "" {
+				file = (*operationsSources)[operation]
+			}
+			return &Source{
+				File:   file,
+				Line:   item.Line,
+				Column: item.Column,
+			}
+		}
+	}
+
+	return &Source{File: (*operationsSources)[operation]}
+}
+
 func NewEmptySource() *Source {
 	return nil
 }
