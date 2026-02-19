@@ -54,6 +54,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 		}
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			op := pathItem.Revision.GetOperation(operation)
+			baseSource, revisionSource := operationSources(operationsSources, operationDiff.Base, operationDiff.Revision)
 
 			if operationDiff.DeprecatedDiff == nil {
 				continue
@@ -70,7 +71,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				).WithDetails(formatDeprecationDetails(op.Extensions)))
+				).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
 				continue
 			}
 
@@ -86,7 +87,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 			if !ok {
 				// if deprecation policy is defined and sunset is missing, it's a breaking change
 				if deprecationDays > 0 {
-					result = append(result, getAPIDeprecatedSunsetMissing(newOpInfo(config, op, operationsSources, operation, path)))
+					result = append(result, getAPIDeprecatedSunsetMissing(newOpInfo(config, op, operationsSources, operation, path)).WithSources(baseSource, revisionSource))
 				} else {
 					// no policy, report deprecation without sunset as INFO
 					result = append(result, NewApiChange(
@@ -98,7 +99,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 						op,
 						operation,
 						path,
-					).WithDetails(formatDeprecationDetails(op.Extensions)))
+					).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
 				}
 				continue
 			}
@@ -114,7 +115,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 				continue
 			}
 
@@ -130,7 +131,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 				continue
 			}
 
@@ -144,7 +145,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 				op,
 				operation,
 				path,
-			).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
+			).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
 		}
 	}
 

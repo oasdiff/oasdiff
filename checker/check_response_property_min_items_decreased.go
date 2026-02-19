@@ -22,6 +22,7 @@ func ResponsePropertyMinItemsDecreasedCheck(diffReport *diff.Diff, operationsSou
 			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff == nil ||
 					responseDiff.ContentDiff == nil ||
@@ -45,7 +46,7 @@ func ResponsePropertyMinItemsDecreasedCheck(diffReport *diff.Diff, operationsSou
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						}
 					}
@@ -78,7 +79,7 @@ func ResponsePropertyMinItemsDecreasedCheck(diffReport *diff.Diff, operationsSou
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

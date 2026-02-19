@@ -31,6 +31,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 			}
 
 			op := operationItem.Revision
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 
 			stability, err := getStabilityLevel(op.Extensions)
 			if err != nil {
@@ -70,7 +71,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -88,7 +89,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 										op,
 										operation,
 										path,
-									).WithDetails(mediaTypeDetails))
+									).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 								} else {
 									// no policy, report deprecation without sunset as INFO
 									result = append(result, NewApiChange(
@@ -100,7 +101,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 										op,
 										operation,
 										path,
-									).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
+									).WithSources(baseSource, revisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 								}
 								return
 							}
@@ -116,7 +117,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -132,7 +133,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -146,7 +147,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								op,
 								operation,
 								path,
-							).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
+							).WithSources(baseSource, revisionSource).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
 						})
 				}
 			}

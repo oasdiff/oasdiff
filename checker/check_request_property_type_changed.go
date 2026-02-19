@@ -27,6 +27,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 				if mediaTypeDiff.SchemaDiff == nil {
@@ -60,7 +61,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 						operationItem.Revision,
 						operation,
 						path,
-					).WithDetails(mediaTypeDetails))
+					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 				}
 
 				CheckModifiedPropertiesDiff(
@@ -99,7 +100,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

@@ -24,6 +24,7 @@ type ApiChange struct {
 	Path        string
 	Source      *load.Source
 
+	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
 	SourceLineEnd   int
@@ -47,6 +48,13 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 			Attributes: getAttributes(config, operation),
 		},
 	}
+}
+
+// WithSources returns a copy of the ApiChange with BaseSource and RevisionSource populated
+func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
+	a.BaseSource = baseSource
+	a.RevisionSource = revisionSource
+	return a
 }
 
 // WithDetails returns a copy of the ApiChange with Details set

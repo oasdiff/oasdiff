@@ -35,6 +35,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responsesDiff := range operationItem.ResponsesDiff.Modified {
 				if responsesDiff.ContentDiff == nil || responsesDiff.ContentDiff.MediaTypeModified == nil {
 					continue
@@ -53,7 +54,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 					if mediaTypeDiff.SchemaDiff == nil {
 						continue

@@ -27,6 +27,8 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
+
 			for _, tag := range operationItem.TagsDiff.Deleted {
 				result = append(result, NewApiChange(
 					APITagRemovedId,
@@ -37,7 +39,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					op,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 
 			for _, tag := range operationItem.TagsDiff.Added {
@@ -50,7 +52,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					op,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 		}
 	}

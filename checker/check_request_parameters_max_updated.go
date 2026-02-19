@@ -22,6 +22,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -51,7 +52,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

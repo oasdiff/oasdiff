@@ -62,6 +62,29 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 		}}, errs)
 }
 
+// CL: adding a new required request property with source tracking
+func TestRequiredRequestPropertyAdded_WithSources(t *testing.T) {
+	enableOriginTracking(t)
+	s1, err := open("../data/checker/request_property_added_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_added_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.NewRequiredRequestPropertyId, errs[0].GetId())
+
+	// Verify source tracking for property-diff callback checkers
+	require.NotEmpty(t, errs[0].GetBaseSource())
+	require.NotEmpty(t, errs[0].GetRevisionSource())
+	require.Equal(t, "../data/checker/request_property_added_base.yaml", errs[0].GetBaseSource().File)
+	require.Equal(t, "../data/checker/request_property_added_revision.yaml", errs[0].GetRevisionSource().File)
+	require.NotZero(t, errs[0].GetBaseSource().Line)
+	require.NotZero(t, errs[0].GetRevisionSource().Line)
+}
+
 // CL: adding a new optional request property
 func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_added_base.yaml")

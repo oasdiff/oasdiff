@@ -39,6 +39,16 @@ func NewRequestNonPathDefaultParameterCheck(diffReport *diff.Diff, operationsSou
 
 					// TODO: if base operation had this param individually (not through the path) - continue
 
+					var baseSource, revisionSource *Source
+					baseOp := pathItem.Base.GetOperation(operation)
+					hasOrigin := (baseOp != nil && baseOp.Origin != nil) || operationItem.Origin != nil
+					if hasOrigin {
+						if baseOp != nil {
+							baseSource = NewSourceFromOrigin(operationsSources, baseOp, baseOp.Origin)
+						}
+						revisionSource = NewSourceFromOrigin(operationsSources, operationItem, operationItem.Origin)
+					}
+
 					result = append(result, NewApiChange(
 						id,
 						config,
@@ -48,7 +58,7 @@ func NewRequestNonPathDefaultParameterCheck(diffReport *diff.Diff, operationsSou
 						operationItem,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

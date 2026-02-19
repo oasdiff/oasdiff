@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -30,6 +31,29 @@ func ResponseNonSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	return responseStatusUpdated(diffReport, operationsSources, config, notSuccess, ResponseNonSuccessStatusRemovedId)
 }
 
+// responseSource returns a Source for a specific response status code within an operation.
+// Falls back to operation-level origin if the response has no origin data.
+func responseSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, responseStatus string) *Source {
+	if op == nil {
+		return nil
+	}
+
+	if op.Responses != nil {
+		if responseRef := op.Responses.Value(responseStatus); responseRef != nil {
+			if responseRef.Value != nil && responseRef.Value.Origin != nil {
+				return NewSourceFromOrigin(operationsSources, op, responseRef.Value.Origin)
+			}
+		}
+	}
+
+	// Fall back to operation-level origin
+	if op.Origin != nil {
+		return NewSourceFromOrigin(operationsSources, op, op.Origin)
+	}
+
+	return nil
+}
+
 func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, filter func(int) bool, id string) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
@@ -53,6 +77,8 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 				}
 
 				if filter(status) {
+					baseSource := responseSource(operationsSources, operationItem.Base, responseStatus)
+					revisionSource := operationSource(operationsSources, operationItem.Revision)
 					result = append(result, NewApiChange(
 						id,
 						config,
@@ -62,7 +88,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 
@@ -74,6 +100,8 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 				}
 
 				if filter(status) {
+					baseSource := operationSource(operationsSources, operationItem.Base)
+					revisionSource := responseSource(operationsSources, operationItem.Revision, responseStatus)
 					result = append(result, NewApiChange(
 						addedId,
 						config,
@@ -83,7 +111,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

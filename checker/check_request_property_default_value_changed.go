@@ -29,6 +29,7 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
@@ -42,7 +43,7 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 						operationItem.Revision,
 						operation,
 						path,
-					).WithDetails(mediaTypeDetails))
+					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 				}
 				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
 					defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff

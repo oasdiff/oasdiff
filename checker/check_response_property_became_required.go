@@ -24,6 +24,7 @@ func ResponsePropertyBecameRequiredCheck(diffReport *diff.Diff, operationsSource
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.ContentDiff == nil ||
 					responseDiff.ContentDiff.MediaTypeModified == nil {
@@ -61,7 +62,7 @@ func ResponsePropertyBecameRequiredCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -95,7 +96,7 @@ func ResponsePropertyBecameRequiredCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

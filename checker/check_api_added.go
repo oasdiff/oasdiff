@@ -25,6 +25,9 @@ func APIAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSour
 			operation,
 			method,
 			path,
+		).WithSources(
+			NewEmptySource(),
+			NewSourceFromOrigin(operationsSources, operation, operation.Origin),
 		))
 	}
 

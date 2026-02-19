@@ -30,6 +30,7 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 
 			mediaTypeChanges := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for _, mediaTypeItem := range mediaTypeChanges {
 				if mediaTypeItem.SchemaDiff == nil {
 					continue
@@ -49,7 +50,7 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

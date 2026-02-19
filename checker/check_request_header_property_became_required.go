@@ -23,6 +23,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 
 				if paramLocation != "header" {
@@ -57,7 +58,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						}
 					}
 
@@ -84,7 +85,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithSources(baseSource, revisionSource))
 							}
 						})
 				}

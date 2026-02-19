@@ -23,6 +23,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 
 				if paramLocation != "header" {
@@ -44,7 +45,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 
 					CheckModifiedPropertiesDiff(
@@ -64,7 +65,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						})
 				}
 			}

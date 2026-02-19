@@ -37,6 +37,7 @@ func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
@@ -50,7 +51,7 @@ func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						operationItem.Revision,
 						operation,
 						path,
-					).WithDetails(mediaTypeDetails))
+					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 				}
 				if mediaTypeDiff.SchemaDiff == nil {
 					continue

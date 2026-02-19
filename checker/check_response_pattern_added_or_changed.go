@@ -25,6 +25,7 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.ContentDiff == nil ||
 					responseDiff.ContentDiff.MediaTypeModified == nil {
@@ -67,7 +68,7 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

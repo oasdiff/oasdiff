@@ -27,6 +27,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responsesDiff := range operationItem.ResponsesDiff.Modified {
 				if responsesDiff.ContentDiff == nil || responsesDiff.ContentDiff.MediaTypeModified == nil {
 					continue
@@ -54,7 +55,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Deleted) > 0 {
@@ -67,7 +68,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					CheckModifiedPropertiesDiff(
@@ -94,7 +95,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 
 							if len(propertyDiff.OneOfDiff.Deleted) > 0 {
@@ -107,7 +108,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

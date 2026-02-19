@@ -44,6 +44,7 @@ func checkPropertyListOfTypesChange(propertyPath string, propertyName string, pr
 		}
 	}
 
+	baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	result = append(result, NewApiChange(
 		messageId,
 		config,
@@ -53,7 +54,7 @@ func checkPropertyListOfTypesChange(propertyPath string, propertyName string, pr
 		operationItem.Revision,
 		operation,
 		path,
-	))
+	).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -95,6 +96,7 @@ func checkBodyListOfTypesChange(schemaDiff *diff.SchemaDiff, mediaType string, r
 		}
 	}
 
+	baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	result = append(result, NewApiChange(
 		messageId,
 		config,
@@ -104,7 +106,7 @@ func checkBodyListOfTypesChange(schemaDiff *diff.SchemaDiff, mediaType string, r
 		operationItem.Revision,
 		operation,
 		path,
-	))
+	).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -134,6 +136,7 @@ func checkParameterListOfTypesChange(paramDiff *diff.ParameterDiff, param *opena
 		args = []any{param.In, param.Name, joinTypes(listDiff.Added)}
 	}
 
+	baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	result = append(result, NewApiChange(
 		messageId,
 		config,
@@ -143,7 +146,7 @@ func checkParameterListOfTypesChange(paramDiff *diff.ParameterDiff, param *opena
 		operationItem.Revision,
 		operation,
 		path,
-	))
+	).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -173,6 +176,7 @@ func checkParameterPropertyListOfTypesChange(propertyPath string, propertyName s
 		args = []any{propertyFullName(propertyPath, propertyName), param.In, param.Name, joinTypes(listDiff.Added)}
 	}
 
+	baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	result = append(result, NewApiChange(
 		messageId,
 		config,
@@ -182,7 +186,7 @@ func checkParameterPropertyListOfTypesChange(propertyPath string, propertyName s
 		operationItem.Revision,
 		operation,
 		path,
-	))
+	).WithSources(baseSource, revisionSource))
 
 	return result
 }

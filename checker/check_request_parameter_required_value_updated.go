@@ -25,6 +25,7 @@ func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operations
 			if operationItem.ParametersDiff.Modified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
 					requiredDiff := paramItem.RequiredDiff
@@ -47,7 +48,7 @@ func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operations
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

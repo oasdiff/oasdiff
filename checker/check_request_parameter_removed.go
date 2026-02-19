@@ -29,6 +29,8 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
+
 			opInfo := newOpInfo(
 				config,
 				operationItem.Revision,
@@ -39,8 +41,8 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Deleted {
 				for _, paramName := range paramItems {
-					if change := checkParameterRemoval(opInfo, operationItem.Base.Parameters.GetByInAndName(paramLocation, paramName)); change != nil {
-						result = append(result, change)
+					if change, ok := checkParameterRemoval(opInfo, operationItem.Base.Parameters.GetByInAndName(paramLocation, paramName)); ok {
+						result = append(result, change.WithSources(baseSource, revisionSource))
 					}
 				}
 			}
@@ -49,7 +51,7 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 	return result
 }
 
-func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) Change {
+func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) (ApiChange, bool) {
 
 	if !param.Deprecated {
 		return NewApiChange(
@@ -61,7 +63,7 @@ func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
-		)
+		), true
 	}
 
 	sunset, ok := getSunset(param.Extensions)
@@ -75,12 +77,12 @@ func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
-		)
+		), true
 	}
 
 	date, err := getSunsetDate(sunset)
 	if err != nil {
-		return getRequestParameterSunsetParse(opInfo, param, err)
+		return getRequestParameterSunsetParse(opInfo, param, err), true
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {
@@ -93,12 +95,12 @@ func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) Change {
 			opInfo.operation,
 			opInfo.method,
 			opInfo.path,
-		)
+		), true
 	}
-	return nil
+	return ApiChange{}, false
 }
 
-func getRequestParameterSunsetParse(opInfo opInfo, param *openapi3.Parameter, err error) Change {
+func getRequestParameterSunsetParse(opInfo opInfo, param *openapi3.Parameter, err error) ApiChange {
 	return NewApiChange(
 		RequestParameterSunsetParseId,
 		opInfo.config,

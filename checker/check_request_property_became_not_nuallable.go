@@ -27,6 +27,7 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
@@ -45,7 +46,7 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					} else if mediaTypeDiff.SchemaDiff.NullableDiff.To == true {
 						result = append(result, NewApiChange(
 							RequestBodyBecomeNullableId,
@@ -56,7 +57,7 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 				}
 
@@ -80,7 +81,7 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						} else if nullableDiff.To == true {
 							result = append(result, NewApiChange(
 								RequestPropertyBecomeNullableId,
@@ -91,7 +92,7 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 
 					})

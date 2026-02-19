@@ -27,6 +27,7 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.ContentDiff == nil ||
 					responseDiff.ContentDiff.MediaTypeModified == nil {
@@ -46,7 +47,7 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
 						defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff

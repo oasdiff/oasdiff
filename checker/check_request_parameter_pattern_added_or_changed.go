@@ -29,6 +29,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 			if operationItem.ParametersDiff.Modified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
 					if paramItem.SchemaDiff == nil {
@@ -49,7 +50,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					} else if patternDiff.To == "" {
 						result = append(result, NewApiChange(
 							RequestParameterPatternRemovedId,
@@ -60,7 +61,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					} else {
 						id := RequestParameterPatternChangedId
 						comment := PatternChangedCommentId
@@ -79,7 +80,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 				}
 			}

@@ -14,6 +14,12 @@ type Change interface {
 	GetPath() string
 	GetSource() string
 	GetAttributes() map[string]any
+
+	// Location tracking methods
+	GetBaseSource() *Source
+	GetRevisionSource() *Source
+
+	// DEPRECATED: Will be removed after GitHubActionsFormatter migration
 	GetSourceFile() string
 	GetSourceLine() int
 	GetSourceLineEnd() int
@@ -25,7 +31,19 @@ type Change interface {
 }
 
 type CommonChange struct {
+	// Location information for correlation UI
+	BaseSource     *Source // Location in base (original) file
+	RevisionSource *Source // Location in revision (modified) file
+
 	Attributes map[string]any
+}
+
+func (c CommonChange) GetBaseSource() *Source {
+	return c.BaseSource
+}
+
+func (c CommonChange) GetRevisionSource() *Source {
+	return c.RevisionSource
 }
 
 func (c CommonChange) GetAttributes() map[string]any {

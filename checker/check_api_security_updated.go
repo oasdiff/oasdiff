@@ -78,6 +78,8 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 				continue
 			}
 
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
+
 			for _, addedSecurity := range operationItem.SecurityDiff.Added {
 				if addedSecurity == "" {
 					continue
@@ -92,7 +94,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 
 			for _, deletedSecurity := range operationItem.SecurityDiff.Deleted {
@@ -109,7 +111,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, revisionSource))
 			}
 
 			for _, updatedSecurity := range operationItem.SecurityDiff.Modified {
@@ -127,7 +129,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 					for _, deletedScope := range updatedSecuritySchemeScopes.Deleted {
 						result = append(result, NewApiChange(
@@ -139,7 +141,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 				}
 			}

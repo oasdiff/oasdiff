@@ -24,6 +24,7 @@ func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources 
 			if operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			baseSource, revisionSource := operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.HeadersDiff == nil {
 					continue
@@ -47,7 +48,7 @@ func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources 
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}
