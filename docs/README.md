@@ -54,6 +54,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 
 ## Features
 - [OpenAPI 3.1 support](OPENAPI-31.md) (beta)
+- [Source location tracking](SOURCE-LOCATOR.md) for inline PR annotations (beta)
 - Detect [breaking changes](BREAKING-CHANGES.md)
 - Display a user-friendly [changelog](BREAKING-CHANGES.md) of all important API changes
 - Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
@@ -97,10 +98,9 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 ## Roadmap
 - **OpenAPI 3.1**  
   See https://github.com/oasdiff/oasdiff/issues/52  
-- **Inline visualization of breaking changes in the OpenAPI document**  
-  I am working on the ability to correlate breaking changes and changelog messages with the underlying edits in the original YAML specification.  
-  This will allow users to review changes in their original context, investigate their impact, and decide how to handle them.  
-  I am considering offering this capability under a separate license and would appreciate feedback from the community.
+- **Inline visualization of breaking changes in the OpenAPI document**
+  [Source location tracking](SOURCE-LOCATOR.md) is now available in beta, enabling inline annotations on GitHub PRs that point to the exact lines where breaking changes occurred.
+  See the [demo](https://github.com/oasdiff/github-demo) and [tracking issue](https://github.com/oasdiff/oasdiff/issues/574) for details.
   
 👉 [Please help prioritize the roadmap](https://github.com/oasdiff/oasdiff/discussions/631).
 
