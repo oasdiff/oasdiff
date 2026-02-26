@@ -124,7 +124,7 @@ Removals appear in the Actions log (no inline annotation):
 
 ## Demo
 
-See [oasdiff/github-demo](https://github.com/oasdiff/github-demo) for a working example with inline PR annotations.
+See [oasdiff/github-demo](https://github.com/oasdiff/github-demo/pull/1/changes) for a working example with inline PR annotations.
 
 ## Provide feedback
 
