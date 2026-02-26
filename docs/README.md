@@ -96,13 +96,8 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - checks: displays the different checks that oasdiff runs to detect changes
 
 ## Roadmap
-- **[OpenAPI 3.1](OPENAPI-31.md)**
-  See https://github.com/oasdiff/oasdiff/issues/52
-- **[Inline visualization of breaking changes in the OpenAPI document](SOURCE-LOCATOR.md)**
-  Source location tracking is now available in beta, enabling inline annotations on GitHub PRs that point to the exact lines where breaking changes occurred.
-  See the [demo](https://github.com/oasdiff/github-demo) and [tracking issue](https://github.com/oasdiff/oasdiff/issues/574) for details.
-  
-👉 [Please help prioritize the roadmap](https://github.com/oasdiff/oasdiff/discussions/631).
+- **[OpenAPI 3.1](OPENAPI-31.md)** (beta)
+- **[Source location tracking](SOURCE-LOCATOR.md)** (beta)
 
 ## Credits
 This project relies on the excellent implementation of OpenAPI 3.0 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
