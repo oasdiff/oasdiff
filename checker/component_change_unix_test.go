@@ -17,9 +17,7 @@ func TestComponentChange_SetPipedOutput_NotPiped_Unix(t *testing.T) {
 }
 
 func TestComponentChange_SetPipedOutput_NilPiped_Unix(t *testing.T) {
-	// Simulate piped output to ensure deterministic behavior
-	piped := true
-	save := checker.SetPipedOutput(&piped)
+	save := checker.SetPipedOutput(nil)
 	defer checker.SetPipedOutput(save)
 	require.Equal(t, "error\t[change_id] \t\n\tin components/component\n\t\tThis is a breaking change.\n\t\tcomment", componentChange.MultiLineError(MockLocalizer, checker.ColorAuto))
 }

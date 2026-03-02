@@ -24,15 +24,14 @@ api-invalid-stability-level: "fallo al parsear el nivel de estabilidad: %v"
 api-deprecated-sunset-missing: "fecha de expiración faltante para la API deprecada"
 api-sunset-date-too-small: "fecha de expiración %s es demasiado pequeña, debe ser al menos %s días desde ahora"
 endpoint-added: endpoint agregado
-endpoint-deprecated: endpoint deprecado
 endpoint-deprecated-with-sunset: "endpoint deprecado con fecha de expiración %s"
 endpoint-reactivated: endpoint reactivado
-request-property-deprecated: "propiedad de solicitud %s deprecada%.0s"
+request-property-deprecated-with-sunset: "propiedad de solicitud %s deprecada con fecha de expiración %s"
 request-property-deprecated-sunset-missing: "propiedad de solicitud %s deprecada sin fecha de expiración"
 request-property-deprecated-sunset-invalid: "propiedad de solicitud %s deprecada con fecha de expiración inválida: %s"
 request-property-reactivated: "propiedad de solicitud %s reactivada"
 request-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de solicitud %s es demasiado pequeña, debe ser al menos %s días desde ahora"
-response-property-deprecated: "propiedad de respuesta %s deprecada%.0s"
+response-property-deprecated-with-sunset: "propiedad de respuesta %s deprecada con fecha de expiración %s"
 response-property-deprecated-sunset-missing: "propiedad de respuesta %s deprecada sin fecha de expiración"
 response-property-deprecated-sunset-invalid: "propiedad de respuesta %s deprecada con fecha de expiración inválida: %s"
 response-property-reactivated: "propiedad de respuesta %s reactivada"

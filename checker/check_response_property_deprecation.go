@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ResponsePropertyDeprecatedId              = "response-property-deprecated"
+	ResponsePropertyDeprecatedWithSunsetId    = "response-property-deprecated-with-sunset"
 	ResponsePropertyDeprecatedSunsetMissingId = "response-property-deprecated-sunset-missing"
 	ResponsePropertyDeprecatedInvalidId       = "response-property-deprecated-sunset-invalid"
 	ResponsePropertyReactivatedId             = "response-property-reactivated"
@@ -92,7 +92,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								} else {
 									// no policy, report deprecation without sunset as INFO
 									result = append(result, NewApiChange(
-										ResponsePropertyDeprecatedId,
+										ResponsePropertyDeprecatedWithSunsetId,
 										config,
 										[]any{propName, ""},
 										"",
@@ -138,7 +138,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 
 							// not breaking changes
 							result = append(result, NewApiChange(
-								ResponsePropertyDeprecatedId,
+								ResponsePropertyDeprecatedWithSunsetId,
 								config,
 								[]any{propName, date},
 								"",
@@ -146,7 +146,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								op,
 								operation,
 								path,
-							).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
+							).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 						})
 				}
 			}
