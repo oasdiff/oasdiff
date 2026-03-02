@@ -24,6 +24,7 @@ api-invalid-stability-level: "falha ao analisar o nível de estabilidade: %v"
 api-deprecated-sunset-missing: "data de expiração ausente para api depreciada"
 api-sunset-date-too-small: "data de expiração %s muito próxima, deve ser pelo menos %s dias a partir de agora"
 endpoint-added: endpoint adicionado
+endpoint-deprecated: endpoint depreciado
 endpoint-deprecated-with-sunset: "endpoint depreciado com data de expiração %s"
 endpoint-reactivated: endpoint reativado
 request-property-deprecated-with-sunset: "propriedade de requisição %s depreciada com data de expiração %s"

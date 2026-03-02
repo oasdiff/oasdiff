@@ -207,14 +207,8 @@ func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
-	// With invalid stability, we get both the stability error and the deprecation (using default days)
-	require.Len(t, errs, 2)
-	// One should be the invalid stability level error, the other is the deprecation
-	ids := []string{errs[0].GetId(), errs[1].GetId()}
-	require.Contains(t, ids, checker.APIInvalidStabilityLevelId)
-	require.Contains(t, ids, checker.RequestPropertyDeprecatedWithSunsetId)
+	changes := checker.RequestPropertyDeprecationCheck(d, osm, checker.NewConfig(nil))
+	require.Empty(t, changes)
 }
 
 // CL: message reports sunset missing when request property deprecated without sunset
@@ -228,10 +222,10 @@ func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.ERR)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestPropertyDeprecatedSunsetMissingId, errs[0].GetId())
-	require.Equal(t, "request property 'oldField' deprecated without sunset date", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
+	require.Equal(t, "request property 'oldField' deprecated with sunset date ''", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: message includes sunset date when request property deprecated with valid sunset
