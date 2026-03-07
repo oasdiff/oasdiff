@@ -81,7 +81,6 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Run from Docker](DOCKER.md)
 - [Integrate in GitHub](https://github.com/oasdiff/github-demo/tree/main)
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action)
-- [Run as a Service](OASDIFF-SERVICE.md)
 - [OpenAPI Sync: Get notified when an API provider breaks the API](https://github.com/oasdiff/sync/)
 - [Embed in your go program](GO.md)
 
