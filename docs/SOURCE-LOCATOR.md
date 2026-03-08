@@ -126,6 +126,8 @@ Removals appear in the Actions log (no inline annotation):
 
 See [oasdiff/github-demo](https://github.com/oasdiff/github-demo/pull/1/changes) for a working example with inline PR annotations.
 
+**Try it visually:** [oasdiff.com/diff](https://oasdiff.com/diff) shows a side-by-side comparison of any two OpenAPI specs in your browser — no installation required.
+
 ## Provide feedback
 
 We need your feedback to move this to general availability.
