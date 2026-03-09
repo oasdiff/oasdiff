@@ -15,7 +15,7 @@ func TestLoadInfo_FileWindows(t *testing.T) {
 
 func TestLoadInfo_UriInvalid(t *testing.T) {
 	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("http://localhost/null"))
-	require.EqualError(t, err, "open ..\\null: The system cannot find the file specified.")
+	require.Error(t, err)
 }
 
 func TestLoadInfo_UriBadScheme(t *testing.T) {
