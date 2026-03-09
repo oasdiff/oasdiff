@@ -1,8 +1,12 @@
 package load
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -15,9 +19,29 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 		return loader.LoadFromStdin()
 	case SourceTypeURL:
 		return loader.LoadFromURI(source.Uri)
+	case SourceTypeGitRevision:
+		return loadFromGitRevision(loader, source.Path)
 	default:
 		return loader.LoadFromFile(source.Path)
 	}
+}
+
+// loadFromGitRevision loads an OpenAPI spec from a git revision reference (e.g. "origin/main:openapi.yaml").
+// It runs "git show <ref>" to obtain the content and loads it via LoadFromDataWithPath so that
+// relative $refs are resolved against the spec's path.
+func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, error) {
+	out, err := exec.Command("git", "show", gitRef).Output()
+	if err != nil {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
+			return nil, fmt.Errorf("failed to load spec from git revision %q: %s", gitRef, strings.TrimSpace(string(exitErr.Stderr)))
+		}
+		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
+	}
+
+	specPath := gitRef[strings.Index(gitRef, ":")+1:]
+	u := &url.URL{Path: filepath.ToSlash(specPath)}
+	return loader.LoadFromDataWithPath(out, u)
 }
 
 func getURL(rawURL string) (*url.URL, error) {

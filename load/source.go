@@ -3,6 +3,7 @@ package load
 import (
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 type SourceType int
@@ -11,6 +12,7 @@ const (
 	SourceTypeStdin SourceType = iota
 	SourceTypeURL
 	SourceTypeFile
+	SourceTypeGitRevision
 )
 
 type Source struct {
@@ -41,6 +43,13 @@ func NewSource(path string) *Source {
 		}
 	}
 
+	if isGitRevision(path) {
+		return &Source{
+			Path: path,
+			Type: SourceTypeGitRevision,
+		}
+	}
+
 	uri, err := getURL(path)
 	if err == nil {
 		return &Source{
@@ -54,6 +63,20 @@ func NewSource(path string) *Source {
 		Path: path,
 		Type: SourceTypeFile,
 	}
+}
+
+// isGitRevision returns true if path looks like a git revision spec (e.g. "origin/main:openapi.yaml" or "HEAD~1:spec.yaml").
+// It excludes URLs (contain "://") and Windows drive letters (single uppercase letter before ":").
+func isGitRevision(path string) bool {
+	idx := strings.Index(path, ":")
+	if idx < 0 || strings.Contains(path, "://") {
+		return false
+	}
+	// Single uppercase letter before colon = Windows drive letter (C:, D:, …)
+	if idx == 1 && path[0] >= 'A' && path[0] <= 'Z' {
+		return false
+	}
+	return true
 }
 
 func (source *Source) String() string {
@@ -73,4 +96,8 @@ func (source *Source) IsStdin() bool {
 
 func (source *Source) IsFile() bool {
 	return source.Type == SourceTypeFile
+}
+
+func (source *Source) IsGitRevision() bool {
+	return source.Type == SourceTypeGitRevision
 }
