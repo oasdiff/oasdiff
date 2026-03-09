@@ -40,7 +40,7 @@ func getVersion(spec *openapi3.T) string {
 }
 
 // NewSpecInfo creates a SpecInfo from a local file path, a URL, or stdin
-func NewSpecInfo(loader Loader, source *Source, options ...Option) (*SpecInfo, error) {
+func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
 	specInfo, err := loadSpecInfo(loader, source)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func NewSpecInfo(loader Loader, source *Source, options ...Option) (*SpecInfo, e
 }
 
 // NewSpecInfoFromGlob creates SpecInfos from local files matching the specified glob parameter
-func NewSpecInfoFromGlob(loader Loader, glob string, options ...Option) ([]*SpecInfo, error) {
+func NewSpecInfoFromGlob(loader *openapi3.Loader, glob string, options ...Option) ([]*SpecInfo, error) {
 	specInfos, err := fromGlob(loader, glob)
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func NewSpecInfoFromGlob(loader Loader, glob string, options ...Option) ([]*Spec
 	return specInfos, nil
 }
 
-func loadSpecInfo(loader Loader, source *Source) (*SpecInfo, error) {
+func loadSpecInfo(loader *openapi3.Loader, source *Source) (*SpecInfo, error) {
 	s, err := from(loader, source)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func loadSpecInfo(loader Loader, source *Source) (*SpecInfo, error) {
 	return newSpecInfo(s, source.Path), nil
 }
 
-func fromGlob(loader Loader, glob string) ([]*SpecInfo, error) {
+func fromGlob(loader *openapi3.Loader, glob string) ([]*SpecInfo, error) {
 	files, err := filepathx.Glob(glob)
 	if err != nil {
 		return nil, err

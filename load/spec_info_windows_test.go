@@ -3,21 +3,22 @@ package load_test
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLoadInfo_FileWindows(t *testing.T) {
-	_, err := load.NewSpecInfo(MockLoader{}, load.NewSource(`C:\dev\OpenApi\spec2.yaml`))
+	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(`C:\dev\OpenApi\spec2.yaml`))
 	require.EqualError(t, err, "open C:\\dev\\OpenApi\\spec2.yaml: The system cannot find the path specified.")
 }
 
 func TestLoadInfo_UriInvalid(t *testing.T) {
-	_, err := load.NewSpecInfo(MockLoader{}, load.NewSource("http://localhost/null"))
-	require.EqualError(t, err, "open ..\\null: The system cannot find the file specified.")
+	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("http://localhost/null"))
+	require.Error(t, err)
 }
 
 func TestLoadInfo_UriBadScheme(t *testing.T) {
-	_, err := load.NewSpecInfo(MockLoader{}, load.NewSource("ftp://localhost/null"))
+	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("ftp://localhost/null"))
 	require.EqualError(t, err, "open ftp:\\\\localhost\\null: The filename, directory name, or volume label syntax is incorrect.")
 }
