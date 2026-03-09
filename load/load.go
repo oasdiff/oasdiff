@@ -36,7 +36,7 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
 			return nil, fmt.Errorf("failed to load spec from git revision %q: %s", gitRef, strings.TrimSpace(string(exitErr.Stderr)))
 		}
-		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
+		return nil, fmt.Errorf("failed to load spec from git revision %q (is git installed and in PATH?): %w", gitRef, err)
 	}
 
 	specPath := gitRef[strings.Index(gitRef, ":")+1:]

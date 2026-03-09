@@ -15,6 +15,7 @@ RUN VERSION=$(git describe --always --tags) && \
 
 ### Create image ###
 FROM alpine:3
+RUN apk add --no-cache git
 WORKDIR /usr/bin
 COPY --from=builder /go/src/app/oasdiff .
 ENTRYPOINT ["/usr/bin/oasdiff"]

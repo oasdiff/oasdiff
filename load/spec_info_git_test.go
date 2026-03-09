@@ -85,5 +85,5 @@ func TestLoadInfo_GitRevisionNotFound(t *testing.T) {
 func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
 	t.Setenv("PATH", t.TempDir()) // remove git from PATH
 	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))
-	require.ErrorContains(t, err, "failed to load spec from git revision")
+	require.ErrorContains(t, err, "is git installed and in PATH?")
 }
