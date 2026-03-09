@@ -38,6 +38,7 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 					}
 
 					if mediaTypeDiff.SchemaDiff.NullableDiff != nil && mediaTypeDiff.SchemaDiff.NullableDiff.To == true {
+						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "nullable")
 						result = append(result, NewApiChange(
 							ResponseBodyBecameNullableId,
 							config,
@@ -47,7 +48,7 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					CheckModifiedPropertiesDiff(
@@ -61,6 +62,7 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "nullable")
 							result = append(result, NewApiChange(
 								ResponsePropertyBecameNullableId,
 								config,
@@ -70,7 +72,7 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

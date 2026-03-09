@@ -34,7 +34,9 @@ func ResponseHeaderRemovedCheck(diffReport *diff.Diff, operationsSources *diff.O
 					if responseDiff.Base.Headers[headerName] == nil {
 						continue
 					}
-					required := responseDiff.Base.Headers[headerName].Value.Required
+					header := responseDiff.Base.Headers[headerName].Value
+					baseSource := NewSourceFromOrigin(operationsSources, operationItem.Base, header.Origin)
+					required := header.Required
 					if required {
 						result = append(result, NewApiChange(
 							RequiredResponseHeaderRemovedId,
@@ -45,7 +47,7 @@ func ResponseHeaderRemovedCheck(diffReport *diff.Diff, operationsSources *diff.O
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, nil))
 					} else {
 						result = append(result, NewApiChange(
 							OptionalResponseHeaderRemovedId,
@@ -56,7 +58,7 @@ func ResponseHeaderRemovedCheck(diffReport *diff.Diff, operationsSources *diff.O
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, nil))
 					}
 				}
 			}

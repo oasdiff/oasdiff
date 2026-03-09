@@ -27,8 +27,12 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				if mediaTypeDiff.SchemaDiff == nil {
+					continue
+				}
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MinDiff != nil {
+				_, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minimum")
+				if mediaTypeDiff.SchemaDiff.MinDiff != nil {
 					minDiff := mediaTypeDiff.SchemaDiff.MinDiff
 					if minDiff.From == nil &&
 						minDiff.To != nil {
@@ -41,7 +45,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 					}
 				}
 
@@ -60,6 +64,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							return
 						}
 
+						_, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minimum")
 						result = append(result, NewApiChange(
 							RequestPropertyMinSetId,
 							config,
@@ -69,7 +74,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

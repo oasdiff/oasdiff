@@ -30,6 +30,7 @@ func ResponseMediaTypeUpdatedCheck(diffReport *diff.Diff, operationsSources *dif
 					continue
 				}
 				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeDeleted {
+					baseSource := mediaTypeSource(operationsSources, operationItem.Base, responsesDiff.Base, mediaType)
 					result = append(result, NewApiChange(
 						ResponseMediaTypeRemovedId,
 						config,
@@ -39,9 +40,10 @@ func ResponseMediaTypeUpdatedCheck(diffReport *diff.Diff, operationsSources *dif
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, nil))
 				}
 				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeAdded {
+					revisionSource := mediaTypeSource(operationsSources, operationItem.Revision, responsesDiff.Revision, mediaType)
 					result = append(result, NewApiChange(
 						ResponseMediaTypeAddedId,
 						config,
@@ -51,7 +53,7 @@ func ResponseMediaTypeUpdatedCheck(diffReport *diff.Diff, operationsSources *dif
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(nil, revisionSource))
 				}
 			}
 		}

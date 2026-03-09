@@ -40,7 +40,12 @@ func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				appendResultItem := func(messageId string, a ...any) {
+				if mediaTypeDiff.SchemaDiff == nil {
+					continue
+				}
+
+				bodyBaseSource, bodyRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "discriminator")
+				appendBodyResultItem := func(messageId string, a ...any) {
 					result = append(result, NewApiChange(
 						messageId,
 						config,
@@ -50,24 +55,34 @@ func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						operationItem.Revision,
 						operation,
 						path,
-					).WithDetails(mediaTypeDetails))
-				}
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
+					).WithSources(bodyBaseSource, bodyRevisionSource).WithDetails(mediaTypeDetails))
 				}
 
 				processDiscriminatorDiffForRequest(
 					mediaTypeDiff.SchemaDiff.DiscriminatorDiff,
 					"",
-					appendResultItem)
+					appendBodyResultItem)
 
 				CheckModifiedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
 					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "discriminator")
+						appendPropResultItem := func(messageId string, a ...any) {
+							result = append(result, NewApiChange(
+								messageId,
+								config,
+								a,
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						}
 						processDiscriminatorDiffForRequest(
 							propertyDiff.DiscriminatorDiff,
 							propertyFullName(propertyPath, propertyName),
-							appendResultItem)
+							appendPropResultItem)
 					})
 
 			}

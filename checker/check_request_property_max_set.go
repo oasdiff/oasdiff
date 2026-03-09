@@ -27,8 +27,12 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				if mediaTypeDiff.SchemaDiff == nil {
+					continue
+				}
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MaxDiff != nil {
+				_, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maximum")
+				if mediaTypeDiff.SchemaDiff.MaxDiff != nil {
 					maxDiff := mediaTypeDiff.SchemaDiff.MaxDiff
 					if maxDiff.From == nil &&
 						maxDiff.To != nil {
@@ -41,7 +45,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 					}
 				}
 
@@ -60,6 +64,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							return
 						}
 
+						_, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maximum")
 						result = append(result, NewApiChange(
 							RequestPropertyMaxSetId,
 							config,
@@ -69,7 +74,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

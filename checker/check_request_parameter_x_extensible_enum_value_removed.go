@@ -30,6 +30,7 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 					if paramItem.SchemaDiff == nil {
 						continue
 					}
+					baseSource, revisionSource := ParameterSources(operationsSources, operationItem, paramItem)
 					if paramItem.SchemaDiff.ExtensionsDiff == nil {
 						continue
 					}
@@ -75,7 +76,7 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 				}
 			}

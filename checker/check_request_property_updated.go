@@ -35,7 +35,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					mediaTypeDiff.SchemaDiff,
 					func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 						if !propertyItem.ReadOnly {
-
+							baseSource := propertySource(operationsSources, operationItem.Base, propertyItem)
 							result = append(result, NewApiChange(
 								RequestPropertyRemovedId,
 								config,
@@ -45,7 +45,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
 						}
 					})
 				CheckAddedPropertiesDiff(
@@ -56,6 +56,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						revisionSource := propertySource(operationsSources, operationItem.Revision, propertyItem)
 
 						if slices.Contains(parent.Revision.Required, propertyName) {
 							if propertyItem.Default == nil {
@@ -68,7 +69,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 							} else {
 								result = append(result, NewApiChange(
 									NewRequiredRequestPropertyWithDefaultId,
@@ -79,7 +80,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						} else {
 							result = append(result, NewApiChange(
@@ -91,7 +92,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

@@ -16,11 +16,19 @@ type SecurityChange struct {
 	Comment string
 	Level   Level
 
+	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
 	SourceLineEnd   int
 	SourceColumn    int
 	SourceColumnEnd int
+}
+
+// WithSources returns a copy of the SecurityChange with BaseSource and RevisionSource populated
+func (c SecurityChange) WithSources(baseSource, revisionSource *Source) SecurityChange {
+	c.BaseSource = baseSource
+	c.RevisionSource = revisionSource
+	return c
 }
 
 func (c SecurityChange) GetSection() string {

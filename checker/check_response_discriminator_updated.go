@@ -43,6 +43,11 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 				modifiedMediaTypes := responsesDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
+					if mediaTypeDiff.SchemaDiff == nil {
+						continue
+					}
+
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "discriminator")
 					appendResultItem := func(messageId string, a ...any) {
 						result = append(result, NewApiChange(
 							messageId,
@@ -53,10 +58,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
-					}
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					processDiscriminatorDiff(
@@ -68,11 +70,24 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "discriminator")
+							propAppendResultItem := func(messageId string, a ...any) {
+								result = append(result, NewApiChange(
+									messageId,
+									config,
+									a,
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+							}
 							processDiscriminatorDiff(
 								propertyDiff.DiscriminatorDiff,
 								responseStatus,
 								propertyFullName(propertyPath, propertyName),
-								appendResultItem)
+								propAppendResultItem)
 						})
 				}
 			}

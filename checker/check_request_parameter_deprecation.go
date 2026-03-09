@@ -39,6 +39,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					if paramItem.DeprecatedDiff == nil {
 						continue
 					}
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationDiff, paramItem.SchemaDiff, "deprecated")
 
 					param := paramItem.Revision
 
@@ -53,7 +54,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							op,
 							operation,
 							path,
-						).WithDetails(formatDeprecationDetails(op.Extensions)))
+						).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
 						continue
 					}
 
@@ -69,7 +70,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					if !ok {
 						// if deprecation policy is defined and sunset is missing, it's a breaking change
 						if deprecationDays > 0 {
-							result = append(result, getParameterDeprecatedSunsetMissing(opInfo, param))
+							result = append(result, getParameterDeprecatedSunsetMissing(opInfo, param).WithSources(baseSource, revisionSource))
 						} else {
 							// no policy, report deprecation without sunset as INFO
 							result = append(result, NewApiChange(
@@ -81,7 +82,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								op,
 								operation,
 								path,
-							).WithDetails(formatDeprecationDetails(op.Extensions)))
+							).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
 						}
 						continue
 					}
@@ -97,7 +98,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							op,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
@@ -113,7 +114,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							op,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
@@ -127,7 +128,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 						op,
 						operation,
 						path,
-					).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
+					).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
 				}
 			}
 		}
@@ -136,7 +137,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 	return result
 }
 
-func getParameterDeprecatedSunsetMissing(opInfo opInfo, param *openapi3.Parameter) Change {
+func getParameterDeprecatedSunsetMissing(opInfo opInfo, param *openapi3.Parameter) ApiChange {
 	return NewApiChange(
 		RequestParameterDeprecatedSunsetMissingId,
 		opInfo.config,

@@ -27,6 +27,7 @@ func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minItems")
 					minItemsDiff := paramDiff.SchemaDiff.MinItemsDiff
 					if minItemsDiff == nil {
 						continue
@@ -50,7 +51,7 @@ func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

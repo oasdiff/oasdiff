@@ -33,6 +33,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 
 			for paramLocation, paramItems := range operationDiff.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
+					baseSource, revisionSource := ParameterSources(operationsSources, operationDiff, paramItem)
 
 					paramBase := paramItem.Base
 					paramRevision := paramItem.Revision
@@ -55,7 +56,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 							opRevision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
@@ -97,7 +98,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 							opRevision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 				}
 			}
