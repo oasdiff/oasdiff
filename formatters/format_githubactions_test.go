@@ -111,23 +111,25 @@ func TestGitHubActionsFormatter_RenderChangelog_MultilineText(t *testing.T) {
 func TestGitHubActionsFormatter_RenderChangelog_FileLocation(t *testing.T) {
 	testChanges := checker.Changes{
 		checker.ApiChange{
-			Id:              "change_id",
-			Level:           checker.ERR,
-			Operation:       http.MethodGet,
-			Path:            "/api/test",
-			Source:          load.NewSource("openapi.yaml"),
-			SourceFile:      "openapi.json",
-			SourceLine:      20,
-			SourceLineEnd:   25,
-			SourceColumn:    5,
-			SourceColumnEnd: 10,
+			Id:        "change_id",
+			Level:     checker.ERR,
+			Operation: http.MethodGet,
+			Path:      "/api/test",
+			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{
+					File:   "openapi.json",
+					Line:   21,
+					Column: 6,
+				},
+			},
 		},
 	}
 
 	// check output
 	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	assert.NoError(t, err)
-	expectedOutput := "::error title=change_id,file=openapi.json,col=6,endColumn=11,line=21,endLine=26::in API GET /api/test This is a breaking change.\n"
+	expectedOutput := "::error title=change_id,file=openapi.json,line=21,col=6::in API GET /api/test This is a breaking change.\n"
 	assert.Equal(t, expectedOutput, string(output))
 }
 

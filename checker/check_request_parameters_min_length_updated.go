@@ -27,6 +27,7 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minLength")
 					minLengthDiff := paramDiff.SchemaDiff.MinLengthDiff
 					if minLengthDiff == nil {
 						continue
@@ -50,7 +51,7 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

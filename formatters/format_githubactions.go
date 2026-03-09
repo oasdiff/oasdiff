@@ -45,20 +45,17 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 		var params = []string{
 			"title=" + change.GetId(),
 		}
-		if change.GetSourceFile() != "" {
-			params = append(params, "file="+change.GetSourceFile())
-		}
-		if change.GetSourceColumn() != 0 {
-			params = append(params, "col="+strconv.Itoa(change.GetSourceColumn()+1))
-		}
-		if change.GetSourceColumnEnd() != 0 {
-			params = append(params, "endColumn="+strconv.Itoa(change.GetSourceColumnEnd()+1))
-		}
-		if change.GetSourceLine() != 0 {
-			params = append(params, "line="+strconv.Itoa(change.GetSourceLine()+1))
-		}
-		if change.GetSourceLineEnd() != 0 {
-			params = append(params, "endLine="+strconv.Itoa(change.GetSourceLineEnd()+1))
+		if rev := change.GetRevisionSource(); rev != nil && rev.File != "" && !isHTTPSource(rev.File) {
+			params = append(params, "file="+rev.File)
+			if rev.Line != 0 {
+				params = append(params, "line="+strconv.Itoa(rev.Line))
+			}
+			if rev.Column != 0 {
+				params = append(params, "col="+strconv.Itoa(rev.Column))
+			}
+		} else if sourceFile := change.GetSourceFile(); sourceFile != "" {
+			// Fallback: operation source file when no revision source is available
+			params = append(params, "file="+sourceFile)
 		}
 
 		buf.WriteString(fmt.Sprintf("::%s %s::%s\n", githubActionsSeverity[change.GetLevel()], strings.Join(params, ","), getMessage(change, f.Localizer)))
@@ -74,6 +71,10 @@ func getMessage(change checker.Change, l checker.Localizer) string {
 
 func (f GitHubActionsFormatter) SupportedOutputs() []Output {
 	return []Output{OutputChangelog}
+}
+
+func isHTTPSource(file string) bool {
+	return strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://")
 }
 
 func writeGitHubActionsJobOutputParameters(params map[string]string) error {

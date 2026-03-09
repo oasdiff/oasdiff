@@ -36,6 +36,7 @@ func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSo
 						if maxLengthDiff.From != nil &&
 							maxLengthDiff.To != nil {
 							if IsIncreasedValue(maxLengthDiff) {
+								baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maxLength")
 								result = append(result, NewApiChange(
 									ResponseBodyMaxLengthIncreasedId,
 									config,
@@ -45,7 +46,7 @@ func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSo
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						}
 					}
@@ -69,6 +70,7 @@ func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSo
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maxLength")
 							result = append(result, NewApiChange(
 								ResponsePropertyMaxLengthIncreasedId,
 								config,
@@ -78,7 +80,7 @@ func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSo
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

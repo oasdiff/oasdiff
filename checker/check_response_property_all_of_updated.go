@@ -39,6 +39,8 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 						continue
 					}
 
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "allOf")
+
 					if mediaTypeDiff.SchemaDiff.AllOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AllOfDiff.Added) > 0 {
 						result = append(result, NewApiChange(
 							ResponseBodyAllOfAddedId,
@@ -49,7 +51,7 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					if mediaTypeDiff.SchemaDiff.AllOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AllOfDiff.Deleted) > 0 {
@@ -62,7 +64,7 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					CheckModifiedPropertiesDiff(
@@ -71,6 +73,8 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							if propertyDiff.AllOfDiff == nil {
 								return
 							}
+
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "allOf")
 
 							if len(propertyDiff.AllOfDiff.Added) > 0 {
 
@@ -83,7 +87,7 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							}
 
 							if len(propertyDiff.AllOfDiff.Deleted) > 0 {
@@ -97,7 +101,7 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

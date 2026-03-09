@@ -48,6 +48,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 								continue
 							}
 
+							baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, paramDiff.SchemaDiff, "required", changedRequiredPropertyName)
 							result = append(result, NewApiChange(
 								RequestHeaderPropertyBecameRequiredId,
 								config,
@@ -57,7 +58,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(baseSource, revisionSource))
 						}
 					}
 
@@ -75,6 +76,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 								if propertyDiff.Revision.Properties[changedRequiredPropertyName].Value.ReadOnly {
 									continue
 								}
+								propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "required", changedRequiredPropertyName)
 								result = append(result, NewApiChange(
 									RequestHeaderPropertyBecameRequiredId,
 									config,
@@ -84,7 +86,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 									operationItem.Revision,
 									operation,
 									path,
-								))
+								).WithSources(propBaseSource, propRevisionSource))
 							}
 						})
 				}

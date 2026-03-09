@@ -48,6 +48,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 								id = ResponseWriteOnlyPropertyBecameOptionalId
 							}
 
+							baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "required", changedRequiredPropertyName)
 							result = append(result, NewApiChange(
 								id,
 								config,
@@ -57,7 +58,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -85,6 +86,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 									id = ResponseWriteOnlyPropertyBecameOptionalId
 								}
 
+								propBaseSource, propRevisionSource := SchemaDeletedItemSources(operationsSources, operationItem, propertyDiff, "required", changedRequiredPropertyName)
 								result = append(result, NewApiChange(
 									id,
 									config,
@@ -94,7 +96,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

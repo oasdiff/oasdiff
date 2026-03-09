@@ -40,6 +40,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 								continue
 							}
 
+							srcBase, srcRevision := SchemaAddedItemSources(operationsSources, operationItem, schemaDiff, "required", changedRequiredPropertyName)
 							if schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.Default == nil {
 								result = append(result, NewApiChange(
 									RequestPropertyBecameRequiredId,
@@ -50,7 +51,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(srcBase, srcRevision).WithDetails(mediaTypeDetails))
 							} else {
 								// property has a default value, so making it required is not a breaking change
 								result = append(result, NewApiChange(
@@ -62,7 +63,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(srcBase, srcRevision).WithDetails(mediaTypeDetails))
 							}
 						}
 						for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Deleted {
@@ -70,6 +71,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 								continue
 							}
 
+							srcBase, srcRevision := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "required", changedRequiredPropertyName)
 							result = append(result, NewApiChange(
 								RequestPropertyBecameOptionalId,
 								config,
@@ -79,7 +81,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(srcBase, srcRevision).WithDetails(mediaTypeDetails))
 						}
 					}
 				}

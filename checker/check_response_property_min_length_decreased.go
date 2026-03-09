@@ -36,6 +36,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 						if minLengthDiff.From != nil &&
 							minLengthDiff.To != nil {
 							if IsDecreasedValue(minLengthDiff) {
+								baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minLength")
 								result = append(result, NewApiChange(
 									ResponseBodyMinLengthDecreasedId,
 									config,
@@ -45,7 +46,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						}
 					}
@@ -69,6 +70,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minLength")
 							result = append(result, NewApiChange(
 								ResponsePropertyMinLengthDecreasedId,
 								config,
@@ -78,7 +80,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

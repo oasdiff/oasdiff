@@ -29,6 +29,7 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 					if paramItem.SchemaDiff == nil {
 						continue
 					}
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramItem.SchemaDiff, "enum")
 
 					if enumDiff := paramItem.SchemaDiff.EnumDiff; enumDiff == nil || !enumDiff.EnumAdded {
 						continue
@@ -43,7 +44,7 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

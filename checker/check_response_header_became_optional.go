@@ -38,6 +38,7 @@ func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources 
 						continue
 					}
 
+					baseSource, revisionSource := headerSources(operationsSources, operationItem, responseDiff, headerName)
 					result = append(result, NewApiChange(
 						ResponseHeaderBecameOptionalId,
 						config,
@@ -47,7 +48,7 @@ func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources 
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

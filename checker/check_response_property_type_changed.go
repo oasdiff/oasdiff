@@ -39,6 +39,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						}
 
 						schemaDiff := mediaTypeDiff.SchemaDiff
+						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, schemaDiff, "type")
 						typeDiff := schemaDiff.TypeDiff
 						formatDiff := schemaDiff.FormatDiff
 						if breakingTypeFormatChangedInResponseProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
@@ -52,7 +53,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -69,6 +70,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 							}
 
 							schemaDiff := propertyDiff
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
 							typeDiff := schemaDiff.TypeDiff
 							formatDiff := schemaDiff.FormatDiff
 
@@ -83,7 +85,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

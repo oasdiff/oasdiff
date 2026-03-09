@@ -42,6 +42,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						id = RequestParameterMaxIncreasedId
 					}
 
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maximum")
 					result = append(result, NewApiChange(
 						id,
 						config,
@@ -51,7 +52,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

@@ -91,21 +91,29 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	}
 
 	for _, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Added {
+		var revisionSource *Source
+		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Revision[updatedSecurity]; ref != nil && ref.Value != nil {
+			revisionSource = sourceFromOrigin(ref.Value.Origin)
+		}
 		result = append(result, ComponentChange{
 			Id:        APIComponentsSecurityAddedId,
 			Level:     INFO,
 			Args:      []any{updatedSecurity},
 			Component: ComponentSecuritySchemes,
-		})
+		}.WithSources(nil, revisionSource))
 	}
 
 	for _, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Deleted {
+		var baseSource *Source
+		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurity]; ref != nil && ref.Value != nil {
+			baseSource = sourceFromOrigin(ref.Value.Origin)
+		}
 		result = append(result, ComponentChange{
 			Id:        APIComponentsSecurityRemovedId,
 			Level:     INFO,
 			Args:      []any{updatedSecurity},
 			Component: ComponentSecuritySchemes,
-		})
+		}.WithSources(baseSource, nil))
 	}
 
 	for updatedSecurityName, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Modified {

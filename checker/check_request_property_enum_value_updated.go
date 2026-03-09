@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"fmt"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -40,6 +42,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 						propName := propertyFullName(propertyPath, propertyName)
 
 						for _, enumVal := range enumDiff.Deleted {
+							baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 
 							id := RequestPropertyEnumValueRemovedId
 							if propertyDiff.Revision.ReadOnly {
@@ -55,10 +58,11 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 
 						for _, enumVal := range enumDiff.Added {
+							baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 							result = append(result, NewApiChange(
 								RequestPropertyEnumValueAddedId,
 								config,
@@ -68,7 +72,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

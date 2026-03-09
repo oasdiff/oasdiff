@@ -30,8 +30,12 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				if mediaTypeDiff.SchemaDiff == nil {
+					continue
+				}
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MaxLengthDiff != nil {
+				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maxLength")
+				if mediaTypeDiff.SchemaDiff.MaxLengthDiff != nil {
 					maxLengthDiff := mediaTypeDiff.SchemaDiff.MaxLengthDiff
 					if maxLengthDiff.From != nil &&
 						maxLengthDiff.To != nil {
@@ -45,7 +49,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						} else {
 							result = append(result, NewApiChange(
 								RequestBodyMaxLengthIncreasedId,
@@ -56,7 +60,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 					}
 				}
@@ -74,6 +78,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maxLength")
 
 						if IsDecreasedValue(maxLengthDiff) {
 
@@ -92,7 +97,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						} else {
 							result = append(result, NewApiChange(
 								RequestPropertyMaxLengthIncreasedId,
@@ -103,7 +108,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 
 					})

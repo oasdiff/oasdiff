@@ -8,9 +8,11 @@ import (
 
 // SecuritySchemesDiff describes the changes between a pair of sets of security scheme objects: https://swagger.io/specification/#security-scheme-object
 type SecuritySchemesDiff struct {
-	Added    []string                `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string                `json:"deleted,omitempty" yaml:"deleted,omitempty"`
-	Modified ModifiedSecuritySchemes `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Added    []string                 `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  []string                 `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Modified ModifiedSecuritySchemes  `json:"modified,omitempty" yaml:"modified,omitempty"`
+	Base     openapi3.SecuritySchemes `json:"-" yaml:"-"`
+	Revision openapi3.SecuritySchemes `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -51,6 +53,8 @@ func getSecuritySchemesDiff(config *Config, securitySchemes1, securitySchemes2 o
 func getSecuritySchemesDiffInternal(config *Config, securitySchemes1, securitySchemes2 openapi3.SecuritySchemes) (*SecuritySchemesDiff, error) {
 
 	result := newSecuritySchemesDiff()
+	result.Base = securitySchemes1
+	result.Revision = securitySchemes2
 
 	for name1, ref1 := range securitySchemes1 {
 		if ref2, ok := securitySchemes2[name1]; ok {

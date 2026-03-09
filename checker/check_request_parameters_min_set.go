@@ -26,6 +26,7 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
+					_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minimum")
 					minDiff := paramDiff.SchemaDiff.MinDiff
 					if minDiff == nil {
 						continue
@@ -44,7 +45,7 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(nil, revisionSource))
 				}
 			}
 		}

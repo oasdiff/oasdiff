@@ -23,18 +23,6 @@ func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
-			appendResultItem := func(messageId string, a ...any) {
-				result = append(result, NewApiChange(
-					messageId,
-					config,
-					a,
-					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
-				))
-			}
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 
@@ -55,6 +43,20 @@ func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 					defaultValueDiff := paramDiff.SchemaDiff.DefaultDiff
 					if defaultValueDiff.Empty() {
 						continue
+					}
+
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "default")
+					appendResultItem := func(messageId string, a ...any) {
+						result = append(result, NewApiChange(
+							messageId,
+							config,
+							a,
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(baseSource, revisionSource))
 					}
 
 					if defaultValueDiff.From == nil {

@@ -36,6 +36,59 @@ func runChecks(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	return false, outputChecks(stdout, flags, checker.GetAllRules())
 }
 
+func directionString(d checker.Direction) string {
+	switch d {
+	case checker.DirectionRequest:
+		return "request"
+	case checker.DirectionResponse:
+		return "response"
+	default:
+		return "none"
+	}
+}
+
+func locationString(l checker.Location) string {
+	switch l {
+	case checker.LocationBody:
+		return "body"
+	case checker.LocationParameters:
+		return "parameters"
+	case checker.LocationProperties:
+		return "properties"
+	case checker.LocationHeaders:
+		return "headers"
+	case checker.LocationSecurity:
+		return "security"
+	case checker.LocationComponents:
+		return "components"
+	default:
+		return "endpoint"
+	}
+}
+
+func actionString(a checker.Action) string {
+	switch a {
+	case checker.ActionAdd:
+		return "add"
+	case checker.ActionRemove:
+		return "remove"
+	case checker.ActionChange:
+		return "change"
+	case checker.ActionGeneralize:
+		return "generalize"
+	case checker.ActionSpecialize:
+		return "specialize"
+	case checker.ActionIncrease:
+		return "increase"
+	case checker.ActionDecrease:
+		return "decrease"
+	case checker.ActionSet:
+		return "set"
+	default:
+		return "none"
+	}
+}
+
 func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompatibilityRule) *ReturnError {
 
 	format := flags.getFormat()
@@ -47,6 +100,8 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 	if err != nil {
 		return getErrUnsupportedFormat(format, checksCmd)
 	}
+
+	localizer := checker.NewLocalizer(flags.getLang())
 
 	// filter rules
 	severity := flags.getSeverity()
@@ -70,10 +125,20 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 			continue
 		}
 
+		commentKey := rule.Id + "-comment"
+		mitigation := localizer(commentKey)
+		if mitigation == commentKey {
+			mitigation = ""
+		}
+
 		checks = append(checks, formatters.Check{
 			Id:          rule.Id,
 			Level:       rule.Level.String(),
-			Description: rule.Description,
+			Direction:   directionString(rule.Direction),
+			Location:    locationString(rule.Location),
+			Action:      actionString(rule.Action),
+			Description: localizer(rule.Description),
+			Mitigation:  mitigation,
 		})
 	}
 

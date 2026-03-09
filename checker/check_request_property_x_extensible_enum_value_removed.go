@@ -69,6 +69,7 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 						if propertyDiff.Revision.ReadOnly {
 							return
 						}
+						propBaseSource, propRevisionSource := SchemaSources(operationsSources, operationItem, propertyDiff)
 						for _, enumVal := range deletedVals {
 							result = append(result, NewApiChange(
 								RequestPropertyXExtensibleEnumValueRemovedId,
@@ -79,7 +80,7 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

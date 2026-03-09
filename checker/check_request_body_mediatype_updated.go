@@ -27,6 +27,7 @@ func RequestBodyMediaTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 			addedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeAdded
 			for _, mediaType := range addedMediaTypes {
+				revisionSource := requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)
 				result = append(result, NewApiChange(
 					RequestBodyMediaTypeAddedId,
 					config,
@@ -36,11 +37,12 @@ func RequestBodyMediaTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(nil, revisionSource))
 			}
 
 			removedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeDeleted
 			for _, mediaType := range removedMediaTypes {
+				baseSource := requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType)
 				result = append(result, NewApiChange(
 					RequestBodyMediaTypeRemovedId,
 					config,
@@ -50,7 +52,7 @@ func RequestBodyMediaTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(baseSource, nil))
 			}
 		}
 	}

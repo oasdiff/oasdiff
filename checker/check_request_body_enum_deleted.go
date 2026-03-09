@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"fmt"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -35,11 +37,13 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 					continue
 				}
 
-				enumDiff := mediaTypeItem.SchemaDiff.EnumDiff
+				schemaDiff := mediaTypeItem.SchemaDiff
+				enumDiff := schemaDiff.EnumDiff
 				if enumDiff == nil || enumDiff.Deleted == nil {
 					continue
 				}
 				for _, enumVal := range enumDiff.Deleted {
+					baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 					result = append(result, NewApiChange(
 						RequestBodyEnumValueRemovedId,
 						config,
@@ -49,7 +53,7 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

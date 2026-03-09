@@ -39,6 +39,7 @@ func RequestPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources *di
 							return
 						}
 
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "enum")
 						result = append(result, NewApiChange(
 							RequestPropertyBecameEnumId,
 							config,
@@ -48,7 +49,7 @@ func RequestPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources *di
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

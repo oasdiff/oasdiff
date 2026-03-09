@@ -42,6 +42,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 				}
 
 				if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AnyOfDiff.Added) > 0 {
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf")
 					result = append(result, NewApiChange(
 						RequestBodyAnyOfAddedId,
 						config,
@@ -51,10 +52,11 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 
 				if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted) > 0 {
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf")
 					result = append(result, NewApiChange(
 						RequestBodyAnyOfRemovedId,
 						config,
@@ -64,7 +66,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 
 				CheckModifiedPropertiesDiff(
@@ -80,6 +82,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "anyOf")
 
 						if len(propertyDiff.AnyOfDiff.Added) > 0 {
 							result = append(result, NewApiChange(
@@ -91,7 +94,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 
 						if len(propertyDiff.AnyOfDiff.Deleted) > 0 {
@@ -104,7 +107,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

@@ -36,6 +36,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 						if minDiff.From != nil &&
 							minDiff.To != nil {
 							if IsDecreasedValue(minDiff) {
+								baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minimum")
 								result = append(result, NewApiChange(
 									ResponseBodyMinDecreasedId,
 									config,
@@ -45,7 +46,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						}
 					}
@@ -69,6 +70,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minimum")
 							result = append(result, NewApiChange(
 								ResponsePropertyMinDecreasedId,
 								config,
@@ -78,7 +80,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}
