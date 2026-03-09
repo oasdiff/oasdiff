@@ -7,15 +7,8 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// Loader interface includes the OAS load functions
-type Loader interface {
-	LoadFromURI(*url.URL) (*openapi3.T, error)
-	LoadFromFile(string) (*openapi3.T, error)
-	LoadFromStdin() (*openapi3.T, error)
-}
-
 // from is a convenience function that opens an OpenAPI spec from a URL or a local path based on the format of the path parameter
-func from(loader Loader, source *Source) (*openapi3.T, error) {
+func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 
 	switch source.Type {
 	case SourceTypeStdin:

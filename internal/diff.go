@@ -94,7 +94,7 @@ func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoP
 	}
 }
 
-func normalDiff(loader load.Loader, flags *Flags) (*diffResult, *ReturnError) {
+func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
@@ -123,7 +123,7 @@ func normalDiff(loader load.Loader, flags *Flags) (*diffResult, *ReturnError) {
 	return newDiffResult(diffReport, operationsSources, load.NewSpecInfoPair(s1, s2)), nil
 }
 
-func composedDiff(loader load.Loader, flags *Flags) (*diffResult, *ReturnError) {
+func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
