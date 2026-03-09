@@ -81,3 +81,9 @@ func TestLoadInfo_GitRevisionNotFound(t *testing.T) {
 	_, err = load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:nonexistent.yaml"))
 	require.ErrorContains(t, err, "failed to load spec from git revision")
 }
+
+func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
+	t.Setenv("PATH", t.TempDir()) // remove git from PATH
+	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))
+	require.ErrorContains(t, err, "failed to load spec from git revision")
+}
