@@ -62,7 +62,7 @@ jobs:
         with:
           fetch-depth: 0          # full history needed for git refs
 
-      - uses: oasdiff/oasdiff-action/breaking@v0.0.30
+      - uses: oasdiff/oasdiff-action/breaking@v0.0.31
         with:
           base: 'origin/${{ github.base_ref }}:openapi.yaml'
           revision: 'HEAD:openapi.yaml'
