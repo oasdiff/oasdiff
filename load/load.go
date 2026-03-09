@@ -39,8 +39,11 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		return nil, fmt.Errorf("failed to load spec from git revision %q (is git installed and in PATH?): %w", gitRef, err)
 	}
 
-	specPath := gitRef[strings.Index(gitRef, ":")+1:]
-	u := &url.URL{Path: filepath.ToSlash(specPath)}
+	// Use the full gitRef as the URL path so each revision gets a unique cache key in the
+	// loader's visitedDocuments map (e.g. "origin/main:openapi.yaml" vs "HEAD:openapi.yaml").
+	// Using only the file portion would cause both refs to share the key "openapi.yaml" and
+	// the loader would return the cached base spec for the revision.
+	u := &url.URL{Path: filepath.ToSlash(gitRef)}
 	return loader.LoadFromDataWithPath(out, u)
 }
 
