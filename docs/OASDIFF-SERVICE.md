@@ -41,4 +41,4 @@ The service uses conventional HTTP response codes to indicate success or failure
 - Codes in the 5xx range indicate a server error (these are rare)
 
 ### Source Code
-https://github.com/oasdiff/oasdiff-service
+Repository: `https://github.com/oasdiff/oasdiff-service` 
