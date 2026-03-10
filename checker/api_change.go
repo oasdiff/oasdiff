@@ -140,7 +140,7 @@ func (c ApiChange) GetPath() string {
 }
 
 func (c ApiChange) GetSource() string {
-	return c.Source.String()
+	return c.Source.DisplayPath()
 }
 
 func (c ApiChange) GetSourceFile() string {
