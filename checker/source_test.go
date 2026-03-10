@@ -236,6 +236,50 @@ func TestSchemaFieldSources(t *testing.T) {
 	require.Nil(t, revisionSource)
 }
 
+func TestNewSourceFromOrigin_StripsGitRevisionPrefix(t *testing.T) {
+	op := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
+	origin := &openapi3.Origin{
+		Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 10, Column: 5},
+	}
+
+	source := checker.NewSourceFromOrigin(&sources, op, origin)
+	require.Equal(t, "openapi.yaml", source.File)
+	require.Equal(t, 10, source.Line)
+	require.Equal(t, 5, source.Column)
+}
+
+func TestNewSourceFromField_StripsGitRevisionPrefix(t *testing.T) {
+	op := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
+	origin := &openapi3.Origin{
+		Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 1, Column: 1},
+		Fields: map[string]openapi3.Location{
+			"pattern": {File: "origin/main:openapi.yaml", Line: 15, Column: 14},
+		},
+	}
+
+	source := checker.NewSourceFromField(&sources, op, origin, "pattern")
+	require.Equal(t, "openapi.yaml", source.File)
+	require.Equal(t, 15, source.Line)
+	require.Equal(t, 14, source.Column)
+}
+
+func TestNewSourceFromSequenceItem_StripsGitRevisionPrefix(t *testing.T) {
+	op := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
+	origin := &openapi3.Origin{
+		Sequences: map[string][]openapi3.Location{
+			"type": {{File: "HEAD:openapi.yaml", Line: 4, Column: 11, Name: "string"}},
+		},
+	}
+
+	source := checker.NewSourceFromSequenceItem(&sources, op, origin, "type", "string")
+	require.Equal(t, "openapi.yaml", source.File)
+	require.Equal(t, 4, source.Line)
+	require.Equal(t, 11, source.Column)
+}
+
 func TestNewSourceFromSequenceItem(t *testing.T) {
 	op := &openapi3.Operation{}
 	sources := diff.OperationsSourcesMap{op: "spec.yaml"}

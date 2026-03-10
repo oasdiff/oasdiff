@@ -3,7 +3,14 @@ package checker
 import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
 )
+
+// displayFilePath strips any git revision prefix from a file path.
+// e.g. "HEAD:openapi.yaml" → "openapi.yaml", "openapi.yaml" → "openapi.yaml"
+func displayFilePath(file string) string {
+	return load.NewSource(file).DisplayPath()
+}
 
 // Source represents the location of a change in an OpenAPI spec file
 type Source struct {
@@ -24,7 +31,7 @@ func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation
 		return &Source{File: (*operationsSources)[operation]}
 	}
 
-	file := origin.Key.File
+	file := displayFilePath(origin.Key.File)
 	if file == "" {
 		file = (*operationsSources)[operation]
 	}
@@ -42,7 +49,7 @@ func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation 
 	}
 
 	if location, ok := origin.Fields[field]; ok {
-		file := location.File
+		file := displayFilePath(location.File)
 		if file == "" {
 			file = (*operationsSources)[operation]
 		}
@@ -91,7 +98,7 @@ func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, ope
 
 	for _, item := range items {
 		if item.Name == value {
-			file := item.File
+			file := displayFilePath(item.File)
 			if file == "" {
 				file = (*operationsSources)[operation]
 			}
@@ -372,7 +379,7 @@ func sourceFromOrigin(origin *openapi3.Origin) *Source {
 		return nil
 	}
 	return &Source{
-		File:   origin.Key.File,
+		File:   displayFilePath(origin.Key.File),
 		Line:   origin.Key.Line,
 		Column: origin.Key.Column,
 	}
