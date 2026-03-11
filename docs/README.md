@@ -79,9 +79,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br, es
 - [Run with configuration file](CONFIG-FILES.md)
 - [Run from Docker](DOCKER.md)
-- [Integrate in GitHub](https://github.com/oasdiff/github-demo/tree/main)
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action)
-- [OpenAPI Sync: Get notified when an API provider breaks the API](https://github.com/oasdiff/sync/)
 - [Embed in your go program](GO.md)
 
 ## Demo
