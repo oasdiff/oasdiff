@@ -70,12 +70,14 @@ type BackwardCompatibilityRules []BackwardCompatibilityRule
 func GetAllRules() BackwardCompatibilityRules {
 	return BackwardCompatibilityRules{
 		// Request property deprecation checks
+		newBackwardCompatibilityRule(RequestPropertyDeprecatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedWithSunsetId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedSunsetMissingId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedInvalidId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyReactivatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertySunsetDateTooSmallId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, LocationBody, ActionChange),
 		// Response property deprecation checks
+		newBackwardCompatibilityRule(ResponsePropertyDeprecatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedWithSunsetId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedSunsetMissingId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedInvalidId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, LocationBody, ActionChange),

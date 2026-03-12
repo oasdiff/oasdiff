@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	ResponsePropertyDeprecatedId              = "response-property-deprecated"
 	ResponsePropertyDeprecatedWithSunsetId    = "response-property-deprecated-with-sunset"
 	ResponsePropertyDeprecatedSunsetMissingId = "response-property-deprecated-sunset-missing"
 	ResponsePropertyDeprecatedInvalidId       = "response-property-deprecated-sunset-invalid"
@@ -92,9 +93,9 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								} else {
 									// no policy, report deprecation without sunset as INFO
 									result = append(result, NewApiChange(
-										ResponsePropertyDeprecatedWithSunsetId,
+										ResponsePropertyDeprecatedId,
 										config,
-										[]any{propName, ""},
+										[]any{propName},
 										"",
 										operationsSources,
 										op,
