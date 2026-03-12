@@ -224,8 +224,8 @@ func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
-	require.Equal(t, "request property 'oldField' deprecated with sunset date ''", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.RequestPropertyDeprecatedId, errs[0].GetId())
+	require.Equal(t, "request property 'oldField' deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: message includes sunset date when request property deprecated with valid sunset

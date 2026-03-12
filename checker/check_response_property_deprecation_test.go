@@ -220,8 +220,8 @@ func TestResponsePropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDeprecationCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
-	require.Equal(t, "response property 'legacyField' deprecated with sunset date ''", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.ResponsePropertyDeprecatedId, errs[0].GetId())
+	require.Equal(t, "response property 'legacyField' deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: message includes sunset date when response property deprecated with valid sunset
