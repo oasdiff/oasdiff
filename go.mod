@@ -5,7 +5,7 @@ go 1.26
 require (
 	cloud.google.com/go v0.123.0
 	github.com/TwiN/go-color v1.4.1
-	github.com/getkin/kin-openapi v0.133.0
+	github.com/getkin/kin-openapi v0.0.0-20260313112509-870a4ad42d31
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
@@ -18,7 +18,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/oasdiff/yaml v0.0.0-20260219140331-2c8a4d8a2666 // indirect
+	github.com/oasdiff/yaml v0.0.0-20260313112342-a3ea61cb4d4c // indirect
 	github.com/oasdiff/yaml3 v0.0.0-20260224194419-61cd415a242b // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
@@ -51,4 +51,4 @@ require (
 	github.com/wI2L/jsondiff v0.7.0
 )
 
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260224194457-78f66ebc5599
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260313112509-870a4ad42d31
