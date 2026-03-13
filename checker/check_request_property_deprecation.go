@@ -9,6 +9,7 @@ import (
 
 const (
 	RequestPropertyDeprecatedId              = "request-property-deprecated"
+	RequestPropertyDeprecatedWithSunsetId    = "request-property-deprecated-with-sunset"
 	RequestPropertyDeprecatedSunsetMissingId = "request-property-deprecated-sunset-missing"
 	RequestPropertyDeprecatedInvalidId       = "request-property-deprecated-sunset-invalid"
 	RequestPropertyReactivatedId             = "request-property-reactivated"
@@ -132,17 +133,17 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 							return
 						}
 
-						// not breaking changes
+						// Report property deprecated with sunset date (always show, regardless of policy)
 						result = append(result, NewApiChange(
-							RequestPropertyDeprecatedId,
+							RequestPropertyDeprecatedWithSunsetId,
 							config,
-							[]any{propName},
+							[]any{propName, date},
 							"",
 							operationsSources,
 							op,
 							operation,
 							path,
-						).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
+						).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 					})
 			}
 		}

@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	EndpointReactivatedId        = "endpoint-reactivated"
-	APIDeprecatedSunsetParseId   = "api-deprecated-sunset-parse"
-	APIDeprecatedSunsetMissingId = "api-deprecated-sunset-missing"
-	APIInvalidStabilityLevelId   = "api-invalid-stability-level"
-	APISunsetDateTooSmallId      = "api-sunset-date-too-small"
-	EndpointDeprecatedId         = "endpoint-deprecated"
+	EndpointReactivatedId          = "endpoint-reactivated"
+	APIDeprecatedSunsetParseId     = "api-deprecated-sunset-parse"
+	APIDeprecatedSunsetMissingId   = "api-deprecated-sunset-missing"
+	APIInvalidStabilityLevelId     = "api-invalid-stability-level"
+	APISunsetDateTooSmallId        = "api-sunset-date-too-small"
+	EndpointDeprecatedId           = "endpoint-deprecated"
+	EndpointDeprecatedWithSunsetId = "endpoint-deprecated-with-sunset"
 )
 
 // formatDeprecationDetails formats optional deprecation details (stability level only)
@@ -134,17 +135,18 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 				continue
 			}
 
-			// not breaking changes
+			// endpoint deprecated with sunset date
 			result = append(result, NewApiChange(
-				EndpointDeprecatedId,
+				EndpointDeprecatedWithSunsetId,
 				config,
-				nil,
+				[]any{date},
 				"",
 				operationsSources,
 				op,
 				operation,
 				path,
-			).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
+			).WithDetails(formatDeprecationDetails(op.Extensions)))
+
 		}
 	}
 

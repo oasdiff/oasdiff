@@ -28,7 +28,7 @@ func TestRequestPropertyDeprecationCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestPropertyDeprecatedId, errs[0].GetId())
+	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "request property 'oldField' deprecated")
 }
 
@@ -45,8 +45,8 @@ func TestRequestPropertyDeprecationCheck_AllOf(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
 	// With multiple media types (json and xml), we get one report per media type with distinct details
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.RequestPropertyDeprecatedId, errs[0].GetId())
-	require.Equal(t, checker.RequestPropertyDeprecatedId, errs[1].GetId())
+	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
+	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[1].GetId())
 	// Each message should include media type context
 	msg0 := errs[0].GetUncolorizedText(checker.NewDefaultLocalizer())
 	msg1 := errs[1].GetUncolorizedText(checker.NewDefaultLocalizer())
@@ -151,7 +151,7 @@ func TestRequestPropertyDeprecation_WithProperSunset(t *testing.T) {
 	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck).WithDeprecation(0, 10)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestPropertyDeprecatedId, errs[0].GetId())
+	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "request property 'oldField' deprecated")
 }
@@ -194,7 +194,7 @@ func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	require.Equal(t, checker.RequestPropertyDeprecatedInvalidId, errs[0].GetId())
 }
 
-// CL: deprecating a request property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
+// CL: deprecating a request property with invalid stability level uses default deprecation days
 func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
 	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -207,12 +207,11 @@ func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-
 	changes := checker.RequestPropertyDeprecationCheck(d, osm, checker.NewConfig(nil))
 	require.Empty(t, changes)
 }
 
-// CL: message has no details when request property deprecated without sunset or stability
+// CL: message reports sunset missing when request property deprecated without sunset
 func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(getPropertyDeprecationFile("property_base.yaml"))
 	require.NoError(t, err)
@@ -227,4 +226,25 @@ func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyDeprecatedId, errs[0].GetId())
 	require.Equal(t, "request property 'oldField' deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// CL: message includes sunset date when request property deprecated with valid sunset
+func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
+	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+
+	sunsetDate := civil.DateOf(time.Now()).AddDays(30).String()
+	s2.Spec.Components.Schemas["TestRequest"].Value.Properties["oldField"].Value.Extensions[diff.SunsetExtension] = toJson(t, sunsetDate)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck).WithDeprecation(0, 10)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
+	require.Equal(t, fmt.Sprintf("request property 'oldField' deprecated with sunset date '%s' (stability: stable)", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
