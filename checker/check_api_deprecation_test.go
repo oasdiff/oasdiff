@@ -194,7 +194,7 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	// both endpoint-deprecated and endpoint-deprecated-with-sunset are reported
+	// endpoint-deprecated-with-sunset reported
 	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")

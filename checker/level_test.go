@@ -11,7 +11,7 @@ import (
 
 func TestStringCond_Info(t *testing.T) {
 	level := checker.INFO
-	require.Equal(t, color.InCyan(level.String()), level.StringCond(checker.ColorAlways))
+	require.Equal(t, level.PrettyString(), level.StringCond(checker.ColorAlways))
 	require.Equal(t, level.String(), level.StringCond(checker.ColorNever))
 	require.Equal(t, level.String(), level.StringCond(checker.ColorAuto))
 	require.Equal(t, level.String(), level.StringCond(checker.ColorInvalid))
