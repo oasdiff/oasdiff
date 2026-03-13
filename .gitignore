@@ -12,3 +12,5 @@ coverage.html
 
 # Claude
 .claude/*
+!.claude/skills
+!.claude/skills/**

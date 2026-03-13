@@ -231,7 +231,7 @@ These examples are automatically generated from unit tests.
 [adding a success response status](../checker/check_response_status_updated_test.go?plain=1#L12)  
 [adding an enum value to a response property](../checker/check_response_property_enum_value_added_test.go?plain=1#L12)  
 [adding an enum value to a response write-only property](../checker/check_response_property_enum_value_added_test.go?plain=1#L38)  
-[adding an enum value to request parameter](../checker/check_request_parameter_enum_value_updated_test.go?plain=1#L35)  
+[adding an enum value to request parameter](../checker/check_request_parameter_enum_value_updated_test.go?plain=1#L47)  
 [adding an optional write-only property to a response](../checker/check_response_optional_property_updated_test.go?plain=1#L34)  
 [adding discriminator to the request body or request body property](../checker/check_request_discriminator_updated_test.go?plain=1#L12)  
 [adding discriminator to the response body or response property](../checker/check_response_discriminator_updated_test.go?plain=1#L12)  
