@@ -60,7 +60,15 @@ func getDiscriminatorDiffInternal(config *Config, discriminator1, discriminator2
 		return nil, err
 	}
 	result.PropertyNameDiff = getValueDiff(discriminator1.PropertyName, discriminator2.PropertyName)
-	result.MappingDiff = getStringMapDiff(discriminator1.Mapping, discriminator2.Mapping)
+	result.MappingDiff = getStringMapDiff(mappingToStringMap(discriminator1.Mapping), mappingToStringMap(discriminator2.Mapping))
 
 	return result, nil
+}
+
+func mappingToStringMap(m openapi3.StringMap[openapi3.MappingRef]) map[string]string {
+	result := make(map[string]string, len(m))
+	for k, v := range m {
+		result[k] = v.Ref
+	}
+	return result
 }
