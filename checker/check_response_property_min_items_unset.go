@@ -35,6 +35,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 						minItemsDiff := mediaTypeDiff.SchemaDiff.MinItemsDiff
 						if minItemsDiff.From != nil &&
 							minItemsDiff.To == nil {
+							baseSource, _ := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minItems")
 							result = append(result, NewApiChange(
 								ResponseBodyMinItemsUnsetId,
 								config,
@@ -44,7 +45,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -63,6 +64,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 								return
 							}
 
+							propBaseSource, _ := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minItems")
 							result = append(result, NewApiChange(
 								ResponsePropertyMinItemsUnsetId,
 								config,
@@ -72,7 +74,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
 						})
 				}
 

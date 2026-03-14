@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"fmt"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -49,6 +51,7 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 							}
 
 							for _, enumVal := range enumDiff.Added {
+								baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 								result = append(result, NewApiChange(
 									id,
 									config,
@@ -58,7 +61,7 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 									operationItem.Revision,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 							}
 						})
 				}

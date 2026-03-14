@@ -17,11 +17,19 @@ type ComponentChange struct {
 	Level     Level
 	Component string
 
+	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
 	SourceLineEnd   int
 	SourceColumn    int
 	SourceColumnEnd int
+}
+
+// WithSources returns a copy of the ComponentChange with BaseSource and RevisionSource populated
+func (c ComponentChange) WithSources(baseSource, revisionSource *Source) ComponentChange {
+	c.BaseSource = baseSource
+	c.RevisionSource = revisionSource
+	return c
 }
 
 func (c ComponentChange) GetSection() string {

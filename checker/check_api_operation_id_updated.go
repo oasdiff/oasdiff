@@ -25,6 +25,8 @@ func APIOperationIdUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.O
 				continue
 			}
 
+			baseSource, revisionSource := OperationFieldSources(operationsSources, operationItem, "operationId")
+
 			op := pathItem.Base.GetOperation(operation)
 			id := APIOperationIdRemovedId
 			args := []any{operationItem.Base.OperationID, operationItem.Revision.OperationID}
@@ -32,6 +34,9 @@ func APIOperationIdUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.O
 				id = APIOperationIdAddId
 				op = pathItem.Revision.GetOperation(operation)
 				args = []any{operationItem.Revision.OperationID}
+				baseSource = nil
+			} else {
+				revisionSource = nil
 			}
 
 			result = append(result, NewApiChange(
@@ -43,7 +48,7 @@ func APIOperationIdUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.O
 				op,
 				operation,
 				path,
-			))
+			).WithSources(baseSource, revisionSource))
 		}
 	}
 	return result

@@ -34,6 +34,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 						continue
 					}
 
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "enum")
 					if paramDiff.SchemaDiff.EnumDiff != nil && paramDiff.SchemaDiff.EnumDiff.EnumAdded {
 						result = append(result, NewApiChange(
 							RequestHeaderPropertyBecameEnumId,
@@ -44,7 +45,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 
 					CheckModifiedPropertiesDiff(
@@ -55,6 +56,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "enum")
 							result = append(result, NewApiChange(
 								RequestHeaderPropertyBecameEnumId,
 								config,
@@ -64,7 +66,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							))
+							).WithSources(propBaseSource, propRevisionSource))
 						})
 				}
 			}

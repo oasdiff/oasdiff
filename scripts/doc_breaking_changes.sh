@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Use C locale for deterministic sort order across macOS and Linux
+export LC_ALL=C
+
 echo "# Examples of Breaking and Non-Breaking Changes"
 echo "These examples are automatically generated from unit tests."
 

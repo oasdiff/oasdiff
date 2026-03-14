@@ -49,6 +49,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								return
 							}
 
+							baseSource := propertySource(operationsSources, operationItem.Base, propertyItem)
 							result = append(result, NewApiChange(
 								id,
 								config,
@@ -58,7 +59,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
 						})
 					CheckAddedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
@@ -72,6 +73,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								return
 							}
 
+							revisionSource := propertySource(operationsSources, operationItem.Revision, propertyItem)
 							result = append(result, NewApiChange(
 								id,
 								config,
@@ -81,7 +83,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

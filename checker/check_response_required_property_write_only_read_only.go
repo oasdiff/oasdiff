@@ -56,6 +56,8 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "writeOnly")
+
 							id := ResponseRequiredPropertyBecameNonWriteOnlyId
 							comment := commentId(ResponseRequiredPropertyBecameNonWriteOnlyId)
 
@@ -73,7 +75,7 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 
 					CheckModifiedPropertiesDiff(
@@ -92,6 +94,8 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "readOnly")
+
 							id := ResponseRequiredPropertyBecameNonReadOnlyId
 
 							if readOnlyDiff.To == true {
@@ -107,7 +111,7 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

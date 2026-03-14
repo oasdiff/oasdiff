@@ -29,6 +29,7 @@ func AddedRequestBodyCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 					id = AddedRequiredRequestBodyId
 				}
 
+				revisionSource := requestBodySource(operationsSources, operationItem.Revision)
 				result = append(result, NewApiChange(
 					id,
 					config,
@@ -38,7 +39,7 @@ func AddedRequestBodyCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 					operationItem.Revision,
 					operation,
 					path,
-				))
+				).WithSources(nil, revisionSource))
 			}
 		}
 	}

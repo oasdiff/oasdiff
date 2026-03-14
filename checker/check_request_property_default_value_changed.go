@@ -31,7 +31,11 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
+				if mediaTypeDiff.SchemaDiff == nil {
+					continue
+				}
 				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
+				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "default")
 				appendResultItem := func(messageId string, a ...any) {
 					result = append(result, NewApiChange(
 						messageId,
@@ -42,9 +46,9 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 						operationItem.Revision,
 						operation,
 						path,
-					).WithDetails(mediaTypeDetails))
+					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 				}
-				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
+				if mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
 					defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff
 
 					if defaultValueDiff.From == nil {
@@ -64,13 +68,27 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 						}
 
 						defaultValueDiff := propertyDiff.DefaultDiff
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "default")
+
+						appendPropResultItem := func(messageId string, a ...any) {
+							result = append(result, NewApiChange(
+								messageId,
+								config,
+								a,
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						}
 
 						if defaultValueDiff.From == nil {
-							appendResultItem(RequestPropertyDefaultValueAddedId, propertyName, defaultValueDiff.To)
+							appendPropResultItem(RequestPropertyDefaultValueAddedId, propertyName, defaultValueDiff.To)
 						} else if defaultValueDiff.To == nil {
-							appendResultItem(RequestPropertyDefaultValueRemovedId, propertyName, defaultValueDiff.From)
+							appendPropResultItem(RequestPropertyDefaultValueRemovedId, propertyName, defaultValueDiff.From)
 						} else {
-							appendResultItem(RequestPropertyDefaultValueChangedId, propertyName, defaultValueDiff.From, defaultValueDiff.To)
+							appendPropResultItem(RequestPropertyDefaultValueChangedId, propertyName, defaultValueDiff.From, defaultValueDiff.To)
 						}
 					})
 			}

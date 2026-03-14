@@ -27,6 +27,13 @@ func NewRequestPathParameterCheck(diffReport *diff.Diff, operationsSources *diff
 				}
 
 				for _, paramName := range paramItems {
+					var revisionSource *Source
+					for _, param := range operationItem.Revision.Parameters {
+						if param.Value.Name == paramName && param.Value.In == paramLocation {
+							revisionSource = parameterSource(operationsSources, operationItem.Revision, param.Value)
+							break
+						}
+					}
 					result = append(result, NewApiChange(
 						NewRequestPathParameterId,
 						config,
@@ -36,7 +43,7 @@ func NewRequestPathParameterCheck(diffReport *diff.Diff, operationsSources *diff
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(nil, revisionSource))
 				}
 			}
 		}

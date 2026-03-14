@@ -35,6 +35,7 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 						maxLengthDiff := mediaTypeDiff.SchemaDiff.MaxLengthDiff
 						if maxLengthDiff.From != nil &&
 							maxLengthDiff.To == nil {
+							baseSource, _ := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maxLength")
 							result = append(result, NewApiChange(
 								ResponseBodyMaxLengthUnsetId,
 								config,
@@ -44,7 +45,7 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
 						}
 					}
 
@@ -63,6 +64,7 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 								return
 							}
 
+							propBaseSource, _ := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maxLength")
 							result = append(result, NewApiChange(
 								ResponsePropertyMaxLengthUnsetId,
 								config,
@@ -72,7 +74,7 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

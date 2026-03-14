@@ -46,6 +46,8 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "pattern")
+
 							propName := propertyFullName(propertyPath, propertyName)
 
 							id := ResponsePropertyPatternChangedId
@@ -67,7 +69,7 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

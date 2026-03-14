@@ -38,6 +38,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "pattern")
 
 						if patternDiff.To == "" {
 							result = append(result, NewApiChange(
@@ -49,7 +50,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						} else if patternDiff.From == "" {
 							result = append(result, NewApiChange(
 								RequestPropertyPatternAddedId,
@@ -60,7 +61,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						} else {
 
 							id := RequestPropertyPatternChangedId
@@ -80,7 +81,7 @@ func RequestPropertyPatternUpdatedCheck(diffReport *diff.Diff, operationsSources
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

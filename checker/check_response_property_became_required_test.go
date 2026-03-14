@@ -30,6 +30,26 @@ func TestResponsePropertyBecameRequiredlCheck(t *testing.T) {
 	}, errs[0])
 }
 
+// CL: changing optional response property to required with source tracking
+func TestResponsePropertyBecameRequired_WithSources(t *testing.T) {
+	enableOriginTracking(t)
+	s1, err := open("../data/checker/response_property_became_optional_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_became_optional_base.yaml")
+	require.NoError(t, err)
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameRequiredCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ResponsePropertyBecameRequiredId, errs[0].GetId())
+
+	// Base has no 'required' list in YAML, so baseSource is nil
+	require.Empty(t, errs[0].GetBaseSource())
+	// Revision has 'required' list, so revisionSource points to it (sequence field)
+	require.NotEmpty(t, errs[0].GetRevisionSource())
+	require.Equal(t, "../data/checker/response_property_became_optional_base.yaml", errs[0].GetRevisionSource().File)
+}
+
 // CL: changing optional response write-only property to required
 func TestResponseWriteOnlyPropertyBecameRequiredCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_became_optional_revision.yaml")

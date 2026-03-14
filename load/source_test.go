@@ -33,6 +33,16 @@ func TestSource_IsGitRevision(t *testing.T) {
 	require.True(t, load.NewSource("HEAD:dir/spec.yaml").IsGitRevision())
 }
 
+func TestSource_DisplayPath_GitRevision(t *testing.T) {
+	require.Equal(t, "openapi.yaml", load.NewSource("origin/main:openapi.yaml").DisplayPath())
+	require.Equal(t, "dir/spec.yaml", load.NewSource("HEAD:dir/spec.yaml").DisplayPath())
+}
+
+func TestSource_DisplayPath_NonGit(t *testing.T) {
+	require.Equal(t, "openapi.yaml", load.NewSource("openapi.yaml").DisplayPath())
+	require.Equal(t, "http://example.com/spec.yaml", load.NewSource("http://example.com/spec.yaml").DisplayPath())
+}
+
 func TestSource_IsNotGitRevision(t *testing.T) {
 	require.False(t, load.NewSource("openapi.yaml").IsGitRevision())
 	require.False(t, load.NewSource("-").IsGitRevision())

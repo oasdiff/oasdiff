@@ -101,3 +101,12 @@ func (source *Source) IsFile() bool {
 func (source *Source) IsGitRevision() bool {
 	return source.Type == SourceTypeGitRevision
 }
+
+// DisplayPath returns the path suitable for display and source-location reporting.
+// For git revisions it strips the ref prefix (e.g. "origin/main:openapi.yaml" → "openapi.yaml").
+func (source *Source) DisplayPath() string {
+	if source.Type != SourceTypeGitRevision {
+		return source.Path
+	}
+	return source.Path[strings.Index(source.Path, ":")+1:]
+}

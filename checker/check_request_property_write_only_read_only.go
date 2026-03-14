@@ -52,6 +52,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "writeOnly")
 
 						if slices.Contains(parent.Base.Required, propertyName) {
 							id := RequestRequiredPropertyBecameNonWriteOnlyCheckId
@@ -68,7 +69,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -85,7 +86,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 					})
 
 				CheckModifiedPropertiesDiff(
@@ -101,6 +102,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "readOnly")
 
 						if slices.Contains(parent.Base.Required, propertyName) {
 							id := RequestRequiredPropertyBecameNonReadOnlyCheckId
@@ -116,7 +118,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 								operationItem.Revision,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -133,7 +135,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						).WithDetails(mediaTypeDetails))
+						).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 					})
 			}
 		}

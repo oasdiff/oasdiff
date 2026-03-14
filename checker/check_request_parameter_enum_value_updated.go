@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"fmt"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -35,6 +37,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 						continue
 					}
 					for _, enumVal := range enumDiff.Deleted {
+						baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, paramItem.SchemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 						result = append(result, NewApiChange(
 							RequestParameterEnumValueRemovedId,
 							config,
@@ -44,9 +47,10 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 					for _, enumVal := range enumDiff.Added {
+						baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, paramItem.SchemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 						result = append(result, NewApiChange(
 							RequestParameterEnumValueAddedId,
 							config,
@@ -56,7 +60,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 							operationItem.Revision,
 							operation,
 							path,
-						))
+						).WithSources(baseSource, revisionSource))
 					}
 				}
 			}

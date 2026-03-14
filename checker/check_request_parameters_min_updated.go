@@ -41,6 +41,7 @@ func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						id = RequestParameterMinDecreasedId
 					}
 
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minimum")
 					result = append(result, NewApiChange(
 						id,
 						config,
@@ -50,7 +51,7 @@ func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 						operationItem.Revision,
 						operation,
 						path,
-					))
+					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

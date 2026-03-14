@@ -32,6 +32,18 @@ func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 	}, errs[0])
 }
 
+// Regression: object-valued enum entries must not produce a false breaking change due to __origin__ metadata.
+func TestRequestParameterObjectEnumNoFalseBreakingChange(t *testing.T) {
+	s, err := open("../data/checker/object_enum_same.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s, s)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}
+
 // CL: adding an enum value to request parameter
 func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_enum_value_updated_revision.yaml")

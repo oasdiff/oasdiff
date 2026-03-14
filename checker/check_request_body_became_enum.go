@@ -32,9 +32,11 @@ func RequestBodyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.O
 				if mediaTypeDiff.SchemaDiff == nil {
 					continue
 				}
-				if schemaDiff := mediaTypeDiff.SchemaDiff; schemaDiff.EnumDiff == nil || !schemaDiff.EnumDiff.EnumAdded {
+				schemaDiff := mediaTypeDiff.SchemaDiff
+				if schemaDiff.EnumDiff == nil || !schemaDiff.EnumDiff.EnumAdded {
 					continue
 				}
+				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, schemaDiff, "enum")
 				result = append(result, NewApiChange(
 					RequestBodyBecameEnumId,
 					config,
@@ -44,7 +46,7 @@ func RequestBodyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.O
 					operationItem.Revision,
 					operation,
 					path,
-				).WithDetails(mediaTypeDetails))
+				).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 			}
 		}
 	}

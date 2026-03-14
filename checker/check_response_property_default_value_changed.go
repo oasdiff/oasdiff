@@ -36,19 +36,20 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
 					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					appendResultItem := func(messageId string, a ...any) {
-						result = append(result, NewApiChange(
-							messageId,
-							config,
-							a,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithDetails(mediaTypeDetails))
-					}
 					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
+						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "default")
+						appendResultItem := func(messageId string, a ...any) {
+							result = append(result, NewApiChange(
+								messageId,
+								config,
+								a,
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+						}
 						defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff
 						if defaultValueDiff.From == nil {
 							appendResultItem(ResponseBodyDefaultValueAddedId, mediaType, defaultValueDiff.To, responseStatus)
@@ -66,6 +67,19 @@ func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 								return
 							}
 
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "default")
+							appendResultItem := func(messageId string, a ...any) {
+								result = append(result, NewApiChange(
+									messageId,
+									config,
+									a,
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+							}
 							defaultValueDiff := propertyDiff.DefaultDiff
 							if defaultValueDiff.From == nil {
 								appendResultItem(ResponsePropertyDefaultValueAddedId, propertyName, defaultValueDiff.To, responseStatus)

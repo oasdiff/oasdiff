@@ -179,6 +179,21 @@ func TestSchemaDiff_EnumDiff(t *testing.T) {
 		d(t, diff.NewConfig(), 1, 3).PathsDiff.Modified[installCommandPath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInPath]["project"].SchemaDiff.EnumDiff)
 }
 
+// Regression test: object-valued enum entries must not produce a false diff due to __origin__ metadata.
+// home-iot-api-1.yaml and home-iot-api-2.yaml are identical in their enum values (including the object
+// enum {x: reuven} in /zones/{zoneId}/quiet). Without the fix, __origin__ would be embedded in the
+// map[string]any enum value and cause reflect.DeepEqual to report it as both added and deleted.
+func TestSchemaDiff_ObjectEnumNoDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+	s1, err := loader.LoadFromFile("../data/home-iot-api-1.yaml")
+	require.NoError(t, err)
+	s2, err := loader.LoadFromFile("../data/home-iot-api-2.yaml")
+	require.NoError(t, err)
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Nil(t, d)
+}
+
 func TestSchemaDiff_RequiredAdded(t *testing.T) {
 	require.Contains(t,
 		d(t, diff.NewConfig(), 1, 5).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInQuery]["filter"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.RequiredDiff.Added,

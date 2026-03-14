@@ -75,7 +75,7 @@ func loadSpecInfo(loader *openapi3.Loader, source *Source) (*SpecInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newSpecInfo(s, source.Path), nil
+	return newSpecInfo(s, source.DisplayPath()), nil
 }
 
 func fromGlob(loader *openapi3.Loader, glob string) ([]*SpecInfo, error) {
