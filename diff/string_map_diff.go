@@ -1,9 +1,5 @@
 package diff
 
-import (
-	"github.com/getkin/kin-openapi/openapi3"
-)
-
 // StringMapDiff describes the changes between a pair of string maps
 type StringMapDiff struct {
 	Added    []string     `json:"added,omitempty" yaml:"added,omitempty"`
@@ -33,7 +29,7 @@ func (diff *StringMapDiff) Empty() bool {
 		len(diff.Modified) == 0
 }
 
-func getStringMapDiff(strings1, strings2 openapi3.StringMap) *StringMapDiff {
+func getStringMapDiff(strings1, strings2 map[string]string) *StringMapDiff {
 	diff := getStringMapDiffInternal(strings1, strings2)
 
 	if diff.Empty() {
@@ -43,7 +39,7 @@ func getStringMapDiff(strings1, strings2 openapi3.StringMap) *StringMapDiff {
 	return diff
 }
 
-func getStringMapDiffInternal(strings1, strings2 openapi3.StringMap) *StringMapDiff {
+func getStringMapDiffInternal(strings1, strings2 map[string]string) *StringMapDiff {
 	result := newStringMapDiffDiff()
 
 	for k1, v1 := range strings1 {
