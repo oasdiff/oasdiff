@@ -9,6 +9,7 @@ import (
 
 const (
 	RequestPropertyDeprecatedId              = "request-property-deprecated"
+	RequestPropertyDeprecatedWithSunsetId    = "request-property-deprecated-with-sunset"
 	RequestPropertyDeprecatedSunsetMissingId = "request-property-deprecated-sunset-missing"
 	RequestPropertyDeprecatedInvalidId       = "request-property-deprecated-sunset-invalid"
 	RequestPropertyReactivatedId             = "request-property-reactivated"
@@ -54,7 +55,6 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "deprecated")
 
 						// Check if property was reactivated (un-deprecated)
 						if propertyDiff.DeprecatedDiff.To == nil || propertyDiff.DeprecatedDiff.To == false {
@@ -67,7 +67,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								op,
 								operation,
 								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+							).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -85,7 +85,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 									op,
 									operation,
 									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+								).WithDetails(mediaTypeDetails))
 							} else {
 								// no policy, report deprecation without sunset as INFO
 								result = append(result, NewApiChange(
@@ -97,7 +97,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 									op,
 									operation,
 									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
+								).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 							}
 							return
 						}
@@ -113,7 +113,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								op,
 								operation,
 								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+							).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -129,21 +129,21 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								op,
 								operation,
 								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+							).WithDetails(mediaTypeDetails))
 							return
 						}
 
-						// not breaking changes
+						// Report property deprecated with sunset date (always show, regardless of policy)
 						result = append(result, NewApiChange(
-							RequestPropertyDeprecatedId,
+							RequestPropertyDeprecatedWithSunsetId,
 							config,
-							[]any{propName},
+							[]any{propName, date},
 							"",
 							operationsSources,
 							op,
 							operation,
 							path,
-						).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
+						).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 					})
 			}
 		}
