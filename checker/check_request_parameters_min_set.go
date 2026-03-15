@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	RequestParameterMinSetId = "request-parameter-min-set"
+	RequestParameterMinSetId          = "request-parameter-min-set"
+	RequestParameterExclusiveMinSetId = "request-parameter-exclusive-min-set"
 )
 
 func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -26,26 +27,29 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
-					_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minimum")
-					minDiff := paramDiff.SchemaDiff.MinDiff
-					if minDiff == nil {
-						continue
+					for _, entry := range []struct {
+						diff  *diff.ValueDiff
+						id    string
+						field string
+					}{
+						{paramDiff.SchemaDiff.MinDiff, RequestParameterMinSetId, "minimum"},
+						{paramDiff.SchemaDiff.ExclusiveMinDiff, RequestParameterExclusiveMinSetId, "exclusiveMinimum"},
+					} {
+						if entry.diff == nil || entry.diff.From != nil || entry.diff.To == nil {
+							continue
+						}
+						_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
+						result = append(result, NewApiChange(
+							entry.id,
+							config,
+							[]any{paramLocation, paramName, entry.diff.To},
+							commentId(entry.id),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(nil, revisionSource))
 					}
-					if minDiff.From != nil ||
-						minDiff.To == nil {
-						continue
-					}
-
-					result = append(result, NewApiChange(
-						RequestParameterMinSetId,
-						config,
-						[]any{paramLocation, paramName, minDiff.To},
-						commentId(RequestParameterMinSetId),
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(nil, revisionSource))
 				}
 			}
 		}

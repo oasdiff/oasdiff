@@ -49,30 +49,54 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 							operation,
 							path,
 						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+					} else if nullAddedToTypeArray(mediaTypeDiff.SchemaDiff.TypeDiff) {
+						// OpenAPI 3.1: type changed from "string" to ["string", "null"]
+						result = append(result, NewApiChange(
+							ResponseBodyBecameNullableId,
+							config,
+							nil,
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithDetails(mediaTypeDetails))
 					}
 
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							nullableDiff := propertyDiff.NullableDiff
-							if nullableDiff == nil {
+							if nullableDiff != nil {
+								if nullableDiff.To != true {
+									return
+								}
+								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "nullable")
+								result = append(result, NewApiChange(
+									ResponsePropertyBecameNullableId,
+									config,
+									[]any{propertyFullName(propertyPath, propertyName), responseStatus},
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 								return
 							}
-							if nullableDiff.To != true {
-								return
+							// OpenAPI 3.1: type changed from "string" to ["string", "null"]
+							if nullAddedToTypeArray(propertyDiff.TypeDiff) {
+								result = append(result, NewApiChange(
+									ResponsePropertyBecameNullableId,
+									config,
+									[]any{propertyFullName(propertyPath, propertyName), responseStatus},
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithDetails(mediaTypeDetails))
 							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "nullable")
-							result = append(result, NewApiChange(
-								ResponsePropertyBecameNullableId,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						})
 				}
 			}

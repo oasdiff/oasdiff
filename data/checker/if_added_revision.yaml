@@ -1,0 +1,48 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              if:
+                properties:
+                  name:
+                    const: special
+              then:
+                required:
+                  - name
+              else:
+                properties:
+                  name:
+                    type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                if:
+                  properties:
+                    name:
+                      const: special
+                then:
+                  required:
+                    - name
+                else:
+                  properties:
+                    name:
+                      type: string
