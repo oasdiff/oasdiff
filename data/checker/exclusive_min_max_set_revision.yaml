@@ -1,0 +1,37 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      operationId: createProduct
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            exclusiveMinimum: 0
+            exclusiveMaximum: 100
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              exclusiveMinimum: 0
+              exclusiveMaximum: 100
+              properties:
+                price:
+                  type: number
+                  exclusiveMinimum: 0
+                  exclusiveMaximum: 1000
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  price:
+                    type: number
