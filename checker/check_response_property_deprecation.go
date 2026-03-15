@@ -9,6 +9,7 @@ import (
 
 const (
 	ResponsePropertyDeprecatedId              = "response-property-deprecated"
+	ResponsePropertyDeprecatedWithSunsetId    = "response-property-deprecated-with-sunset"
 	ResponsePropertyDeprecatedSunsetMissingId = "response-property-deprecated-sunset-missing"
 	ResponsePropertyDeprecatedInvalidId       = "response-property-deprecated-sunset-invalid"
 	ResponsePropertyReactivatedId             = "response-property-reactivated"
@@ -57,7 +58,6 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 								return
 							}
 
-							baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "deprecated")
 							propName := propertyFullName(propertyPath, propertyName)
 
 							// Check if property was reactivated (un-deprecated)
@@ -71,7 +71,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -89,7 +89,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 										op,
 										operation,
 										path,
-									).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+									).WithDetails(mediaTypeDetails))
 								} else {
 									// no policy, report deprecation without sunset as INFO
 									result = append(result, NewApiChange(
@@ -101,7 +101,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 										op,
 										operation,
 										path,
-									).WithSources(baseSource, revisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
+									).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 								}
 								return
 							}
@@ -117,7 +117,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
@@ -133,21 +133,21 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 									op,
 									operation,
 									path,
-								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+								).WithDetails(mediaTypeDetails))
 								return
 							}
 
 							// not breaking changes
 							result = append(result, NewApiChange(
-								ResponsePropertyDeprecatedId,
+								ResponsePropertyDeprecatedWithSunsetId,
 								config,
-								[]any{propName},
+								[]any{propName, date},
 								"",
 								operationsSources,
 								op,
 								operation,
 								path,
-							).WithSources(baseSource, revisionSource).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
+							).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 						})
 				}
 			}

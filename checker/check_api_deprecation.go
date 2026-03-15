@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	EndpointReactivatedId        = "endpoint-reactivated"
-	APIDeprecatedSunsetParseId   = "api-deprecated-sunset-parse"
-	APIDeprecatedSunsetMissingId = "api-deprecated-sunset-missing"
-	APIInvalidStabilityLevelId   = "api-invalid-stability-level"
-	APISunsetDateTooSmallId      = "api-sunset-date-too-small"
-	EndpointDeprecatedId         = "endpoint-deprecated"
+	EndpointReactivatedId          = "endpoint-reactivated"
+	APIDeprecatedSunsetParseId     = "api-deprecated-sunset-parse"
+	APIDeprecatedSunsetMissingId   = "api-deprecated-sunset-missing"
+	APIInvalidStabilityLevelId     = "api-invalid-stability-level"
+	APISunsetDateTooSmallId        = "api-sunset-date-too-small"
+	EndpointDeprecatedId           = "endpoint-deprecated"
+	EndpointDeprecatedWithSunsetId = "endpoint-deprecated-with-sunset"
 )
 
 // formatDeprecationDetails formats optional deprecation details (stability level only)
@@ -54,7 +55,6 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 		}
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			op := pathItem.Revision.GetOperation(operation)
-			baseSource, revisionSource := OperationFieldSources(operationsSources, operationDiff, "deprecated")
 
 			if operationDiff.DeprecatedDiff == nil {
 				continue
@@ -71,7 +71,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
+				).WithDetails(formatDeprecationDetails(op.Extensions)))
 				continue
 			}
 
@@ -87,7 +87,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 			if !ok {
 				// if deprecation policy is defined and sunset is missing, it's a breaking change
 				if deprecationDays > 0 {
-					result = append(result, getAPIDeprecatedSunsetMissing(newOpInfo(config, op, operationsSources, operation, path)).WithSources(baseSource, revisionSource))
+					result = append(result, getAPIDeprecatedSunsetMissing(newOpInfo(config, op, operationsSources, operation, path)))
 				} else {
 					// no policy, report deprecation without sunset as INFO
 					result = append(result, NewApiChange(
@@ -99,7 +99,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 						op,
 						operation,
 						path,
-					).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
+					).WithDetails(formatDeprecationDetails(op.Extensions)))
 				}
 				continue
 			}
@@ -115,7 +115,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				))
 				continue
 			}
 
@@ -131,21 +131,22 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				))
 				continue
 			}
 
-			// not breaking changes
+			// endpoint deprecated with sunset date
 			result = append(result, NewApiChange(
-				EndpointDeprecatedId,
+				EndpointDeprecatedWithSunsetId,
 				config,
-				nil,
+				[]any{date},
 				"",
 				operationsSources,
 				op,
 				operation,
 				path,
-			).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
+			).WithDetails(formatDeprecationDetails(op.Extensions)))
+
 		}
 	}
 

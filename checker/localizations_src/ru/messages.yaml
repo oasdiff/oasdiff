@@ -22,7 +22,20 @@ api-sunset-date-too-small: дата API sunset date %s слишком рання
 api-path-added: API path добавлено
 endpoint-added: эндпоинт добавлен
 endpoint-deprecated: эндпоинт устарел
+endpoint-deprecated-with-sunset: "эндпоинт устарел с датой прекращения %s"
 endpoint-reactivated: эндпоинт реактивирован
+request-property-deprecated: "поле запроса %s устарело"
+request-property-deprecated-with-sunset: "поле запроса %s устарело с датой прекращения %s"
+request-property-deprecated-sunset-missing: "поле запроса %s устарело без даты прекращения"
+request-property-deprecated-sunset-invalid: "поле запроса %s устарело с недействительной датой прекращения: %s"
+request-property-reactivated: "поле запроса %s реактивировано"
+request-property-sunset-date-too-small: "дата прекращения %s поля запроса %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
+response-property-deprecated: "поле ответа %s устарело"
+response-property-deprecated-with-sunset: "поле ответа %s устарело с датой прекращения %s"
+response-property-deprecated-sunset-missing: "поле ответа %s устарело без даты прекращения"
+response-property-deprecated-sunset-invalid: "поле ответа %s устарело с недействительной датой прекращения: %s"
+response-property-reactivated: "поле ответа %s реактивировано"
+response-property-sunset-date-too-small: "дата прекращения %s поля ответа %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
 api-path-deprecated: API path deprecated
 api-path-reactivated: API path реактивирован
 api-path-removed-without-deprecation: API path удалён без процедуры deprecation
