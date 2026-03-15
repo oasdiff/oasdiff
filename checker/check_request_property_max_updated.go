@@ -5,11 +5,16 @@ import (
 )
 
 const (
-	RequestBodyMaxDecreasedId             = "request-body-max-decreased"
-	RequestBodyMaxIncreasedId             = "request-body-max-increased"
-	RequestPropertyMaxDecreasedId         = "request-property-max-decreased"
-	RequestReadOnlyPropertyMaxDecreasedId = "request-read-only-property-max-decreased"
-	RequestPropertyMaxIncreasedId         = "request-property-max-increased"
+	RequestBodyMaxDecreasedId                      = "request-body-max-decreased"
+	RequestBodyMaxIncreasedId                      = "request-body-max-increased"
+	RequestPropertyMaxDecreasedId                  = "request-property-max-decreased"
+	RequestReadOnlyPropertyMaxDecreasedId          = "request-read-only-property-max-decreased"
+	RequestPropertyMaxIncreasedId                  = "request-property-max-increased"
+	RequestBodyExclusiveMaxDecreasedId             = "request-body-exclusive-max-decreased"
+	RequestBodyExclusiveMaxIncreasedId             = "request-body-exclusive-max-increased"
+	RequestPropertyExclusiveMaxDecreasedId         = "request-property-exclusive-max-decreased"
+	RequestReadOnlyPropertyExclusiveMaxDecreasedId = "request-read-only-property-exclusive-max-decreased"
+	RequestPropertyExclusiveMaxIncreasedId         = "request-property-exclusive-max-increased"
 )
 
 func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -64,6 +69,36 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 						}
 					}
 				}
+				if mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff != nil {
+					exMaxDiff := mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff
+					if exMaxDiff.From != nil &&
+						exMaxDiff.To != nil {
+						exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "exclusiveMaximum")
+						if IsDecreasedValue(exMaxDiff) {
+							result = append(result, NewApiChange(
+								RequestBodyExclusiveMaxDecreasedId,
+								config,
+								[]any{exMaxDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
+						} else {
+							result = append(result, NewApiChange(
+								RequestBodyExclusiveMaxIncreasedId,
+								config,
+								[]any{exMaxDiff.From, exMaxDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
+						}
+					}
+				}
 
 				CheckModifiedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
@@ -109,6 +144,51 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 
+					})
+
+				CheckModifiedPropertiesDiff(
+					mediaTypeDiff.SchemaDiff,
+					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+						exMaxDiff := propertyDiff.ExclusiveMaxDiff
+						if exMaxDiff == nil {
+							return
+						}
+						if exMaxDiff.From == nil ||
+							exMaxDiff.To == nil {
+							return
+						}
+
+						propName := propertyFullName(propertyPath, propertyName)
+
+						id := RequestPropertyExclusiveMaxDecreasedId
+						if propertyDiff.Revision.ReadOnly {
+							id = RequestReadOnlyPropertyExclusiveMaxDecreasedId
+						}
+
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "exclusiveMaximum")
+						if IsDecreasedValue(exMaxDiff) {
+							result = append(result, NewApiChange(
+								id,
+								config,
+								[]any{propName, exMaxDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						} else {
+							result = append(result, NewApiChange(
+								RequestPropertyExclusiveMaxIncreasedId,
+								config,
+								[]any{propName, exMaxDiff.From, exMaxDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						}
 					})
 			}
 		}
