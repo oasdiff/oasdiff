@@ -32,8 +32,8 @@ type SchemaCollection struct {
 	Description          []string
 	Enum                 [][]any
 	UniqueItems          []bool
-	ExclusiveMin         []bool
-	ExclusiveMax         []bool
+	ExclusiveMin         []openapi3.ExclusiveBound
+	ExclusiveMax         []openapi3.ExclusiveBound
 	Min                  []*float64
 	Max                  []*float64
 	MultipleOf           []*float64
@@ -431,36 +431,36 @@ func resolveNumberRange(schema *openapi3.Schema, collection *SchemaCollection) *
 
 	//resolve minimum
 	max := math.Inf(-1)
-	isExcluded := false
+	var exclusiveMin openapi3.ExclusiveBound
 	var value *float64
 	for i, s := range collection.Min {
 		if s != nil {
 			if *s > max {
 				max = *s
 				value = s
-				isExcluded = collection.ExclusiveMin[i]
+				exclusiveMin = collection.ExclusiveMin[i]
 			}
 		}
 	}
 
 	schema.Min = value
-	schema.ExclusiveMin = isExcluded
+	schema.ExclusiveMin = exclusiveMin
 	//resolve maximum
 	min := math.Inf(1)
-	isExcluded = false
+	var exclusiveMax openapi3.ExclusiveBound
 	// var value *float64
 	for i, s := range collection.Max {
 		if s != nil {
 			if *s < min {
 				min = *s
 				value = s
-				isExcluded = collection.ExclusiveMax[i]
+				exclusiveMax = collection.ExclusiveMax[i]
 			}
 		}
 	}
 
 	schema.Max = value
-	schema.ExclusiveMax = isExcluded
+	schema.ExclusiveMax = exclusiveMax
 	return schema
 }
 
