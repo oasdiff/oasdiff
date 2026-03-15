@@ -23,6 +23,7 @@ require (
 	github.com/oasdiff/yaml3 v0.0.0-20260224194419-61cd415a242b // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -50,3 +51,5 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.0
 )
+
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260315174704-1838b43109e3

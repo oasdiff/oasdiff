@@ -32,6 +32,7 @@ type DetailName string
 const (
 	// Swagger
 	PathsDetail        DetailName = "paths"
+	WebhooksDetail     DetailName = "webhooks"
 	SecurityDetail     DetailName = "security"
 	ServersDetail      DetailName = "servers"
 	TagsDetail         DetailName = "tags"

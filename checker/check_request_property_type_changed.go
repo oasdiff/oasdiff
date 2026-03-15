@@ -48,6 +48,11 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 						continue
 					}
 
+					// Suppress null-only type changes (handled by nullable checkers)
+					if isNullTypeChange(typeDiff) && formatDiff.Empty() {
+						continue
+					}
+
 					if breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
 						id = RequestBodyTypeChangedId
 					}
@@ -76,6 +81,11 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 
 						// Check for suppression by ListOfTypes checker
 						if shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff) {
+							return
+						}
+
+						// Suppress null-only type changes (handled by nullable checkers)
+						if isNullTypeChange(propertyDiff.TypeDiff) && propertyDiff.FormatDiff.Empty() {
 							return
 						}
 

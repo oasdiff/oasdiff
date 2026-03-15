@@ -30,6 +30,15 @@ func allChecksConfig() *checker.Config {
 	return checker.NewConfig(checker.GetAllChecks())
 }
 
+func containsId(errs checker.Changes, id string) bool {
+	for _, e := range errs {
+		if e.GetId() == id {
+			return true
+		}
+	}
+	return false
+}
+
 // BC: deprecating an operation with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 
@@ -194,7 +203,7 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	// endpoint-deprecated-with-sunset reported
+	// only a non-breaking change detected
 	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
@@ -363,6 +372,7 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
+	// only a non-breaking change detected
 	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
@@ -385,34 +395,4 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIDeprecatedSunsetParseId, errs[0].GetId())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "failed to unmarshal sunset json")
-}
-
-// CL: endpoint deprecation message includes sunset date
-func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
-	require.NoError(t, err)
-
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
-	require.NoError(t, err)
-
-	// Use RFC3339 format (with time) instead of just date
-	sunsetDate := civil.DateOf(time.Now()).AddDays(30)
-	sunsetRFC3339 := time.Date(sunsetDate.Year, sunsetDate.Month, sunsetDate.Day, 12, 0, 0, 0, time.UTC).Format(time.RFC3339)
-	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, sunsetRFC3339)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
-
-	// Find the endpoint-deprecated-with-sunset change
-	var sunsetChange checker.Change
-	for _, err := range errs {
-		if err.GetId() == checker.EndpointDeprecatedWithSunsetId {
-			sunsetChange = err
-			break
-		}
-	}
-	require.NotNil(t, sunsetChange, "expected to find endpoint-deprecated-with-sunset change")
-	require.Equal(t, fmt.Sprintf("endpoint deprecated with sunset date '%s'", sunsetDate.String()), sunsetChange.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

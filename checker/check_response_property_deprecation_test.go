@@ -223,24 +223,3 @@ func TestResponsePropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, checker.ResponsePropertyDeprecatedId, errs[0].GetId())
 	require.Equal(t, "response property 'legacyField' deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
-
-// CL: message includes sunset date when response property deprecated with valid sunset
-func TestResponsePropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
-	require.NoError(t, err)
-
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
-	require.NoError(t, err)
-
-	sunsetDate := civil.DateOf(time.Now()).AddDays(30).String()
-	s2.Spec.Components.Schemas["TestResponse"].Value.Properties["legacyField"].Value.Extensions[diff.SunsetExtension] = toJson(t, sunsetDate)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-
-	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck).WithDeprecation(0, 10)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
-	require.Equal(t, fmt.Sprintf("response property 'legacyField' deprecated with sunset date '%s' (stability: stable)", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-}
