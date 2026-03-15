@@ -28,6 +28,34 @@ func TestRequestBodyUnevaluatedAdded(t *testing.T) {
 	require.True(t, ids[checker.RequestBodyUnevaluatedPropertiesAddedId], "expected request-body-unevaluated-properties-added")
 }
 
+// CL: adding unevaluated constraints to request property
+func TestRequestPropertyUnevaluatedAdded(t *testing.T) {
+	s1, err := open("../data/checker/unevaluated_property_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/unevaluated_property_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedItemsAddedId))
+	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedPropertiesAddedId))
+}
+
+// CL: removing unevaluated constraints from request property
+func TestRequestPropertyUnevaluatedRemoved(t *testing.T) {
+	s1, err := open("../data/checker/unevaluated_property_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/unevaluated_property_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedItemsRemovedId))
+	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedPropertiesRemovedId))
+}
+
 // CL: removing unevaluated constraints from request body
 func TestRequestBodyUnevaluatedRemoved(t *testing.T) {
 	s1, err := open("../data/checker/unevaluated_revision.yaml")
