@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	RequestParameterMinIncreasedId = "request-parameter-min-increased"
-	RequestParameterMinDecreasedId = "request-parameter-min-decreased"
+	RequestParameterMinIncreasedId          = "request-parameter-min-increased"
+	RequestParameterMinDecreasedId          = "request-parameter-min-decreased"
+	RequestParameterExclusiveMinIncreasedId = "request-parameter-exclusive-min-increased"
+	RequestParameterExclusiveMinDecreasedId = "request-parameter-exclusive-min-decreased"
 )
 
 func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -27,31 +29,34 @@ func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
-					minDiff := paramDiff.SchemaDiff.MinDiff
-					if minDiff == nil {
-						continue
+					for _, entry := range []struct {
+						diff        *diff.ValueDiff
+						increasedId string
+						decreasedId string
+						field       string
+					}{
+						{paramDiff.SchemaDiff.MinDiff, RequestParameterMinIncreasedId, RequestParameterMinDecreasedId, "minimum"},
+						{paramDiff.SchemaDiff.ExclusiveMinDiff, RequestParameterExclusiveMinIncreasedId, RequestParameterExclusiveMinDecreasedId, "exclusiveMinimum"},
+					} {
+						if entry.diff == nil || entry.diff.From == nil || entry.diff.To == nil {
+							continue
+						}
+						id := entry.increasedId
+						if !IsIncreasedValue(entry.diff) {
+							id = entry.decreasedId
+						}
+						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
+						result = append(result, NewApiChange(
+							id,
+							config,
+							[]any{paramLocation, paramName, entry.diff.From, entry.diff.To},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(baseSource, revisionSource))
 					}
-					if minDiff.From == nil ||
-						minDiff.To == nil {
-						continue
-					}
-
-					id := RequestParameterMinIncreasedId
-					if !IsIncreasedValue(minDiff) {
-						id = RequestParameterMinDecreasedId
-					}
-
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minimum")
-					result = append(result, NewApiChange(
-						id,
-						config,
-						[]any{paramLocation, paramName, minDiff.From, minDiff.To},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

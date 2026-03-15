@@ -10,6 +10,7 @@ type InfoDiff struct {
 	Deleted            bool            `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	ExtensionsDiff     *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	TitleDiff          *ValueDiff      `json:"title,omitempty" yaml:"title,omitempty"`
+	SummaryDiff        *ValueDiff      `json:"summary,omitempty" yaml:"summary,omitempty"`
 	DescriptionDiff    *ValueDiff      `json:"description,omitempty" yaml:"description,omitempty"`
 	TermsOfServiceDiff *ValueDiff      `json:"termsOfService,omitempty" yaml:"termsOfService,omitempty"`
 	ContactDiff        *ContactDiff    `json:"contact,omitempty" yaml:"contact,omitempty"`
@@ -69,6 +70,7 @@ func getInfoDiffInternal(config *Config, info1, info2 *openapi3.Info) (*InfoDiff
 	return &InfoDiff{
 		ExtensionsDiff:     extensionsDiff,
 		TitleDiff:          getValueDiffConditional(config.IsExcludeTitle(), info1.Title, info2.Title),
+		SummaryDiff:        getValueDiffConditional(config.IsExcludeSummary(), info1.Summary, info2.Summary),
 		DescriptionDiff:    getValueDiffConditional(config.IsExcludeDescription(), info1.Description, info2.Description),
 		TermsOfServiceDiff: getValueDiff(info1.TermsOfService, info2.TermsOfService),
 		ContactDiff:        contactDiff,

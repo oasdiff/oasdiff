@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	RequestParameterMaxDecreasedId = "request-parameter-max-decreased"
-	RequestParameterMaxIncreasedId = "request-parameter-max-increased"
+	RequestParameterMaxDecreasedId          = "request-parameter-max-decreased"
+	RequestParameterMaxIncreasedId          = "request-parameter-max-increased"
+	RequestParameterExclusiveMaxDecreasedId = "request-parameter-exclusive-max-decreased"
+	RequestParameterExclusiveMaxIncreasedId = "request-parameter-exclusive-max-increased"
 )
 
 func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -27,32 +29,34 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
-					maxDiff := paramDiff.SchemaDiff.MaxDiff
-					if maxDiff == nil {
-						continue
+					for _, entry := range []struct {
+						diff        *diff.ValueDiff
+						decreasedId string
+						increasedId string
+						field       string
+					}{
+						{paramDiff.SchemaDiff.MaxDiff, RequestParameterMaxDecreasedId, RequestParameterMaxIncreasedId, "maximum"},
+						{paramDiff.SchemaDiff.ExclusiveMaxDiff, RequestParameterExclusiveMaxDecreasedId, RequestParameterExclusiveMaxIncreasedId, "exclusiveMaximum"},
+					} {
+						if entry.diff == nil || entry.diff.From == nil || entry.diff.To == nil {
+							continue
+						}
+						id := entry.decreasedId
+						if !IsDecreasedValue(entry.diff) {
+							id = entry.increasedId
+						}
+						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
+						result = append(result, NewApiChange(
+							id,
+							config,
+							[]any{paramLocation, paramName, entry.diff.From, entry.diff.To},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(baseSource, revisionSource))
 					}
-					if maxDiff.From == nil ||
-						maxDiff.To == nil {
-						continue
-					}
-
-					id := RequestParameterMaxDecreasedId
-
-					if !IsDecreasedValue(maxDiff) {
-						id = RequestParameterMaxIncreasedId
-					}
-
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maximum")
-					result = append(result, NewApiChange(
-						id,
-						config,
-						[]any{paramLocation, paramName, maxDiff.From, maxDiff.To},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

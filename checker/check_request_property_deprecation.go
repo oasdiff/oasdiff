@@ -55,6 +55,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "deprecated")
 
 						// Check if property was reactivated (un-deprecated)
 						if propertyDiff.DeprecatedDiff.To == nil || propertyDiff.DeprecatedDiff.To == false {
@@ -67,7 +68,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								op,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -85,7 +86,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 									op,
 									operation,
 									path,
-								).WithDetails(mediaTypeDetails))
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							} else {
 								// no policy, report deprecation without sunset as INFO
 								result = append(result, NewApiChange(
@@ -97,7 +98,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 									op,
 									operation,
 									path,
-								).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
+								).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
 							}
 							return
 						}
@@ -113,7 +114,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								op,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -129,7 +130,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 								op,
 								operation,
 								path,
-							).WithDetails(mediaTypeDetails))
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							return
 						}
 
@@ -143,7 +144,7 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 							op,
 							operation,
 							path,
-						).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
+						).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetailsWithSunset(date, op.Extensions), mediaTypeDetails)))
 					})
 			}
 		}
