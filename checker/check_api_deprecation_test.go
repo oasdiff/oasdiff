@@ -30,6 +30,15 @@ func allChecksConfig() *checker.Config {
 	return checker.NewConfig(checker.GetAllChecks())
 }
 
+func containsId(errs checker.Changes, id string) bool {
+	for _, e := range errs {
+		if e.GetId() == id {
+			return true
+		}
+	}
+	return false
+}
+
 // BC: deprecating an operation with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 
