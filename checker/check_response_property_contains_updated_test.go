@@ -18,14 +18,148 @@ func TestResponseBodyContainsAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.ResponseBodyContainsAddedId))
+}
 
-	found := false
-	for _, e := range errs {
-		if e.GetId() == checker.ResponseBodyContainsAddedId {
-			found = true
-			break
-		}
-	}
-	require.True(t, found, "expected response-body-contains-added")
+// CL: removing contains constraint from response body
+func TestResponseBodyContainsRemoved(t *testing.T) {
+	s1, err := open("../data/checker/contains_added_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_added_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponseBodyContainsRemovedId))
+}
+
+// CL: increasing minContains on response body
+func TestResponseBodyMinContainsIncreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_min_max_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_min_max_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponseBodyMinContainsIncreasedId))
+}
+
+// CL: decreasing minContains on response body
+func TestResponseBodyMinContainsDecreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_min_max_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_min_max_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponseBodyMinContainsDecreasedId))
+}
+
+// CL: increasing maxContains on response body
+func TestResponseBodyMaxContainsIncreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_min_max_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_min_max_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponseBodyMaxContainsIncreasedId))
+}
+
+// CL: decreasing maxContains on response body
+func TestResponseBodyMaxContainsDecreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_min_max_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_min_max_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponseBodyMaxContainsDecreasedId))
+}
+
+// CL: adding contains constraint to response property
+func TestResponsePropertyContainsAdded(t *testing.T) {
+	s1, err := open("../data/checker/contains_property_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_property_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyContainsAddedId))
+}
+
+// CL: removing contains constraint from response property
+func TestResponsePropertyContainsRemoved(t *testing.T) {
+	s1, err := open("../data/checker/contains_property_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_property_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyContainsRemovedId))
+}
+
+// CL: increasing minContains on response property
+func TestResponsePropertyMinContainsIncreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_property_min_max_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_property_min_max_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyMinContainsIncreasedId))
+}
+
+// CL: decreasing minContains on response property
+func TestResponsePropertyMinContainsDecreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_property_min_max_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_property_min_max_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyMinContainsDecreasedId))
+}
+
+// CL: increasing maxContains on response property
+func TestResponsePropertyMaxContainsIncreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_property_min_max_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_property_min_max_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyMaxContainsIncreasedId))
+}
+
+// CL: decreasing maxContains on response property
+func TestResponsePropertyMaxContainsDecreased(t *testing.T) {
+	s1, err := open("../data/checker/contains_property_min_max_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/contains_property_min_max_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyMaxContainsDecreasedId))
 }

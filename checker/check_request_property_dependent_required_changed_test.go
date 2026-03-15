@@ -30,6 +30,45 @@ func TestRequestBodyDependentRequiredAdded(t *testing.T) {
 	require.True(t, found, "expected request-body-dependent-required-added")
 }
 
+// CL: changing dependentRequired on request body
+func TestRequestBodyDependentRequiredChanged(t *testing.T) {
+	s1, err := open("../data/checker/dependent_required_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/dependent_required_changed_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.RequestBodyDependentRequiredChangedId))
+}
+
+// CL: adding dependentRequired to request property
+func TestRequestPropertyDependentRequiredAdded(t *testing.T) {
+	s1, err := open("../data/checker/dependent_required_property_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/dependent_required_property_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredAddedId))
+}
+
+// CL: removing dependentRequired from request property
+func TestRequestPropertyDependentRequiredRemoved(t *testing.T) {
+	s1, err := open("../data/checker/dependent_required_property_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/dependent_required_property_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredRemovedId))
+}
+
 // CL: removing dependentRequired from request body
 func TestRequestBodyDependentRequiredRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_revision.yaml")
