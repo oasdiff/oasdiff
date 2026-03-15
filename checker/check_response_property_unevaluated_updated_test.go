@@ -8,6 +8,48 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// CL: removing unevaluated constraints from response body
+func TestResponseBodyUnevaluatedRemoved(t *testing.T) {
+	s1, err := open("../data/checker/unevaluated_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/unevaluated_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponseBodyUnevaluatedItemsRemovedId))
+	require.True(t, containsId(errs, checker.ResponseBodyUnevaluatedPropertiesRemovedId))
+}
+
+// CL: adding unevaluated constraints to response property
+func TestResponsePropertyUnevaluatedAdded(t *testing.T) {
+	s1, err := open("../data/checker/unevaluated_property_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/unevaluated_property_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedItemsAddedId))
+	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedPropertiesAddedId))
+}
+
+// CL: removing unevaluated constraints from response property
+func TestResponsePropertyUnevaluatedRemoved(t *testing.T) {
+	s1, err := open("../data/checker/unevaluated_property_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/unevaluated_property_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedItemsRemovedId))
+	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedPropertiesRemovedId))
+}
+
 // CL: adding unevaluated constraints to response body
 func TestResponseBodyUnevaluatedAdded(t *testing.T) {
 	s1, err := open("../data/checker/unevaluated_base.yaml")
