@@ -11,6 +11,7 @@ type LicenseDiff struct {
 	ExtensionsDiff *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	NameDiff       *ValueDiff      `json:"name,omitempty" yaml:"name,omitempty"`
 	URLDiff        *ValueDiff      `json:"url,omitempty" yaml:"url,omitempty"`
+	IdentifierDiff *ValueDiff      `json:"identifier,omitempty" yaml:"identifier,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -57,6 +58,7 @@ func getLicenseDiffInternal(config *Config, license1, license2 *openapi3.License
 	}
 	result.NameDiff = getValueDiff(license1.Name, license2.Name)
 	result.URLDiff = getValueDiff(license1.URL, license2.URL)
+	result.IdentifierDiff = getValueDiff(license1.Identifier, license2.Identifier)
 
 	return &result, nil
 }

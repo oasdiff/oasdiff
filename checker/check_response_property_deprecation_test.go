@@ -226,6 +226,7 @@ func TestResponsePropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, "response property `legacyField` deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
+
 // CL: message includes sunset date when response property deprecated with valid sunset
 func TestResponsePropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	s1, err := open(getDeprecationFile("property_base_stable.yaml"))

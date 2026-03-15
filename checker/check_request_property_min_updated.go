@@ -5,11 +5,16 @@ import (
 )
 
 const (
-	RequestBodyMinIncreasedId             = "request-body-min-increased"
-	RequestBodyMinDecreasedId             = "request-body-min-decreased"
-	RequestPropertyMinIncreasedId         = "request-property-min-increased"
-	RequestReadOnlyPropertyMinIncreasedId = "request-read-only-property-min-increased"
-	RequestPropertyMinDecreasedId         = "request-property-min-decreased"
+	RequestBodyMinIncreasedId                      = "request-body-min-increased"
+	RequestBodyMinDecreasedId                      = "request-body-min-decreased"
+	RequestPropertyMinIncreasedId                  = "request-property-min-increased"
+	RequestReadOnlyPropertyMinIncreasedId          = "request-read-only-property-min-increased"
+	RequestPropertyMinDecreasedId                  = "request-property-min-decreased"
+	RequestBodyExclusiveMinIncreasedId             = "request-body-exclusive-min-increased"
+	RequestBodyExclusiveMinDecreasedId             = "request-body-exclusive-min-decreased"
+	RequestPropertyExclusiveMinIncreasedId         = "request-property-exclusive-min-increased"
+	RequestReadOnlyPropertyExclusiveMinIncreasedId = "request-read-only-property-exclusive-min-increased"
+	RequestPropertyExclusiveMinDecreasedId         = "request-property-exclusive-min-decreased"
 )
 
 func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -64,6 +69,36 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 						}
 					}
 				}
+				if mediaTypeDiff.SchemaDiff.ExclusiveMinDiff != nil {
+					exMinDiff := mediaTypeDiff.SchemaDiff.ExclusiveMinDiff
+					if exMinDiff.From != nil &&
+						exMinDiff.To != nil {
+						exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "exclusiveMinimum")
+						if IsIncreasedValue(exMinDiff) {
+							result = append(result, NewApiChange(
+								RequestBodyExclusiveMinIncreasedId,
+								config,
+								[]any{exMinDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
+						} else {
+							result = append(result, NewApiChange(
+								RequestBodyExclusiveMinDecreasedId,
+								config,
+								[]any{exMinDiff.From, exMinDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
+						}
+					}
+				}
 
 				CheckModifiedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
@@ -103,6 +138,50 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 								RequestPropertyMinDecreasedId,
 								config,
 								[]any{propName, minDiff.From, minDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						}
+					})
+
+				CheckModifiedPropertiesDiff(
+					mediaTypeDiff.SchemaDiff,
+					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+						exMinDiff := propertyDiff.ExclusiveMinDiff
+						if exMinDiff == nil {
+							return
+						}
+						if exMinDiff.From == nil ||
+							exMinDiff.To == nil {
+							return
+						}
+
+						propName := propertyFullName(propertyPath, propertyName)
+						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "exclusiveMinimum")
+
+						if IsIncreasedValue(exMinDiff) {
+							id := RequestPropertyExclusiveMinIncreasedId
+							if propertyDiff.Revision.ReadOnly {
+								id = RequestReadOnlyPropertyExclusiveMinIncreasedId
+							}
+							result = append(result, NewApiChange(
+								id,
+								config,
+								[]any{propName, exMinDiff.To},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						} else {
+							result = append(result, NewApiChange(
+								RequestPropertyExclusiveMinDecreasedId,
+								config,
+								[]any{propName, exMinDiff.From, exMinDiff.To},
 								"",
 								operationsSources,
 								operationItem.Revision,
