@@ -2,6 +2,7 @@ package diff_test
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -177,6 +178,29 @@ func TestSchemaDiff_EnumDiff(t *testing.T) {
 			Deleted: diff.EnumValues{},
 		},
 		d(t, diff.NewConfig(), 1, 3).PathsDiff.Modified[installCommandPath].OperationsDiff.Modified["GET"].ParametersDiff.Modified[openapi3.ParameterInPath]["project"].SchemaDiff.EnumDiff)
+}
+
+// Regression test: identical files loaded from different paths must produce an empty diff.
+// Without the fix, __origin__ (source-location metadata) leaks into the MediaType.Encoding map as a
+// real entry, causing false positive diffs when file paths differ (issue #806).
+func TestDiff_IdenticalFilesNoDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+	s1, err := loader.LoadFromFile("../data/openapi-test1.yaml")
+	require.NoError(t, err)
+	// Copy the same file to a temp location to get a different path.
+	tmp, err := os.CreateTemp("", "openapi-test-*.yaml")
+	require.NoError(t, err)
+	defer os.Remove(tmp.Name())
+	src, err := os.ReadFile("../data/openapi-test1.yaml")
+	require.NoError(t, err)
+	_, err = tmp.Write(src)
+	require.NoError(t, err)
+	require.NoError(t, tmp.Close())
+	s2, err := loader.LoadFromFile(tmp.Name())
+	require.NoError(t, err)
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Nil(t, d)
 }
 
 // Regression test: object-valued enum entries must not produce a false diff due to __origin__ metadata.
