@@ -1,6 +1,6 @@
 package commonparams
 
-import "github.com/getkin/kin-openapi/openapi3"
+import "github.com/oasdiff/kin-openapi/openapi3"
 
 // Move moves common parameters to the operations under the path
 func Move(spec *openapi3.T) {

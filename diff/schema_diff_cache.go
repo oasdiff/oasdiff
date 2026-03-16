@@ -1,6 +1,6 @@
 package diff
 
-import "github.com/getkin/kin-openapi/openapi3"
+import "github.com/oasdiff/kin-openapi/openapi3"
 
 type schemaPair struct {
 	Schema1 *openapi3.SchemaRef
