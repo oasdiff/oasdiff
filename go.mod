@@ -19,8 +19,8 @@ require (
 	github.com/go-openapi/swag/jsonname v0.25.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/oasdiff/yaml v0.0.0-20260316160413-530022a25b2e // indirect
-	github.com/oasdiff/yaml3 v0.0.0-20260316155952-42d24df7b091 // indirect
+	github.com/oasdiff/yaml v0.0.1 // indirect
+	github.com/oasdiff/yaml3 v0.0.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
@@ -51,4 +51,4 @@ require (
 	github.com/wI2L/jsondiff v0.7.0
 )
 
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.135.0
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.135.1
