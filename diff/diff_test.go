@@ -203,6 +203,17 @@ func TestDiff_IdenticalFilesNoDiff(t *testing.T) {
 	require.Nil(t, d)
 }
 
+// Regression test: loading a spec with an empty mapping node in a sequence (e.g. security: - {})
+// must not panic. Without the fix, addOriginInSeq in oasdiff/yaml3 panicked with
+// "index out of range [0] with length 0" (issue #808).
+func TestDiff_EmptySecurityRequirementNoPanic(t *testing.T) {
+	loader := openapi3.NewLoader()
+	s, err := loader.LoadFromFile("../data/empty-security-requirement.yaml")
+	require.NoError(t, err)
+	_, err = diff.Get(diff.NewConfig(), s, s)
+	require.NoError(t, err)
+}
+
 // Regression test: object-valued enum entries must not produce a false diff due to __origin__ metadata.
 // home-iot-api-1.yaml and home-iot-api-2.yaml are identical in their enum values (including the object
 // enum {x: reuven} in /zones/{zoneId}/quiet). Without the fix, __origin__ would be embedded in the
