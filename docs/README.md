@@ -54,14 +54,15 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 
 ## Features
 - [OpenAPI 3.1 support](OPENAPI-31.md) (beta)
-- [Source location tracking](SOURCE-LOCATOR.md) for inline PR annotations
 - Detect [breaking changes](BREAKING-CHANGES.md)
 - Display a user-friendly [changelog](BREAKING-CHANGES.md) of all important API changes
 - Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
 - Output reports in YAML, JSON, Text, Markdown, HTML, JUnit XML or the [github actions annotation format](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-a-warning-message)
+- [Source location tracking](SOURCE-LOCATOR.md)
 - [Customize HTML and Markdown changelog reports](USAGE_EXAMPLES.md#openapi-changelog-with-custom-template)
 - Compare specs from local files, http/s URLs, or [git revisions](GIT-REVISION.md)
 - Compare specs in YAML or JSON format
+- [Change fingerprints](FINGERPRINT.md) for stable cross-commit change identity
 - [Compare two collections of specs](COMPOSED.md)
 - [Deprecate APIs and Parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md)
