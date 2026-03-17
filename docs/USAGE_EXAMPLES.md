@@ -66,7 +66,8 @@ oasdiff changelog base.yaml revision.yaml --template my-template.html -f html
 ```
 You can customize the changelog output format by providing a custom template file when using markdown or html format.  
 The template uses Go's text/template format and has access to the following data:
-- `.APIChanges` - map of endpoints to their changes
+- `.GroupedChanges` - map of change groups to their changes (grouped by endpoint for API changes, by section for security/component changes)
+- `.APIChanges` - deprecated alias for `.GroupedChanges`
 - `.BaseVersion` - base spec version
 - `.RevisionVersion` - revision spec version  
 - `.GetVersionTitle()` - formatted version comparison string
@@ -74,8 +75,8 @@ The template uses Go's text/template format and has access to the following data
 Example custom template:
 ```markdown
 ### Changes {{ .GetVersionTitle }}
-{{ range $endpoint, $changes := .APIChanges }}
-#### {{ $endpoint.Operation }} {{ $endpoint.Path }}
+{{ range $group, $changes := .GroupedChanges }}
+#### {{ if $group.Operation }}{{ $group.Operation }} {{ end }}{{ $group.Path }}
 {{ range $changes }}* {{ if .IsBreaking }}**BREAKING**: {{ end }}{{ .Text }}
 {{ end }}
 {{ end }}

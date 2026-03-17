@@ -61,7 +61,7 @@ func (f MarkupFormatter) loadCustomTemplate(templatePath string) (*template.Temp
 	return tmpl, nil
 }
 
-func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByEndpoint, baseVersion, revisionVersion string) ([]byte, error) {
+func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string) ([]byte, error) {
 	var out bytes.Buffer
 	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion}); err != nil {
 		return nil, err

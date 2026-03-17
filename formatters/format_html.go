@@ -66,7 +66,7 @@ func (f HTMLFormatter) loadCustomTemplate(templatePath string) (*template.Templa
 	return tmpl, nil
 }
 
-func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByEndpoint, baseVersion, revisionVersion string) ([]byte, error) {
+func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string) ([]byte, error) {
 	var out bytes.Buffer
 	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion}); err != nil {
 		return nil, err

@@ -54,9 +54,15 @@ func NewRenderOpts() RenderOpts {
 }
 
 type TemplateData struct {
-	APIChanges      ChangesByEndpoint
+	GroupedChanges  ChangesByGroup
 	BaseVersion     string
 	RevisionVersion string
+}
+
+// APIChanges returns GroupedChanges.
+// Deprecated: Use .GroupedChanges in templates instead. Kept for backward compatibility with custom templates.
+func (t TemplateData) APIChanges() ChangesByGroup {
+	return t.GroupedChanges
 }
 
 func (t TemplateData) GetVersionTitle() string {

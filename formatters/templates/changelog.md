@@ -1,6 +1,6 @@
 # API Changelog {{ .GetVersionTitle }}
-{{ range $endpoint, $changes := .APIChanges }}
-## {{ $endpoint.Operation }} {{ $endpoint.Path }}
+{{ range $group, $changes := .GroupedChanges }}
+## {{ if $group.Operation }}{{ $group.Operation }} {{ end }}{{ $group.Path }}
 {{ range $changes }}- {{ if .IsBreaking }}:warning:{{ end }} {{ .Text }}
 {{ end }}
 {{ end }}

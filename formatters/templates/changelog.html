@@ -106,11 +106,11 @@
 
 <body>
     <div class="title">API Changelog {{ .GetVersionTitle }}</div>
-    {{ range $endpoint, $changes := .APIChanges }}
+    {{ range $group, $changes := .GroupedChanges }}
     <div class="endpoint">
         <div class="endpoint-header">
             <span class="path">
-                <div class="">{{ $endpoint.Operation }}<!-- --> <!-- -->{{ $endpoint.Path }}</div>
+                <div class="">{{ if $group.Operation }}{{ $group.Operation }} {{ end }}{{ $group.Path }}</div>
             </span>
             <div class="change-type">Updated</div>
         </div>
