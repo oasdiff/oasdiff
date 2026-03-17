@@ -39,6 +39,8 @@ github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
 github.com/oasdiff/kin-openapi v0.136.0 h1:znR1xptw6DoK5drWIGEHAPTjgdCXZ6kKNpBCkdBDvBw=
 github.com/oasdiff/kin-openapi v0.136.0/go.mod h1:BMeaLn+GmFJKtHJ31JrgXFt91eZi/q+Og4tr7sq0BzI=
+github.com/oasdiff/kin-openapi v0.136.1 h1:x1G9doDyPcagCNXDcMK5dt5yAmIgsSCiK7F5gPUiQdM=
+github.com/oasdiff/kin-openapi v0.136.1/go.mod h1:BMeaLn+GmFJKtHJ31JrgXFt91eZi/q+Og4tr7sq0BzI=
 github.com/oasdiff/yaml v0.0.1 h1:dPrn0F2PJ7HdzHPndJkArvB2Fw0cwgFdVUKCEkoFuds=
 github.com/oasdiff/yaml v0.0.1/go.mod h1:r8bgVgpWT5iIN/AgP0GljFvB6CicK+yL1nIAbm+8/QQ=
 github.com/oasdiff/yaml3 v0.0.1 h1:kReOSraQLTxuuGNX9aNeJ7tcsvUB2MS+iupdUrWe4Z0=
