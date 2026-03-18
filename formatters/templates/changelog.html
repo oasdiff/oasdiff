@@ -110,7 +110,7 @@
     <div class="endpoint">
         <div class="endpoint-header">
             <span class="path">
-                <div class="">{{ if $group.Operation }}{{ $group.Operation }} {{ end }}{{ $group.Path }}</div>
+                <div class="">{{ if $group.Path }}{{ $group.Operation }} {{ $group.Path }}{{ else }}{{ $group.Section }}{{ end }}</div>
             </span>
             <div class="change-type">Updated</div>
         </div>

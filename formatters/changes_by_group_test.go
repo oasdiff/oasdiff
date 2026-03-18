@@ -33,7 +33,7 @@ var changes = checker.Changes{
 
 func TestChanges_Group(t *testing.T) {
 	grouped := formatters.GroupChanges(changes, checker.NewDefaultLocalizer())
-	require.Contains(t, grouped, formatters.ChangeGroup{Path: "/test", Operation: "GET"})
-	require.Contains(t, grouped, formatters.ChangeGroup{Path: "components"})
-	require.Contains(t, grouped, formatters.ChangeGroup{Path: "security"})
+	require.Contains(t, grouped, formatters.ChangeGroup{Section: "paths", Path: "/test", Operation: "GET"})
+	require.Contains(t, grouped, formatters.ChangeGroup{Section: "components"})
+	require.Contains(t, grouped, formatters.ChangeGroup{Section: "security"})
 }

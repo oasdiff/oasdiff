@@ -3,6 +3,7 @@ package formatters
 import "github.com/oasdiff/oasdiff/checker"
 
 type ChangeGroup struct {
+	Section   string
 	Path      string
 	Operation string
 }
@@ -18,9 +19,9 @@ func GroupChanges(changes checker.Changes, l checker.Localizer) ChangesByGroup {
 
 		switch change.(type) {
 		case checker.ApiChange:
-			group = ChangeGroup{Path: change.GetPath(), Operation: change.GetOperation()}
+			group = ChangeGroup{Section: change.GetSection(), Path: change.GetPath(), Operation: change.GetOperation()}
 		default:
-			group = ChangeGroup{Path: change.GetSection()}
+			group = ChangeGroup{Section: change.GetSection()}
 		}
 
 		changeEntry := Change{
