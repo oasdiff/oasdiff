@@ -17,6 +17,16 @@ func getExtensionsDiff(config *Config, extensions1, extensions2 map[string]any) 
 	filtered1 := filterExtensions(extensions1, config)
 	filtered2 := filterExtensions(extensions2, config)
 
+	// Strip origin metadata from extension values before comparing.
+	// When IncludeOrigin is enabled, the YAML parser injects __origin__ keys
+	// into all parsed objects. For known schema fields, kin-openapi strips these
+	// during unmarshal, but unknown fields (e.g. propertyNames) stored in the
+	// raw Extensions map retain embedded __origin__ data that includes file paths.
+	// This causes false diffs when comparing identical content loaded from
+	// different files.
+	stripOrigin(filtered1)
+	stripOrigin(filtered2)
+
 	diff, err := getExtensionsDiffInternal(filtered1, filtered2)
 	if err != nil {
 		return nil, err
@@ -31,6 +41,16 @@ func getExtensionsDiff(config *Config, extensions1, extensions2 map[string]any) 
 
 func getExtensionsDiffInternal(extensions1, extensions2 map[string]any) (*InterfaceMapDiff, error) {
 	return getInterfaceMapDiff(extensions1, extensions2)
+}
+
+// stripOrigin recursively removes __origin__ keys from a map.
+func stripOrigin(m map[string]any) {
+	delete(m, "__origin__")
+	for _, v := range m {
+		if nested, ok := v.(map[string]any); ok {
+			stripOrigin(nested)
+		}
+	}
 }
 
 // filterExtensions returns a copy of the extensions map with excluded extensions removed

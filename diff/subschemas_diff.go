@@ -286,7 +286,7 @@ func getNonContainedInlineSchemas(config *Config, state *state, schemaRefs1, sch
 
 func findIndenticalSchema(config *Config, state *state, schemaRef1 *openapi3.SchemaRef, schemasRefs2 openapi3.SchemaRefs, matched map[int]struct{}, filter schemaRefsFilter) (bool, int, error) {
 	for index2, schemaRef2 := range schemasRefs2 {
-		if !filter(schemaRef1) {
+		if !filter(schemaRef2) {
 			continue
 		}
 		if alreadyMatched(index2, matched) {
