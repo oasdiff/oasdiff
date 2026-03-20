@@ -1,6 +1,9 @@
 # API Changelog 1.0.0 vs. 1.0.1
 
-## GET /api/{domain}/{project}/badges/security-score
+
+## API Changes
+
+### GET /api/{domain}/{project}/badges/security-score
 - :warning: removed the success response with the status '200'
 - :warning: removed the success response with the status '201'
 - :warning: deleted the 'cookie' request parameter 'test'
@@ -14,12 +17,29 @@
 -  removed the non-success response with the status '400'
 
 
-## GET /api/{domain}/{project}/install-command
+### GET /api/{domain}/{project}/install-command
 - :warning: deleted the 'header' request parameter 'network-policies'
 -  added the new optional 'header' request parameter 'name' to all path's operations
 -  added the new enum value 'test1' to the 'path' request parameter 'project'
 
 
-## POST /register
+### POST /register
 -  the endpoint scheme security 'bearerAuth' was removed from the API
 -  the security scope 'write:pets' was added to the endpoint's security scheme 'OAuth'
+
+
+
+
+## Components
+-  removed the schema 'network-policies'
+-  removed the schema 'rules'
+-  the component security scheme 'AccessToken' was removed
+-  the component security scheme 'bearerAuth' was removed
+
+
+## Security
+-  the security scheme 'bearerAuth' was removed from the API
+
+
+
+

@@ -80,6 +80,27 @@ func TestHtmlFormatter_RenderChangelog_WithBaseAndRevisionVersion(t *testing.T) 
 	require.Contains(t, string(out), "<div class=\"title\">API Changelog 1.0.0 vs. 2.0.0</div>")
 }
 
+func TestHtmlFormatter_RenderChangelog_SecurityAndComponentChanges(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.SecurityChange{
+			Id:    "change_id",
+			Level: checker.INFO,
+		},
+		checker.ComponentChange{
+			Id:        "change_id",
+			Level:     checker.INFO,
+			Component: "securitySchemes",
+		},
+	}
+
+	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	require.NoError(t, err)
+
+	result := string(out)
+	require.Contains(t, result, "security")
+	require.Contains(t, result, "components")
+}
+
 func TestHtmlFormatter_NotImplemented(t *testing.T) {
 	var err error
 
@@ -97,7 +118,7 @@ func TestHtmlFormatter_NotImplemented(t *testing.T) {
 var changelogHtml string
 
 func TestExecuteHtmlTemplate_Err(t *testing.T) {
-	tmpl := template.Must(template.New("changelog").Parse(changelogHtml))
+	tmpl := template.Must(template.New("changelog").Funcs(formatters.HtmlTemplateFuncs()).Parse(changelogHtml))
 	tmpl.Tree = nil
 	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, "", "")
 	assert.Error(t, err)

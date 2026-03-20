@@ -75,6 +75,27 @@ func TestMarkupFormatter_RenderChangelog_WithVersions(t *testing.T) {
 	require.Contains(t, string(out), "# API Changelog 1.0.0 vs. 2.0.0")
 }
 
+func TestMarkupFormatter_RenderChangelog_SecurityAndComponentChanges(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.SecurityChange{
+			Id:    "change_id",
+			Level: checker.INFO,
+		},
+		checker.ComponentChange{
+			Id:        "change_id",
+			Level:     checker.INFO,
+			Component: "securitySchemes",
+		},
+	}
+
+	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	require.NoError(t, err)
+
+	result := string(out)
+	require.Contains(t, result, "## Security")
+	require.Contains(t, result, "## Components")
+}
+
 func TestMarkupFormatter_NotImplemented(t *testing.T) {
 	var err error
 

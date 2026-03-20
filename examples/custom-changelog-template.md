@@ -1,10 +1,27 @@
-# API Changes {{ .GetVersionTitle }}
+# API Changelog {{ .GetVersionTitle }}
 
-{{ range $endpoint, $changes := .APIChanges }}
-## {{ $endpoint.Operation }} {{ $endpoint.Path }}
+{{ if .GroupedChanges }}
+{{ with pathGroups .GroupedChanges }}
+## API Changes
 
-{{ range $changes }}
+{{ range . }}
+### {{ .Group.Operation }} {{ .Group.Path }}
+
+{{ range .Changes }}
 - {{ if .IsBreaking }}🚨 **BREAKING CHANGE**: {{ else }}📝 {{ end }}{{ .Text }}
 {{ end }}
 
+{{ end }}
+{{ end }}
+
+{{ range sectionGroups .GroupedChanges }}
+## {{ .Group.Section }}
+
+{{ range .Changes }}
+- {{ if .IsBreaking }}🚨 **BREAKING CHANGE**: {{ else }}📝 {{ end }}{{ .Text }}
+{{ end }}
+
+{{ end }}
+{{ else }}
+No changes
 {{ end }}
