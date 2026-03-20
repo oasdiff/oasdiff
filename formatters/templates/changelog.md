@@ -1,6 +1,18 @@
 # API Changelog {{ .GetVersionTitle }}
-{{ range $group, $changes := .GroupedChanges }}
-## {{ if $group.Path }}{{ $group.Operation }} {{ $group.Path }}{{ else }}{{ $group.Section }}{{ end }}
-{{ range $changes }}- {{ if .IsBreaking }}:warning:{{ end }} {{ .Text }}
+{{ if .GroupedChanges }}
+{{ with pathGroups .GroupedChanges }}
+## API Changes
+{{ range . }}
+### {{ .Group.Operation }} {{ .Group.Path }}
+{{ range .Changes }}- {{ if .IsBreaking }}:warning:{{ end }} {{ .Text }}
 {{ end }}
+{{ end }}
+{{ end }}
+{{ range sectionGroups .GroupedChanges }}
+## {{ capitalize .Group.Section }}
+{{ range .Changes }}- {{ if .IsBreaking }}:warning:{{ end }} {{ .Text }}
+{{ end }}
+{{ end }}
+{{ else }}
+No changes
 {{ end }}

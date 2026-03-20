@@ -59,7 +59,6 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
 - Output reports in YAML, JSON, Text, Markdown, HTML, JUnit XML or the [github actions annotation format](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-a-warning-message)
 - [Source location tracking](SOURCE-LOCATOR.md)
-- [Customize HTML and Markdown changelog reports](USAGE_EXAMPLES.md#openapi-changelog-with-custom-template)
 - Compare specs from local files, http/s URLs, or [git revisions](GIT-REVISION.md)
 - Compare specs in YAML or JSON format
 - [Change fingerprints](FINGERPRINT.md) for stable cross-commit change identity
@@ -78,6 +77,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Filter endpoints](FILTERING-ENDPOINTS.md)
 - [Extend breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
 - Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br, es
+- [Customize HTML and Markdown changelog reports](CHANGELOG-TEMPLATE.md)
 - [Run with configuration file](CONFIG-FILES.md)
 - [Run from Docker](DOCKER.md)
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action)

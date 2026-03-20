@@ -118,7 +118,7 @@ func TestHtmlFormatter_NotImplemented(t *testing.T) {
 var changelogHtml string
 
 func TestExecuteHtmlTemplate_Err(t *testing.T) {
-	tmpl := template.Must(template.New("changelog").Parse(changelogHtml))
+	tmpl := template.Must(template.New("changelog").Funcs(formatters.HtmlTemplateFuncs()).Parse(changelogHtml))
 	tmpl.Tree = nil
 	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, "", "")
 	assert.Error(t, err)

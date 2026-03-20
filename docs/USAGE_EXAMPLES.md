@@ -64,23 +64,7 @@ oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/op
 oasdiff changelog base.yaml revision.yaml --template my-template.md -f markdown
 oasdiff changelog base.yaml revision.yaml --template my-template.html -f html
 ```
-You can customize the changelog output format by providing a custom template file when using markdown or html format.  
-The template uses Go's text/template format and has access to the following data:
-- `.GroupedChanges` - map of change groups to their changes (grouped by endpoint for API changes, by section for security/component changes)
-- `.APIChanges` - deprecated alias for `.GroupedChanges`
-- `.BaseVersion` - base spec version
-- `.RevisionVersion` - revision spec version  
-- `.GetVersionTitle()` - formatted version comparison string
-
-Example custom template:
-```markdown
-### Changes {{ .GetVersionTitle }}
-{{ range $group, $changes := .GroupedChanges }}
-#### {{ if $group.Path }}{{ $group.Operation }} {{ $group.Path }}{{ else }}{{ $group.Section }}{{ end }}
-{{ range $changes }}* {{ if .IsBreaking }}**BREAKING**: {{ end }}{{ .Text }}
-{{ end }}
-{{ end }}
-```
+See [CHANGELOG-TEMPLATE.md](CHANGELOG-TEMPLATE.md) for full documentation and examples.
 
 ### OpenAPI diff for endpoints containing "/api" in the path
 ```bash

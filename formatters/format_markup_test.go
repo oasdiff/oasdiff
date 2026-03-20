@@ -92,8 +92,8 @@ func TestMarkupFormatter_RenderChangelog_SecurityAndComponentChanges(t *testing.
 	require.NoError(t, err)
 
 	result := string(out)
-	require.Contains(t, result, "## security")
-	require.Contains(t, result, "## components")
+	require.Contains(t, result, "## Security")
+	require.Contains(t, result, "## Components")
 }
 
 func TestMarkupFormatter_NotImplemented(t *testing.T) {

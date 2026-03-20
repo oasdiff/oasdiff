@@ -41,7 +41,7 @@ func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpt
 			return nil, fmt.Errorf("failed to load custom template: %w", err)
 		}
 	} else {
-		tmpl = template.Must(template.New("changelog").Parse(changelogMarkdown))
+		tmpl = template.Must(template.New("changelog").Funcs(MarkupTemplateFuncs()).Parse(changelogMarkdown))
 	}
 
 	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion)
@@ -53,12 +53,17 @@ func (f MarkupFormatter) loadCustomTemplate(templatePath string) (*template.Temp
 		return nil, fmt.Errorf("failed to read template file %s: %w", templatePath, err)
 	}
 
-	tmpl, err := template.New("custom-changelog").Parse(string(templateContent))
+	tmpl, err := template.New("custom-changelog").Funcs(MarkupTemplateFuncs()).Parse(string(templateContent))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	return tmpl, nil
+}
+
+// MarkupTemplateFuncs returns the FuncMap available to Markup changelog templates.
+func MarkupTemplateFuncs() template.FuncMap {
+	return template.FuncMap(changelogTemplateFuncs())
 }
 
 func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string) ([]byte, error) {

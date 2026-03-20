@@ -68,7 +68,14 @@
             color: #DB3030;
         }
 
-        .endpoint-changes {
+        .section-title {
+            margin: 1.5em 0 0.5em 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #21313c;
+            border-bottom: 2px solid #e8edeb;
+            padding-bottom: 0.25em;
+            text-transform: capitalize;
         }
 
         .tooltip {
@@ -106,27 +113,49 @@
 
 <body>
     <div class="title">API Changelog {{ .GetVersionTitle }}</div>
-    {{ range $group, $changes := .GroupedChanges }}
+    {{ define "change-list" }}
+    <ul class="endpoint-changes">
+        {{ range . }}
+        <li class="change">
+        {{ if .IsBreaking }}
+        <div class="breaking tooltip" data-text="Breaking Change">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" class="breaking-icon" role="img" aria-label="Important With Circle Icon"><path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM7 4.5a1 1 0 0 1 2 0v4a1 1 0 0 1-2 0v-4Zm2 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clip-rule="evenodd"></path></svg>
+        </div>
+        {{ end }}
+        {{ .Text }}
+        </li>
+        {{ end }}
+    </ul>
+    {{ end }}
+
+    {{ define "path-group" }}
     <div class="endpoint">
         <div class="endpoint-header">
-            <span class="path">
-                <div class="">{{ if $group.Path }}{{ $group.Operation }} {{ $group.Path }}{{ else }}{{ $group.Section }}{{ end }}</div>
-            </span>
+            <span class="path">{{ .Group.Operation }} {{ .Group.Path }}</span>
             <div class="change-type">Updated</div>
         </div>
-        <ul class="endpoint-changes">
-            {{ range $changes }}
-            <li class="change">
-            {{ if .IsBreaking }}
-            <div class="breaking tooltip" data-text="Breaking Change">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" class="breaking-icon" role="img" aria-label="Important With Circle Icon"><path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM7 4.5a1 1 0 0 1 2 0v4a1 1 0 0 1-2 0v-4Zm2 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z" clip-rule="evenodd"></path></svg>
-            </div>
-            {{ end }}
-            {{ .Text }}
-            </li>
-            {{ end }}
-        </ul>
+        {{ template "change-list" .Changes }}
     </div>
+    {{ end }}
+
+    {{ define "section-group" }}
+    <div class="endpoint">
+        {{ template "change-list" .Changes }}
+    </div>
+    {{ end }}
+
+    {{ if .GroupedChanges }}
+    {{ with pathGroups .GroupedChanges }}
+    <div class="section-title">API Changes</div>
+    {{ range . }}{{ template "path-group" . }}{{ end }}
+    {{ end }}
+
+    {{ range sectionGroups .GroupedChanges }}
+    <div class="section-title">{{ .Group.Section }}</div>
+    {{ template "section-group" . }}
+    {{ end }}
+    {{ else }}
+    <p>No changes</p>
     {{ end }}
 </body>
 
