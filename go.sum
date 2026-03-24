@@ -39,8 +39,6 @@ github.com/mailru/easyjson v0.9.2 h1:dX8U45hQsZpxd80nLvDGihsQ/OxlvTkVUXH2r/8cb2M
 github.com/mailru/easyjson v0.9.2/go.mod h1:1+xMtQp2MRNVL/V1bOzuP3aP8VNwRW55fQUto+XFtTU=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
-github.com/oasdiff/kin-openapi v0.0.0-20260324102947-2c8734335235 h1:dVRTumorXWw88g3Ax8R2ZrButZXVNoCoFsoi+/sM8i8=
-github.com/oasdiff/kin-openapi v0.0.0-20260324102947-2c8734335235/go.mod h1:gMd9t3N+56tBZpkJBRORxqDiHYVGYVDcasJEWS3JF3s=
 github.com/oasdiff/kin-openapi v0.137.0-openapi31.beta.1 h1:CvRZa6+eA+R7+KMjnNIjcdKUeH0IKhCvrG3wBkiw6wU=
 github.com/oasdiff/kin-openapi v0.137.0-openapi31.beta.1/go.mod h1:gMd9t3N+56tBZpkJBRORxqDiHYVGYVDcasJEWS3JF3s=
 github.com/oasdiff/yaml v0.0.1 h1:dPrn0F2PJ7HdzHPndJkArvB2Fw0cwgFdVUKCEkoFuds=
