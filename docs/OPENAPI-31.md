@@ -41,6 +41,18 @@ Changes are detected for all 3.1-specific fields:
 
 ## How to try it
 
+### Install the beta release
+```bash
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=2.2.0-openapi31.beta.1 sh
+```
+
+Then use oasdiff as normal:
+```bash
+oasdiff diff base.yaml revision.yaml
+oasdiff breaking base.yaml revision.yaml
+oasdiff changelog base.yaml revision.yaml
+```
+
 ### Docker
 ```bash
 docker pull tufin/oasdiff:feat-openapi-3.1-support
