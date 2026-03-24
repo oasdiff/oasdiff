@@ -39,10 +39,8 @@ github.com/mailru/easyjson v0.9.2 h1:dX8U45hQsZpxd80nLvDGihsQ/OxlvTkVUXH2r/8cb2M
 github.com/mailru/easyjson v0.9.2/go.mod h1:1+xMtQp2MRNVL/V1bOzuP3aP8VNwRW55fQUto+XFtTU=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 h1:RWengNIwukTxcDr9M+97sNutRR1RKhG96O6jWumTTnw=
 github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826/go.mod h1:TaXosZuwdSHYgviHp1DAtfrULt5eUgsSMsZf+YrPgl8=
-github.com/oasdiff/kin-openapi v0.0.0-20260315174704-1838b43109e3 h1:z7NQn5Yzcfy7CaFXSEtacHbfTdNxkAF5uI1ETSmKRYY=
-github.com/oasdiff/kin-openapi v0.0.0-20260315174704-1838b43109e3/go.mod h1:/inWGX3wtLrQC1nPW1nEPgryvTlm770s7sw1+MpQgBY=
-github.com/oasdiff/kin-openapi v0.136.1 h1:x1G9doDyPcagCNXDcMK5dt5yAmIgsSCiK7F5gPUiQdM=
-github.com/oasdiff/kin-openapi v0.136.1/go.mod h1:BMeaLn+GmFJKtHJ31JrgXFt91eZi/q+Og4tr7sq0BzI=
+github.com/oasdiff/kin-openapi v0.0.0-20260324102947-2c8734335235 h1:dVRTumorXWw88g3Ax8R2ZrButZXVNoCoFsoi+/sM8i8=
+github.com/oasdiff/kin-openapi v0.0.0-20260324102947-2c8734335235/go.mod h1:gMd9t3N+56tBZpkJBRORxqDiHYVGYVDcasJEWS3JF3s=
 github.com/oasdiff/yaml v0.0.1 h1:dPrn0F2PJ7HdzHPndJkArvB2Fw0cwgFdVUKCEkoFuds=
 github.com/oasdiff/yaml v0.0.1/go.mod h1:r8bgVgpWT5iIN/AgP0GljFvB6CicK+yL1nIAbm+8/QQ=
 github.com/oasdiff/yaml3 v0.0.1 h1:kReOSraQLTxuuGNX9aNeJ7tcsvUB2MS+iupdUrWe4Z0=

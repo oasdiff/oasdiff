@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 )
 
 // WebhooksDiff describes the changes between a pair of Webhooks objects (OpenAPI 3.1)
