@@ -66,6 +66,10 @@ func (flags *Flags) getCaseInsensitiveHeaders() bool {
 	return flags.v.GetBool("case-insensitive-headers")
 }
 
+func (flags *Flags) getAllowExternalRefs() bool {
+	return flags.v.GetBool("allow-external-refs")
+}
+
 func (flags *Flags) getIncludeChecks() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("include-checks"))
 }
