@@ -1,0 +1,16 @@
+type: object
+required:
+  - name
+properties:
+  id:
+    type: integer
+    description: Unique identifier for the pet
+  name:
+    type: string
+    description: Name of the pet
+  tag:
+    type: string
+    description: Optional tag for the pet
+  breed:
+    type: string
+    description: Breed of the pet (new non-breaking addition)
