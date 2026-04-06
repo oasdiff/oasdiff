@@ -108,6 +108,7 @@ type Config struct {
 	StripPrefixBase        string   `mapstructure:"strip-prefix-base"`
 	StripPrefixRevision    string   `mapstructure:"strip-prefix-revision"`
 	IncludePathParams      bool     `mapstructure:"include-path-params"`
+	AllowExternalRefs      bool     `mapstructure:"allow-external-refs"`
 }
 
 // validate checks that each of the provided configuration values is one of the generally accepted values

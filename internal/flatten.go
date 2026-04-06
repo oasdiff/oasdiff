@@ -25,6 +25,7 @@ Spec can be a path to a file, a URL or '-' to read standard input.
 	}
 
 	enumWithOptions(&cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputFlatten), string(formatters.FormatJSON)), "format", "f", "output format")
+	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 	addHiddenCircularDepFlag(&cmd)
 
 	return &cmd
@@ -33,7 +34,7 @@ Spec can be a path to a file, a URL or '-' to read standard input.
 func runFlatten(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	loader := openapi3.NewLoader()
-	loader.IsExternalRefsAllowed = true
+	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
 	spec, err := load.NewSpecInfo(loader, flags.getBase(), load.WithFlattenAllOf())
 	if err != nil {
 		return false, getErrFailedToLoadSpec("original", flags.getBase(), err)

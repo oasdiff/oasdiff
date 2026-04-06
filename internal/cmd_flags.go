@@ -21,6 +21,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
 	cmd.PersistentFlags().Bool("case-insensitive-headers", false, "case-insensitive header name comparison")
 	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
+	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 
 	addHiddenFlattenFlag(cmd)
 	addHiddenCircularDepFlag(cmd)
