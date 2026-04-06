@@ -142,3 +142,65 @@ func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
 	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))
 	require.ErrorContains(t, err, "is git installed and in PATH?")
 }
+
+// TestLoadInfo_GitRevisionWithExternalRef verifies that $ref chains are resolved via
+// "git show" when loading from a git revision, not opened as literal file paths.
+func TestLoadInfo_GitRevisionWithExternalRef(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "schemas"), 0755))
+
+	topLevel := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/pet.yaml"
+`
+	petSchema := `type: object
+required:
+  - id
+properties:
+  id:
+    type: integer
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(topLevel), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "schemas", "pet.yaml"), []byte(petSchema), 0644))
+
+	run("git", "add", ".")
+	run("git", "commit", "-m", "add multi-file spec")
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))
+	require.NoError(t, err)
+	require.Equal(t, "1.0", specInfo.GetVersion())
+
+	// Verify the $ref was resolved — the pet schema should have the "id" property
+	schema := specInfo.Spec.Paths.Value("/pets").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value
+	require.NotNil(t, schema.Properties["id"], "id property from $ref chain should be resolved")
+}
