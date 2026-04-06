@@ -22,6 +22,13 @@ Use `--allow-external-refs=false` to prevent oasdiff from fetching external URLs
 oasdiff breaking base.yaml revision.yaml --allow-external-refs=false
 ```
 
+Note: boolean flags require `=` when setting to `false` on the command line — `--allow-external-refs false` will not work as expected (see [configuration files](CONFIG-FILES.md)).
+
+Alternatively, set it in an [oasdiff configuration file](CONFIG-FILES.md):
+```yaml
+allow-external-refs: false
+```
+
 This flag is supported by the `diff`, `breaking`, `changelog`, `summary`, and `flatten` commands.
 
 When external refs are disabled, oasdiff will return an error if a spec contains an external `$ref`, rather than fetching it.
