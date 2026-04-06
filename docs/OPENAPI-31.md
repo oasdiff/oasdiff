@@ -20,6 +20,7 @@ Changes are detected for all 3.1-specific fields:
 - `patternProperties`, `propertyNames`
 - `unevaluatedItems`, `unevaluatedProperties`
 - `contentSchema`, `contentMediaType`, `contentEncoding`
+- `$defs`, `$schema`, `$comment`
 - Webhooks (added/deleted/modified)
 - Info `summary`, License `identifier`
 
@@ -38,6 +39,15 @@ Changes are detected for all 3.1-specific fields:
 - **propertyNames**: added/removed
 - **unevaluatedItems/unevaluatedProperties**: added/removed
 - **contentSchema/contentMediaType/contentEncoding**: added/removed/changed
+
+## Known limitations
+
+The following OpenAPI 3.1 / JSON Schema 2020-12 features are not yet fully implemented:
+
+- **`$dynamicRef`/`$dynamicAnchor`**: not resolved during loading; referenced schemas are not followed
+- **`pathItems` in `components`**: not yet supported
+- **Built-in validator**: most 3.1-specific keywords (e.g. `prefixItems`, `contains`, `if`/`then`/`else`) are only enforced when JSON Schema 2020-12 validation is explicitly enabled via `EnableJSONSchema2020()`; without it, validation silently skips them
+- **`prefixItems` in array validation**: not enforced by the built-in validator even with JSON Schema 2020-12 enabled
 
 ## How to try it
 
