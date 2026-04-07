@@ -1,0 +1,27 @@
+openapi: "3.1.0"
+info:
+  title: Ref Sibling Test
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      operationId: getPing
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PingResponse"
+components:
+  schemas:
+    PingStatus:
+      type: string
+      enum: [ok, error]
+    PingResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        status:
+          $ref: "#/components/schemas/PingStatus"
