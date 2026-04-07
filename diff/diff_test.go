@@ -678,6 +678,35 @@ func TestOAS31(t *testing.T) {
 		"tag")
 }
 
+// TestOAS31_RefSiblingKeyword verifies that sibling keywords alongside $ref are parsed correctly
+// in OpenAPI 3.1 (e.g. deprecated:true next to $ref — illegal in 3.0, legal in 3.1).
+//
+// In 3.0, $ref replaces its entire object so siblings are ignored.
+// In 3.1, $ref and sibling keywords are both applied (JSON Schema 2020-12 semantics).
+func TestOAS31_RefSiblingKeyword(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile("../data/openapi31-ref-sibling-base.yaml")
+	require.NoError(t, err)
+
+	s2, err := loader.LoadFromFile("../data/openapi31-ref-sibling-revision.yaml")
+	require.NoError(t, err)
+
+	// Confirm the sibling deprecated:true is actually parsed from the 3.1 spec.
+	statusProp := s2.Components.Schemas["PingResponse"].Value.Properties["status"]
+	require.True(t, statusProp.Value.Deprecated, "kin-openapi should honour deprecated:true as a sibling to $ref in OAS 3.1")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	// oasdiff should detect the deprecation change on the "status" property.
+	statusDiff := d.ComponentsDiff.SchemasDiff.Modified["PingResponse"].PropertiesDiff.Modified["status"]
+	require.NotNil(t, statusDiff, "expected a diff on the 'status' property")
+	require.NotNil(t, statusDiff.DeprecatedDiff, "expected deprecated to be detected as changed")
+	require.Equal(t, false, statusDiff.DeprecatedDiff.From)
+	require.Equal(t, true, statusDiff.DeprecatedDiff.To)
+}
+
 func TestCircularSchema_Diff(t *testing.T) {
 	loader := openapi3.NewLoader()
 
