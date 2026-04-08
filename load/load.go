@@ -39,13 +39,6 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
 	}
 
-	// We must set IsExternalRefsAllowed=true so kin-openapi doesn't reject relative $refs
-	// (which look like external refs) before calling our ReadFromURIFunc.
-	// The original value is captured and enforced inside ReadFromURIFunc so that
-	// non-git refs (e.g. HTTP/HTTPS) still respect the caller's --allow-external-refs setting.
-	externalRefsAllowed := loader.IsExternalRefsAllowed
-	loader.IsExternalRefsAllowed = true
-
 	// gitPrefix is the "revision:" part of gitRef (e.g. "HEAD:", "origin/main:").
 	// When a spec lives at the repo root (no "/" in gitRef after the ":"), Go's URL
 	// resolution strips the prefix from relative $refs — e.g. "HEAD:openapi.yaml" +
@@ -55,6 +48,9 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 
 	// Install a ReadFromURIFunc so relative $refs inside a git-revision spec are also
 	// fetched via "git show" rather than opened as literal file paths.
+	// kin-openapi calls this function before checking IsExternalRefsAllowed, so the
+	// caller's --allow-external-refs setting is still enforced for non-git refs via
+	// DefaultReadFromURI.
 	loader.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		p := filepath.FromSlash(location.Path)
 		if isGitRevision(p) {
@@ -64,9 +60,6 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		// root and Go URL resolution drops the "revision:" prefix. Restore it.
 		if location.Scheme == "" && location.Host == "" {
 			return gitShow(gitPrefix + p)
-		}
-		if !externalRefsAllowed {
-			return nil, fmt.Errorf("external references not allowed: %s", location)
 		}
 		return openapi3.DefaultReadFromURI(loader, location)
 	}
