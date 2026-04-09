@@ -29,5 +29,5 @@ func TestRequestParameterBecameEnum(t *testing.T) {
 		Source:      load.NewSource("../data/checker/request_parameter_became_enum_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs[0])
-	require.Equal(t, "the 'path' request parameter 'groupId' was restricted to a list of enum values", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `path` request parameter `groupId` was restricted to a list of enum values", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

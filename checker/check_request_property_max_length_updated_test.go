@@ -90,7 +90,7 @@ func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs[0])
-	require.Equal(t, "the 'description' request property's maxLength was decreased to '50'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `description` request property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: decreasing max length of request read-only property
@@ -120,7 +120,7 @@ func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs[0])
-	require.Equal(t, "the 'description' request read-only property's maxLength was decreased to '50'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `description` request read-only property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: increasing max length of request property

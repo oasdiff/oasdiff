@@ -76,7 +76,7 @@ func TestBreaking_RemoveBeforeSunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIRemovedBeforeSunsetId, errs[0].GetId())
-	require.Equal(t, "api removed before the sunset date '9999-08-10'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "api removed before the sunset date `9999-08-10`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.NewSource("../data/deprecation/deprecated-future.yaml", 11, 5), errs[0].GetBaseSource())
 	require.Empty(t, errs[0].GetRevisionSource())
 }
@@ -209,7 +209,7 @@ func TestBreaking_DeprecationPathMixed(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIPathRemovedBeforeSunsetId, errs[0].GetId())
-	require.Equal(t, "api path removed before the sunset date '9999-08-10'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "api path removed before the sunset date `9999-08-10`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.NewSource("../data/deprecation/deprecated-path-mixed.yaml", 18, 5), errs[0].GetBaseSource())
 	require.Empty(t, errs[0].GetRevisionSource())
 }
@@ -258,7 +258,7 @@ func TestBreaking_RemoveEndpointWithInvalidSunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIPathSunsetParseId, errs[0].GetId())
-	require.Equal(t, "failed to parse sunset date: 'sunset date doesn't conform with RFC3339: invalid-date'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: invalid-date`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/deprecated-invalid.yaml", errs[0].GetSource())
 	require.Equal(t, checker.NewSource("../data/deprecation/deprecated-invalid.yaml", 11, 5), errs[0].GetBaseSource())
 	require.Empty(t, errs[0].GetRevisionSource())
@@ -280,7 +280,7 @@ func TestBreaking_DeprecationPathMixed_RFC3339_Sunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIPathRemovedBeforeSunsetId, errs[0].GetId())
-	require.Equal(t, "api path removed before the sunset date '9999-08-10'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "api path removed before the sunset date `9999-08-10`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.NewSource("../data/deprecation/deprecated-path-mixed-rfc3339-sunset.yaml", 19, 5), errs[0].GetBaseSource())
 	require.Empty(t, errs[0].GetRevisionSource())
 }

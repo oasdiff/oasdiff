@@ -20,7 +20,7 @@ func TestChangeMediaTypeParameters(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseMediaTypeNameUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
-	require.Equal(t, "media type 'application/json' was changed to 'application/problem+json;q=1' for the response status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "media type `application/json` was changed to `application/problem+json;q=1` for the response status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: modifying a media type name in response to make it more specific is not breaking
@@ -35,7 +35,7 @@ func TestSpecializeMediaTypeName(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseMediaTypeNameUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
-	require.Equal(t, "media type 'application/json' was changed to a more specific media type 'application/problem+json' for the response status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "media type `application/json` was changed to a more specific media type `application/problem+json` for the response status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: modifying a media type name in response to make it more general is breaking
@@ -50,5 +50,5 @@ func TestGeneralizeMediaTypeName(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseMediaTypeNameUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
-	require.Equal(t, "media type 'application/problem+json' was changed to a more general media type 'application/json' for the response status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "media type `application/problem+json` was changed to a more general media type `application/json` for the response status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

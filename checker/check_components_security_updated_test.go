@@ -27,7 +27,7 @@ func TestComponentSecurityOauthURLUpdated(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'petstore_auth' oauth url changed from 'http://example.org/api/oauth/dialog' to 'http://example.new.org/api/oauth/dialog'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth url changed from `http://example.org/api/oauth/dialog` to `http://example.new.org/api/oauth/dialog`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: changing security component token url
@@ -49,7 +49,7 @@ func TestComponentSecurityOauthTokenUpdated(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'petstore_auth' oauth token url changed from '' to 'http://example.new.org/api/oauth/dialog'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth token url changed from `` to `http://example.new.org/api/oauth/dialog`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: changing security component type
@@ -71,7 +71,7 @@ func TestComponentSecurityTypeUpdated(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'petstore_auth' type changed from 'oauth2' to 'http'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` type changed from `oauth2` to `http`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: adding a new security component
@@ -91,7 +91,7 @@ func TestComponentSecurityAdded(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'BasicAuth' was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `BasicAuth` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: removing a new security component
@@ -111,7 +111,7 @@ func TestComponentSecurityRemoved(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'BasicAuth' was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `BasicAuth` was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: adding a new oauth security scope
@@ -133,7 +133,7 @@ func TestComponentSecurityOauthScopeAdded(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'petstore_auth' oauth scope 'admin:pets' was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `admin:pets` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: removing a new oauth security scope
@@ -156,7 +156,7 @@ func TestComponentSecurityOauthScopeRemoved(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'petstore_auth' oauth scope 'admin:pets' was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `admin:pets` was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: removing a new oauth security scope
@@ -178,5 +178,5 @@ func TestComponentSecurityOauthScopeUpdated(t *testing.T) {
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme 'petstore_auth' oauth scope 'read:pets' was updated from 'read your pets' to 'grants access to pets (deprecated)'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `read:pets` was updated from `read your pets` to `grants access to pets (deprecated)`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

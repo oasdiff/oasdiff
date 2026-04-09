@@ -255,32 +255,32 @@ request-property-default-value-removed: the %s request property default value %s
 request-body-default-value-added: the request body %s default value %s was added
 request-body-default-value-changed: the request body %s default value changed from %s to %s
 request-body-default-value-removed: the request body %s default value %s was removed
-request-body-any-of-added: added %s to the request body 'anyOf' list
-request-body-any-of-removed: removed %s from the request body 'anyOf' list
-request-property-any-of-added: added %s to the %s request property 'anyOf' list
-request-property-any-of-removed: removed %s from the %s request property 'anyOf' list
-response-body-any-of-added: added %s to the response body 'anyOf' list for the response status %s
-response-body-any-of-removed: removed %s from the response body 'anyOf' list for the response status %s
-response-property-any-of-added: added %s to the %s response property 'anyOf' list for the response status %s
-response-property-any-of-removed: removed %s from the %s response property 'anyOf' list for the response status %s
-request-body-one-of-added: added %s to the request body 'oneOf' list
-request-body-one-of-removed: removed %s from the request body 'oneOf' list
+request-body-any-of-added: added %s to the request body `anyOf` list
+request-body-any-of-removed: removed %s from the request body `anyOf` list
+request-property-any-of-added: added %s to the %s request property `anyOf` list
+request-property-any-of-removed: removed %s from the %s request property `anyOf` list
+response-body-any-of-added: added %s to the response body `anyOf` list for the response status %s
+response-body-any-of-removed: removed %s from the response body `anyOf` list for the response status %s
+response-property-any-of-added: added %s to the %s response property `anyOf` list for the response status %s
+response-property-any-of-removed: removed %s from the %s response property `anyOf` list for the response status %s
+request-body-one-of-added: added %s to the request body `oneOf` list
+request-body-one-of-removed: removed %s from the request body `oneOf` list
 request-body-removed: removed the request body
 request-body-removed-description: request body removed
-request-property-one-of-added: added %s to the %s request property 'oneOf' list
-request-property-one-of-removed: removed %s from the %s request property 'oneOf' list
-response-body-one-of-added: added %s to the response body 'oneOf' list for the response status %s
-response-body-one-of-removed: removed %s from the response body 'oneOf' list for the response status %s
-response-property-one-of-added: added %s to the %s response property 'oneOf' list for the response status %s
-response-property-one-of-removed: removed %s from the %s response property 'oneOf' list for the response status %s
-request-body-all-of-added: added %s to the request body 'allOf' list
-request-body-all-of-removed: removed %s from the request body 'allOf' list
-request-property-all-of-added: added %s to the %s request property 'allOf' list
-request-property-all-of-removed: removed %s from the %s request property 'allOf' list
-response-body-all-of-added: added %s to the response body 'allOf' list for the response status %s
-response-body-all-of-removed: removed %s from the response body 'allOf' list for the response status %s
-response-property-all-of-added: added %s to the %s response property 'allOf' list for the response status %s
-response-property-all-of-removed: removed %s from the %s response property 'allOf' list for the response status %s
+request-property-one-of-added: added %s to the %s request property `oneOf` list
+request-property-one-of-removed: removed %s from the %s request property `oneOf` list
+response-body-one-of-added: added %s to the response body `oneOf` list for the response status %s
+response-body-one-of-removed: removed %s from the response body `oneOf` list for the response status %s
+response-property-one-of-added: added %s to the %s response property `oneOf` list for the response status %s
+response-property-one-of-removed: removed %s from the %s response property `oneOf` list for the response status %s
+request-body-all-of-added: added %s to the request body `allOf` list
+request-body-all-of-removed: removed %s from the request body `allOf` list
+request-property-all-of-added: added %s to the %s request property `allOf` list
+request-property-all-of-removed: removed %s from the %s request property `allOf` list
+response-body-all-of-added: added %s to the response body `allOf` list for the response status %s
+response-body-all-of-removed: removed %s from the response body `allOf` list for the response status %s
+response-property-all-of-added: added %s to the %s response property `allOf` list for the response status %s
+response-property-all-of-removed: removed %s from the %s response property `allOf` list for the response status %s
 response-body-discriminator-added: added response discriminator for the response status %s
 response-property-discriminator-added: added discriminator to %s response property for the response status %s
 response-body-discriminator-removed: removed response discriminator for the response status %s

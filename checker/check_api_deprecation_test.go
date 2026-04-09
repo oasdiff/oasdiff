@@ -46,7 +46,7 @@ func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIDeprecatedSunsetParseId, errs[0].GetId())
-	require.Equal(t, "failed to parse sunset date: 'sunset date doesn't conform with RFC3339: invalid'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: invalid`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: deprecating an operation with a deprecation policy and an invalid stability level is breaking
@@ -65,7 +65,7 @@ func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIInvalidStabilityLevelId, errs[0].GetId())
-	require.Equal(t, "failed to parse stability level: 'value is not one of draft, alpha, beta or stable: \"invalid\"'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/deprecated-with-invalid-stability.yaml", errs[0].GetSource())
 }
 
@@ -175,7 +175,7 @@ func TestBreaking_DeprecationWithEarlySunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APISunsetDateTooSmallId, errs[0].GetId())
-	require.Equal(t, fmt.Sprintf("sunset date '%s' is too small, must be at least '10' days from now", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, fmt.Sprintf("sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: deprecating an operation with a deprecation policy and sunset date after required deprecation period is not breaking
@@ -264,7 +264,7 @@ func TestBreaking_InvaidStability(t *testing.T) {
 	require.Equal(t, checker.APIInvalidStabilityLevelId, e0.Id)
 	require.Equal(t, "GET", e0.Operation)
 	require.Equal(t, "/api/test", e0.Path)
-	require.Equal(t, "failed to parse stability level: 'value is not one of draft, alpha, beta or stable: \"ga\"'", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"ga\"`", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/invalid-stability.yaml", errs[0].GetSource())
 }
 
@@ -414,5 +414,5 @@ func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 		}
 	}
 	require.NotNil(t, sunsetChange, "expected to find endpoint-deprecated-with-sunset change")
-	require.Equal(t, fmt.Sprintf("endpoint deprecated with sunset date '%s'", sunsetDate.String()), sunsetChange.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, fmt.Sprintf("endpoint deprecated with sunset date `%s`", sunsetDate.String()), sunsetChange.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

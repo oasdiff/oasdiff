@@ -1,1 +1,1 @@
-GET /api/{domain}/{project}/install-command deleted the 'header' request parameter 'network-policies'
+GET /api/{domain}/{project}/install-command deleted the `header` request parameter `network-policies`

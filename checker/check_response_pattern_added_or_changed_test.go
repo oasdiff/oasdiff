@@ -31,7 +31,7 @@ func TestResponsePropertyPatternChanged(t *testing.T) {
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs[0])
-	require.Equal(t, "the 'data/created' response's property pattern was changed from '^[a-z]+$' to '^(?:([a-z]+-)*([a-z]+)?)$' for the status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `data/created` response's property pattern was changed from `^[a-z]+$` to `^(?:([a-z]+-)*([a-z]+)?)$` for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: adding response property pattern
@@ -56,7 +56,7 @@ func TestResponsePropertyPatternAdded(t *testing.T) {
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs[0])
-	require.Equal(t, "the 'data/created' response's property pattern '^[a-z]+$' was added for the status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `data/created` response's property pattern `^[a-z]+$` was added for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: removing response property pattern
@@ -81,5 +81,5 @@ func TestResponsePropertyPatternRemoved(t *testing.T) {
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs[0])
-	require.Equal(t, "the 'data/created' response's property pattern '^[a-z]+$' was removed for the status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `data/created` response's property pattern `^[a-z]+$` was removed for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

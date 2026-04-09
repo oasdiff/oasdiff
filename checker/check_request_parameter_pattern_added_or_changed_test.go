@@ -30,7 +30,7 @@ func TestRequestParameterPatternChanged(t *testing.T) {
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
 	}, errs[0])
-	require.Equal(t, "changed the pattern of the 'query' request parameter 'category' from '^\\w+$' to '^[\\w\\s]+$'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "changed the pattern of the `query` request parameter `category` from `^\\w+$` to `^[\\w\\s]+$`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
@@ -54,7 +54,7 @@ func TestRequestParameterPatternGeneralized(t *testing.T) {
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
 	}, errs[0])
-	require.Equal(t, "changed the pattern of the 'query' request parameter 'category' from '^\\w+$' to a more general pattern '.*'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "changed the pattern of the `query` request parameter `category` from `^\\w+$` to a more general pattern `.*`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: adding pattern to request parameters
