@@ -191,6 +191,13 @@ properties:
 	run("git", "add", ".")
 	run("git", "commit", "-m", "add multi-file spec")
 
+	// Remove the files after committing so they only exist in git history.
+	// This ensures $ref resolution must go through "git show" — if the
+	// repo-root gitPrefix restoration fails, the relative ref resolves to
+	// "schemas/pet.yaml" (no "HEAD:" prefix) and the load will fail.
+	require.NoError(t, os.Remove(filepath.Join(dir, "openapi.yaml")))
+	require.NoError(t, os.Remove(filepath.Join(dir, "schemas", "pet.yaml")))
+
 	oldDir, err := os.Getwd()
 	require.NoError(t, err)
 	require.NoError(t, os.Chdir(dir))
