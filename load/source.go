@@ -21,20 +21,23 @@ type Source struct {
 	Type SourceType
 }
 
-// NewSource creates a Source by categorizing the input path as stdin, URL, or file.
+// NewSource creates a Source by categorizing the input path as stdin, URL, git revision, or file.
 // This function is intentionally infallible (does not return an error) to allow
 // clean usage in struct literal initialization and avoid error handling boilerplate
 // in hundreds of call sites throughout the codebase.
 //
-// Design rationale:
-//   - Valid http/https URLs are categorized as SourceTypeURL
-//   - "-" is categorized as SourceTypeStdin
-//   - Everything else (including URLs with invalid schemes like ftp://) is categorized as SourceTypeFile
-//   - Actual validation and error handling occurs later when the Loader interface methods
-//     (LoadFromURI, LoadFromFile, LoadFromStdin) are called
+// Categorization rules (evaluated in order):
+//   - "-" → SourceTypeStdin
+//   - Git revision syntax (e.g. "HEAD:openapi.yaml", "origin/main:api/openapi.yaml") → SourceTypeGitRevision
+//   - Valid http/https URLs → SourceTypeURL
+//   - Everything else (including URLs with unsupported schemes) → SourceTypeFile
 //
-// This design provides clean separation of concerns: NewSource categorizes inputs,
-// while Loader implementations handle validation and produce appropriate error messages.
+// Git revision syntax is "<ref>:<path>" where <ref> is any git ref (branch, tag, commit SHA,
+// or expressions like HEAD~1) and <path> is the file path within the repo. Multi-file specs
+// with relative $refs are fully supported — referenced files are also read via "git show".
+//
+// Actual validation and error handling occurs later when the source is loaded, providing
+// clean separation of concerns between categorization and I/O.
 func NewSource(path string) *Source {
 	if path == "-" {
 		return &Source{
