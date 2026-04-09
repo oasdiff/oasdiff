@@ -26,7 +26,7 @@ func TestBreaking_RespTypeStringToNumber(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponseBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the response's body type/format changed from 'string'/'' to 'number'/'' for status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the response's body type/format changed from `string`/`` to `number`/`` for status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing response's body schema type from number to string is breaking
@@ -46,7 +46,7 @@ func TestBreaking_RespTypeNumberToString(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponseBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the response's body type/format changed from 'number'/'' to 'string'/'' for status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the response's body type/format changed from `number`/`` to `string`/`` for status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing response's body schema type from number to integer is not breaking
@@ -84,7 +84,7 @@ func TestBreaking_RespTypeIntegerToNumber(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponseBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the response's body type/format changed from 'integer'/'' to 'number'/'' for status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the response's body type/format changed from `integer`/`` to `number`/`` for status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing response's body schema type from number/none to integer/int32 is not breaking
@@ -119,5 +119,5 @@ func TestBreaking_RespTypeChanged(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, "response-property-type-changed", errs[0].GetId())
-	require.Equal(t, "the '/items/testField' response's property type/format changed from 'string'/'' to 'integer'/'int32' for status '200'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the `/items/testField` response's property type/format changed from `string`/`` to `integer`/`int32` for status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

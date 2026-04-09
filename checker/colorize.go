@@ -56,7 +56,7 @@ func colorizedValues(args []any) []any {
 func quotedValues(args []any) []any {
 	result := make([]any, len(args))
 	for i, arg := range args {
-		result[i] = fmt.Sprintf("'%s'", interfaceToString(arg))
+		result[i] = fmt.Sprintf("`%s`", interfaceToString(arg))
 	}
 	return result
 }

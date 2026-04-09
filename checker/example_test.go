@@ -65,11 +65,11 @@ func ExampleCheckBackwardCompatibility() {
 
 	// Output:
 	// 4 breaking changes: 1 error, 3 warning
-	// error at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score removed the success response with the status '201' [response-success-status-removed].
+	// error at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score removed the success response with the status `201` [response-success-status-removed].
 	//
-	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the 'cookie' request parameter 'test' [request-parameter-removed]. This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.
+	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the `cookie` request parameter `test` [request-parameter-removed]. This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.
 	//
-	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the 'header' request parameter 'user' [request-parameter-removed]. This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.
+	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the `header` request parameter `user` [request-parameter-removed]. This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.
 	//
-	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the 'query' request parameter 'filter' [request-parameter-removed]. This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.
+	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the `query` request parameter `filter` [request-parameter-removed]. This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.
 }

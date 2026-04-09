@@ -21,7 +21,7 @@ func TestBreaking_DeletedParameter(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterRemovedCheck), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterRemovedId, errs[0].GetId())
-	require.Equal(t, "deleted the 'query' request parameter 'id'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "deleted the `query` request parameter `id`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
@@ -55,7 +55,7 @@ func TestBreaking_ParameterDeprecationFuture(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ParameterRemovedBeforeSunsetId, errs[0].GetId())
-	require.Equal(t, "deleted the 'query' request parameter 'id' before the sunset date '9999-08-10'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "deleted the `query` request parameter `id` before the sunset date `9999-08-10`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: deleting a deprecated parameter without sunset date is not breaking
@@ -102,6 +102,6 @@ func TestBreaking_RemoveParameterWithInvalidSunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterSunsetParseId, errs[0].GetId())
-	require.Equal(t, "failed to parse sunset date for the 'query' request parameter 'id': 'sunset date doesn't conform with RFC3339: invalid-date'", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `sunset date doesn't conform with RFC3339: invalid-date`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/param-deprecation/sunset.yaml", errs[0].GetSource())
 }
