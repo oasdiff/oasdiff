@@ -46,13 +46,15 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 	// We capture the prefix here so we can restore it in ReadFromURIFunc.
 	gitPrefix := gitRef[:strings.Index(gitRef, ":")+1]
 
-	// Install a ReadFromURIFunc so relative $refs inside a git-revision spec are also
-	// fetched via "git show" rather than opened as literal file paths.
-	// kin-openapi calls this function before checking IsExternalRefsAllowed, so the
+	// Copy the loader so we can install a custom ReadFromURIFunc without mutating the
+	// caller's instance. The shallow copy shares the unexported visitedDocuments cache,
+	// which is intentional: common $ref files are not fetched twice, and the unique
+	// gitRef-based URL keys prevent collisions between base and revision entries.
+	// kin-openapi calls ReadFromURIFunc before checking IsExternalRefsAllowed, so the
 	// caller's --allow-external-refs setting is still enforced for non-git refs via
 	// DefaultReadFromURI.
-	prevReadFromURIFunc := loader.ReadFromURIFunc
-	loader.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
+	loaderCopy := *loader
+	loaderCopy.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		p := filepath.FromSlash(location.Path)
 		if isGitRevision(p) {
 			return gitShow(p)
@@ -64,14 +66,13 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		}
 		return openapi3.DefaultReadFromURI(loader, location)
 	}
-	defer func() { loader.ReadFromURIFunc = prevReadFromURIFunc }()
 
 	// Use the full gitRef as the URL path so each revision gets a unique cache key in the
 	// loader's visitedDocuments map (e.g. "origin/main:openapi.yaml" vs "HEAD:openapi.yaml").
 	// Using only the file portion would cause both refs to share the key "openapi.yaml" and
 	// the loader would return the cached base spec for the revision.
 	u := &url.URL{Path: filepath.ToSlash(gitRef)}
-	return loader.LoadFromDataWithPath(out, u)
+	return loaderCopy.LoadFromDataWithPath(out, u)
 }
 
 // gitShow runs "git show <ref>" and returns its stdout, or a descriptive error.
