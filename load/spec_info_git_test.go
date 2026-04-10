@@ -185,6 +185,7 @@ paths: {}
 	s2, err := load.NewSpecInfo(loader, load.NewSource(localPath))
 	require.NoError(t, err, "local-file load must not use the git ReadFromURIFunc")
 	require.Equal(t, "2.0", s2.GetVersion())
+	require.Nil(t, loader.ReadFromURIFunc, "loadFromGitRevision must not mutate the caller's loader")
 }
 
 func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
