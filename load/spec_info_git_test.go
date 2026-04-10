@@ -137,6 +137,56 @@ paths: {}
 	require.Equal(t, "2.0", s2.GetVersion(), "revision spec should be v2")
 }
 
+// TestLoadInfo_GitRevisionThenLocalFile verifies that loading a git-revision spec followed
+// by a local-file spec on the same loader works correctly (ReadFromURIFunc must not leak).
+func TestLoadInfo_GitRevisionThenLocalFile(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	specV1 := minimalSpec
+	specV2 := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "2.0"
+paths: {}
+`
+	specPath := filepath.Join(dir, "openapi.yaml")
+	localPath := filepath.Join(dir, "openapi-local.yaml")
+
+	require.NoError(t, os.WriteFile(specPath, []byte(specV1), 0644))
+	run("git", "add", "openapi.yaml")
+	run("git", "commit", "-m", "v1")
+
+	require.NoError(t, os.WriteFile(localPath, []byte(specV2), 0644))
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("HEAD:openapi.yaml"))
+	require.NoError(t, err)
+	require.Equal(t, "1.0", s1.GetVersion())
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource(localPath))
+	require.NoError(t, err, "local-file load must not use the git ReadFromURIFunc")
+	require.Equal(t, "2.0", s2.GetVersion())
+}
+
 func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
 	t.Setenv("PATH", t.TempDir()) // remove git from PATH
 	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))

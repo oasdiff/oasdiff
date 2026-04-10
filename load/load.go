@@ -51,6 +51,7 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 	// kin-openapi calls this function before checking IsExternalRefsAllowed, so the
 	// caller's --allow-external-refs setting is still enforced for non-git refs via
 	// DefaultReadFromURI.
+	prevReadFromURIFunc := loader.ReadFromURIFunc
 	loader.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		p := filepath.FromSlash(location.Path)
 		if isGitRevision(p) {
@@ -63,6 +64,7 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		}
 		return openapi3.DefaultReadFromURI(loader, location)
 	}
+	defer func() { loader.ReadFromURIFunc = prevReadFromURIFunc }()
 
 	// Use the full gitRef as the URL path so each revision gets a unique cache key in the
 	// loader's visitedDocuments map (e.g. "origin/main:openapi.yaml" vs "HEAD:openapi.yaml").
