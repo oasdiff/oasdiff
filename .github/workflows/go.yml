@@ -64,14 +64,6 @@ jobs:
     - run: git --no-pager diff --exit-code
 
     - if: runner.os == 'Linux'
-      name: Generate breaking-changes examples
-      run: make doc-breaking-changes
-    
-    - if: runner.os == 'Linux'
-      name: Check breaking-changes examples are up to date
-      run: git --no-pager diff --exit-code docs/BREAKING-CHANGES-EXAMPLES.md
-
-    - if: runner.os == 'Linux'
       name: Generate localized messages
       run: |
         make localize

@@ -5,7 +5,7 @@ LINKER_FLAGS=-s -w -X github.com/oasdiff/oasdiff/build.Version=${VERSION}
 GOLANGCILINT_VERSION=v2.11.4
 
 .PHONY: test
-test: doc-breaking-changes localize ## Run tests
+test: localize ## Run tests
 	@echo "==> Running tests..."
 	go test ./...
 
@@ -28,11 +28,6 @@ build: ## Build oasdiff binary
 install: deps ## Install oasdiff binary
 	@echo "==> Installing oasdiff binary..."
 	go install -ldflags "$(LINKER_FLAGS)" .
-
-.PHONY: doc-breaking-changes
-doc-breaking-changes: ## Generate documentation for breaking changes
-	@echo "==> Updating breaking changes documentation..."
-	./scripts/doc_breaking_changes.sh > docs/BREAKING-CHANGES-EXAMPLES.md
 
 .PHONY: deps
 deps:  ## Download go module dependencies

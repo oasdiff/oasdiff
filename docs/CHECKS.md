@@ -51,5 +51,3 @@ Each check has a unique ID (e.g. `api-path-removed-without-deprecation`) which c
 - [Customize severity levels](BREAKING-CHANGES.md#customizing-severity-levels)
 - [Write custom checks](CUSTOMIZING-CHECKS.md)
 
-### Full List of Checks
-The full list of checks is also available at [BREAKING-CHANGES-EXAMPLES.md](BREAKING-CHANGES-EXAMPLES.md).

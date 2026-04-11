@@ -22,12 +22,7 @@
 3. Add the checker func to the defaultChecks or optionalChecks list
 
 ## Documentation
-1. Optionally, add additional unit tests and comment them with "BC: \<use-case\> is breaking" or "BC: \<use-case\> is not breaking"
-2. Update [BREAKING-CHANGES-EXAMPLES.md](BREAKING-CHANGES-EXAMPLES.md):
-    ```
-    make doc-breaking-changes
-    ```
-3. Make sure that [BREAKING-CHANGES-EXAMPLES.md](BREAKING-CHANGES-EXAMPLES.md) was updated with your use-cases
+Optionally, add additional unit tests and comment them with "BC: \<use-case\> is breaking" or "BC: \<use-case\> is not breaking"
 
 ## Example
 See this example of adding a custom check: https://github.com/oasdiff/oasdiff/pull/208/files
