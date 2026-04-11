@@ -2,6 +2,9 @@
     "ignorePatterns": [
       {
         "pattern": "^https://stackoverflow.com/questions/33987316/what-is-a-complex-mapping-key-in-yaml"
+      },
+      {
+        "pattern": "^https://codecov.io/"
       }
     ]
 }
