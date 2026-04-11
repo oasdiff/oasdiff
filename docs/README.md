@@ -96,7 +96,6 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 
 ## Roadmap
 - **[OpenAPI 3.1](OPENAPI-31.md)** (beta)
-- **[Source location tracking](SOURCE-LOCATOR.md)** (beta)
 
 ## Credits
 This project relies on the excellent implementation of OpenAPI 3.0 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
