@@ -1,17 +1,12 @@
 package diff_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )
-
-func getXOfTitlesFile(file string) string {
-	return fmt.Sprintf("../data/x-of-titles/%s", file)
-}
 
 func TestXOfTitles_Identical(t *testing.T) {
 	loader := openapi3.NewLoader()

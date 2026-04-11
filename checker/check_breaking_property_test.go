@@ -1,7 +1,6 @@
 package checker_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/oasdiff/kin-openapi/openapi3"
@@ -10,10 +9,6 @@ import (
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
-
-func getReqPropFile(file string) string {
-	return fmt.Sprintf("../data/required-properties/%s", file)
-}
 
 // BC: new required property in request header is breaking
 func TestBreaking_NewRequiredProperty(t *testing.T) {

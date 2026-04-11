@@ -43,7 +43,7 @@ paths:
 	tmpfile, err := os.CreateTemp("", "example")
 	require.NoError(t, err)
 
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer os.Remove(tmpfile.Name()) //nolint:errcheck // clean up
 
 	_, err = tmpfile.Write(content)
 	require.NoError(t, err)
@@ -72,7 +72,7 @@ paths:
 	tmpfile, err := os.CreateTemp("", "example")
 	require.NoError(t, err)
 
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer os.Remove(tmpfile.Name()) //nolint:errcheck // clean up
 
 	_, err = tmpfile.Write(content)
 	require.NoError(t, err)

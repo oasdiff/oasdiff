@@ -40,7 +40,7 @@ func TestViper_ReadInConfigErr(t *testing.T) {
 	v.ReadInConfigMock = func() error { return errors.New("error") }
 
 	cmd := cobra.Command{}
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: read error: error \n")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: read error: error")
 }
 
 func TestViper_BindPFlagErr(t *testing.T) {
@@ -162,5 +162,5 @@ func TestViper_InvalidFlag(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: validation error: decoding failed due to the following error(s):\n\n'internal.Config' has invalid keys: invalid \n")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: validation error: decoding failed due to the following error(s):\n\n'internal.Config' has invalid keys: invalid")
 }

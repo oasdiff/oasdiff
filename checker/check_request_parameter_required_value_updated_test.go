@@ -34,9 +34,8 @@ func TestBreaking_HeaderParamBecameRequired(t *testing.T) {
 
 // BC: changing an existing header param from optional to required with source tracking
 func TestBreaking_HeaderParamBecameRequired_WithSources(t *testing.T) {
-	enableOriginTracking(t)
-	s1 := l(t, 1)
-	s2 := l(t, 1)
+	s1 := l(t, 1, newLoaderWithOriginTracking())
+	s2 := l(t, 1, newLoaderWithOriginTracking())
 
 	s1.Spec.Paths.Value(installCommandPath).Get.Parameters.GetByInAndName(openapi3.ParameterInHeader, "network-policies").Required = false
 	s2.Spec.Paths.Value(installCommandPath).Get.Parameters.GetByInAndName(openapi3.ParameterInHeader, "network-policies").Required = true

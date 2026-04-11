@@ -30,11 +30,14 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 				if responsesDiff.ContentDiff == nil {
 					continue
 				}
-				baseSource, revisionSource := ResponseSources(operationsSources, operationItem, responsesDiff)
 				for _, mediaType := range responsesDiff.ContentDiff.MediaTypeModified {
 					if mediaType.NameDiff == nil {
 						continue
 					}
+
+					fromMediaType, _ := mediaType.NameDiff.NameDiff.From.(string)
+					toMediaType, _ := mediaType.NameDiff.NameDiff.To.(string)
+					baseSource, revisionSource := responseMediaTypeNameSources(operationsSources, operationItem, responsesDiff, fromMediaType, toMediaType)
 
 					// If parameters changed, this is a changed media type
 					if !mediaType.NameDiff.ParametersDiff.Empty() {

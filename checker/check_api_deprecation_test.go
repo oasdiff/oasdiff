@@ -7,28 +7,10 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
-
-func open(file string) (*load.SpecInfo, error) {
-	return load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(file))
-}
-
-func getDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/deprecation/%s", file)
-}
-
-func singleCheckConfig(c checker.BackwardCompatibilityCheck) *checker.Config {
-	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}).WithSingleCheck(c)
-}
-
-func allChecksConfig() *checker.Config {
-	return checker.NewConfig(checker.GetAllChecks())
-}
 
 // BC: deprecating an operation with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {

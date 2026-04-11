@@ -15,7 +15,7 @@ func WriteToFile(t *testing.T, filename string, lines []string) {
 
 	file, err := os.Create(filename)
 	require.NoError(t, err)
-	defer file.Close()
+	defer file.Close() //nolint:errcheck
 	for _, line := range lines {
 		_, err = file.WriteString(line + "\n")
 		require.NoError(t, err)

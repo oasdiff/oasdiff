@@ -1,7 +1,6 @@
 package checker_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/oasdiff/kin-openapi/openapi3"
@@ -10,29 +9,6 @@ import (
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
-
-const (
-	securityScorePath      = "/api/{domain}/{project}/badges/security-score"
-	securityScorePathSlash = securityScorePath + "/"
-	installCommandPath     = "/api/{domain}/{project}/install-command"
-)
-
-func l(t *testing.T, v int) *load.SpecInfo {
-	t.Helper()
-	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(fmt.Sprintf("../data/openapi-test%d.yaml", v)))
-	require.NoError(t, err)
-	return specInfo
-}
-
-func d(t *testing.T, config *diff.Config, v1, v2 int) checker.Changes {
-	t.Helper()
-	l1 := l(t, v1)
-	l2 := l(t, v2)
-	d, osm, err := diff.GetWithOperationsSourcesMap(config, l1, l2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	return errs
-}
 
 // BC: adding a required request body is breaking
 func TestBreaking_AddingRequiredRequestBody(t *testing.T) {

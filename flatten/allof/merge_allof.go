@@ -721,7 +721,7 @@ func resolvePattern(values []string) string {
 	for _, p := range patterns {
 		if len(p) > 0 {
 			if !isPatternResolved(p) {
-				pattern.WriteString(fmt.Sprintf("(?=%s)", p))
+				fmt.Fprintf(&pattern, "(?=%s)", p)
 			} else {
 				pattern.WriteString(p)
 			}

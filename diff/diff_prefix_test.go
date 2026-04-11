@@ -1,17 +1,12 @@
 package diff_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )
-
-func getPrefixFile(file string) string {
-	return fmt.Sprintf("../data/prefix/%s", file)
-}
 
 func TestPrefix_NoArgs(t *testing.T) {
 	loader := openapi3.NewLoader()

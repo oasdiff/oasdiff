@@ -22,8 +22,8 @@ func (r *report) indent() *report {
 	}
 }
 
-func (r *report) print(output ...any) (n int, err error) {
-	return fmt.Fprintln(r.Writer, addPrefix(r.level, output)...)
+func (r *report) print(output ...any) {
+	fmt.Fprintln(r.Writer, addPrefix(r.level, output)...) //nolint:errcheck
 }
 
 func addPrefix(level int, output []any) []any {

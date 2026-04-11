@@ -7,20 +7,18 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
-func getPropertyDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/deprecation/%s", file)
-}
-
 // CL: detecting deprecated request properties with sunset date
 func TestRequestPropertyDeprecationCheck(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("request_property_deprecation_base.yaml"))
+	s1, err := open(getDeprecationFile("request_property_deprecation_base.yaml"))
 	require.NoError(t, err)
-	s2, err := open(getPropertyDeprecationFile("request_property_deprecation_spec.yaml"))
+	s2, err := open(getDeprecationFile("request_property_deprecation_spec.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -34,9 +32,9 @@ func TestRequestPropertyDeprecationCheck(t *testing.T) {
 
 // CL: detecting deprecated request properties in allOf schemas with multiple media types
 func TestRequestPropertyDeprecationCheck_AllOf(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("request_property_deprecation_allof_base.yaml"))
+	s1, err := open(getDeprecationFile("request_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
-	s2, err := open(getPropertyDeprecationFile("request_property_deprecation_allof_spec.yaml"))
+	s2, err := open(getDeprecationFile("request_property_deprecation_allof_spec.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -58,9 +56,9 @@ func TestRequestPropertyDeprecationCheck_AllOf(t *testing.T) {
 
 // CL: each media type gets its own report with distinct details (issue #594)
 func TestRequestPropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("request_property_deprecation_allof_base.yaml"))
+	s1, err := open(getDeprecationFile("request_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
-	s2, err := open(getPropertyDeprecationFile("request_property_deprecation_allof_spec.yaml"))
+	s2, err := open(getDeprecationFile("request_property_deprecation_allof_spec.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -85,10 +83,10 @@ func TestRequestPropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
 
 // BC: deprecating a property with a deprecation policy but without specifying sunset date is breaking
 func TestRequestPropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_no_sunset.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_no_sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -102,10 +100,10 @@ func TestRequestPropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 
 // BC: deprecating a property without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestRequestPropertyDeprecation_ForAlpha(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_alpha.yaml"))
+	s1, err := open(getDeprecationFile("property_base_alpha.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_no_sunset_alpha.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_no_sunset_alpha.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -116,10 +114,10 @@ func TestRequestPropertyDeprecation_ForAlpha(t *testing.T) {
 
 // BC: deprecating a property with a deprecation policy and sunset date before required deprecation period is breaking
 func TestRequestPropertyDeprecation_WithEarlySunset(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
 
 	sunsetDate := civil.DateOf(time.Now()).AddDays(9).String()
@@ -137,10 +135,10 @@ func TestRequestPropertyDeprecation_WithEarlySunset(t *testing.T) {
 
 // BC: deprecating a property with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestRequestPropertyDeprecation_WithProperSunset(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
 
 	sunsetDate := civil.DateOf(time.Now()).AddDays(10).String()
@@ -158,10 +156,10 @@ func TestRequestPropertyDeprecation_WithProperSunset(t *testing.T) {
 
 // CL: properties that were re-activated
 func TestRequestPropertyDeprecation_DetectsReactivated(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	s1, err := open(getDeprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s2, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -180,10 +178,10 @@ func TestRequestPropertyDeprecation_DetectsReactivated(t *testing.T) {
 
 // BC: deprecating a property with an invalid sunset date format is breaking
 func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_invalid_sunset.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_invalid_sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -196,10 +194,10 @@ func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
 
 // CL: deprecating a request property with invalid stability level uses default deprecation days
 func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
 
 	// Set invalid stability level on the operation
@@ -213,10 +211,10 @@ func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
 
 // CL: message reports sunset missing when request property deprecated without sunset
 func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base.yaml"))
+	s1, err := open(getDeprecationFile("property_base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_no_sunset_no_stability.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_no_sunset_no_stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -230,10 +228,10 @@ func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 
 // CL: message includes sunset date when request property deprecated with valid sunset
 func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
-	s1, err := open(getPropertyDeprecationFile("property_base_stable.yaml"))
+	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getPropertyDeprecationFile("property_deprecated_future.yaml"))
+	s2, err := open(getDeprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
 
 	sunsetDate := civil.DateOf(time.Now()).AddDays(30).String()
@@ -247,4 +245,25 @@ func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, fmt.Sprintf("request property `oldField` deprecated with sunset date `%s` (stability: stable)", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// CL: source location points to the deprecated field, not the operation level
+func TestRequestPropertyDeprecationCheck_SourceLocation(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	s1, err := load.NewSpecInfo(loader, load.NewSource(getDeprecationFile("request_property_deprecation_base.yaml")))
+	require.NoError(t, err)
+	s2, err := load.NewSpecInfo(loader, load.NewSource(getDeprecationFile("request_property_deprecation_spec.yaml")))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+
+	// RevisionSource must point to the `deprecated: true` line, not the operation level
+	revSource := errs[0].GetRevisionSource()
+	require.NotNil(t, revSource, "revision source must be set")
+	require.Equal(t, 37, revSource.Line, "source must point to `deprecated: true` line, not operation level")
 }
