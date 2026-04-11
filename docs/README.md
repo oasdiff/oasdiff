@@ -88,11 +88,11 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 <img src="./demo.svg">
 
 ## The main commands
-- [diff](DIFF.md): the diff between OpenAPI specs, fully detailed
-- [breaking](BREAKING-CHANGES.md): breaking changes between OpenAPI specs  
-- [changelog](BREAKING-CHANGES.md): important changes between OpenAPI specs including breaking and non-breaking changes
+- [diff](DIFF.md): the full diff between OpenAPI specs
+- [breaking](BREAKING-CHANGES.md): breaking changes between OpenAPI specs
+- [changelog](BREAKING-CHANGES.md): all significant changes between OpenAPI specs, including breaking and non-breaking
 - [flatten](ALLOF.md): replace all instances of allOf by a merged equivalent
-- checks: displays the different checks that oasdiff runs to detect changes
+- [checks](CHECKS.md): display the checks that oasdiff uses to detect changes
 
 ## Roadmap
 - **[OpenAPI 3.1](OPENAPI-31.md)** (beta)
