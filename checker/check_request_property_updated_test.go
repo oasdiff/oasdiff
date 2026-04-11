@@ -64,10 +64,10 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 
 // CL: adding a new required request property with source tracking
 func TestRequiredRequestPropertyAdded_WithSources(t *testing.T) {
-	enableOriginTracking(t)
-	s1, err := open("../data/checker/request_property_added_base.yaml")
+	loader := newLoaderWithOriginTracking()
+	s1, err := open("../data/checker/request_property_added_base.yaml", loader)
 	require.NoError(t, err)
-	s2, err := open("../data/checker/request_property_added_revision.yaml")
+	s2, err := open("../data/checker/request_property_added_revision.yaml", loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

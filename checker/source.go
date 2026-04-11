@@ -333,6 +333,18 @@ func mediaTypeSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.
 	return nil
 }
 
+// responseMediaTypeNameSources returns source locations for a renamed media type within a response.
+// It points to the old media-type line in the base and the new media-type line in the revision.
+// Falls back to response-level sources when media type origin data is unavailable.
+func responseMediaTypeNameSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff, fromMediaType, toMediaType string) (*Source, *Source) {
+	baseSource := mediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, fromMediaType)
+	revisionSource := mediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, toMediaType)
+	if baseSource == nil && revisionSource == nil {
+		return ResponseSources(operationsSources, operationItem, responseDiff)
+	}
+	return baseSource, revisionSource
+}
+
 // headerSources returns source locations from the base and revision headers within a response.
 // Falls back to response-level sources when header origin data is unavailable.
 func headerSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff, headerName string) (*Source, *Source) {

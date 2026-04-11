@@ -137,7 +137,7 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 	// temp file to mock GITHUB_OUTPUT
 	tempFile, err := os.CreateTemp("", "github-output")
 	assert.NoError(t, err)
-	defer os.Remove(tempFile.Name())
+	defer os.Remove(tempFile.Name()) //nolint:errcheck
 	_ = os.Setenv("GITHUB_OUTPUT", tempFile.Name())
 
 	testChanges := checker.Changes{

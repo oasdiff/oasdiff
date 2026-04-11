@@ -61,10 +61,9 @@ func TestOperationIdUpdated(t *testing.T) {
 
 // CL: removing an existing operation id with source tracking
 func TestOperationIdRemoved_WithSources(t *testing.T) {
-	enableOriginTracking(t)
-	s1, err := open("../data/checker/operation_id_removed_base.yaml")
+	s1, err := open("../data/checker/operation_id_removed_base.yaml", newLoaderWithOriginTracking())
 	require.NoError(t, err)
-	s2, err := open("../data/checker/operation_id_removed_base.yaml")
+	s2, err := open("../data/checker/operation_id_removed_base.yaml", newLoaderWithOriginTracking())
 	require.NoError(t, err)
 
 	s2.Spec.Paths.Value("/api/v1.0/groups").Post.OperationID = ""
@@ -78,7 +77,8 @@ func TestOperationIdRemoved_WithSources(t *testing.T) {
 	// Verify source tracking: base has operationId, revision does not
 	require.NotEmpty(t, errs[0].GetBaseSource())
 	require.Equal(t, "../data/checker/operation_id_removed_base.yaml", errs[0].GetBaseSource().File)
-	require.NotZero(t, errs[0].GetBaseSource().Line)
+	require.Equal(t, errs[0].GetBaseSource().Line, 12)
+	require.Equal(t, errs[0].GetBaseSource().Column, 7)
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 

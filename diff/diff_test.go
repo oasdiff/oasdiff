@@ -190,7 +190,7 @@ func TestDiff_IdenticalFilesNoDiff(t *testing.T) {
 	// Copy the same file to a temp location to get a different path.
 	tmp, err := os.CreateTemp("", "openapi-test-*.yaml")
 	require.NoError(t, err)
-	defer os.Remove(tmp.Name())
+	defer os.Remove(tmp.Name()) //nolint:errcheck
 	src, err := os.ReadFile("../data/openapi-test1.yaml")
 	require.NoError(t, err)
 	_, err = tmp.Write(src)

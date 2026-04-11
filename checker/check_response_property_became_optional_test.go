@@ -36,9 +36,8 @@ func TestResponsePropertyBecameOptionalCheck(t *testing.T) {
 // This exercises the yaml3 root-mapping origin fix: previously, schemas loaded from $ref'd files
 // had Origin==nil because document() in yaml3 never injected __origin__ for the root mapping.
 func TestResponsePropertyBecameOptionalCheck_ExternalRef(t *testing.T) {
-	enableOriginTracking(t)
-
 	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
 	loader.IsExternalRefsAllowed = true
 
 	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/ref-chain-example/base/openapi.yaml"))

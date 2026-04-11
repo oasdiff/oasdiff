@@ -31,7 +31,7 @@ func ProcessIgnoredBackwardCompatibilityErrors(level Level, errs Changes, ignore
 	if err != nil {
 		return nil, err
 	}
-	defer ignore.Close()
+	defer func() { _ = ignore.Close() }()
 	ignoreScanner := bufio.NewScanner(ignore)
 
 	ignoredErrs := make([]bool, len(errs))

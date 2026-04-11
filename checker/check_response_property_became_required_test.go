@@ -32,10 +32,10 @@ func TestResponsePropertyBecameRequiredlCheck(t *testing.T) {
 
 // CL: changing optional response property to required with source tracking
 func TestResponsePropertyBecameRequired_WithSources(t *testing.T) {
-	enableOriginTracking(t)
-	s1, err := open("../data/checker/response_property_became_optional_revision.yaml")
+	loader := newLoaderWithOriginTracking()
+	s1, err := open("../data/checker/response_property_became_optional_revision.yaml", loader)
 	require.NoError(t, err)
-	s2, err := open("../data/checker/response_property_became_optional_base.yaml")
+	s2, err := open("../data/checker/response_property_became_optional_base.yaml", loader)
 	require.NoError(t, err)
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)

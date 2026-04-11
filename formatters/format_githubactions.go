@@ -58,7 +58,7 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 			params = append(params, "file="+sourceFile)
 		}
 
-		buf.WriteString(fmt.Sprintf("::%s %s::%s\n", githubActionsSeverity[change.GetLevel()], strings.Join(params, ","), getMessage(change, f.Localizer)))
+		fmt.Fprintf(&buf, "::%s %s::%s\n", githubActionsSeverity[change.GetLevel()], strings.Join(params, ","), getMessage(change, f.Localizer))
 	}
 
 	return buf.Bytes(), nil
@@ -77,6 +77,11 @@ func isHTTPSource(file string) bool {
 	return strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://")
 }
 
+// writeGitHubActionsJobOutputParameters publishes key=value pairs as GitHub Actions
+// step output parameters by appending them to the file referenced by $GITHUB_OUTPUT.
+// This is the mechanism GitHub Actions uses to pass outputs between steps
+// (https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs).
+// If $GITHUB_OUTPUT is unset (i.e. running outside GitHub Actions), this is a no-op.
 func writeGitHubActionsJobOutputParameters(params map[string]string) error {
 	githubOutputFile := os.Getenv("GITHUB_OUTPUT")
 	if githubOutputFile == "" {
@@ -89,12 +94,12 @@ func writeGitHubActionsJobOutputParameters(params map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("failed to open GitHub Actions job output file: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 
 	// collect all parameters into a string
 	var contentBuilder strings.Builder
 	for key, value := range params {
-		contentBuilder.WriteString(fmt.Sprintf("%s=%s\n", key, value))
+		fmt.Fprintf(&contentBuilder, "%s=%s\n", key, value)
 	}
 
 	// write the parameters to the file

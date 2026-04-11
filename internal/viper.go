@@ -48,7 +48,7 @@ func readConfFile(v IViper) error {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			// Config file not found; ignore error
 		} else {
-			return fmt.Errorf("read error: %s \n", err)
+			return fmt.Errorf("read error: %s", err)
 		}
 	}
 
@@ -117,7 +117,7 @@ func validate(v IViper) error {
 	var config Config
 
 	if err := v.UnmarshalExact(&config); err != nil {
-		return fmt.Errorf("validation error: %s \n", err)
+		return fmt.Errorf("validation error: %s", err)
 	}
 
 	if err := validateString(localizations.GetSupportedLanguages(), config.Lang, "lang"); err != nil {

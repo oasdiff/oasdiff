@@ -11,10 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func getParameterDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/param-deprecation/%s", file)
-}
-
 // BC: deprecating a parameter with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 

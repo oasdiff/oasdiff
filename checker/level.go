@@ -79,7 +79,7 @@ func ProcessSeverityLevels(file string) (map[string]Level, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	return GetSeverityLevels(f)
 }
