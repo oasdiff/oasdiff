@@ -155,7 +155,7 @@
     {{ template "section-group" . }}
     {{ end }}
     {{ else }}
-    <p>No changes</p>
+    {{ if .DiffEmpty }}<p>No changes detected</p>{{ else }}<p>No changes to report, but the specs are different</p>{{ end }}
     {{ end }}
 </body>
 

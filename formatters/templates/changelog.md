@@ -14,5 +14,5 @@
 {{ end }}
 {{ end }}
 {{ else }}
-No changes
+{{ if .DiffEmpty }}No changes detected{{ else }}No changes to report, but the specs are different{{ end }}
 {{ end }}
