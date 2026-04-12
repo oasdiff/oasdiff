@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 func getTypeDiff(types1, types2 *openapi3.Types) *StringsDiff {

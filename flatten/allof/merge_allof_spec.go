@@ -1,7 +1,7 @@
 package allof
 
 import (
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // MergeSpec merges all instances in allOf in place
