@@ -44,7 +44,7 @@ func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpt
 		tmpl = template.Must(template.New("changelog").Funcs(MarkupTemplateFuncs()).Parse(changelogMarkdown))
 	}
 
-	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion)
+	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion, opts.DiffEmpty)
 }
 
 func (f MarkupFormatter) loadCustomTemplate(templatePath string) (*template.Template, error) {
@@ -66,9 +66,9 @@ func MarkupTemplateFuncs() template.FuncMap {
 	return template.FuncMap(changelogTemplateFuncs())
 }
 
-func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string) ([]byte, error) {
+func ExecuteTextTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string, diffEmpty bool) ([]byte, error) {
 	var out bytes.Buffer
-	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion}); err != nil {
+	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion, diffEmpty}); err != nil {
 		return nil, err
 	}
 	return out.Bytes(), nil

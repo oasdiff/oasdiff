@@ -110,7 +110,7 @@ func TestMarkupFormatter_NotImplemented(t *testing.T) {
 }
 
 func TestExecuteMarkupTemplate_Err(t *testing.T) {
-	_, err := formatters.ExecuteTextTemplate(&template.Template{}, nil, "", "")
+	_, err := formatters.ExecuteTextTemplate(&template.Template{}, nil, "", "", false)
 	assert.Error(t, err)
 }
 

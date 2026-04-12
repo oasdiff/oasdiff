@@ -21,9 +21,16 @@ func newSingleLineFormatter(l checker.Localizer) SingleLineFormatter {
 func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
-	if len(changes) > 0 {
-		_, _ = fmt.Fprint(result, getChangelogTitle(changes, f.Localizer, opts.ColorMode))
+	if len(changes) == 0 {
+		if opts.DiffEmpty {
+			_, _ = fmt.Fprint(result, "No changes detected")
+		} else {
+			_, _ = fmt.Fprint(result, "No changes to report, but the specs are different")
+		}
+		return result.Bytes(), nil
 	}
+
+	_, _ = fmt.Fprint(result, getChangelogTitle(changes, f.Localizer, opts.ColorMode))
 
 	for _, c := range changes {
 		_, _ = fmt.Fprintf(result, "%s\n\n", c.SingleLineError(f.Localizer, opts.ColorMode))

@@ -45,6 +45,7 @@ type RenderOpts struct {
 	ColorMode    checker.ColorMode
 	WrapInObject bool   // wrap the output in a JSON object with the key "changes"
 	TemplatePath string // path to custom template file for changelog generation
+	DiffEmpty    bool   // true when the underlying diff found no changes at all
 }
 
 func NewRenderOpts() RenderOpts {
@@ -57,6 +58,7 @@ type TemplateData struct {
 	GroupedChanges  ChangesByGroup
 	BaseVersion     string
 	RevisionVersion string
+	DiffEmpty       bool
 }
 
 // APIChanges returns GroupedChanges.
