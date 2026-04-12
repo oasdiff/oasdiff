@@ -3,7 +3,7 @@ package diff
 import (
 	"fmt"
 
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // HeadersDiff describes the changes between a pair of sets of header objects: https://swagger.io/specification/#header-object

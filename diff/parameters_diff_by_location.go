@@ -3,7 +3,7 @@ package diff
 import (
 	"fmt"
 
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // ParametersDiffByLocation describes the changes, grouped by param location, between a pair of lists of parameter objects: https://swagger.io/specification/#parameter-object

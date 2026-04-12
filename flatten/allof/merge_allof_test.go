@@ -6,7 +6,7 @@ import (
 
 	"github.com/oasdiff/oasdiff/flatten/allof"
 
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/require"
 )
 
