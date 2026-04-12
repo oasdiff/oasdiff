@@ -267,6 +267,65 @@ func SchemaAddedItemSources(operationsSources *diff.OperationsSourcesMap, operat
 	return nil, revisionSource
 }
 
+// SubschemaSources returns source locations for a specific subschema within an allOf/oneOf/anyOf array.
+// For added subschemas, baseIndex should be -1; for deleted subschemas, revisionIndex should be -1.
+func SubschemaSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, baseIndex, revisionIndex int) (*Source, *Source) {
+	if schemaDiff == nil {
+		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
+	}
+
+	var baseSource, revisionSource *Source
+
+	if baseIndex >= 0 && schemaDiff.Base != nil && operationItem.Base != nil {
+		baseSource = subschemaSource(operationsSources, operationItem.Base, schemaDiff.Base, field, baseIndex)
+	}
+	if revisionIndex >= 0 && schemaDiff.Revision != nil && operationItem.Revision != nil {
+		revisionSource = subschemaSource(operationsSources, operationItem.Revision, schemaDiff.Revision, field, revisionIndex)
+	}
+
+	// Fall back to field-level source if subschema origin is not available
+	if baseSource == nil && revisionSource == nil {
+		return SchemaFieldSources(operationsSources, operationItem, schemaDiff, field)
+	}
+
+	return baseSource, revisionSource
+}
+
+// subschemaSource extracts the source location from a specific subschema in an allOf/oneOf/anyOf array.
+func subschemaSource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, schema *openapi3.Schema, field string, index int) *Source {
+	var refs openapi3.SchemaRefs
+	switch field {
+	case "allOf":
+		refs = schema.AllOf
+	case "oneOf":
+		refs = schema.OneOf
+	case "anyOf":
+		refs = schema.AnyOf
+	default:
+		return nil
+	}
+
+	if index >= len(refs) || refs[index] == nil || refs[index].Value == nil {
+		return nil
+	}
+
+	origin := refs[index].Value.Origin
+	if origin == nil || origin.Key == nil {
+		return nil
+	}
+
+	file := displayFilePath(origin.Key.File)
+	if file == "" {
+		file = (*operationsSources)[operation]
+	}
+
+	return &Source{
+		File:   file,
+		Line:   origin.Key.Line,
+		Column: origin.Key.Column,
+	}
+}
+
 // parameterSource returns the source location of a specific parameter.
 // Returns nil when the parameter has no origin data.
 func parameterSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, param *openapi3.Parameter) *Source {
