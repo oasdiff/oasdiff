@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 )
 
 // OAuthFlowDiff describes the changes between a pair of oauth flow objects: https://swagger.io/specification/#oauth-flow-object
