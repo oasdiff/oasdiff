@@ -20,6 +20,11 @@ request-property-pattern-generalized: "cambiado el patrón de la propiedad de so
 api-deprecated-sunset-parse: "fallo al parsear la fecha de expiración: %v"
 api-path-sunset-parse: "fallo al parsear la fecha de expiración: %v"
 api-stability-decreased: "nivel de estabilidad del endpoint disminuido de %s a %s"
+api-stability-increased: "nivel de estabilidad del endpoint aumentado de %s a %s"
+request-property-stability-decreased: "nivel de estabilidad de la propiedad de solicitud %s disminuido de %s a %s"
+request-property-stability-increased: "nivel de estabilidad de la propiedad de solicitud %s aumentado de %s a %s"
+response-property-stability-decreased: "nivel de estabilidad de la propiedad de respuesta %s disminuido de %s a %s"
+response-property-stability-increased: "nivel de estabilidad de la propiedad de respuesta %s aumentado de %s a %s"
 api-invalid-stability-level: "fallo al parsear el nivel de estabilidad: %v"
 api-deprecated-sunset-missing: "fecha de expiración faltante para la API deprecada"
 api-sunset-date-too-small: "fecha de expiración %s es demasiado pequeña, debe ser al menos %s días desde ahora"
@@ -245,6 +250,11 @@ api-global-security-scope-removed: el alcance de seguridad %s fue removido del e
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
 api-stability-decreased-description: el nivel de estabilidad del endpoint fue disminuido
+api-stability-increased-description: el nivel de estabilidad del endpoint fue aumentado
+request-property-stability-decreased-description: el nivel de estabilidad de la propiedad de solicitud fue disminuido
+request-property-stability-increased-description: el nivel de estabilidad de la propiedad de solicitud fue aumentado
+response-property-stability-decreased-description: el nivel de estabilidad de la propiedad de respuesta fue disminuido
+response-property-stability-increased-description: el nivel de estabilidad de la propiedad de respuesta fue aumentado
 api-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad del endpoint %s
 api-security-component-type-changed: el tipo del esquema de seguridad %s fue cambiado de %s a %s
 api-security-component-oauth-url-changed: la URL OAuth del esquema de seguridad %s fue cambiada de %s a %s

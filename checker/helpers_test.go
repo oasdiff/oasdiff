@@ -91,3 +91,27 @@ func containsId(errs checker.Changes, id string) bool {
 	}
 	return false
 }
+
+// requireChange asserts that changes contains a Change with the given id and
+// returns it for further assertions. Fails the test if no matching change is found.
+func requireChange(t *testing.T, changes checker.Changes, id string) checker.Change {
+	t.Helper()
+	for _, c := range changes {
+		if c.GetId() == id {
+			return c
+		}
+	}
+	require.Fail(t, "expected change with id "+id)
+	return nil
+}
+
+// requireNoChange asserts that changes does not contain any Change whose id
+// matches one of the given ids.
+func requireNoChange(t *testing.T, changes checker.Changes, ids ...string) {
+	t.Helper()
+	for _, c := range changes {
+		for _, id := range ids {
+			require.NotEqual(t, id, c.GetId(), "unexpected change with id "+id)
+		}
+	}
+}

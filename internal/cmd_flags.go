@@ -71,6 +71,7 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
+	enumWithOptions(cmd, newEnumValue(checker.GetSupportedStabilityLevels(), ""), "stability-level", "", "minimum stability level to include")
 }
 
 // addOpenFlags registers --open and its companion review-upload flags. Kept out
