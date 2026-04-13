@@ -51,3 +51,31 @@ func TestRequestBodyPatternPropertyRemoved(t *testing.T) {
 	}
 	require.True(t, found, "expected request-body-pattern-property-removed")
 }
+
+// CL: adding pattern property to request property
+func TestRequestPropertyPatternPropertyAdded(t *testing.T) {
+	s1, err := open("../data/checker/pattern_properties_prop_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/pattern_properties_prop_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternPropertiesUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.RequestPropertyPatternPropertyAddedId), "expected request-property-pattern-property-added")
+}
+
+// CL: removing pattern property from request property
+func TestRequestPropertyPatternPropertyRemoved(t *testing.T) {
+	s1, err := open("../data/checker/pattern_properties_prop_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/pattern_properties_prop_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternPropertiesUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.RequestPropertyPatternPropertyRemovedId), "expected request-property-pattern-property-removed")
+}
