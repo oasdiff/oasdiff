@@ -63,7 +63,7 @@ func removeDraftAndAlphaOperationsDiffs(config *Config, diffReport *diff.Diff, r
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
 				continue
 			}
-			if baseStability != STABILITY_DRAFT && baseStability != STABILITY_ALPHA {
+			if !(baseStability == STABILITY_DRAFT || baseStability == STABILITY_ALPHA) || (config != nil && config.IncludeStabilityLevels[baseStability]) {
 				ignore = false
 				break
 			}
@@ -89,7 +89,7 @@ func removeDraftAndAlphaOperationsDiffs(config *Config, diffReport *diff.Diff, r
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
 				continue
 			}
-			if baseStability != STABILITY_DRAFT && baseStability != STABILITY_ALPHA {
+			if !(baseStability == STABILITY_DRAFT || baseStability == STABILITY_ALPHA) || (config != nil && config.IncludeStabilityLevels[baseStability]) {
 				pathDiff.OperationsDiff.Deleted[iOperation] = operation
 				iOperation++
 			}
@@ -126,7 +126,9 @@ func removeDraftAndAlphaOperationsDiffs(config *Config, diffReport *diff.Diff, r
 				continue
 			}
 			if revisionStability == STABILITY_DRAFT || revisionStability == STABILITY_ALPHA {
-				delete(pathDiff.OperationsDiff.Modified, operation)
+				if config == nil || !config.IncludeStabilityLevels[revisionStability] {
+					delete(pathDiff.OperationsDiff.Modified, operation)
+				}
 			}
 		}
 	}

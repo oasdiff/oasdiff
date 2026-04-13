@@ -149,3 +149,7 @@ func (flags *Flags) getTags() []string {
 func (flags *Flags) getTemplate() string {
 	return flags.v.GetString("template")
 }
+
+func (flags *Flags) getIncludeStabilityLevels() []string {
+	return fixViperStringSlice(flags.v.GetStringSlice("include-stability-levels"))
+}

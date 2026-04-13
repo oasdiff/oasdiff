@@ -1,0 +1,18 @@
+info:
+  title: Draft Test
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /api/test:
+    get:
+      operationId: getTest
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string

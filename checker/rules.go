@@ -471,6 +471,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
 		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesWidenedId, INFO, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
 		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
+		// APIDraftCheck
+		newBackwardCompatibilityRule(EndpointDraftId, INFO, APIDraftCheck, DirectionNone, LocationNone, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyDraftId, INFO, RequestPropertyDraftCheck, DirectionRequest, LocationProperties, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyDraftId, INFO, ResponsePropertyDraftCheck, DirectionResponse, LocationProperties, ActionChange),
 	}
 }
 

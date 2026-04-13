@@ -1,0 +1,43 @@
+info:
+  title: Draft Test
+  version: 1.0.0
+openapi: 3.0.3
+paths:
+  /api/test:
+    get:
+      operationId: getTest
+      x-stability-level: draft
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+    post:
+      operationId: createTest
+      x-stability-level: draft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  x-stability-level: draft
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stability-level: draft

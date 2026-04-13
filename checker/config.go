@@ -3,11 +3,12 @@ package checker
 import "log"
 
 type Config struct {
-	Checks              BackwardCompatibilityChecks
-	MinSunsetBetaDays   uint
-	MinSunsetStableDays uint
-	LogLevels           map[string]Level
-	Attributes          []string
+	Checks                 BackwardCompatibilityChecks
+	MinSunsetBetaDays      uint
+	MinSunsetStableDays    uint
+	LogLevels              map[string]Level
+	Attributes             []string
+	IncludeStabilityLevels map[string]bool
 }
 
 const (
