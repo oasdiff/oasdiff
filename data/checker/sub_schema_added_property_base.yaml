@@ -1,0 +1,65 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  if:
+                    properties:
+                      kind:
+                        type: string
+                  then:
+                    properties:
+                      name:
+                        type: string
+                  else:
+                    properties:
+                      code:
+                        type: string
+                  contains:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                  prefixItems:
+                    - type: object
+                      properties:
+                        label:
+                          type: string
+                  propertyNames:
+                    type: string
+                  unevaluatedProperties:
+                    type: object
+                    properties:
+                      tag:
+                        type: string
+                  contentSchema:
+                    type: object
+                    properties:
+                      encoding:
+                        type: string
+                  patternProperties:
+                    "^x-":
+                      type: object
+                      properties:
+                        ext:
+                          type: string
+                  dependentSchemas:
+                    name:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+      responses:
+        "200":
+          description: OK
