@@ -370,7 +370,6 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "failed to unmarshal sunset json")
 }
 
-
 // CL: endpoint deprecation message includes sunset date
 func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 	s1, err := open(getDeprecationFile("base.yaml"))

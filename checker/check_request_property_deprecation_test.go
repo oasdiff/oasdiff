@@ -227,7 +227,6 @@ func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, "request property `oldField` deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-
 // CL: message includes sunset date when request property deprecated with valid sunset
 func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	s1, err := open(getDeprecationFile("property_base_stable.yaml"))
