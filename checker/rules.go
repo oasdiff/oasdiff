@@ -103,8 +103,14 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityAddedCheckId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionRemove),
-		// Stability Descreased Check is run as part of CheckBackwardCompatibility
+		// Stability Decreased/Increased Checks are run as part of CheckBackwardCompatibility
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, LocationNone, ActionDecrease),
+		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, LocationNone, ActionIncrease),
+		// Property-level stability checks
+		newBackwardCompatibilityRule(RequestPropertyStabilityDecreasedId, INFO, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityIncreasedId, INFO, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityDecreasedId, INFO, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityIncreasedId, INFO, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
 		// APIDeprecationCheck
 		newBackwardCompatibilityRule(EndpointReactivatedId, INFO, APIDeprecationCheck, DirectionNone, LocationNone, ActionChange),
 		newBackwardCompatibilityRule(APIDeprecatedSunsetParseId, ERR, APIDeprecationCheck, DirectionNone, LocationNone, ActionChange),

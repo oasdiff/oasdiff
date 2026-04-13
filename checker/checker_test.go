@@ -19,7 +19,11 @@ func TestBreaking_StabilityLevelDecreased(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+
+	// Use Alpha threshold so both beta and alpha are at/above threshold
+	config := allChecksConfig()
+	config.StabilityLevel = checker.StabilityLevelAlpha
+	errs := checker.CheckBackwardCompatibility(config, d, osm)
 	require.Len(t, errs, 1)
 
 	require.IsType(t, checker.ApiChange{}, errs[0])
