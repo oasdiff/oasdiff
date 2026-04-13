@@ -48,6 +48,38 @@ func TestRequestPropertyExclusiveMaxDecreased(t *testing.T) {
 	require.True(t, ids[checker.RequestPropertyExclusiveMaxDecreasedId], "expected request-property-exclusive-max-decreased")
 }
 
+// CL: request body/property exclusiveMinimum decreased (swap base/revision)
+func TestRequestPropertyExclusiveMinDecreased(t *testing.T) {
+	s1, err := open("../data/checker/exclusive_min_max_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/exclusive_min_max_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinIncreasedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	require.True(t, containsId(errs, checker.RequestBodyExclusiveMinDecreasedId), "expected request-body-exclusive-min-decreased")
+	require.True(t, containsId(errs, checker.RequestPropertyExclusiveMinDecreasedId), "expected request-property-exclusive-min-decreased")
+}
+
+// CL: request body/property exclusiveMaximum increased (swap base/revision)
+func TestRequestPropertyExclusiveMaxIncreased(t *testing.T) {
+	s1, err := open("../data/checker/exclusive_min_max_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/exclusive_min_max_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxDecreasedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	require.True(t, containsId(errs, checker.RequestBodyExclusiveMaxIncreasedId), "expected request-body-exclusive-max-increased")
+	require.True(t, containsId(errs, checker.RequestPropertyExclusiveMaxIncreasedId), "expected request-property-exclusive-max-increased")
+}
+
 // CL: request body/property exclusiveMinimum set
 func TestRequestPropertyExclusiveMinSet(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_set_base.yaml")

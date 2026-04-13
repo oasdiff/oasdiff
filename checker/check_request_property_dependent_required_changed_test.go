@@ -69,6 +69,19 @@ func TestRequestPropertyDependentRequiredRemoved(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredRemovedId))
 }
 
+// CL: changing dependentRequired on request property
+func TestRequestPropertyDependentRequiredChanged(t *testing.T) {
+	s1, err := open("../data/checker/dependent_required_property_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/dependent_required_property_changed_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredChangedId))
+}
+
 // CL: removing dependentRequired from request body
 func TestRequestBodyDependentRequiredRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_revision.yaml")
