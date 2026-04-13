@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/flatten/commonparams"
 	"github.com/stretchr/testify/require"
 )

@@ -3,7 +3,7 @@ package diff
 import (
 	"fmt"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 )
 
 // MediaTypeDiff describes the changes between a pair of media type objects: https://swagger.io/specification/#media-type-object
