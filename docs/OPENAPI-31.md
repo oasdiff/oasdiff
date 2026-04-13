@@ -53,7 +53,7 @@ The following OpenAPI 3.1 / JSON Schema 2020-12 features are not yet fully imple
 
 ### Install the beta release
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=2.2.0-openapi31.beta.2 sh
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=2.2.0-openapi31.beta.3 sh
 ```
 
 Then use oasdiff as normal:
