@@ -29,3 +29,45 @@ func TestResponseBodyPatternPropertyAdded(t *testing.T) {
 	}
 	require.True(t, found, "expected response-body-pattern-property-added")
 }
+
+// CL: removing pattern property from response body
+func TestResponseBodyPatternPropertyRemoved(t *testing.T) {
+	s1, err := open("../data/checker/pattern_properties_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/pattern_properties_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyPatternPropertiesUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.ResponseBodyPatternPropertyRemovedId), "expected response-body-pattern-property-removed")
+}
+
+// CL: adding pattern property to response property
+func TestResponsePropertyPatternPropertyAdded(t *testing.T) {
+	s1, err := open("../data/checker/pattern_properties_prop_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/pattern_properties_prop_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyPatternPropertiesUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.ResponsePropertyPatternPropertyAddedId), "expected response-property-pattern-property-added")
+}
+
+// CL: removing pattern property from response property
+func TestResponsePropertyPatternPropertyRemoved(t *testing.T) {
+	s1, err := open("../data/checker/pattern_properties_prop_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/pattern_properties_prop_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyPatternPropertiesUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.ResponsePropertyPatternPropertyRemovedId), "expected response-property-pattern-property-removed")
+}
