@@ -43,6 +43,29 @@ func TestRequestPropertyOneOfAdded(t *testing.T) {
 		}}, errs)
 }
 
+// CL: adding 'oneOf' subschema ($ref) with source tracking
+func TestRequestPropertyOneOfAdded_WithSources(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+	s1, err := open("../data/checker/request_property_one_of_added_base.yaml", loader)
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_one_of_added_revision.yaml", loader)
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyOneOfUpdatedCheck), d, osm, checker.INFO)
+
+	require.Len(t, errs, 2)
+
+	for _, err := range errs {
+		if err.GetId() == checker.RequestBodyOneOfAddedId {
+			require.NotEmpty(t, err.GetRevisionSource())
+			require.Equal(t, "../data/checker/request_property_one_of_added_revision.yaml", err.GetRevisionSource().File)
+			require.NotZero(t, err.GetRevisionSource().Line)
+		}
+	}
+}
+
 // CL: removing 'oneOf' schema from the request body or request body property
 func TestRequestPropertyOneOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_removed_base.yaml")

@@ -43,6 +43,29 @@ func TestResponsePropertyAnyOfAdded(t *testing.T) {
 		}}, errs)
 }
 
+// CL: adding 'anyOf' subschema ($ref) with source tracking
+func TestResponsePropertyAnyOfAdded_WithSources(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+	s1, err := open("../data/checker/response_property_any_of_added_base.yaml", loader)
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_any_of_added_revision.yaml", loader)
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyAnyOfUpdatedCheck), d, osm, checker.INFO)
+
+	require.Len(t, errs, 2)
+
+	for _, err := range errs {
+		if err.GetId() == checker.ResponseBodyAnyOfAddedId {
+			require.NotEmpty(t, err.GetRevisionSource())
+			require.Equal(t, "../data/checker/response_property_any_of_added_revision.yaml", err.GetRevisionSource().File)
+			require.NotZero(t, err.GetRevisionSource().Line)
+		}
+	}
+}
+
 // CL: removing 'anyOf' schema from the response body or response body property
 func TestResponsePropertyAnyOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_any_of_removed_base.yaml")

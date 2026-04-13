@@ -305,13 +305,21 @@ func subschemaSource(operationsSources *diff.OperationsSourcesMap, operation *op
 		return nil
 	}
 
-	if index >= len(refs) || refs[index] == nil || refs[index].Value == nil {
+	if index >= len(refs) || refs[index] == nil {
 		return nil
 	}
 
-	origin := refs[index].Value.Origin
+	// Prefer the SchemaRef origin (points to the $ref line or inline schema in the array)
+	// over the resolved Value origin (points to the component definition for $ref schemas)
+	origin := refs[index].Origin
 	if origin == nil || origin.Key == nil {
-		return nil
+		if refs[index].Value == nil {
+			return nil
+		}
+		origin = refs[index].Value.Origin
+		if origin == nil || origin.Key == nil {
+			return nil
+		}
 	}
 
 	file := displayFilePath(origin.Key.File)
