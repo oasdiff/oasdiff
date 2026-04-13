@@ -3,7 +3,7 @@ package load
 import (
 	"fmt"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/flatten/allof"
 	"github.com/oasdiff/oasdiff/flatten/commonparams"
 	"github.com/oasdiff/oasdiff/flatten/headers"

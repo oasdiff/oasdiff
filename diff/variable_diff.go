@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 )
 
 // VariableDiff describes the changes between a pair of server variable objects: https://swagger.io/specification/#server-variable-object

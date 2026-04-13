@@ -36,7 +36,7 @@ func addHiddenFlattenFlag(cmd *cobra.Command) {
 }
 
 // addHiddenCircularDepFlag adds --max-circular-dep as a hidden flag
-// --max-circular-dep is no longer needed because kin-openapi3 handles circular references automatically since https://github.com/getkin/kin-openapi/pull/970
+// --max-circular-dep is no longer needed because kin-openapi3 handles circular references automatically since https://github.com/oasdiff/kin-openapi/pull/970
 // we still accept --max-circular-dep to avoid breaking existing scripts, but we ignore this flag
 func addHiddenCircularDepFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().Int("max-circular-dep", 5, "maximum allowed number of circular dependencies between objects in OpenAPI specs")

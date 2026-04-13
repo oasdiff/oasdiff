@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/utils"
 )
 

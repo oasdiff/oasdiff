@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 )
 
 // LicenseDiff describes the changes between a pair of license objects: https://swagger.io/specification/#license-object

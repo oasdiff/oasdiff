@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
@@ -254,7 +254,9 @@ properties:
 	require.NoError(t, os.Chdir(dir))
 	defer os.Chdir(oldDir) //nolint:errcheck
 
-	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	specInfo, err := load.NewSpecInfo(loader, load.NewSource("HEAD:openapi.yaml"))
 	require.NoError(t, err)
 	require.Equal(t, "1.0", specInfo.GetVersion())
 
