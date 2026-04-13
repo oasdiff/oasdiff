@@ -47,6 +47,19 @@ func TestResponseBodyDependentRequiredChanged(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyDependentRequiredChangedId))
 }
 
+// CL: changing dependentRequired on response property
+func TestResponsePropertyDependentRequiredChanged(t *testing.T) {
+	s1, err := open("../data/checker/dependent_required_property_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/dependent_required_property_changed_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
+	require.True(t, containsId(errs, checker.ResponsePropertyDependentRequiredChangedId))
+}
+
 // CL: adding dependentRequired to response property
 func TestResponsePropertyDependentRequiredAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_base.yaml")
