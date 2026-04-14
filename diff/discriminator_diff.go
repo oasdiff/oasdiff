@@ -1,7 +1,7 @@
 package diff
 
 import (
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // DiscriminatorDiff describes the changes between a pair of discriminator objects: https://swagger.io/specification/#discriminator-object

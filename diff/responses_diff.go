@@ -3,7 +3,7 @@ package diff
 import (
 	"fmt"
 
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // ResponsesDiff describes the changes between a pair of sets of response objects: https://swagger.io/specification/#responses-object

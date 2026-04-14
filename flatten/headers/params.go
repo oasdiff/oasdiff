@@ -3,7 +3,7 @@ package headers
 import (
 	"strings"
 
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // Lowercase replaces header names to lowercase

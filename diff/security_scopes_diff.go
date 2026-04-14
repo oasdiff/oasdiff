@@ -1,6 +1,6 @@
 package diff
 
-import "github.com/oasdiff/kin-openapi/openapi3"
+import "github.com/getkin/kin-openapi/openapi3"
 
 // SecurityScopesDiff is a map of security schemes to their respective scope diffs
 type SecurityScopesDiff map[string]*StringsDiff
