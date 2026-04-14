@@ -18,7 +18,7 @@ Changes are detected for all 3.1-specific fields:
 - `if`/`then`/`else` conditional schemas
 - `dependentRequired`, `dependentSchemas`
 - `patternProperties`, `propertyNames`
-- `unevaluatedItems`, `unevaluatedProperties`
+- `unevaluatedItems`, `unevaluatedProperties` (both boolean and schema forms)
 - `contentSchema`, `contentMediaType`, `contentEncoding`
 - `$defs`, `$schema`, `$comment`
 - Webhooks (added/deleted/modified)
@@ -53,7 +53,7 @@ The following OpenAPI 3.1 / JSON Schema 2020-12 features are not yet fully imple
 
 ### Install the beta release
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=2.2.0-openapi31.beta.3 sh
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=2.2.0-openapi31.beta.4 sh
 ```
 
 Then use oasdiff as normal:
