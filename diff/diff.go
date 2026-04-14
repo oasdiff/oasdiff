@@ -7,7 +7,7 @@ import (
 	"maps"
 
 	"cloud.google.com/go/civil"
-	"github.com/oasdiff/kin-openapi/openapi3"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/load"
 )
 
@@ -50,7 +50,7 @@ Get calculates the diff between a pair of OpenAPI objects.
 
 Note that Get expects OpenAPI References (https://swagger.io/docs/specification/using-ref/) to be resolved.
 References are normally resolved automatically when you load the spec.
-In other cases you can resolve refs using https://pkg.go.dev/github.com/oasdiff/kin-openapi/openapi3#Loader.ResolveRefsIn.
+In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
 func Get(config *Config, s1, s2 *openapi3.T) (*Diff, error) {
 	diff, err := getDiff(config, newState(), s1, s2)
@@ -65,7 +65,7 @@ GetWithOperationsSourcesMap calculates the diff between a pair of OpenAPI object
 
 Note that GetWithOperationsSourcesMap expects OpenAPI References (https://swagger.io/docs/specification/using-ref/) to be resolved.
 References are normally resolved automatically when you load the spec.
-In other cases you can resolve refs using https://pkg.go.dev/github.com/oasdiff/kin-openapi/openapi3#Loader.ResolveRefsIn.
+In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
 func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, *OperationsSourcesMap, error) {
 	diff, err := getDiff(config, newState(), s1.Spec, s2.Spec)
@@ -99,7 +99,7 @@ The format of the x-since-date is the RFC3339 full-date format
 
 Note that Get expects OpenAPI References (https://swagger.io/docs/specification/using-ref/) to be resolved.
 References are normally resolved automatically when you load the spec.
-In other cases you can resolve refs using https://pkg.go.dev/github.com/oasdiff/kin-openapi/openapi3#Loader.ResolveRefsIn.
+In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
 func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSourcesMap, error) {
 	state := newState()

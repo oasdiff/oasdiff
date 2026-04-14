@@ -344,3 +344,22 @@ func TestOpenAPI31_ExclusiveMinMax(t *testing.T) {
 	require.Equal(t, float64(100), scoreDiff.ExclusiveMaxDiff.From)
 	require.Equal(t, float64(90), scoreDiff.ExclusiveMaxDiff.To)
 }
+
+// TestOpenAPI31_UnevaluatedPropertiesBool verifies that unevaluatedProperties: false
+// (boolean form) can be loaded and diffed. Regression test for issue #844.
+func TestOpenAPI31_UnevaluatedPropertiesBool(t *testing.T) {
+	s1 := loadSpec(t, "../data/checker/unevaluated_bool_base.yaml")
+	s2 := loadSpec(t, "../data/checker/unevaluated_bool_revision.yaml")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+
+	schemaDiff := d.PathsDiff.Modified["/test"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff
+	require.NotNil(t, schemaDiff)
+
+	// unevaluatedProperties: false was added — should show up as boolean allowed diff
+	require.NotNil(t, schemaDiff.UnevaluatedPropertiesAllowedDiff)
+	require.Nil(t, schemaDiff.UnevaluatedPropertiesAllowedDiff.From)
+	require.Equal(t, false, schemaDiff.UnevaluatedPropertiesAllowedDiff.To)
+}
