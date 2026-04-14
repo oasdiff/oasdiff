@@ -280,6 +280,263 @@ func TestNewSourceFromSequenceItem_StripsGitRevisionPrefix(t *testing.T) {
 	require.Equal(t, 11, source.Column)
 }
 
+func TestSubschemaSources_AllOf_Added_Inline(t *testing.T) {
+	baseOp := &openapi3.Operation{}
+	revisionOp := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	// Inline subschemas: SchemaRef.Origin points to the inline definition
+	revisionSchema := &openapi3.Schema{
+		AllOf: openapi3.SchemaRefs{
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 15, Column: 17}}, Value: &openapi3.Schema{}},
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 19, Column: 17}}, Value: &openapi3.Schema{}},
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 23, Column: 17}}, Value: &openapi3.Schema{}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
+			Fields: map[string]openapi3.Location{"allOf": {File: "revision.yaml", Line: 14, Column: 15}},
+		},
+	}
+	baseSchema := &openapi3.Schema{
+		AllOf: openapi3.SchemaRefs{
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 15, Column: 17}}, Value: &openapi3.Schema{}},
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 19, Column: 17}}, Value: &openapi3.Schema{}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
+			Fields: map[string]openapi3.Location{"allOf": {File: "base.yaml", Line: 14, Column: 15}},
+		},
+	}
+
+	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
+
+	// Added inline subschema at revision index 2 (baseIndex=-1)
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 2)
+	require.Nil(t, baseSource)
+	require.NotNil(t, revisionSource)
+	require.Equal(t, "revision.yaml", revisionSource.File)
+	require.Equal(t, 23, revisionSource.Line) // points to the 3rd subschema, not allOf keyword
+	require.Equal(t, 17, revisionSource.Column)
+}
+
+func TestSubschemaSources_AllOf_Added_Ref(t *testing.T) {
+	baseOp := &openapi3.Operation{}
+	revisionOp := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	// $ref subschemas: SchemaRef.Origin points to the $ref line in the allOf array;
+	// Value.Origin points to the component definition — we want the $ref line
+	revisionSchema := &openapi3.Schema{
+		AllOf: openapi3.SchemaRefs{
+			{
+				Ref:    "#/components/schemas/Dog",
+				Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 15, Column: 11}},
+				Value:  &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 58, Column: 5}}},
+			},
+			{
+				Ref:    "#/components/schemas/Cat",
+				Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 16, Column: 11}},
+				Value:  &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 62, Column: 5}}},
+			},
+			{
+				Ref:    "#/components/schemas/Rabbit",
+				Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 17, Column: 11}},
+				Value:  &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 66, Column: 5}}},
+			},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
+			Fields: map[string]openapi3.Location{"allOf": {File: "revision.yaml", Line: 14, Column: 15}},
+		},
+	}
+	baseSchema := &openapi3.Schema{
+		AllOf: openapi3.SchemaRefs{
+			{
+				Ref:    "#/components/schemas/Dog",
+				Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 15, Column: 11}},
+				Value:  &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 50, Column: 5}}},
+			},
+			{
+				Ref:    "#/components/schemas/Cat",
+				Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 16, Column: 11}},
+				Value:  &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 54, Column: 5}}},
+			},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
+			Fields: map[string]openapi3.Location{"allOf": {File: "base.yaml", Line: 14, Column: 15}},
+		},
+	}
+
+	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
+
+	// Added $ref subschema at revision index 2: should point to line 17 ($ref line), NOT line 66 (component def)
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 2)
+	require.Nil(t, baseSource)
+	require.NotNil(t, revisionSource)
+	require.Equal(t, "revision.yaml", revisionSource.File)
+	require.Equal(t, 17, revisionSource.Line) // $ref line, not component definition line 66
+	require.Equal(t, 11, revisionSource.Column)
+}
+
+func TestSubschemaSources_OneOf_Deleted(t *testing.T) {
+	baseOp := &openapi3.Operation{}
+	revisionOp := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	// Base schema has 3 oneOf subschemas; the 3rd is deleted
+	baseSchema := &openapi3.Schema{
+		OneOf: openapi3.SchemaRefs{
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 10, Column: 9}}, Value: &openapi3.Schema{}},
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 14, Column: 9}}, Value: &openapi3.Schema{}},
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 18, Column: 9}}, Value: &openapi3.Schema{}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "base.yaml", Line: 9, Column: 7},
+			Fields: map[string]openapi3.Location{"oneOf": {File: "base.yaml", Line: 9, Column: 7}},
+		},
+	}
+	revisionSchema := &openapi3.Schema{
+		OneOf: openapi3.SchemaRefs{
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 10, Column: 9}}, Value: &openapi3.Schema{}},
+			{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 14, Column: 9}}, Value: &openapi3.Schema{}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "revision.yaml", Line: 9, Column: 7},
+			Fields: map[string]openapi3.Location{"oneOf": {File: "revision.yaml", Line: 9, Column: 7}},
+		},
+	}
+
+	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
+
+	// Deleted subschema at base index 2 (revisionIndex=-1)
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "oneOf", 2, -1)
+	require.NotNil(t, baseSource)
+	require.Nil(t, revisionSource)
+	require.Equal(t, "base.yaml", baseSource.File)
+	require.Equal(t, 18, baseSource.Line) // points to the 3rd subschema, not oneOf keyword
+	require.Equal(t, 9, baseSource.Column)
+}
+
+func TestSubschemaSources_AnyOf_NoOrigin_FallsBack(t *testing.T) {
+	baseOp := &openapi3.Operation{}
+	revisionOp := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	// Subschemas have no Origin — should fall back to field-level source
+	revisionSchema := &openapi3.Schema{
+		AnyOf: openapi3.SchemaRefs{
+			{Value: &openapi3.Schema{}},
+			{Value: &openapi3.Schema{}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "revision.yaml", Line: 9, Column: 7},
+			Fields: map[string]openapi3.Location{"anyOf": {File: "revision.yaml", Line: 10, Column: 9}},
+		},
+	}
+	baseSchema := &openapi3.Schema{
+		AnyOf: openapi3.SchemaRefs{
+			{Value: &openapi3.Schema{}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "base.yaml", Line: 9, Column: 7},
+			Fields: map[string]openapi3.Location{"anyOf": {File: "base.yaml", Line: 10, Column: 9}},
+		},
+	}
+
+	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
+
+	// Subschema has no origin → falls back to field-level source
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "anyOf", -1, 1)
+	// Fallback to field-level: both base and revision should have anyOf field source
+	require.NotNil(t, baseSource)
+	require.Equal(t, 10, baseSource.Line) // anyOf field line, not schema key line
+	require.NotNil(t, revisionSource)
+	require.Equal(t, 10, revisionSource.Line) // anyOf field line
+}
+
+func TestSubschemaSources_NilSchemaDiff(t *testing.T) {
+	baseOp := &openapi3.Operation{
+		Origin: &openapi3.Origin{Key: &openapi3.Location{File: "base.yaml", Line: 3, Column: 1}},
+	}
+	revisionOp := &openapi3.Operation{
+		Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 5, Column: 1}},
+	}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	// Nil schemaDiff falls back to operation sources
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, nil, "allOf", -1, 0)
+	require.Equal(t, "base.yaml", baseSource.File)
+	require.Equal(t, 3, baseSource.Line)
+	require.Equal(t, "revision.yaml", revisionSource.File)
+	require.Equal(t, 5, revisionSource.Line)
+}
+
+func TestSubschemaSources_InvalidField(t *testing.T) {
+	baseOp := &openapi3.Operation{}
+	revisionOp := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	revisionSchema := &openapi3.Schema{
+		AllOf: openapi3.SchemaRefs{
+			{Value: &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 15, Column: 17}}}},
+		},
+		Origin: &openapi3.Origin{
+			Key: &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
+		},
+	}
+	baseSchema := &openapi3.Schema{
+		Origin: &openapi3.Origin{
+			Key: &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
+		},
+	}
+
+	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
+
+	// Invalid field name returns nil from subschemaSource, falls back to field-level (also nil for invalid field)
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "invalid", -1, 0)
+	require.Nil(t, baseSource)
+	require.Nil(t, revisionSource)
+}
+
+func TestSubschemaSources_IndexOutOfRange(t *testing.T) {
+	baseOp := &openapi3.Operation{}
+	revisionOp := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
+
+	revisionSchema := &openapi3.Schema{
+		AllOf: openapi3.SchemaRefs{
+			{Value: &openapi3.Schema{Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 15, Column: 17}}}},
+		},
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
+			Fields: map[string]openapi3.Location{"allOf": {File: "revision.yaml", Line: 14, Column: 15}},
+		},
+	}
+	baseSchema := &openapi3.Schema{
+		Origin: &openapi3.Origin{
+			Key:    &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
+			Fields: map[string]openapi3.Location{"allOf": {File: "base.yaml", Line: 14, Column: 15}},
+		},
+	}
+
+	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
+
+	// Index 99 is out of range → falls back to field-level source
+	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 99)
+	require.NotNil(t, baseSource)
+	require.Equal(t, 14, baseSource.Line)
+	require.NotNil(t, revisionSource)
+	require.Equal(t, 14, revisionSource.Line)
+}
+
 func TestNewSourceFromSequenceItem(t *testing.T) {
 	op := &openapi3.Operation{}
 	sources := diff.OperationsSourcesMap{op: "spec.yaml"}

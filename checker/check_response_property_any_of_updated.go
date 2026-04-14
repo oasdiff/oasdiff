@@ -44,10 +44,8 @@ func ResponsePropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 						continue
 					}
 
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf")
-
 					if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AnyOfDiff.Added) > 0 {
-
+						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf", -1, mediaTypeDiff.SchemaDiff.AnyOfDiff.Added[0].Index)
 						result = append(result, NewApiChange(
 							ResponseBodyAnyOfAddedId,
 							config,
@@ -61,6 +59,7 @@ func ResponsePropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					}
 
 					if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted) > 0 {
+						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf", mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted[0].Index, -1)
 						result = append(result, NewApiChange(
 							ResponseBodyAnyOfRemovedId,
 							config,
@@ -85,10 +84,8 @@ func ResponsePropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 								return
 							}
 
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "anyOf")
-
 							if len(propertyDiff.AnyOfDiff.Added) > 0 {
-
+								propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "anyOf", -1, propertyDiff.AnyOfDiff.Added[0].Index)
 								result = append(result, NewApiChange(
 									ResponsePropertyAnyOfAddedId,
 									config,
@@ -102,7 +99,7 @@ func ResponsePropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							}
 
 							if len(propertyDiff.AnyOfDiff.Deleted) > 0 {
-
+								propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "anyOf", propertyDiff.AnyOfDiff.Deleted[0].Index, -1)
 								result = append(result, NewApiChange(
 									ResponsePropertyAnyOfRemovedId,
 									config,

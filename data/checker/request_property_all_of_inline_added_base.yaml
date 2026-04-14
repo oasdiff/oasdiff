@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: ACME
+  version: 1.0.0
+
+paths:
+  /pets:
+    post:
+      operationId: updatePets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    prop1:
+                      type: string
+                - type: object
+                  properties:
+                    prop2:
+                      type: boolean
+      responses:
+        "200":
+          description: Updated

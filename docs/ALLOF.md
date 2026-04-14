@@ -30,6 +30,9 @@ In order to see how oasdiff merges allOf, you can use the dedicated `flatten` co
 oasdiff flatten data/allof/simple.yaml
 ```
 
+### Source location limitations
+When using `--flatten-allof`, source locations (file, line, column) are not available for changes detected in flattened schemas. This is because the merged schema is a new construct that doesn't correspond to a single location in the original file.
+
 The following schema fields are not merged:
 - Extensions
 - Example

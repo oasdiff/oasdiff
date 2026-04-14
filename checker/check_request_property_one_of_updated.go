@@ -42,7 +42,7 @@ func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 				}
 
 				if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Added) > 0 {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf")
+					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", -1, mediaTypeDiff.SchemaDiff.OneOfDiff.Added[0].Index)
 					result = append(result, NewApiChange(
 						RequestBodyOneOfAddedId,
 						config,
@@ -56,7 +56,7 @@ func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 				}
 
 				if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Deleted) > 0 {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf")
+					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", mediaTypeDiff.SchemaDiff.OneOfDiff.Deleted[0].Index, -1)
 					result = append(result, NewApiChange(
 						RequestBodyOneOfRemovedId,
 						config,
@@ -82,9 +82,9 @@ func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						}
 
 						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "oneOf")
 
 						if len(propertyDiff.OneOfDiff.Added) > 0 {
+							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", -1, propertyDiff.OneOfDiff.Added[0].Index)
 							result = append(result, NewApiChange(
 								RequestPropertyOneOfAddedId,
 								config,
@@ -98,6 +98,7 @@ func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 						}
 
 						if len(propertyDiff.OneOfDiff.Deleted) > 0 {
+							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", propertyDiff.OneOfDiff.Deleted[0].Index, -1)
 							result = append(result, NewApiChange(
 								RequestPropertyOneOfRemovedId,
 								config,
