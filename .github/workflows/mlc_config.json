@@ -1,15 +1,10 @@
 {
-    "httpHeaders": [
-      {
-        "urls": ["https://github.com/", "https://guides.github.com/", "https://help.github.com/", "https://docs.github.com/"],
-        "headers": {
-          "Accept-Encoding": "zstd, br, gzip, deflate"
-        }
-      }
-    ],
     "ignorePatterns": [
       {
-        "pattern": "^https://stackoverflow.com/questions/33987316/what-is-a-complex-mapping-key-in-yaml"
+        "pattern": "^https://github.com/"
+      },
+      {
+        "pattern": "^https://stackoverflow.com/"
       },
       {
         "pattern": "^https://codecov.io/"
