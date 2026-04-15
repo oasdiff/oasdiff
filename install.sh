@@ -105,8 +105,15 @@ do_install() {
   echo "Extracting tar file"
   (cd $tmp_dir && tar -xzf "$asset_name")
 
-  echo "Installing $BINARY_NAME into $tmp_dir"
-  mv "$tmp_dir/$BINARY_NAME" $INSTALL_DIR
+  echo "Installing $BINARY_NAME into $INSTALL_DIR"
+  if ! mv "$tmp_dir/$BINARY_NAME" $INSTALL_DIR 2>/dev/null; then
+    echo "Permission denied installing to $INSTALL_DIR"
+    echo "Try one of:"
+    echo "  curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=$version sudo sh"
+    echo "  curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=$version INSTALL_DIR=~/bin sh"
+    rm -rf $tmp_dir
+    exit 1
+  fi
 
   chmod +x $INSTALL_DIR/$BINARY_NAME
   echo "Installed oasdiff to $INSTALL_DIR"
