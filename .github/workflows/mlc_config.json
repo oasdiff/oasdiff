@@ -1,4 +1,12 @@
 {
+    "httpHeaders": [
+      {
+        "urls": ["https://github.com"],
+        "headers": {
+          "Authorization": "Bearer ${GITHUB_TOKEN}"
+        }
+      }
+    ],
     "ignorePatterns": [
       {
         "pattern": "^https://stackoverflow.com/questions/33987316/what-is-a-complex-mapping-key-in-yaml"
