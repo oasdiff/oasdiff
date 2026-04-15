@@ -1,8 +1,13 @@
 {
-    "ignorePatterns": [
+    "httpHeaders": [
       {
-        "pattern": "^https://github.com/"
-      },
+        "urls": ["https://github.com/"],
+        "headers": {
+          "Authorization": "Bearer {{GITHUB_TOKEN}}"
+        }
+      }
+    ],
+    "ignorePatterns": [
       {
         "pattern": "^https://stackoverflow.com/"
       },

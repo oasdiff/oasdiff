@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+    - name: Inject GITHUB_TOKEN into link checker config
+      run: |
+        sed -i 's|{{GITHUB_TOKEN}}|${{ secrets.GITHUB_TOKEN }}|g' .github/workflows/mlc_config.json
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         config-file: '.github/workflows/mlc_config.json'
