@@ -77,6 +77,14 @@ docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.1 breaking
 docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.1 changelog /specs/base.yaml /specs/revision.yaml
 ```
 
+### GitHub Action
+```yaml
+- uses: oasdiff/oasdiff-action/breaking@v0.0.40-beta.1
+  with:
+    base: 'specs/base.yaml'
+    revision: 'specs/revision.yaml'
+```
+
 ### Build from source
 ```bash
 git clone -b feat/openapi-3.1-support https://github.com/oasdiff/oasdiff.git
