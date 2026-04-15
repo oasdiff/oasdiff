@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'source-location-tracking'
-      - 'feat/openapi-3.1-support'
     tags:
       - 'v*'
 jobs:
