@@ -20,7 +20,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/oasdiff/yaml v0.0.9 // indirect
-	github.com/oasdiff/yaml3 v0.0.9 // indirect
+	github.com/oasdiff/yaml3 v0.0.10 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
@@ -52,4 +52,4 @@ require (
 	github.com/wI2L/jsondiff v0.7.1
 )
 
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.138.0-openapi31.beta.1
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.138.0-openapi31.beta.2
