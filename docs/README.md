@@ -11,6 +11,8 @@
 
 Command-line and Go package to compare and detect breaking changes in OpenAPI specs.
 
+> **New: [OpenAPI 3.1 support](OPENAPI-31.md) is now in beta** — including webhooks, nullable type arrays (`type: ["string", "null"]`), JSON Schema 2020-12 keywords, and 148 new breaking change rules. Available in the CLI, Docker, GitHub Action, and the online diff tool at [oasdiff.com](https://www.oasdiff.com). [Try it →](OPENAPI-31.md)
+
 ## Installation
 
 ### Install with Go
@@ -95,7 +97,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [checks](CHECKS.md): display the checks that oasdiff uses to detect changes
 
 ## Roadmap
-- **[OpenAPI 3.1](OPENAPI-31.md)** (beta)
+- **[OpenAPI 3.1](OPENAPI-31.md)** — in beta, targeting GA after community testing
 
 ## Credits
 This project relies on the excellent implementation of OpenAPI 3.0 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
