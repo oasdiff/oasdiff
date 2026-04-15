@@ -53,7 +53,7 @@ The following OpenAPI 3.1 / JSON Schema 2020-12 features are not yet fully imple
 
 ### Install the beta release
 ```bash
-curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=2.2.0-openapi31.beta.4 sh
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=1.15.0-openapi31.beta.1 sh
 ```
 
 Then use oasdiff as normal:
@@ -65,16 +65,16 @@ oasdiff changelog base.yaml revision.yaml
 
 ### Docker
 ```bash
-docker pull tufin/oasdiff:feat-openapi-3.1-support
+docker pull tufin/oasdiff:v1.15.0-openapi31.beta.1
 
 # Diff
-docker run --rm -v $(pwd):/specs tufin/oasdiff:feat-openapi-3.1-support diff /specs/base.yaml /specs/revision.yaml
+docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.1 diff /specs/base.yaml /specs/revision.yaml
 
 # Breaking changes
-docker run --rm -v $(pwd):/specs tufin/oasdiff:feat-openapi-3.1-support breaking /specs/base.yaml /specs/revision.yaml
+docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.1 breaking /specs/base.yaml /specs/revision.yaml
 
 # Changelog
-docker run --rm -v $(pwd):/specs tufin/oasdiff:feat-openapi-3.1-support changelog /specs/base.yaml /specs/revision.yaml
+docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.1 changelog /specs/base.yaml /specs/revision.yaml
 ```
 
 ### Build from source
@@ -103,5 +103,7 @@ We need to hear from you too! Please add a thumbs-up reaction to [this tracking 
 | Diff | Done |
 | Breaking changes | Done |
 | Changelog | Done |
+| GitHub Action | Done |
+| Online diff tool (oasdiff.com) | Done |
 | Community testing | **In progress** |
 | General availability | Pending testing feedback |
