@@ -204,36 +204,36 @@ response-body-max-increased: el valor máximo del cuerpo de respuesta fue aument
 response-property-max-increased: el valor máximo de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 response-body-min-decreased: el valor mínimo del cuerpo de respuesta fue disminuido de %s a %s
 response-property-min-decreased: el valor mínimo de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s
-request-body-exclusive-min-increased: the request's body exclusiveMinimum was increased to %s
-request-body-exclusive-min-decreased: the request's body exclusiveMinimum was decreased from %s to %s
-request-property-exclusive-min-increased: the %s request property's exclusiveMinimum was increased to %s
-request-read-only-property-exclusive-min-increased: the %s request read-only property's exclusiveMinimum was increased to %s
-request-property-exclusive-min-decreased: the %s request property's exclusiveMinimum was decreased from %s to %s
-request-body-exclusive-min-set: the request's body exclusiveMinimum was set to %s
-request-body-exclusive-min-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-property-exclusive-min-set: the %s request property's exclusiveMinimum was set to %s
-request-property-exclusive-min-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-body-exclusive-max-decreased: the request's body exclusiveMaximum was decreased to %s
-request-body-exclusive-max-increased: the request's body exclusiveMaximum was increased from %s to %s
-request-property-exclusive-max-decreased: the %s request property's exclusiveMaximum was decreased to %s
-request-read-only-property-exclusive-max-decreased: the %s request read-only property's exclusiveMaximum was decreased to %s
-request-property-exclusive-max-increased: the %s request property's exclusiveMaximum was increased from %s to %s
-request-body-exclusive-max-set: the request's body exclusiveMaximum was set to %s
-request-body-exclusive-max-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-property-exclusive-max-set: the %s request property's exclusiveMaximum was set to %s
-request-property-exclusive-max-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-parameter-exclusive-min-increased: for the %s request parameter %s, the exclusiveMinimum was increased from %s to %s
-request-parameter-exclusive-min-decreased: for the %s request parameter %s, the exclusiveMinimum was decreased from %s to %s
-request-parameter-exclusive-min-set: for the %s request parameter %s, the exclusiveMinimum was set to %s
-request-parameter-exclusive-min-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-parameter-exclusive-max-decreased: for the %s request parameter %s, the exclusiveMaximum was decreased from %s to %s
-request-parameter-exclusive-max-increased: for the %s request parameter %s, the exclusiveMaximum was increased from %s to %s
-request-parameter-exclusive-max-set: for the %s request parameter %s, the exclusiveMaximum was set to %s
-request-parameter-exclusive-max-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-response-body-exclusive-max-increased: the response's body exclusiveMaximum was increased from %s to %s
-response-property-exclusive-max-increased: the %s response property's exclusiveMaximum was increased from %s to %s for the response status %s
-response-body-exclusive-min-decreased: the response's body exclusiveMinimum was decreased from %s to %s
-response-property-exclusive-min-decreased: the %s response property's exclusiveMinimum was decreased from %s to %s for the response status %s
+request-body-exclusive-min-increased: "el exclusiveMinimum del cuerpo de solicitud fue aumentado a %s"
+request-body-exclusive-min-decreased: "el exclusiveMinimum del cuerpo de solicitud fue disminuido de %s a %s"
+request-property-exclusive-min-increased: "el exclusiveMinimum de la propiedad de solicitud %s fue aumentado a %s"
+request-read-only-property-exclusive-min-increased: "el exclusiveMinimum de la propiedad de solicitud de solo lectura %s fue aumentado a %s"
+request-property-exclusive-min-decreased: "el exclusiveMinimum de la propiedad de solicitud %s fue disminuido de %s a %s"
+request-body-exclusive-min-set: "el exclusiveMinimum del cuerpo de solicitud fue establecido en %s"
+request-body-exclusive-min-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-property-exclusive-min-set: "el exclusiveMinimum de la propiedad de solicitud %s fue establecido en %s"
+request-property-exclusive-min-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-body-exclusive-max-decreased: "el exclusiveMaximum del cuerpo de solicitud fue disminuido a %s"
+request-body-exclusive-max-increased: "el exclusiveMaximum del cuerpo de solicitud fue aumentado de %s a %s"
+request-property-exclusive-max-decreased: "el exclusiveMaximum de la propiedad de solicitud %s fue disminuido a %s"
+request-read-only-property-exclusive-max-decreased: "el exclusiveMaximum de la propiedad de solicitud de solo lectura %s fue disminuido a %s"
+request-property-exclusive-max-increased: "el exclusiveMaximum de la propiedad de solicitud %s fue aumentado de %s a %s"
+request-body-exclusive-max-set: "el exclusiveMaximum del cuerpo de solicitud fue establecido en %s"
+request-body-exclusive-max-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-property-exclusive-max-set: "el exclusiveMaximum de la propiedad de solicitud %s fue establecido en %s"
+request-property-exclusive-max-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-parameter-exclusive-min-increased: "para el parámetro de solicitud %s %s, el exclusiveMinimum fue aumentado de %s a %s"
+request-parameter-exclusive-min-decreased: "para el parámetro de solicitud %s %s, el exclusiveMinimum fue disminuido de %s a %s"
+request-parameter-exclusive-min-set: "para el parámetro de solicitud %s %s, el exclusiveMinimum fue establecido en %s"
+request-parameter-exclusive-min-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-parameter-exclusive-max-decreased: "para el parámetro de solicitud %s %s, el exclusiveMaximum fue disminuido de %s a %s"
+request-parameter-exclusive-max-increased: "para el parámetro de solicitud %s %s, el exclusiveMaximum fue aumentado de %s a %s"
+request-parameter-exclusive-max-set: "para el parámetro de solicitud %s %s, el exclusiveMaximum fue establecido en %s"
+request-parameter-exclusive-max-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+response-body-exclusive-max-increased: "el exclusiveMaximum del cuerpo de respuesta fue aumentado de %s a %s"
+response-property-exclusive-max-increased: "el exclusiveMaximum de la propiedad de respuesta %s fue aumentado de %s a %s para el estado de respuesta %s"
+response-body-exclusive-min-decreased: "el exclusiveMinimum del cuerpo de respuesta fue disminuido de %s a %s"
+response-property-exclusive-min-decreased: "el exclusiveMinimum de la propiedad de respuesta %s fue disminuido de %s a %s para el estado de respuesta %s"
 api-security-added: el esquema de seguridad %s fue agregado al endpoint de la api
 api-security-removed: el esquema de seguridad %s fue removido del endpoint de la api
 api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
@@ -659,275 +659,275 @@ request-parameter-list-of-types-widened-description: lista de tipos del parámet
 request-parameter-list-of-types-narrowed-description: lista de tipos del parámetro de solicitud reducida
 request-parameter-property-list-of-types-widened-description: lista de tipos de la propiedad del parámetro de solicitud ampliada
 request-parameter-property-list-of-types-narrowed-description: lista de tipos de la propiedad del parámetro de solicitud reducida
-request-body-prefix-items-added: "added %s to the request body 'prefixItems' list"
-request-body-prefix-items-removed: "removed %s from the request body 'prefixItems' list"
-request-property-prefix-items-added: "added %s to the %s request property 'prefixItems' list"
-request-property-prefix-items-removed: "removed %s from the %s request property 'prefixItems' list"
-response-body-prefix-items-added: "added %s to the response body 'prefixItems' list for the response status %s"
-response-body-prefix-items-removed: "removed %s from the response body 'prefixItems' list for the response status %s"
-response-property-prefix-items-added: "added %s to the %s response property 'prefixItems' list for the response status %s"
-response-property-prefix-items-removed: "removed %s from the %s response property 'prefixItems' list for the response status %s"
-request-body-prefix-items-added-description: sub-schema added to prefixItems in request body
-request-body-prefix-items-removed-description: sub-schema removed from prefixItems in request body
-request-property-prefix-items-added-description: sub-schema added to prefixItems in request property
-request-property-prefix-items-removed-description: sub-schema removed from prefixItems in request property
-response-body-prefix-items-added-description: sub-schema added to prefixItems in response body
-response-body-prefix-items-removed-description: sub-schema removed from prefixItems in response body
-response-property-prefix-items-added-description: sub-schema added to prefixItems in response property
-response-property-prefix-items-removed-description: sub-schema removed from prefixItems in response property
-request-body-if-added: "added 'if' subschema to the request body"
-request-body-if-removed: "removed 'if' subschema from the request body"
-request-body-then-added: "added 'then' subschema to the request body"
-request-body-then-removed: "removed 'then' subschema from the request body"
-request-body-else-added: "added 'else' subschema to the request body"
-request-body-else-removed: "removed 'else' subschema from the request body"
-request-property-if-added: "added 'if' subschema to the request property %s"
-request-property-if-removed: "removed 'if' subschema from the request property %s"
-request-property-then-added: "added 'then' subschema to the request property %s"
-request-property-then-removed: "removed 'then' subschema from the request property %s"
-request-property-else-added: "added 'else' subschema to the request property %s"
-request-property-else-removed: "removed 'else' subschema from the request property %s"
-response-body-if-added: "added 'if' subschema to the response body for the status %s"
-response-body-if-removed: "removed 'if' subschema from the response body for the status %s"
-response-body-then-added: "added 'then' subschema to the response body for the status %s"
-response-body-then-removed: "removed 'then' subschema from the response body for the status %s"
-response-body-else-added: "added 'else' subschema to the response body for the status %s"
-response-body-else-removed: "removed 'else' subschema from the response body for the status %s"
-response-property-if-added: "added 'if' subschema to the %s response property for the status %s"
-response-property-if-removed: "removed 'if' subschema from the %s response property for the status %s"
-response-property-then-added: "added 'then' subschema to the %s response property for the status %s"
-response-property-then-removed: "removed 'then' subschema from the %s response property for the status %s"
-response-property-else-added: "added 'else' subschema to the %s response property for the status %s"
-response-property-else-removed: "removed 'else' subschema from the %s response property for the status %s"
-request-body-if-added-description: if subschema added to request body
-request-body-if-removed-description: if subschema removed from request body
-request-body-then-added-description: then subschema added to request body
-request-body-then-removed-description: then subschema removed from request body
-request-body-else-added-description: else subschema added to request body
-request-body-else-removed-description: else subschema removed from request body
-request-property-if-added-description: if subschema added to request property
-request-property-if-removed-description: if subschema removed from request property
-request-property-then-added-description: then subschema added to request property
-request-property-then-removed-description: then subschema removed from request property
-request-property-else-added-description: else subschema added to request property
-request-property-else-removed-description: else subschema removed from request property
-response-body-if-added-description: if subschema added to response body
-response-body-if-removed-description: if subschema removed from response body
-response-body-then-added-description: then subschema added to response body
-response-body-then-removed-description: then subschema removed from response body
-response-body-else-added-description: else subschema added to response body
-response-body-else-removed-description: else subschema removed from response body
-response-property-if-added-description: if subschema added to response property
-response-property-if-removed-description: if subschema removed from response property
-response-property-then-added-description: then subschema added to response property
-response-property-then-removed-description: then subschema removed from response property
-response-property-else-added-description: else subschema added to response property
-response-property-else-removed-description: else subschema removed from response property
-request-body-contains-added: "added 'contains' constraint to the request body"
-request-body-contains-removed: "removed 'contains' constraint from the request body"
-request-body-min-contains-increased: "the request body minContains was increased from %s to %s"
-request-body-min-contains-decreased: "the request body minContains was decreased from %s to %s"
-request-body-max-contains-increased: "the request body maxContains was increased from %s to %s"
-request-body-max-contains-decreased: "the request body maxContains was decreased from %s to %s"
-request-property-contains-added: "added 'contains' constraint to the request property %s"
-request-property-contains-removed: "removed 'contains' constraint from the request property %s"
-request-property-min-contains-increased: "the %s request property minContains was increased from %s to %s"
-request-property-min-contains-decreased: "the %s request property minContains was decreased from %s to %s"
-request-property-max-contains-increased: "the %s request property maxContains was increased from %s to %s"
-request-property-max-contains-decreased: "the %s request property maxContains was decreased from %s to %s"
-response-body-contains-added: "added 'contains' constraint to the response body for the status %s"
-response-body-contains-removed: "removed 'contains' constraint from the response body for the status %s"
-response-body-min-contains-increased: "the response body minContains was increased from %s to %s for the status %s"
-response-body-min-contains-decreased: "the response body minContains was decreased from %s to %s for the status %s"
-response-body-max-contains-increased: "the response body maxContains was increased from %s to %s for the status %s"
-response-body-max-contains-decreased: "the response body maxContains was decreased from %s to %s for the status %s"
-response-property-contains-added: "added 'contains' constraint to the %s response property for the status %s"
-response-property-contains-removed: "removed 'contains' constraint from the %s response property for the status %s"
-response-property-min-contains-increased: "the %s response property minContains was increased from %s to %s for the status %s"
-response-property-min-contains-decreased: "the %s response property minContains was decreased from %s to %s for the status %s"
-response-property-max-contains-increased: "the %s response property maxContains was increased from %s to %s for the status %s"
-response-property-max-contains-decreased: "the %s response property maxContains was decreased from %s to %s for the status %s"
-request-body-contains-added-description: contains constraint added to request body
-request-body-contains-removed-description: contains constraint removed from request body
-request-body-min-contains-increased-description: request body minContains increased
-request-body-min-contains-decreased-description: request body minContains decreased
-request-body-max-contains-increased-description: request body maxContains increased
-request-body-max-contains-decreased-description: request body maxContains decreased
-request-property-contains-added-description: contains constraint added to request property
-request-property-contains-removed-description: contains constraint removed from request property
-request-property-min-contains-increased-description: request property minContains increased
-request-property-min-contains-decreased-description: request property minContains decreased
-request-property-max-contains-increased-description: request property maxContains increased
-request-property-max-contains-decreased-description: request property maxContains decreased
-response-body-contains-added-description: contains constraint added to response body
-response-body-contains-removed-description: contains constraint removed from response body
-response-body-min-contains-increased-description: response body minContains increased
-response-body-min-contains-decreased-description: response body minContains decreased
-response-body-max-contains-increased-description: response body maxContains increased
-response-body-max-contains-decreased-description: response body maxContains decreased
-response-property-contains-added-description: contains constraint added to response property
-response-property-contains-removed-description: contains constraint removed from response property
-response-property-min-contains-increased-description: response property minContains increased
-response-property-min-contains-decreased-description: response property minContains decreased
-response-property-max-contains-increased-description: response property maxContains increased
-response-property-max-contains-decreased-description: response property maxContains decreased
-request-body-dependent-required-added: "the request body dependentRequired was added: when %s is present, %s are required"
-request-body-dependent-required-removed: "the request body dependentRequired was removed: when %s was present, %s were required"
-request-body-dependent-required-changed: "the request body dependentRequired for %s was updated: %s"
-request-property-dependent-required-added: "the %s request property dependentRequired was added: when %s is present, %s are required"
-request-property-dependent-required-removed: "the %s request property dependentRequired was removed: when %s was present, %s were required"
-request-property-dependent-required-changed: "the %s request property dependentRequired for %s was updated: %s"
-response-body-dependent-required-added: "the response body dependentRequired was added for the status %s: when %s is present, %s are required"
-response-body-dependent-required-removed: "the response body dependentRequired was removed for the status %s: when %s was present, %s were required"
-response-body-dependent-required-changed: "the response body dependentRequired for %s was updated for the status %s: %s"
-response-property-dependent-required-added: "the %s response property dependentRequired was added for the status %s: when %s is present, %s are required"
-response-property-dependent-required-removed: "the %s response property dependentRequired was removed for the status %s: when %s was present, %s were required"
-response-property-dependent-required-changed: "the %s response property dependentRequired for %s was updated for the status %s: %s"
-request-body-dependent-required-added-description: request body dependentRequired added
-request-body-dependent-required-removed-description: request body dependentRequired removed
-request-body-dependent-required-changed-description: request body dependentRequired changed
-request-property-dependent-required-added-description: request property dependentRequired added
-request-property-dependent-required-removed-description: request property dependentRequired removed
-request-property-dependent-required-changed-description: request property dependentRequired changed
-response-body-dependent-required-added-description: response body dependentRequired added
-response-body-dependent-required-removed-description: response body dependentRequired removed
-response-body-dependent-required-changed-description: response body dependentRequired changed
-response-property-dependent-required-added-description: response property dependentRequired added
-response-property-dependent-required-removed-description: response property dependentRequired removed
-response-property-dependent-required-changed-description: response property dependentRequired changed
-request-body-dependent-schema-added: "added the dependent schema %s to the request body"
-request-body-dependent-schema-removed: "removed the dependent schema %s from the request body"
-request-property-dependent-schema-added: "added the dependent schema %s to the %s request property"
-request-property-dependent-schema-removed: "removed the dependent schema %s from the %s request property"
-response-body-dependent-schema-added: "added the dependent schema %s to the response body for the status %s"
-response-body-dependent-schema-removed: "removed the dependent schema %s from the response body for the status %s"
-response-property-dependent-schema-added: "added the dependent schema %s to the %s response property for the status %s"
-response-property-dependent-schema-removed: "removed the dependent schema %s from the %s response property for the status %s"
-request-body-dependent-schema-added-description: dependent schema added to request body
-request-body-dependent-schema-removed-description: dependent schema removed from request body
-request-property-dependent-schema-added-description: dependent schema added to request property
-request-property-dependent-schema-removed-description: dependent schema removed from request property
-response-body-dependent-schema-added-description: dependent schema added to response body
-response-body-dependent-schema-removed-description: dependent schema removed from response body
-response-property-dependent-schema-added-description: dependent schema added to response property
-response-property-dependent-schema-removed-description: dependent schema removed from response property
-request-body-pattern-property-added: "added the pattern property %s to the request body"
-request-body-pattern-property-removed: "removed the pattern property %s from the request body"
-request-property-pattern-property-added: "added the pattern property %s to the %s request property"
-request-property-pattern-property-removed: "removed the pattern property %s from the %s request property"
-response-body-pattern-property-added: "added the pattern property %s to the response body for the status %s"
-response-body-pattern-property-removed: "removed the pattern property %s from the response body for the status %s"
-response-property-pattern-property-added: "added the pattern property %s to the %s response property for the status %s"
-response-property-pattern-property-removed: "removed the pattern property %s from the %s response property for the status %s"
-request-body-pattern-property-added-description: pattern property added to request body
-request-body-pattern-property-removed-description: pattern property removed from request body
-request-property-pattern-property-added-description: pattern property added to request property
-request-property-pattern-property-removed-description: pattern property removed from request property
-response-body-pattern-property-added-description: pattern property added to response body
-response-body-pattern-property-removed-description: pattern property removed from response body
-response-property-pattern-property-added-description: pattern property added to response property
-response-property-pattern-property-removed-description: pattern property removed from response property
-request-body-property-names-added: "added 'propertyNames' constraint to the request body"
-request-body-property-names-removed: "removed 'propertyNames' constraint from the request body"
-request-property-property-names-added: "added 'propertyNames' constraint to the request property %s"
-request-property-property-names-removed: "removed 'propertyNames' constraint from the request property %s"
-response-body-property-names-added: "added 'propertyNames' constraint to the response body for the status %s"
-response-body-property-names-removed: "removed 'propertyNames' constraint from the response body for the status %s"
-response-property-property-names-added: "added 'propertyNames' constraint to the %s response property for the status %s"
-response-property-property-names-removed: "removed 'propertyNames' constraint from the %s response property for the status %s"
-request-body-property-names-added-description: propertyNames constraint added to request body
-request-body-property-names-removed-description: propertyNames constraint removed from request body
-request-property-property-names-added-description: propertyNames constraint added to request property
-request-property-property-names-removed-description: propertyNames constraint removed from request property
-response-body-property-names-added-description: propertyNames constraint added to response body
-response-body-property-names-removed-description: propertyNames constraint removed from response body
-response-property-property-names-added-description: propertyNames constraint added to response property
-response-property-property-names-removed-description: propertyNames constraint removed from response property
-request-body-unevaluated-items-added: "added 'unevaluatedItems' constraint to the request body"
-request-body-unevaluated-items-removed: "removed 'unevaluatedItems' constraint from the request body"
-request-body-unevaluated-properties-added: "added 'unevaluatedProperties' constraint to the request body"
-request-body-unevaluated-properties-removed: "removed 'unevaluatedProperties' constraint from the request body"
-request-property-unevaluated-items-added: "added 'unevaluatedItems' constraint to the request property %s"
-request-property-unevaluated-items-removed: "removed 'unevaluatedItems' constraint from the request property %s"
-request-property-unevaluated-properties-added: "added 'unevaluatedProperties' constraint to the request property %s"
-request-property-unevaluated-properties-removed: "removed 'unevaluatedProperties' constraint from the request property %s"
-response-body-unevaluated-items-added: "added 'unevaluatedItems' constraint to the response body for the status %s"
-response-body-unevaluated-items-removed: "removed 'unevaluatedItems' constraint from the response body for the status %s"
-response-body-unevaluated-properties-added: "added 'unevaluatedProperties' constraint to the response body for the status %s"
-response-body-unevaluated-properties-removed: "removed 'unevaluatedProperties' constraint from the response body for the status %s"
-response-property-unevaluated-items-added: "added 'unevaluatedItems' constraint to the %s response property for the status %s"
-response-property-unevaluated-items-removed: "removed 'unevaluatedItems' constraint from the %s response property for the status %s"
-response-property-unevaluated-properties-added: "added 'unevaluatedProperties' constraint to the %s response property for the status %s"
-response-property-unevaluated-properties-removed: "removed 'unevaluatedProperties' constraint from the %s response property for the status %s"
-request-body-unevaluated-items-added-description: unevaluatedItems constraint added to request body
-request-body-unevaluated-items-removed-description: unevaluatedItems constraint removed from request body
-request-body-unevaluated-properties-added-description: unevaluatedProperties constraint added to request body
-request-body-unevaluated-properties-removed-description: unevaluatedProperties constraint removed from request body
-request-property-unevaluated-items-added-description: unevaluatedItems constraint added to request property
-request-property-unevaluated-items-removed-description: unevaluatedItems constraint removed from request property
-request-property-unevaluated-properties-added-description: unevaluatedProperties constraint added to request property
-request-property-unevaluated-properties-removed-description: unevaluatedProperties constraint removed from request property
-response-body-unevaluated-items-added-description: unevaluatedItems constraint added to response body
-response-body-unevaluated-items-removed-description: unevaluatedItems constraint removed from response body
-response-body-unevaluated-properties-added-description: unevaluatedProperties constraint added to response body
-response-body-unevaluated-properties-removed-description: unevaluatedProperties constraint removed from response body
-response-property-unevaluated-items-added-description: unevaluatedItems constraint added to response property
-response-property-unevaluated-items-removed-description: unevaluatedItems constraint removed from response property
-response-property-unevaluated-properties-added-description: unevaluatedProperties constraint added to response property
-response-property-unevaluated-properties-removed-description: unevaluatedProperties constraint removed from response property
-request-body-content-schema-added: "added 'contentSchema' to the request body"
-request-body-content-schema-removed: "removed 'contentSchema' from the request body"
-request-body-content-media-type-changed: "the request body contentMediaType changed from %s to %s"
-request-body-content-encoding-changed: "the request body contentEncoding changed from %s to %s"
-request-property-content-schema-added: "added 'contentSchema' to the request property %s"
-request-property-content-schema-removed: "removed 'contentSchema' from the request property %s"
-request-property-content-media-type-changed: "the %s request property contentMediaType changed from %s to %s"
-request-property-content-encoding-changed: "the %s request property contentEncoding changed from %s to %s"
-response-body-content-schema-added: "added 'contentSchema' to the response body for the status %s"
-response-body-content-schema-removed: "removed 'contentSchema' from the response body for the status %s"
-response-body-content-media-type-changed: "the response body contentMediaType changed from %s to %s for the status %s"
-response-body-content-encoding-changed: "the response body contentEncoding changed from %s to %s for the status %s"
-response-property-content-schema-added: "added 'contentSchema' to the %s response property for the status %s"
-response-property-content-schema-removed: "removed 'contentSchema' from the %s response property for the status %s"
-response-property-content-media-type-changed: "the %s response property contentMediaType changed from %s to %s for the status %s"
-response-property-content-encoding-changed: "the %s response property contentEncoding changed from %s to %s for the status %s"
-request-body-content-schema-added-description: contentSchema added to request body
-request-body-content-schema-removed-description: contentSchema removed from request body
-request-body-content-media-type-changed-description: request body contentMediaType changed
-request-body-content-encoding-changed-description: request body contentEncoding changed
-request-property-content-schema-added-description: contentSchema added to request property
-request-property-content-schema-removed-description: contentSchema removed from request property
-request-property-content-media-type-changed-description: request property contentMediaType changed
-request-property-content-encoding-changed-description: request property contentEncoding changed
-response-body-content-schema-added-description: contentSchema added to response body
-response-body-content-schema-removed-description: contentSchema removed from response body
-response-body-content-media-type-changed-description: response body contentMediaType changed
-response-body-content-encoding-changed-description: response body contentEncoding changed
-response-property-content-schema-added-description: contentSchema added to response property
-response-property-content-schema-removed-description: contentSchema removed from response property
-response-property-content-media-type-changed-description: response property contentMediaType changed
-response-property-content-encoding-changed-description: response property contentEncoding changed
-request-body-exclusive-min-increased-description: request body exclusiveMinimum increased
-request-body-exclusive-min-decreased-description: request body exclusiveMinimum decreased
-request-property-exclusive-min-increased-description: request property exclusiveMinimum increased
-request-read-only-property-exclusive-min-increased-description: request read-only property exclusiveMinimum increased
-request-property-exclusive-min-decreased-description: request property exclusiveMinimum decreased
-request-body-exclusive-min-set-description: request body exclusiveMinimum set
-request-property-exclusive-min-set-description: request property exclusiveMinimum set
-request-body-exclusive-max-decreased-description: request body exclusiveMaximum decreased
-request-body-exclusive-max-increased-description: request body exclusiveMaximum increased
-request-property-exclusive-max-decreased-description: request property exclusiveMaximum decreased
-request-read-only-property-exclusive-max-decreased-description: request read-only property exclusiveMaximum decreased
-request-property-exclusive-max-increased-description: request property exclusiveMaximum increased
-request-body-exclusive-max-set-description: request body exclusiveMaximum set
-request-property-exclusive-max-set-description: request property exclusiveMaximum set
-request-parameter-exclusive-min-increased-description: request parameter exclusiveMinimum increased
-request-parameter-exclusive-min-decreased-description: request parameter exclusiveMinimum decreased
-request-parameter-exclusive-min-set-description: request parameter exclusiveMinimum set
-request-parameter-exclusive-max-decreased-description: request parameter exclusiveMaximum decreased
-request-parameter-exclusive-max-increased-description: request parameter exclusiveMaximum increased
-request-parameter-exclusive-max-set-description: request parameter exclusiveMaximum set
-response-body-exclusive-max-increased-description: response body exclusiveMaximum increased
-response-property-exclusive-max-increased-description: response property exclusiveMaximum increased
-response-body-exclusive-min-decreased-description: response body exclusiveMinimum decreased
-response-property-exclusive-min-decreased-description: response property exclusiveMinimum decreased
+request-body-prefix-items-added: "agregado %s a la lista 'prefixItems' del cuerpo de solicitud"
+request-body-prefix-items-removed: "removido %s de la lista 'prefixItems' del cuerpo de solicitud"
+request-property-prefix-items-added: "agregado %s a la lista 'prefixItems' de la propiedad de solicitud %s"
+request-property-prefix-items-removed: "removido %s de la lista 'prefixItems' de la propiedad de solicitud %s"
+response-body-prefix-items-added: "agregado %s a la lista 'prefixItems' del cuerpo de respuesta para el estado de respuesta %s"
+response-body-prefix-items-removed: "removido %s de la lista 'prefixItems' del cuerpo de respuesta para el estado de respuesta %s"
+response-property-prefix-items-added: "agregado %s a la lista 'prefixItems' de la propiedad de respuesta %s para el estado de respuesta %s"
+response-property-prefix-items-removed: "removido %s de la lista 'prefixItems' de la propiedad de respuesta %s para el estado de respuesta %s"
+request-body-prefix-items-added-description: "subesquema agregado a prefixItems en el cuerpo de solicitud"
+request-body-prefix-items-removed-description: "subesquema removido de prefixItems en el cuerpo de solicitud"
+request-property-prefix-items-added-description: "subesquema agregado a prefixItems en la propiedad de solicitud"
+request-property-prefix-items-removed-description: "subesquema removido de prefixItems en la propiedad de solicitud"
+response-body-prefix-items-added-description: "subesquema agregado a prefixItems en el cuerpo de respuesta"
+response-body-prefix-items-removed-description: "subesquema removido de prefixItems en el cuerpo de respuesta"
+response-property-prefix-items-added-description: "subesquema agregado a prefixItems en la propiedad de respuesta"
+response-property-prefix-items-removed-description: "subesquema removido de prefixItems en la propiedad de respuesta"
+request-body-if-added: "agregado el subesquema 'if' al cuerpo de solicitud"
+request-body-if-removed: "removido el subesquema 'if' del cuerpo de solicitud"
+request-body-then-added: "agregado el subesquema 'then' al cuerpo de solicitud"
+request-body-then-removed: "removido el subesquema 'then' del cuerpo de solicitud"
+request-body-else-added: "agregado el subesquema 'else' al cuerpo de solicitud"
+request-body-else-removed: "removido el subesquema 'else' del cuerpo de solicitud"
+request-property-if-added: "agregado el subesquema 'if' a la propiedad de solicitud %s"
+request-property-if-removed: "removido el subesquema 'if' de la propiedad de solicitud %s"
+request-property-then-added: "agregado el subesquema 'then' a la propiedad de solicitud %s"
+request-property-then-removed: "removido el subesquema 'then' de la propiedad de solicitud %s"
+request-property-else-added: "agregado el subesquema 'else' a la propiedad de solicitud %s"
+request-property-else-removed: "removido el subesquema 'else' de la propiedad de solicitud %s"
+response-body-if-added: "agregado el subesquema 'if' al cuerpo de respuesta para el estado %s"
+response-body-if-removed: "removido el subesquema 'if' del cuerpo de respuesta para el estado %s"
+response-body-then-added: "agregado el subesquema 'then' al cuerpo de respuesta para el estado %s"
+response-body-then-removed: "removido el subesquema 'then' del cuerpo de respuesta para el estado %s"
+response-body-else-added: "agregado el subesquema 'else' al cuerpo de respuesta para el estado %s"
+response-body-else-removed: "removido el subesquema 'else' del cuerpo de respuesta para el estado %s"
+response-property-if-added: "agregado el subesquema 'if' a la propiedad de respuesta %s para el estado %s"
+response-property-if-removed: "removido el subesquema 'if' de la propiedad de respuesta %s para el estado %s"
+response-property-then-added: "agregado el subesquema 'then' a la propiedad de respuesta %s para el estado %s"
+response-property-then-removed: "removido el subesquema 'then' de la propiedad de respuesta %s para el estado %s"
+response-property-else-added: "agregado el subesquema 'else' a la propiedad de respuesta %s para el estado %s"
+response-property-else-removed: "removido el subesquema 'else' de la propiedad de respuesta %s para el estado %s"
+request-body-if-added-description: "subesquema if agregado al cuerpo de solicitud"
+request-body-if-removed-description: "subesquema if removido del cuerpo de solicitud"
+request-body-then-added-description: "subesquema then agregado al cuerpo de solicitud"
+request-body-then-removed-description: "subesquema then removido del cuerpo de solicitud"
+request-body-else-added-description: "subesquema else agregado al cuerpo de solicitud"
+request-body-else-removed-description: "subesquema else removido del cuerpo de solicitud"
+request-property-if-added-description: "subesquema if agregado a la propiedad de solicitud"
+request-property-if-removed-description: "subesquema if removido de la propiedad de solicitud"
+request-property-then-added-description: "subesquema then agregado a la propiedad de solicitud"
+request-property-then-removed-description: "subesquema then removido de la propiedad de solicitud"
+request-property-else-added-description: "subesquema else agregado a la propiedad de solicitud"
+request-property-else-removed-description: "subesquema else removido de la propiedad de solicitud"
+response-body-if-added-description: "subesquema if agregado al cuerpo de respuesta"
+response-body-if-removed-description: "subesquema if removido del cuerpo de respuesta"
+response-body-then-added-description: "subesquema then agregado al cuerpo de respuesta"
+response-body-then-removed-description: "subesquema then removido del cuerpo de respuesta"
+response-body-else-added-description: "subesquema else agregado al cuerpo de respuesta"
+response-body-else-removed-description: "subesquema else removido del cuerpo de respuesta"
+response-property-if-added-description: "subesquema if agregado a la propiedad de respuesta"
+response-property-if-removed-description: "subesquema if removido de la propiedad de respuesta"
+response-property-then-added-description: "subesquema then agregado a la propiedad de respuesta"
+response-property-then-removed-description: "subesquema then removido de la propiedad de respuesta"
+response-property-else-added-description: "subesquema else agregado a la propiedad de respuesta"
+response-property-else-removed-description: "subesquema else removido de la propiedad de respuesta"
+request-body-contains-added: "agregada la restricción 'contains' al cuerpo de solicitud"
+request-body-contains-removed: "removida la restricción 'contains' del cuerpo de solicitud"
+request-body-min-contains-increased: "el minContains del cuerpo de solicitud fue aumentado de %s a %s"
+request-body-min-contains-decreased: "el minContains del cuerpo de solicitud fue disminuido de %s a %s"
+request-body-max-contains-increased: "el maxContains del cuerpo de solicitud fue aumentado de %s a %s"
+request-body-max-contains-decreased: "el maxContains del cuerpo de solicitud fue disminuido de %s a %s"
+request-property-contains-added: "agregada la restricción 'contains' a la propiedad de solicitud %s"
+request-property-contains-removed: "removida la restricción 'contains' de la propiedad de solicitud %s"
+request-property-min-contains-increased: "el minContains de la propiedad de solicitud %s fue aumentado de %s a %s"
+request-property-min-contains-decreased: "el minContains de la propiedad de solicitud %s fue disminuido de %s a %s"
+request-property-max-contains-increased: "el maxContains de la propiedad de solicitud %s fue aumentado de %s a %s"
+request-property-max-contains-decreased: "el maxContains de la propiedad de solicitud %s fue disminuido de %s a %s"
+response-body-contains-added: "agregada la restricción 'contains' al cuerpo de respuesta para el estado %s"
+response-body-contains-removed: "removida la restricción 'contains' del cuerpo de respuesta para el estado %s"
+response-body-min-contains-increased: "el minContains del cuerpo de respuesta fue aumentado de %s a %s para el estado %s"
+response-body-min-contains-decreased: "el minContains del cuerpo de respuesta fue disminuido de %s a %s para el estado %s"
+response-body-max-contains-increased: "el maxContains del cuerpo de respuesta fue aumentado de %s a %s para el estado %s"
+response-body-max-contains-decreased: "el maxContains del cuerpo de respuesta fue disminuido de %s a %s para el estado %s"
+response-property-contains-added: "agregada la restricción 'contains' a la propiedad de respuesta %s para el estado %s"
+response-property-contains-removed: "removida la restricción 'contains' de la propiedad de respuesta %s para el estado %s"
+response-property-min-contains-increased: "el minContains de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s"
+response-property-min-contains-decreased: "el minContains de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s"
+response-property-max-contains-increased: "el maxContains de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s"
+response-property-max-contains-decreased: "el maxContains de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s"
+request-body-contains-added-description: "restricción contains agregada al cuerpo de solicitud"
+request-body-contains-removed-description: "restricción contains removida del cuerpo de solicitud"
+request-body-min-contains-increased-description: "minContains del cuerpo de solicitud aumentado"
+request-body-min-contains-decreased-description: "minContains del cuerpo de solicitud disminuido"
+request-body-max-contains-increased-description: "maxContains del cuerpo de solicitud aumentado"
+request-body-max-contains-decreased-description: "maxContains del cuerpo de solicitud disminuido"
+request-property-contains-added-description: "restricción contains agregada a la propiedad de solicitud"
+request-property-contains-removed-description: "restricción contains removida de la propiedad de solicitud"
+request-property-min-contains-increased-description: "minContains de la propiedad de solicitud aumentado"
+request-property-min-contains-decreased-description: "minContains de la propiedad de solicitud disminuido"
+request-property-max-contains-increased-description: "maxContains de la propiedad de solicitud aumentado"
+request-property-max-contains-decreased-description: "maxContains de la propiedad de solicitud disminuido"
+response-body-contains-added-description: "restricción contains agregada al cuerpo de respuesta"
+response-body-contains-removed-description: "restricción contains removida del cuerpo de respuesta"
+response-body-min-contains-increased-description: "minContains del cuerpo de respuesta aumentado"
+response-body-min-contains-decreased-description: "minContains del cuerpo de respuesta disminuido"
+response-body-max-contains-increased-description: "maxContains del cuerpo de respuesta aumentado"
+response-body-max-contains-decreased-description: "maxContains del cuerpo de respuesta disminuido"
+response-property-contains-added-description: "restricción contains agregada a la propiedad de respuesta"
+response-property-contains-removed-description: "restricción contains removida de la propiedad de respuesta"
+response-property-min-contains-increased-description: "minContains de la propiedad de respuesta aumentado"
+response-property-min-contains-decreased-description: "minContains de la propiedad de respuesta disminuido"
+response-property-max-contains-increased-description: "maxContains de la propiedad de respuesta aumentado"
+response-property-max-contains-decreased-description: "maxContains de la propiedad de respuesta disminuido"
+request-body-dependent-required-added: "se agregó dependentRequired al cuerpo de solicitud: cuando %s está presente, %s son requeridos"
+request-body-dependent-required-removed: "se eliminó dependentRequired del cuerpo de solicitud: cuando %s estaba presente, %s eran requeridos"
+request-body-dependent-required-changed: "se actualizó dependentRequired del cuerpo de solicitud para %s: %s"
+request-property-dependent-required-added: "se agregó dependentRequired a la propiedad de solicitud %s: cuando %s está presente, %s son requeridos"
+request-property-dependent-required-removed: "se eliminó dependentRequired de la propiedad de solicitud %s: cuando %s estaba presente, %s eran requeridos"
+request-property-dependent-required-changed: "se actualizó dependentRequired de la propiedad de solicitud %s para %s: %s"
+response-body-dependent-required-added: "se agregó dependentRequired al cuerpo de respuesta para el estado %s: cuando %s está presente, %s son requeridos"
+response-body-dependent-required-removed: "se eliminó dependentRequired del cuerpo de respuesta para el estado %s: cuando %s estaba presente, %s eran requeridos"
+response-body-dependent-required-changed: "se actualizó dependentRequired del cuerpo de respuesta para %s para el estado %s: %s"
+response-property-dependent-required-added: "se agregó dependentRequired a la propiedad de respuesta %s para el estado %s: cuando %s está presente, %s son requeridos"
+response-property-dependent-required-removed: "se eliminó dependentRequired de la propiedad de respuesta %s para el estado %s: cuando %s estaba presente, %s eran requeridos"
+response-property-dependent-required-changed: "se actualizó dependentRequired de la propiedad de respuesta %s para %s para el estado %s: %s"
+request-body-dependent-required-added-description: "dependentRequired del cuerpo de solicitud agregado"
+request-body-dependent-required-removed-description: "dependentRequired del cuerpo de solicitud eliminado"
+request-body-dependent-required-changed-description: "dependentRequired del cuerpo de solicitud cambiado"
+request-property-dependent-required-added-description: "dependentRequired de propiedad de solicitud agregado"
+request-property-dependent-required-removed-description: "dependentRequired de propiedad de solicitud eliminado"
+request-property-dependent-required-changed-description: "dependentRequired de propiedad de solicitud cambiado"
+response-body-dependent-required-added-description: "dependentRequired del cuerpo de respuesta agregado"
+response-body-dependent-required-removed-description: "dependentRequired del cuerpo de respuesta eliminado"
+response-body-dependent-required-changed-description: "dependentRequired del cuerpo de respuesta cambiado"
+response-property-dependent-required-added-description: "dependentRequired de propiedad de respuesta agregado"
+response-property-dependent-required-removed-description: "dependentRequired de propiedad de respuesta eliminado"
+response-property-dependent-required-changed-description: "dependentRequired de propiedad de respuesta cambiado"
+request-body-dependent-schema-added: "agregado el esquema dependiente %s al cuerpo de solicitud"
+request-body-dependent-schema-removed: "removido el esquema dependiente %s del cuerpo de solicitud"
+request-property-dependent-schema-added: "agregado el esquema dependiente %s a la propiedad de solicitud %s"
+request-property-dependent-schema-removed: "removido el esquema dependiente %s de la propiedad de solicitud %s"
+response-body-dependent-schema-added: "agregado el esquema dependiente %s al cuerpo de respuesta para el estado %s"
+response-body-dependent-schema-removed: "removido el esquema dependiente %s del cuerpo de respuesta para el estado %s"
+response-property-dependent-schema-added: "agregado el esquema dependiente %s a la propiedad de respuesta %s para el estado %s"
+response-property-dependent-schema-removed: "removido el esquema dependiente %s de la propiedad de respuesta %s para el estado %s"
+request-body-dependent-schema-added-description: "esquema dependiente agregado al cuerpo de solicitud"
+request-body-dependent-schema-removed-description: "esquema dependiente removido del cuerpo de solicitud"
+request-property-dependent-schema-added-description: "esquema dependiente agregado a la propiedad de solicitud"
+request-property-dependent-schema-removed-description: "esquema dependiente removido de la propiedad de solicitud"
+response-body-dependent-schema-added-description: "esquema dependiente agregado al cuerpo de respuesta"
+response-body-dependent-schema-removed-description: "esquema dependiente removido del cuerpo de respuesta"
+response-property-dependent-schema-added-description: "esquema dependiente agregado a la propiedad de respuesta"
+response-property-dependent-schema-removed-description: "esquema dependiente removido de la propiedad de respuesta"
+request-body-pattern-property-added: "agregada la propiedad de patrón %s al cuerpo de solicitud"
+request-body-pattern-property-removed: "removida la propiedad de patrón %s del cuerpo de solicitud"
+request-property-pattern-property-added: "agregada la propiedad de patrón %s a la propiedad de solicitud %s"
+request-property-pattern-property-removed: "removida la propiedad de patrón %s de la propiedad de solicitud %s"
+response-body-pattern-property-added: "agregada la propiedad de patrón %s al cuerpo de respuesta para el estado %s"
+response-body-pattern-property-removed: "removida la propiedad de patrón %s del cuerpo de respuesta para el estado %s"
+response-property-pattern-property-added: "agregada la propiedad de patrón %s a la propiedad de respuesta %s para el estado %s"
+response-property-pattern-property-removed: "removida la propiedad de patrón %s de la propiedad de respuesta %s para el estado %s"
+request-body-pattern-property-added-description: "propiedad de patrón agregada al cuerpo de solicitud"
+request-body-pattern-property-removed-description: "propiedad de patrón removida del cuerpo de solicitud"
+request-property-pattern-property-added-description: "propiedad de patrón agregada a la propiedad de solicitud"
+request-property-pattern-property-removed-description: "propiedad de patrón removida de la propiedad de solicitud"
+response-body-pattern-property-added-description: "propiedad de patrón agregada al cuerpo de respuesta"
+response-body-pattern-property-removed-description: "propiedad de patrón removida del cuerpo de respuesta"
+response-property-pattern-property-added-description: "propiedad de patrón agregada a la propiedad de respuesta"
+response-property-pattern-property-removed-description: "propiedad de patrón removida de la propiedad de respuesta"
+request-body-property-names-added: "agregada la restricción 'propertyNames' al cuerpo de solicitud"
+request-body-property-names-removed: "removida la restricción 'propertyNames' del cuerpo de solicitud"
+request-property-property-names-added: "agregada la restricción 'propertyNames' a la propiedad de solicitud %s"
+request-property-property-names-removed: "removida la restricción 'propertyNames' de la propiedad de solicitud %s"
+response-body-property-names-added: "agregada la restricción 'propertyNames' al cuerpo de respuesta para el estado %s"
+response-body-property-names-removed: "removida la restricción 'propertyNames' del cuerpo de respuesta para el estado %s"
+response-property-property-names-added: "agregada la restricción 'propertyNames' a la propiedad de respuesta %s para el estado %s"
+response-property-property-names-removed: "removida la restricción 'propertyNames' de la propiedad de respuesta %s para el estado %s"
+request-body-property-names-added-description: "restricción propertyNames agregada al cuerpo de solicitud"
+request-body-property-names-removed-description: "restricción propertyNames removida del cuerpo de solicitud"
+request-property-property-names-added-description: "restricción propertyNames agregada a la propiedad de solicitud"
+request-property-property-names-removed-description: "restricción propertyNames removida de la propiedad de solicitud"
+response-body-property-names-added-description: "restricción propertyNames agregada al cuerpo de respuesta"
+response-body-property-names-removed-description: "restricción propertyNames removida del cuerpo de respuesta"
+response-property-property-names-added-description: "restricción propertyNames agregada a la propiedad de respuesta"
+response-property-property-names-removed-description: "restricción propertyNames removida de la propiedad de respuesta"
+request-body-unevaluated-items-added: "agregada la restricción 'unevaluatedItems' al cuerpo de solicitud"
+request-body-unevaluated-items-removed: "removida la restricción 'unevaluatedItems' del cuerpo de solicitud"
+request-body-unevaluated-properties-added: "agregada la restricción 'unevaluatedProperties' al cuerpo de solicitud"
+request-body-unevaluated-properties-removed: "removida la restricción 'unevaluatedProperties' del cuerpo de solicitud"
+request-property-unevaluated-items-added: "agregada la restricción 'unevaluatedItems' a la propiedad de solicitud %s"
+request-property-unevaluated-items-removed: "removida la restricción 'unevaluatedItems' de la propiedad de solicitud %s"
+request-property-unevaluated-properties-added: "agregada la restricción 'unevaluatedProperties' a la propiedad de solicitud %s"
+request-property-unevaluated-properties-removed: "removida la restricción 'unevaluatedProperties' de la propiedad de solicitud %s"
+response-body-unevaluated-items-added: "agregada la restricción 'unevaluatedItems' al cuerpo de respuesta para el estado %s"
+response-body-unevaluated-items-removed: "removida la restricción 'unevaluatedItems' del cuerpo de respuesta para el estado %s"
+response-body-unevaluated-properties-added: "agregada la restricción 'unevaluatedProperties' al cuerpo de respuesta para el estado %s"
+response-body-unevaluated-properties-removed: "removida la restricción 'unevaluatedProperties' del cuerpo de respuesta para el estado %s"
+response-property-unevaluated-items-added: "agregada la restricción 'unevaluatedItems' a la propiedad de respuesta %s para el estado %s"
+response-property-unevaluated-items-removed: "removida la restricción 'unevaluatedItems' de la propiedad de respuesta %s para el estado %s"
+response-property-unevaluated-properties-added: "agregada la restricción 'unevaluatedProperties' a la propiedad de respuesta %s para el estado %s"
+response-property-unevaluated-properties-removed: "removida la restricción 'unevaluatedProperties' de la propiedad de respuesta %s para el estado %s"
+request-body-unevaluated-items-added-description: "restricción unevaluatedItems agregada al cuerpo de solicitud"
+request-body-unevaluated-items-removed-description: "restricción unevaluatedItems removida del cuerpo de solicitud"
+request-body-unevaluated-properties-added-description: "restricción unevaluatedProperties agregada al cuerpo de solicitud"
+request-body-unevaluated-properties-removed-description: "restricción unevaluatedProperties removida del cuerpo de solicitud"
+request-property-unevaluated-items-added-description: "restricción unevaluatedItems agregada a la propiedad de solicitud"
+request-property-unevaluated-items-removed-description: "restricción unevaluatedItems removida de la propiedad de solicitud"
+request-property-unevaluated-properties-added-description: "restricción unevaluatedProperties agregada a la propiedad de solicitud"
+request-property-unevaluated-properties-removed-description: "restricción unevaluatedProperties removida de la propiedad de solicitud"
+response-body-unevaluated-items-added-description: "restricción unevaluatedItems agregada al cuerpo de respuesta"
+response-body-unevaluated-items-removed-description: "restricción unevaluatedItems removida del cuerpo de respuesta"
+response-body-unevaluated-properties-added-description: "restricción unevaluatedProperties agregada al cuerpo de respuesta"
+response-body-unevaluated-properties-removed-description: "restricción unevaluatedProperties removida del cuerpo de respuesta"
+response-property-unevaluated-items-added-description: "restricción unevaluatedItems agregada a la propiedad de respuesta"
+response-property-unevaluated-items-removed-description: "restricción unevaluatedItems removida de la propiedad de respuesta"
+response-property-unevaluated-properties-added-description: "restricción unevaluatedProperties agregada a la propiedad de respuesta"
+response-property-unevaluated-properties-removed-description: "restricción unevaluatedProperties removida de la propiedad de respuesta"
+request-body-content-schema-added: "agregado 'contentSchema' al cuerpo de solicitud"
+request-body-content-schema-removed: "removido 'contentSchema' del cuerpo de solicitud"
+request-body-content-media-type-changed: "el contentMediaType del cuerpo de solicitud fue cambiado de %s a %s"
+request-body-content-encoding-changed: "el contentEncoding del cuerpo de solicitud fue cambiado de %s a %s"
+request-property-content-schema-added: "agregado 'contentSchema' a la propiedad de solicitud %s"
+request-property-content-schema-removed: "removido 'contentSchema' de la propiedad de solicitud %s"
+request-property-content-media-type-changed: "el contentMediaType de la propiedad de solicitud %s fue cambiado de %s a %s"
+request-property-content-encoding-changed: "el contentEncoding de la propiedad de solicitud %s fue cambiado de %s a %s"
+response-body-content-schema-added: "agregado 'contentSchema' al cuerpo de respuesta para el estado %s"
+response-body-content-schema-removed: "removido 'contentSchema' del cuerpo de respuesta para el estado %s"
+response-body-content-media-type-changed: "el contentMediaType del cuerpo de respuesta fue cambiado de %s a %s para el estado %s"
+response-body-content-encoding-changed: "el contentEncoding del cuerpo de respuesta fue cambiado de %s a %s para el estado %s"
+response-property-content-schema-added: "agregado 'contentSchema' a la propiedad de respuesta %s para el estado %s"
+response-property-content-schema-removed: "removido 'contentSchema' de la propiedad de respuesta %s para el estado %s"
+response-property-content-media-type-changed: "el contentMediaType de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s"
+response-property-content-encoding-changed: "el contentEncoding de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s"
+request-body-content-schema-added-description: "contentSchema agregado al cuerpo de solicitud"
+request-body-content-schema-removed-description: "contentSchema removido del cuerpo de solicitud"
+request-body-content-media-type-changed-description: "contentMediaType del cuerpo de solicitud cambiado"
+request-body-content-encoding-changed-description: "contentEncoding del cuerpo de solicitud cambiado"
+request-property-content-schema-added-description: "contentSchema agregado a la propiedad de solicitud"
+request-property-content-schema-removed-description: "contentSchema removido de la propiedad de solicitud"
+request-property-content-media-type-changed-description: "contentMediaType de la propiedad de solicitud cambiado"
+request-property-content-encoding-changed-description: "contentEncoding de la propiedad de solicitud cambiado"
+response-body-content-schema-added-description: "contentSchema agregado al cuerpo de respuesta"
+response-body-content-schema-removed-description: "contentSchema removido del cuerpo de respuesta"
+response-body-content-media-type-changed-description: "contentMediaType del cuerpo de respuesta cambiado"
+response-body-content-encoding-changed-description: "contentEncoding del cuerpo de respuesta cambiado"
+response-property-content-schema-added-description: "contentSchema agregado a la propiedad de respuesta"
+response-property-content-schema-removed-description: "contentSchema removido de la propiedad de respuesta"
+response-property-content-media-type-changed-description: "contentMediaType de la propiedad de respuesta cambiado"
+response-property-content-encoding-changed-description: "contentEncoding de la propiedad de respuesta cambiado"
+request-body-exclusive-min-increased-description: "exclusiveMinimum del cuerpo de solicitud aumentado"
+request-body-exclusive-min-decreased-description: "exclusiveMinimum del cuerpo de solicitud disminuido"
+request-property-exclusive-min-increased-description: "exclusiveMinimum de la propiedad de solicitud aumentado"
+request-read-only-property-exclusive-min-increased-description: "exclusiveMinimum de la propiedad de solicitud de solo lectura aumentado"
+request-property-exclusive-min-decreased-description: "exclusiveMinimum de la propiedad de solicitud disminuido"
+request-body-exclusive-min-set-description: "exclusiveMinimum del cuerpo de solicitud establecido"
+request-property-exclusive-min-set-description: "exclusiveMinimum de la propiedad de solicitud establecido"
+request-body-exclusive-max-decreased-description: "exclusiveMaximum del cuerpo de solicitud disminuido"
+request-body-exclusive-max-increased-description: "exclusiveMaximum del cuerpo de solicitud aumentado"
+request-property-exclusive-max-decreased-description: "exclusiveMaximum de la propiedad de solicitud disminuido"
+request-read-only-property-exclusive-max-decreased-description: "exclusiveMaximum de la propiedad de solicitud de solo lectura disminuido"
+request-property-exclusive-max-increased-description: "exclusiveMaximum de la propiedad de solicitud aumentado"
+request-body-exclusive-max-set-description: "exclusiveMaximum del cuerpo de solicitud establecido"
+request-property-exclusive-max-set-description: "exclusiveMaximum de la propiedad de solicitud establecido"
+request-parameter-exclusive-min-increased-description: "exclusiveMinimum del parámetro de solicitud aumentado"
+request-parameter-exclusive-min-decreased-description: "exclusiveMinimum del parámetro de solicitud disminuido"
+request-parameter-exclusive-min-set-description: "exclusiveMinimum del parámetro de solicitud establecido"
+request-parameter-exclusive-max-decreased-description: "exclusiveMaximum del parámetro de solicitud disminuido"
+request-parameter-exclusive-max-increased-description: "exclusiveMaximum del parámetro de solicitud aumentado"
+request-parameter-exclusive-max-set-description: "exclusiveMaximum del parámetro de solicitud establecido"
+response-body-exclusive-max-increased-description: "exclusiveMaximum del cuerpo de respuesta aumentado"
+response-property-exclusive-max-increased-description: "exclusiveMaximum de la propiedad de respuesta aumentado"
+response-body-exclusive-min-decreased-description: "exclusiveMinimum del cuerpo de respuesta disminuido"
+response-property-exclusive-min-decreased-description: "exclusiveMinimum de la propiedad de respuesta disminuido"
