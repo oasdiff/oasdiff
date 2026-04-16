@@ -48,3 +48,12 @@ jobs:
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
+
+      - name: Notify downstream
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CROSS_REPO_TOKEN }}
+          repository: oasdiff/enterprise
+          event-type: oasdiff-released
+          client-payload: '{"tag": "${{ github.ref_name }}"}'
