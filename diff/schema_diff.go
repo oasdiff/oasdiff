@@ -51,35 +51,35 @@ type SchemaDiff struct {
 	AdditionalPropertiesDiff        *SchemaDiff             `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	DiscriminatorDiff               *DiscriminatorDiff      `json:"discriminatorDiff,omitempty" yaml:"discriminatorDiff,omitempty"`
 	// OpenAPI 3.1 / JSON Schema 2020-12 fields
-	ConstDiff                        *ValueDiff       `json:"const,omitempty" yaml:"const,omitempty"`
-	ExamplesDiff                     *ValueDiff       `json:"examples,omitempty" yaml:"examples,omitempty"`
-	PrefixItemsDiff                  *SubschemasDiff  `json:"prefixItems,omitempty" yaml:"prefixItems,omitempty"`
-	ContainsDiff                     *SchemaDiff      `json:"contains,omitempty" yaml:"contains,omitempty"`
-	MinContainsDiff                  *ValueDiff       `json:"minContains,omitempty" yaml:"minContains,omitempty"`
-	MaxContainsDiff                  *ValueDiff       `json:"maxContains,omitempty" yaml:"maxContains,omitempty"`
-	PatternPropertiesDiff            *SchemasDiff     `json:"patternProperties,omitempty" yaml:"patternProperties,omitempty"`
-	DependentSchemasDiff             *SchemasDiff     `json:"dependentSchemas,omitempty" yaml:"dependentSchemas,omitempty"`
-	PropertyNamesDiff                *SchemaDiff      `json:"propertyNames,omitempty" yaml:"propertyNames,omitempty"`
-	UnevaluatedItemsAllowedDiff      *ValueDiff       `json:"unevaluatedItemsAllowed,omitempty" yaml:"unevaluatedItemsAllowed,omitempty"`
-	UnevaluatedItemsDiff             *SchemaDiff      `json:"unevaluatedItems,omitempty" yaml:"unevaluatedItems,omitempty"`
-	UnevaluatedPropertiesAllowedDiff *ValueDiff       `json:"unevaluatedPropertiesAllowed,omitempty" yaml:"unevaluatedPropertiesAllowed,omitempty"`
-	UnevaluatedPropertiesDiff        *SchemaDiff      `json:"unevaluatedProperties,omitempty" yaml:"unevaluatedProperties,omitempty"`
-	IfDiff                           *SchemaDiff      `json:"if,omitempty" yaml:"if,omitempty"`
-	ThenDiff                         *SchemaDiff      `json:"then,omitempty" yaml:"then,omitempty"`
-	ElseDiff                         *SchemaDiff      `json:"else,omitempty" yaml:"else,omitempty"`
+	ConstDiff                        *ValueDiff             `json:"const,omitempty" yaml:"const,omitempty"`
+	ExamplesDiff                     *ValueDiff             `json:"examples,omitempty" yaml:"examples,omitempty"`
+	PrefixItemsDiff                  *SubschemasDiff        `json:"prefixItems,omitempty" yaml:"prefixItems,omitempty"`
+	ContainsDiff                     *SchemaDiff            `json:"contains,omitempty" yaml:"contains,omitempty"`
+	MinContainsDiff                  *ValueDiff             `json:"minContains,omitempty" yaml:"minContains,omitempty"`
+	MaxContainsDiff                  *ValueDiff             `json:"maxContains,omitempty" yaml:"maxContains,omitempty"`
+	PatternPropertiesDiff            *SchemasDiff           `json:"patternProperties,omitempty" yaml:"patternProperties,omitempty"`
+	DependentSchemasDiff             *SchemasDiff           `json:"dependentSchemas,omitempty" yaml:"dependentSchemas,omitempty"`
+	PropertyNamesDiff                *SchemaDiff            `json:"propertyNames,omitempty" yaml:"propertyNames,omitempty"`
+	UnevaluatedItemsAllowedDiff      *ValueDiff             `json:"unevaluatedItemsAllowed,omitempty" yaml:"unevaluatedItemsAllowed,omitempty"`
+	UnevaluatedItemsDiff             *SchemaDiff            `json:"unevaluatedItems,omitempty" yaml:"unevaluatedItems,omitempty"`
+	UnevaluatedPropertiesAllowedDiff *ValueDiff             `json:"unevaluatedPropertiesAllowed,omitempty" yaml:"unevaluatedPropertiesAllowed,omitempty"`
+	UnevaluatedPropertiesDiff        *SchemaDiff            `json:"unevaluatedProperties,omitempty" yaml:"unevaluatedProperties,omitempty"`
+	IfDiff                           *SchemaDiff            `json:"if,omitempty" yaml:"if,omitempty"`
+	ThenDiff                         *SchemaDiff            `json:"then,omitempty" yaml:"then,omitempty"`
+	ElseDiff                         *SchemaDiff            `json:"else,omitempty" yaml:"else,omitempty"`
 	DependentRequiredDiff            *DependentRequiredDiff `json:"dependentRequired,omitempty" yaml:"dependentRequired,omitempty"`
-	SchemaIDDiff                     *ValueDiff       `json:"$id,omitempty" yaml:"$id,omitempty"`
-	AnchorDiff                       *ValueDiff       `json:"$anchor,omitempty" yaml:"$anchor,omitempty"`
-	DynamicRefDiff                   *ValueDiff       `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
-	DynamicAnchorDiff                *ValueDiff       `json:"$dynamicAnchor,omitempty" yaml:"$dynamicAnchor,omitempty"`
-	ContentMediaTypeDiff             *ValueDiff       `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
-	ContentEncodingDiff              *ValueDiff       `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
-	ContentSchemaDiff                *SchemaDiff      `json:"contentSchema,omitempty" yaml:"contentSchema,omitempty"`
-	DefsDiff                         *SchemasDiff     `json:"$defs,omitempty" yaml:"$defs,omitempty"`
-	SchemaDialectDiff                *ValueDiff       `json:"$schema,omitempty" yaml:"$schema,omitempty"`
-	CommentDiff                      *ValueDiff       `json:"$comment,omitempty" yaml:"$comment,omitempty"`
-	Base                             *openapi3.Schema `json:"-" yaml:"-"`
-	Revision                         *openapi3.Schema `json:"-" yaml:"-"`
+	SchemaIDDiff                     *ValueDiff             `json:"$id,omitempty" yaml:"$id,omitempty"`
+	AnchorDiff                       *ValueDiff             `json:"$anchor,omitempty" yaml:"$anchor,omitempty"`
+	DynamicRefDiff                   *ValueDiff             `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
+	DynamicAnchorDiff                *ValueDiff             `json:"$dynamicAnchor,omitempty" yaml:"$dynamicAnchor,omitempty"`
+	ContentMediaTypeDiff             *ValueDiff             `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
+	ContentEncodingDiff              *ValueDiff             `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
+	ContentSchemaDiff                *SchemaDiff            `json:"contentSchema,omitempty" yaml:"contentSchema,omitempty"`
+	DefsDiff                         *SchemasDiff           `json:"$defs,omitempty" yaml:"$defs,omitempty"`
+	SchemaDialectDiff                *ValueDiff             `json:"$schema,omitempty" yaml:"$schema,omitempty"`
+	CommentDiff                      *ValueDiff             `json:"$comment,omitempty" yaml:"$comment,omitempty"`
+	Base                             *openapi3.Schema       `json:"-" yaml:"-"`
+	Revision                         *openapi3.Schema       `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element

@@ -4,8 +4,8 @@ package diff
 // Each key in the map is a property name, and the value is the list of properties
 // that become required when that property is present.
 type DependentRequiredDiff struct {
-	Added    map[string][]string `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  map[string][]string `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    map[string][]string     `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  map[string][]string     `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified map[string]*StringsDiff `json:"modified,omitempty" yaml:"modified,omitempty"`
 }
 
