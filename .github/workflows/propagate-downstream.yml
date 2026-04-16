@@ -1,0 +1,152 @@
+name: Propagate version to downstream repos
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  wait-for-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Docker image
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          for i in $(seq 1 30); do
+            if curl -sf "https://hub.docker.com/v2/repositories/tufin/oasdiff/tags/${TAG}" > /dev/null 2>&1; then
+              echo "Image tufin/oasdiff:${TAG} is available"
+              exit 0
+            fi
+            echo "Attempt $i/30: image not yet available, waiting 30s..."
+            sleep 30
+          done
+          echo "::error::Timed out waiting for Docker image tufin/oasdiff:${TAG}"
+          exit 1
+
+  bump-service:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CROSS_REPO_APP_ID }}
+          private-key: ${{ secrets.CROSS_REPO_APP_PRIVATE_KEY }}
+          owner: oasdiff
+          repositories: oasdiff-service
+
+      - name: Checkout oasdiff-service
+        uses: actions/checkout@v6
+        with:
+          repository: oasdiff/oasdiff-service
+          token: ${{ steps.app-token.outputs.token }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Bump go.mod
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          for i in 1 2 3 4 5; do
+            go get "github.com/oasdiff/oasdiff@${TAG}" && break
+            echo "Retry $i: waiting 60s for module proxy..."
+            sleep 60
+          done
+          go mod tidy
+
+      - name: Commit and push
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "bump/oasdiff-${TAG}"
+          git add go.mod go.sum
+          git commit -m "bump: oasdiff ${TAG}"
+          git push origin "bump/oasdiff-${TAG}"
+
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh pr create \
+            --repo oasdiff/oasdiff-service \
+            --base main \
+            --head "bump/oasdiff-${TAG}" \
+            --title "bump: oasdiff ${TAG}" \
+            --body "Automated version bump triggered by [oasdiff ${TAG}](https://github.com/oasdiff/oasdiff/releases/tag/${TAG})."
+
+  bump-action:
+    needs: wait-for-docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.CROSS_REPO_APP_ID }}
+          private-key: ${{ secrets.CROSS_REPO_APP_PRIVATE_KEY }}
+          owner: oasdiff
+          repositories: oasdiff-action
+
+      - name: Checkout oasdiff-action
+        uses: actions/checkout@v6
+        with:
+          repository: oasdiff/oasdiff-action
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Compute action version and bump files
+        id: versions
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          # Get latest action tag
+          LATEST_ACTION_TAG=$(gh api repos/oasdiff/oasdiff-action/tags --jq '.[0].name')
+          echo "Latest action tag: ${LATEST_ACTION_TAG}"
+
+          # Extract patch number: v0.0.40-beta.3 -> 40
+          CURRENT_PATCH=$(echo "${LATEST_ACTION_TAG}" | sed 's/^v0\.0\.\([0-9]*\).*/\1/')
+          NEW_PATCH=$((CURRENT_PATCH + 1))
+
+          # Extract beta suffix from oasdiff tag if present
+          if echo "${TAG}" | grep -qE 'beta\.[0-9]+'; then
+            BETA_SUFFIX=$(echo "${TAG}" | grep -oE 'beta\.[0-9]+')
+            NEW_ACTION_VERSION="v0.0.${NEW_PATCH}-${BETA_SUFFIX}"
+          else
+            NEW_ACTION_VERSION="v0.0.${NEW_PATCH}"
+          fi
+          echo "New action version: ${NEW_ACTION_VERSION}"
+          echo "action_version=${NEW_ACTION_VERSION}" >> "$GITHUB_OUTPUT"
+
+          # Bump Dockerfiles
+          for f in breaking/Dockerfile changelog/Dockerfile diff/Dockerfile pr-comment/Dockerfile; do
+            sed -i "s|FROM tufin/oasdiff:.*|FROM tufin/oasdiff:${TAG}|" "$f"
+          done
+
+          # Bump README action version references
+          OLD_VERSION=$(echo "${LATEST_ACTION_TAG}" | sed 's/[.[\*^$()+?{|\\]/\\&/g')
+          sed -i "s|@${OLD_VERSION}|@${NEW_ACTION_VERSION}|g" README.md
+
+      - name: Commit, push, and create PR
+        env:
+          TAG: ${{ github.ref_name }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ACTION_VERSION: ${{ steps.versions.outputs.action_version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "bump/oasdiff-${TAG}"
+          git add breaking/Dockerfile changelog/Dockerfile diff/Dockerfile pr-comment/Dockerfile README.md
+          git commit -m "bump: oasdiff ${TAG}"
+          git push origin "bump/oasdiff-${TAG}"
+          gh pr create \
+            --repo oasdiff/oasdiff-action \
+            --base main \
+            --head "bump/oasdiff-${TAG}" \
+            --title "bump: oasdiff ${TAG}" \
+            --body "Automated version bump triggered by [oasdiff ${TAG}](https://github.com/oasdiff/oasdiff/releases/tag/${TAG}).
+
+          ACTION_VERSION=${ACTION_VERSION}"
