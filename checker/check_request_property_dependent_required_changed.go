@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"strings"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -35,42 +37,10 @@ func RequestPropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operati
 				if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DependentRequiredDiff != nil {
 					depReqDiff := mediaTypeDiff.SchemaDiff.DependentRequiredDiff
 					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "dependentRequired")
-					fromMap, _ := depReqDiff.From.(map[string][]string)
-					toMap, _ := depReqDiff.To.(map[string][]string)
-					if len(fromMap) == 0 {
-						result = append(result, NewApiChange(
-							RequestBodyDependentRequiredAddedId,
-							config,
-							[]any{depReqDiff.To},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-					} else if len(toMap) == 0 {
-						result = append(result, NewApiChange(
-							RequestBodyDependentRequiredRemovedId,
-							config,
-							[]any{depReqDiff.From},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-					} else {
-						result = append(result, NewApiChange(
-							RequestBodyDependentRequiredChangedId,
-							config,
-							[]any{depReqDiff.From, depReqDiff.To},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
+					result = append(result, requestBodyDependentRequiredChanges(
+						depReqDiff, config, operationsSources, operationItem, operation, path,
+						baseSource, revisionSource, mediaTypeDetails,
+					)...)
 				}
 
 				CheckModifiedPropertiesDiff(
@@ -83,45 +53,124 @@ func RequestPropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operati
 						depReqDiff := propertyDiff.DependentRequiredDiff
 						propName := propertyFullName(propertyPath, propertyName)
 						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "dependentRequired")
-						fromMap, _ := depReqDiff.From.(map[string][]string)
-						toMap, _ := depReqDiff.To.(map[string][]string)
-						if len(fromMap) == 0 {
-							result = append(result, NewApiChange(
-								RequestPropertyDependentRequiredAddedId,
-								config,
-								[]any{propName, depReqDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-						} else if len(toMap) == 0 {
-							result = append(result, NewApiChange(
-								RequestPropertyDependentRequiredRemovedId,
-								config,
-								[]any{propName, depReqDiff.From},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestPropertyDependentRequiredChangedId,
-								config,
-								[]any{propName, depReqDiff.From, depReqDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
+						result = append(result, requestPropertyDependentRequiredChanges(
+							depReqDiff, config, operationsSources, operationItem, operation, path,
+							propName, propBaseSource, propRevisionSource, mediaTypeDetails,
+						)...)
 					})
 			}
 		}
 	}
+	return result
+}
+
+func requestBodyDependentRequiredChanges(
+	depReqDiff *diff.DependentRequiredDiff,
+	config *Config,
+	operationsSources *diff.OperationsSourcesMap,
+	operationItem *diff.MethodDiff,
+	operation string,
+	path string,
+	baseSource *Source,
+	revisionSource *Source,
+	mediaTypeDetails string,
+) Changes {
+	result := make(Changes, 0)
+
+	for key, values := range depReqDiff.Added {
+		result = append(result, NewApiChange(
+			RequestBodyDependentRequiredAddedId,
+			config,
+			[]any{key, strings.Join(values, ", ")},
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
+	}
+
+	for key, values := range depReqDiff.Deleted {
+		result = append(result, NewApiChange(
+			RequestBodyDependentRequiredRemovedId,
+			config,
+			[]any{key, strings.Join(values, ", ")},
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
+	}
+
+	for key, stringsDiff := range depReqDiff.Modified {
+		result = append(result, NewApiChange(
+			RequestBodyDependentRequiredChangedId,
+			config,
+			[]any{key, formatDependentRequiredModification(stringsDiff)},
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+	}
+
+	return result
+}
+
+func requestPropertyDependentRequiredChanges(
+	depReqDiff *diff.DependentRequiredDiff,
+	config *Config,
+	operationsSources *diff.OperationsSourcesMap,
+	operationItem *diff.MethodDiff,
+	operation string,
+	path string,
+	propName string,
+	baseSource *Source,
+	revisionSource *Source,
+	mediaTypeDetails string,
+) Changes {
+	result := make(Changes, 0)
+
+	for key, values := range depReqDiff.Added {
+		result = append(result, NewApiChange(
+			RequestPropertyDependentRequiredAddedId,
+			config,
+			[]any{propName, key, strings.Join(values, ", ")},
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
+	}
+
+	for key, values := range depReqDiff.Deleted {
+		result = append(result, NewApiChange(
+			RequestPropertyDependentRequiredRemovedId,
+			config,
+			[]any{propName, key, strings.Join(values, ", ")},
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
+	}
+
+	for key, stringsDiff := range depReqDiff.Modified {
+		result = append(result, NewApiChange(
+			RequestPropertyDependentRequiredChangedId,
+			config,
+			[]any{propName, key, formatDependentRequiredModification(stringsDiff)},
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+	}
+
 	return result
 }

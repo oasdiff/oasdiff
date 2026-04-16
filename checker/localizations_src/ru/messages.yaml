@@ -774,18 +774,18 @@ response-property-min-contains-increased-description: response property minConta
 response-property-min-contains-decreased-description: response property minContains decreased
 response-property-max-contains-increased-description: response property maxContains increased
 response-property-max-contains-decreased-description: response property maxContains decreased
-request-body-dependent-required-added: "the request body dependentRequired %s was added"
-request-body-dependent-required-removed: "the request body dependentRequired %s was removed"
-request-body-dependent-required-changed: "the request body dependentRequired changed from %s to %s"
-request-property-dependent-required-added: "the %s request property dependentRequired %s was added"
-request-property-dependent-required-removed: "the %s request property dependentRequired %s was removed"
-request-property-dependent-required-changed: "the %s request property dependentRequired changed from %s to %s"
-response-body-dependent-required-added: "the response body dependentRequired %s was added for the status %s"
-response-body-dependent-required-removed: "the response body dependentRequired %s was removed for the status %s"
-response-body-dependent-required-changed: "the response body dependentRequired changed from %s to %s for the status %s"
-response-property-dependent-required-added: "the %s response property dependentRequired %s was added for the status %s"
-response-property-dependent-required-removed: "the %s response property dependentRequired %s was removed for the status %s"
-response-property-dependent-required-changed: "the %s response property dependentRequired changed from %s to %s for the status %s"
+request-body-dependent-required-added: "the request body dependentRequired was added: when %s is present, %s are required"
+request-body-dependent-required-removed: "the request body dependentRequired was removed: when %s was present, %s were required"
+request-body-dependent-required-changed: "the request body dependentRequired for %s was updated: %s"
+request-property-dependent-required-added: "the %s request property dependentRequired was added: when %s is present, %s are required"
+request-property-dependent-required-removed: "the %s request property dependentRequired was removed: when %s was present, %s were required"
+request-property-dependent-required-changed: "the %s request property dependentRequired for %s was updated: %s"
+response-body-dependent-required-added: "the response body dependentRequired was added for the status %s: when %s is present, %s are required"
+response-body-dependent-required-removed: "the response body dependentRequired was removed for the status %s: when %s was present, %s were required"
+response-body-dependent-required-changed: "the response body dependentRequired for %s was updated for the status %s: %s"
+response-property-dependent-required-added: "the %s response property dependentRequired was added for the status %s: when %s is present, %s are required"
+response-property-dependent-required-removed: "the %s response property dependentRequired was removed for the status %s: when %s was present, %s were required"
+response-property-dependent-required-changed: "the %s response property dependentRequired for %s was updated for the status %s: %s"
 request-body-dependent-required-added-description: request body dependentRequired added
 request-body-dependent-required-removed-description: request body dependentRequired removed
 request-body-dependent-required-changed-description: request body dependentRequired changed

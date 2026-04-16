@@ -67,7 +67,7 @@ type SchemaDiff struct {
 	IfDiff                           *SchemaDiff      `json:"if,omitempty" yaml:"if,omitempty"`
 	ThenDiff                         *SchemaDiff      `json:"then,omitempty" yaml:"then,omitempty"`
 	ElseDiff                         *SchemaDiff      `json:"else,omitempty" yaml:"else,omitempty"`
-	DependentRequiredDiff            *ValueDiff       `json:"dependentRequired,omitempty" yaml:"dependentRequired,omitempty"`
+	DependentRequiredDiff            *DependentRequiredDiff `json:"dependentRequired,omitempty" yaml:"dependentRequired,omitempty"`
 	SchemaIDDiff                     *ValueDiff       `json:"$id,omitempty" yaml:"$id,omitempty"`
 	AnchorDiff                       *ValueDiff       `json:"$anchor,omitempty" yaml:"$anchor,omitempty"`
 	DynamicRefDiff                   *ValueDiff       `json:"$dynamicRef,omitempty" yaml:"$dynamicRef,omitempty"`
@@ -276,7 +276,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	if err != nil {
 		return nil, err
 	}
-	result.DependentRequiredDiff = getValueDiff(value1.DependentRequired, value2.DependentRequired)
+	result.DependentRequiredDiff = getDependentRequiredDiff(value1.DependentRequired, value2.DependentRequired)
 	result.SchemaIDDiff = getValueDiff(value1.SchemaID, value2.SchemaID)
 	result.AnchorDiff = getValueDiff(value1.Anchor, value2.Anchor)
 	result.DynamicRefDiff = getValueDiff(value1.DynamicRef, value2.DynamicRef)
