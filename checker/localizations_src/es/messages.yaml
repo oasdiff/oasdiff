@@ -771,30 +771,30 @@ response-property-min-contains-increased-description: response property minConta
 response-property-min-contains-decreased-description: response property minContains decreased
 response-property-max-contains-increased-description: response property maxContains increased
 response-property-max-contains-decreased-description: response property maxContains decreased
-request-body-dependent-required-added: "the request body dependentRequired %s was added"
-request-body-dependent-required-removed: "the request body dependentRequired %s was removed"
-request-body-dependent-required-changed: "the request body dependentRequired changed from %s to %s"
-request-property-dependent-required-added: "the %s request property dependentRequired %s was added"
-request-property-dependent-required-removed: "the %s request property dependentRequired %s was removed"
-request-property-dependent-required-changed: "the %s request property dependentRequired changed from %s to %s"
-response-body-dependent-required-added: "the response body dependentRequired %s was added for the status %s"
-response-body-dependent-required-removed: "the response body dependentRequired %s was removed for the status %s"
-response-body-dependent-required-changed: "the response body dependentRequired changed from %s to %s for the status %s"
-response-property-dependent-required-added: "the %s response property dependentRequired %s was added for the status %s"
-response-property-dependent-required-removed: "the %s response property dependentRequired %s was removed for the status %s"
-response-property-dependent-required-changed: "the %s response property dependentRequired changed from %s to %s for the status %s"
-request-body-dependent-required-added-description: request body dependentRequired added
-request-body-dependent-required-removed-description: request body dependentRequired removed
-request-body-dependent-required-changed-description: request body dependentRequired changed
-request-property-dependent-required-added-description: request property dependentRequired added
-request-property-dependent-required-removed-description: request property dependentRequired removed
-request-property-dependent-required-changed-description: request property dependentRequired changed
-response-body-dependent-required-added-description: response body dependentRequired added
-response-body-dependent-required-removed-description: response body dependentRequired removed
-response-body-dependent-required-changed-description: response body dependentRequired changed
-response-property-dependent-required-added-description: response property dependentRequired added
-response-property-dependent-required-removed-description: response property dependentRequired removed
-response-property-dependent-required-changed-description: response property dependentRequired changed
+request-body-dependent-required-added: "se agregó dependentRequired al cuerpo de solicitud: cuando %s está presente, %s son requeridos"
+request-body-dependent-required-removed: "se eliminó dependentRequired del cuerpo de solicitud: cuando %s estaba presente, %s eran requeridos"
+request-body-dependent-required-changed: "se actualizó dependentRequired del cuerpo de solicitud para %s: %s"
+request-property-dependent-required-added: "se agregó dependentRequired a la propiedad de solicitud %s: cuando %s está presente, %s son requeridos"
+request-property-dependent-required-removed: "se eliminó dependentRequired de la propiedad de solicitud %s: cuando %s estaba presente, %s eran requeridos"
+request-property-dependent-required-changed: "se actualizó dependentRequired de la propiedad de solicitud %s para %s: %s"
+response-body-dependent-required-added: "se agregó dependentRequired al cuerpo de respuesta para el estado %s: cuando %s está presente, %s son requeridos"
+response-body-dependent-required-removed: "se eliminó dependentRequired del cuerpo de respuesta para el estado %s: cuando %s estaba presente, %s eran requeridos"
+response-body-dependent-required-changed: "se actualizó dependentRequired del cuerpo de respuesta para %s para el estado %s: %s"
+response-property-dependent-required-added: "se agregó dependentRequired a la propiedad de respuesta %s para el estado %s: cuando %s está presente, %s son requeridos"
+response-property-dependent-required-removed: "se eliminó dependentRequired de la propiedad de respuesta %s para el estado %s: cuando %s estaba presente, %s eran requeridos"
+response-property-dependent-required-changed: "se actualizó dependentRequired de la propiedad de respuesta %s para %s para el estado %s: %s"
+request-body-dependent-required-added-description: dependentRequired del cuerpo de solicitud agregado
+request-body-dependent-required-removed-description: dependentRequired del cuerpo de solicitud eliminado
+request-body-dependent-required-changed-description: dependentRequired del cuerpo de solicitud cambiado
+request-property-dependent-required-added-description: dependentRequired de propiedad de solicitud agregado
+request-property-dependent-required-removed-description: dependentRequired de propiedad de solicitud eliminado
+request-property-dependent-required-changed-description: dependentRequired de propiedad de solicitud cambiado
+response-body-dependent-required-added-description: dependentRequired del cuerpo de respuesta agregado
+response-body-dependent-required-removed-description: dependentRequired del cuerpo de respuesta eliminado
+response-body-dependent-required-changed-description: dependentRequired del cuerpo de respuesta cambiado
+response-property-dependent-required-added-description: dependentRequired de propiedad de respuesta agregado
+response-property-dependent-required-removed-description: dependentRequired de propiedad de respuesta eliminado
+response-property-dependent-required-changed-description: dependentRequired de propiedad de respuesta cambiado
 request-body-dependent-schema-added: "added the dependent schema %s to the request body"
 request-body-dependent-schema-removed: "removed the dependent schema %s from the request body"
 request-property-dependent-schema-added: "added the dependent schema %s to the %s request property"
