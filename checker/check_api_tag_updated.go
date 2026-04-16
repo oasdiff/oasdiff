@@ -27,9 +27,11 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 				continue
 			}
 
-			baseSource, revisionSource := OperationFieldSources(operationsSources, operationItem, "tags")
-
 			for _, tag := range operationItem.TagsDiff.Deleted {
+				var baseSource *Source
+				if operationItem.Base != nil && operationItem.Base.Origin != nil {
+					baseSource = NewSourceFromSequenceItem(operationsSources, operationItem.Base, operationItem.Base.Origin, "tags", tag)
+				}
 				result = append(result, NewApiChange(
 					APITagRemovedId,
 					config,
@@ -39,10 +41,14 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				).WithSources(baseSource, nil))
 			}
 
 			for _, tag := range operationItem.TagsDiff.Added {
+				var revisionSource *Source
+				if operationItem.Revision != nil && operationItem.Revision.Origin != nil {
+					revisionSource = NewSourceFromSequenceItem(operationsSources, operationItem.Revision, operationItem.Revision.Origin, "tags", tag)
+				}
 				result = append(result, NewApiChange(
 					APITagAddedId,
 					config,
@@ -52,7 +58,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				).WithSources(nil, revisionSource))
 			}
 		}
 	}
