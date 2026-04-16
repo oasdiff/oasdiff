@@ -35,8 +35,9 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 				}
 
 				if mediaTypeDiff.SchemaDiff.PatternPropertiesDiff != nil {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "patternProperties")
-					for _, pattern := range mediaTypeDiff.SchemaDiff.PatternPropertiesDiff.Added {
+					patPropsDiff := mediaTypeDiff.SchemaDiff.PatternPropertiesDiff
+					for _, pattern := range patPropsDiff.Added {
+						revisionSource := SchemaMapItemSource(operationsSources, operationItem.Revision, patPropsDiff.Revision, pattern)
 						result = append(result, NewApiChange(
 							RequestBodyPatternPropertyAddedId,
 							config,
@@ -48,7 +49,8 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 							path,
 						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 					}
-					for _, pattern := range mediaTypeDiff.SchemaDiff.PatternPropertiesDiff.Deleted {
+					for _, pattern := range patPropsDiff.Deleted {
+						baseSource := SchemaMapItemSource(operationsSources, operationItem.Base, patPropsDiff.Base, pattern)
 						result = append(result, NewApiChange(
 							RequestBodyPatternPropertyRemovedId,
 							config,
@@ -69,8 +71,9 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 							return
 						}
 						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "patternProperties")
-						for _, pattern := range propertyDiff.PatternPropertiesDiff.Added {
+						patPropsDiff := propertyDiff.PatternPropertiesDiff
+						for _, pattern := range patPropsDiff.Added {
+							revisionSource := SchemaMapItemSource(operationsSources, operationItem.Revision, patPropsDiff.Revision, pattern)
 							result = append(result, NewApiChange(
 								RequestPropertyPatternPropertyAddedId,
 								config,
@@ -80,9 +83,10 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
+							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 						}
-						for _, pattern := range propertyDiff.PatternPropertiesDiff.Deleted {
+						for _, pattern := range patPropsDiff.Deleted {
+							baseSource := SchemaMapItemSource(operationsSources, operationItem.Base, patPropsDiff.Base, pattern)
 							result = append(result, NewApiChange(
 								RequestPropertyPatternPropertyRemovedId,
 								config,
@@ -92,7 +96,7 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
 						}
 					})
 			}
