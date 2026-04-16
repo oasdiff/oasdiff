@@ -35,8 +35,9 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 				}
 
 				if mediaTypeDiff.SchemaDiff.DependentSchemasDiff != nil {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "dependentSchemas")
-					for _, name := range mediaTypeDiff.SchemaDiff.DependentSchemasDiff.Added {
+					depSchemasDiff := mediaTypeDiff.SchemaDiff.DependentSchemasDiff
+					for _, name := range depSchemasDiff.Added {
+						revisionSource := SchemaMapItemSource(operationsSources, operationItem.Revision, depSchemasDiff.Revision, name)
 						result = append(result, NewApiChange(
 							RequestBodyDependentSchemaAddedId,
 							config,
@@ -48,7 +49,8 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 							path,
 						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 					}
-					for _, name := range mediaTypeDiff.SchemaDiff.DependentSchemasDiff.Deleted {
+					for _, name := range depSchemasDiff.Deleted {
+						baseSource := SchemaMapItemSource(operationsSources, operationItem.Base, depSchemasDiff.Base, name)
 						result = append(result, NewApiChange(
 							RequestBodyDependentSchemaRemovedId,
 							config,
@@ -69,8 +71,9 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 							return
 						}
 						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "dependentSchemas")
-						for _, name := range propertyDiff.DependentSchemasDiff.Added {
+						depSchemasDiff := propertyDiff.DependentSchemasDiff
+						for _, name := range depSchemasDiff.Added {
+							revisionSource := SchemaMapItemSource(operationsSources, operationItem.Revision, depSchemasDiff.Revision, name)
 							result = append(result, NewApiChange(
 								RequestPropertyDependentSchemaAddedId,
 								config,
@@ -80,9 +83,10 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
+							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
 						}
-						for _, name := range propertyDiff.DependentSchemasDiff.Deleted {
+						for _, name := range depSchemasDiff.Deleted {
+							baseSource := SchemaMapItemSource(operationsSources, operationItem.Base, depSchemasDiff.Base, name)
 							result = append(result, NewApiChange(
 								RequestPropertyDependentSchemaRemovedId,
 								config,
@@ -92,7 +96,7 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 								operationItem.Revision,
 								operation,
 								path,
-							).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
+							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
 						}
 					})
 			}

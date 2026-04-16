@@ -267,6 +267,20 @@ func SchemaAddedItemSources(operationsSources *diff.OperationsSourcesMap, operat
 	return nil, revisionSource
 }
 
+// SchemaMapItemSource returns the source location for a named schema within a Schemas map
+// (e.g., a specific key in dependentSchemas, patternProperties, or properties).
+// It uses the schema's own Origin rather than the parent field's origin.
+func SchemaMapItemSource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, schemas openapi3.Schemas, name string) *Source {
+	if schemas == nil {
+		return nil
+	}
+	schemaRef, ok := schemas[name]
+	if !ok || schemaRef == nil || schemaRef.Value == nil || schemaRef.Value.Origin == nil {
+		return nil
+	}
+	return NewSourceFromOrigin(operationsSources, operation, schemaRef.Value.Origin)
+}
+
 // SubschemaSources returns source locations for a specific subschema within an allOf/oneOf/anyOf array.
 // For added subschemas, baseIndex should be -1; for deleted subschemas, revisionIndex should be -1.
 func SubschemaSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, baseIndex, revisionIndex int) (*Source, *Source) {
