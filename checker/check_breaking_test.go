@@ -652,7 +652,7 @@ func TestBreaking_RequestPropertyAnyOfRemoved(t *testing.T) {
 
 	require.Equal(t, checker.RequestPropertyAnyOfRemovedId, errs[1].GetId())
 	require.Equal(t, checker.ERR, errs[1].GetLevel())
-	require.Equal(t, "removed `#/components/schemas/Breed3` from the `/anyOf[#/components/schemas/Dog]/breed` request property `anyOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed `#/components/schemas/Breed3` from the `anyOf[#/components/schemas/Dog]/breed` request property `anyOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: removing 'oneOf' schema from the request body or request body property is breaking
@@ -673,7 +673,7 @@ func TestBreaking_RequestPropertyOneOfRemoved(t *testing.T) {
 
 	require.Equal(t, checker.RequestPropertyOneOfRemovedId, errs[1].GetId())
 	require.Equal(t, checker.ERR, errs[1].GetLevel())
-	require.Equal(t, "removed `#/components/schemas/Breed3` from the `/oneOf[#/components/schemas/Dog]/breed` request property `oneOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed `#/components/schemas/Breed3` from the `oneOf[#/components/schemas/Dog]/breed` request property `oneOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: adding 'allOf' subschema to the request body or request body property is breaking
@@ -695,7 +695,7 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 
 	require.Equal(t, checker.RequestPropertyAllOfAddedId, errs[1].GetId())
 	require.Equal(t, checker.ERR, errs[1].GetLevel())
-	require.Equal(t, "added `#/components/schemas/Breed3` to the `/allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: removing 'allOf' subschema from the request body or request body property is breaking with warn
@@ -717,5 +717,5 @@ func TestBreaking_RequestPropertyAllOfRemoved(t *testing.T) {
 
 	require.Equal(t, checker.RequestPropertyAllOfRemovedId, errs[1].GetId())
 	require.Equal(t, checker.WARN, errs[1].GetLevel())
-	require.Equal(t, "removed `#/components/schemas/Breed3` from the `/allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed `#/components/schemas/Breed3` from the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
