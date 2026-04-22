@@ -103,8 +103,14 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityAddedCheckId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionRemove),
-		// Stability Descreased Check is run as part of CheckBackwardCompatibility
+		// Stability Decreased/Increased Checks are run as part of CheckBackwardCompatibility
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, LocationNone, ActionDecrease),
+		newBackwardCompatibilityRule(APIStabilityIncreasedId, ERR, nil, DirectionNone, LocationNone, ActionIncrease),
+		// Property-level stability checks
+		newBackwardCompatibilityRule(RequestPropertyStabilityDecreasedId, ERR, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityIncreasedId, ERR, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityDecreasedId, ERR, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityIncreasedId, ERR, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
 		// APIDeprecationCheck
 		newBackwardCompatibilityRule(EndpointDeprecatedId, INFO, APIDeprecationCheck, DirectionNone, LocationNone, ActionChange),
 		newBackwardCompatibilityRule(EndpointReactivatedId, INFO, APIDeprecationCheck, DirectionNone, LocationNone, ActionChange),
@@ -472,9 +478,9 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesWidenedId, INFO, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionAdd),
 		newBackwardCompatibilityRule(RequestParameterPropertyListOfTypesNarrowedId, ERR, RequestParameterListOfTypesChangedCheck, DirectionRequest, LocationParameters, ActionRemove),
 		// APIDraftCheck
-		newBackwardCompatibilityRule(EndpointDraftId, INFO, APIDraftCheck, DirectionNone, LocationNone, ActionChange),
-		newBackwardCompatibilityRule(RequestPropertyDraftId, INFO, RequestPropertyDraftCheck, DirectionRequest, LocationProperties, ActionChange),
-		newBackwardCompatibilityRule(ResponsePropertyDraftId, INFO, ResponsePropertyDraftCheck, DirectionResponse, LocationProperties, ActionChange),
+		//	newBackwardCompatibilityRule(EndpointDraftId, INFO, APIDraftCheck, DirectionNone, LocationNone, ActionChange),
+		//	newBackwardCompatibilityRule(RequestPropertyDraftId, INFO, RequestPropertyDraftCheck, DirectionRequest, LocationProperties, ActionChange),
+		//	newBackwardCompatibilityRule(ResponsePropertyDraftId, INFO, ResponsePropertyDraftCheck, DirectionResponse, LocationProperties, ActionChange),
 	}
 }
 

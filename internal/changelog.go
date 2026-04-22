@@ -57,13 +57,8 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level) (bool, *R
 	}
 
 	bcConfig := checker.NewConfig(checker.GetAllChecks()).WithOptionalChecks(flags.getIncludeChecks()).WithSeverityLevels(severityLevels).WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()).WithAttributes(flags.getAttributes())
-	if levels := flags.getIncludeStabilityLevels(); len(levels) > 0 {
-		bcConfig.IncludeStabilityLevels = make(map[string]bool)
-		for _, level := range levels {
-			if level != "" {
-				bcConfig.IncludeStabilityLevels[level] = true
-			}
-		}
+	if level := flags.getStabilityLevel(); level != "" {
+		bcConfig.StabilityLevel = checker.ParseStabilityLevel(level)
 	}
 
 	errs, returnErr := filterIgnored(

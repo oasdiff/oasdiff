@@ -3,12 +3,12 @@ package checker
 import "log"
 
 type Config struct {
-	Checks                 BackwardCompatibilityChecks
-	MinSunsetBetaDays      uint
-	MinSunsetStableDays    uint
-	LogLevels              map[string]Level
-	Attributes             []string
-	IncludeStabilityLevels map[string]bool
+	Checks              BackwardCompatibilityChecks
+	MinSunsetBetaDays   uint
+	MinSunsetStableDays uint
+	LogLevels           map[string]Level
+	Attributes          []string
+	StabilityLevel      StabilityLevel
 }
 
 const (
@@ -23,6 +23,7 @@ func NewConfig(checks BackwardCompatibilityChecks) *Config {
 		LogLevels:           GetCheckLevels(),
 		MinSunsetBetaDays:   DefaultBetaDeprecationDays,
 		MinSunsetStableDays: DefaultStableDeprecationDays,
+		StabilityLevel:      DefaultStabilityLevel,
 	}
 }
 

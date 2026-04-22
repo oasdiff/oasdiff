@@ -150,6 +150,6 @@ func (flags *Flags) getTemplate() string {
 	return flags.v.GetString("template")
 }
 
-func (flags *Flags) getIncludeStabilityLevels() []string {
-	return fixViperStringSlice(flags.v.GetStringSlice("include-stability-levels"))
+func (flags *Flags) getStabilityLevel() string {
+	return flags.v.GetString("stability-level")
 }

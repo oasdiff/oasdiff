@@ -20,6 +20,11 @@ request-property-pattern-generalized: "changed the pattern of the request proper
 api-deprecated-sunset-parse: "failed to parse sunset date: %v"
 api-path-sunset-parse: "failed to parse sunset date: %v"
 api-stability-decreased: "endpoint stability level decreased from %s to %s"
+api-stability-increased: "endpoint stability level increased from %s to %s"
+request-property-stability-decreased: "request property %s stability level decreased from %s to %s"
+request-property-stability-increased: "request property %s stability level increased from %s to %s"
+response-property-stability-decreased: "response property %s stability level decreased from %s to %s"
+response-property-stability-increased: "response property %s stability level increased from %s to %s"
 api-invalid-stability-level: "failed to parse stability level: %v"
 api-deprecated-sunset-missing: "sunset date is missing for deprecated API"
 api-sunset-date-too-small: "sunset date %s is too small, must be at least %s days from now"
@@ -216,6 +221,11 @@ api-global-security-scope-removed: the security scope %s was removed from the gl
 api-global-security-scope-added: the security scope %s was added to the global security scheme %s
 api-security-scope-removed: the security scope %s was removed from the endpoint's security scheme %s
 api-stability-decreased-description: endpoint stability level decreased
+api-stability-increased-description: endpoint stability level increased
+request-property-stability-decreased-description: request property stability level decreased
+request-property-stability-increased-description: request property stability level increased
+response-property-stability-decreased-description: response property stability level decreased
+response-property-stability-increased-description: response property stability level increased
 api-security-scope-added: the security scope %s was added to the endpoint's security scheme %s
 api-security-component-type-changed: the component security scheme %s type changed from %s to %s
 api-security-component-oauth-url-changed: the component security scheme %s oauth url changed from %s to %s

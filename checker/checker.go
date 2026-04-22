@@ -12,6 +12,7 @@ import (
 
 const (
 	APIStabilityDecreasedId = "api-stability-decreased"
+	APIStabilityIncreasedId = "api-stability-increased"
 )
 
 // CheckBackwardCompatibility runs the checks with level WARN and ERR
@@ -63,7 +64,7 @@ func removeDraftAndAlphaOperationsDiffs(config *Config, diffReport *diff.Diff, r
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
 				continue
 			}
-			if !(baseStability == STABILITY_DRAFT || baseStability == STABILITY_ALPHA) || (config != nil && config.IncludeStabilityLevels[baseStability]) {
+			if config != nil && config.StabilityLevel.IsIncluded(baseStability) {
 				ignore = false
 				break
 			}
@@ -89,14 +90,14 @@ func removeDraftAndAlphaOperationsDiffs(config *Config, diffReport *diff.Diff, r
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
 				continue
 			}
-			if !(baseStability == STABILITY_DRAFT || baseStability == STABILITY_ALPHA) || (config != nil && config.IncludeStabilityLevels[baseStability]) {
+			if config != nil && config.StabilityLevel.IsIncluded(baseStability) {
 				pathDiff.OperationsDiff.Deleted[iOperation] = operation
 				iOperation++
 			}
 		}
 		pathDiff.OperationsDiff.Deleted = pathDiff.OperationsDiff.Deleted[:iOperation]
 
-		// remove draft and alpha operations diffs modified
+		// Always check for invalid stability levels in modified operations
 		for operation, operationItem := range pathDiff.OperationsDiff.Modified {
 			baseStability, err := getStabilityLevel(pathDiff.Base.GetOperation(operation).Extensions)
 			if err != nil {
@@ -108,27 +109,83 @@ func removeDraftAndAlphaOperationsDiffs(config *Config, diffReport *diff.Diff, r
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Revision, operationsSources, operation, path, err))
 				continue
 			}
-			if baseStability == STABILITY_STABLE && revisionStability != STABILITY_STABLE ||
-				baseStability == STABILITY_BETA && revisionStability != STABILITY_BETA && revisionStability != STABILITY_STABLE ||
-				baseStability == STABILITY_ALPHA && revisionStability != STABILITY_ALPHA && revisionStability != STABILITY_BETA && revisionStability != STABILITY_STABLE ||
-				revisionStability == "" && baseStability != "" {
+
+			// Normalize: no x-stability-level is treated as implicit "stable"
+			baseLabel := baseStability
+			if baseLabel == "" {
+				baseLabel = STABILITY_STABLE
+			}
+			revisionLabel := revisionStability
+			if revisionLabel == "" {
+				revisionLabel = STABILITY_STABLE
+			}
+
+			baseLevel := ParseStabilityLevel(baseLabel)
+			revisionLevel := ParseStabilityLevel(revisionLabel)
+
+			// Default behavior (no flag): only detect stable→beta decrease
+			if baseLabel == STABILITY_STABLE && revisionLabel == STABILITY_BETA {
 				result = append(result, NewApiChange(
 					APIStabilityDecreasedId,
 					config,
-					[]any{baseStability, revisionStability},
+					[]any{baseLabel, revisionLabel},
 					"",
 					operationsSources,
 					operationItem.Revision,
 					operation,
 					path,
 				))
-
-				continue
 			}
-			if revisionStability == STABILITY_DRAFT || revisionStability == STABILITY_ALPHA {
-				if config == nil || !config.IncludeStabilityLevels[revisionStability] {
+
+			if config == nil || config.StabilityLevel == StabilityLevelNone {
+				// Default behavior: filter out draft and alpha operations
+				if revisionStability == STABILITY_DRAFT || revisionStability == STABILITY_ALPHA {
 					delete(pathDiff.OperationsDiff.Modified, operation)
 				}
+				continue
+			}
+
+			// With --stability-level flag: detect all stability changes at/above threshold
+			// (skip stable→beta since already reported above)
+			if revisionLevel < baseLevel && !(baseLabel == STABILITY_STABLE && revisionLabel == STABILITY_BETA) {
+				if config.StabilityLevel.IsIncluded(baseLabel) || config.StabilityLevel.IsIncluded(revisionLabel) {
+					result = append(result, NewApiChange(
+						APIStabilityDecreasedId,
+						config,
+						[]any{baseLabel, revisionLabel},
+						"",
+						operationsSources,
+						operationItem.Revision,
+						operation,
+						path,
+					))
+				}
+				continue
+			}
+			if revisionLevel > baseLevel {
+				// Stability increased (e.g., alpha→beta, draft→stable)
+				if config.StabilityLevel.IsIncluded(baseLabel) || config.StabilityLevel.IsIncluded(revisionLabel) {
+					result = append(result, NewApiChange(
+						APIStabilityIncreasedId,
+						config,
+						[]any{baseLabel, revisionLabel},
+						"",
+						operationsSources,
+						operationItem.Revision,
+						operation,
+						path,
+					))
+				}
+				continue
+			}
+			// Filter out operations below the configured stability threshold
+			// Use the higher of base/revision stability to decide inclusion
+			effectiveStability := baseStability
+			if revisionStability != "" && ParseStabilityLevel(revisionStability) < ParseStabilityLevel(effectiveStability) {
+				effectiveStability = revisionStability
+			}
+			if !config.StabilityLevel.IsIncluded(effectiveStability) {
+				delete(pathDiff.OperationsDiff.Modified, operation)
 			}
 		}
 	}
