@@ -95,7 +95,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 	require.ElementsMatch(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"/anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", []string{"string"}, "", []string{"number"}, "", "200"},
+			Args:        []any{"anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", []string{"string"}, "", []string{"number"}, "", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -104,7 +104,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"/anyOf[subschema #3: Rabbit]/", []string{"string"}, "", []string{"number"}, "", "200"},
+			Args:        []any{"anyOf[subschema #3: Rabbit]/", []string{"string"}, "", []string{"number"}, "", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -113,7 +113,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"/anyOf[subschema #4 -> subschema #5]/", []string{"string"}, "", []string{"number"}, "", "200"},
+			Args:        []any{"anyOf[subschema #4 -> subschema #5]/", []string{"string"}, "", []string{"number"}, "", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -159,7 +159,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"/additionalProperties/property1", []string{"integer"}, "", []string{"string"}, "", "200"},
+		Args:        []any{"additionalProperties/property1", []string{"integer"}, "", []string{"string"}, "", "200"},
 		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/value",

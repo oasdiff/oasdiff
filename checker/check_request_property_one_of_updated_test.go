@@ -34,7 +34,7 @@ func TestRequestPropertyOneOfAdded(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyOneOfAddedId,
-			Args:        []any{"#/components/schemas/Breed3", "/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{"#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -91,7 +91,7 @@ func TestRequestPropertyOneOfRemoved(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyOneOfRemovedId,
-			Args:        []any{"#/components/schemas/Breed3", "/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{"#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.ERR,
 			Operation:   "POST",
 			Path:        "/pets",

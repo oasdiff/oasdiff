@@ -33,7 +33,7 @@ func TestRequestDiscriminatorUpdatedCheckAdded(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyDiscriminatorAddedId,
-			Args:        []any{"/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{"oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -66,7 +66,7 @@ func TestRequestDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyDiscriminatorRemovedId,
-			Args:        []any{"/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{"oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -100,7 +100,7 @@ func TestRequestDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyDiscriminatorPropertyNameChangedId,
-			Args:        []any{"/oneOf[#/components/schemas/Dog]/breed", "name", "name2"},
+			Args:        []any{"oneOf[#/components/schemas/Dog]/breed", "name", "name2"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -143,7 +143,7 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyDiscriminatorMappingAddedId,
-			Args:        []any{[]string{"breed1Code"}, "/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{[]string{"breed1Code"}, "oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -152,7 +152,7 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyDiscriminatorMappingChangedId,
-			Args:        []any{"breed2", "#/components/schemas/Breed2", "#/components/schemas/Breed3", "/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{"breed2", "#/components/schemas/Breed2", "#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
@@ -161,7 +161,7 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyDiscriminatorMappingDeletedId,
-			Args:        []any{[]string{"breed1"}, "/oneOf[#/components/schemas/Dog]/breed"},
+			Args:        []any{[]string{"breed1"}, "oneOf[#/components/schemas/Dog]/breed"},
 			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/pets",
