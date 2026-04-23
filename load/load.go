@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -30,39 +31,46 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 // It runs "git show <ref>" to obtain the content and loads it via LoadFromDataWithPath so that
 // relative $refs are resolved against the spec's path.
 //
-// Relative $refs (e.g. "./schemas/pet.yaml") are resolved by kin-openapi into paths like
-// "origin/main:multi-file/schemas/pet.yaml". We install a ReadFromURIFunc so the loader
-// recognises that pattern and reads referenced files via "git show" too.
+// Relative $refs (e.g. "./schemas/pet.yaml") are resolved by kin-openapi; we install a
+// JoinFunc so the "<rev>:" prefix is preserved (the default path.Dir strips it), and a
+// ReadFromURIFunc so referenced files are read via "git show" too.
 func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, error) {
 	out, err := gitShow(gitRef)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
 	}
 
-	// gitPrefix is the "revision:" part of gitRef (e.g. "HEAD:", "origin/main:").
-	// When a spec lives at the repo root (no "/" in gitRef after the ":"), Go's URL
-	// resolution strips the prefix from relative $refs — e.g. "HEAD:openapi.yaml" +
-	// "./schemas/pet.yaml" → "schemas/pet.yaml" instead of "HEAD:schemas/pet.yaml".
-	// We capture the prefix here so we can restore it in ReadFromURIFunc.
-	gitPrefix := gitRef[:strings.Index(gitRef, ":")+1]
+	// Copy the loader so we can install custom resolvers without mutating the caller's
+	// instance. The shallow copy shares the unexported visitedDocuments cache, which is
+	// intentional: common $ref files are not fetched twice, and the unique gitRef-based
+	// URL keys prevent collisions between base and revision entries.
+	loaderCopy := *loader
 
-	// Copy the loader so we can install a custom ReadFromURIFunc without mutating the
-	// caller's instance. The shallow copy shares the unexported visitedDocuments cache,
-	// which is intentional: common $ref files are not fetched twice, and the unique
-	// gitRef-based URL keys prevent collisions between base and revision entries.
+	// JoinFunc preserves the "<rev>:" prefix when resolving relative $refs.
+	// Without this, path.Dir("origin/main:openapi.yaml") returns "origin" and
+	// "./schemas/pet.yaml" resolves to "origin/schemas/pet.yaml" instead of
+	// "origin/main:schemas/pet.yaml".
+	loaderCopy.JoinFunc = func(basePath, relativePath *url.URL) *url.URL {
+		if basePath == nil {
+			return relativePath
+		}
+		result := *basePath
+		base := basePath.Path
+		if i := strings.IndexByte(base, ':'); i >= 0 {
+			result.Path = base[:i+1] + path.Join(path.Dir(base[i+1:]), relativePath.Path)
+		} else {
+			result.Path = path.Join(path.Dir(base), relativePath.Path)
+		}
+		return &result
+	}
+
 	// kin-openapi calls ReadFromURIFunc before checking IsExternalRefsAllowed, so the
 	// caller's --allow-external-refs setting is still enforced for non-git refs via
 	// DefaultReadFromURI.
-	loaderCopy := *loader
 	loaderCopy.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		p := filepath.FromSlash(location.Path)
 		if isGitRevision(p) {
 			return gitShow(p)
-		}
-		// Relative path without the git prefix — happens when the spec is at the repo
-		// root and Go URL resolution drops the "revision:" prefix. Restore it.
-		if location.Scheme == "" && location.Host == "" {
-			return gitShow(gitPrefix + p)
 		}
 		return openapi3.DefaultReadFromURI(loader, location)
 	}
