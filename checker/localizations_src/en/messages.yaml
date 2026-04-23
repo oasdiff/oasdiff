@@ -70,6 +70,8 @@ request-parameter-became-optional: the %s request parameter %s became optional
 request-parameter-became-enum: the %s request parameter %s was restricted to a list of enum values
 request-parameter-enum-value-removed: removed the enum value %s from the %s request parameter %s
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
+request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
+request-parameter-property-enum-value-added: added the enum value %s to the property %s of the %s request parameter %s
 pattern-changed-warn-comment: "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')"
 pattern-added-error-comment: "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients"
 request-parameter-x-extensible-enum-value-removed: removed the x-extensible-enum value %s from the %s request parameter %s
@@ -447,6 +449,8 @@ request-parameter-default-value-changed-description: request parameter default v
 request-parameter-default-value-removed-description:  request parameter default value unset
 request-parameter-enum-value-added-description: request parameter enum value added
 request-parameter-enum-value-removed-description: request parameter enum value deleted
+request-parameter-property-enum-value-added-description: request parameter property enum value added
+request-parameter-property-enum-value-removed-description: request parameter property enum value removed
 request-parameter-max-decreased-description: request parameter max decreased
 request-parameter-max-increased-description: request parameter max increased
 request-parameter-max-items-decreased-description: request parameter max items decreased

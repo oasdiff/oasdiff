@@ -58,6 +58,8 @@ request-parameter-became-optional: o parâmetro de requisição do tipo %s e nom
 request-parameter-became-enum: o parâmetro de requisição do tipo %s e nome %s foi restrito a uma lista de valores enum
 request-parameter-enum-value-removed: valor %s do enum removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-enum-value-added: valor %s do enum adicionado ao parâmetro de requisição do tipo %s e nome %s
+request-parameter-property-enum-value-removed: valor %s do enum removido da propriedade %s do parâmetro de requisição do tipo %s e nome %s
+request-parameter-property-enum-value-added: valor %s do enum adicionado à propriedade %s do parâmetro de requisição do tipo %s e nome %s
 pattern-changed-warn-comment: "Este é um aviso porque é difícil analisar automaticamente se o novo padrão é um superconjunto do padrão anterior (por exemplo, alterado de '[0-9]+' para '[0-9]*')"
 pattern-added-error-comment: "Esta é uma alteração crítica porque adicionar uma restrição de padrão a um parâmetro anteriormente irrestrito rejeitará valores que eram aceitos anteriormente, quebrando clientes existentes"
 request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição do tipo %s e nome %s
@@ -439,6 +441,8 @@ request-parameter-default-value-changed-description: valor padrão do parâmetro
 request-parameter-default-value-removed-description: valor padrão do parâmetro da requisição removido
 request-parameter-enum-value-added-description: valor do enum do parâmetro da requisição adicionado
 request-parameter-enum-value-removed-description: valor do enum do parâmetro da requisição removido
+request-parameter-property-enum-value-added-description: valor do enum da propriedade do parâmetro da requisição adicionado
+request-parameter-property-enum-value-removed-description: valor do enum da propriedade do parâmetro da requisição removido
 request-parameter-max-decreased-description: valor máximo do parâmetro da requisição reduzido
 request-parameter-max-increased-description: valor máximo do parâmetro da requisição aumentado
 request-parameter-max-items-decreased-description: itens máximos do parâmetro da requisição reduzidos
