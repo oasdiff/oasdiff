@@ -105,12 +105,12 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, LocationSecurity, ActionRemove),
 		// Stability Decreased/Increased Checks are run as part of CheckBackwardCompatibility
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, LocationNone, ActionDecrease),
-		newBackwardCompatibilityRule(APIStabilityIncreasedId, ERR, nil, DirectionNone, LocationNone, ActionIncrease),
+		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, LocationNone, ActionIncrease),
 		// Property-level stability checks
-		newBackwardCompatibilityRule(RequestPropertyStabilityDecreasedId, ERR, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionDecrease),
-		newBackwardCompatibilityRule(RequestPropertyStabilityIncreasedId, ERR, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionIncrease),
-		newBackwardCompatibilityRule(ResponsePropertyStabilityDecreasedId, ERR, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
-		newBackwardCompatibilityRule(ResponsePropertyStabilityIncreasedId, ERR, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityDecreasedId, INFO, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityIncreasedId, INFO, RequestPropertyStabilityUpdatedCheck, DirectionRequest, LocationProperties, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityDecreasedId, INFO, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityIncreasedId, INFO, ResponsePropertyStabilityUpdatedCheck, DirectionResponse, LocationProperties, ActionIncrease),
 		// APIDeprecationCheck
 		newBackwardCompatibilityRule(EndpointDeprecatedId, INFO, APIDeprecationCheck, DirectionNone, LocationNone, ActionChange),
 		newBackwardCompatibilityRule(EndpointReactivatedId, INFO, APIDeprecationCheck, DirectionNone, LocationNone, ActionChange),
