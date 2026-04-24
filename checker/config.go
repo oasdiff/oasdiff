@@ -8,6 +8,7 @@ type Config struct {
 	MinSunsetStableDays uint
 	LogLevels           map[string]Level
 	Attributes          []string
+	StabilityLevel      StabilityLevel
 }
 
 const (
@@ -22,6 +23,7 @@ func NewConfig(checks BackwardCompatibilityChecks) *Config {
 		LogLevels:           GetCheckLevels(),
 		MinSunsetBetaDays:   DefaultBetaDeprecationDays,
 		MinSunsetStableDays: DefaultStableDeprecationDays,
+		StabilityLevel:      DefaultStabilityLevel,
 	}
 }
 

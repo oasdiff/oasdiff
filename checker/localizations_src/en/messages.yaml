@@ -20,23 +20,31 @@ request-property-pattern-generalized: "changed the pattern of the request proper
 api-deprecated-sunset-parse: "failed to parse sunset date: %v"
 api-path-sunset-parse: "failed to parse sunset date: %v"
 api-stability-decreased: "endpoint stability level decreased from %s to %s"
+api-stability-increased: "endpoint stability level increased from %s to %s"
+request-property-stability-decreased: "request property %s stability level decreased from %s to %s"
+request-property-stability-increased: "request property %s stability level increased from %s to %s"
+response-property-stability-decreased: "response property %s stability level decreased from %s to %s"
+response-property-stability-increased: "response property %s stability level increased from %s to %s"
 api-invalid-stability-level: "failed to parse stability level: %v"
 api-deprecated-sunset-missing: "sunset date is missing for deprecated API"
 api-sunset-date-too-small: "sunset date %s is too small, must be at least %s days from now"
 endpoint-added: endpoint added
 endpoint-deprecated: "endpoint deprecated"
 endpoint-deprecated-with-sunset: "endpoint deprecated with sunset date %s"
+endpoint-draft: "endpoint marked as draft"
 endpoint-reactivated: endpoint reactivated
 request-property-deprecated: "request property %s deprecated"
 request-property-deprecated-with-sunset: "request property %s deprecated with sunset date %s"
 request-property-deprecated-sunset-missing: "request property %s deprecated without sunset date"
 request-property-deprecated-sunset-invalid: "request property %s deprecated with invalid sunset date: %s"
+request-property-draft: "request property %s marked as draft"
 request-property-reactivated: "request property %s reactivated"
 request-property-sunset-date-too-small: "request property %s sunset date %s is too small, must be at least %s days from now"
 response-property-deprecated: "response property %s deprecated"
 response-property-deprecated-with-sunset: "response property %s deprecated with sunset date %s"
 response-property-deprecated-sunset-missing: "response property %s deprecated without sunset date"
 response-property-deprecated-sunset-invalid: "response property %s deprecated with invalid sunset date: %s"
+response-property-draft: "response property %s marked as draft"
 response-property-reactivated: "response property %s reactivated"
 response-property-sunset-date-too-small: "response property %s sunset date %s is too small, must be at least %s days from now"
 api-path-removed-without-deprecation: api path removed without deprecation
@@ -213,6 +221,11 @@ api-global-security-scope-removed: the security scope %s was removed from the gl
 api-global-security-scope-added: the security scope %s was added to the global security scheme %s
 api-security-scope-removed: the security scope %s was removed from the endpoint's security scheme %s
 api-stability-decreased-description: endpoint stability level decreased
+api-stability-increased-description: endpoint stability level increased
+request-property-stability-decreased-description: request property stability level decreased
+request-property-stability-increased-description: request property stability level increased
+response-property-stability-decreased-description: response property stability level decreased
+response-property-stability-increased-description: response property stability level increased
 api-security-scope-added: the security scope %s was added to the endpoint's security scheme %s
 api-security-component-type-changed: the component security scheme %s type changed from %s to %s
 api-security-component-oauth-url-changed: the component security scheme %s oauth url changed from %s to %s
@@ -321,6 +334,7 @@ request-body-added-optional-description: optional request body added
 api-deprecated-sunset-parse-description: endpoint deprecated with invalid sunset date
 api-deprecated-sunset-missing-description: endpoint deprecated without sunset date
 endpoint-added-description: endpoint added
+endpoint-draft-description: endpoint marked as draft
 api-global-security-added-description: security scheme added in security
 api-global-security-removed-description: security scheme deleted in security
 api-global-security-scope-added-description: scope added to a security scheme in security
@@ -486,6 +500,7 @@ request-property-pattern-changed-description: request property pattern changed
 request-property-pattern-generalized-description: request property pattern generalized
 request-property-pattern-removed-description: request property pattern unset
 request-property-removed-description: request property removed
+request-property-draft-description: request property marked as draft
 request-property-type-changed-description: request property type changed
 request-property-type-generalized-description: request property type generalized
 request-property-x-extensible-enum-value-removed-description: request property x-extensible-enum value removed
@@ -562,6 +577,7 @@ response-property-one-of-removed-description: sub-schema removed from oneOf in r
 response-property-pattern-added-description: response property pattern set
 response-property-pattern-changed-description: response property pattern changed
 response-property-pattern-removed-description: response property pattern unset
+response-property-draft-description: response property marked as draft
 response-property-type-changed-description: response property type changed
 response-required-property-added-description: response required property added
 response-required-property-became-not-read-only-description: response required property became not read-only

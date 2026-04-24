@@ -66,4 +66,5 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
+	cmd.PersistentFlags().String("stability-level", "", "minimum stability level to include: draft, alpha, beta (default), stable")
 }
