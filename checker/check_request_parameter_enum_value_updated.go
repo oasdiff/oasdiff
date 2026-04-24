@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	RequestParameterEnumValueAddedId            = "request-parameter-enum-value-added"
-	RequestParameterEnumValueRemovedId          = "request-parameter-enum-value-removed"
-	RequestParameterPropertyEnumValueAddedId    = "request-parameter-property-enum-value-added"
-	RequestParameterPropertyEnumValueRemovedId  = "request-parameter-property-enum-value-removed"
+	RequestParameterEnumValueAddedId           = "request-parameter-enum-value-added"
+	RequestParameterEnumValueRemovedId         = "request-parameter-enum-value-removed"
+	RequestParameterPropertyEnumValueAddedId   = "request-parameter-property-enum-value-added"
+	RequestParameterPropertyEnumValueRemovedId = "request-parameter-property-enum-value-removed"
 )
 
 func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
