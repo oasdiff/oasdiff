@@ -34,77 +34,79 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 					if paramItem.SchemaDiff == nil {
 						continue
 					}
-					enumDiff := paramItem.SchemaDiff.EnumDiff
-					if enumDiff != nil {
-						for _, enumVal := range enumDiff.Deleted {
-							baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, paramItem.SchemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-							result = append(result, NewApiChange(
-								RequestParameterEnumValueRemovedId,
-								config,
-								[]any{enumVal, paramLocation, paramName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource))
-						}
-						for _, enumVal := range enumDiff.Added {
-							baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, paramItem.SchemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-							result = append(result, NewApiChange(
-								RequestParameterEnumValueAddedId,
-								config,
-								[]any{enumVal, paramLocation, paramName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource))
-						}
-					}
+
+					result = append(result, checkParameterEnumDiff(
+						paramItem.SchemaDiff.EnumDiff,
+						paramItem.SchemaDiff,
+						RequestParameterEnumValueRemovedId,
+						RequestParameterEnumValueAddedId,
+						func(enumVal any) []any { return []any{enumVal, paramLocation, paramName} },
+						operationsSources, operationItem, config, operation, path,
+					)...)
 
 					CheckModifiedPropertiesDiff(
 						paramItem.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							propEnumDiff := propertyDiff.EnumDiff
-							if propEnumDiff == nil {
-								return
-							}
-
-							propName := propertyFullName(propertyPath, propertyName)
-
-							for _, enumVal := range propEnumDiff.Deleted {
-								propBaseSource, propRevisionSource := SchemaDeletedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
-								result = append(result, NewApiChange(
-									RequestParameterPropertyEnumValueRemovedId,
-									config,
-									[]any{enumVal, propName, paramLocation, paramName},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource))
-							}
-
-							for _, enumVal := range propEnumDiff.Added {
-								propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
-								result = append(result, NewApiChange(
-									RequestParameterPropertyEnumValueAddedId,
-									config,
-									[]any{enumVal, propName, paramLocation, paramName},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource))
-							}
+							result = append(result, checkParameterEnumDiff(
+								propertyDiff.EnumDiff,
+								propertyDiff,
+								RequestParameterPropertyEnumValueRemovedId,
+								RequestParameterPropertyEnumValueAddedId,
+								func(enumVal any) []any {
+									return []any{enumVal, propertyFullName(propertyPath, propertyName), paramLocation, paramName}
+								},
+								operationsSources, operationItem, config, operation, path,
+							)...)
 						})
 				}
 			}
 		}
 	}
+	return result
+}
+
+func checkParameterEnumDiff(
+	enumDiff *diff.EnumDiff,
+	schemaDiff *diff.SchemaDiff,
+	removedId, addedId string,
+	makeArgs func(enumVal any) []any,
+	operationsSources *diff.OperationsSourcesMap,
+	operationItem *diff.MethodDiff,
+	config *Config,
+	operation, path string,
+) Changes {
+	result := make(Changes, 0)
+	if enumDiff == nil {
+		return result
+	}
+
+	for _, enumVal := range enumDiff.Deleted {
+		baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		result = append(result, NewApiChange(
+			removedId,
+			config,
+			makeArgs(enumVal),
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(baseSource, revisionSource))
+	}
+
+	for _, enumVal := range enumDiff.Added {
+		baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		result = append(result, NewApiChange(
+			addedId,
+			config,
+			makeArgs(enumVal),
+			"",
+			operationsSources,
+			operationItem.Revision,
+			operation,
+			path,
+		).WithSources(baseSource, revisionSource))
+	}
+
 	return result
 }
