@@ -188,6 +188,83 @@ paths: {}
 	require.Nil(t, loader.ReadFromURIFunc, "loadFromGitRevision must not mutate the caller's loader")
 }
 
+// TestLoadInfo_GitRevisionSlashedRef_WithExternalRef verifies that $ref resolution
+// works when the git revision contains a slash (e.g. "origin/main:openapi.yaml").
+// Reproduces the production failure in oasdiff-test/tmp: path.Dir("origin/main:openapi.yaml")
+// returns "origin" (not "origin/main:"), so a naive join mangles "./schemas/pet.yaml"
+// into "origin/schemas/pet.yaml" instead of "origin/main:schemas/pet.yaml".
+func TestLoadInfo_GitRevisionSlashedRef_WithExternalRef(t *testing.T) {
+	dir := t.TempDir()
+	remoteDir := t.TempDir()
+
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	// Bare remote to enable "origin/main:..." refs.
+	bareCmd := exec.Command("git", "init", "--bare", remoteDir)
+	out, err := bareCmd.CombinedOutput()
+	require.NoError(t, err, string(out))
+
+	run("git", "init", "-b", "main")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+	run("git", "remote", "add", "origin", remoteDir)
+
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "schemas"), 0755))
+
+	topLevel := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/pet.yaml"
+`
+	petSchema := `type: object
+required:
+  - id
+properties:
+  id:
+    type: integer
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(topLevel), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "schemas", "pet.yaml"), []byte(petSchema), 0644))
+
+	run("git", "add", ".")
+	run("git", "commit", "-m", "add multi-file spec")
+	run("git", "push", "origin", "main")
+	run("git", "fetch", "origin")
+
+	// Remove working-tree copies so $ref resolution must go through "git show".
+	require.NoError(t, os.Remove(filepath.Join(dir, "openapi.yaml")))
+	require.NoError(t, os.Remove(filepath.Join(dir, "schemas", "pet.yaml")))
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("origin/main:openapi.yaml"))
+	require.NoError(t, err)
+	require.Equal(t, "1.0", specInfo.GetVersion())
+
+	schema := specInfo.Spec.Paths.Value("/pets").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value
+	require.NotNil(t, schema.Properties["id"], "id property from $ref chain should be resolved")
+}
+
 func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
 	t.Setenv("PATH", t.TempDir()) // remove git from PATH
 	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:openapi.yaml"))
