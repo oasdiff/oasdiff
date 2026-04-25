@@ -14,6 +14,10 @@ Changes that represent a removal (e.g., endpoint removed, property removed) will
 Likewise, Changes that represent an addition (e.g., endpoint added, new enum value) will have a `RevisionSource` only since the added element doesn't exist in the base file.   
 Changes that represent a modification (e.g., maxLength increased) will have both `BaseSource` and `RevisionSource`.
 
+### Multi-file specs
+
+When a spec uses `$ref` to import schemas from other YAML or JSON files, source locations point to the file where the changed element actually lives, with the precise line and column. The `file` field on `BaseSource` and `RevisionSource` reflects the imported file, not just the top-level spec entry point, and inline GitHub Actions annotations use that path.
+
 ## Output formats
 
 Source locations are available in:
@@ -36,7 +40,8 @@ Additions and modifications appear inline:
 ::error title=new-required-request-property,file=openapi.yaml,line=30,col=13::in API POST /users added the new required request property 'email'
 ```
 
-Removals appear without inline annotation:
+Removals appear without inline annotation, because GitHub only attaches Actions annotations to the revision (head) version of files, not to the base. `BaseSource` is still emitted in `-f json` and `-f yaml` output and points at the exact line in the base spec where the removed element used to live.
+
 ```
 ::error title=request-property-removed::in API POST /users removed the request property 'name'
 ```
@@ -73,6 +78,4 @@ Removals appear without inline annotation:
 
 ## Demo
 
-See [oasdiff/github-demo](https://github.com/oasdiff/github-demo/pull/1/changes) for a working example with inline PR annotations.
-
-**Try it visually:** [oasdiff.com/diff](https://oasdiff.com/diff) shows a side-by-side comparison of any two OpenAPI specs in your browser — no installation required.
+**Try it visually:** [oasdiff.com/diff](https://oasdiff.com/diff) shows a side-by-side comparison of any two OpenAPI specs in your browser, no installation required.
