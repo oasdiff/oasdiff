@@ -10,6 +10,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// exclusiveBoundBool creates an ExclusiveBound with a boolean value (OpenAPI 3.0 style).
+func exclusiveBoundBool(b bool) openapi3.ExclusiveBound {
+	return openapi3.ExclusiveBound{Bool: &b}
+}
+
 // identical Default fields are merged successfully
 func TestMerge_Default(t *testing.T) {
 	merged, err := allof.Merge(
@@ -298,14 +303,14 @@ func TestMerge_NestedAllOfInProperties(t *testing.T) {
 									Value: &openapi3.Schema{
 										Type:     &openapi3.Types{"object"},
 										MinProps: 10,
-										MaxProps: openapi3.Ptr(uint64(40)),
+										MaxProps: new(uint64(40)),
 									},
 								},
 								&openapi3.SchemaRef{
 									Value: &openapi3.Schema{
 										Type:     &openapi3.Types{"object"},
 										MinProps: 5,
-										MaxProps: openapi3.Ptr(uint64(25)),
+										MaxProps: new(uint64(25)),
 									},
 								},
 							},
@@ -331,14 +336,14 @@ func TestMerge_NestedAllOfInNot(t *testing.T) {
 								Value: &openapi3.Schema{
 									Type:     &openapi3.Types{"object"},
 									MinProps: 10,
-									MaxProps: openapi3.Ptr(uint64(40)),
+									MaxProps: new(uint64(40)),
 								},
 							},
 							&openapi3.SchemaRef{
 								Value: &openapi3.Schema{
 									Type:     &openapi3.Types{"object"},
 									MinProps: 5,
-									MaxProps: openapi3.Ptr(uint64(25)),
+									MaxProps: new(uint64(25)),
 								},
 							},
 						},
@@ -364,14 +369,14 @@ func TestMerge_NestedAllOfInOneOf(t *testing.T) {
 									Value: &openapi3.Schema{
 										Type:     &openapi3.Types{"object"},
 										MinProps: 10,
-										MaxProps: openapi3.Ptr(uint64(40)),
+										MaxProps: new(uint64(40)),
 									},
 								},
 								&openapi3.SchemaRef{
 									Value: &openapi3.Schema{
 										Type:     &openapi3.Types{"object"},
 										MinProps: 5,
-										MaxProps: openapi3.Ptr(uint64(25)),
+										MaxProps: new(uint64(25)),
 									},
 								},
 							},
@@ -399,14 +404,14 @@ func TestMerge_NestedAllOfInAnyOf(t *testing.T) {
 									Value: &openapi3.Schema{
 										Type:     &openapi3.Types{"object"},
 										MinProps: 10,
-										MaxProps: openapi3.Ptr(uint64(40)),
+										MaxProps: new(uint64(40)),
 									},
 								},
 								&openapi3.SchemaRef{
 									Value: &openapi3.Schema{
 										Type:     &openapi3.Types{"object"},
 										MinProps: 5,
-										MaxProps: openapi3.Ptr(uint64(25)),
+										MaxProps: new(uint64(25)),
 									},
 								},
 							},
@@ -570,21 +575,21 @@ func TestMerge_ExclusiveMaxIsTrue(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: true,
-							Max:          openapi3.Ptr(1.0),
+							ExclusiveMax: exclusiveBoundBool(true),
+							Max:          new(1.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: false,
-							Max:          openapi3.Ptr(2.0),
+							ExclusiveMax: exclusiveBoundBool(false),
+							Max:          new(2.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, true, merged.ExclusiveMax)
+	require.True(t, merged.ExclusiveMax.IsTrue())
 }
 
 // if ExclusiveMax is false on the minimum Max value, then ExclusiveMax is false in the merged schema.
@@ -596,21 +601,21 @@ func TestMerge_ExclusiveMaxIsFalse(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: false,
-							Max:          openapi3.Ptr(1.0),
+							ExclusiveMax: exclusiveBoundBool(false),
+							Max:          new(1.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMax: true,
-							Max:          openapi3.Ptr(2.0),
+							ExclusiveMax: exclusiveBoundBool(true),
+							Max:          new(2.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, false, merged.ExclusiveMax)
+	require.False(t, merged.ExclusiveMax.IsTrue())
 }
 
 // if ExclusiveMin is false on the highest Min value, then ExclusiveMin is false in the merged schema.
@@ -622,21 +627,21 @@ func TestMerge_ExclusiveMinIsFalse(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: false,
-							Min:          openapi3.Ptr(40.0),
+							ExclusiveMin: exclusiveBoundBool(false),
+							Min:          new(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: true,
-							Min:          openapi3.Ptr(5.0),
+							ExclusiveMin: exclusiveBoundBool(true),
+							Min:          new(5.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, false, merged.ExclusiveMin)
+	require.False(t, merged.ExclusiveMin.IsTrue())
 }
 
 // if ExclusiveMin is true on the highest Min value, then ExclusiveMin is true in the merged schema.
@@ -648,21 +653,21 @@ func TestMerge_ExclusiveMinIsTrue(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: true,
-							Min:          openapi3.Ptr(40.0),
+							ExclusiveMin: exclusiveBoundBool(true),
+							Min:          new(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:         &openapi3.Types{"object"},
-							ExclusiveMin: false,
-							Min:          openapi3.Ptr(5.0),
+							ExclusiveMin: exclusiveBoundBool(false),
+							Min:          new(5.0),
 						},
 					},
 				},
 			}})
 	require.NoError(t, err)
-	require.Equal(t, true, merged.ExclusiveMin)
+	require.True(t, merged.ExclusiveMin.IsTrue())
 }
 
 // merge multiple Not inside AllOf
@@ -939,13 +944,13 @@ func TestMerge_MultipleOfContained(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:       &openapi3.Types{"object"},
-							MultipleOf: openapi3.Ptr(10.0),
+							MultipleOf: new(10.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:       &openapi3.Types{"object"},
-							MultipleOf: openapi3.Ptr(2.0),
+							MultipleOf: new(2.0),
 						},
 					},
 				},
@@ -962,13 +967,13 @@ func TestMerge_MultipleOfDecimal(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:       &openapi3.Types{"object"},
-							MultipleOf: openapi3.Ptr(11.0),
+							MultipleOf: new(11.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:       &openapi3.Types{"object"},
-							MultipleOf: openapi3.Ptr(0.7),
+							MultipleOf: new(0.7),
 						},
 					},
 				},
@@ -1033,14 +1038,14 @@ func TestMerge_RangeProperties(t *testing.T) {
 						Value: &openapi3.Schema{
 							Type:     &openapi3.Types{"object"},
 							MinProps: 10,
-							MaxProps: openapi3.Ptr(uint64(40)),
+							MaxProps: new(uint64(40)),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:     &openapi3.Types{"object"},
 							MinProps: 5,
-							MaxProps: openapi3.Ptr(uint64(25)),
+							MaxProps: new(uint64(25)),
 						},
 					},
 				},
@@ -1061,14 +1066,14 @@ func TestMerge_RangeItems(t *testing.T) {
 						Value: &openapi3.Schema{
 							Type:     &openapi3.Types{"object"},
 							MinItems: 10,
-							MaxItems: openapi3.Ptr(uint64(40)),
+							MaxItems: new(uint64(40)),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:     &openapi3.Types{"object"},
 							MinItems: 5,
-							MaxItems: openapi3.Ptr(uint64(25)),
+							MaxItems: new(uint64(25)),
 						},
 					},
 				},
@@ -1086,15 +1091,15 @@ func TestMerge_Range(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Min:  openapi3.Ptr(10.0),
-							Max:  openapi3.Ptr(40.0),
+							Min:  new(10.0),
+							Max:  new(40.0),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type: &openapi3.Types{"object"},
-							Min:  openapi3.Ptr(5.0),
-							Max:  openapi3.Ptr(25.0),
+							Min:  new(5.0),
+							Max:  new(25.0),
 						},
 					},
 				},
@@ -1112,13 +1117,13 @@ func TestMerge_MaxLength(t *testing.T) {
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:      &openapi3.Types{"object"},
-							MaxLength: openapi3.Ptr(uint64(10)),
+							MaxLength: new(uint64(10)),
 						},
 					},
 					&openapi3.SchemaRef{
 						Value: &openapi3.Schema{
 							Type:      &openapi3.Types{"object"},
-							MaxLength: openapi3.Ptr(uint64(20)),
+							MaxLength: new(uint64(20)),
 						},
 					},
 				},

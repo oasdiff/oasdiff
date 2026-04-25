@@ -32,8 +32,8 @@ type SchemaCollection struct {
 	Description          []string
 	Enum                 [][]any
 	UniqueItems          []bool
-	ExclusiveMin         []bool
-	ExclusiveMax         []bool
+	ExclusiveMin         []openapi3.ExclusiveBound
+	ExclusiveMax         []openapi3.ExclusiveBound
 	Min                  []*float64
 	Max                  []*float64
 	MultipleOf           []*float64
@@ -210,17 +210,17 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.Default = base.Value.Default
 	result.Value.Discriminator = base.Value.Discriminator
 	if base.Value.MaxLength != nil {
-		result.Value.MaxLength = openapi3.Ptr(*base.Value.MaxLength)
+		result.Value.MaxLength = new(*base.Value.MaxLength)
 	}
 	result.Value.Pattern = base.Value.Pattern
 	result.Value.MinItems = base.Value.MinItems
 	if base.Value.MaxItems != nil {
-		result.Value.MaxItems = openapi3.Ptr(*base.Value.MaxItems)
+		result.Value.MaxItems = new(*base.Value.MaxItems)
 	}
 	result.Value.Required = base.Value.Required
 	result.Value.MinProps = base.Value.MinProps
 	if base.Value.MaxProps != nil {
-		result.Value.MaxProps = openapi3.Ptr(*base.Value.MaxProps)
+		result.Value.MaxProps = new(*base.Value.MaxProps)
 	}
 
 	// merge all fields of type SchemaRef
@@ -431,36 +431,36 @@ func resolveNumberRange(schema *openapi3.Schema, collection *SchemaCollection) *
 
 	//resolve minimum
 	max := math.Inf(-1)
-	isExcluded := false
+	var exclusiveMin openapi3.ExclusiveBound
 	var value *float64
 	for i, s := range collection.Min {
 		if s != nil {
 			if *s > max {
 				max = *s
 				value = s
-				isExcluded = collection.ExclusiveMin[i]
+				exclusiveMin = collection.ExclusiveMin[i]
 			}
 		}
 	}
 
 	schema.Min = value
-	schema.ExclusiveMin = isExcluded
+	schema.ExclusiveMin = exclusiveMin
 	//resolve maximum
 	min := math.Inf(1)
-	isExcluded = false
+	var exclusiveMax openapi3.ExclusiveBound
 	// var value *float64
 	for i, s := range collection.Max {
 		if s != nil {
 			if *s < min {
 				min = *s
 				value = s
-				isExcluded = collection.ExclusiveMax[i]
+				exclusiveMax = collection.ExclusiveMax[i]
 			}
 		}
 	}
 
 	schema.Max = value
-	schema.ExclusiveMax = isExcluded
+	schema.ExclusiveMax = exclusiveMax
 	return schema
 }
 
@@ -547,7 +547,7 @@ func resolveMultipleOf(schema *openapi3.Schema, collection *SchemaCollection) *o
 	for _, v := range uintValues {
 		lcmValue = lcm(lcmValue, v)
 	}
-	schema.MultipleOf = openapi3.Ptr(float64(lcmValue) / factor)
+	schema.MultipleOf = new(float64(lcmValue) / factor)
 	return schema
 }
 
@@ -761,7 +761,7 @@ func findMinValue(values []*uint64) *uint64 {
 			min = num
 		}
 	}
-	return openapi3.Ptr(min)
+	return new(min)
 }
 
 func resolveType(schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
