@@ -1,8 +1,8 @@
-# OpenAPI 3.1 Support (Beta)
+# OpenAPI 3.1 Support
 
-oasdiff now supports OpenAPI 3.1 specs across all commands: `diff`, `breaking`, and `changelog`.
+oasdiff supports OpenAPI 3.1 specs across all commands: `diff`, `breaking`, and `changelog`.
 
-This feature is currently in **beta** and available for community testing before general availability.
+OpenAPI 3.1 support is generally available starting with `v1.15.0`. Previous beta tags (`v1.15.0-openapi31.beta.*` and `v2.2.0-openapi31.beta.*`) are superseded.
 
 ## What's supported
 
@@ -25,7 +25,7 @@ Changes are detected for all 3.1-specific fields:
 - Info `summary`, License `identifier`
 
 ### Breaking changes and changelog
-148 new rule IDs covering:
+162 new rule IDs covering:
 - **Nullable type arrays**: `type: ["string", "null"]` correctly detected as nullable changes (not false-positive type changes)
 - **Webhooks**: added/removed detection + all existing operation-level checks automatically applied to modified webhook operations
 - **const**: added/removed/changed for request and response body/properties
@@ -40,80 +40,19 @@ Changes are detected for all 3.1-specific fields:
 - **unevaluatedItems/unevaluatedProperties**: added/removed
 - **contentSchema/contentMediaType/contentEncoding**: added/removed/changed
 
-## Known limitations
+## Caveats
 
-The following OpenAPI 3.1 / JSON Schema 2020-12 features are not yet fully implemented:
+The following 3.1 features are not yet fully supported by [`kin-openapi`](https://github.com/getkin/kin-openapi) (the parser oasdiff uses) and therefore do not appear in oasdiff diffs:
 
-- **`$dynamicRef`/`$dynamicAnchor`**: not resolved during loading; referenced schemas are not followed
-- **`pathItems` in `components`**: not yet supported
-- **Built-in validator**: most 3.1-specific keywords (e.g. `prefixItems`, `contains`, `if`/`then`/`else`) are only enforced when JSON Schema 2020-12 validation is explicitly enabled via `EnableJSONSchema2020()`; without it, validation silently skips them
-- **`prefixItems` in array validation**: not enforced by the built-in validator even with JSON Schema 2020-12 enabled
+- **`$dynamicRef` / `$dynamicAnchor`**: parsed but not resolved during loading. Schemas using dynamic references for recursive definitions will not be followed.
+- **`pathItems` in `components`**: not represented in the parser's data model. Specs that declare reusable path items in components will silently drop them.
 
-## How to try it
+The `flatten` command has one additional caveat:
 
-### Install the beta release
-```bash
-curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=1.15.0-openapi31.beta.3 sh
-```
+- **`flatten` of `allOf` ignores 3.1 numeric `exclusiveMinimum` / `exclusiveMaximum`**: when merging `allOf` subschemas, the merge logic considers only `minimum` / `maximum` and the 3.0-style boolean `exclusiveMinimum` / `exclusiveMaximum`. 3.1 numeric exclusive bounds are silently dropped from the merged result. Tracked in [#868](https://github.com/oasdiff/oasdiff/issues/868).
 
-Then use oasdiff as normal:
-```bash
-oasdiff diff base.yaml revision.yaml
-oasdiff breaking base.yaml revision.yaml
-oasdiff changelog base.yaml revision.yaml
-```
+If you hit any of these, please [open an issue](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.1]%20).
 
-### Docker
-```bash
-docker pull tufin/oasdiff:v1.15.0-openapi31.beta.3
+## Feedback
 
-# Diff
-docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.3 diff /specs/base.yaml /specs/revision.yaml
-
-# Breaking changes
-docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.3 breaking /specs/base.yaml /specs/revision.yaml
-
-# Changelog
-docker run --rm -v $(pwd):/specs tufin/oasdiff:v1.15.0-openapi31.beta.3 changelog /specs/base.yaml /specs/revision.yaml
-```
-
-### GitHub Action
-```yaml
-- uses: oasdiff/oasdiff-action/breaking@v0.0.40-beta.3
-  with:
-    base: specs/base.yaml
-    revision: specs/revision.yaml
-```
-
-Other actions: `oasdiff/oasdiff-action/diff`, `oasdiff/oasdiff-action/changelog`, `oasdiff/oasdiff-action/pr-comment`.
-
-### Build from source
-```bash
-git clone -b feat/openapi-3.1-support https://github.com/oasdiff/oasdiff.git
-cd oasdiff
-go build
-./oasdiff diff base.yaml revision.yaml
-```
-
-## Provide feedback
-
-We need your feedback to move this to general availability.
-
-### Found an issue?
-[Open an issue](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.1]%20) with `[3.1]` in the title.
-
-### It works for you?
-We need to hear from you too! Please add a thumbs-up reaction to [this tracking issue](https://github.com/oasdiff/oasdiff/issues/52) and optionally leave a comment describing your use case and which 3.1 features you tested. Knowing how many users are running 3.1 successfully helps us decide when to make it generally available.
-
-## Status
-
-| Milestone | Status |
-|-----------|--------|
-| Spec loading | Done |
-| Diff | Done |
-| Breaking changes | Done |
-| Changelog | Done |
-| GitHub Action | Done |
-| Online diff tool (oasdiff.com) | Done |
-| Community testing | **In progress** |
-| General availability | Pending testing feedback |
+Found an issue? [Open one here](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.1]%20) with `[3.1]` in the title.
