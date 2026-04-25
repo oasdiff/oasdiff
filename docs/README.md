@@ -52,7 +52,6 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 ```
 
 ## Features
-- [OpenAPI 3.1 support](OPENAPI-31.md) (beta)
 - Detect [breaking changes](BREAKING-CHANGES.md)
 - Display a user-friendly [changelog](BREAKING-CHANGES.md) of all important API changes
 - Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
@@ -60,6 +59,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Source location tracking](SOURCE-LOCATOR.md)
 - Compare specs from local files, http/s URLs, or [git revisions](GIT-REVISION.md)
 - Compare specs in YAML or JSON format
+- [OpenAPI 3.1 support](OPENAPI-31.md)
 - [Change fingerprints](FINGERPRINT.md) for stable cross-commit change identity
 - [Compare two collections of specs](COMPOSED.md)
 - [Deprecate APIs and Parameters](DEPRECATION.md)
@@ -93,11 +93,8 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [flatten](ALLOF.md): replace all instances of allOf by a merged equivalent
 - [checks](CHECKS.md): display the checks that oasdiff uses to detect changes
 
-## Roadmap
-- **[OpenAPI 3.1](OPENAPI-31.md)** (beta)
-
 ## Credits
-This project relies on the excellent implementation of OpenAPI 3.0 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
+This project relies on the excellent implementation of OpenAPI 3.0 and 3.1 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
 
 ## Feedback
 We welcome your feedback.  
