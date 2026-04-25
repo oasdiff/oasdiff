@@ -1,0 +1,27 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                minimum: 5
+                exclusiveMinimum: 2
+                properties:
+                  price:
+                    type: number
+                    minimum: 50
+                    exclusiveMinimum: 25

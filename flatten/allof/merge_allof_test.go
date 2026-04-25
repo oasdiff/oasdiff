@@ -1650,7 +1650,7 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 									},
 								},
 							},
-							AdditionalProperties: openapi3.AdditionalProperties{
+							AdditionalProperties: openapi3.BoolSchema{
 								Has: &apTrue,
 							},
 						},
@@ -1665,7 +1665,7 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 									},
 								},
 							},
-							AdditionalProperties: openapi3.AdditionalProperties{
+							AdditionalProperties: openapi3.BoolSchema{
 								Has: &apFalse,
 							},
 						},
@@ -1680,7 +1680,7 @@ func TestMerge_AdditionalProperties_False(t *testing.T) {
 									},
 								},
 							},
-							AdditionalProperties: openapi3.AdditionalProperties{
+							AdditionalProperties: openapi3.BoolSchema{
 								Has: &apFalse,
 							},
 						},
@@ -1721,7 +1721,7 @@ func TestMerge_AdditionalProperties_True(t *testing.T) {
 									},
 								},
 							},
-							AdditionalProperties: openapi3.AdditionalProperties{
+							AdditionalProperties: openapi3.BoolSchema{
 								Has: &apTrue,
 							},
 						},
@@ -1736,7 +1736,7 @@ func TestMerge_AdditionalProperties_True(t *testing.T) {
 									},
 								},
 							},
-							AdditionalProperties: openapi3.AdditionalProperties{
+							AdditionalProperties: openapi3.BoolSchema{
 								Has: &apTrue,
 							},
 						},
@@ -1751,7 +1751,7 @@ func TestMerge_AdditionalProperties_True(t *testing.T) {
 									},
 								},
 							},
-							AdditionalProperties: openapi3.AdditionalProperties{
+							AdditionalProperties: openapi3.BoolSchema{
 								Has: &apTrue,
 							},
 						},

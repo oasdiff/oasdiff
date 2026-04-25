@@ -12,4 +12,6 @@ NEVER push directly to main. Always:
 3. Push the branch
 4. Open a PR
 
+Before committing, run `make lint` to ensure formatting and generated files are up to date.
+
 After the pre-commit step and staging files, write a concise commit message and commit.

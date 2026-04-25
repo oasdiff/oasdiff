@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	RequestParameterMaxSetId = "request-parameter-max-set"
+	RequestParameterMaxSetId          = "request-parameter-max-set"
+	RequestParameterExclusiveMaxSetId = "request-parameter-exclusive-max-set"
 )
 
 func RequestParameterMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -26,26 +27,29 @@ func RequestParameterMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.
 					if paramDiff.SchemaDiff == nil {
 						continue
 					}
-					maxDiff := paramDiff.SchemaDiff.MaxDiff
-					if maxDiff == nil {
-						continue
+					for _, entry := range []struct {
+						diff  *diff.ValueDiff
+						id    string
+						field string
+					}{
+						{paramDiff.SchemaDiff.MaxDiff, RequestParameterMaxSetId, "maximum"},
+						{paramDiff.SchemaDiff.ExclusiveMaxDiff, RequestParameterExclusiveMaxSetId, "exclusiveMaximum"},
+					} {
+						if entry.diff == nil || entry.diff.From != nil || entry.diff.To == nil {
+							continue
+						}
+						_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
+						result = append(result, NewApiChange(
+							entry.id,
+							config,
+							[]any{paramLocation, paramName, entry.diff.To},
+							commentId(entry.id),
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(nil, revisionSource))
 					}
-					if maxDiff.From != nil ||
-						maxDiff.To == nil {
-						continue
-					}
-
-					_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maximum")
-					result = append(result, NewApiChange(
-						RequestParameterMaxSetId,
-						config,
-						[]any{paramLocation, paramName, maxDiff.To},
-						commentId(RequestParameterMaxSetId),
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(nil, revisionSource))
 				}
 			}
 		}

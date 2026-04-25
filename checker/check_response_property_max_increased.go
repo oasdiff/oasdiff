@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	ResponseBodyMaxIncreasedId     = "response-body-max-increased"
-	ResponsePropertyMaxIncreasedId = "response-property-max-increased"
+	ResponseBodyMaxIncreasedId              = "response-body-max-increased"
+	ResponsePropertyMaxIncreasedId          = "response-property-max-increased"
+	ResponseBodyExclusiveMaxIncreasedId     = "response-body-exclusive-max-increased"
+	ResponsePropertyExclusiveMaxIncreasedId = "response-property-exclusive-max-increased"
 )
 
 func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -50,6 +52,25 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 							}
 						}
 					}
+					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff != nil {
+						exMaxDiff := mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff
+						if exMaxDiff.From != nil &&
+							exMaxDiff.To != nil {
+							if IsIncreasedValue(exMaxDiff) {
+								exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "exclusiveMaximum")
+								result = append(result, NewApiChange(
+									ResponseBodyExclusiveMaxIncreasedId,
+									config,
+									[]any{exMaxDiff.From, exMaxDiff.To},
+									"",
+									operationsSources,
+									operationItem.Revision,
+									operation,
+									path,
+								).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
+							}
+						}
+					}
 
 					CheckModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
@@ -75,6 +96,38 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 								ResponsePropertyMaxIncreasedId,
 								config,
 								[]any{propertyFullName(propertyPath, propertyName), maxDiff.From, maxDiff.To, responseStatus},
+								"",
+								operationsSources,
+								operationItem.Revision,
+								operation,
+								path,
+							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
+						})
+
+					CheckModifiedPropertiesDiff(
+						mediaTypeDiff.SchemaDiff,
+						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+							exMaxDiff := propertyDiff.ExclusiveMaxDiff
+							if exMaxDiff == nil {
+								return
+							}
+							if exMaxDiff.To == nil ||
+								exMaxDiff.From == nil {
+								return
+							}
+							if !IsIncreasedValue(exMaxDiff) {
+								return
+							}
+
+							if propertyDiff.Revision.WriteOnly {
+								return
+							}
+
+							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "exclusiveMaximum")
+							result = append(result, NewApiChange(
+								ResponsePropertyExclusiveMaxIncreasedId,
+								config,
+								[]any{propertyFullName(propertyPath, propertyName), exMaxDiff.From, exMaxDiff.To, responseStatus},
 								"",
 								operationsSources,
 								operationItem.Revision,

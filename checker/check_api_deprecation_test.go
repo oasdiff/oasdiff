@@ -176,7 +176,7 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	// endpoint-deprecated-with-sunset reported
+	// only a non-breaking change detected
 	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
@@ -345,6 +345,7 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
+	// only a non-breaking change detected
 	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }

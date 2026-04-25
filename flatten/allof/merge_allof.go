@@ -47,7 +47,7 @@ type SchemaCollection struct {
 	Properties           []openapi3.Schemas
 	MinProps             []uint64
 	MaxProps             []*uint64
-	AdditionalProperties []openapi3.AdditionalProperties
+	AdditionalProperties []openapi3.BoolSchema
 	Nullable             []bool
 	ReadOnly             []bool
 	WriteOnly            []bool
@@ -300,8 +300,8 @@ func isAllOfCircular(state *state, srefs openapi3.SchemaRefs) bool {
 	return false
 }
 
-func mergeAdditionalProperties(state *state, ap openapi3.AdditionalProperties) (openapi3.AdditionalProperties, error) {
-	result := openapi3.AdditionalProperties{}
+func mergeAdditionalProperties(state *state, ap openapi3.BoolSchema) (openapi3.BoolSchema, error) {
+	result := openapi3.BoolSchema{}
 	if ap.Schema != nil && ap.Schema.Value != nil {
 		merged, err := mergeInternal(state, ap.Schema)
 		if err != nil {
@@ -551,7 +551,7 @@ func resolveMultipleOf(schema *openapi3.Schema, collection *SchemaCollection) *o
 	return schema
 }
 
-func hasFalseValue(ap []openapi3.AdditionalProperties) bool {
+func hasFalseValue(ap []openapi3.BoolSchema) bool {
 	for _, v := range ap {
 		if v.Has != nil && !*v.Has {
 			return true

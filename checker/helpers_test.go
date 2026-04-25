@@ -82,3 +82,12 @@ func singleCheckConfig(c checker.BackwardCompatibilityCheck) *checker.Config {
 func allChecksConfig() *checker.Config {
 	return checker.NewConfig(checker.GetAllChecks())
 }
+
+func containsId(errs checker.Changes, id string) bool {
+	for _, e := range errs {
+		if e.GetId() == id {
+			return true
+		}
+	}
+	return false
+}
