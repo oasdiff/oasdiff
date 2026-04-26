@@ -10,6 +10,8 @@
 
 Command-line and Go package to compare and detect breaking changes in OpenAPI specs.
 
+Run it locally, in CI via the [GitHub Action](https://github.com/oasdiff/oasdiff-action), or use the hosted PR review workflow at [oasdiff.com](https://www.oasdiff.com) to approve or reject each change with a CI commit status.
+
 ## Installation
 
 ### Install with Go
@@ -80,7 +82,7 @@ docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oas
 - [Customize HTML and Markdown changelog reports](CHANGELOG-TEMPLATE.md)
 - [Run with configuration file](CONFIG-FILES.md)
 - [Run from Docker](DOCKER.md)
-- [GitHub Action](https://github.com/oasdiff/oasdiff-action)
+- [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI; for teams, [oasdiff.com](https://www.oasdiff.com) adds a per-change PR comment with approve/reject and commit-status checks
 - [Embed in your go program](GO.md)
 
 ## Demo
