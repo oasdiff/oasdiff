@@ -181,6 +181,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestParameterEnumValueUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterEnumValueAddedId, INFO, RequestParameterEnumValueUpdatedCheck, DirectionRequest, LocationParameters, ActionAdd),
 		newBackwardCompatibilityRule(RequestParameterEnumValueRemovedId, ERR, RequestParameterEnumValueUpdatedCheck, DirectionRequest, LocationParameters, ActionRemove),
+		newBackwardCompatibilityRule(RequestParameterPropertyEnumValueAddedId, INFO, RequestParameterEnumValueUpdatedCheck, DirectionRequest, LocationParameters, ActionAdd),
+		newBackwardCompatibilityRule(RequestParameterPropertyEnumValueRemovedId, ERR, RequestParameterEnumValueUpdatedCheck, DirectionRequest, LocationParameters, ActionRemove),
 		// RequestParameterMaxItemsUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMaxItemsIncreasedId, INFO, RequestParameterMaxItemsUpdatedCheck, DirectionRequest, LocationParameters, ActionIncrease),
 		newBackwardCompatibilityRule(RequestParameterMaxItemsDecreasedId, ERR, RequestParameterMaxItemsUpdatedCheck, DirectionRequest, LocationParameters, ActionDecrease),

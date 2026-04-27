@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /test:
+    get:
+      operationId: getTest
+      parameters:
+        - name: filter
+          in: query
+          style: deepObject
+          explode: true
+          schema:
+            type: object
+            properties:
+              origin:
+                type: string
+                enum:
+                  - value-a
+                  - value-c
+      responses:
+        '200':
+          description: OK

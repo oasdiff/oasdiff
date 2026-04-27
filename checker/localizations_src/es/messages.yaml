@@ -58,6 +58,8 @@ request-parameter-became-optional: el parámetro %s de solicitud %s se volvió o
 request-parameter-became-enum: el parámetro %s de solicitud %s fue restringido a una lista de valores enum
 request-parameter-enum-value-removed: removido el valor enum %s del parámetro %s de solicitud %s
 request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro %s de solicitud %s
+request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
+request-parameter-property-enum-value-added: agregado el valor enum %s a la propiedad %s del parámetro %s de solicitud %s
 pattern-changed-warn-comment: "Esta es una advertencia porque agregar o cambiar un patrón puede restringir los valores aceptados y romper clientes existentes. Para cambios de patrón, es difícil analizar automáticamente si el nuevo patrón es un superconjunto del patrón anterior (ej. cambiado de '[0-9]+' a '[0-9]*')"
 request-parameter-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s del parámetro %s de solicitud %s
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
@@ -444,6 +446,8 @@ request-parameter-default-value-changed-description: valor por defecto del pará
 request-parameter-default-value-removed-description: valor por defecto del parámetro de solicitud removido
 request-parameter-enum-value-added-description: valor del enum del parámetro de solicitud agregado
 request-parameter-enum-value-removed-description: valor del enum del parámetro de solicitud removido
+request-parameter-property-enum-value-added-description: valor del enum de propiedad del parámetro de solicitud agregado
+request-parameter-property-enum-value-removed-description: valor del enum de propiedad del parámetro de solicitud removido
 request-parameter-max-decreased-description: valor máximo del parámetro de solicitud reducido
 request-parameter-max-increased-description: valor máximo del parámetro de solicitud aumentado
 request-parameter-max-items-decreased-description: elementos máximos del parámetro de solicitud reducidos
