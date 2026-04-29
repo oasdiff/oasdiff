@@ -427,40 +427,146 @@ func hasFalse(values []bool) bool {
 	return false
 }
 
+// boundSource records which schema field a numeric bound came from. Needed
+// because OpenAPI 3.0 (boolean exclusiveMinimum/Maximum modifying min/max)
+// and 3.1 (numeric exclusiveMinimum/Maximum standing alone) round-trip
+// through different fields and the merge result has to be emitted in the
+// same form it came in.
+type boundSource int
+
+const (
+	sourceMinMax     boundSource = iota // schema.Min / schema.Max field, optionally with 3.0-style boolean exclusive
+	sourceExclusive                     // schema.ExclusiveMin.Value / schema.ExclusiveMax.Value (3.1 numeric)
+)
+
+// numericBound is one candidate bound contributed by one schema in the allOf
+// collection, normalized so different forms can be compared on a single axis.
+type numericBound struct {
+	value     float64
+	exclusive bool        // true: strict (>, <); false: inclusive (>=, <=)
+	source    boundSource // how to emit it back when this candidate wins
+}
+
+// collectLowerBounds extracts every effective lower-bound candidate from the
+// merged collection. A 3.1 schema with both `minimum` and `exclusiveMinimum`
+// contributes two candidates and the more restrictive one wins downstream.
+func collectLowerBounds(collection *SchemaCollection) []numericBound {
+	var bounds []numericBound
+	for i, m := range collection.Min {
+		eb := collection.ExclusiveMin[i]
+		if m != nil {
+			// 3.0: `minimum` plus optional boolean `exclusiveMinimum`.
+			// 3.1 with `minimum`: never has Bool set, so IsTrue()==false → inclusive.
+			bounds = append(bounds, numericBound{
+				value:     *m,
+				exclusive: eb.IsTrue(),
+				source:    sourceMinMax,
+			})
+		}
+		if eb.Value != nil {
+			// 3.1: numeric `exclusiveMinimum`. Always strict.
+			bounds = append(bounds, numericBound{
+				value:     *eb.Value,
+				exclusive: true,
+				source:    sourceExclusive,
+			})
+		}
+	}
+	return bounds
+}
+
+func collectUpperBounds(collection *SchemaCollection) []numericBound {
+	var bounds []numericBound
+	for i, m := range collection.Max {
+		eb := collection.ExclusiveMax[i]
+		if m != nil {
+			bounds = append(bounds, numericBound{
+				value:     *m,
+				exclusive: eb.IsTrue(),
+				source:    sourceMinMax,
+			})
+		}
+		if eb.Value != nil {
+			bounds = append(bounds, numericBound{
+				value:     *eb.Value,
+				exclusive: true,
+				source:    sourceExclusive,
+			})
+		}
+	}
+	return bounds
+}
+
+// pickMostRestrictive returns the lower-bound candidate that excludes the most
+// values. For lower bounds (`upper=false`), the most-restrictive bound is the
+// highest one; ties break in favor of the strict (exclusive) variant.
+func pickMostRestrictive(bounds []numericBound, upper bool) (numericBound, bool) {
+	if len(bounds) == 0 {
+		return numericBound{}, false
+	}
+	best := bounds[0]
+	for _, b := range bounds[1:] {
+		if upper {
+			if b.value < best.value || (b.value == best.value && b.exclusive && !best.exclusive) {
+				best = b
+			}
+		} else {
+			if b.value > best.value || (b.value == best.value && b.exclusive && !best.exclusive) {
+				best = b
+			}
+		}
+	}
+	return best, true
+}
+
+// emitLower writes the chosen lower bound back to the schema in its original
+// form: 3.0 boolean style if the winner came from `minimum`, 3.1 numeric
+// exclusive style if it came from `exclusiveMinimum`.
+func emitLower(schema *openapi3.Schema, b numericBound) {
+	v := b.value
+	if b.source == sourceExclusive {
+		schema.Min = nil
+		schema.ExclusiveMin = openapi3.ExclusiveBound{Value: &v}
+		return
+	}
+	schema.Min = &v
+	if b.exclusive {
+		t := true
+		schema.ExclusiveMin = openapi3.ExclusiveBound{Bool: &t}
+	} else {
+		schema.ExclusiveMin = openapi3.ExclusiveBound{}
+	}
+}
+
+func emitUpper(schema *openapi3.Schema, b numericBound) {
+	v := b.value
+	if b.source == sourceExclusive {
+		schema.Max = nil
+		schema.ExclusiveMax = openapi3.ExclusiveBound{Value: &v}
+		return
+	}
+	schema.Max = &v
+	if b.exclusive {
+		t := true
+		schema.ExclusiveMax = openapi3.ExclusiveBound{Bool: &t}
+	} else {
+		schema.ExclusiveMax = openapi3.ExclusiveBound{}
+	}
+}
+
 func resolveNumberRange(schema *openapi3.Schema, collection *SchemaCollection) *openapi3.Schema {
-
-	//resolve minimum
-	max := math.Inf(-1)
-	var exclusiveMin openapi3.ExclusiveBound
-	var value *float64
-	for i, s := range collection.Min {
-		if s != nil {
-			if *s > max {
-				max = *s
-				value = s
-				exclusiveMin = collection.ExclusiveMin[i]
-			}
-		}
+	if best, ok := pickMostRestrictive(collectLowerBounds(collection), false); ok {
+		emitLower(schema, best)
+	} else {
+		schema.Min = nil
+		schema.ExclusiveMin = openapi3.ExclusiveBound{}
 	}
-
-	schema.Min = value
-	schema.ExclusiveMin = exclusiveMin
-	//resolve maximum
-	min := math.Inf(1)
-	var exclusiveMax openapi3.ExclusiveBound
-	// var value *float64
-	for i, s := range collection.Max {
-		if s != nil {
-			if *s < min {
-				min = *s
-				value = s
-				exclusiveMax = collection.ExclusiveMax[i]
-			}
-		}
+	if best, ok := pickMostRestrictive(collectUpperBounds(collection), true); ok {
+		emitUpper(schema, best)
+	} else {
+		schema.Max = nil
+		schema.ExclusiveMax = openapi3.ExclusiveBound{}
 	}
-
-	schema.Max = value
-	schema.ExclusiveMax = exclusiveMax
 	return schema
 }
 
