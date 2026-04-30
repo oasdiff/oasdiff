@@ -93,14 +93,20 @@ Communicate intent across versions.
 - [Deprecate APIs and parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md) (draft / alpha / beta / stable)
 
-### Output & tracking
-Shape, enrich, and track changes across runs.
+### Filtering changes
+Choose which kinds of differences are reported.
+
+- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes) — e.g. ignore description-only edits
+- [Track OpenAPI extensions](DIFF.md#openapi-extensions) — opt in to reporting changes in `x-*` fields
+- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names) — when extensions are tracked, skip ones you don't care about
+
+### Output
+Shape and enrich the report.
 
 - [Customize HTML and Markdown changelog templates](CHANGELOG-TEMPLATE.md)
 - [Add OpenAPI-extension attributes to changelog entries](ATTRIBUTES.md)
 - [Source location tracking](SOURCE-LOCATOR.md)
 - [Change fingerprints](FINGERPRINT.md) — stable IDs across commits
-- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes), [exclude extension names](DIFF.md#excluding-specific-extension-names), [track OpenAPI extensions](DIFF.md#openapi-extensions)
 - [Error reporting](ERRORS.md)
 - Localization: en, ru, pt-br, es
 
