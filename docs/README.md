@@ -54,8 +54,8 @@ curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | v
 
 https://github.com/oasdiff/asdf-oasdiff
 
-### Manually install on macOS, Windows and Linux
-Copy binaries from [latest release](https://github.com/oasdiff/oasdiff/releases/).  
+### Download a binary
+Pre-built binaries for macOS, Linux, and Windows (both x86_64 and arm64) are on the [releases page](https://github.com/oasdiff/oasdiff/releases/).
 
 ## Documentation
 
