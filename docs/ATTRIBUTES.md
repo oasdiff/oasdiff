@@ -1,5 +1,5 @@
-## Adding custom attributes to changelog entries basing on OpenAPI extension tags
-Some people annotate their endpoints with OpenAPI Extension tags, for example:
+# Add OpenAPI Extensions to the Changelog
+OpenAPI specs can carry custom `x-*` extension fields that attach metadata to operations. For example:
 ```
 /restapi/oauth/token:
   post:
@@ -12,7 +12,7 @@ Some people annotate their endpoints with OpenAPI Extension tags, for example:
         ...
 ```
 
-Oasdiff can add these attributes to the changelog in JSON or YAML formats as follows:
+Use the `--attributes` flag to include these values in JSON or YAML changelog entries:
 
 ```
 ❯ oasdiff changelog base.yaml revision.yaml -f yaml --attributes x-audience

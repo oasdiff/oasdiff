@@ -1,4 +1,4 @@
-## Merging AllOf Schemas [Beta]
+# Merging AllOf Schemas [Beta]
 OpenAPI 3.0 provides several keywords which can be used to combine schemas.  
 You can use these keywords to create a complex schema or validate a value against multiple criteria.  
 - oneOf – validates the value against exactly one of the subschemas
@@ -11,7 +11,7 @@ Consider, for example, the following comparison of two OpenAPI specs:
 oasdiff breaking data/allof/simple.yaml data/allof/revision.yaml 
 ```
 
-The result shows one breaking change which is due to a new subschema that was added under allOf. But the new subschema, doesn't actually add any new constraints, because it is identical to a previously existing subschema, and, as such, this isn't a breaking chanage.
+The result shows one breaking change which is due to a new subschema that was added under allOf. But the new subschema doesn't actually add any new constraints because it is identical to a previously existing subschema, and as such this isn't a breaking change.
 You can verify this with a regular diff comparison:
 ```
 diff --side-by-side data/allof/simple.yaml data/allof/revision.yaml
@@ -30,7 +30,7 @@ In order to see how oasdiff merges allOf, you can use the dedicated `flatten` co
 oasdiff flatten data/allof/simple.yaml
 ```
 
-### Source location limitations
+## Source location limitations
 When using `--flatten-allof`, source locations (file, line, column) are not available for changes detected in flattened schemas. This is because the merged schema is a new construct that doesn't correspond to a single location in the original file.
 
 The following schema fields are not merged:

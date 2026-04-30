@@ -21,8 +21,5 @@
 2. Create a check func inside the file and name it accordingly
 3. Add the checker func to the defaultChecks or optionalChecks list
 
-## Documentation
-Optionally, add additional unit tests and comment them with "BC: \<use-case\> is breaking" or "BC: \<use-case\> is not breaking"
-
 ## Example
 See this example of adding a custom check: https://github.com/oasdiff/oasdiff/pull/208/files

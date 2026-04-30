@@ -12,6 +12,18 @@ Command-line and Go package to compare and detect breaking changes in OpenAPI sp
 
 Run it locally, in CI via the [GitHub Action](https://github.com/oasdiff/oasdiff-action), or use the hosted PR review workflow at [oasdiff.com](https://www.oasdiff.com) to approve or reject each change with a CI commit status.
 
+## Get started in 30 seconds
+
+No install needed — try it with Docker against two sample specs:
+
+```bash
+docker run --rm -t tufin/oasdiff changelog \
+  https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml \
+  https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test5.yaml
+```
+
+That prints a human-readable changelog of every significant change between the two specs. Swap `changelog` for `breaking` to see only breaking changes, or `diff` for the full machine-readable diff.
+
 ## Installation
 
 ### Install with Go
@@ -26,74 +38,97 @@ brew install oasdiff
 
 ### Install on macOS and Linux using curl
 
+The [install.sh](../install.sh) script downloads the latest oasdiff binary into `/usr/local/bin`:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+```
+
+To pin a specific version, set the `version` env var:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=1.11.7 sh
 ```
 
 ### Install with asdf
 
 https://github.com/oasdiff/asdf-oasdiff
 
-### Manually install on macOS, Windows and Linux
-Copy binaries from [latest release](https://github.com/oasdiff/oasdiff/releases/).  
+### Download a binary
+Pre-built binaries for macOS, Linux, and Windows (both x86_64 and arm64) are on the [releases page](https://github.com/oasdiff/oasdiff/releases/).
 
-### Use install.sh
-You can use the [install.sh](../install.sh) script to install oasdiff.  
-The script will download the latest version, or a specific version of oasdiff and install it in /usr/local/bin.  
+## Documentation
 
-## Try it
+Grouped by what you're trying to do. New to oasdiff? Start with **Commands**.
 
-### Locally
-```
-oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test5.yaml
-```
+### Commands
+The six top-level subcommands.
 
-### With Docker
-```
-docker run --rm -t tufin/oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test5.yaml
-```
+- [`diff`](DIFF.md) — full diff between two OpenAPI specs (output: html, json, markdown, markup, text, or yaml — default yaml)
+- [`summary`](DIFF.md) — high-level count of changes between two specs (built on the diff engine; same shared options)
+- [`breaking`](BREAKING-CHANGES.md) — only breaking changes
+- [`changelog`](BREAKING-CHANGES.md) — every significant change, breaking or not, in human-readable form
+- [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
+- [`checks`](CHECKS.md) — list the rules oasdiff uses to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
 
-## Features
-- Detect [breaking changes](BREAKING-CHANGES.md)
-- Display a user-friendly [changelog](BREAKING-CHANGES.md) of all important API changes
-- Generate comprehensive [diff](DIFF.md) reports including all aspects of [OpenAPI Specification](https://swagger.io/specification/): paths, operations, parameters, request bodies, responses, schemas, enums, callbacks, security etc.
-- Output reports in YAML, JSON, Text, Markdown, HTML, JUnit XML or the [github actions annotation format](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#setting-a-warning-message)
-- [Source location tracking](SOURCE-LOCATOR.md)
-- Compare specs from local files, http/s URLs, or [git revisions](GIT-REVISION.md)
-- Compare specs in YAML or JSON format
-- [OpenAPI 3.1 support](OPENAPI-31.md)
-- [Change fingerprints](FINGERPRINT.md) for stable cross-commit change identity
-- [Compare two collections of specs](COMPOSED.md)
-- [Deprecate APIs and Parameters](DEPRECATION.md)
-- [API stability levels](STABILITY.md)
-- [Multiple versions of the same endpoint](MATCHING-ENDPOINTS.md#duplicate-endpoints)
-- [Merge allOf schemas](ALLOF.md)
+### Inputs
+Where specs come from.
+
+- [Git revisions](GIT-REVISION.md) — compare against a branch, tag, or commit
+- Local files, http/s URLs, YAML or JSON — all handled transparently
+
+### Comparison
+How oasdiff pairs up base and revision and what counts as a difference.
+
+- [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
+- [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
+- [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
+
+### Normalization
+Align each spec before diffing so equivalent things line up.
+
+- [Merge `allOf` schemas](ALLOF.md)
 - [Merge common (path-level) parameters](COMMON-PARAMS.md)
-- [Case-insensitive header comparison](HEADER-DIFF.md)
-- [Path prefix modification](PATH-PREFIX.md)
-- [Path parameter renaming](PATH-PARAM-RENAME.md)
-- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes)
-- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names)
-- [Track changes to OpenAPI Extensions](DIFF.md#openapi-extensions)
-- [Filter endpoints](FILTERING-ENDPOINTS.md)
-- [Extend breaking changes with custom checks](CUSTOMIZING-CHECKS.md)
-- [Security: control external $ref loading to prevent SSRF](SECURITY.md)
-- Localization: view breaking changes and changelog messages in local languages: en, ru, pt-br, es
-- [Customize HTML and Markdown changelog reports](CHANGELOG-TEMPLATE.md)
-- [Run with configuration file](CONFIG-FILES.md)
-- [Run from Docker](DOCKER.md)
-- [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI; for teams, [oasdiff.com](https://www.oasdiff.com) adds a per-change PR comment with approve/reject and commit-status checks
-- [Embed in your go program](GO.md)
+- [Path prefix modification](PATH-PREFIX.md) — strip or add a prefix so a moved API still matches
+- [Case-insensitive header comparison](HEADER-DIFF.md) — treat `Content-Type` and `content-type` as the same header
+
+### API lifecycle
+Communicate intent across versions.
+
+- [Deprecate APIs and parameters](DEPRECATION.md)
+- [API stability levels](STABILITY.md) (draft / alpha / beta / stable)
+
+### Filtering changes
+Choose which kinds of differences are reported.
+
+- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes) — e.g. ignore description-only edits
+- [Track OpenAPI extensions](DIFF.md#openapi-extensions) — opt in to reporting changes in `x-*` fields
+- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names) — when extensions are tracked, skip ones you don't care about
+
+### Output
+Shape and enrich the report.
+
+- [Customize HTML and Markdown changelog templates](CHANGELOG-TEMPLATE.md)
+- [Add OpenAPI-extension attributes to changelog entries](ATTRIBUTES.md)
+- [Source location tracking](SOURCE-LOCATOR.md)
+- [Change fingerprints](FINGERPRINT.md) — stable IDs across commits
+- [Error reporting](ERRORS.md)
+- Localization: en, ru, pt-br, es
+
+### How to run
+- [Docker](DOCKER.md)
+- [Configuration file](CONFIG-FILES.md)
+- [Embed in a Go program](GO.md)
+- [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI — and [oasdiff.com](https://www.oasdiff.com) for teams, which adds a per-change PR comment with approve/reject and commit-status checks
+
+### Reference
+- [OpenAPI 3.1 support](OPENAPI-31.md) — what's supported
+- [Security: control external `$ref` loading to prevent SSRF](SECURITY.md)
+- [Usage examples](USAGE_EXAMPLES.md) — recipes for common scenarios
+- [Contributing](CONTRIB.md)
 
 ## Demo
 <img src="./demo.svg">
-
-## The main commands
-- [diff](DIFF.md): the full diff between OpenAPI specs
-- [breaking](BREAKING-CHANGES.md): breaking changes between OpenAPI specs
-- [changelog](BREAKING-CHANGES.md): all significant changes between OpenAPI specs, including breaking and non-breaking
-- [flatten](ALLOF.md): replace all instances of allOf by a merged equivalent
-- [checks](CHECKS.md): display the checks that oasdiff uses to detect changes
 
 ## Credits
 This project relies on the excellent implementation of OpenAPI 3.0 and 3.1 for Go: [kin-openapi](https://github.com/getkin/kin-openapi).
