@@ -1,5 +1,5 @@
 ## Running oasdiff from docker
-To run oasdiff from docker just replace the oasdiff command by `docker run --rm -t oasdiff/oasdiff` (or the image you prefer).  
+To run oasdiff from docker just replace the oasdiff command by `docker run --rm -t tufin/oasdiff` (or the image you prefer).  
 Here are a few examples:
 
 ### Breaking changes with Docker
