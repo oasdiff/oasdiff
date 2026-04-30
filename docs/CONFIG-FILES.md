@@ -1,4 +1,4 @@
-## Configuration Files
+# Configuration Files
 The `oasdiff` command can read its configuration from a file.  
 This is useful for complex configurations or repeated usage patterns.  
 The config file should be named oasdiff.{json,yaml,yml,toml,hcl} and placed in the directory where the command is run.  

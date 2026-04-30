@@ -1,4 +1,4 @@
-## Adding custom attributes to changelog entries basing on OpenAPI extension tags
+# Adding custom attributes to changelog entries basing on OpenAPI extension tags
 Some people annotate their endpoints with OpenAPI Extension tags, for example:
 ```
 /restapi/oauth/token:

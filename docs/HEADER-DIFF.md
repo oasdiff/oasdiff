@@ -1,4 +1,4 @@
-## Case-Insensitive Header Comparison
+# Case-Insensitive Header Comparison
 
 By default, oasdiff compares header names case-sensitively. This matches OpenAPI's general rule that "all field names in the specification are case sensitive".
 

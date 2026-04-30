@@ -1,6 +1,6 @@
-## Errors
+# Errors
 
-### Invalid Specs
+## Invalid Specs
 Oasdiff expects valid OpenAPI 3 specs as input.  
 The specs can be written in JSON or YAML.  
 Oasdiff may return an error when given invalid specs, for example:

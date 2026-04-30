@@ -1,4 +1,4 @@
-## API Stability Levels
+# API Stability Levels
 When a new API is introduced, you may want to allow developers to change its behavior without triggering a breaking change error. Mark the endpoint with the `x-stability-level` extension:
 
 ```
@@ -14,8 +14,8 @@ There are four levels, in increasing order of stability:
 
 Endpoints with no `x-stability-level` are treated like `stable`: any breaking change is reported.
 
-### Allowed transitions
+## Allowed transitions
 Stability may be increased (`draft` → `alpha` → `beta` → `stable`) but never decreased. An endpoint that previously had no `x-stability-level` may be assigned any level.
 
-### See also
+## See also
 Stability levels also control [grace periods for API deprecation](DEPRECATION.md#grace-period).
