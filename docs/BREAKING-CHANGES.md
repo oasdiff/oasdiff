@@ -6,6 +6,8 @@ These commands are typically used in the CI to report or prevent breaking change
 
 > **Note:** `breaking` and `changelog` run on the diff engine described in [DIFF.md](DIFF.md). The flags and concepts there — extension tracking, path matching, `allOf` flattening, the path-prefix family, header case, `--allow-external-refs`, `--fail-on-diff` — apply here too, in addition to the breaking-specific options below.
 
+> **For teams:** [oasdiff.com](https://www.oasdiff.com) wraps these commands with a per-change PR comment, one-click approve/reject buttons, and commit-status checks — so reviewers can act on each breaking change directly from the pull request.
+
 ### Example: display breaking changes
 ```
 oasdiff breaking https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
