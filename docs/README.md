@@ -67,23 +67,25 @@ The five top-level subcommands.
 - [`checks`](CHECKS.md) — list the rules oasdiff uses to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
 
 ### Inputs
-What you can compare and how oasdiff loads it.
+Where specs come from.
 
 - [Git revisions](GIT-REVISION.md) — compare against a branch, tag, or commit
-- [Composed mode](COMPOSED.md) — compare two collections of specs (e.g. behind an API gateway)
-- [OpenAPI 3.1](OPENAPI-31.md) — what's supported
-- [`allOf` merging](ALLOF.md)
-- [Common (path-level) parameter merging](COMMON-PARAMS.md)
 - Local files, http/s URLs, YAML or JSON — all handled transparently
 
-### Matching & filtering endpoints
-Tell oasdiff which endpoints in the base correspond to which in the revision.
+### Comparison
+How oasdiff pairs up base and revision and what counts as a difference.
 
-- [Endpoint matching](MATCHING-ENDPOINTS.md) (including [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints))
-- [Filter endpoints](FILTERING-ENDPOINTS.md)
-- [Path prefix modification](PATH-PREFIX.md)
-- [Path parameter renaming](PATH-PARAM-RENAME.md)
+- [Endpoint matching](MATCHING-ENDPOINTS.md) — including [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints) and [path parameter renaming](PATH-PARAM-RENAME.md)
+- [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
+- [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
 - [Case-insensitive header comparison](HEADER-DIFF.md)
+
+### Preprocessing
+Transform each spec before diffing.
+
+- [Merge `allOf` schemas](ALLOF.md)
+- [Merge common (path-level) parameters](COMMON-PARAMS.md)
+- [Path prefix modification](PATH-PREFIX.md) — strip or add a prefix so a moved API still matches
 
 ### API lifecycle
 Communicate intent across versions.
@@ -109,6 +111,7 @@ Shape, enrich, and track changes across runs.
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI — and [oasdiff.com](https://www.oasdiff.com) for teams, which adds a per-change PR comment with approve/reject and commit-status checks
 
 ### Reference
+- [OpenAPI 3.1 support](OPENAPI-31.md) — what's supported
 - [Security: control external `$ref` loading to prevent SSRF](SECURITY.md)
 - [Usage examples](USAGE_EXAMPLES.md) — recipes for common scenarios
 - [Contributing](CONTRIB.md)
