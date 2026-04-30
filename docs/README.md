@@ -38,8 +38,16 @@ brew install oasdiff
 
 ### Install on macOS and Linux using curl
 
+The [install.sh](../install.sh) script downloads the latest oasdiff binary into `/usr/local/bin`:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+```
+
+To pin a specific version, set the `version` env var:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | version=1.11.7 sh
 ```
 
 ### Install with asdf
@@ -48,10 +56,6 @@ https://github.com/oasdiff/asdf-oasdiff
 
 ### Manually install on macOS, Windows and Linux
 Copy binaries from [latest release](https://github.com/oasdiff/oasdiff/releases/).  
-
-### Use install.sh
-You can use the [install.sh](../install.sh) script to install oasdiff.  
-The script will download the latest version, or a specific version of oasdiff and install it in /usr/local/bin.  
 
 ## Documentation
 
