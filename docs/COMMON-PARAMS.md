@@ -56,12 +56,12 @@ paths:
                         - tenant-id
                     path:
                         - id
-```						
+```
 
 To overcome this limitation use the `--flatten-params` flag which merges common parameters from the path level into the operation level before running the diff:
 ```
 oasdiff diff data/common-params/params_in_path.yaml data/common-params/params_in_op.yaml --flatten-params
- ```
+```
 The output will be empty meaning that no change was found.
 
 ### Changelog (incl. Breaking Changes) and Common Parameters
