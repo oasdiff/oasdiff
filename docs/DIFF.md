@@ -3,6 +3,8 @@ The `oasdiff diff` command displays the diff between OpenAPI specs.
 Output is fully detailed, typically in yaml or json but also available in text, markdown and html formats.  
 This commmand is typically used to generate a structured diff report which can be consumed by other tools but it can also be viewed by humans.
 
+> **Note:** `summary`, `breaking`, and `changelog` are built on the same diff engine. Most concepts and flags described here apply to those commands too. Exceptions are called out inline.
+
 ### Output Formats
 The default diff output format is `yaml`.  
 Additional formats can be generated using the `--format` flag:
@@ -84,6 +86,8 @@ endpoints:
 ```
 
 ### Excluding Specific Kinds of Changes
+Currently available on `diff` and `summary`.
+
 You can use the `--exclude-elements` flag with to exclude one or more of the following:
 - Use `--exclude-elements examples` to exclude [Examples](https://swagger.io/specification/#example-object)
 - Use `--exclude-elements extensions` to exclude [Extensions](https://swagger.io/specification/#specification-extensions)
