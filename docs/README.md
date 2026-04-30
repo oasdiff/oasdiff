@@ -75,7 +75,7 @@ Where specs come from.
 ### Comparison
 How oasdiff pairs up base and revision and what counts as a difference.
 
-- [Endpoint matching](MATCHING-ENDPOINTS.md) — including [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints) and [path parameter renaming](PATH-PARAM-RENAME.md)
+- [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
 - [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
 - [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
 

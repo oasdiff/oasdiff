@@ -112,7 +112,7 @@ This is useful when you have extensions that are only used internally or for too
 - [Merging AllOf Schemas](ALLOF.md)
 - [Merging common parameters from the path level into the operation level](COMMON-PARAMS.md)
 - [Filtering endpoints](FILTERING-ENDPOINTS.md)
-- [Path parameter renaming](PATH-PARAM-RENAME.md)
+- [Path parameter renaming](MATCHING-ENDPOINTS.md)
 - [Case-insensitive header comparison](HEADER-DIFF.md)
 - [Comparing multiple specs](COMPOSED.md)
 - [Customize with configuration files](CONFIG-FILES.md)
