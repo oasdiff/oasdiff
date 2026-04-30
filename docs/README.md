@@ -78,14 +78,14 @@ How oasdiff pairs up base and revision and what counts as a difference.
 - [Endpoint matching](MATCHING-ENDPOINTS.md) — including [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints) and [path parameter renaming](PATH-PARAM-RENAME.md)
 - [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
 - [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
-- [Case-insensitive header comparison](HEADER-DIFF.md)
 
-### Preprocessing
-Transform each spec before diffing.
+### Normalization
+Align each spec before diffing so equivalent things line up.
 
 - [Merge `allOf` schemas](ALLOF.md)
 - [Merge common (path-level) parameters](COMMON-PARAMS.md)
 - [Path prefix modification](PATH-PREFIX.md) — strip or add a prefix so a moved API still matches
+- [Case-insensitive header comparison](HEADER-DIFF.md) — treat `Content-Type` and `content-type` as the same header
 
 ### API lifecycle
 Communicate intent across versions.
