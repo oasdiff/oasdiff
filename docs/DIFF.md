@@ -112,17 +112,6 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
-### Additional Options
-- [Merging AllOf Schemas](ALLOF.md)
-- [Merging common parameters from the path level into the operation level](COMMON-PARAMS.md)
-- [Filtering endpoints](FILTERING-ENDPOINTS.md)
-- [Path parameter renaming](MATCHING-ENDPOINTS.md)
-- [Case-insensitive header comparison](HEADER-DIFF.md)
-- [Comparing multiple specs](COMPOSED.md)
-- [Customize with configuration files](CONFIG-FILES.md)
-- [Running from docker](DOCKER.md)
-- [Embedding in your go program](GO.md)
-
 ### Usage Examples
 
 #### Diff as YAML

@@ -134,18 +134,6 @@ If you encounter a change that isn't reported, you may:
 1. Run `oasdiff checks` to see if the check is available, and [customize the level as needed](#customizing-severity-levels).  
 2. Add a [custom check](CUSTOMIZING-CHECKS.md)
 
-### Additional Options
-- [Merging AllOf Schemas](ALLOF.md)
-- [Merging common parameters from the path level into the operation level](COMMON-PARAMS.md)
-- [Filtering endpoints](FILTERING-ENDPOINTS.md)
-- [Path parameter renaming](MATCHING-ENDPOINTS.md)
-- [Case-insensitive header comparison](HEADER-DIFF.md)
-- [Comparing multiple specs](COMPOSED.md)
-- [Adding OpenAPI Extensions to the changelog output](ATTRIBUTES.md)
-- [Customize with configuration files](CONFIG-FILES.md)
-- [Running from docker](DOCKER.md)
-- [Embedding in your go program](GO.md)
-
 ### Known Limitations
 - no checks for `context` instead of `schema` for request parameters
 - no checks for `callback`s
