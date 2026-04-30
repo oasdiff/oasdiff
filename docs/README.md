@@ -60,7 +60,7 @@ Grouped by what you're trying to do. New to oasdiff? Start with **Commands**.
 ### Commands
 The five top-level subcommands.
 
-- [`diff`](DIFF.md) — full diff between two OpenAPI specs (YAML, JSON, Text, Markdown, HTML, JUnit XML, or GitHub Actions annotations)
+- [`diff`](DIFF.md) — full diff between two OpenAPI specs (output: html, json, markdown, markup, text, or yaml — default yaml)
 - [`breaking`](BREAKING-CHANGES.md) — only breaking changes
 - [`changelog`](BREAKING-CHANGES.md) — every significant change, breaking or not, in human-readable form
 - [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
