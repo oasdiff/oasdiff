@@ -70,7 +70,7 @@ See [CHANGELOG-TEMPLATE.md](CHANGELOG-TEMPLATE.md) for full documentation and ex
 ```bash
 oasdiff diff https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml -f text -p "/api"
 ```
-Filters are applied recursively at all levels. For example, if a path contains a [callback](https://swagger.io/docs/specification/callbacks/), the filter will be applied both to the path itself and to the callback path. To include such a nested change, use a regular expression that contains both paths, for example ```-filter "path|callback-path"```
+Filters are applied recursively at all levels. For example, if a path contains a [callback](https://swagger.io/docs/specification/callbacks/), the filter will be applied both to the path itself and to the callback path. To include such a nested change, use a regular expression that contains both paths, for example `--match-path "path|callback-path"`.
 
 ### Exclude paths and operations with extension "x-beta"
 ```bash
@@ -91,7 +91,7 @@ oasdiff summary https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/open
 ```
 
 ### OpenAPI Diff with Docker
-To run with docker just replace the `oasdiff` command by `docker run --rm -t oasdiff/oasdiff`, for example:
+To run with docker just replace the `oasdiff` command by `docker run --rm -t tufin/oasdiff`, for example:
 
 ```bash
 docker run --rm -t tufin/oasdiff diff https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml -f text
