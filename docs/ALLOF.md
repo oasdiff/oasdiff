@@ -11,7 +11,7 @@ Consider, for example, the following comparison of two OpenAPI specs:
 oasdiff breaking data/allof/simple.yaml data/allof/revision.yaml 
 ```
 
-The result shows one breaking change which is due to a new subschema that was added under allOf. But the new subschema, doesn't actually add any new constraints, because it is identical to a previously existing subschema, and, as such, this isn't a breaking chanage.
+The result shows one breaking change which is due to a new subschema that was added under allOf. But the new subschema doesn't actually add any new constraints because it is identical to a previously existing subschema, and as such this isn't a breaking change.
 You can verify this with a regular diff comparison:
 ```
 diff --side-by-side data/allof/simple.yaml data/allof/revision.yaml

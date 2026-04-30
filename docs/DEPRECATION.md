@@ -48,7 +48,7 @@ If you are using [API stability levels](STABILITY.md) you can define different s
 Notes:
 1. Deprecation days can be set to non-negative integers
 2. Setting deprecation days to a zero value disables enforcement and reverts to the [Deprecation with a sunset date](#deprecation-with-a-sunset-date) behavior
-2. After an `x-sunset` extension is specified, it can only be changed to a future date which respects the sunset grace period relative to date of the change.
+3. After an `x-sunset` extension is specified, it can only be changed to a future date which respects the sunset grace period relative to date of the change.
 
 ### Supported Resources for Deprecation
 OpenAPI 3 supports the `deprecation` field for `Operations`, `Parameters`, `Headers` and `Schemas`.  
