@@ -58,9 +58,10 @@ The script will download the latest version, or a specific version of oasdiff an
 Grouped by what you're trying to do. New to oasdiff? Start with **Commands**.
 
 ### Commands
-The five top-level subcommands.
+The six top-level subcommands.
 
 - [`diff`](DIFF.md) — full diff between two OpenAPI specs (output: html, json, markdown, markup, text, or yaml — default yaml)
+- [`summary`](DIFF.md) — high-level count of changes between two specs (built on the diff engine; same shared options)
 - [`breaking`](BREAKING-CHANGES.md) — only breaking changes
 - [`changelog`](BREAKING-CHANGES.md) — every significant change, breaking or not, in human-readable form
 - [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
