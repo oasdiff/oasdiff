@@ -46,6 +46,7 @@ type RenderOpts struct {
 	WrapInObject bool   // wrap the output in a JSON object with the key "changes"
 	TemplatePath string // path to custom template file for changelog generation
 	DiffEmpty    bool   // true when the underlying diff found no changes at all
+	IsBreaking   bool   // true when invoked via `oasdiff breaking` (vs `changelog`); affects empty-result wording
 }
 
 func NewRenderOpts() RenderOpts {
@@ -59,6 +60,7 @@ type TemplateData struct {
 	BaseVersion     string
 	RevisionVersion string
 	DiffEmpty       bool
+	IsBreaking      bool
 }
 
 // APIChanges returns GroupedChanges.

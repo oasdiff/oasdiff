@@ -120,7 +120,7 @@ var changelogHtml string
 func TestExecuteHtmlTemplate_Err(t *testing.T) {
 	tmpl := template.Must(template.New("changelog").Funcs(formatters.HtmlTemplateFuncs()).Parse(changelogHtml))
 	tmpl.Tree = nil
-	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, "", "", false)
+	_, err := formatters.ExecuteHtmlTemplate(tmpl, nil, "", "", false, false)
 	assert.Error(t, err)
 }
 

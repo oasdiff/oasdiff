@@ -57,7 +57,7 @@ func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts,
 		tmpl = template.Must(template.New("changelog").Funcs(HtmlTemplateFuncs()).Parse(changelogHtml))
 	}
 
-	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion, opts.DiffEmpty)
+	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion, opts.DiffEmpty, opts.IsBreaking)
 }
 
 func (f HTMLFormatter) loadCustomTemplate(templatePath string) (*template.Template, error) {
@@ -121,9 +121,9 @@ func HtmlTemplateFuncs() template.FuncMap {
 	return template.FuncMap(changelogTemplateFuncs())
 }
 
-func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string, diffEmpty bool) ([]byte, error) {
+func ExecuteHtmlTemplate(tmpl *template.Template, changes ChangesByGroup, baseVersion, revisionVersion string, diffEmpty, isBreaking bool) ([]byte, error) {
 	var out bytes.Buffer
-	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion, diffEmpty}); err != nil {
+	if err := tmpl.Execute(&out, TemplateData{changes, baseVersion, revisionVersion, diffEmpty, isBreaking}); err != nil {
 		return nil, err
 	}
 	return out.Bytes(), nil

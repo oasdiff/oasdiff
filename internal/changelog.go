@@ -41,10 +41,10 @@ func runChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 		return false, getErrInvalidFlags(fmt.Errorf("invalid level value: %q", flags.getLevel()))
 	}
 
-	return getChangelog(flags, stdout, level)
+	return getChangelog(flags, stdout, level, false)
 }
 
-func getChangelog(flags *Flags, stdout io.Writer, level checker.Level) (bool, *ReturnError) {
+func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
 
 	diffResult, returnErr := calcDiff(flags)
 	if returnErr != nil {
@@ -70,7 +70,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level) (bool, *R
 		return false, returnErr
 	}
 
-	if returnErr := outputChangelog(flags, stdout, errs, diffResult.specInfoPair, diffResult.diffReport.Empty()); returnErr != nil {
+	if returnErr := outputChangelog(flags, stdout, errs, diffResult.specInfoPair, diffResult.diffReport.Empty(), isBreaking); returnErr != nil {
 		return false, returnErr
 	}
 
@@ -106,7 +106,7 @@ func filterIgnored(errs checker.Changes, warnIgnoreFile string, errIgnoreFile st
 	return errs, nil
 }
 
-func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) *ReturnError {
+func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty, isBreaking bool) *ReturnError {
 
 	// formatter lookup
 	formatter, err := formatters.Lookup(flags.getFormat(), formatters.FormatterOpts{
@@ -127,7 +127,7 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 		return getErrInvalidColorMode(err)
 	}
 
-	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode, TemplatePath: flags.getTemplate(), DiffEmpty: diffEmpty}, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion())
+	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode, TemplatePath: flags.getTemplate(), DiffEmpty: diffEmpty, IsBreaking: isBreaking}, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion())
 	if err != nil {
 		return getErrFailedPrint(changelogCmd+" "+flags.getFormat(), err)
 	}

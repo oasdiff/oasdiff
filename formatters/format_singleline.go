@@ -24,6 +24,8 @@ func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts Rende
 	if len(changes) == 0 {
 		if opts.DiffEmpty {
 			_, _ = fmt.Fprint(result, "No changes detected")
+		} else if opts.IsBreaking {
+			_, _ = fmt.Fprint(result, "No breaking changes to report, but the specs are different")
 		} else {
 			_, _ = fmt.Fprint(result, "No changes to report, but the specs are different")
 		}
