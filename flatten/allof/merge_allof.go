@@ -12,10 +12,12 @@ import (
 )
 
 const (
-	FormatErrorMessage  = "unable to resolve Format conflict using default resolver: all Format values must be identical"
-	TypeErrorMessage    = "unable to resolve Type conflict: all Type values must be identical"
-	DefaultErrorMessage = "unable to resolve Default conflict: all Default values must be identical"
-	ConstErrorMessage   = "unable to resolve Const conflict: all Const values must be identical"
+	FormatErrorMessage           = "unable to resolve Format conflict using default resolver: all Format values must be identical"
+	TypeErrorMessage             = "unable to resolve Type conflict: all Type values must be identical"
+	DefaultErrorMessage          = "unable to resolve Default conflict: all Default values must be identical"
+	ConstErrorMessage            = "unable to resolve Const conflict: all Const values must be identical"
+	ContentMediaTypeErrorMessage = "unable to resolve ContentMediaType conflict: all ContentMediaType values must be identical"
+	ContentEncodingErrorMessage  = "unable to resolve ContentEncoding conflict: all ContentEncoding values must be identical"
 
 	FormatInt32  = "int32"
 	FormatInt64  = "int64"
@@ -56,6 +58,8 @@ type SchemaCollection struct {
 	Const                []any
 	MinContains          []*uint64
 	MaxContains          []*uint64
+	ContentMediaType     []string
+	ContentEncoding      []string
 }
 
 type state struct {
@@ -218,6 +222,8 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	if base.Value.MaxContains != nil {
 		result.Value.MaxContains = new(*base.Value.MaxContains)
 	}
+	result.Value.ContentMediaType = base.Value.ContentMediaType
+	result.Value.ContentEncoding = base.Value.ContentEncoding
 	result.Value.Discriminator = base.Value.Discriminator
 	// Fields documented in ALLOF.md as "not merged" — i.e. the merge
 	// logic doesn't combine them across allOf subschemas. They MUST
@@ -396,6 +402,14 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	result.Value = resolveMultipleOf(result.Value, &collection)
 	result.Value.UniqueItems = resolveUniqueItems(collection.UniqueItems)
 	result.Value.Const, err = resolveConst(&collection)
+	if err != nil {
+		return err
+	}
+	result.Value.ContentMediaType, err = resolveStringEqual(collection.ContentMediaType, ContentMediaTypeErrorMessage)
+	if err != nil {
+		return err
+	}
+	result.Value.ContentEncoding, err = resolveStringEqual(collection.ContentEncoding, ContentEncodingErrorMessage)
 	if err != nil {
 		return err
 	}
@@ -1123,6 +1137,8 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.Const = append(collection.Const, s.Value.Const)
 		collection.MinContains = append(collection.MinContains, s.Value.MinContains)
 		collection.MaxContains = append(collection.MaxContains, s.Value.MaxContains)
+		collection.ContentMediaType = append(collection.ContentMediaType, s.Value.ContentMediaType)
+		collection.ContentEncoding = append(collection.ContentEncoding, s.Value.ContentEncoding)
 	}
 	return collection
 }
@@ -1312,6 +1328,27 @@ func findIntersection(arrays ...[]string) []string {
 	}
 
 	return intersection
+}
+
+// resolveStringEqual handles 3.1 string-valued schema keywords whose merge
+// semantics are simple equality: every non-empty candidate must equal every
+// other; otherwise the merged schema is unsatisfiable. Empty string means
+// "unset" (matches the kin-openapi convention for these fields).
+func resolveStringEqual(values []string, errMessage string) (string, error) {
+	first := ""
+	for _, v := range values {
+		if v == "" {
+			continue
+		}
+		if first == "" {
+			first = v
+			continue
+		}
+		if v != first {
+			return "", errors.New(errMessage)
+		}
+	}
+	return first, nil
 }
 
 func resolveDefault(collection *SchemaCollection) (any, error) {
