@@ -141,6 +141,67 @@ func TestMerge_DefaultFailure(t *testing.T) {
 	require.EqualError(t, err, allof.DefaultErrorMessage)
 }
 
+// OpenAPI 3.1 / JSON Schema 2020-12 `const`: a single subschema with `const`
+// is preserved as-is — the value flows through unchanged.
+func TestMerge_Const(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				Const: "ACTIVE",
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, "ACTIVE", merged.Const)
+}
+
+// `const` with the same value across allOf subschemas merges to that value
+// (the constraints are equal — no conflict).
+func TestMerge_ConstEqual(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Const: float64(42)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Const: float64(42)}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, float64(42), merged.Const)
+}
+
+// `const` set on one subschema and absent on another — the present value
+// wins (nothing to conflict with).
+func TestMerge_ConstWithAbsentSibling(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Const: "only"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, "only", merged.Const)
+}
+
+// Conflicting `const` values across allOf subschemas describe an
+// unsatisfiable schema (no instance is both 1 and 2). Merge must surface
+// the conflict, not silently pick a winner.
+func TestMerge_ConstFailure(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Const: float64(1)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Const: float64(2)}},
+				},
+			},
+		})
+	require.EqualError(t, err, allof.ConstErrorMessage)
+}
+
 // verify that if all ReadOnly fields are set to false, then the ReadOnly field in the merged schema is false.
 func TestMerge_ReadOnlyIsSetToFalse(t *testing.T) {
 	merged, err := allof.Merge(
