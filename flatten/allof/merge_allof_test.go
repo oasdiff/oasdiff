@@ -15,6 +15,11 @@ func exclusiveBoundBool(b bool) openapi3.ExclusiveBound {
 	return openapi3.ExclusiveBound{Bool: &b}
 }
 
+// exclusiveBoundValue creates an ExclusiveBound with a numeric value (OpenAPI 3.1 style).
+func exclusiveBoundValue(v float64) openapi3.ExclusiveBound {
+	return openapi3.ExclusiveBound{Value: &v}
+}
+
 // identical Default fields are merged successfully
 func TestMerge_Default(t *testing.T) {
 	merged, err := allof.Merge(
@@ -668,6 +673,245 @@ func TestMerge_ExclusiveMinIsTrue(t *testing.T) {
 			}})
 	require.NoError(t, err)
 	require.True(t, merged.ExclusiveMin.IsTrue())
+}
+
+// OpenAPI 3.1: two numeric `exclusiveMinimum` values (no `minimum` on either
+// side). The merged schema must keep the higher one — failing this test was
+// the original symptom in issue #868: both values were silently dropped.
+func TestMerge_ExclusiveMinNumeric_PicksHigher(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMin: exclusiveBoundValue(10),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMin: exclusiveBoundValue(5),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.Min, "Min must be nil for 3.1 numeric exclusive form")
+	require.NotNil(t, merged.ExclusiveMin.Value)
+	require.Equal(t, 10.0, *merged.ExclusiveMin.Value)
+}
+
+// Same value on both sides — `minimum: 5` (inclusive) vs
+// `exclusiveMinimum: 5` (strict). The strict bound rejects the value
+// 5 itself and is therefore more restrictive at the boundary, so the
+// merged result is `exclusiveMinimum: 5` with `minimum` cleared.
+func TestMerge_ExclusiveMinNumeric_BeatsIdenticalInclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Min:  new(5.0),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMin: exclusiveBoundValue(5),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.Min)
+	require.NotNil(t, merged.ExclusiveMin.Value)
+	require.Equal(t, 5.0, *merged.ExclusiveMin.Value)
+}
+
+// Two subschemas: `minimum: 0` (inclusive) and `exclusiveMinimum: 5`
+// (strict). The strict bound at 5 is more restrictive than the inclusive
+// bound at 0, so the merged result is `exclusiveMinimum: 5` with
+// `minimum` cleared.
+func TestMerge_ExclusiveMinNumeric_BeatsLowerInclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Min:  new(0.0),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMin: exclusiveBoundValue(5),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.Min)
+	require.NotNil(t, merged.ExclusiveMin.Value)
+	require.Equal(t, 5.0, *merged.ExclusiveMin.Value)
+}
+
+// Two subschemas: `minimum: 10` (inclusive) and `exclusiveMinimum: 5`
+// (strict). Even though `exclusiveMinimum: 5` is strict, its value is
+// lower, so the inclusive `minimum: 10` is more restrictive overall.
+// The merged result is `minimum: 10` with no `exclusiveMinimum`.
+func TestMerge_InclusiveMinBeatsLowerNumericExclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Min:  new(10.0),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMin: exclusiveBoundValue(5),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Min)
+	require.Equal(t, 10.0, *merged.Min)
+	require.Nil(t, merged.ExclusiveMin.Value)
+	require.False(t, merged.ExclusiveMin.IsTrue())
+}
+
+// One schema has both `minimum: 0` (inclusive) and `exclusiveMinimum: 5`
+// (strict) — within that schema, the strict bound at 5 wins (effective
+// constraint: x > 5). A second schema contributes `minimum: 10`
+// (inclusive), which is more restrictive than the first schema's
+// effective `> 5`. The merged result is `minimum: 10` with no
+// `exclusiveMinimum`.
+func TestMerge_ExclusiveMinNumeric_WithSiblingInclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						Min:          new(0.0),
+						ExclusiveMin: exclusiveBoundValue(5),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Min:  new(10.0),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	// Effective lower bounds: > 5 (from schema 1's numeric exclusive),
+	// >= 0 (from schema 1's minimum), >= 10 (from schema 2). The most
+	// restrictive is >= 10.
+	require.NotNil(t, merged.Min)
+	require.Equal(t, 10.0, *merged.Min)
+	require.Nil(t, merged.ExclusiveMin.Value)
+	require.False(t, merged.ExclusiveMin.IsTrue())
+}
+
+// Mirror cases for the upper bound.
+
+func TestMerge_ExclusiveMaxNumeric_PicksLower(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMax: exclusiveBoundValue(100),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMax: exclusiveBoundValue(50),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.Max)
+	require.NotNil(t, merged.ExclusiveMax.Value)
+	require.Equal(t, 50.0, *merged.ExclusiveMax.Value)
+}
+
+func TestMerge_ExclusiveMaxNumeric_BeatsHigherInclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Max:  new(100.0),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMax: exclusiveBoundValue(50),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.Max)
+	require.NotNil(t, merged.ExclusiveMax.Value)
+	require.Equal(t, 50.0, *merged.ExclusiveMax.Value)
+}
+
+func TestMerge_InclusiveMaxBeatsHigherNumericExclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Max:  new(50.0),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMax: exclusiveBoundValue(100),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Max)
+	require.Equal(t, 50.0, *merged.Max)
+	require.Nil(t, merged.ExclusiveMax.Value)
+	require.False(t, merged.ExclusiveMax.IsTrue())
+}
+
+// Per docs/ALLOF.md, source locations are not available for changes detected
+// in flattened schemas — the merged schema is a new construct that doesn't
+// correspond to a single line in the original file. This test pins that
+// behavior so a future change to the merge code can't accidentally leak
+// stale origin metadata (e.g. a `minimum` field origin pointing at the
+// subschema whose value lost the merge), which would surface as wrong
+// line numbers in downstream consumers.
+func TestMerge_FlattenedNumericBounds_HaveNoSourceLocation(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	doc, err := loader.LoadFromData([]byte(`openapi: 3.1.0
+info: {title: t, version: '1'}
+paths: {}
+components:
+  schemas:
+    Bounded:
+      allOf:
+        - {type: number, minimum: 5}
+        - {type: number, exclusiveMinimum: 6}
+`))
+	require.NoError(t, err)
+
+	// Sanity-check: the loader actually populated origin info on the input —
+	// otherwise the post-merge nil assertion would be vacuously true.
+	require.NotNil(t, doc.Components.Schemas["Bounded"].Value.Origin,
+		"input schema must have origin tracking populated for this test to be meaningful")
+
+	merged, err := allof.Merge(*doc.Components.Schemas["Bounded"])
+	require.NoError(t, err)
+
+	// Sanity-check: merge picked the more restrictive bound (exclusive 6
+	// beats inclusive 5).
+	require.Nil(t, merged.Min)
+	require.NotNil(t, merged.ExclusiveMin.Value)
+	require.Equal(t, 6.0, *merged.ExclusiveMin.Value)
+
+	// The actual assertion: no origin metadata on the merged schema.
+	require.Nil(t, merged.Origin,
+		"flattened schema must not carry origin metadata (per docs/ALLOF.md)")
 }
 
 // merge multiple Not inside AllOf
