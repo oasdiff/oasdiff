@@ -873,6 +873,47 @@ func TestMerge_InclusiveMaxBeatsHigherNumericExclusive(t *testing.T) {
 	require.False(t, merged.ExclusiveMax.IsTrue())
 }
 
+// Per docs/ALLOF.md, source locations are not available for changes detected
+// in flattened schemas — the merged schema is a new construct that doesn't
+// correspond to a single line in the original file. This test pins that
+// behavior so a future change to the merge code can't accidentally leak
+// stale origin metadata (e.g. a `minimum` field origin pointing at the
+// subschema whose value lost the merge), which would surface as wrong
+// line numbers in downstream consumers.
+func TestMerge_FlattenedNumericBounds_HaveNoSourceLocation(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	doc, err := loader.LoadFromData([]byte(`openapi: 3.1.0
+info: {title: t, version: '1'}
+paths: {}
+components:
+  schemas:
+    Bounded:
+      allOf:
+        - {type: number, minimum: 5}
+        - {type: number, exclusiveMinimum: 6}
+`))
+	require.NoError(t, err)
+
+	// Sanity-check: the loader actually populated origin info on the input —
+	// otherwise the post-merge nil assertion would be vacuously true.
+	require.NotNil(t, doc.Components.Schemas["Bounded"].Value.Origin,
+		"input schema must have origin tracking populated for this test to be meaningful")
+
+	merged, err := allof.Merge(*doc.Components.Schemas["Bounded"])
+	require.NoError(t, err)
+
+	// Sanity-check: merge picked the more restrictive bound (exclusive 6
+	// beats inclusive 5).
+	require.Nil(t, merged.Min)
+	require.NotNil(t, merged.ExclusiveMin.Value)
+	require.Equal(t, 6.0, *merged.ExclusiveMin.Value)
+
+	// The actual assertion: no origin metadata on the merged schema.
+	require.Nil(t, merged.Origin,
+		"flattened schema must not carry origin metadata (per docs/ALLOF.md)")
+}
+
 // merge multiple Not inside AllOf
 func TestMerge_Not(t *testing.T) {
 	merged, err := allof.Merge(
