@@ -41,5 +41,6 @@ The following schema fields are not merged:
 - Deprecated
 - XML
 - Discriminator
+- `$defs` (OpenAPI 3.1) — intentionally dropped from the flattened output. `$defs` is a reusable-schema namespace used as the target of `$ref` pointers. After `--flatten-allof` runs, the merged schema has no `$ref`s left to resolve, so the namespace contributes nothing to its semantics. Preserving it would only add noise (and risk silent collisions when two `allOf` subschemas define different things under the same `$defs` key).
 
 Please help us improve this feature by providing feedback and reporting issues.
