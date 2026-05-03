@@ -16,7 +16,7 @@ The simplest contribution is to use oasdiff in your projects and tell others abo
 If your team uses GitHub, install the [oasdiff GitHub Action](https://github.com/oasdiff/oasdiff-action) to automatically detect breaking changes on every pull request:
 
 ```yaml
-- uses: oasdiff/oasdiff-action/changelog@v0.0.44
+- uses: oasdiff/oasdiff-action/changelog@v0.0.45
   with:
     base: 'origin/${{ github.base_ref }}:openapi.yaml'
     revision: 'HEAD:openapi.yaml'
