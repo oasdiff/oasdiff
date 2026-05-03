@@ -47,10 +47,6 @@ The following 3.1 features are not yet fully supported by [`kin-openapi`](https:
 - **`$dynamicRef` / `$dynamicAnchor`**: parsed but not resolved during loading. Schemas using dynamic references for recursive definitions will not be followed.
 - **`pathItems` in `components`**: not represented in the parser's data model. Specs that declare reusable path items in components will silently drop them.
 
-The `flatten` command has one additional caveat:
-
-- **`flatten` of `allOf` ignores 3.1 numeric `exclusiveMinimum` / `exclusiveMaximum`**: when merging `allOf` subschemas, the merge logic considers only `minimum` / `maximum` and the 3.0-style boolean `exclusiveMinimum` / `exclusiveMaximum`. 3.1 numeric exclusive bounds are silently dropped from the merged result. Tracked in [#868](https://github.com/oasdiff/oasdiff/issues/868).
-
 If you hit any of these, please [open an issue](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.1]%20).
 
 ## Feedback
