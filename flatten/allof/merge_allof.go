@@ -60,6 +60,7 @@ type SchemaCollection struct {
 	MaxContains          []*uint64
 	ContentMediaType     []string
 	ContentEncoding      []string
+	DependentRequired    []map[string][]string
 }
 
 type state struct {
@@ -224,6 +225,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	}
 	result.Value.ContentMediaType = base.Value.ContentMediaType
 	result.Value.ContentEncoding = base.Value.ContentEncoding
+	result.Value.DependentRequired = base.Value.DependentRequired
 	result.Value.Discriminator = base.Value.Discriminator
 	// Fields documented in ALLOF.md as "not merged" — i.e. the merge
 	// logic doesn't combine them across allOf subschemas. They MUST
@@ -399,6 +401,7 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	result.Value.ReadOnly = hasTrue(collection.ReadOnly)
 	result.Value.WriteOnly = hasTrue(collection.WriteOnly)
 	result.Value.Required = resolveRequired(collection.Required)
+	result.Value.DependentRequired = resolveDependentRequired(collection.DependentRequired)
 	result.Value = resolveMultipleOf(result.Value, &collection)
 	result.Value.UniqueItems = resolveUniqueItems(collection.UniqueItems)
 	result.Value.Const, err = resolveConst(&collection)
@@ -1097,6 +1100,33 @@ func resolveRequired(values [][]string) []string {
 	return uniqueValues
 }
 
+// resolveDependentRequired handles 3.1 / JSON Schema 2020-12 `dependentRequired`:
+// per-trigger-property maps to a list of properties that must be present when
+// the trigger is. Under allOf, every subschema's constraints apply, so we
+// take the per-key union of required-property lists (deduplicated).
+func resolveDependentRequired(maps []map[string][]string) map[string][]string {
+	merged := map[string][]string{}
+	seen := map[string]map[string]bool{} // trigger -> set of dependents
+	for _, m := range maps {
+		for trigger, deps := range m {
+			if _, ok := seen[trigger]; !ok {
+				seen[trigger] = map[string]bool{}
+			}
+			for _, dep := range deps {
+				if seen[trigger][dep] {
+					continue
+				}
+				seen[trigger][dep] = true
+				merged[trigger] = append(merged[trigger], dep)
+			}
+		}
+	}
+	if len(merged) == 0 {
+		return nil
+	}
+	return merged
+}
+
 func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 	collection := SchemaCollection{}
 	for _, s := range schemas {
@@ -1139,6 +1169,7 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.MaxContains = append(collection.MaxContains, s.Value.MaxContains)
 		collection.ContentMediaType = append(collection.ContentMediaType, s.Value.ContentMediaType)
 		collection.ContentEncoding = append(collection.ContentEncoding, s.Value.ContentEncoding)
+		collection.DependentRequired = append(collection.DependentRequired, s.Value.DependentRequired)
 	}
 	return collection
 }
