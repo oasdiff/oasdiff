@@ -435,8 +435,8 @@ func hasFalse(values []bool) bool {
 type boundSource int
 
 const (
-	sourceMinMax     boundSource = iota // schema.Min / schema.Max field, optionally with 3.0-style boolean exclusive
-	sourceExclusive                     // schema.ExclusiveMin.Value / schema.ExclusiveMax.Value (3.1 numeric)
+	sourceMinMax    boundSource = iota // schema.Min / schema.Max field, optionally with 3.0-style boolean exclusive
+	sourceExclusive                    // schema.ExclusiveMin.Value / schema.ExclusiveMax.Value (3.1 numeric)
 )
 
 // numericBound is one candidate bound contributed by one schema in the allOf
