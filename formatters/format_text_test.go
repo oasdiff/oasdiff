@@ -47,6 +47,18 @@ func TestTextFormatter_RenderChecks(t *testing.T) {
 	require.Equal(t, string(out), "ID        DESCRIPTION                LEVEL\nchange_id This is a breaking change. info\n")
 }
 
+func TestTextFormatter_RenderChangelog_EmptyChangesDifferentSpecs(t *testing.T) {
+	out, err := textFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{}, "", "")
+	require.NoError(t, err)
+	require.Equal(t, "No changes to report, but the specs are different", string(out))
+}
+
+func TestTextFormatter_RenderChangelog_EmptyChangesDifferentSpecs_BreakingMode(t *testing.T) {
+	out, err := textFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{IsBreaking: true}, "", "")
+	require.NoError(t, err)
+	require.Equal(t, "No breaking changes to report, but the specs are different", string(out))
+}
+
 func TestTextFormatter_RenderDiff(t *testing.T) {
 	out, err := textFormatter.RenderDiff(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)

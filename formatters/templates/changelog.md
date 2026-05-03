@@ -14,5 +14,5 @@
 {{ end }}
 {{ end }}
 {{ else }}
-{{ if .DiffEmpty }}No changes detected{{ else }}No changes to report, but the specs are different{{ end }}
+{{ if .DiffEmpty }}No changes detected{{ else if .IsBreaking }}No breaking changes to report, but the specs are different{{ else }}No changes to report, but the specs are different{{ end }}
 {{ end }}
