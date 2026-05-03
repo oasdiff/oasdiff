@@ -699,9 +699,35 @@ func TestMerge_ExclusiveMinNumeric_PicksHigher(t *testing.T) {
 	require.Equal(t, 10.0, *merged.ExclusiveMin.Value)
 }
 
-// OpenAPI 3.1: same axis, but mixed with a 3.0-style `minimum` with no
-// numeric exclusive on the other side. The numeric exclusive (5 strict) is
-// more restrictive than `minimum: 0`, so the result is the 3.1 form.
+// Same value on both sides — `minimum: 5` (inclusive) vs
+// `exclusiveMinimum: 5` (strict). The strict bound rejects the value
+// 5 itself and is therefore more restrictive at the boundary, so the
+// merged result is `exclusiveMinimum: 5` with `minimum` cleared.
+func TestMerge_ExclusiveMinNumeric_BeatsIdenticalInclusive(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type: &openapi3.Types{"number"},
+						Min:  new(5.0),
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Type:         &openapi3.Types{"number"},
+						ExclusiveMin: exclusiveBoundValue(5),
+					}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.Min)
+	require.NotNil(t, merged.ExclusiveMin.Value)
+	require.Equal(t, 5.0, *merged.ExclusiveMin.Value)
+}
+
+// Two subschemas: `minimum: 0` (inclusive) and `exclusiveMinimum: 5`
+// (strict). The strict bound at 5 is more restrictive than the inclusive
+// bound at 0, so the merged result is `exclusiveMinimum: 5` with
+// `minimum` cleared.
 func TestMerge_ExclusiveMinNumeric_BeatsLowerInclusive(t *testing.T) {
 	merged, err := allof.Merge(
 		openapi3.SchemaRef{
@@ -723,8 +749,10 @@ func TestMerge_ExclusiveMinNumeric_BeatsLowerInclusive(t *testing.T) {
 	require.Equal(t, 5.0, *merged.ExclusiveMin.Value)
 }
 
-// OpenAPI 3.1: same axis, the 3.0-style `minimum` wins when its value is
-// higher than the numeric exclusive. Result is the 3.0 inclusive form.
+// Two subschemas: `minimum: 10` (inclusive) and `exclusiveMinimum: 5`
+// (strict). Even though `exclusiveMinimum: 5` is strict, its value is
+// lower, so the inclusive `minimum: 10` is more restrictive overall.
+// The merged result is `minimum: 10` with no `exclusiveMinimum`.
 func TestMerge_InclusiveMinBeatsLowerNumericExclusive(t *testing.T) {
 	merged, err := allof.Merge(
 		openapi3.SchemaRef{
@@ -747,10 +775,12 @@ func TestMerge_InclusiveMinBeatsLowerNumericExclusive(t *testing.T) {
 	require.False(t, merged.ExclusiveMin.IsTrue())
 }
 
-// OpenAPI 3.1: a single schema with both `minimum` and `exclusiveMinimum`
-// (the issue's case 2). The numeric exclusive is more restrictive within
-// that schema, and a less-restrictive `minimum: 10` from the other schema
-// shouldn't change the picture.
+// One schema has both `minimum: 0` (inclusive) and `exclusiveMinimum: 5`
+// (strict) — within that schema, the strict bound at 5 wins (effective
+// constraint: x > 5). A second schema contributes `minimum: 10`
+// (inclusive), which is more restrictive than the first schema's
+// effective `> 5`. The merged result is `minimum: 10` with no
+// `exclusiveMinimum`.
 func TestMerge_ExclusiveMinNumeric_WithSiblingInclusive(t *testing.T) {
 	merged, err := allof.Merge(
 		openapi3.SchemaRef{
