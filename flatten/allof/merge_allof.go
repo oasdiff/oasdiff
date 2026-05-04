@@ -195,7 +195,6 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.Type = base.Value.Type
 	result.Value.Format = base.Value.Format
 	result.Value.Description = base.Value.Description
-	result.Value.Type = base.Value.Type
 	result.Value.Enum = base.Value.Enum
 	result.Value.UniqueItems = base.Value.UniqueItems
 	result.Value.ExclusiveMax = base.Value.ExclusiveMax
@@ -209,6 +208,16 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.MinLength = base.Value.MinLength
 	result.Value.Default = base.Value.Default
 	result.Value.Discriminator = base.Value.Discriminator
+	// Fields documented in ALLOF.md as "not merged" — i.e. the merge
+	// logic doesn't combine them across allOf subschemas. They MUST
+	// still flow through from the outer (base) schema, otherwise a
+	// single-schema Merge silently loses them.
+	result.Value.Example = base.Value.Example
+	result.Value.Deprecated = base.Value.Deprecated
+	result.Value.AllowEmptyValue = base.Value.AllowEmptyValue
+	result.Value.ExternalDocs = base.Value.ExternalDocs
+	result.Value.XML = base.Value.XML
+	result.Value.Extensions = base.Value.Extensions
 	if base.Value.MaxLength != nil {
 		result.Value.MaxLength = new(*base.Value.MaxLength)
 	}
