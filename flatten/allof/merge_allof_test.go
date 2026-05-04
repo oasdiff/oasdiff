@@ -2780,3 +2780,56 @@ func TestMerge_DependentRequired_AllUnset(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, merged.DependentRequired)
 }
+
+// Per OpenAPI / JSON Schema, multipleOf must be > 0. A spec containing
+// 0 or a negative value is invalid. Before #889 the code reached
+// lcm(0, 0) and panicked with "integer divide by zero"; now invalid
+// values are skipped.
+func TestMerge_MultipleOf_ZeroIsSkipped(t *testing.T) {
+	zero := 0.0
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MultipleOf: &zero}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MultipleOf: &zero}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Nil(t, merged.MultipleOf)
+}
+
+// One valid + one zero multipleOf → the valid one wins, zero is dropped.
+func TestMerge_MultipleOf_ZeroDroppedAlongsideValid(t *testing.T) {
+	zero := 0.0
+	five := 5.0
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MultipleOf: &zero}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MultipleOf: &five}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.MultipleOf)
+	require.Equal(t, 5.0, *merged.MultipleOf)
+}
+
+// Negative multipleOf is also invalid per spec; treat the same as zero.
+func TestMerge_MultipleOf_NegativeIsSkipped(t *testing.T) {
+	negative := -3.0
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MultipleOf: &negative}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MultipleOf: &negative}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Nil(t, merged.MultipleOf)
+}
