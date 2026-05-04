@@ -2780,3 +2780,104 @@ func TestMerge_DependentRequired_AllUnset(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, merged.DependentRequired)
 }
+
+// OpenAPI 3.1 / JSON Schema 2020-12 `contains`: at least one array item
+// must validate against the subschema. Strict allOf semantics are
+// "≥1 item matches X AND ≥1 item matches Y" (different items allowed),
+// but we over-constrain to "≥1 item matches Merge(X, Y)" — see
+// resolveContains and docs/ALLOF.md for the rationale.
+
+// Single subschema with `contains` flows through unchanged.
+func TestMerge_Contains_SinglePass(t *testing.T) {
+	contains := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{Contains: contains},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Contains)
+	require.Equal(t, &openapi3.Types{"string"}, merged.Contains.Value.Type)
+}
+
+// `contains` set on one subschema, absent on another — the present
+// subschema flows through.
+func TestMerge_Contains_WithAbsentSibling(t *testing.T) {
+	contains := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Contains: contains}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Contains)
+	require.Equal(t, &openapi3.Types{"string"}, merged.Contains.Value.Type)
+}
+
+// Two subschemas with compatible `contains` are recursively merged into
+// one (over-constrained: requires a single item satisfying both).
+func TestMerge_Contains_TwoCompatibleAreMerged(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Contains: &openapi3.SchemaRef{Value: &openapi3.Schema{
+							Type: &openapi3.Types{"integer"},
+							Min:  new(10.0),
+						}},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Contains: &openapi3.SchemaRef{Value: &openapi3.Schema{
+							Type: &openapi3.Types{"integer"},
+							Max:  new(100.0),
+						}},
+					}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Contains)
+	require.Equal(t, &openapi3.Types{"integer"}, merged.Contains.Value.Type)
+	require.NotNil(t, merged.Contains.Value.Min)
+	require.Equal(t, 10.0, *merged.Contains.Value.Min)
+	require.NotNil(t, merged.Contains.Value.Max)
+	require.Equal(t, 100.0, *merged.Contains.Value.Max)
+}
+
+// Two subschemas with `contains` whose Types disagree → recursive merge
+// surfaces the underlying conflict as an error (Type "must be identical").
+func TestMerge_Contains_ConflictBubblesUp(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Contains: &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						Contains: &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"integer"}}},
+					}},
+				},
+			},
+		})
+	require.EqualError(t, err, allof.TypeErrorMessage)
+}
+
+// No subschema sets `contains` → merged value stays nil.
+func TestMerge_Contains_AllUnset(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Nil(t, merged.Contains)
+}
