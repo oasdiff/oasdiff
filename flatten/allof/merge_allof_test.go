@@ -1048,6 +1048,93 @@ components:
 		"flattened schema must not carry origin metadata (per docs/ALLOF.md)")
 }
 
+// OpenAPI 3.1 / JSON Schema 2020-12 `minContains`: lower bound on how
+// many array items must match the `contains` schema. Under allOf, the
+// most restrictive (highest) value wins.
+func TestMerge_MinContains_PicksHigher(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: uint64Ptr(2)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: uint64Ptr(5)}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.MinContains)
+	require.Equal(t, uint64(5), *merged.MinContains)
+}
+
+// `minContains` set on one subschema, absent on another — the present
+// value flows through.
+func TestMerge_MinContains_WithAbsentSibling(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: uint64Ptr(3)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.MinContains)
+	require.Equal(t, uint64(3), *merged.MinContains)
+}
+
+// No subschema sets `minContains` — merged value stays nil (no constraint).
+func TestMerge_MinContains_AllUnset(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Nil(t, merged.MinContains)
+}
+
+// `maxContains`: upper bound on how many array items match. Under allOf,
+// the most restrictive (lowest) value wins.
+func TestMerge_MaxContains_PicksLower(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: uint64Ptr(10)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: uint64Ptr(4)}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.MaxContains)
+	require.Equal(t, uint64(4), *merged.MaxContains)
+}
+
+// `maxContains` set on one subschema, absent on another — the present
+// value flows through.
+func TestMerge_MaxContains_WithAbsentSibling(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: uint64Ptr(7)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.MaxContains)
+	require.Equal(t, uint64(7), *merged.MaxContains)
+}
+
+// uint64Ptr is a small helper for *uint64 literal in tests.
+func uint64Ptr(v uint64) *uint64 { return &v }
+
 // merge multiple Not inside AllOf
 func TestMerge_Not(t *testing.T) {
 	merged, err := allof.Merge(

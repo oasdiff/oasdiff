@@ -54,6 +54,8 @@ type SchemaCollection struct {
 	WriteOnly            []bool
 	Default              []any
 	Const                []any
+	MinContains          []*uint64
+	MaxContains          []*uint64
 }
 
 type state struct {
@@ -210,6 +212,12 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.MinLength = base.Value.MinLength
 	result.Value.Default = base.Value.Default
 	result.Value.Const = base.Value.Const
+	if base.Value.MinContains != nil {
+		result.Value.MinContains = new(*base.Value.MinContains)
+	}
+	if base.Value.MaxContains != nil {
+		result.Value.MaxContains = new(*base.Value.MaxContains)
+	}
 	result.Value.Discriminator = base.Value.Discriminator
 	// Fields documented in ALLOF.md as "not merged" — i.e. the merge
 	// logic doesn't combine them across allOf subschemas. They MUST
@@ -373,11 +381,13 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	result.Value.Description = firstOrSecondNonEmpty(collection.Description)
 	result.Value = resolveNumberRange(result.Value, &collection)
 	result.Value.MinLength = findMaxValue(collection.MinLength)
-	result.Value.MaxLength = findMinValue(collection.MaxLength)
+	result.Value.MaxLength = findMinValuePtr(collection.MaxLength)
 	result.Value.MinItems = findMaxValue(collection.MinItems)
-	result.Value.MaxItems = findMinValue(collection.MaxItems)
+	result.Value.MaxItems = findMinValuePtr(collection.MaxItems)
 	result.Value.MinProps = findMaxValue(collection.MinProps)
-	result.Value.MaxProps = findMinValue(collection.MaxProps)
+	result.Value.MaxProps = findMinValuePtr(collection.MaxProps)
+	result.Value.MinContains = findMaxValuePtr(collection.MinContains)
+	result.Value.MaxContains = findMinValuePtr(collection.MaxContains)
 	result.Value.Pattern = resolvePattern(collection.Pattern)
 	result.Value.Nullable = !hasFalse(collection.Nullable)
 	result.Value.ReadOnly = hasTrue(collection.ReadOnly)
@@ -867,7 +877,7 @@ func findMaxValue(values []uint64) uint64 {
 	return max
 }
 
-func findMinValue(values []*uint64) *uint64 {
+func findMinValuePtr(values []*uint64) *uint64 {
 	dvalues := []uint64{}
 	for _, v := range values {
 		if v != nil {
@@ -884,6 +894,25 @@ func findMinValue(values []*uint64) *uint64 {
 		}
 	}
 	return new(min)
+}
+
+// findMaxValuePtr is the upper-bound counterpart to findMinValuePtr: returns
+// nil if every value is nil, otherwise the highest non-nil value.
+func findMaxValuePtr(values []*uint64) *uint64 {
+	var max *uint64
+	for _, v := range values {
+		if v == nil {
+			continue
+		}
+		if max == nil || *v > *max {
+			max = v
+		}
+	}
+	if max == nil {
+		return nil
+	}
+	out := *max
+	return &out
 }
 
 func resolveType(schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
@@ -1092,6 +1121,8 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.WriteOnly = append(collection.WriteOnly, s.Value.WriteOnly)
 		collection.Default = append(collection.Default, s.Value.Default)
 		collection.Const = append(collection.Const, s.Value.Const)
+		collection.MinContains = append(collection.MinContains, s.Value.MinContains)
+		collection.MaxContains = append(collection.MaxContains, s.Value.MaxContains)
 	}
 	return collection
 }
