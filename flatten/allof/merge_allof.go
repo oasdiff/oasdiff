@@ -58,6 +58,7 @@ type SchemaCollection struct {
 	Const                []any
 	MinContains          []*uint64
 	MaxContains          []*uint64
+	Contains             []*openapi3.SchemaRef
 	ContentMediaType     []string
 	ContentEncoding      []string
 	DependentRequired    []map[string][]string
@@ -223,6 +224,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	if base.Value.MaxContains != nil {
 		result.Value.MaxContains = new(*base.Value.MaxContains)
 	}
+	result.Value.Contains = base.Value.Contains
 	result.Value.ContentMediaType = base.Value.ContentMediaType
 	result.Value.ContentEncoding = base.Value.ContentEncoding
 	result.Value.DependentRequired = base.Value.DependentRequired
@@ -436,6 +438,10 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	if err != nil {
 		return err
 	}
+	result.Value, err = resolveContains(state, result.Value, &collection)
+	if err != nil {
+		return err
+	}
 	result.Value, err = resolveProperties(state, result.Value, &collection)
 	if err != nil {
 		return err
@@ -635,6 +641,41 @@ func resolveItems(state *state, schema *openapi3.Schema, collection *SchemaColle
 		return nil, err
 	}
 	schema.Items = result
+	return schema, nil
+}
+
+// resolveContains merges OpenAPI 3.1 / JSON Schema 2020-12 `contains`
+// subschemas across allOf siblings. `contains` means "at least one array
+// item matches the subschema", so the strict allOf semantics are
+// "≥1 item matches X AND ≥1 item matches Y" — the two matching items can
+// be different. We can't express that as a single subschema, so we
+// over-constrain: we recursively flatten X and Y as if wrapped in allOf,
+// producing a single subschema that ≥1 item must match. This rejects some
+// arrays that the original spec accepts (those where X and Y are matched
+// by distinct items) but never accepts an array the original rejects.
+// Documented in docs/ALLOF.md.
+func resolveContains(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
+
+	contains := openapi3.SchemaRefs{}
+	for _, sref := range collection.Contains {
+		if sref != nil {
+			contains = append(contains, sref)
+		}
+	}
+	if len(contains) == 0 {
+		schema.Contains = nil
+		return schema, nil
+	}
+	if len(contains) == 1 {
+		schema.Contains = contains[0]
+		return schema, nil
+	}
+	result := openapi3.NewSchemaRef("", openapi3.NewSchema())
+	err := flattenSchemas(state, result, contains)
+	if err != nil {
+		return nil, err
+	}
+	schema.Contains = result
 	return schema, nil
 }
 
@@ -1167,6 +1208,7 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.Const = append(collection.Const, s.Value.Const)
 		collection.MinContains = append(collection.MinContains, s.Value.MinContains)
 		collection.MaxContains = append(collection.MaxContains, s.Value.MaxContains)
+		collection.Contains = append(collection.Contains, s.Value.Contains)
 		collection.ContentMediaType = append(collection.ContentMediaType, s.Value.ContentMediaType)
 		collection.ContentEncoding = append(collection.ContentEncoding, s.Value.ContentEncoding)
 		collection.DependentRequired = append(collection.DependentRequired, s.Value.DependentRequired)

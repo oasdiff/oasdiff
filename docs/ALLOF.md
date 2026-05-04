@@ -43,4 +43,8 @@ The following schema fields are not merged:
 - Discriminator
 - `$defs` (OpenAPI 3.1) — intentionally dropped from the flattened output. `$defs` is a reusable-schema namespace used as the target of `$ref` pointers. After `--flatten-allof` runs, the merged schema has no `$ref`s left to resolve, so the namespace contributes nothing to its semantics. Preserving it would only add noise (and risk silent collisions when two `allOf` subschemas define different things under the same `$defs` key).
 
+## `contains` is over-constrained when subschemas differ (OpenAPI 3.1)
+
+The strict `allOf` semantics for `contains` are *"≥1 array item matches X AND ≥1 item matches Y"* — the two matching items can be different. We can't express that as a single subschema, so when multiple `allOf` siblings each set `contains`, oasdiff merges the subschemas recursively (as if wrapped in `allOf`) and emits a single `contains: Merge(X, Y)`. That is *stricter* than the original: it requires one item to satisfy both X and Y. Arrays the original spec accepts (where X and Y are matched by distinct items) may be rejected after flattening; arrays the original rejects are never accepted. In practice this rarely matters because most specs have at most one `contains` per `allOf` chain.
+
 Please help us improve this feature by providing feedback and reporting issues.
