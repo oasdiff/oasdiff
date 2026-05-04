@@ -388,11 +388,11 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	result.Value.Title = firstOrSecondNonEmpty(collection.Title)
 	result.Value.Description = firstOrSecondNonEmpty(collection.Description)
 	result.Value = resolveNumberRange(result.Value, &collection)
-	result.Value.MinLength = findMaxValue(collection.MinLength)
+	result.Value.MinLength = findMaxValueScalar(collection.MinLength)
 	result.Value.MaxLength = findMinValuePtr(collection.MaxLength)
-	result.Value.MinItems = findMaxValue(collection.MinItems)
+	result.Value.MinItems = findMaxValueScalar(collection.MinItems)
 	result.Value.MaxItems = findMinValuePtr(collection.MaxItems)
-	result.Value.MinProps = findMaxValue(collection.MinProps)
+	result.Value.MinProps = findMaxValueScalar(collection.MinProps)
 	result.Value.MaxProps = findMinValuePtr(collection.MaxProps)
 	result.Value.MinContains = findMaxValuePtr(collection.MinContains)
 	result.Value.MaxContains = findMinValuePtr(collection.MaxContains)
@@ -884,7 +884,7 @@ func isPatternResolved(pattern string) bool {
 	return match
 }
 
-func findMaxValue(values []uint64) uint64 {
+func findMaxValueScalar(values []uint64) uint64 {
 	max := uint64(0)
 	for _, num := range values {
 		if num > max {
