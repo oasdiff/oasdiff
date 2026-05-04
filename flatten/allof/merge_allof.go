@@ -671,7 +671,10 @@ func containsNonInteger(arr []float64) bool {
 func resolveMultipleOf(schema *openapi3.Schema, collection *SchemaCollection) *openapi3.Schema {
 	values := []float64{}
 	for _, v := range collection.MultipleOf {
-		if v == nil {
+		// Per OpenAPI / JSON Schema, multipleOf must be > 0. A spec
+		// containing 0 or a negative value is invalid; skip rather than
+		// panic. Letting 0 through reaches lcm(0, 0) → divide by zero.
+		if v == nil || *v <= 0 {
 			continue
 		}
 		values = append(values, *v)
