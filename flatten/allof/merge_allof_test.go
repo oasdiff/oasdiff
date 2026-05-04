@@ -2581,3 +2581,91 @@ func TestMerge_DifferentOneOfGroups(t *testing.T) {
 	// Different oneOf groups should produce cartesian product (1 * 1 = 1 in this case)
 	require.Len(t, merged.OneOf, 1)
 }
+
+// OpenAPI 3.1: contentMediaType and contentEncoding describe how a string
+// is encoded and what it represents. They're string-valued and must agree
+// across allOf subschemas — two different content types describe an
+// unsatisfiable schema, not a merge ambiguity. Mirrors the Format
+// "must be identical" pattern.
+
+func TestMerge_ContentMediaType_Equal(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentMediaType: "application/json"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentMediaType: "application/json"}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, "application/json", merged.ContentMediaType)
+}
+
+func TestMerge_ContentMediaType_WithAbsentSibling(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentMediaType: "image/png"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, "image/png", merged.ContentMediaType)
+}
+
+func TestMerge_ContentMediaType_Conflict(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentMediaType: "application/json"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentMediaType: "text/plain"}},
+				},
+			},
+		})
+	require.EqualError(t, err, allof.ContentMediaTypeErrorMessage)
+}
+
+func TestMerge_ContentEncoding_Equal(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentEncoding: "base64"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentEncoding: "base64"}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, "base64", merged.ContentEncoding)
+}
+
+func TestMerge_ContentEncoding_WithAbsentSibling(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentEncoding: "base16"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, "base16", merged.ContentEncoding)
+}
+
+func TestMerge_ContentEncoding_Conflict(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentEncoding: "base64"}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{ContentEncoding: "base16"}},
+				},
+			},
+		})
+	require.EqualError(t, err, allof.ContentEncodingErrorMessage)
+}
