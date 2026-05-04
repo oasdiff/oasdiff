@@ -15,6 +15,7 @@ const (
 	FormatErrorMessage  = "unable to resolve Format conflict using default resolver: all Format values must be identical"
 	TypeErrorMessage    = "unable to resolve Type conflict: all Type values must be identical"
 	DefaultErrorMessage = "unable to resolve Default conflict: all Default values must be identical"
+	ConstErrorMessage   = "unable to resolve Const conflict: all Const values must be identical"
 
 	FormatInt32  = "int32"
 	FormatInt64  = "int64"
@@ -52,6 +53,7 @@ type SchemaCollection struct {
 	ReadOnly             []bool
 	WriteOnly            []bool
 	Default              []any
+	Const                []any
 }
 
 type state struct {
@@ -207,6 +209,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.MultipleOf = base.Value.MultipleOf
 	result.Value.MinLength = base.Value.MinLength
 	result.Value.Default = base.Value.Default
+	result.Value.Const = base.Value.Const
 	result.Value.Discriminator = base.Value.Discriminator
 	// Fields documented in ALLOF.md as "not merged" — i.e. the merge
 	// logic doesn't combine them across allOf subschemas. They MUST
@@ -382,6 +385,10 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	result.Value.Required = resolveRequired(collection.Required)
 	result.Value = resolveMultipleOf(result.Value, &collection)
 	result.Value.UniqueItems = resolveUniqueItems(collection.UniqueItems)
+	result.Value.Const, err = resolveConst(&collection)
+	if err != nil {
+		return err
+	}
 	result.Value.Default, err = resolveDefault(&collection)
 	if err != nil {
 		return err
@@ -1084,6 +1091,7 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.ReadOnly = append(collection.ReadOnly, s.Value.ReadOnly)
 		collection.WriteOnly = append(collection.WriteOnly, s.Value.WriteOnly)
 		collection.Default = append(collection.Default, s.Value.Default)
+		collection.Const = append(collection.Const, s.Value.Const)
 	}
 	return collection
 }
@@ -1289,6 +1297,29 @@ func resolveDefault(collection *SchemaCollection) (any, error) {
 	for _, v := range values {
 		if !reflect.DeepEqual(first, v) {
 			return nil, errors.New(DefaultErrorMessage)
+		}
+	}
+	return first, nil
+}
+
+// resolveConst handles the OpenAPI 3.1 / JSON Schema 2020-12 `const` keyword.
+// `const` constrains the instance to a single value, so under allOf every
+// non-nil candidate must be deep-equal to every other; a mismatch is an
+// unsatisfiable schema, not a merge ambiguity. Mirrors resolveDefault.
+func resolveConst(collection *SchemaCollection) (any, error) {
+	values := make([]any, 0)
+	for _, v := range collection.Const {
+		if v != nil {
+			values = append(values, v)
+		}
+	}
+	if len(values) == 0 {
+		return nil, nil
+	}
+	first := values[0]
+	for _, v := range values {
+		if !reflect.DeepEqual(first, v) {
+			return nil, errors.New(ConstErrorMessage)
 		}
 	}
 	return first, nil
