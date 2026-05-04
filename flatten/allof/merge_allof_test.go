@@ -2669,3 +2669,114 @@ func TestMerge_ContentEncoding_Conflict(t *testing.T) {
 		})
 	require.EqualError(t, err, allof.ContentEncodingErrorMessage)
 }
+
+// OpenAPI 3.1 / JSON Schema 2020-12 `dependentRequired`: per-trigger-property
+// map naming OTHER properties that must be present when the trigger is.
+// Under allOf, every subschema's constraints apply, so the merge is a
+// per-key union of required-property lists (deduplicated).
+
+// Single subschema with dependentRequired flows through unchanged.
+func TestMerge_DependentRequired_SinglePass(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				DependentRequired: map[string][]string{
+					"credit_card": {"billing_address", "country"},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t,
+		map[string][]string{"credit_card": {"billing_address", "country"}},
+		merged.DependentRequired)
+}
+
+// Same trigger appears in two subschemas with different dependents → union.
+func TestMerge_DependentRequired_UnionsSameTrigger(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						DependentRequired: map[string][]string{
+							"credit_card": {"billing_address"},
+						},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						DependentRequired: map[string][]string{
+							"credit_card": {"country"},
+						},
+					}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Contains(t, merged.DependentRequired, "credit_card")
+	require.ElementsMatch(t,
+		[]string{"billing_address", "country"},
+		merged.DependentRequired["credit_card"])
+}
+
+// Different triggers are kept separate; overlapping dependents are deduped.
+func TestMerge_DependentRequired_DistinctTriggersAndDedup(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						DependentRequired: map[string][]string{
+							"credit_card": {"billing_address"},
+							"ssn":         {"country"},
+						},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						DependentRequired: map[string][]string{
+							"credit_card": {"billing_address", "country"}, // billing_address dupes
+						},
+					}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Len(t, merged.DependentRequired, 2)
+	require.ElementsMatch(t,
+		[]string{"billing_address", "country"},
+		merged.DependentRequired["credit_card"])
+	require.ElementsMatch(t,
+		[]string{"country"},
+		merged.DependentRequired["ssn"])
+}
+
+// dependentRequired set on one subschema, absent on another → flows through.
+func TestMerge_DependentRequired_WithAbsentSibling(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						DependentRequired: map[string][]string{
+							"a": {"b"},
+						},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Equal(t, map[string][]string{"a": {"b"}}, merged.DependentRequired)
+}
+
+// No subschema sets dependentRequired → merged value stays nil.
+func TestMerge_DependentRequired_AllUnset(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Nil(t, merged.DependentRequired)
+}
