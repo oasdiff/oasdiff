@@ -20,6 +20,79 @@ func exclusiveBoundValue(v float64) openapi3.ExclusiveBound {
 	return openapi3.ExclusiveBound{Value: &v}
 }
 
+// Single-schema round-trip tests: Merge on a schema with no allOf must not
+// silently drop scalar fields. mergeInternal hand-copied a curated allowlist
+// of base fields into result, so any field not on the list (Example,
+// Deprecated, AllowEmptyValue, XML, ExternalDocs, Extensions) was lost on
+// every Merge call — including pure passthroughs with no actual merging.
+// These tests pin "round-trip preserves the field" so a future regression
+// in the copy block is caught.
+
+func TestMerge_SingleSchema_PreservesExample(t *testing.T) {
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{Example: "sample-value"},
+	})
+	require.NoError(t, err)
+	require.Equal(t, "sample-value", merged.Example)
+}
+
+func TestMerge_SingleSchema_PreservesDeprecated(t *testing.T) {
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{Deprecated: true},
+	})
+	require.NoError(t, err)
+	require.True(t, merged.Deprecated)
+}
+
+func TestMerge_SingleSchema_PreservesAllowEmptyValue(t *testing.T) {
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{AllowEmptyValue: true},
+	})
+	require.NoError(t, err)
+	require.True(t, merged.AllowEmptyValue)
+}
+
+func TestMerge_SingleSchema_PreservesExternalDocs(t *testing.T) {
+	docs := &openapi3.ExternalDocs{Description: "more info", URL: "https://example.com/docs"}
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{ExternalDocs: docs},
+	})
+	require.NoError(t, err)
+	require.Same(t, docs, merged.ExternalDocs)
+}
+
+func TestMerge_SingleSchema_PreservesXML(t *testing.T) {
+	xml := &openapi3.XML{Name: "user", Namespace: "https://example.com/ns"}
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{XML: xml},
+	})
+	require.NoError(t, err)
+	require.Same(t, xml, merged.XML)
+}
+
+func TestMerge_SingleSchema_PreservesExtensions(t *testing.T) {
+	ext := map[string]any{"x-internal-id": "abc-123"}
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{Extensions: ext},
+	})
+	require.NoError(t, err)
+	require.Equal(t, ext, merged.Extensions)
+}
+
+// Single-schema with Type set must round-trip the Type. Pins regression
+// against the duplicate `result.Value.Type = base.Value.Type` lines that
+// existed before — if both were removed accidentally, the field would
+// be lost; if only the duplicate was removed (the intended cleanup),
+// this test still passes.
+func TestMerge_SingleSchema_PreservesType(t *testing.T) {
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Type)
+	require.True(t, merged.Type.Is("string"))
+}
+
 // identical Default fields are merged successfully
 func TestMerge_Default(t *testing.T) {
 	merged, err := allof.Merge(
