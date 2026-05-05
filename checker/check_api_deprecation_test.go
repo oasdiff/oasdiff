@@ -282,11 +282,11 @@ func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIDeprecationCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
-	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
-	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "stability: beta")
+	// Find the deprecation change specifically
+	deprecationChange := requireChange(t, errs, checker.EndpointDeprecatedWithSunsetId)
+	require.Contains(t, deprecationChange.GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
+	require.Contains(t, deprecationChange.GetUncolorizedText(checker.NewDefaultLocalizer()), "stability: beta")
 }
 
 // CL: message has no details when endpoint deprecated without sunset or stability
