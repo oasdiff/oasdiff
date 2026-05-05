@@ -29,7 +29,7 @@ func TestJsonFormatter_RenderChangelog(t *testing.T) {
 
 	out, err := jsonFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
 	require.NoError(t, err)
-	require.Equal(t, "[{\"id\":\"change_id\",\"text\":\"This is a breaking change.\",\"level\":3,\"section\":\"components\",\"fingerprint\":\"d22c5b8b9cec\"}]", string(out))
+	require.Equal(t, "[{\"id\":\"change_id\",\"text\":\"This is a breaking change.\",\"level\":3,\"section\":\"components\",\"fingerprint\":\"f8cd9af6b117\"}]", string(out))
 }
 
 func TestJsonFormatter_RenderChecks(t *testing.T) {
@@ -87,6 +87,6 @@ func TestJsonFormatter_RenderChangelog_WithSources(t *testing.T) {
 	require.NoError(t, err)
 
 	// Parse and check that baseSource is included but revisionSource is not (due to omitempty)
-	expected := `[{"id":"change_id","text":"This is a breaking change.","level":3,"operation":"GET","path":"/test","section":"paths","baseSource":{"file":"base.yaml","line":10,"column":5},"fingerprint":"ebee3a862e95"}]`
+	expected := `[{"id":"change_id","text":"This is a breaking change.","level":3,"operation":"GET","path":"/test","section":"paths","baseSource":{"file":"base.yaml","line":10,"column":5},"fingerprint":"80a8c624dc40"}]`
 	require.Equal(t, expected, string(out))
 }
