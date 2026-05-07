@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info:
+  title: Validate-test schema-3-1-keyword-in-3-0
+  version: 1.0.0
+paths:
+  /thing:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    const: "fixed"

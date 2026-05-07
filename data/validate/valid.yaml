@@ -1,0 +1,10 @@
+openapi: 3.0.3
+info:
+  title: Validate-test valid
+  version: 1.0.0
+paths:
+  /things:
+    get:
+      responses:
+        "200":
+          description: ok

@@ -51,3 +51,5 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
 )
+
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260507054533-0879509f06ed

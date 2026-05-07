@@ -1,0 +1,11 @@
+openapi: 3.0.3
+info:
+  title: Validate-test webhooks-in-3-0
+  version: 1.0.0
+paths: {}
+webhooks:
+  ping:
+    post:
+      responses:
+        "200":
+          description: ok
