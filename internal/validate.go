@@ -249,6 +249,10 @@ func writeFindingsText(w io.Writer, findings []Finding) {
 		if f.Line > 0 {
 			loc = fmt.Sprintf("%s:%d:%d", f.Source, f.Line, f.Column)
 		}
-		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, loc, f.Text)
+		// Some kin errors (notably *SchemaError) embed newlines in the
+		// message — Schema:\n... + Value:\n... blocks. Indent every
+		// continuation line so the finding stays visually grouped.
+		indented := strings.ReplaceAll(f.Text, "\n", "\n\t")
+		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, loc, indented)
 	}
 }

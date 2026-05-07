@@ -145,6 +145,23 @@ func Test_ValidateCmd_TextFormatLocation(t *testing.T) {
 	require.Contains(t, stdout.String(), "../data/validate/missing-required-info.yaml:2:1")
 }
 
+// Multi-line error messages (e.g. kin's *SchemaError dumps Schema +
+// Value blocks separated by newlines) render with every continuation
+// line tab-indented, keeping the finding visually grouped.
+func Test_ValidateCmd_TextFormatMultiLineMessage(t *testing.T) {
+	// data/openapi-test1.yaml contains a parameter whose example
+	// exceeds its maxLength — kin's SchemaError dumps the Schema
+	// and Value blocks in the message. The fixture is shipped with
+	// the oasdiff repo for other tests; we reuse it here.
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/openapi-test1.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	// Both the Schema: and Value: continuation lines should appear
+	// indented with a tab.
+	require.Contains(t, out, "\n\tSchema:")
+	require.Contains(t, out, "\n\tValue:")
+}
+
 // Invalid file path → exit 102 (failed-to-load), not 1 (validation finding).
 // Distinguishing these matters for CI: load failures and validation
 // failures are different incidents.
