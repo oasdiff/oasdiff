@@ -10,6 +10,9 @@ coverage.html
 # vscode files
 .vscode/*
 
+# macOS
+.DS_Store
+
 # Claude
 .claude/*
 !.claude/skills
