@@ -63,6 +63,10 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
+	// Origin tracking lets the typed cluster errors carry an *Origin
+	// pointing at the offending element. Cheap to leave on; consumers
+	// that don't surface line/column simply ignore the extra fields.
+	loader.IncludeOrigin = true
 
 	spec, err := load.NewSpecInfo(loader, flags.getBase())
 	if err != nil {
@@ -86,11 +90,19 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 // changelog command's output (id/text/level/source) so consumers can
 // parse both with the same data structure. Id is a descriptive
 // kebab-case identifier matching the changelog rule-ID convention.
+//
+// Line and Column are populated when kin-openapi tracks origins
+// (Loader.IncludeOrigin = true) and the underlying typed error
+// carries the offending element's Origin. Both are 0 / omitted when
+// the element doesn't have origin metadata (e.g. document-root
+// fields like openapi version) or origin tracking is off.
 type Finding struct {
 	Id     string        `yaml:"id"`
 	Text   string        `yaml:"text"`
 	Level  checker.Level `yaml:"level"`
 	Source string        `yaml:"source"`
+	Line   int           `yaml:"line,omitempty"`
+	Column int           `yaml:"column,omitempty"`
 }
 
 // mapKinErrors flattens kin-openapi's MultiError tree into a list of
@@ -112,7 +124,43 @@ func mapKinErrors(source string, err error) []Finding {
 		Text:   err.Error(),
 		Level:  checker.ERR,
 		Source: source,
+		Line:   lineForKinError(err),
+		Column: columnForKinError(err),
 	}}
+}
+
+// lineForKinError extracts the line number from the typed cluster
+// errors' Origin. Returns 0 when origin metadata isn't available
+// (untyped error, doc-root field, or loader.IncludeOrigin = false).
+func lineForKinError(err error) int {
+	if k := keyOriginForKinError(err); k != nil {
+		return k.Line
+	}
+	return 0
+}
+
+// columnForKinError extracts the column number from the typed cluster
+// errors' Origin. Returns 0 when origin metadata isn't available.
+func columnForKinError(err error) int {
+	if k := keyOriginForKinError(err); k != nil {
+		return k.Column
+	}
+	return 0
+}
+
+// keyOriginForKinError returns the *Location pointed at by either
+// cluster type's Origin.Key, or nil if neither cluster matches or
+// the Origin is not set.
+func keyOriginForKinError(err error) *openapi3.Location {
+	var rfe *openapi3.RequiredFieldError
+	if errors.As(err, &rfe) && rfe.Origin != nil {
+		return rfe.Origin.Key
+	}
+	var fvm *openapi3.FieldVersionMismatchError
+	if errors.As(err, &fvm) && fvm.Origin != nil {
+		return fvm.Origin.Key
+	}
+	return nil
 }
 
 // ruleIDForKinError dispatches a kin-openapi error to a stable
@@ -197,6 +245,10 @@ func writeFindingsText(w io.Writer, findings []Finding) {
 	fmt.Fprintf(w, "%d findings: %d error, %d warning, %d info\n", len(findings), nErr, nWarn, nInfo)
 
 	for _, f := range findings {
-		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, f.Source, f.Text)
+		loc := f.Source
+		if f.Line > 0 {
+			loc = fmt.Sprintf("%s:%d:%d", f.Source, f.Line, f.Column)
+		}
+		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, loc, f.Text)
 	}
 }

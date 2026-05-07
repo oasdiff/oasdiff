@@ -102,6 +102,49 @@ func Test_ValidateCmd_TextFormatHeaderAndBlock(t *testing.T) {
 	require.Contains(t, lines[1], "error\t[info-version-required] at ")
 }
 
+// Origin tracking: line + column appear in YAML output for typed
+// errors carrying an *Origin (info, license, server, schema). The
+// loader is started with IncludeOrigin=true unconditionally so this
+// always fires for converted call sites.
+func Test_ValidateCmd_LineColumnFromOrigin(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "info-version-required", findings[0]["id"])
+	// info: starts at line 2 of the fixture; the cluster Origin points
+	// at the info object's start.
+	require.Equal(t, 2, findings[0]["line"])
+	require.Equal(t, 1, findings[0]["column"])
+}
+
+// Document-root fields (openapi version, webhooks, jsonSchemaDialect)
+// have no Origin since the loader doesn't track *T. Their findings
+// have line/column omitted (not zero — yaml:"...,omitempty" elides
+// them entirely).
+func Test_ValidateCmd_DocRootFieldHasNoLineColumn(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/openapi-version-empty.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "openapi-required", findings[0]["id"])
+	require.NotContains(t, findings[0], "line")
+	require.NotContains(t, findings[0], "column")
+}
+
+// Text format renders source as <file>:<line>:<column> when origin is
+// available, and as plain <file> otherwise (matching the changelog
+// command's location formatting in MultiLineError).
+func Test_ValidateCmd_TextFormatLocation(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "../data/validate/missing-required-info.yaml:2:1")
+}
+
 // Invalid file path → exit 102 (failed-to-load), not 1 (validation finding).
 // Distinguishing these matters for CI: load failures and validation
 // failures are different incidents.
