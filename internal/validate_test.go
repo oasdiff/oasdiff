@@ -147,17 +147,21 @@ func Test_ValidateCmd_TextFormatLocation(t *testing.T) {
 
 // Multi-line error messages (e.g. kin's *SchemaError dumps Schema +
 // Value blocks separated by newlines) render with every continuation
-// line tab-indented, keeping the finding visually grouped.
-func Test_ValidateCmd_TextFormatMultiLineMessage(t *testing.T) {
-	// data/openapi-test1.yaml contains a parameter whose example
-	// exceeds its maxLength — kin's SchemaError dumps the Schema
-	// and Value blocks in the message. The fixture is shipped with
-	// the oasdiff repo for other tests; we reuse it here.
+// line tab-indented, keeping the finding visually grouped. Also pins
+// the SchemaValueError dispatch (parameter example violates schema)
+// and Origin extraction (line/column from the parameter).
+func Test_ValidateCmd_SchemaValueError(t *testing.T) {
+	// data/openapi-test1.yaml's "token" parameter has example "26734...8"
+	// (36 chars) but maxLength: 29. kin's SchemaError dumps Schema +
+	// Value; SchemaValueError wraps it and supplies parameter.Origin.
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/openapi-test1.yaml"), &stdout, io.Discard))
 	out := stdout.String()
-	// Both the Schema: and Value: continuation lines should appear
-	// indented with a tab.
+	// Cluster dispatch: ValueKind "example" → "example-violates-schema".
+	require.Contains(t, out, "[example-violates-schema]")
+	// Origin from parameter.Origin produces a line:column suffix.
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+	// Multi-line content stays indented.
 	require.Contains(t, out, "\n\tSchema:")
 	require.Contains(t, out, "\n\tValue:")
 }

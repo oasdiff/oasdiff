@@ -163,9 +163,9 @@ func indentContinuation(s string) string {
 	return strings.TrimRight(strings.Join(lines, "\n"), " \t\n")
 }
 
-// keyOriginForKinError returns the *Location pointed at by either
-// cluster type's Origin.Key, or nil if neither cluster matches or
-// the Origin is not set.
+// keyOriginForKinError returns the *Location pointed at by any cluster
+// type's Origin.Key, or nil if no cluster matches or the Origin is not
+// set.
 func keyOriginForKinError(err error) *openapi3.Location {
 	var rfe *openapi3.RequiredFieldError
 	if errors.As(err, &rfe) && rfe.Origin != nil {
@@ -174,6 +174,10 @@ func keyOriginForKinError(err error) *openapi3.Location {
 	var fvm *openapi3.FieldVersionMismatchError
 	if errors.As(err, &fvm) && fvm.Origin != nil {
 		return fvm.Origin.Key
+	}
+	var sve *openapi3.SchemaValueError
+	if errors.As(err, &sve) && sve.Origin != nil {
+		return sve.Origin.Key
 	}
 	return nil
 }
@@ -199,6 +203,11 @@ func ruleIDForKinError(err error) string {
 	var fvm *openapi3.FieldVersionMismatchError
 	if errors.As(err, &fvm) {
 		return ruleIDFromField(fvm.Field) + "-field-for-3-1-plus"
+	}
+
+	var sve *openapi3.SchemaValueError
+	if errors.As(err, &sve) {
+		return ruleIDFromField(sve.ValueKind) + "-violates-schema"
 	}
 
 	return kinUnknownID
