@@ -148,6 +148,21 @@ func columnForKinError(err error) int {
 	return 0
 }
 
+// indentContinuation prefixes every non-empty continuation line of s
+// with a tab. The first line is left as-is (the caller's format string
+// already supplies its leading tab), and blank lines stay blank rather
+// than becoming stray "\t" lines. Trailing whitespace is trimmed.
+func indentContinuation(s string) string {
+	lines := strings.Split(s, "\n")
+	for i, line := range lines {
+		if i == 0 || line == "" {
+			continue
+		}
+		lines[i] = "\t" + line
+	}
+	return strings.TrimRight(strings.Join(lines, "\n"), " \t\n")
+}
+
 // keyOriginForKinError returns the *Location pointed at by either
 // cluster type's Origin.Key, or nil if neither cluster matches or
 // the Origin is not set.
@@ -251,8 +266,8 @@ func writeFindingsText(w io.Writer, findings []Finding) {
 		}
 		// Some kin errors (notably *SchemaError) embed newlines in the
 		// message — Schema:\n... + Value:\n... blocks. Indent every
-		// continuation line so the finding stays visually grouped.
-		indented := strings.ReplaceAll(f.Text, "\n", "\n\t")
-		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, loc, indented)
+		// non-empty continuation line so the finding stays visually
+		// grouped, while leaving blank lines blank (not "\t").
+		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, loc, indentContinuation(f.Text))
 	}
 }
