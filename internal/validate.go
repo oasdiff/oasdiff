@@ -76,7 +76,7 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	findings := mapKinErrors(flags.getBase().String(), verr)
 	if err := writeFindings(stdout, findings, flags.getFormat()); err != nil {
-		return false, getErrFailedPrint("validate "+flags.getFormat(), err)
+		return false, getErrFailedPrint(validateCmd+" "+flags.getFormat(), err)
 	}
 
 	return true, nil
