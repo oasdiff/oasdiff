@@ -217,6 +217,10 @@ func processAddedPropertiesDiff(propertyPath string, propertyName string, schema
 		}
 	}
 
+	if schemaDiff.AdditionalPropertiesDiff != nil {
+		processAddedPropertiesDiff(joinPath(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, processor)
+	}
+
 	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
 	if schemaDiff.PrefixItemsDiff != nil {
 		for _, v := range schemaDiff.PrefixItemsDiff.Modified {
@@ -314,6 +318,10 @@ func processDeletedPropertiesDiff(propertyPath string, propertyName string, sche
 		for i, v := range schemaDiff.PropertiesDiff.Modified {
 			processDeletedPropertiesDiff(propertyPath, i, v, processor)
 		}
+	}
+
+	if schemaDiff.AdditionalPropertiesDiff != nil {
+		processDeletedPropertiesDiff(joinPath(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, processor)
 	}
 
 	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields

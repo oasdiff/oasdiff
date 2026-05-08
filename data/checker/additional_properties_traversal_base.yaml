@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /entries:
+    get:
+      operationId: listEntries
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  required:
+                    - id
+                    - kind
+                  properties:
+                    id:
+                      type: integer
+                    kind:
+                      type: string
