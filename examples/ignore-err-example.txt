@@ -1,0 +1,16 @@
+# Each line is a regex; ERROR-level findings whose rendered text matches the
+# regex are ignored. Empty lines and lines starting with # are skipped.
+#
+# Pair with `err-ignore: ignore-err-example.txt` in oasdiff config (e.g.
+# .oasdiff.yaml), or pass `--err-ignore <path>` on the command line.
+#
+# Uncomment and edit any of the following examples to suit your repo:
+
+# Ignore removal of internal-only endpoints:
+# GET /internal/.* removed
+
+# Ignore removal of a deprecated schema in components:
+# in components removed the schema `LegacyType`
+
+# Ignore property type changes inside a specific request body:
+# request body for the content type 'application/json' .* property 'oldField' .* changed

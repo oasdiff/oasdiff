@@ -1,0 +1,14 @@
+# Each line is a regex; WARNING-level findings whose rendered text matches
+# the regex are ignored. Empty lines and lines starting with # are skipped.
+#
+# Same shape as ignore-err-example.txt; matches WARNING-level findings only.
+# Pair with `warn-ignore: ignore-warn-example.txt` in oasdiff config, or
+# pass `--warn-ignore <path>` on the command line.
+#
+# Empty by default — uncomment a pattern to suppress matching warnings.
+
+# Ignore deprecation warnings on a specific path:
+# GET /deprecated/.* deprecated
+
+# Ignore header parameter changes that are known-safe in your repo:
+# deleted the `header` request parameter `X-Internal-Trace`
