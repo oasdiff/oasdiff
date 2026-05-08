@@ -4,8 +4,6 @@ This is useful for complex configurations or repeated usage patterns.
 The config file should be named oasdiff.{json,yaml,yml,toml,hcl} and placed in the directory where the command is run.  
 For example, see [oasdiff.yaml](../examples/oasdiff.yaml).
 
-This config file also works with the [oasdiff GitHub Actions](https://github.com/oasdiff/oasdiff-action) — drop it at your repo root and the `breaking`, `changelog`, and `diff` actions pick it up automatically.
-
 The configuration file supports the exact same flags that are supported by the command-line.
 Notes:
 1. Command-line flags take precedence over configuration file settings.
