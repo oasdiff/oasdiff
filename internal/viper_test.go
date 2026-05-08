@@ -308,6 +308,160 @@ func TestViper_ConfigEnvVar(t *testing.T) {
 		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
 }
 
+// ---------------------------------------------------------------------
+// Relative-path resolution: path-valued config keys (err-ignore,
+// warn-ignore, severity-levels, template) should resolve against the
+// config file's directory, not the process's cwd. Matches behaviour
+// of ESLint, Prettier, golangci-lint, etc.
+// ---------------------------------------------------------------------
+
+// TestViper_RelativePath_ResolvesAgainstConfigDir: when the config
+// file lives in a subdirectory and references a sibling file via a
+// relative path, the path is rewritten to be anchored at the config's
+// directory.
+func TestViper_RelativePath_ResolvesAgainstConfigDir(t *testing.T) {
+	root := chdirIsolated(t)
+	configDir := filepath.Join(root, "subdir")
+	require.NoError(t, os.Mkdir(configDir, 0700))
+
+	configPath := filepath.Join(configDir, "cfg.yaml")
+	writeFile(t, configPath, "err-ignore: ignore-rules.txt\n")
+	// Sibling file next to the config — what the relative path should
+	// resolve to.
+	ignorePath := filepath.Join(configDir, "ignore-rules.txt")
+	writeFile(t, ignorePath, "")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	cmd.PersistentFlags().String("err-ignore", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", configPath))
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+	require.Equal(t, ignorePath, v.GetString("err-ignore"))
+}
+
+// TestViper_RelativePath_AbsoluteValueUnchanged: an absolute path in
+// the config file is left alone, regardless of where the config lives.
+func TestViper_RelativePath_AbsoluteValueUnchanged(t *testing.T) {
+	root := chdirIsolated(t)
+	configDir := filepath.Join(root, "subdir")
+	require.NoError(t, os.Mkdir(configDir, 0700))
+
+	absoluteIgnore := filepath.Join(root, "elsewhere.txt")
+	writeFile(t, absoluteIgnore, "")
+
+	configPath := filepath.Join(configDir, "cfg.yaml")
+	writeFile(t, configPath, "err-ignore: "+absoluteIgnore+"\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	cmd.PersistentFlags().String("err-ignore", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", configPath))
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+	require.Equal(t, absoluteIgnore, v.GetString("err-ignore"))
+}
+
+// TestViper_RelativePath_CLIFlagOverridesConfig: when the CLI flag
+// is explicitly set by the user, its value wins over the config and
+// is NOT rewritten — the user's path means what they typed.
+func TestViper_RelativePath_CLIFlagOverridesConfig(t *testing.T) {
+	root := chdirIsolated(t)
+	configDir := filepath.Join(root, "subdir")
+	require.NoError(t, os.Mkdir(configDir, 0700))
+
+	configPath := filepath.Join(configDir, "cfg.yaml")
+	writeFile(t, configPath, "err-ignore: from-config.txt\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	cmd.PersistentFlags().String("err-ignore", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", configPath))
+	// User explicitly passes --err-ignore; this should win and stay
+	// as typed (not rewritten relative to configDir).
+	require.NoError(t, cmd.PersistentFlags().Set("err-ignore", "from-cli.txt"))
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+	require.Equal(t, "from-cli.txt", v.GetString("err-ignore"))
+}
+
+// TestViper_RelativePath_AllPathKeysHandled: each documented path-valued
+// config key gets the same rewrite treatment.
+func TestViper_RelativePath_AllPathKeysHandled(t *testing.T) {
+	root := chdirIsolated(t)
+	configDir := filepath.Join(root, "subdir")
+	require.NoError(t, os.Mkdir(configDir, 0700))
+
+	// One YAML setting all four path-valued keys with relative values.
+	configPath := filepath.Join(configDir, "cfg.yaml")
+	writeFile(t, configPath, `
+err-ignore: err.txt
+warn-ignore: warn.txt
+severity-levels: sev.txt
+template: tmpl.tmpl
+`)
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	for _, k := range []string{"err-ignore", "warn-ignore", "severity-levels", "template"} {
+		cmd.PersistentFlags().String(k, "", "")
+	}
+	require.NoError(t, cmd.PersistentFlags().Set("config", configPath))
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+
+	for k, expected := range map[string]string{
+		"err-ignore":      filepath.Join(configDir, "err.txt"),
+		"warn-ignore":     filepath.Join(configDir, "warn.txt"),
+		"severity-levels": filepath.Join(configDir, "sev.txt"),
+		"template":        filepath.Join(configDir, "tmpl.tmpl"),
+	} {
+		require.Equal(t, expected, v.GetString(k), "key %q", k)
+	}
+}
+
+// TestViper_RelativePath_DefaultLookup_ConfigInCwd: when the config
+// file is loaded from cwd via the default lookup (.oasdiff.yaml),
+// relative paths still work — they get rewritten to absolute paths
+// anchored at cwd, which is functionally equivalent to the
+// pre-existing cwd-relative behaviour. No behaviour change for the
+// default case.
+func TestViper_RelativePath_DefaultLookup_ConfigInCwd(t *testing.T) {
+	root := chdirIsolated(t)
+	writeFile(t, ".oasdiff.yaml", "err-ignore: ignore-rules.txt\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("err-ignore", "", "")
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+	// Path is rewritten to an absolute path under cwd. Functionally
+	// equivalent to "ignore-rules.txt" relative to cwd.
+	require.Equal(t, filepath.Join(root, "ignore-rules.txt"), v.GetString("err-ignore"))
+}
+
+// TestViper_RelativePath_BackCompat_LegacyOasdiffYamlInCwd: explicitly
+// covers the population this fix could conceivably regress —
+// long-standing CLI users with the legacy `oasdiff.yaml` filename in
+// cwd referencing a sibling file via a relative path. They were
+// reading <cwd>/<file>; after the fix, the path is rewritten to
+// <abs cwd>/<file>. Same file, same behaviour.
+func TestViper_RelativePath_BackCompat_LegacyOasdiffYamlInCwd(t *testing.T) {
+	root := chdirIsolated(t)
+	writeFile(t, "oasdiff.yaml", "err-ignore: my-rules.txt\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("err-ignore", "", "")
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+	require.Equal(t, filepath.Join(root, "my-rules.txt"), v.GetString("err-ignore"))
+}
+
 // TestViper_ConfigFlagWinsOverEnv: when both --config and
 // OASDIFF_CONFIG are set, the flag takes precedence.
 func TestViper_ConfigFlagWinsOverEnv(t *testing.T) {

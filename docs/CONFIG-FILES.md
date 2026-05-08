@@ -39,3 +39,6 @@ Notes:
     - `err-ignore`:              configuration file for ignoring errors
     - `severity-levels`:         configuration file for custom severity levels
     - `warn-ignore`:             configuration file for ignoring warnings
+    - `template`:                custom Go template file for changelog generation
+
+   **Relative paths in these flags are resolved against the config file's directory**, not the process's current working directory. So when you write `err-ignore: rules.txt` in `path/to/.oasdiff.yaml`, oasdiff reads `path/to/rules.txt`. Absolute paths and paths set via CLI flag are not rewritten.

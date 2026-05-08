@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -19,11 +20,25 @@ import (
 // config-file lookup. Lower precedence than the --config flag.
 const EnvConfigPath = "OASDIFF_CONFIG"
 
+// configRelativePathKeys lists viper keys whose values are file paths.
+// When read from a config file, relative values in these keys are
+// resolved against the config file's own directory. Absolute values
+// and values explicitly set via CLI flag are left alone.
+var configRelativePathKeys = []string{
+	"err-ignore",
+	"warn-ignore",
+	"severity-levels",
+	"template",
+}
+
 type IViper interface {
 	SetConfigName(in string)
 	SetConfigFile(in string)
 	AddConfigPath(in string)
 	ReadInConfig() error
+	ConfigFileUsed() string
+	GetString(key string) string
+	Set(key string, value any)
 	BindPFlag(key string, flag *pflag.Flag) error
 	UnmarshalExact(rawVal any, opts ...viper.DecoderConfigOption) error
 }
@@ -41,7 +56,46 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 		return getErrConfigFileProblem(err)
 	}
 
+	// After CLI flags are bound, rewrite path-valued config-file values
+	// to be relative to the config file's directory (vs. cwd). Skips
+	// values where the user explicitly set the corresponding CLI flag —
+	// those mean what the user typed.
+	resolveConfigRelativePaths(cmd, v)
+
 	return nil
+}
+
+// resolveConfigRelativePaths walks the documented path-valued config
+// keys and rewrites relative values to be anchored at the config file's
+// directory. A config file is self-contained — relative paths in it
+// refer to siblings of the config, not arbitrary files at the process's
+// cwd.
+//
+// Skipped per key:
+//   - The corresponding CLI flag was explicitly set by the user
+//     (Changed=true). Their typed path means what they typed.
+//   - The value is empty, or already absolute.
+//
+// Skipped overall when no config file was loaded.
+func resolveConfigRelativePaths(cmd *cobra.Command, v IViper) {
+	configFile := v.ConfigFileUsed()
+	if configFile == "" {
+		return
+	}
+	configDir := filepath.Dir(configFile)
+
+	for _, key := range configRelativePathKeys {
+		if cmd != nil {
+			if flag := cmd.Flag(key); flag != nil && flag.Changed {
+				continue
+			}
+		}
+		val := v.GetString(key)
+		if val == "" || filepath.IsAbs(val) {
+			continue
+		}
+		v.Set(key, filepath.Join(configDir, val))
+	}
 }
 
 // readConfFile loads the oasdiff configuration file. Resolution order:
@@ -152,6 +206,7 @@ type Config struct {
 	StripPrefixRevision    string   `mapstructure:"strip-prefix-revision"`
 	IncludePathParams      bool     `mapstructure:"include-path-params"`
 	AllowExternalRefs      bool     `mapstructure:"allow-external-refs"`
+	Template               string   `mapstructure:"template"`
 }
 
 // validate checks that each of the provided configuration values is one of the generally accepted values
