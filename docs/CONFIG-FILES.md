@@ -4,7 +4,12 @@ This is useful for complex configurations or repeated usage patterns.
 
 ## Default lookup
 
-By default, `oasdiff` looks for `.oasdiff.{json,yaml,yml,toml,hcl}` in the directory where the command is run.
+By default, `oasdiff` looks for a config file in the directory where the command is run, in this order:
+
+1. `.oasdiff.{json,yaml,yml,toml,hcl}` — preferred (dotfile convention)
+2. `oasdiff.{json,yaml,yml,toml,hcl}` — legacy fallback, kept for back-compat with existing setups
+
+`.oasdiff.*` is recommended for new setups. Existing `oasdiff.*` users don't need to migrate — both filenames continue to work.
 
 For example, see [.oasdiff.yaml](../examples/.oasdiff.yaml).
 
