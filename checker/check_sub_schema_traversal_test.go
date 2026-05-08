@@ -56,6 +56,40 @@ func TestSubSchemaTraversalDeletedProperty(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyRemovedId), "expected request-property-removed via sub-schema traversal")
 }
 
+// CL: exercise processDeletedPropertiesDiff traversal through additionalProperties.
+// Regression: prior to the fix, processDeletedPropertiesDiff and
+// processAddedPropertiesDiff did not recurse through AdditionalPropertiesDiff
+// (only processModifiedPropertiesDiff did), so removing a required property from
+// the value-type of a `dict[str, X]`-style schema went undetected.
+func TestAdditionalPropertiesTraversalDeletedRequiredProperty(t *testing.T) {
+	s1, err := open("../data/checker/additional_properties_traversal_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/additional_properties_traversal_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.ResponseRequiredPropertyRemovedId), "expected response-required-property-removed via additionalProperties traversal")
+}
+
+// CL: exercise processAddedPropertiesDiff traversal through additionalProperties.
+// Symmetric to the deletion test above — swapping base/revision exercises the
+// added-required-property path through AdditionalPropertiesDiff.
+func TestAdditionalPropertiesTraversalAddedRequiredProperty(t *testing.T) {
+	s1, err := open("../data/checker/additional_properties_traversal_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/additional_properties_traversal_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+	require.True(t, containsId(errs, checker.ResponseRequiredPropertyAddedId), "expected response-required-property-added via additionalProperties traversal")
+}
+
 // CL: exercise processModifiedPropertiesDiff traversal for minimum changes through if/then sub-schemas
 func TestSubSchemaTraversalMinChanged(t *testing.T) {
 	s1, err := open("../data/checker/sub_schema_traversal_base.yaml")
