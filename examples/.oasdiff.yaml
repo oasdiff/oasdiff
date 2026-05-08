@@ -11,6 +11,7 @@ composed: false
 flatten-allof: true
 allow-external-refs: true  # set to false to block external $refs (prevents SSRF when processing untrusted specs)
 err-ignore: ignore-err-example.txt
+warn-ignore: ignore-warn-example.txt
 lang: en
 fail-on: ERR
 level: INFO
