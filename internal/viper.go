@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -14,8 +15,13 @@ import (
 	"slices"
 )
 
+// EnvConfigPath is the environment variable that overrides the default
+// config-file lookup. Lower precedence than the --config flag.
+const EnvConfigPath = "OASDIFF_CONFIG"
+
 type IViper interface {
 	SetConfigName(in string)
+	SetConfigFile(in string)
 	AddConfigPath(in string)
 	ReadInConfig() error
 	BindPFlag(key string, flag *pflag.Flag) error
@@ -23,7 +29,7 @@ type IViper interface {
 }
 
 func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
-	if err := readConfFile(v); err != nil {
+	if err := readConfFile(cmd, v); err != nil {
 		return getErrConfigFileProblem(err)
 	}
 
@@ -38,10 +44,25 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 	return nil
 }
 
-func readConfFile(v IViper) error {
+// readConfFile loads the oasdiff configuration file. Resolution order:
+//
+//  1. --config <path> flag (when set, the file MUST exist; missing or malformed file is an error)
+//  2. OASDIFF_CONFIG environment variable (same semantics)
+//  3. Default cwd lookup for .oasdiff.{json,yaml,yml,toml,hcl} (silent when missing)
+//
+// Returns nil when no config is found via the default lookup; only the two
+// explicit-override paths surface "file not found" as an error.
+func readConfFile(cmd *cobra.Command, v IViper) error {
+	if path := explicitConfigPath(cmd); path != "" {
+		v.SetConfigFile(path)
+		if err := v.ReadInConfig(); err != nil {
+			return fmt.Errorf("read error: %s", err)
+		}
+		return nil
+	}
 
-	// the config file should be named oasdiff.{json,yaml,yml,toml,hcl} in the directory where the command is run
-	v.SetConfigName("oasdiff")
+	// Default lookup: .oasdiff.{json,yaml,yml,toml,hcl} in cwd.
+	v.SetConfigName(".oasdiff")
 	v.AddConfigPath(".")
 
 	if err := v.ReadInConfig(); err != nil {
@@ -53,6 +74,20 @@ func readConfFile(v IViper) error {
 	}
 
 	return nil
+}
+
+// explicitConfigPath returns the explicit config path requested by the
+// caller via --config or OASDIFF_CONFIG. The flag wins when both are set.
+// Returns "" when neither is set (caller falls back to cwd lookup).
+func explicitConfigPath(cmd *cobra.Command) string {
+	if cmd != nil {
+		if flag := cmd.Flag("config"); flag != nil {
+			if path := flag.Value.String(); path != "" {
+				return path
+			}
+		}
+	}
+	return os.Getenv(EnvConfigPath)
 }
 
 func bindFlags(cmd *cobra.Command, v IViper) error {
