@@ -205,18 +205,32 @@ func TestViper_DefaultLookup_DotOasdiffYaml(t *testing.T) {
 		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
 }
 
-// TestViper_DefaultLookup_LegacyOasdiffYamlIsIgnored: a legacy
-// oasdiff.yaml (no leading dot) at repo root is no longer recognized
-// by the default lookup. The CLI should silently skip it.
-func TestViper_DefaultLookup_LegacyOasdiffYamlIsIgnored(t *testing.T) {
+// TestViper_DefaultLookup_LegacyOasdiffYamlStillWorks: the legacy
+// oasdiff.{yaml,...} filename remains supported as a back-compat
+// fallback for CLI users who had it set up before the .oasdiff.* move.
+// .oasdiff.* is preferred, but oasdiff.* keeps working when no dotfile
+// is present.
+func TestViper_DefaultLookup_LegacyOasdiffYamlStillWorks(t *testing.T) {
 	chdirIsolated(t)
-	// Legacy filename — would have been picked up before the .oasdiff.*
-	// move. Now it should be ignored entirely.
 	writeFile(t, "oasdiff.yaml", "lang: invalid\n")
 
 	cmd := cobra.Command{}
-	// No error: validate() never sees the bad value because the file
-	// wasn't loaded.
+	require.EqualError(t,
+		internal.RunViper(&cmd, viper.New()),
+		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
+}
+
+// TestViper_DefaultLookup_DotPreferredOverLegacy: when both .oasdiff.yaml
+// and oasdiff.yaml exist in cwd, the dotfile wins. Proves the lookup
+// order — preferred first, legacy as fallback only.
+func TestViper_DefaultLookup_DotPreferredOverLegacy(t *testing.T) {
+	chdirIsolated(t)
+	// Dotfile is clean; legacy is not. If the legacy file were loaded,
+	// validate() would error.
+	writeFile(t, ".oasdiff.yaml", "lang: en\n")
+	writeFile(t, "oasdiff.yaml", "lang: invalid\n")
+
+	cmd := cobra.Command{}
 	require.Nil(t, internal.RunViper(&cmd, viper.New()))
 }
 

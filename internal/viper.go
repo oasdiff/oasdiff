@@ -48,7 +48,9 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 //
 //  1. --config <path> flag (when set, the file MUST exist; missing or malformed file is an error)
 //  2. OASDIFF_CONFIG environment variable (same semantics)
-//  3. Default cwd lookup for .oasdiff.{json,yaml,yml,toml,hcl} (silent when missing)
+//  3. Default cwd lookup, in order:
+//     a. .oasdiff.{json,yaml,yml,toml,hcl} (preferred — dotfile convention)
+//     b. oasdiff.{json,yaml,yml,toml,hcl} (legacy — kept for back-compat, still works without warning)
 //
 // Returns nil when no config is found via the default lookup; only the two
 // explicit-override paths surface "file not found" as an error.
@@ -61,18 +63,24 @@ func readConfFile(cmd *cobra.Command, v IViper) error {
 		return nil
 	}
 
-	// Default lookup: .oasdiff.{json,yaml,yml,toml,hcl} in cwd.
-	v.SetConfigName(".oasdiff")
-	v.AddConfigPath(".")
+	// Default lookup: try .oasdiff.* first (preferred), then oasdiff.*
+	// (legacy back-compat) — cwd-scoped, all viper-supported extensions.
+	for _, name := range []string{".oasdiff", "oasdiff"} {
+		v.SetConfigName(name)
+		v.AddConfigPath(".")
 
-	if err := v.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			// Config file not found; ignore error
-		} else {
-			return fmt.Errorf("read error: %s", err)
+		err := v.ReadInConfig()
+		if err == nil {
+			return nil
 		}
+		if _, notFound := err.(viper.ConfigFileNotFoundError); notFound {
+			continue // try the next candidate
+		}
+		// File found but malformed — surface the error.
+		return fmt.Errorf("read error: %s", err)
 	}
 
+	// No config file found in cwd; not an error.
 	return nil
 }
 
