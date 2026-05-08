@@ -20,6 +20,11 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	rootCmd.SetErr(stderr)
 	rootCmd.Version = build.Version
 
+	// --config is a persistent flag on the root command so every subcommand
+	// inherits it. Lookup order is documented in internal/viper.go's
+	// readConfFile: --config > OASDIFF_CONFIG env var > .oasdiff.* in cwd.
+	rootCmd.PersistentFlags().String("config", "", "path to config file (overrides .oasdiff.* lookup; can also use the OASDIFF_CONFIG env var)")
+
 	rootCmd.AddCommand(
 		getDiffCmd(),
 		getSummaryCmd(),

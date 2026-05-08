@@ -1,6 +1,7 @@
 # oasdiff configuration file
 # This file is used to customize the behavior of oasdiff.
-# Place in the directory where the command is run
+# Place at the directory where the command is run, or override the
+# location with --config <path> or the OASDIFF_CONFIG env var.
 format: json
 color: never
 attributes:

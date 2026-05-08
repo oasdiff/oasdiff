@@ -1,8 +1,27 @@
 # Configuration Files
 The `oasdiff` command can read its configuration from a file.  
-This is useful for complex configurations or repeated usage patterns.  
-The config file should be named oasdiff.{json,yaml,yml,toml,hcl} and placed in the directory where the command is run.  
-For example, see [oasdiff.yaml](../examples/oasdiff.yaml).
+This is useful for complex configurations or repeated usage patterns.
+
+## Default lookup
+
+By default, `oasdiff` looks for `.oasdiff.{json,yaml,yml,toml,hcl}` in the directory where the command is run.
+
+For example, see [.oasdiff.yaml](../examples/.oasdiff.yaml).
+
+## Explicit override
+
+To use a different filename or path, pass `--config <path>` or set the `OASDIFF_CONFIG` environment variable. When either is set, the default lookup is skipped and the file at the given path must exist (missing or malformed file is an error).
+
+Precedence: `--config <path>` > `OASDIFF_CONFIG` > default `.oasdiff.*` lookup.
+
+```sh
+# Explicit flag (per-invocation)
+oasdiff diff --config ./my-config.yaml base.yaml revision.yaml
+
+# Environment variable (set once for a shell or CI workflow)
+export OASDIFF_CONFIG=./my-config.yaml
+oasdiff diff base.yaml revision.yaml
+```
 
 The configuration file supports the exact same flags that are supported by the command-line.
 Notes:

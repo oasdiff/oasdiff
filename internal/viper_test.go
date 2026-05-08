@@ -2,6 +2,8 @@ package internal_test
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -163,4 +165,153 @@ func TestViper_InvalidFlag(t *testing.T) {
 	cmd := cobra.Command{}
 
 	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: validation error: decoding failed due to the following error(s):\n\n'internal.Config' has invalid keys: invalid")
+}
+
+// ---------------------------------------------------------------------
+// Config-file lookup: .oasdiff.* in cwd; --config flag; OASDIFF_CONFIG
+// env var; precedence flag > env > default.
+//
+// Each test uses t.Chdir(t.TempDir()) so it runs in an isolated cwd
+// without polluting the test working directory or interfering with
+// sibling tests.
+// ---------------------------------------------------------------------
+
+// writeFile writes content to path, failing the test on error.
+func writeFile(t *testing.T, path, content string) {
+	t.Helper()
+	require.NoError(t, os.WriteFile(path, []byte(content), 0600))
+}
+
+// chdirIsolated moves the test into a fresh temp dir for the duration
+// of the test. Returns the temp dir path so callers can construct
+// absolute paths to fixtures they create inside it.
+func chdirIsolated(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	t.Chdir(dir)
+	return dir
+}
+
+// TestViper_DefaultLookup_DotOasdiffYaml: when .oasdiff.yaml exists in
+// cwd and no override is set, it is loaded. Asserted via a value that
+// validate() rejects — error message proves the file was read.
+func TestViper_DefaultLookup_DotOasdiffYaml(t *testing.T) {
+	chdirIsolated(t)
+	writeFile(t, ".oasdiff.yaml", "lang: invalid\n")
+
+	cmd := cobra.Command{}
+	require.EqualError(t,
+		internal.RunViper(&cmd, viper.New()),
+		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
+}
+
+// TestViper_DefaultLookup_LegacyOasdiffYamlIsIgnored: a legacy
+// oasdiff.yaml (no leading dot) at repo root is no longer recognized
+// by the default lookup. The CLI should silently skip it.
+func TestViper_DefaultLookup_LegacyOasdiffYamlIsIgnored(t *testing.T) {
+	chdirIsolated(t)
+	// Legacy filename — would have been picked up before the .oasdiff.*
+	// move. Now it should be ignored entirely.
+	writeFile(t, "oasdiff.yaml", "lang: invalid\n")
+
+	cmd := cobra.Command{}
+	// No error: validate() never sees the bad value because the file
+	// wasn't loaded.
+	require.Nil(t, internal.RunViper(&cmd, viper.New()))
+}
+
+// TestViper_DefaultLookup_NoConfigIsNotAnError: with no .oasdiff.*
+// in cwd and no override, RunViper succeeds.
+func TestViper_DefaultLookup_NoConfigIsNotAnError(t *testing.T) {
+	chdirIsolated(t)
+
+	cmd := cobra.Command{}
+	require.Nil(t, internal.RunViper(&cmd, viper.New()))
+}
+
+// TestViper_ConfigFlag_ExplicitPath: --config <path> loads the file
+// at the given path, regardless of cwd's .oasdiff.*.
+func TestViper_ConfigFlag_ExplicitPath(t *testing.T) {
+	dir := chdirIsolated(t)
+	customPath := filepath.Join(dir, "custom-config.yaml")
+	writeFile(t, customPath, "lang: invalid\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", customPath))
+
+	require.EqualError(t,
+		internal.RunViper(&cmd, viper.New()),
+		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
+}
+
+// TestViper_ConfigFlag_MissingFileIsError: --config pointing at a
+// non-existent file is an explicit error (unlike the silent-skip
+// behavior of the default lookup).
+func TestViper_ConfigFlag_MissingFileIsError(t *testing.T) {
+	chdirIsolated(t)
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", "does-not-exist.yaml"))
+
+	err := internal.RunViper(&cmd, viper.New())
+	require.NotNil(t, err)
+	require.Contains(t, err.Error(), "read error")
+}
+
+// TestViper_ConfigFlag_OverridesDefaultLookup: when --config is set,
+// the default cwd lookup is skipped — even if .oasdiff.yaml is also
+// present at cwd. Proves the flag's path is used, not the default.
+func TestViper_ConfigFlag_OverridesDefaultLookup(t *testing.T) {
+	dir := chdirIsolated(t)
+	// Default-lookup file with a value that WOULD fail validation if loaded.
+	writeFile(t, ".oasdiff.yaml", "lang: invalid\n")
+	// Explicit-path file that's clean.
+	customPath := filepath.Join(dir, "clean.yaml")
+	writeFile(t, customPath, "lang: en\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", customPath))
+
+	// No error: the explicit clean.yaml was loaded, not the bad .oasdiff.yaml.
+	require.Nil(t, internal.RunViper(&cmd, viper.New()))
+}
+
+// TestViper_ConfigEnvVar: OASDIFF_CONFIG points at a config file in
+// the absence of --config.
+func TestViper_ConfigEnvVar(t *testing.T) {
+	dir := chdirIsolated(t)
+	customPath := filepath.Join(dir, "env-config.yaml")
+	writeFile(t, customPath, "lang: invalid\n")
+
+	t.Setenv("OASDIFF_CONFIG", customPath)
+
+	cmd := cobra.Command{}
+	require.EqualError(t,
+		internal.RunViper(&cmd, viper.New()),
+		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
+}
+
+// TestViper_ConfigFlagWinsOverEnv: when both --config and
+// OASDIFF_CONFIG are set, the flag takes precedence.
+func TestViper_ConfigFlagWinsOverEnv(t *testing.T) {
+	dir := chdirIsolated(t)
+	// Env points at a clean file; flag points at a bad one. If env
+	// were honored, no error. If flag wins, validation fails.
+	envPath := filepath.Join(dir, "env-clean.yaml")
+	writeFile(t, envPath, "lang: en\n")
+	flagPath := filepath.Join(dir, "flag-bad.yaml")
+	writeFile(t, flagPath, "lang: invalid\n")
+
+	t.Setenv("OASDIFF_CONFIG", envPath)
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("config", "", "")
+	require.NoError(t, cmd.PersistentFlags().Set("config", flagPath))
+
+	require.EqualError(t,
+		internal.RunViper(&cmd, viper.New()),
+		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
 }
