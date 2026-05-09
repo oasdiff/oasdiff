@@ -2934,3 +2934,105 @@ func TestMerge_Contains_AllUnset(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, merged.Contains)
 }
+
+// OpenAPI 3.1 / JSON Schema 2020-12 `propertyNames`: every property name in
+// an object must validate against the subschema. Unlike `contains`,
+// the strict allOf semantics ("every name matches X AND every name
+// matches Y") are exactly equivalent to "every name matches Merge(X, Y)",
+// so the recursive merge is semantically faithful — no over-constraint.
+
+// Single subschema with `propertyNames` flows through unchanged.
+func TestMerge_PropertyNames_SinglePass(t *testing.T) {
+	names := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, MinLength: 3}}
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{PropertyNames: names},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.PropertyNames)
+	require.Equal(t, &openapi3.Types{"string"}, merged.PropertyNames.Value.Type)
+	require.EqualValues(t, 3, merged.PropertyNames.Value.MinLength)
+}
+
+// `propertyNames` set on one subschema, absent on another — the present
+// subschema flows through.
+func TestMerge_PropertyNames_WithAbsentSibling(t *testing.T) {
+	names := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{PropertyNames: names}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.PropertyNames)
+	require.Equal(t, &openapi3.Types{"string"}, merged.PropertyNames.Value.Type)
+}
+
+// Two subschemas with compatible `propertyNames` are recursively merged
+// into one. This is faithful: every name must match the merged subschema,
+// which is the same as matching both originals.
+func TestMerge_PropertyNames_TwoCompatibleAreMerged(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						PropertyNames: &openapi3.SchemaRef{Value: &openapi3.Schema{
+							Type:      &openapi3.Types{"string"},
+							MinLength: 3,
+						}},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						PropertyNames: &openapi3.SchemaRef{Value: &openapi3.Schema{
+							Type:      &openapi3.Types{"string"},
+							MaxLength: new(uint64(10)),
+						}},
+					}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.NotNil(t, merged.PropertyNames)
+	require.Equal(t, &openapi3.Types{"string"}, merged.PropertyNames.Value.Type)
+	require.EqualValues(t, 3, merged.PropertyNames.Value.MinLength)
+	require.NotNil(t, merged.PropertyNames.Value.MaxLength)
+	require.EqualValues(t, 10, *merged.PropertyNames.Value.MaxLength)
+}
+
+// Two subschemas with `propertyNames` whose Types disagree → recursive
+// merge surfaces the underlying conflict as an error.
+func TestMerge_PropertyNames_ConflictBubblesUp(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						PropertyNames: &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}},
+					}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{
+						PropertyNames: &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"integer"}}},
+					}},
+				},
+			},
+		})
+	require.EqualError(t, err, allof.TypeErrorMessage)
+}
+
+// No subschema sets `propertyNames` → merged value stays nil.
+func TestMerge_PropertyNames_AllUnset(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}},
+				},
+			},
+		})
+	require.NoError(t, err)
+	require.Nil(t, merged.PropertyNames)
+}

@@ -59,6 +59,7 @@ type SchemaCollection struct {
 	MinContains          []*uint64
 	MaxContains          []*uint64
 	Contains             []*openapi3.SchemaRef
+	PropertyNames        []*openapi3.SchemaRef
 	ContentMediaType     []string
 	ContentEncoding      []string
 	DependentRequired    []map[string][]string
@@ -225,6 +226,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 		result.Value.MaxContains = new(*base.Value.MaxContains)
 	}
 	result.Value.Contains = base.Value.Contains
+	result.Value.PropertyNames = base.Value.PropertyNames
 	result.Value.ContentMediaType = base.Value.ContentMediaType
 	result.Value.ContentEncoding = base.Value.ContentEncoding
 	result.Value.DependentRequired = base.Value.DependentRequired
@@ -439,6 +441,10 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 		return err
 	}
 	result.Value, err = resolveContains(state, result.Value, &collection)
+	if err != nil {
+		return err
+	}
+	result.Value, err = resolvePropertyNames(state, result.Value, &collection)
 	if err != nil {
 		return err
 	}
@@ -676,6 +682,40 @@ func resolveContains(state *state, schema *openapi3.Schema, collection *SchemaCo
 		return nil, err
 	}
 	schema.Contains = result
+	return schema, nil
+}
+
+// resolvePropertyNames merges OpenAPI 3.1 / JSON Schema 2020-12
+// `propertyNames` subschemas across allOf siblings. `propertyNames`
+// constrains every property name in an object to validate against the
+// subschema. Unlike `contains`, this is a universal quantifier ("every
+// name matches"), so the strict allOf semantics are exact: a name must
+// match X AND match Y, which is the same as matching Merge(X, Y). We
+// recursively flatten X and Y as if wrapped in allOf and emit a single
+// `propertyNames`. No over-constraint — the merge is semantically
+// faithful.
+func resolvePropertyNames(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
+
+	names := openapi3.SchemaRefs{}
+	for _, sref := range collection.PropertyNames {
+		if sref != nil {
+			names = append(names, sref)
+		}
+	}
+	if len(names) == 0 {
+		schema.PropertyNames = nil
+		return schema, nil
+	}
+	if len(names) == 1 {
+		schema.PropertyNames = names[0]
+		return schema, nil
+	}
+	result := openapi3.NewSchemaRef("", openapi3.NewSchema())
+	err := flattenSchemas(state, result, names)
+	if err != nil {
+		return nil, err
+	}
+	schema.PropertyNames = result
 	return schema, nil
 }
 
@@ -1212,6 +1252,7 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.MinContains = append(collection.MinContains, s.Value.MinContains)
 		collection.MaxContains = append(collection.MaxContains, s.Value.MaxContains)
 		collection.Contains = append(collection.Contains, s.Value.Contains)
+		collection.PropertyNames = append(collection.PropertyNames, s.Value.PropertyNames)
 		collection.ContentMediaType = append(collection.ContentMediaType, s.Value.ContentMediaType)
 		collection.ContentEncoding = append(collection.ContentEncoding, s.Value.ContentEncoding)
 		collection.DependentRequired = append(collection.DependentRequired, s.Value.DependentRequired)
