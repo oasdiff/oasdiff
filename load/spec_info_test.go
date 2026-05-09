@@ -1,6 +1,7 @@
 package load_test
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -122,4 +123,19 @@ func TestSpecInfo_Options(t *testing.T) {
 func TestSpecInfo_GlobOptions(t *testing.T) {
 	_, err := load.NewSpecInfoFromGlob(openapi3.NewLoader(), "../data/*.yaml", load.WithIdentity(), load.WithFlattenAllOf(), load.WithFlattenParams())
 	require.NoError(t, err)
+}
+
+// Pin the FlattenError contract: failures from WithFlattenAllOf must be
+// reachable via errors.As so callers can distinguish them from genuine
+// load failures (#907).
+func TestSpecInfo_FlattenError_Typed(t *testing.T) {
+	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/allof/invalid.yaml"), load.WithFlattenAllOf())
+	require.Error(t, err)
+
+	var flatErr *load.FlattenError
+	require.True(t, errors.As(err, &flatErr))
+	require.Equal(t, "../data/allof/invalid.yaml", flatErr.Url)
+	require.NotNil(t, flatErr.Err)
+
+	require.EqualError(t, err, `failed to flatten allOf in "../data/allof/invalid.yaml": unable to resolve Type conflict: all Type values must be identical`)
 }

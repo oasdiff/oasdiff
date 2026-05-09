@@ -301,8 +301,8 @@ func Test_FlattenCmdOK(t *testing.T) {
 
 func Test_FlattenCmdInvalid(t *testing.T) {
 	var stderr bytes.Buffer
-	require.Equal(t, 102, internal.Run(cmdToArgs("oasdiff flatten ../data/allof/invalid.yaml"), io.Discard, &stderr))
-	require.Equal(t, `Error: failed to load original spec from "../data/allof/invalid.yaml": failed to flatten allOf in "../data/allof/invalid.yaml": unable to resolve Type conflict: all Type values must be identical
+	require.Equal(t, 122, internal.Run(cmdToArgs("oasdiff flatten ../data/allof/invalid.yaml"), io.Discard, &stderr))
+	require.Equal(t, `Error: failed to flatten allOf in "../data/allof/invalid.yaml": unable to resolve Type conflict: all Type values must be identical
 `, stderr.String())
 }
 
