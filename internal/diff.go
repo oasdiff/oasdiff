@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -104,19 +103,11 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 
 	s1, err := load.NewSpecInfo(loader, flags.getBase(), flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
-		var flatErr *load.FlattenError
-		if errors.As(err, &flatErr) {
-			return nil, getErrFailedToFlatten(flatErr)
-		}
 		return nil, getErrFailedToLoadSpec("base", flags.getBase(), err)
 	}
 
 	s2, err := load.NewSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
-		var flatErr *load.FlattenError
-		if errors.As(err, &flatErr) {
-			return nil, getErrFailedToFlatten(flatErr)
-		}
 		return nil, getErrFailedToLoadSpec("revision", flags.getRevision(), err)
 	}
 
@@ -141,19 +132,11 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 
 	s1, err := load.NewSpecInfoFromGlob(loader, flags.getBase().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
-		var flatErr *load.FlattenError
-		if errors.As(err, &flatErr) {
-			return nil, getErrFailedToFlatten(flatErr)
-		}
 		return nil, getErrFailedToLoadSpecs("base", flags.getBase().Path, err)
 	}
 
 	s2, err := load.NewSpecInfoFromGlob(loader, flags.getRevision().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
-		var flatErr *load.FlattenError
-		if errors.As(err, &flatErr) {
-			return nil, getErrFailedToFlatten(flatErr)
-		}
 		return nil, getErrFailedToLoadSpecs("revision", flags.getRevision().Path, err)
 	}
 
