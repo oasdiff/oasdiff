@@ -24,6 +24,7 @@ func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 
 			// Check modified parameters
 			for _, paramDiffs := range operationItem.ParametersDiff.Modified {
@@ -35,13 +36,9 @@ func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 
 					// Check parameter schema
 					changes := checkParameterListOfTypesChange(
+						opInfo,
 						paramDiff,
 						param,
-						config,
-						operationsSources,
-						operationItem,
-						operation,
-						path,
 					)
 					result = append(result, changes...)
 
@@ -51,15 +48,11 @@ func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 							paramDiff.SchemaDiff,
 							func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 								changes := checkParameterPropertyListOfTypesChange(
+									opInfo,
 									propertyPath,
 									propertyName,
 									propertyDiff,
 									param,
-									config,
-									operationsSources,
-									operationItem,
-									operation,
-									path,
 								)
 								result = append(result, changes...)
 							})

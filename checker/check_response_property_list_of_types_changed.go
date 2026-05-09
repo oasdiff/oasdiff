@@ -24,6 +24,7 @@ func ResponsePropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.ContentDiff == nil ||
@@ -39,14 +40,10 @@ func ResponsePropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 
 					// Check response body schema
 					changes := checkBodyListOfTypesChange(
+						opInfo,
 						mediaTypeDiff.SchemaDiff,
 						mediaType,
 						responseStatus,
-						config,
-						operationsSources,
-						operationItem,
-						operation,
-						path,
 						false, // isRequest
 					)
 					result = append(result, changes...)
@@ -60,16 +57,12 @@ func ResponsePropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 							}
 
 							changes := checkPropertyListOfTypesChange(
+								opInfo,
 								propertyPath,
 								propertyName,
 								propertyDiff,
 								mediaType,
 								responseStatus,
-								config,
-								operationsSources,
-								operationItem,
-								operation,
-								path,
 								false, // isRequest
 							)
 							result = append(result, changes...)
