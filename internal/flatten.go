@@ -1,7 +1,6 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -38,10 +37,6 @@ func runFlatten(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
 	spec, err := load.NewSpecInfo(loader, flags.getBase(), load.WithFlattenAllOf())
 	if err != nil {
-		var flatErr *load.FlattenError
-		if errors.As(err, &flatErr) {
-			return false, getErrFailedToFlatten(flatErr)
-		}
 		return false, getErrFailedToLoadSpec("original", flags.getBase(), err)
 	}
 

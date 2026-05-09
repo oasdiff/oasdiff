@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -23,6 +24,9 @@ func getErrInvalidFlags(err error) *ReturnError {
 }
 
 func getErrFailedToLoadSpec(what string, source *load.Source, err error) *ReturnError {
+	if flatErr := asFlattenError(err); flatErr != nil {
+		return getErrFailedToFlatten(flatErr)
+	}
 	return getError(
 		fmt.Errorf("failed to load %s spec from %s: %w", what, source.Out(), err),
 		102,
@@ -30,10 +34,24 @@ func getErrFailedToLoadSpec(what string, source *load.Source, err error) *Return
 }
 
 func getErrFailedToLoadSpecs(what string, path string, err error) *ReturnError {
+	if flatErr := asFlattenError(err); flatErr != nil {
+		return getErrFailedToFlatten(flatErr)
+	}
 	return getError(
 		fmt.Errorf("failed to load %s specs from glob %q: %w", what, path, err),
 		103,
 	)
+}
+
+// asFlattenError returns the *load.FlattenError in err's chain, or nil
+// if err is a genuine load failure. Centralised so every spec-loading
+// site stays a single line at the call site.
+func asFlattenError(err error) *load.FlattenError {
+	var flatErr *load.FlattenError
+	if errors.As(err, &flatErr) {
+		return flatErr
+	}
+	return nil
 }
 
 // getErrFailedToFlatten returns the FlattenError unwrapped — its Error()
