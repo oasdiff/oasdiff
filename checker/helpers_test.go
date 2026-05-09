@@ -75,12 +75,12 @@ func getParameterDeprecationFile(file string) string {
 	return fmt.Sprintf("../data/param-deprecation/%s", file)
 }
 
-func singleCheckConfig(c checker.BackwardCompatibilityCheck) *checker.Config {
-	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}).WithSingleCheck(c)
+func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
+	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, append([]checker.Option{checker.WithSingleCheck(c)}, opts...)...)
 }
 
-func allChecksConfig() *checker.Config {
-	return checker.NewConfig(checker.GetAllChecks())
+func allChecksConfig(opts ...checker.Option) *checker.Config {
+	return checker.NewConfig(checker.GetAllChecks(), opts...)
 }
 
 func containsId(errs checker.Changes, id string) bool {

@@ -91,7 +91,7 @@ func TestRequestPropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck).WithDeprecation(30, 100)
+	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyDeprecatedSunsetMissingId, errs[0].GetId())
@@ -125,7 +125,7 @@ func TestRequestPropertyDeprecation_WithEarlySunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertySunsetDateTooSmallId, errs[0].GetId())
@@ -146,7 +146,7 @@ func TestRequestPropertyDeprecation_WithProperSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())
@@ -241,7 +241,7 @@ func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestPropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestPropertyDeprecatedWithSunsetId, errs[0].GetId())

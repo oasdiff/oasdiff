@@ -23,7 +23,7 @@ func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -42,7 +42,7 @@ func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -62,7 +62,7 @@ func TestBreaking_DeprecationWithoutSunsetNoPolicy(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 0)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 0))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Empty(t, errs)
 }
@@ -78,7 +78,7 @@ func TestBreaking_DeprecationWithoutSunsetWithPolicy(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(30, 100)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIDeprecatedSunsetMissingId, errs[0].GetId())
@@ -152,7 +152,7 @@ func TestBreaking_DeprecationWithEarlySunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -172,7 +172,7 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(10).String())
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
@@ -342,7 +342,7 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	// only a non-breaking change detected
@@ -363,7 +363,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIDeprecatedSunsetParseId, errs[0].GetId())
@@ -385,7 +385,7 @@ func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 
 	// Find the endpoint-deprecated-with-sunset change

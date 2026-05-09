@@ -58,7 +58,13 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 
 	errs, returnErr := filterIgnored(
 		checker.CheckBackwardCompatibilityUntilLevel(
-			checker.NewConfig(checker.GetAllChecks()).WithOptionalChecks(flags.getIncludeChecks()).WithSeverityLevels(severityLevels).WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()).WithAttributes(flags.getAttributes()),
+			checker.NewConfig(
+				checker.GetAllChecks(),
+				checker.WithOptionalChecks(flags.getIncludeChecks()),
+				checker.WithSeverityLevels(severityLevels),
+				checker.WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()),
+				checker.WithAttributes(flags.getAttributes()),
+			),
 			diffResult.diffReport,
 			diffResult.operationsSources,
 			level),
