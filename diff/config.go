@@ -38,22 +38,39 @@ func GetExcludeDiffOptions() []string {
 	}
 }
 
-// NewConfig returns a default configuration
-func NewConfig() *Config {
-	return &Config{
+// Option configures a Config during NewConfig. Options compose: each
+// receives the Config after defaults and prior options have been
+// applied.
+type Option func(*Config)
+
+// NewConfig returns a default configuration, then applies the given
+// options in order.
+func NewConfig(opts ...Option) *Config {
+	c := &Config{
 		ExcludeElements:   utils.StringSet{},
 		ExcludeExtensions: utils.StringSet{},
 	}
+	for _, opt := range opts {
+		opt(c)
+	}
+	return c
 }
 
-func (config *Config) WithExcludeElements(excludeElements []string) *Config {
-	config.ExcludeElements = utils.StringSetFromSlice(excludeElements)
-	return config
+// WithExcludeElements sets the elements (description, summary,
+// endpoints, examples, extensions, title) to omit from the diff.
+func WithExcludeElements(excludeElements []string) Option {
+	return func(c *Config) {
+		c.ExcludeElements = utils.StringSetFromSlice(excludeElements)
+	}
 }
 
-func (config *Config) WithExcludeExtensions(excludeExtensions []string) *Config {
-	config.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)
-	return config
+// WithExcludeExtensions sets specific OpenAPI extension names to omit
+// from the diff (only takes effect when "extensions" is also in
+// ExcludeElements).
+func WithExcludeExtensions(excludeExtensions []string) Option {
+	return func(c *Config) {
+		c.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)
+	}
 }
 
 func (config *Config) IsExcludeExamples() bool {

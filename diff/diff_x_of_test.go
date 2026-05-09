@@ -194,7 +194,7 @@ func TestAnyOf_ExcludeDescriptions(t *testing.T) {
 	s2, err := loader.LoadFromFile(getXOfFile("anyof-rev-openapi.yml"))
 	require.NoError(t, err)
 
-	dd, err := diff.Get(diff.NewConfig().WithExcludeElements([]string{diff.ExcludeDescriptionOption}), s1, s2)
+	dd, err := diff.Get(diff.NewConfig(diff.WithExcludeElements([]string{diff.ExcludeDescriptionOption})), s1, s2)
 	require.NoError(t, err)
 	anyOfDiff := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
 	require.ElementsMatch(t, diff.Subschemas{
