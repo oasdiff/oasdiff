@@ -19,9 +19,10 @@ func NewFlags() *Flags {
 }
 
 func (flags *Flags) toConfig() *diff.Config {
-	config := diff.NewConfig().
-		WithExcludeElements(flags.getExcludeElements()).
-		WithExcludeExtensions(flags.getExcludeExtensions())
+	config := diff.NewConfig(
+		diff.WithExcludeElements(flags.getExcludeElements()),
+		diff.WithExcludeExtensions(flags.getExcludeExtensions()),
+	)
 	config.MatchPath = flags.v.GetString("match-path")
 	config.UnmatchPath = flags.v.GetString("unmatch-path")
 	config.FilterExtension = flags.v.GetString("filter-extension")
