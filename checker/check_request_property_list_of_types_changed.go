@@ -39,7 +39,7 @@ func RequestPropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSou
 					opInfo,
 					mediaTypeDiff.SchemaDiff,
 					mediaType,
-					"", // responseStatus not applicable for requests
+					"",   // responseStatus not applicable for requests
 					true, // isRequest
 				)
 				result = append(result, changes...)
@@ -61,7 +61,7 @@ func RequestPropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSou
 							propertyName,
 							propertyDiff,
 							mediaType,
-							"", // responseStatus not applicable for requests
+							"",   // responseStatus not applicable for requests
 							true, // isRequest
 						)
 						result = append(result, changes...)
