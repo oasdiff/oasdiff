@@ -3036,3 +3036,74 @@ func TestMerge_PropertyNames_AllUnset(t *testing.T) {
 	require.NoError(t, err)
 	require.Nil(t, merged.PropertyNames)
 }
+
+// Cycle through Properties — the user-reported reproducer in #890.
+// Tree-node-shaped schema where Properties["child"] points back to the
+// same *Schema. The same node appears twice under allOf.
+func TestMerge_Cycle_PropertiesSameNodeTwice(t *testing.T) {
+	node := &openapi3.Schema{Type: &openapi3.Types{"object"}}
+	node.Properties = openapi3.Schemas{
+		"child": &openapi3.SchemaRef{Value: node},
+	}
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			AllOf: openapi3.SchemaRefs{
+				&openapi3.SchemaRef{Value: node},
+				&openapi3.SchemaRef{Value: node},
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Properties["child"])
+	// Cycle preserved in the merged output: child points back to the
+	// merged result Value.
+	require.Same(t, merged, merged.Properties["child"].Value)
+}
+
+// Cycle through Properties — two distinct cyclic *Schema pointers
+// (a.child = a, b.child = b) merged under allOf. Pointer-dedup alone
+// can't help here (a and b are different pointers); the in-flight
+// guard breaks the recursion.
+func TestMerge_Cycle_PropertiesTwoDistinctNodes(t *testing.T) {
+	a := &openapi3.Schema{Type: &openapi3.Types{"object"}}
+	a.Properties = openapi3.Schemas{
+		"child": &openapi3.SchemaRef{Value: a},
+	}
+	b := &openapi3.Schema{Type: &openapi3.Types{"object"}}
+	b.Properties = openapi3.Schemas{
+		"child": &openapi3.SchemaRef{Value: b},
+	}
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			AllOf: openapi3.SchemaRefs{
+				&openapi3.SchemaRef{Value: a},
+				&openapi3.SchemaRef{Value: b},
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Properties["child"])
+	require.Same(t, merged, merged.Properties["child"].Value)
+}
+
+// Cycle through Items — two distinct cyclic *Schema pointers
+// (a.items = a, b.items = b) merged under allOf. With two items in
+// the merge, resolveItems recurses via flattenSchemas, exercising the
+// cycle guard.
+func TestMerge_Cycle_ItemsTwoDistinctNodes(t *testing.T) {
+	a := &openapi3.Schema{Type: &openapi3.Types{"array"}}
+	a.Items = &openapi3.SchemaRef{Value: a}
+	b := &openapi3.Schema{Type: &openapi3.Types{"array"}}
+	b.Items = &openapi3.SchemaRef{Value: b}
+	merged, err := allof.Merge(openapi3.SchemaRef{
+		Value: &openapi3.Schema{
+			AllOf: openapi3.SchemaRefs{
+				&openapi3.SchemaRef{Value: a},
+				&openapi3.SchemaRef{Value: b},
+			},
+		},
+	})
+	require.NoError(t, err)
+	require.NotNil(t, merged.Items)
+	require.Same(t, merged, merged.Items.Value)
+}
