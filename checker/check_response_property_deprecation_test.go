@@ -91,7 +91,7 @@ func TestResponsePropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck).WithDeprecation(30, 100)
+	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponsePropertyDeprecatedSunsetMissingId, errs[0].GetId())
@@ -125,7 +125,7 @@ func TestResponsePropertyDeprecation_WithEarlySunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponsePropertySunsetDateTooSmallId, errs[0].GetId())
@@ -145,7 +145,7 @@ func TestResponsePropertyDeprecation_WithProperSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
@@ -185,7 +185,7 @@ func TestResponsePropertyDeprecation_WithInvalidSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponsePropertyDeprecatedInvalidId, errs[0].GetId())
@@ -240,7 +240,7 @@ func TestResponsePropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())

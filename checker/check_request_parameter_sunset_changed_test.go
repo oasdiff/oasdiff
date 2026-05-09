@@ -55,7 +55,7 @@ func TestBreaking_SunsetModifiedForDeprecatedParameter(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck).WithDeprecation(31, 180), d, osm)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck, checker.WithDeprecation(31, 180)), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterSunsetDateChangedTooSmallId, errs[0].GetId())

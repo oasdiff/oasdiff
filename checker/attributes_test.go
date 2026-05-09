@@ -17,7 +17,7 @@ func TestBreaking_Attributes(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig().WithAttributes([]string{"x-test"}), d, osm)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithAttributes([]string{"x-test"})), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 2)
 
@@ -34,7 +34,7 @@ func TestBreaking_AttributesNone(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig().WithAttributes([]string{"x-other"}), d, osm)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithAttributes([]string{"x-other"})), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 2)
 
@@ -51,7 +51,7 @@ func TestBreaking_AttributesReverse(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig().WithAttributes([]string{"x-test"}), d, osm)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithAttributes([]string{"x-test"})), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 2)
 
@@ -68,7 +68,7 @@ func TestBreaking_AttributesTwo(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig().WithAttributes([]string{"x-test", "x-test2"}), d, osm)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithAttributes([]string{"x-test", "x-test2"})), d, osm)
 	require.Len(t, errs, 2)
 
 	require.Equal(t, map[string]any{"x-test": []any{"xyz", float64(456)}}, errs[0].GetAttributes())

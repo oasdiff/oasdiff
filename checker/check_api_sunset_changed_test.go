@@ -37,7 +37,7 @@ func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck).WithDeprecation(31, 180), d, osm)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck, checker.WithDeprecation(31, 180)), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APISunsetDateChangedTooSmallId, errs[0].GetId())

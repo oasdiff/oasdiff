@@ -15,59 +15,77 @@ const (
 	DefaultStableDeprecationDays = uint(0)
 )
 
-// NewConfig creates a new configuration with default values.
-func NewConfig(checks BackwardCompatibilityChecks) *Config {
-	return &Config{
+// Option configures a Config during NewConfig. Options compose: each
+// receives the Config after defaults and prior options have been
+// applied. Use the With* constructors below to obtain Options.
+type Option func(*Config)
+
+// NewConfig creates a new configuration with default values, then
+// applies the given options in order.
+func NewConfig(checks BackwardCompatibilityChecks, opts ...Option) *Config {
+	c := &Config{
 		Checks:              checks,
 		LogLevels:           GetCheckLevels(),
 		MinSunsetBetaDays:   DefaultBetaDeprecationDays,
 		MinSunsetStableDays: DefaultStableDeprecationDays,
 	}
-}
-
-// WithOptionalCheck adds a check to the list of optional checks.
-func (config *Config) WithOptionalCheck(id string) *Config {
-	return config.WithOptionalChecks([]string{id})
-}
-
-// WithOptionalChecks overrides the log level of the given checks to ERR so they will appear in `oasdiff breaking`
-func (config *Config) WithOptionalChecks(ids []string) *Config {
-	for _, id := range ids {
-		config.setLogLevel(id, ERR)
+	for _, opt := range opts {
+		opt(c)
 	}
-	return config
+	return c
 }
 
-func (config *Config) WithSeverityLevels(severityLevels map[string]Level) *Config {
-	for id, level := range severityLevels {
-		config.setLogLevel(id, level)
-	}
+// WithOptionalCheck adds a single check to the list of optional checks.
+func WithOptionalCheck(id string) Option {
+	return WithOptionalChecks([]string{id})
+}
 
-	return config
+// WithOptionalChecks overrides the log level of the given checks to ERR
+// so they will appear in `oasdiff breaking`.
+func WithOptionalChecks(ids []string) Option {
+	return func(c *Config) {
+		for _, id := range ids {
+			c.setLogLevel(id, ERR)
+		}
+	}
+}
+
+// WithSeverityLevels overrides per-check log levels from the given map.
+func WithSeverityLevels(severityLevels map[string]Level) Option {
+	return func(c *Config) {
+		for id, level := range severityLevels {
+			c.setLogLevel(id, level)
+		}
+	}
 }
 
 // WithDeprecation sets the number of days before sunset for deprecation warnings.
-func (config *Config) WithDeprecation(deprecationDaysBeta uint, deprecationDaysStable uint) *Config {
-	config.MinSunsetBetaDays = deprecationDaysBeta
-	config.MinSunsetStableDays = deprecationDaysStable
-	return config
+func WithDeprecation(deprecationDaysBeta uint, deprecationDaysStable uint) Option {
+	return func(c *Config) {
+		c.MinSunsetBetaDays = deprecationDaysBeta
+		c.MinSunsetStableDays = deprecationDaysStable
+	}
 }
 
-// WithSingleCheck sets a single check to be used.
-func (config *Config) WithSingleCheck(check BackwardCompatibilityCheck) *Config {
-	return config.WithChecks(BackwardCompatibilityChecks{check})
+// WithSingleCheck sets a single check to be used (replaces the
+// constructor's checks argument).
+func WithSingleCheck(check BackwardCompatibilityCheck) Option {
+	return WithChecks(BackwardCompatibilityChecks{check})
 }
 
-// WithChecks sets a list of checks to be used.
-func (config *Config) WithChecks(checks BackwardCompatibilityChecks) *Config {
-	config.Checks = checks
-	return config
+// WithChecks sets the list of checks to be used (replaces the
+// constructor's checks argument).
+func WithChecks(checks BackwardCompatibilityChecks) Option {
+	return func(c *Config) {
+		c.Checks = checks
+	}
 }
 
-// WithAttributes sets a list of attributes to be used.
-func (config *Config) WithAttributes(attributes []string) *Config {
-	config.Attributes = attributes
-	return config
+// WithAttributes sets the list of attributes to be used.
+func WithAttributes(attributes []string) Option {
+	return func(c *Config) {
+		c.Attributes = attributes
+	}
 }
 
 func (config *Config) getLogLevel(checkId string) Level {

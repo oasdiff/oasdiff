@@ -22,7 +22,7 @@ func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -41,7 +41,7 @@ func TestBreaking_ParameterDeprecationWithoutSunsetNoPolicy(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 0)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 0))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Empty(t, errs)
 }
@@ -57,7 +57,7 @@ func TestBreaking_ParameterDeprecationWithoutSunsetWithPolicy(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(30, 100)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterDeprecatedSunsetMissingId, errs[0].GetId())
@@ -108,7 +108,7 @@ func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -128,7 +128,7 @@ func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 	s2.Spec.Paths.Value("/api/test").GetOperation("GET").Parameters.GetByInAndName("query", "id").Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(10).String())
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 10))
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
