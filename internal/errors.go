@@ -36,6 +36,13 @@ func getErrFailedToLoadSpecs(what string, path string, err error) *ReturnError {
 	)
 }
 
+// getErrFailedToFlatten returns the FlattenError unwrapped — its Error()
+// already reports the offending file and the merge failure. The outer
+// "failed to load spec" wrap is misleading because loading succeeded.
+func getErrFailedToFlatten(err *load.FlattenError) *ReturnError {
+	return getError(err, 122)
+}
+
 func getErrDiffFailed(err error) *ReturnError {
 	return getError(
 		fmt.Errorf("diff failed: %w", err),
