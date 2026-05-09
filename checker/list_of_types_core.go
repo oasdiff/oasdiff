@@ -8,9 +8,8 @@ import (
 // Core logic functions for ListOfTypes checking that can be reused by both full checkers and suppression functions
 
 // checkPropertyListOfTypesChange checks if a property change involves list-of-types patterns and returns breaking changes
-func checkPropertyListOfTypesChange(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
-	mediaType string, responseStatus string, config *Config, operationsSources *diff.OperationsSourcesMap,
-	operationItem *diff.MethodDiff, operation string, path string, isRequest bool) Changes {
+func checkPropertyListOfTypesChange(opInfo opInfo, propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
+	mediaType string, responseStatus string, isRequest bool) Changes {
 
 	result := make(Changes, 0)
 
@@ -44,25 +43,24 @@ func checkPropertyListOfTypesChange(propertyPath string, propertyName string, pr
 		}
 	}
 
-	baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
+	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, propertyDiff, "type")
 	result = append(result, NewApiChange(
 		messageId,
-		config,
+		opInfo.config,
 		args,
 		"",
-		operationsSources,
-		operationItem.Revision,
-		operation,
-		path,
+		opInfo.operationsSources,
+		opInfo.operation,
+		opInfo.method,
+		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
 }
 
 // checkBodyListOfTypesChange checks if a request/response body change involves list-of-types patterns and returns breaking changes
-func checkBodyListOfTypesChange(schemaDiff *diff.SchemaDiff, mediaType string, responseStatus string,
-	config *Config, operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff,
-	operation string, path string, isRequest bool) Changes {
+func checkBodyListOfTypesChange(opInfo opInfo, schemaDiff *diff.SchemaDiff, mediaType string, responseStatus string,
+	isRequest bool) Changes {
 
 	result := make(Changes, 0)
 
@@ -96,25 +94,23 @@ func checkBodyListOfTypesChange(schemaDiff *diff.SchemaDiff, mediaType string, r
 		}
 	}
 
-	baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, schemaDiff, "type")
+	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "type")
 	result = append(result, NewApiChange(
 		messageId,
-		config,
+		opInfo.config,
 		args,
 		"",
-		operationsSources,
-		operationItem.Revision,
-		operation,
-		path,
+		opInfo.operationsSources,
+		opInfo.operation,
+		opInfo.method,
+		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
 }
 
 // checkParameterListOfTypesChange checks if a parameter change involves list-of-types patterns and returns breaking changes
-func checkParameterListOfTypesChange(paramDiff *diff.ParameterDiff, param *openapi3.Parameter,
-	config *Config, operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff,
-	operation string, path string) Changes {
+func checkParameterListOfTypesChange(opInfo opInfo, paramDiff *diff.ParameterDiff, param *openapi3.Parameter) Changes {
 
 	result := make(Changes, 0)
 
@@ -136,25 +132,24 @@ func checkParameterListOfTypesChange(paramDiff *diff.ParameterDiff, param *opena
 		args = []any{param.In, param.Name, joinTypes(listDiff.Added)}
 	}
 
-	baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "type")
+	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, paramDiff.SchemaDiff, "type")
 	result = append(result, NewApiChange(
 		messageId,
-		config,
+		opInfo.config,
 		args,
 		"",
-		operationsSources,
-		operationItem.Revision,
-		operation,
-		path,
+		opInfo.operationsSources,
+		opInfo.operation,
+		opInfo.method,
+		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
 }
 
 // checkParameterPropertyListOfTypesChange checks if a parameter property change involves list-of-types patterns and returns breaking changes
-func checkParameterPropertyListOfTypesChange(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
-	param *openapi3.Parameter, config *Config, operationsSources *diff.OperationsSourcesMap,
-	operationItem *diff.MethodDiff, operation string, path string) Changes {
+func checkParameterPropertyListOfTypesChange(opInfo opInfo, propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
+	param *openapi3.Parameter) Changes {
 
 	result := make(Changes, 0)
 
@@ -176,16 +171,16 @@ func checkParameterPropertyListOfTypesChange(propertyPath string, propertyName s
 		args = []any{propertyFullName(propertyPath, propertyName), param.In, param.Name, joinTypes(listDiff.Added)}
 	}
 
-	baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
+	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, propertyDiff, "type")
 	result = append(result, NewApiChange(
 		messageId,
-		config,
+		opInfo.config,
 		args,
 		"",
-		operationsSources,
-		operationItem.Revision,
-		operation,
-		path,
+		opInfo.operationsSources,
+		opInfo.operation,
+		opInfo.method,
+		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result

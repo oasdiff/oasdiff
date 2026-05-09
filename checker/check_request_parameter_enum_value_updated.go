@@ -29,6 +29,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 			if operationItem.ParametersDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
 					if paramItem.SchemaDiff == nil {
@@ -36,18 +37,19 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 					}
 
 					result = append(result, checkParameterEnumDiff(
+						opInfo,
 						paramItem.SchemaDiff.EnumDiff,
 						paramItem.SchemaDiff,
 						RequestParameterEnumValueRemovedId,
 						RequestParameterEnumValueAddedId,
 						func(enumVal any) []any { return []any{enumVal, paramLocation, paramName} },
-						operationsSources, operationItem, config, operation, path,
 					)...)
 
 					CheckModifiedPropertiesDiff(
 						paramItem.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							result = append(result, checkParameterEnumDiff(
+								opInfo,
 								propertyDiff.EnumDiff,
 								propertyDiff,
 								RequestParameterPropertyEnumValueRemovedId,
@@ -55,7 +57,6 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 								func(enumVal any) []any {
 									return []any{enumVal, propertyFullName(propertyPath, propertyName), paramLocation, paramName}
 								},
-								operationsSources, operationItem, config, operation, path,
 							)...)
 						})
 				}
@@ -66,14 +67,11 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 }
 
 func checkParameterEnumDiff(
+	opInfo opInfo,
 	enumDiff *diff.EnumDiff,
 	schemaDiff *diff.SchemaDiff,
 	removedId, addedId string,
 	makeArgs func(enumVal any) []any,
-	operationsSources *diff.OperationsSourcesMap,
-	operationItem *diff.MethodDiff,
-	config *Config,
-	operation, path string,
 ) Changes {
 	result := make(Changes, 0)
 	if enumDiff == nil {
@@ -81,30 +79,30 @@ func checkParameterEnumDiff(
 	}
 
 	for _, enumVal := range enumDiff.Deleted {
-		baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		baseSource, revisionSource := SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, NewApiChange(
 			removedId,
-			config,
+			opInfo.config,
 			makeArgs(enumVal),
 			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
+			opInfo.operationsSources,
+			opInfo.operation,
+			opInfo.method,
+			opInfo.path,
 		).WithSources(baseSource, revisionSource))
 	}
 
 	for _, enumVal := range enumDiff.Added {
-		baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		baseSource, revisionSource := SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, NewApiChange(
 			addedId,
-			config,
+			opInfo.config,
 			makeArgs(enumVal),
 			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
+			opInfo.operationsSources,
+			opInfo.operation,
+			opInfo.method,
+			opInfo.path,
 		).WithSources(baseSource, revisionSource))
 	}
 
