@@ -165,7 +165,7 @@ func indentContinuation(s string) string {
 
 // keyOriginForKinError returns the *Location pointed at by any cluster
 // type's Origin.Key, or nil if no cluster matches or the Origin is not
-// set.
+// set. Covers all kin clusters that carry an *Origin.
 func keyOriginForKinError(err error) *openapi3.Location {
 	var rfe *openapi3.RequiredFieldError
 	if errors.As(err, &rfe) && rfe.Origin != nil {
@@ -179,21 +179,57 @@ func keyOriginForKinError(err error) *openapi3.Location {
 	if errors.As(err, &sve) && sve.Origin != nil {
 		return sve.Origin.Key
 	}
+	var ppe *openapi3.PathParametersError
+	if errors.As(err, &ppe) && ppe.Origin != nil {
+		return ppe.Origin.Key
+	}
+	var mef *openapi3.MutuallyExclusiveFieldsError
+	if errors.As(err, &mef) && mef.Origin != nil {
+		return mef.Origin.Key
+	}
+	var ffe *openapi3.ForbiddenFieldError
+	if errors.As(err, &ffe) && ffe.Origin != nil {
+		return ffe.Origin.Key
+	}
+	var sute *openapi3.ServerURLTemplateError
+	if errors.As(err, &sute) && sute.Origin != nil {
+		return sute.Origin.Key
+	}
+	var efr *openapi3.EitherFieldRequiredError
+	if errors.As(err, &efr) && efr.Origin != nil {
+		return efr.Origin.Key
+	}
+	var sbf *openapi3.SchemaBothFormsExclusive
+	if errors.As(err, &sbf) && sbf.Origin != nil {
+		return sbf.Origin.Key
+	}
+	var eofe *openapi3.ExactlyOneFieldError
+	if errors.As(err, &eofe) && eofe.Origin != nil {
+		return eofe.Origin.Key
+	}
+	var sec *openapi3.SingleEntryContentError
+	if errors.As(err, &sec) && sec.Origin != nil {
+		return sec.Origin.Key
+	}
+	// WebhookNilError carries no Origin (the offending key is on the
+	// document root, which the loader doesn't track per-key).
 	return nil
 }
 
 // ruleIDForKinError dispatches a kin-openapi error to a stable
 // kebab-case rule ID. Uses the typed cluster wrappers from kin's
-// openapi3 package — *RequiredFieldError covers "X must be non-empty"
-// failures, *FieldVersionMismatchError covers "X is for OpenAPI >=Y"
-// failures. Both clusters carry the offending field name, which we
-// transform into the canonical rule ID.
+// openapi3 package; one arm per cluster covers all the call-site
+// leaves wrapped by that cluster.
 //
 // kin errors not yet migrated to a cluster fall through to
-// kinUnknownID. The rule ID for converted leaves is derived from the
-// cluster's .Field — the per-leaf type isn't consulted here because
+// kinUnknownID. Where a cluster carries field-name metadata, the rule
+// ID is derived from that — the per-leaf type isn't consulted because
 // (a) the cluster carries enough metadata, and (b) deriving from a
 // single field keeps the dispatch stable as kin adds new leaves.
+// Where a cluster has no useful field for derivation
+// (ServerURLTemplateError carries only the offending URL,
+// PathParametersError carries Path+Method+Missing), a static rule ID
+// is returned for the whole cluster.
 func ruleIDForKinError(err error) string {
 	var rfe *openapi3.RequiredFieldError
 	if errors.As(err, &rfe) {
@@ -210,7 +246,64 @@ func ruleIDForKinError(err error) string {
 		return ruleIDFromField(sve.ValueKind) + "-violates-schema"
 	}
 
+	var ppe *openapi3.PathParametersError
+	if errors.As(err, &ppe) {
+		return "path-parameters-mismatch"
+	}
+
+	var mef *openapi3.MutuallyExclusiveFieldsError
+	if errors.As(err, &mef) {
+		return ruleIDFromField(mef.Field1) + "-" + ruleIDFromField(mef.Field2) + "-mutually-exclusive"
+	}
+
+	var ffe *openapi3.ForbiddenFieldError
+	if errors.As(err, &ffe) {
+		return ruleIDFromField(ffe.Field) + "-forbidden"
+	}
+
+	var sute *openapi3.ServerURLTemplateError
+	if errors.As(err, &sute) {
+		return "server-url-template-invalid"
+	}
+
+	var efr *openapi3.EitherFieldRequiredError
+	if errors.As(err, &efr) {
+		return joinFieldsForRuleID(efr.Fields) + "-required"
+	}
+
+	var sbf *openapi3.SchemaBothFormsExclusive
+	if errors.As(err, &sbf) {
+		return ruleIDFromField(sbf.Field) + "-both-forms-exclusive"
+	}
+
+	var eofe *openapi3.ExactlyOneFieldError
+	if errors.As(err, &eofe) {
+		return joinFieldsForRuleID(eofe.Fields) + "-exactly-one"
+	}
+
+	var sec *openapi3.SingleEntryContentError
+	if errors.As(err, &sec) {
+		return ruleIDFromField(sec.Subject) + "-content-single-entry"
+	}
+
+	var wne *openapi3.WebhookNilError
+	if errors.As(err, &wne) {
+		return "webhook-nil"
+	}
+
 	return kinUnknownID
+}
+
+// joinFieldsForRuleID renders an N-field "any/exactly one of" rule ID
+// fragment as kebab-case fields joined by "-or-" (e.g. ["value",
+// "externalValue"] → "value-or-external-value"). The caller appends
+// the cluster-specific suffix ("-required", "-exactly-one", ...).
+func joinFieldsForRuleID(fields []string) string {
+	parts := make([]string, len(fields))
+	for i, f := range fields {
+		parts[i] = ruleIDFromField(f)
+	}
+	return strings.Join(parts, "-or-")
 }
 
 // ruleIDFromField normalises a field path into a kebab-case identifier.

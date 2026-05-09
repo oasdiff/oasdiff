@@ -64,15 +64,25 @@ func Test_ValidateCmd_FieldVersionMismatch_SchemaKeyword(t *testing.T) {
 	require.Contains(t, stdout.String(), "const-field-for-3-1-plus")
 }
 
-// kin errors not yet migrated to a typed cluster fall through to the
-// generic kin-validation-error catchall. The mismatched-braces server
-// URL check is one such site (kin still returns a plain errors.New
-// for it). When kin migrates that site to a typed leaf, this test
-// flips and gets a more specific rule ID.
-func Test_ValidateCmd_UntypedKinErrorFallback(t *testing.T) {
+// Mismatched-braces server URL → kin returns *ServerURLTemplateError
+// wrapping *ServerURLMismatchedBraces. We dispatch the cluster to a
+// single static rule ID for the whole template-error family rather
+// than per-leaf, since the cluster carries only the offending URL and
+// not a derivable field name.
+func Test_ValidateCmd_ServerURLTemplate(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/server-url-mismatched-braces.yaml"), &stdout, io.Discard))
-	require.Contains(t, stdout.String(), "kin-validation-error")
+	require.Contains(t, stdout.String(), "server-url-template-invalid")
+}
+
+// Path template declares variables not matched by parameters → kin
+// returns *PathParametersError. Static rule ID for the whole cluster
+// (the cluster carries Path + Method + Missing list, no single field
+// to derive from).
+func Test_ValidateCmd_PathParametersMismatch(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/openapi-test2.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "path-parameters-mismatch")
 }
 
 // YAML format produces a marshalled list of Finding records that round-
