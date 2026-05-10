@@ -101,10 +101,10 @@ func TestBreaking_PropertyRequiredDisabled(t *testing.T) {
 
 // BC: changing an existing property in response body to optional is breaking
 func TestBreaking_RespBodyRequiredPropertyDisabled(t *testing.T) {
-	s1, err := open(getReqPropFile("response-base.json"))
+	s1, err := open(getDataFile("required-properties", "response-base.json"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-revision.json"))
+	s2, err := open(getDataFile("required-properties", "response-revision.json"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -275,10 +275,10 @@ func TestBreaking_RespBodyEmbeddedPropertyNullable(t *testing.T) {
 
 // BC: changing a required property in response body to optional and also deleting it is breaking
 func TestBreaking_RespBodyDeleteAndDisableRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("response-del-required-prop-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "response-del-required-prop-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-del-required-prop-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "response-del-required-prop-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -289,10 +289,10 @@ func TestBreaking_RespBodyDeleteAndDisableRequiredProperty(t *testing.T) {
 
 // BC: adding a non-existent required property in request body is not breaking
 func TestBreaking_ReqBodyNewRequiredPropertyNew(t *testing.T) {
-	s1, err := open(getReqPropFile("request-new-required-prop-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "request-new-required-prop-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("request-new-required-prop-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "request-new-required-prop-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -303,10 +303,10 @@ func TestBreaking_ReqBodyNewRequiredPropertyNew(t *testing.T) {
 
 // BC: changing an existing property in response body to required is not breaking
 func TestBreaking_RespBodyRequiredPropertyEnabled(t *testing.T) {
-	s1, err := open(getReqPropFile("response-revision.json"))
+	s1, err := open(getDataFile("required-properties", "response-revision.json"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-base.json"))
+	s2, err := open(getDataFile("required-properties", "response-base.json"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -317,10 +317,10 @@ func TestBreaking_RespBodyRequiredPropertyEnabled(t *testing.T) {
 
 // BC: changing an existing property in request body to optional is not breaking
 func TestBreaking_ReqBodyRequiredPropertyDisabled(t *testing.T) {
-	s1, err := open(getReqPropFile("request-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "request-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("request-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "request-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -331,10 +331,10 @@ func TestBreaking_ReqBodyRequiredPropertyDisabled(t *testing.T) {
 
 // BC: changing an existing property in request body to required is breaking
 func TestBreaking_ReqBodyRequiredPropertyEnabled(t *testing.T) {
-	s1, err := open(getReqPropFile("request-revision.yaml"))
+	s1, err := open(getDataFile("required-properties", "request-revision.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("request-base.yaml"))
+	s2, err := open(getDataFile("required-properties", "request-base.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -347,10 +347,10 @@ func TestBreaking_ReqBodyRequiredPropertyEnabled(t *testing.T) {
 
 // BC: adding a new required property in request body is breaking
 func TestBreaking_ReqBodyNewRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("request-new-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "request-new-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("request-new-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "request-new-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -363,10 +363,10 @@ func TestBreaking_ReqBodyNewRequiredProperty(t *testing.T) {
 
 // BC: deleting a required property in request is breaking with warn
 func TestBreaking_ReqBodyDeleteRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("request-new-revision.yaml"))
+	s1, err := open(getDataFile("required-properties", "request-new-revision.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("request-new-base.yaml"))
+	s2, err := open(getDataFile("required-properties", "request-new-base.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -380,10 +380,10 @@ func TestBreaking_ReqBodyDeleteRequiredProperty(t *testing.T) {
 
 // BC: deleting an embedded optional property in request is breaking with warn
 func TestBreaking_ReqBodyDeleteRequiredProperty2(t *testing.T) {
-	s1, err := open(getReqPropFile("request-property-items.yaml"))
+	s1, err := open(getDataFile("required-properties", "request-property-items.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("request-property-items-2.yaml"))
+	s2, err := open(getDataFile("required-properties", "request-property-items-2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -401,10 +401,10 @@ func TestBreaking_ReqBodyDeleteRequiredProperty2(t *testing.T) {
 
 // BC: adding a new required property in response body is not breaking
 func TestBreaking_RespBodyNewRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("response-new-base.json"))
+	s1, err := open(getDataFile("required-properties", "response-new-base.json"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-new-revision.json"))
+	s2, err := open(getDataFile("required-properties", "response-new-revision.json"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -415,10 +415,10 @@ func TestBreaking_RespBodyNewRequiredProperty(t *testing.T) {
 
 // BC: deleting a required property in response body is breaking
 func TestBreaking_RespBodyDeleteRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("response-new-revision.json"))
+	s1, err := open(getDataFile("required-properties", "response-new-revision.json"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-new-base.json"))
+	s2, err := open(getDataFile("required-properties", "response-new-base.json"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -431,10 +431,10 @@ func TestBreaking_RespBodyDeleteRequiredProperty(t *testing.T) {
 
 // BC: adding a new required property under AllOf in response body is not breaking
 func TestBreaking_RespBodyNewAllOfRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("response-allof-base.json"))
+	s1, err := open(getDataFile("required-properties", "response-allof-base.json"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-allof-revision.json"))
+	s2, err := open(getDataFile("required-properties", "response-allof-revision.json"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -445,10 +445,10 @@ func TestBreaking_RespBodyNewAllOfRequiredProperty(t *testing.T) {
 
 // BC: deleting a required property under AllOf in response body is breaking
 func TestBreaking_RespBodyDeleteAllOfRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("response-allof-revision.json"))
+	s1, err := open(getDataFile("required-properties", "response-allof-revision.json"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("response-allof-base.json"))
+	s2, err := open(getDataFile("required-properties", "response-allof-base.json"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -461,10 +461,10 @@ func TestBreaking_RespBodyDeleteAllOfRequiredProperty(t *testing.T) {
 
 // BC: adding a new required read-only property in request body is not breaking
 func TestBreaking_ReadOnlyNewRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("read-only-new-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "read-only-new-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("read-only-new-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "read-only-new-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -475,10 +475,10 @@ func TestBreaking_ReadOnlyNewRequiredProperty(t *testing.T) {
 
 // BC: changing an existing read-only property in request body to required is not breaking
 func TestBreaking_ReadOnlyPropertyRequiredEnabled(t *testing.T) {
-	s1, err := open(getReqPropFile("read-only-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "read-only-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("read-only-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "read-only-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -489,10 +489,10 @@ func TestBreaking_ReadOnlyPropertyRequiredEnabled(t *testing.T) {
 
 // BC: deleting a required write-only property in response body is not breaking
 func TestBreaking_WriteOnlyDeleteRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("write-only-delete-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "write-only-delete-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("write-only-delete-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "write-only-delete-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -506,10 +506,10 @@ func TestBreaking_WriteOnlyDeleteRequiredProperty(t *testing.T) {
 
 // BC: deleting a non-required non-write-only property in response body is breaking with warning
 func TestBreaking_WriteOnlyDeleteNonRequiredProperty(t *testing.T) {
-	s1, err := open(getReqPropFile("write-only-delete-partial-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "write-only-delete-partial-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("write-only-delete-partial-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "write-only-delete-partial-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -527,10 +527,10 @@ func TestBreaking_WriteOnlyDeleteNonRequiredProperty(t *testing.T) {
 
 // BC: changing an existing write-only property in response body to optional is not breaking
 func TestBreaking_WriteOnlyPropertyRequiredDisabled(t *testing.T) {
-	s1, err := open(getReqPropFile("write-only-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "write-only-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("write-only-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "write-only-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -541,10 +541,10 @@ func TestBreaking_WriteOnlyPropertyRequiredDisabled(t *testing.T) {
 
 // BC: changing an existing required property in response body to write-only is not breaking
 func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
-	s1, err := open(getReqPropFile("write-only-changed-base.yaml"))
+	s1, err := open(getDataFile("required-properties", "write-only-changed-base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("write-only-changed-revision.yaml"))
+	s2, err := open(getDataFile("required-properties", "write-only-changed-revision.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -555,10 +555,10 @@ func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
 
 // BC: changing an existing required property in response body to not-write-only is breaking
 func TestBreaking_RequiredPropertyWriteOnlyDisabled(t *testing.T) {
-	s1, err := open(getReqPropFile("write-only-changed-revision.yaml"))
+	s1, err := open(getDataFile("required-properties", "write-only-changed-revision.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("write-only-changed-base.yaml"))
+	s2, err := open(getDataFile("required-properties", "write-only-changed-base.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -574,10 +574,10 @@ func TestBreaking_RequiredPropertyWriteOnlyDisabled(t *testing.T) {
 
 // BC: changing an existing property in request body to required is breaking
 func TestBreaking_Body(t *testing.T) {
-	s1, err := open(getReqPropFile("body1.yaml"))
+	s1, err := open(getDataFile("required-properties", "body1.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("body2.yaml"))
+	s2, err := open(getDataFile("required-properties", "body2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -591,10 +591,10 @@ func TestBreaking_Body(t *testing.T) {
 
 // BC: changing an existing property in request body items to required is breaking
 func TestBreaking_Items(t *testing.T) {
-	s1, err := open(getReqPropFile("items1.yaml"))
+	s1, err := open(getDataFile("required-properties", "items1.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("items2.yaml"))
+	s2, err := open(getDataFile("required-properties", "items2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -608,10 +608,10 @@ func TestBreaking_Items(t *testing.T) {
 
 // BC: changing an existing property in request body items to required with a default value is not breaking
 func TestBreaking_ItemsWithDefault(t *testing.T) {
-	s1, err := open(getReqPropFile("items1.yaml"))
+	s1, err := open(getDataFile("required-properties", "items1.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("items3.yaml"))
+	s2, err := open(getDataFile("required-properties", "items3.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -622,10 +622,10 @@ func TestBreaking_ItemsWithDefault(t *testing.T) {
 
 // BC: changing an existing property in request body anyOf to required is breaking
 func TestBreaking_AnyOf(t *testing.T) {
-	s1, err := open(getReqPropFile("anyOf1.yaml"))
+	s1, err := open(getDataFile("required-properties", "anyOf1.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("anyOf2.yaml"))
+	s2, err := open(getDataFile("required-properties", "anyOf2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -638,10 +638,10 @@ func TestBreaking_AnyOf(t *testing.T) {
 
 // BC: changing an existing property under another property in request body to required is breaking
 func TestBreaking_NestedProp(t *testing.T) {
-	s1, err := open(getReqPropFile("nested-property1.yaml"))
+	s1, err := open(getDataFile("required-properties", "nested-property1.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getReqPropFile("nested-property2.yaml"))
+	s2, err := open(getDataFile("required-properties", "nested-property2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

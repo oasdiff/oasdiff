@@ -60,19 +60,11 @@ func d(t *testing.T, config *diff.Config, v1, v2 int, loaders ...*openapi3.Loade
 	return checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 }
 
-// getDeprecationFile returns the path to a file under data/deprecation/.
-func getDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/deprecation/%s", file)
-}
-
-// getReqPropFile returns the path to a file under data/required-properties/.
-func getReqPropFile(file string) string {
-	return fmt.Sprintf("../data/required-properties/%s", file)
-}
-
-// getParameterDeprecationFile returns the path to a file under data/param-deprecation/.
-func getParameterDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/param-deprecation/%s", file)
+// getDataFile returns the path to a file under data/<subdir>/.
+// Generic replacement for the per-subdirectory helpers — new test
+// categories don't need their own dedicated helper.
+func getDataFile(subdir, file string) string {
+	return fmt.Sprintf("../data/%s/%s", subdir, file)
 }
 
 func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
