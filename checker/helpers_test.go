@@ -60,12 +60,20 @@ func d(t *testing.T, config *diff.Config, v1, v2 int, loaders ...*openapi3.Loade
 	return checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 }
 
-// getDataFile returns the path to a file under data/<subdir>/.
-// Generic replacement for the per-subdirectory helpers — new test
-// categories don't need their own dedicated helper.
-func getDataFile(subdir, file string) string {
-	return fmt.Sprintf("../data/%s/%s", subdir, file)
+// dataFileFn returns a closure that resolves files under data/<subdir>/.
+// Use it to declare a named handle per data subdirectory; call sites then
+// pass only the file name.
+func dataFileFn(subdir string) func(string) string {
+	return func(file string) string {
+		return fmt.Sprintf("../data/%s/%s", subdir, file)
+	}
 }
+
+var (
+	deprecationFile      = dataFileFn("deprecation")
+	paramDeprecationFile = dataFileFn("param-deprecation")
+	requiredPropertyFile = dataFileFn("required-properties")
+)
 
 func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
 	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, append([]checker.Option{checker.WithSingleCheck(c)}, opts...)...)
