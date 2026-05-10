@@ -206,6 +206,7 @@ type Config struct {
 	StripPrefixRevision    string   `mapstructure:"strip-prefix-revision"`
 	IncludePathParams      bool     `mapstructure:"include-path-params"`
 	AllowExternalRefs      bool     `mapstructure:"allow-external-refs"`
+	AutoUpgrade            bool     `mapstructure:"auto-upgrade"`
 	Template               string   `mapstructure:"template"`
 }
 

@@ -71,6 +71,10 @@ func (flags *Flags) getAllowExternalRefs() bool {
 	return flags.v.GetBool("allow-external-refs")
 }
 
+func (flags *Flags) getAutoUpgrade() bool {
+	return flags.v.GetBool("auto-upgrade")
+}
+
 func (flags *Flags) getIncludeChecks() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("include-checks"))
 }

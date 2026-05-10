@@ -1,0 +1,21 @@
+openapi: 3.1.0
+info:
+  title: upgrade-test
+  version: '1.0'
+paths:
+  /items:
+    get:
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: [string, "null"]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: integer
+                exclusiveMinimum: 0
+                examples: [7]

@@ -116,6 +116,8 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 		s2.Spec = s1.Spec
 	}
 
+	autoUpgradeSpecs(flags.getAutoUpgrade(), s1, s2)
+
 	diffReport, operationsSources, err := diff.GetWithOperationsSourcesMap(flags.toConfig(), s1, s2)
 	if err != nil {
 		return nil, getErrDiffFailed(err)
@@ -138,6 +140,11 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 	s2, err := load.NewSpecInfoFromGlob(loader, flags.getRevision().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpecs("revision", flags.getRevision().Path, err)
+	}
+
+	if flags.getAutoUpgrade() {
+		autoUpgradeSpecs(true, s1...)
+		autoUpgradeSpecs(true, s2...)
 	}
 
 	diffReport, operationsSources, err := diff.GetPathsDiff(flags.toConfig(), s1, s2)

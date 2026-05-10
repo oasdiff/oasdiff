@@ -58,6 +58,25 @@ func runUpgrade(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	return false, nil
 }
 
+// autoUpgradeSpecs canonicalizes the given specs to the latest OpenAPI 3.x
+// when --auto-upgrade is set. The walker is idempotent on already-canonical
+// specs, so calling it on a same-version pair is a safe no-op (the version
+// string bumps to the latest 3.x). Used by diff/breaking/changelog/summary
+// to make cross-version comparisons (e.g. 3.0 vs 3.1) just work.
+//
+// Nil entries are skipped; callers don't have to filter.
+func autoUpgradeSpecs(enabled bool, specs ...*load.SpecInfo) {
+	if !enabled {
+		return
+	}
+	for _, s := range specs {
+		if s == nil || s.Spec == nil {
+			continue
+		}
+		openapi3conv.Upgrade(s.Spec)
+	}
+}
+
 func outputUpgradedSpec(stdout io.Writer, spec *openapi3.T, format string) *ReturnError {
 	// Reuse the flatten output path: both subcommands serialize a full
 	// *openapi3.T to JSON/YAML and the rendering is identical. If a future
