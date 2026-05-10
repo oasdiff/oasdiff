@@ -11,10 +11,10 @@ import (
 // BC: deleting sunset header for a deprecated endpoint is breaking
 func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-with-sunset.yaml"))
+	s1, err := open(deprecationFile("deprecated-with-sunset.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -29,10 +29,10 @@ func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 // BC: changing sunset to an earlier date for a deprecated endpoint with a deprecation policy is breaking
 func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-past.yaml"))
+	s2, err := open(deprecationFile("deprecated-past.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -47,10 +47,10 @@ func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 // BC: changing sunset to an invalid date for a deprecated endpoint is breaking
 func TestBreaking_SunsetModifiedToInvalidForDeprecatedEndpoint(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-invalid.yaml"))
+	s2, err := open(deprecationFile("deprecated-invalid.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -65,10 +65,10 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedEndpoint(t *testing.T) {
 // BC: changing sunset from an invalid date for a deprecated endpoint is breaking
 func TestBreaking_SunsetModifiedFromInvalidForDeprecatedEndpoint(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-invalid.yaml"))
+	s1, err := open(deprecationFile("deprecated-invalid.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -84,10 +84,10 @@ func TestBreaking_SunsetModifiedFromInvalidForDeprecatedEndpoint(t *testing.T) {
 // BC: deleting other extension (not sunset) header for a deprecated endpoint is not breaking
 func TestBreaking_NonSunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-with-other-extension.yaml"))
+	s1, err := open(deprecationFile("deprecated-with-other-extension.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -99,10 +99,10 @@ func TestBreaking_NonSunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 // BC: no change to headers for a deprecated endpoint is not breaking
 func TestBreaking_NoChangeToSunsetDeprecatedEndpoint(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future-2.yaml"))
+	s2, err := open(deprecationFile("deprecated-future-2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

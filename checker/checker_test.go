@@ -12,10 +12,10 @@ import (
 // BC: decreasing stability level is breaking
 func TestBreaking_StabilityLevelDecreased(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base-beta-stability.yaml"))
+	s1, err := open(deprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s2, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -34,10 +34,10 @@ func TestBreaking_StabilityLevelDecreased(t *testing.T) {
 // BC: increasing stability level is not breaking
 func TestBreaking_StabilityLevelIncreased(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base-beta-stability.yaml"))
+	s2, err := open(deprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -48,10 +48,10 @@ func TestBreaking_StabilityLevelIncreased(t *testing.T) {
 
 // BC: specifying an invalid stability level in revision is breaking
 func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base-invalid-stability.yaml"))
+	s2, err := open(deprecationFile("base-invalid-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -65,10 +65,10 @@ func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
 
 // BC: specifying an invalid stability level in base is breaking
 func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
-	s1, err := open(getDeprecationFile("base-invalid-stability.yaml"))
+	s1, err := open(deprecationFile("base-invalid-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base.yaml"))
+	s2, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -82,10 +82,10 @@ func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
 
 // BC: specifying a non-text, not-json stability level in base is breaking
 func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base-invalid-stability-2.yaml"))
+	s2, err := open(deprecationFile("base-invalid-stability-2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
