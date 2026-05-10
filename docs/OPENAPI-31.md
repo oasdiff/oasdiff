@@ -40,6 +40,34 @@ Changes are detected for all 3.1-specific fields:
 - **unevaluatedItems/unevaluatedProperties**: added/removed
 - **contentSchema/contentMediaType/contentEncoding**: added/removed/changed
 
+## Migrating from 3.0 to 3.1
+
+OpenAPI 3.1 changes the shape of several constructs:
+
+| 3.0 | 3.1 |
+|---|---|
+| `nullable: true` on `type: string` | `type: ["string", "null"]` |
+| `exclusiveMinimum: true` + `minimum: 0` | `exclusiveMinimum: 0` (numeric) |
+| `example: 7` | `examples: [7]` |
+
+A team migrating their spec from 3.0 to 3.1 has two problems oasdiff can help with: producing the migrated spec, and verifying the migration doesn't break clients.
+
+### Converting a spec with `oasdiff upgrade`
+
+The `upgrade` subcommand rewrites a 3.0 spec into the latest 3.x canonical form (currently 3.2.0). The transforms are idempotent, so running it on an already-canonical spec just bumps the version string.
+
+```
+oasdiff upgrade old-spec.yaml > new-spec.yaml
+oasdiff upgrade old-spec.yaml --format json > new-spec.json
+cat old-spec.yaml | oasdiff upgrade -
+```
+
+The output goes to stdout; redirect to a file to keep it. The default output format is `yaml`; pass `--format json` for JSON.
+
+The walker handles 3.0 → 3.x only. Swagger 2.0 → 3.0 is out of scope.
+
+Available since `v1.16.0`.
+
 ## Caveats
 
 The following 3.1 features are not yet fully supported by [`kin-openapi`](https://github.com/getkin/kin-openapi) (the parser oasdiff uses) and therefore do not appear in oasdiff diffs:
