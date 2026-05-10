@@ -284,7 +284,7 @@ func Test_BreakingChangesFlattenAllOf(t *testing.T) {
 func Test_BreakingChangesInvalidDeprecationDays(t *testing.T) {
 	var stderr bytes.Buffer
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking ../data/deprecation/base.yaml ../data/deprecation/deprecated-with-sunset.yaml --deprecation-days-stable=-1"), io.Discard, &stderr))
-	require.Equal(t, "Error: invalid argument \"-1\" for \"--deprecation-days-stable\" flag: strconv.ParseUint: parsing \"-1\": invalid syntax\n", stderr.String())
+	require.Equal(t, "Error: invalid argument \"-1\" for \"--deprecation-days-stable\" flag: must be a non-negative integer\n", stderr.String())
 }
 
 func Test_BreakingChangesFlattenCommonParams(t *testing.T) {

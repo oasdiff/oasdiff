@@ -18,6 +18,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	rootCmd.SetArgs(args[1:])
 	rootCmd.SetOut(stdout)
 	rootCmd.SetErr(stderr)
+	rootCmd.SetFlagErrorFunc(friendlyFlagError)
 	rootCmd.Version = build.Version
 
 	// --config is a persistent flag on the root command so every subcommand
