@@ -306,6 +306,48 @@ func Test_FlattenCmdInvalid(t *testing.T) {
 `, stderr.String())
 }
 
+func Test_UpgradeCmdOK(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/simple-30.yaml"), io.Discard, io.Discard))
+}
+
+func Test_UpgradeCmdProducesCanonicalForm(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/simple-30.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	// Version-string bump.
+	require.Contains(t, out, "openapi: 3.2.0")
+	// nullable: true -> type array including "null".
+	require.Contains(t, out, "- \"null\"")
+	require.NotContains(t, out, "nullable: true")
+	// boolean exclusiveMinimum -> numeric form.
+	require.Contains(t, out, "exclusiveMinimum: 0")
+	// example -> examples.
+	require.Contains(t, out, "examples:")
+	require.NotContains(t, out, "example: 7")
+}
+
+func Test_UpgradeCmdAlreadyCurrent(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/already-31.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "openapi: 3.2.0")
+	require.Contains(t, out, "title: already-31")
+}
+
+func Test_UpgradeCmdJsonFormat(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/simple-30.yaml --format json"), &stdout, io.Discard))
+	var doc map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &doc))
+	require.Equal(t, "3.2.0", doc["openapi"])
+}
+
+func Test_UpgradeCmdInvalid(t *testing.T) {
+	var stderr bytes.Buffer
+	require.Equal(t, 102, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/invalid.yaml"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "failed to load original spec")
+}
+
 func Test_Checks(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags decrease,parameters --severity info,warn,error"), io.Discard, io.Discard))
 }
