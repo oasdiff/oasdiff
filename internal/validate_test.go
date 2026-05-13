@@ -2,6 +2,7 @@ package internal_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"strings"
 	"testing"
@@ -87,7 +88,7 @@ func Test_ValidateCmd_PathParametersMismatch(t *testing.T) {
 
 // YAML format produces a marshalled list of Finding records that round-
 // trips through yaml.Unmarshal. Field names match changelog's:
-// id, text, level, source.
+// id, text, level, source (object with file/line/column), fingerprint.
 func Test_ValidateCmd_YAMLFormat(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
@@ -96,9 +97,46 @@ func Test_ValidateCmd_YAMLFormat(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
 	require.Len(t, findings, 1)
 	require.Equal(t, "info-version-required", findings[0]["id"])
-	require.Equal(t, "../data/validate/missing-required-info.yaml", findings[0]["source"])
+	src, ok := findings[0]["source"].(map[string]any)
+	require.True(t, ok, "source should be an object")
+	require.Equal(t, "../data/validate/missing-required-info.yaml", src["file"])
 	require.Equal(t, 3, findings[0]["level"]) // checker.ERR
 	require.Contains(t, findings[0]["text"], "version")
+	require.Equal(t, "info", findings[0]["section"])
+	require.NotEmpty(t, findings[0]["fingerprint"])
+}
+
+// JSON format mirrors the changelog --format json shape: top-level
+// bare array, lowercase field names, source as an object, numeric level.
+func Test_ValidateCmd_JSONFormat(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "info-version-required", findings[0]["id"])
+	require.Equal(t, float64(3), findings[0]["level"]) // json numbers decode to float64
+	require.Equal(t, "info", findings[0]["section"])
+	src, ok := findings[0]["source"].(map[string]any)
+	require.True(t, ok, "source should be an object")
+	require.Equal(t, "../data/validate/missing-required-info.yaml", src["file"])
+	require.NotEmpty(t, findings[0]["fingerprint"])
+}
+
+// Fingerprint is deterministic: running validate twice on the same
+// input produces the same fingerprint for the same finding. This is
+// the property Pro PR-comment partitioning depends on for matching
+// findings across base/revision spec versions.
+func Test_ValidateCmd_FingerprintStable(t *testing.T) {
+	var out1, out2 bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/missing-required-info.yaml"), &out1, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/missing-required-info.yaml"), &out2, io.Discard))
+
+	var f1, f2 []map[string]any
+	require.NoError(t, json.Unmarshal(out1.Bytes(), &f1))
+	require.NoError(t, json.Unmarshal(out2.Bytes(), &f2))
+	require.Equal(t, f1[0]["fingerprint"], f2[0]["fingerprint"])
 }
 
 // Text format: header summary line + changelog-style multi-line block.
@@ -112,8 +150,8 @@ func Test_ValidateCmd_TextFormatHeaderAndBlock(t *testing.T) {
 	require.Contains(t, lines[1], "error\t[info-version-required] at ")
 }
 
-// Origin tracking: line + column appear in YAML output for typed
-// errors carrying an *Origin (info, license, server, schema). The
+// Origin tracking: line + column appear inside the source object for
+// typed errors carrying an *Origin (info, license, server, schema). The
 // loader is started with IncludeOrigin=true unconditionally so this
 // always fires for converted call sites.
 func Test_ValidateCmd_LineColumnFromOrigin(t *testing.T) {
@@ -124,16 +162,17 @@ func Test_ValidateCmd_LineColumnFromOrigin(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
 	require.Len(t, findings, 1)
 	require.Equal(t, "info-version-required", findings[0]["id"])
+	src := findings[0]["source"].(map[string]any)
 	// info: starts at line 2 of the fixture; the cluster Origin points
 	// at the info object's start.
-	require.Equal(t, 2, findings[0]["line"])
-	require.Equal(t, 1, findings[0]["column"])
+	require.Equal(t, 2, src["line"])
+	require.Equal(t, 1, src["column"])
 }
 
 // Document-root fields (openapi version, webhooks, jsonSchemaDialect)
 // have no Origin since the loader doesn't track *T. Their findings
-// have line/column omitted (not zero — yaml:"...,omitempty" elides
-// them entirely).
+// have source.line / source.column omitted (yaml:"...,omitempty" on
+// Source's Line/Column elides them entirely).
 func Test_ValidateCmd_DocRootFieldHasNoLineColumn(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/openapi-version-empty.yaml"), &stdout, io.Discard))
@@ -142,8 +181,9 @@ func Test_ValidateCmd_DocRootFieldHasNoLineColumn(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
 	require.Len(t, findings, 1)
 	require.Equal(t, "openapi-required", findings[0]["id"])
-	require.NotContains(t, findings[0], "line")
-	require.NotContains(t, findings[0], "column")
+	src := findings[0]["source"].(map[string]any)
+	require.NotContains(t, src, "line")
+	require.NotContains(t, src, "column")
 }
 
 // Text format renders source as <file>:<line>:<column> when origin is

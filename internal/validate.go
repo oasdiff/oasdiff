@@ -2,6 +2,9 @@ package internal
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -28,6 +31,7 @@ const kinUnknownID = "kin-validation-error"
 const (
 	formatText = "text"
 	formatYAML = "yaml"
+	formatJSON = "json"
 )
 
 func getValidateCmd() *cobra.Command {
@@ -53,7 +57,7 @@ Spec can be a path to a file, a URL or '-' to read standard input.
 		RunE: getRun(runValidate),
 	}
 
-	enumWithOptions(&cmd, newEnumValue([]string{formatText, formatYAML}, formatText), "format", "f", "output format")
+	enumWithOptions(&cmd, newEnumValue([]string{formatText, formatYAML, formatJSON}, formatText), "format", "f", "output format")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 
 	return &cmd
@@ -86,23 +90,42 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	return true, nil
 }
 
-// Finding is a single validation finding. Field names mirror the
-// changelog command's output (id/text/level/source) so consumers can
-// parse both with the same data structure. Id is a descriptive
-// kebab-case identifier matching the changelog rule-ID convention.
+// Finding is a single validation finding. The JSON / YAML shape mirrors
+// the changelog command's output so consumers can parse both with the
+// same data structure.
 //
-// Line and Column are populated when kin-openapi tracks origins
-// (Loader.IncludeOrigin = true) and the underlying typed error
-// carries the offending element's Origin. Both are 0 / omitted when
-// the element doesn't have origin metadata (e.g. document-root
-// fields like openapi version) or origin tracking is off.
+// Comment, Operation, and Path use omitempty because doc-root findings
+// (e.g. info-version-required) have no operation/path scope.
+//
+// Source.Line and Source.Column are populated when kin-openapi tracks
+// origins (Loader.IncludeOrigin = true) and the underlying typed error
+// carries the offending element's Origin. Both are 0 when the element
+// doesn't have origin metadata (doc-root fields like openapi version)
+// or origin tracking is off.
+//
+// Fingerprint is a stable 12-char identifier that lets a downstream
+// tool match the same logical finding across base/revision spec
+// versions (used by the Pro PR-comment for new/pre-existing/fixed
+// partitioning). Format mirrors formatters/changes.go:computeFingerprint.
 type Finding struct {
-	Id     string        `yaml:"id"`
-	Text   string        `yaml:"text"`
-	Level  checker.Level `yaml:"level"`
-	Source string        `yaml:"source"`
-	Line   int           `yaml:"line,omitempty"`
-	Column int           `yaml:"column,omitempty"`
+	Id          string        `yaml:"id"                    json:"id"`
+	Text        string        `yaml:"text"                  json:"text"`
+	Comment     string        `yaml:"comment,omitempty"     json:"comment,omitempty"`
+	Level       checker.Level `yaml:"level"                 json:"level"`
+	Operation   string        `yaml:"operation,omitempty"   json:"operation,omitempty"`
+	Path        string        `yaml:"path,omitempty"        json:"path,omitempty"`
+	Section     string        `yaml:"section"               json:"section"`
+	Source      Source        `yaml:"source"                json:"source"`
+	Fingerprint string        `yaml:"fingerprint"           json:"fingerprint"`
+}
+
+// Source identifies the spec location of a finding. File is the spec
+// path; Line and Column come from kin's Origin tracking and are 0 for
+// doc-root findings that have no per-key origin.
+type Source struct {
+	File   string `yaml:"file"             json:"file"`
+	Line   int    `yaml:"line,omitempty"   json:"line,omitempty"`
+	Column int    `yaml:"column,omitempty" json:"column,omitempty"`
 }
 
 // mapKinErrors flattens kin-openapi's MultiError tree into a list of
@@ -119,14 +142,154 @@ func mapKinErrors(source string, err error) []Finding {
 		}
 		return out
 	}
-	return []Finding{{
-		Id:     ruleIDForKinError(err),
-		Text:   err.Error(),
-		Level:  checker.ERR,
-		Source: source,
-		Line:   lineForKinError(err),
-		Column: columnForKinError(err),
-	}}
+	id := ruleIDForKinError(err)
+	f := Finding{
+		Id:      id,
+		Text:    err.Error(),
+		Level:   checker.ERR,
+		Section: sectionForKinError(err),
+		Source: Source{
+			File:   source,
+			Line:   lineForKinError(err),
+			Column: columnForKinError(err),
+		},
+	}
+	// Fingerprint last so it sees the populated fields it hashes over.
+	f.Fingerprint = fingerprintFor(f, argsForKinError(err))
+	return []Finding{f}
+}
+
+// sectionForKinError maps a typed kin error to its logical doc section,
+// matching the values used by ApiChange / ComponentChange / SecurityChange
+// in the existing changelog output (`paths`, `components`, `security`).
+//
+// The mapping is per-cluster + a light Field-prefix check on the cluster
+// types that carry one (RequiredFieldError, FieldVersionMismatchError).
+// Doc-root findings without a natural section (e.g. *RequiredFieldError
+// {Field: "openapi"}) get the empty string.
+func sectionForKinError(err error) string {
+	// Cluster types that have a structural section regardless of payload.
+	var ppe *openapi3.PathParametersError
+	if errors.As(err, &ppe) {
+		return "paths"
+	}
+	var wne *openapi3.WebhookNilError
+	if errors.As(err, &wne) {
+		return "webhooks"
+	}
+	var sute *openapi3.ServerURLTemplateError
+	if errors.As(err, &sute) {
+		return "servers"
+	}
+
+	// Cluster types with a Field that hints at the section.
+	var rfe *openapi3.RequiredFieldError
+	if errors.As(err, &rfe) {
+		return sectionFromField(rfe.Field)
+	}
+	var fvm *openapi3.FieldVersionMismatchError
+	if errors.As(err, &fvm) {
+		return sectionFromField(fvm.Field)
+	}
+
+	// Schema-deep clusters: lean toward "paths" since most kin
+	// validation surfaces from request/response schemas inside
+	// operations. Inline component schemas miscount here, but the
+	// section is a navigational hint, not a hard claim.
+	var sve *openapi3.SchemaValueError
+	if errors.As(err, &sve) {
+		return "paths"
+	}
+	var sbf *openapi3.SchemaBothFormsExclusive
+	if errors.As(err, &sbf) {
+		return "paths"
+	}
+	return ""
+}
+
+// sectionFromField returns the section a kin Field name lives in,
+// based on the field's top-level prefix. Anything not recognised
+// returns empty.
+func sectionFromField(field string) string {
+	switch {
+	case strings.HasPrefix(field, "info"):
+		return "info"
+	case strings.HasPrefix(field, "paths"):
+		return "paths"
+	case strings.HasPrefix(field, "components"):
+		return "components"
+	case strings.HasPrefix(field, "webhooks"):
+		return "webhooks"
+	case strings.HasPrefix(field, "servers"):
+		return "servers"
+	case strings.HasPrefix(field, "security"):
+		return "security"
+	case strings.HasPrefix(field, "tags"):
+		return "tags"
+	default:
+		return ""
+	}
+}
+
+// argsForKinError returns the disambiguating args used in fingerprint
+// computation. For most validate clusters the args list is the
+// cluster's structured Field (or Fields); for clusters that carry no
+// per-finding field, the args are empty and identity is already
+// captured by the rule ID + Source.
+func argsForKinError(err error) []any {
+	var rfe *openapi3.RequiredFieldError
+	if errors.As(err, &rfe) {
+		return []any{rfe.Field}
+	}
+	var fvm *openapi3.FieldVersionMismatchError
+	if errors.As(err, &fvm) {
+		return []any{fvm.Field}
+	}
+	var mef *openapi3.MutuallyExclusiveFieldsError
+	if errors.As(err, &mef) {
+		return []any{mef.Field1, mef.Field2}
+	}
+	var ffe *openapi3.ForbiddenFieldError
+	if errors.As(err, &ffe) {
+		return []any{ffe.Field}
+	}
+	var efr *openapi3.EitherFieldRequiredError
+	if errors.As(err, &efr) {
+		return []any{strings.Join(efr.Fields, "-or-")}
+	}
+	var sbf *openapi3.SchemaBothFormsExclusive
+	if errors.As(err, &sbf) {
+		return []any{sbf.Field}
+	}
+	var eofe *openapi3.ExactlyOneFieldError
+	if errors.As(err, &eofe) {
+		return []any{strings.Join(eofe.Fields, "-or-")}
+	}
+	var sec *openapi3.SingleEntryContentError
+	if errors.As(err, &sec) {
+		return []any{sec.Subject}
+	}
+	var sve *openapi3.SchemaValueError
+	if errors.As(err, &sve) {
+		return []any{sve.ValueKind}
+	}
+	return nil
+}
+
+// fingerprintFor produces a stable 12-char identifier for a finding.
+// Format mirrors formatters/changes.go:computeFingerprint:
+// sha256("{id}:{operation}:{path}:{args}") truncated to 12 hex chars.
+// Inputs are structured rather than the rendered text so rendering
+// changes (locale, message edits) don't invalidate stored fingerprints
+// used for new/pre-existing/fixed partitioning across spec versions.
+func fingerprintFor(f Finding, args []any) string {
+	parts := make([]string, len(args))
+	for i, a := range args {
+		parts[i] = fmt.Sprintf("%v", a)
+	}
+	h := fmt.Sprintf("%s:%s:%s:%s", f.Id, f.Operation, f.Path, strings.Join(parts, ";"))
+	sum := sha256.Sum256([]byte(h))
+	return hex.EncodeToString(sum[:])[:12]
 }
 
 // lineForKinError extracts the line number from the typed cluster
@@ -332,6 +495,13 @@ func writeFindings(w io.Writer, findings []Finding, format string) error {
 		}
 		_, err = w.Write(bytes)
 		return err
+	case formatJSON:
+		bytes, err := json.Marshal(findings)
+		if err != nil {
+			return err
+		}
+		_, err = w.Write(bytes)
+		return err
 	case formatText, "":
 		writeFindingsText(w, findings)
 		return nil
@@ -362,9 +532,9 @@ func writeFindingsText(w io.Writer, findings []Finding) {
 	fmt.Fprintf(w, "%d findings: %d error, %d warning, %d info\n", len(findings), nErr, nWarn, nInfo)
 
 	for _, f := range findings {
-		loc := f.Source
-		if f.Line > 0 {
-			loc = fmt.Sprintf("%s:%d:%d", f.Source, f.Line, f.Column)
+		loc := f.Source.File
+		if f.Source.Line > 0 {
+			loc = fmt.Sprintf("%s:%d:%d", f.Source.File, f.Source.Line, f.Source.Column)
 		}
 		// Some kin errors (notably *SchemaError) embed newlines in the
 		// message — Schema:\n... + Value:\n... blocks. Indent every
