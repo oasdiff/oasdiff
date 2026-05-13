@@ -32,6 +32,13 @@ func NewColorMode(color string) (ColorMode, error) {
 	}
 }
 
+// IsColorEnabled is the exported form of isColorEnabled. Lets oasdiff
+// packages outside checker (validate, future subcommands) gate their
+// own color logic on the same auto-detect + override convention.
+func IsColorEnabled(colorMode ColorMode) bool {
+	return isColorEnabled(colorMode)
+}
+
 func isColorEnabled(colorMode ColorMode) bool {
 	switch colorMode {
 	case ColorAlways:

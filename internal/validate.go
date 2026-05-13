@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/TwiN/go-color"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/load"
@@ -58,6 +59,7 @@ Spec can be a path to a file, a URL or '-' to read standard input.
 	}
 
 	enumWithOptions(&cmd, newEnumValue([]string{formatText, formatYAML, formatJSON}, formatText), "format", "f", "output format")
+	enumWithOptions(&cmd, newEnumValue(checker.GetSupportedColorValues(), "auto"), "color", "", "when to colorize textual output")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 
 	return &cmd
@@ -83,7 +85,11 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	}
 
 	findings := mapKinErrors(flags.getBase().String(), verr)
-	if err := writeFindings(stdout, findings, flags.getFormat()); err != nil {
+	colorMode, cerr := checker.NewColorMode(flags.getColor())
+	if cerr != nil {
+		return false, getErrFailedPrint(validateCmd+" color", cerr)
+	}
+	if err := writeFindings(stdout, findings, flags.getFormat(), colorMode); err != nil {
 		return false, getErrFailedPrint(validateCmd+" "+flags.getFormat(), err)
 	}
 
@@ -486,7 +492,7 @@ func ruleIDFromField(field string) string {
 	return b.String()
 }
 
-func writeFindings(w io.Writer, findings []Finding, format string) error {
+func writeFindings(w io.Writer, findings []Finding, format string, colorMode checker.ColorMode) error {
 	switch format {
 	case formatYAML:
 		bytes, err := yaml.Marshal(findings)
@@ -503,7 +509,7 @@ func writeFindings(w io.Writer, findings []Finding, format string) error {
 		_, err = w.Write(bytes)
 		return err
 	case formatText, "":
-		writeFindingsText(w, findings)
+		writeFindingsText(w, findings, colorMode)
 		return nil
 	default:
 		return fmt.Errorf("unsupported format %q", format)
@@ -517,7 +523,12 @@ func writeFindings(w io.Writer, findings []Finding, format string) error {
 //
 //	error	[<rule-id>] at <source>
 //		<text>
-func writeFindingsText(w io.Writer, findings []Finding) {
+//
+// When color is enabled, level is rendered red/purple/cyan via
+// Level.StringCond and the rule ID is rendered yellow, matching
+// changelog / breaking. The color decision honours the --color flag
+// (auto/always/never) via checker.IsColorEnabled.
+func writeFindingsText(w io.Writer, findings []Finding, colorMode checker.ColorMode) {
 	var nErr, nWarn, nInfo int
 	for _, f := range findings {
 		switch f.Level {
@@ -531,15 +542,20 @@ func writeFindingsText(w io.Writer, findings []Finding) {
 	}
 	fmt.Fprintf(w, "%d findings: %d error, %d warning, %d info\n", len(findings), nErr, nWarn, nInfo)
 
+	useColor := checker.IsColorEnabled(colorMode)
 	for _, f := range findings {
 		loc := f.Source.File
 		if f.Source.Line > 0 {
 			loc = fmt.Sprintf("%s:%d:%d", f.Source.File, f.Source.Line, f.Source.Column)
 		}
+		id := f.Id
+		if useColor {
+			id = color.InYellow(f.Id)
+		}
 		// Some kin errors (notably *SchemaError) embed newlines in the
 		// message — Schema:\n... + Value:\n... blocks. Indent every
 		// non-empty continuation line so the finding stays visually
 		// grouped, while leaving blank lines blank (not "\t").
-		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.String(), f.Id, loc, indentContinuation(f.Text))
+		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.StringCond(colorMode), id, loc, indentContinuation(f.Text))
 	}
 }
