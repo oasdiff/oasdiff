@@ -19,8 +19,8 @@ require (
 	github.com/go-openapi/swag/jsonname v0.25.5 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/oasdiff/yaml v0.0.9 // indirect
-	github.com/oasdiff/yaml3 v0.0.12 // indirect
+	github.com/oasdiff/yaml v0.1.0 // indirect
+	github.com/oasdiff/yaml3 v0.0.13 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
@@ -51,3 +51,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
 )
+
+// TEMPORARY: point at oasdiff/kin-openapi feat/yaml-disable-timestamps until
+// kin cuts a release tag containing #1181 (DisableTimestamps integration).
+// Remove this directive and bump the require above to the released kin
+// version before merge.
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260513092218-b8149b53d36a
