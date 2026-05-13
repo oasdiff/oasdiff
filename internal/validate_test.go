@@ -41,10 +41,22 @@ func Test_ValidateCmd_OpenAPIVersionRequired(t *testing.T) {
 // 3.1-only license.identifier in a 3.0 doc → kin returns
 // *FieldVersionMismatchError{Field:"identifier"} wrapping
 // *LicenseIdentifierFieldFor31Plus. Rule ID: "identifier-field-for-3-1-plus".
+//
+// The fixture has `identifier: MIT` on line 7. This pin guards a real
+// regression: until 2026-05-13 we used Origin.Key (the enclosing
+// `license:` line, 5:3) instead of Origin.Fields["identifier"] (the
+// offending line, 7:5).
 func Test_ValidateCmd_FieldVersionMismatch_LicenseIdentifier(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/license-identifier-in-3-0.yaml"), &stdout, io.Discard))
-	require.Contains(t, stdout.String(), "identifier-field-for-3-1-plus")
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/license-identifier-in-3-0.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "identifier-field-for-3-1-plus", findings[0]["id"])
+	src := findings[0]["source"].(map[string]any)
+	require.Equal(t, 7, src["line"], "should pin to the identifier: line, not the license: line")
+	require.Equal(t, 5, src["column"])
 }
 
 // 3.1-only doc.webhooks in a 3.0 doc → kin returns

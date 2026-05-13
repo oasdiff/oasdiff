@@ -302,7 +302,7 @@ func fingerprintFor(f Finding, args []any) string {
 // errors' Origin. Returns 0 when origin metadata isn't available
 // (untyped error, doc-root field, or loader.IncludeOrigin = false).
 func lineForKinError(err error) int {
-	if k := keyOriginForKinError(err); k != nil {
+	if k := locationForKinError(err); k != nil {
 		return k.Line
 	}
 	return 0
@@ -311,7 +311,7 @@ func lineForKinError(err error) int {
 // columnForKinError extracts the column number from the typed cluster
 // errors' Origin. Returns 0 when origin metadata isn't available.
 func columnForKinError(err error) int {
-	if k := keyOriginForKinError(err); k != nil {
+	if k := locationForKinError(err); k != nil {
 		return k.Column
 	}
 	return 0
@@ -332,21 +332,33 @@ func indentContinuation(s string) string {
 	return strings.TrimRight(strings.Join(lines, "\n"), " \t\n")
 }
 
-// keyOriginForKinError returns the *Location pointed at by any cluster
-// type's Origin.Key, or nil if no cluster matches or the Origin is not
-// set. Covers all kin clusters that carry an *Origin.
-func keyOriginForKinError(err error) *openapi3.Location {
+// locationForKinError returns the most-specific *Location available
+// for a typed kin error. kin's Origin model:
+//
+//   - Origin.Key       points at the start of the enclosing collection
+//     (e.g. for a LicenseIdentifierFieldFor31Plus, Key is the line of
+//     the parent "license:" key, not "identifier:").
+//   - Origin.Fields[X] points at the specific scalar field X inside
+//     that collection.
+//
+// For clusters that carry a Field, we want Fields[Field] (the
+// offending line) rather than Key (the enclosing object's line).
+// Falls back to Key when the per-field entry is missing, and finally
+// to nil for clusters with no Origin at all (WebhookNilError).
+func locationForKinError(err error) *openapi3.Location {
 	var rfe *openapi3.RequiredFieldError
 	if errors.As(err, &rfe) && rfe.Origin != nil {
-		return rfe.Origin.Key
+		return fieldLoc(rfe.Origin, rfe.Field)
 	}
 	var fvm *openapi3.FieldVersionMismatchError
 	if errors.As(err, &fvm) && fvm.Origin != nil {
-		return fvm.Origin.Key
+		return fieldLoc(fvm.Origin, fvm.Field)
 	}
 	var sve *openapi3.SchemaValueError
 	if errors.As(err, &sve) && sve.Origin != nil {
-		return sve.Origin.Key
+		// SchemaValueError carries ValueKind (e.g. "example", "default")
+		// — the per-field key under the schema where the value lives.
+		return fieldLoc(sve.Origin, sve.ValueKind)
 	}
 	var ppe *openapi3.PathParametersError
 	if errors.As(err, &ppe) && ppe.Origin != nil {
@@ -354,11 +366,14 @@ func keyOriginForKinError(err error) *openapi3.Location {
 	}
 	var mef *openapi3.MutuallyExclusiveFieldsError
 	if errors.As(err, &mef) && mef.Origin != nil {
-		return mef.Origin.Key
+		// Prefer Field1's location; either offender pins the finding to
+		// the right object. We don't carry both since a single Source
+		// is the contract.
+		return fieldLoc(mef.Origin, mef.Field1)
 	}
 	var ffe *openapi3.ForbiddenFieldError
 	if errors.As(err, &ffe) && ffe.Origin != nil {
-		return ffe.Origin.Key
+		return fieldLoc(ffe.Origin, ffe.Field)
 	}
 	var sute *openapi3.ServerURLTemplateError
 	if errors.As(err, &sute) && sute.Origin != nil {
@@ -366,23 +381,43 @@ func keyOriginForKinError(err error) *openapi3.Location {
 	}
 	var efr *openapi3.EitherFieldRequiredError
 	if errors.As(err, &efr) && efr.Origin != nil {
+		// EitherFieldRequiredError fires when none of {Fields...} are
+		// present, so per-field lookup wouldn't match anything — the
+		// enclosing object's Key is the right pin.
 		return efr.Origin.Key
 	}
 	var sbf *openapi3.SchemaBothFormsExclusive
 	if errors.As(err, &sbf) && sbf.Origin != nil {
-		return sbf.Origin.Key
+		return fieldLoc(sbf.Origin, sbf.Field)
 	}
 	var eofe *openapi3.ExactlyOneFieldError
 	if errors.As(err, &eofe) && eofe.Origin != nil {
+		// Same reasoning as EitherFieldRequiredError: cluster fires
+		// when the constraint is violated across multiple fields; the
+		// object Key is the cleanest pin.
 		return eofe.Origin.Key
 	}
 	var sec *openapi3.SingleEntryContentError
 	if errors.As(err, &sec) && sec.Origin != nil {
-		return sec.Origin.Key
+		return fieldLoc(sec.Origin, sec.Subject)
 	}
 	// WebhookNilError carries no Origin (the offending key is on the
 	// document root, which the loader doesn't track per-key).
 	return nil
+}
+
+// fieldLoc returns the location of a specific scalar field inside an
+// Origin's collection if present; otherwise the collection's Key.
+// Lookup is by the leaf field name (e.g. "identifier" for license
+// errors, "version" for info errors).
+func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
+	if origin == nil {
+		return nil
+	}
+	if loc, ok := origin.Fields[field]; ok {
+		return &loc
+	}
+	return origin.Key
 }
 
 // ruleIDForKinError dispatches a kin-openapi error to a stable
