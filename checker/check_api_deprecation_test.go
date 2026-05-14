@@ -15,15 +15,15 @@ import (
 // BC: deprecating an operation with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-with-invalid-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-with-invalid-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -34,15 +34,15 @@ func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 // BC: deprecating an operation with a deprecation policy and an invalid stability level is breaking
 func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-with-invalid-stability.yaml"))
+	s2, err := open(deprecationFile("deprecated-with-invalid-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -54,15 +54,15 @@ func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 // BC: deprecating an operation without a deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_DeprecationWithoutSunsetNoPolicy(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 0)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 0))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Empty(t, errs)
 }
@@ -70,15 +70,15 @@ func TestBreaking_DeprecationWithoutSunsetNoPolicy(t *testing.T) {
 // BC: deprecating an operation with a deprecation policy but without specifying sunset date is breaking
 func TestBreaking_DeprecationWithoutSunsetWithPolicy(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(30, 100)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIDeprecatedSunsetMissingId, errs[0].GetId())
@@ -88,10 +88,10 @@ func TestBreaking_DeprecationWithoutSunsetWithPolicy(t *testing.T) {
 // BC: deprecating an operation with a default deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_DeprecationWithoutSunset(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -104,10 +104,10 @@ func TestBreaking_DeprecationWithoutSunset(t *testing.T) {
 // BC: deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_DeprecationForAlpha(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -118,12 +118,12 @@ func TestBreaking_DeprecationForAlpha(t *testing.T) {
 
 // BC: deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for draft level
 func TestBreaking_DeprecationForDraft(t *testing.T) {
-	s1, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 	draft := toJson(t, checker.STABILITY_DRAFT)
 	s1.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = draft
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
 	require.NoError(t, err)
 	s2.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = draft
 
@@ -142,17 +142,17 @@ func toJson(t *testing.T, value string) json.RawMessage {
 
 // BC: deprecating an operation with a deprecation policy and sunset date before required deprecation period is breaking
 func TestBreaking_DeprecationWithEarlySunset(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 	sunsetDate := civil.DateOf(time.Now()).AddDays(9).String()
 	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, sunsetDate)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -163,16 +163,16 @@ func TestBreaking_DeprecationWithEarlySunset(t *testing.T) {
 // BC: deprecating an operation with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(10).String())
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
@@ -184,10 +184,10 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 
 // CL: path operations that became deprecated
 func TestApiDeprecated_DetectsDeprecatedOperations(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -207,10 +207,10 @@ func TestApiDeprecated_DetectsDeprecatedOperations(t *testing.T) {
 
 // CL: path operations that were re-activated
 func TestApiDeprecated_DetectsReactivatedOperations(t *testing.T) {
-	s1, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base.yaml"))
+	s2, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -230,10 +230,10 @@ func TestApiDeprecated_DetectsReactivatedOperations(t *testing.T) {
 
 func TestBreaking_InvaidStability(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("invalid-stability.yaml"))
+	s1, err := open(deprecationFile("invalid-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s2, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -252,10 +252,10 @@ func TestBreaking_InvaidStability(t *testing.T) {
 
 // CL: message includes sunset details when endpoint deprecated with sunset date
 func TestApiDeprecated_MessageIncludesSunset(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -271,10 +271,10 @@ func TestApiDeprecated_MessageIncludesSunset(t *testing.T) {
 
 // CL: message includes both sunset and stability when endpoint deprecated with both
 func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future-beta-stability.yaml"))
+	s2, err := open(deprecationFile("deprecated-future-beta-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -291,10 +291,10 @@ func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 
 // CL: message has no details when endpoint deprecated without sunset or stability
 func TestApiDeprecated_MessageWithoutDetails(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -310,10 +310,10 @@ func TestApiDeprecated_MessageWithoutDetails(t *testing.T) {
 
 // CL: message includes stability when endpoint deprecated with stability but no sunset
 func TestApiDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
-	s1, err := open(getDeprecationFile("base-beta-stability.yaml"))
+	s1, err := open(deprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-no-sunset-beta-stability.yaml"))
+	s2, err := open(deprecationFile("deprecated-no-sunset-beta-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -329,10 +329,10 @@ func TestApiDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 
 // CL: deprecating an operation with a sunset date in RFC3339 format is properly parsed
 func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	// Use RFC3339 format (with time) instead of just date
@@ -342,7 +342,7 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	// only a non-breaking change detected
@@ -352,10 +352,10 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 
 // BC: deprecating an operation with invalid JSON sunset date is breaking
 func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	// Use invalid JSON that can't be unmarshaled to a string
@@ -363,7 +363,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIDeprecatedSunsetParseId, errs[0].GetId())
@@ -372,10 +372,10 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 
 // CL: endpoint deprecation message includes sunset date
 func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
-	s1, err := open(getDeprecationFile("base.yaml"))
+	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	// Use RFC3339 format (with time) instead of just date
@@ -385,7 +385,7 @@ func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.APIDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 
 	// Find the endpoint-deprecated-with-sunset change

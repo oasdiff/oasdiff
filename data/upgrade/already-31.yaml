@@ -1,0 +1,10 @@
+openapi: 3.1.0
+info:
+  title: already-31
+  version: '1.0'
+paths:
+  /items:
+    get:
+      responses:
+        '200':
+          description: ok

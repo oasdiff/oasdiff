@@ -254,3 +254,51 @@ func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was generalized from `integer`/`` to `number`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
+
+// CL: widening a query parameter from a scalar to a form/explode array of the
+// same type is backwards-compatible (one-element array on the wire), so it
+// should be reported as a generalization rather than a breaking change.
+// Reproduces issue #689.
+func TestRequestQueryParamScalarToFormExplodeArray(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	queryParam := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
+	queryParam.Schema.Value.Type = &openapi3.Types{"array"}
+	queryParam.Schema.Value.Format = ""
+	queryParam.Schema.Value.Items = &openapi3.SchemaRef{
+		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Format: "uuid"},
+	}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId())
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+}
+
+// CL: widening a path parameter from scalar to array stays breaking, since
+// path parameters use simple style (not form), so a single value on the wire
+// no longer matches the new array schema.
+func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	pathParam := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[0].Value
+	pathParam.Schema.Value.Type = &openapi3.Types{"array"}
+	pathParam.Schema.Value.Items = &openapi3.SchemaRef{
+		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}},
+	}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}

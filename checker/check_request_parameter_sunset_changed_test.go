@@ -11,10 +11,10 @@ import (
 // BC: deleting sunset header for a deprecated parameter is breaking
 func TestBreaking_SunsetDeletedForDeprecatedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-with-sunset.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-with-sunset.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -29,10 +29,10 @@ func TestBreaking_SunsetDeletedForDeprecatedParameter(t *testing.T) {
 // BC: deleting sunset header for a deprecated parameter is breaking even if the parameter is renamed
 func TestBreaking_SunsetDeletedForDeprecatedAndRenamedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-with-sunset-path.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-with-sunset-path.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset-path-renamed.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset-path-renamed.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -47,15 +47,15 @@ func TestBreaking_SunsetDeletedForDeprecatedAndRenamedParameter(t *testing.T) {
 // BC: changing sunset to an earlier date for a deprecated parameter with a deprecation policy is breaking
 func TestBreaking_SunsetModifiedForDeprecatedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-past.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-past.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck).WithDeprecation(31, 180), d, osm)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck, checker.WithDeprecation(31, 180)), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterSunsetDateChangedTooSmallId, errs[0].GetId())
@@ -65,10 +65,10 @@ func TestBreaking_SunsetModifiedForDeprecatedParameter(t *testing.T) {
 // BC: changing sunset to an invalid date for a deprecated parameter is breaking
 func TestBreaking_SunsetModifiedToInvalidForDeprecatedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-invalid.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-invalid.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -84,10 +84,10 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedParameter(t *testing.T) {
 // BC: changing sunset from an invalid date for a deprecated parameter is breaking
 func TestBreaking_SunsetModifiedFromInvalidForDeprecatedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-invalid.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-invalid.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -103,10 +103,10 @@ func TestBreaking_SunsetModifiedFromInvalidForDeprecatedParameter(t *testing.T) 
 // BC: deleting other extension (not sunset) header for a deprecated parameter is not breaking
 func TestBreaking_NonSunsetDeletedForDeprecatedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-with-other-extension.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-with-other-extension.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -118,10 +118,10 @@ func TestBreaking_NonSunsetDeletedForDeprecatedParameter(t *testing.T) {
 // BC: no change to headers for a deprecated parameter is not breaking
 func TestBreaking_NoChangeToSunsetDeprecatedParameter(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future-2.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future-2.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

@@ -14,15 +14,15 @@ import (
 // BC: deprecating a parameter with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-invalid.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-invalid.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -33,15 +33,15 @@ func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 // BC: deprecating a parameter without a deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_ParameterDeprecationWithoutSunsetNoPolicy(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 0)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 0))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Empty(t, errs)
 }
@@ -49,15 +49,15 @@ func TestBreaking_ParameterDeprecationWithoutSunsetNoPolicy(t *testing.T) {
 // BC: deprecating a parameter with a deprecation policy but without specifying sunset date is breaking
 func TestBreaking_ParameterDeprecationWithoutSunsetWithPolicy(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(30, 100)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterDeprecatedSunsetMissingId, errs[0].GetId())
@@ -67,10 +67,10 @@ func TestBreaking_ParameterDeprecationWithoutSunsetWithPolicy(t *testing.T) {
 // BC: deprecating a parameter with a default deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_ParameterDeprecationWithoutSunset(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -83,10 +83,10 @@ func TestBreaking_ParameterDeprecationWithoutSunset(t *testing.T) {
 // BC: deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_ParameterDeprecationForAlpha(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(paramDeprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -97,10 +97,10 @@ func TestBreaking_ParameterDeprecationForAlpha(t *testing.T) {
 
 // BC: deprecating a parameter with a deprecation policy and sunset date before required deprecation period is breaking
 func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 	sunsetDate := civil.DateOf(time.Now()).AddDays(9).String()
 
@@ -108,7 +108,7 @@ func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
@@ -119,16 +119,16 @@ func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
 // BC: deprecating a parameter with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	s2.Spec.Paths.Value("/api/test").GetOperation("GET").Parameters.GetByInAndName("query", "id").Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(10).String())
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	c := singleCheckConfig(checker.RequestParameterDeprecationCheck).WithDeprecation(0, 10)
+	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 10))
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
@@ -140,10 +140,10 @@ func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 
 // CL: parameters that became deprecated
 func TestParameterDeprecated_DetectsDeprecated(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -163,10 +163,10 @@ func TestParameterDeprecated_DetectsDeprecated(t *testing.T) {
 
 // CL: parameters that were re-activated
 func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("base.yaml"))
+	s2, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -186,10 +186,10 @@ func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
 
 // CL: message includes sunset details when parameter deprecated with sunset date
 func TestParameterDeprecated_MessageIncludesSunset(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -205,10 +205,10 @@ func TestParameterDeprecated_MessageIncludesSunset(t *testing.T) {
 
 // CL: message includes both sunset and stability when parameter deprecated with both
 func TestParameterDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base-beta-stability.yaml"))
+	s1, err := open(paramDeprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-future-beta-stability.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-future-beta-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -224,10 +224,10 @@ func TestParameterDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 
 // CL: message has no details when parameter deprecated without sunset or stability
 func TestParameterDeprecated_MessageWithoutDetails(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -243,10 +243,10 @@ func TestParameterDeprecated_MessageWithoutDetails(t *testing.T) {
 
 // CL: message includes stability when parameter deprecated with stability but no sunset
 func TestParameterDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base-beta-stability.yaml"))
+	s1, err := open(paramDeprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("deprecated-no-sunset-beta-stability.yaml"))
+	s2, err := open(paramDeprecationFile("deprecated-no-sunset-beta-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

@@ -62,13 +62,14 @@ Pre-built binaries for macOS, Linux, and Windows (both x86_64 and arm64) are on 
 Grouped by what you're trying to do. New to oasdiff? Start with **Commands**.
 
 ### Commands
-The six top-level subcommands.
+The seven top-level subcommands.
 
 - [`diff`](DIFF.md) — full diff between two OpenAPI specs (output: html, json, markdown, markup, text, or yaml — default yaml)
 - [`summary`](DIFF.md) — high-level count of changes between two specs (built on the diff engine; same shared options)
 - [`breaking`](BREAKING-CHANGES.md) — only breaking changes
 - [`changelog`](BREAKING-CHANGES.md) — every significant change, breaking or not, in human-readable form
 - [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
+- [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade) — canonicalize an OpenAPI 3.0 spec to the latest 3.x
 - [`checks`](CHECKS.md) — list the rules oasdiff uses to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
 
 ### Inputs

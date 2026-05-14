@@ -21,7 +21,7 @@ func TestNewConfig(t *testing.T) {
 }
 
 func TestNewConfigWithDeprecation(t *testing.T) {
-	config := allChecksConfig().WithDeprecation(10, 20)
+	config := allChecksConfig(checker.WithDeprecation(10, 20))
 	require.Len(t, config.Checks, numOfChecks)
 	require.Len(t, config.LogLevels, numOfIds)
 	require.Equal(t, uint(10), config.MinSunsetBetaDays)
@@ -30,12 +30,12 @@ func TestNewConfigWithDeprecation(t *testing.T) {
 
 func TestNewConfigWithOptionalCheck(t *testing.T) {
 	const id = checker.RequestPropertyDefaultValueChangedId
-	config := allChecksConfig().WithOptionalCheck(id)
+	config := allChecksConfig(checker.WithOptionalCheck(id))
 	require.Equal(t, checker.ERR, config.LogLevels[id])
 }
 
 func TestNewConfigWithSeverityLevels(t *testing.T) {
 	const id = checker.RequestPropertyDefaultValueChangedId
-	config := allChecksConfig().WithSeverityLevels(map[string]checker.Level{id: checker.ERR})
+	config := allChecksConfig(checker.WithSeverityLevels(map[string]checker.Level{id: checker.ERR}))
 	require.Equal(t, checker.ERR, config.LogLevels[id])
 }

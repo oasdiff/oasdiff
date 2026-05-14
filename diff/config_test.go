@@ -17,7 +17,7 @@ func TestConfig_Default(t *testing.T) {
 }
 
 func TestConfig_ExcludeElements(t *testing.T) {
-	c := diff.NewConfig().WithExcludeElements(diff.GetExcludeDiffOptions())
+	c := diff.NewConfig(diff.WithExcludeElements(diff.GetExcludeDiffOptions()))
 	require.True(t, c.IsExcludeExamples())
 	require.True(t, c.IsExcludeDescription())
 	require.True(t, c.IsExcludeEndpoints())

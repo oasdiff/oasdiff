@@ -42,3 +42,9 @@ Notes:
     - `template`:                custom Go template file for changelog generation
 
    **Relative paths in these flags are resolved against the config file's directory**, not the process's current working directory. So when you write `err-ignore: rules.txt` in `path/to/.oasdiff.yaml`, oasdiff reads `path/to/rules.txt`. Absolute paths and paths set via CLI flag are not rewritten.
+
+## Using with the GitHub Action
+
+[oasdiff-action](https://github.com/oasdiff/oasdiff-action) (`breaking`, `changelog`, `diff`, `pr-comment`) automatically picks up `.oasdiff.yaml` from the checked-out repository root, so the same config file you use locally also drives the action in CI. Action `with:` inputs override values from the config file. To use a non-default path, set `OASDIFF_CONFIG` in the workflow `env:` block.
+
+See the [Configuring with `.oasdiff.yaml`](https://github.com/oasdiff/oasdiff-action#configuring-with-oasdiffyaml) section of the oasdiff-action README for the action-specific details and an example.

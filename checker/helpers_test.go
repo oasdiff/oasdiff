@@ -60,27 +60,27 @@ func d(t *testing.T, config *diff.Config, v1, v2 int, loaders ...*openapi3.Loade
 	return checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 }
 
-// getDeprecationFile returns the path to a file under data/deprecation/.
-func getDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/deprecation/%s", file)
+// dataFileFn returns a closure that resolves files under data/<subdir>/.
+// Use it to declare a named handle per data subdirectory; call sites then
+// pass only the file name.
+func dataFileFn(subdir string) func(string) string {
+	return func(file string) string {
+		return fmt.Sprintf("../data/%s/%s", subdir, file)
+	}
 }
 
-// getReqPropFile returns the path to a file under data/required-properties/.
-func getReqPropFile(file string) string {
-	return fmt.Sprintf("../data/required-properties/%s", file)
+var (
+	deprecationFile      = dataFileFn("deprecation")
+	paramDeprecationFile = dataFileFn("param-deprecation")
+	requiredPropertyFile = dataFileFn("required-properties")
+)
+
+func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
+	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, append([]checker.Option{checker.WithSingleCheck(c)}, opts...)...)
 }
 
-// getParameterDeprecationFile returns the path to a file under data/param-deprecation/.
-func getParameterDeprecationFile(file string) string {
-	return fmt.Sprintf("../data/param-deprecation/%s", file)
-}
-
-func singleCheckConfig(c checker.BackwardCompatibilityCheck) *checker.Config {
-	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}).WithSingleCheck(c)
-}
-
-func allChecksConfig() *checker.Config {
-	return checker.NewConfig(checker.GetAllChecks())
+func allChecksConfig(opts ...checker.Option) *checker.Config {
+	return checker.NewConfig(checker.GetAllChecks(), opts...)
 }
 
 func containsId(errs checker.Changes, id string) bool {

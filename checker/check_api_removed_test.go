@@ -41,10 +41,10 @@ func TestBreaking_DeletedOp(t *testing.T) {
 // BC: deleting an operation after sunset date is not breaking
 func TestBreaking_DeprecationPast(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-past.yaml"))
+	s1, err := open(deprecationFile("deprecated-past.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset.yaml"))
+	s2, err := open(deprecationFile("sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -57,10 +57,10 @@ func TestBreaking_DeprecationPast(t *testing.T) {
 func TestBreaking_RemoveBeforeSunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
-	s1, err := open(getDeprecationFile("deprecated-future.yaml"), loader)
+	s1, err := open(deprecationFile("deprecated-future.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset.yaml"), loader)
+	s2, err := open(deprecationFile("sunset.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -78,10 +78,10 @@ func TestBreaking_RemoveBeforeSunset(t *testing.T) {
 func TestBreaking_DeprecationNoSunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
-	s1, err := open(getDeprecationFile("deprecated-no-sunset.yaml"), loader)
+	s1, err := open(deprecationFile("deprecated-no-sunset.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset.yaml"), loader)
+	s2, err := open(deprecationFile("sunset.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -97,13 +97,13 @@ func TestBreaking_DeprecationNoSunset(t *testing.T) {
 
 // BC: removing the path without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_RemovedPathForAlpha(t *testing.T) {
-	s1, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 	alpha := toJson(t, checker.STABILITY_ALPHA)
 	s1.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = alpha
 	s1.Spec.Paths.Value("/api/test").Post.Extensions = map[string]any{"x-stability-level": alpha}
 
-	s2, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s2, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	s2.Spec.Paths.Delete("/api/test")
@@ -116,13 +116,13 @@ func TestBreaking_RemovedPathForAlpha(t *testing.T) {
 
 // BC: removing the path without a deprecation policy and without specifying sunset date is not breaking for draft level
 func TestBreaking_RemovedPathForDraft(t *testing.T) {
-	s1, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 	draft := toJson(t, checker.STABILITY_DRAFT)
 	s1.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = draft
 	s1.Spec.Paths.Value("/api/test").Post.Extensions = map[string]any{"x-stability-level": draft}
 
-	s2, err := open(getDeprecationFile("base-alpha-stability.yaml"))
+	s2, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	s2.Spec.Paths.Delete("/api/test")
@@ -136,10 +136,10 @@ func TestBreaking_RemovedPathForDraft(t *testing.T) {
 // BC: removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level
 func TestBreaking_RemovedPathForAlphaBreaking(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
-	s1, err := open(getDeprecationFile("base-alpha-stability.yaml"), loader)
+	s1, err := open(deprecationFile("base-alpha-stability.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset-path.yaml"), loader)
+	s2, err := open(deprecationFile("sunset-path.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -155,10 +155,10 @@ func TestBreaking_RemovedPathForAlphaBreaking(t *testing.T) {
 // BC: removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level
 func TestBreaking_RemovedPathForDraftBreaking(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
-	s1, err := open(getDeprecationFile("base-draft-stability.yaml"), loader)
+	s1, err := open(deprecationFile("base-draft-stability.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset-path.yaml"), loader)
+	s2, err := open(deprecationFile("sunset-path.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -174,10 +174,10 @@ func TestBreaking_RemovedPathForDraftBreaking(t *testing.T) {
 // BC: deleting a path after sunset date of all contained operations is not breaking
 func TestBreaking_DeprecationPathPast(t *testing.T) {
 
-	s1, err := open(getDeprecationFile("deprecated-path-past.yaml"))
+	s1, err := open(deprecationFile("deprecated-path-past.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset-path.yaml"))
+	s2, err := open(deprecationFile("sunset-path.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -190,10 +190,10 @@ func TestBreaking_DeprecationPathPast(t *testing.T) {
 func TestBreaking_DeprecationPathMixed(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
-	s1, err := open(getDeprecationFile("deprecated-path-mixed.yaml"), loader)
+	s1, err := open(deprecationFile("deprecated-path-mixed.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset-path.yaml"), loader)
+	s2, err := open(deprecationFile("sunset-path.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -211,10 +211,10 @@ func TestBreaking_DeprecationPathMixed(t *testing.T) {
 func TestBreaking_PathDeprecationNoSunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
-	s1, err := open(getDeprecationFile("deprecated-path-no-sunset.yaml"), loader)
+	s1, err := open(deprecationFile("deprecated-path-no-sunset.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset-path.yaml"), loader)
+	s2, err := open(deprecationFile("sunset-path.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -235,10 +235,10 @@ func TestBreaking_PathDeprecationNoSunset(t *testing.T) {
 
 // BC: removing a deprecated enpoint with an invalid date is breaking
 func TestBreaking_RemoveEndpointWithInvalidSunset(t *testing.T) {
-	s1, err := open(getDeprecationFile("deprecated-invalid.yaml"), newLoaderWithOriginTracking())
+	s1, err := open(deprecationFile("deprecated-invalid.yaml"), newLoaderWithOriginTracking())
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("deprecated-invalid.yaml"), newLoaderWithOriginTracking())
+	s2, err := open(deprecationFile("deprecated-invalid.yaml"), newLoaderWithOriginTracking())
 	require.NoError(t, err)
 
 	s2.Spec.Paths.Find("/api/test").SetOperation("GET", nil)
@@ -259,10 +259,10 @@ func TestBreaking_RemoveEndpointWithInvalidSunset(t *testing.T) {
 func TestBreaking_DeprecationPathMixed_RFC3339_Sunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
-	s1, err := open(getDeprecationFile("deprecated-path-mixed-rfc3339-sunset.yaml"), loader)
+	s1, err := open(deprecationFile("deprecated-path-mixed-rfc3339-sunset.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(getDeprecationFile("sunset-path.yaml"), loader)
+	s2, err := open(deprecationFile("sunset-path.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

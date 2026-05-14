@@ -75,6 +75,13 @@ type state struct {
 
 	// after mergeInternal is executed, circularAllOf contains all SchemaRefs which have circular allof.
 	circularAllOf openapi3.SchemaRefs
+
+	// flattening tracks input schemas currently being processed by
+	// flattenSchemas, mapping each to the result Value being populated
+	// for that call. Re-entry with an in-flight schema short-circuits
+	// to that result Value, which breaks recursion through cyclic
+	// Properties / Items / Contains / PropertyNames sub-schemas (#890).
+	flattening map[*openapi3.Schema]*openapi3.Schema
 }
 
 func newState() *state {
@@ -82,6 +89,7 @@ func newState() *state {
 		mergedSchemas: map[*openapi3.Schema]*openapi3.Schema{},
 		refs:          map[string]bool{},
 		circularAllOf: openapi3.SchemaRefs{},
+		flattening:    map[*openapi3.Schema]*openapi3.Schema{},
 	}
 }
 
@@ -385,6 +393,46 @@ func mergeSchemaRefs(state *state, srefs openapi3.SchemaRefs) (openapi3.SchemaRe
 // Given a list of schemas that are free of AllOf or nested AllOf components as input,
 // the function produces a single equivalent schema in the resultRef parameter.
 func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi3.SchemaRef) error {
+
+	// Tier 1: pointer-dedup the input. The same *Schema appearing
+	// multiple times contributes nothing extra to the merge and, when
+	// the input set reduces to schemas already in flight (Tier 2),
+	// trims work the cycle guard would otherwise have to do.
+	schemas = dedupSchemaRefsByValue(schemas)
+
+	// Tier 2: cycle guard. If any input schema is already being
+	// flattened higher in the call stack, point our result Value at
+	// that in-flight Value and return — the cyclic Properties / Items
+	// / Contains / PropertyNames link in the input is preserved as a
+	// cyclic link in the merged output, without infinite recursion.
+	for _, s := range schemas {
+		if s == nil || s.Value == nil {
+			continue
+		}
+		if inFlight, ok := state.flattening[s.Value]; ok {
+			result.Value = inFlight
+			return nil
+		}
+	}
+
+	// Mark each non-nil input schema as in-flight, mapped to the
+	// result Value being populated for this call. Cleared on return so
+	// sibling flattenSchemas calls (different sub-schemas, same
+	// inputs) don't see stale markers.
+	for _, s := range schemas {
+		if s == nil || s.Value == nil {
+			continue
+		}
+		state.flattening[s.Value] = result.Value
+	}
+	defer func() {
+		for _, s := range schemas {
+			if s == nil || s.Value == nil {
+				continue
+			}
+			delete(state.flattening, s.Value)
+		}
+	}()
 
 	collection := collect(schemas)
 	var err error
@@ -1327,6 +1375,29 @@ func filterEmptySchemaRefs(groups []openapi3.SchemaRefs) []openapi3.SchemaRefs {
 		if len(group) > 0 {
 			result = append(result, group)
 		}
+	}
+	return result
+}
+
+// dedupSchemaRefsByValue returns schemas with duplicate Value pointers
+// removed (first occurrence kept). Refs with nil or nil Value flow
+// through unchanged so callers see the same nil-handling shape.
+func dedupSchemaRefsByValue(schemas openapi3.SchemaRefs) openapi3.SchemaRefs {
+	if len(schemas) < 2 {
+		return schemas
+	}
+	seen := make(map[*openapi3.Schema]struct{}, len(schemas))
+	result := make(openapi3.SchemaRefs, 0, len(schemas))
+	for _, s := range schemas {
+		if s == nil || s.Value == nil {
+			result = append(result, s)
+			continue
+		}
+		if _, ok := seen[s.Value]; ok {
+			continue
+		}
+		seen[s.Value] = struct{}{}
+		result = append(result, s)
 	}
 	return result
 }

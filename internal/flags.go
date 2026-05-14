@@ -19,9 +19,10 @@ func NewFlags() *Flags {
 }
 
 func (flags *Flags) toConfig() *diff.Config {
-	config := diff.NewConfig().
-		WithExcludeElements(flags.getExcludeElements()).
-		WithExcludeExtensions(flags.getExcludeExtensions())
+	config := diff.NewConfig(
+		diff.WithExcludeElements(flags.getExcludeElements()),
+		diff.WithExcludeExtensions(flags.getExcludeExtensions()),
+	)
 	config.MatchPath = flags.v.GetString("match-path")
 	config.UnmatchPath = flags.v.GetString("unmatch-path")
 	config.FilterExtension = flags.v.GetString("filter-extension")
@@ -68,6 +69,10 @@ func (flags *Flags) getCaseInsensitiveHeaders() bool {
 
 func (flags *Flags) getAllowExternalRefs() bool {
 	return flags.v.GetBool("allow-external-refs")
+}
+
+func (flags *Flags) getAutoUpgrade() bool {
+	return flags.v.GetBool("auto-upgrade")
 }
 
 func (flags *Flags) getIncludeChecks() []string {

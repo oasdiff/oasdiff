@@ -19,13 +19,19 @@ func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operation
 	return CheckBackwardCompatibilityUntilLevel(config, diffReport, operationsSources, WARN)
 }
 
-// CheckBackwardCompatibilityUntilLevel runs the checks with level equal or higher than the given level
+// CheckBackwardCompatibilityUntilLevel runs the checks with level equal or higher than the given level.
+// The caller's diffReport is not mutated — internally we clone the
+// PathsDiff and the nested maps/slices that the check pipeline writes
+// to (the rest of the diff is shared by reference, since checks only
+// read it).
 func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, level Level) Changes {
 	result := make(Changes, 0)
 
 	if diffReport == nil {
 		return result
 	}
+
+	diffReport = clonePathsDiffForCheck(diffReport)
 
 	result = removeDraftAndAlphaOperationsDiffs(config, diffReport, result, operationsSources)
 
@@ -146,6 +152,53 @@ func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, 
 		method,
 		path,
 	)
+}
+
+// clonePathsDiffForCheck returns a copy of diffReport whose PathsDiff —
+// and the specific nested fields the check pipeline writes to — are
+// separate allocations from the caller's. Everything outside that
+// mutation surface (WebhooksDiff, ComponentsDiff, etc., and the
+// MethodDiff/PathDiff values themselves, which are only read) is
+// shared by reference.
+//
+// Mutation surface (must be cloned):
+//   - PathsDiff struct itself (Deleted/Modified are reassigned)
+//   - PathsDiff.Deleted slice (truncated in-place)
+//   - PathsDiff.Modified map (webhook entries inserted, see
+//     mergeWebhookOperationsIntoPathsDiff)
+//   - For each PathDiff in PathsDiff.Modified: a fresh PathDiff
+//     because OperationsDiff.Deleted gets truncated and
+//     OperationsDiff.Modified has keys deleted.
+func clonePathsDiffForCheck(d *diff.Diff) *diff.Diff {
+	cloned := *d
+	if d.PathsDiff == nil {
+		return &cloned
+	}
+
+	pdCopy := *d.PathsDiff
+	cloned.PathsDiff = &pdCopy
+	cloned.PathsDiff.Deleted = slices.Clone(d.PathsDiff.Deleted)
+
+	if d.PathsDiff.Modified != nil {
+		cloned.PathsDiff.Modified = make(diff.ModifiedPaths, len(d.PathsDiff.Modified))
+		for k, v := range d.PathsDiff.Modified {
+			pdElem := *v
+			if v.OperationsDiff != nil {
+				odCopy := *v.OperationsDiff
+				pdElem.OperationsDiff = &odCopy
+				pdElem.OperationsDiff.Deleted = slices.Clone(v.OperationsDiff.Deleted)
+				if v.OperationsDiff.Modified != nil {
+					pdElem.OperationsDiff.Modified = make(diff.ModifiedOperations, len(v.OperationsDiff.Modified))
+					for ok, ov := range v.OperationsDiff.Modified {
+						pdElem.OperationsDiff.Modified[ok] = ov
+					}
+				}
+			}
+			cloned.PathsDiff.Modified[k] = &pdElem
+		}
+	}
+
+	return &cloned
 }
 
 // mergeWebhookOperationsIntoPathsDiff merges modified webhooks into PathsDiff.Modified with a "webhook:" prefix.

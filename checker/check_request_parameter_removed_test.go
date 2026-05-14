@@ -10,10 +10,10 @@ import (
 
 // BC: deleting a parameter without deprecation is breaking
 func TestBreaking_DeletedParameter(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base.yaml"))
+	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("sunset.yaml"))
+	s2, err := open(paramDeprecationFile("sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -28,10 +28,10 @@ func TestBreaking_DeletedParameter(t *testing.T) {
 // BC: deleting a parameter after sunset date is not breaking
 func TestBreaking_ParameterDeprecationPast(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-past.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-past.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("sunset.yaml"))
+	s2, err := open(paramDeprecationFile("sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -43,10 +43,10 @@ func TestBreaking_ParameterDeprecationPast(t *testing.T) {
 // BC: deleting a parameter before sunset date is breaking
 func TestBreaking_ParameterDeprecationFuture(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-future.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("sunset.yaml"))
+	s2, err := open(paramDeprecationFile("sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -61,10 +61,10 @@ func TestBreaking_ParameterDeprecationFuture(t *testing.T) {
 // BC: deleting a deprecated parameter without sunset date is not breaking
 func TestBreaking_ParameterDeprecationNoSunset(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-no-sunset.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("sunset.yaml"))
+	s2, err := open(paramDeprecationFile("sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -75,10 +75,10 @@ func TestBreaking_ParameterDeprecationNoSunset(t *testing.T) {
 
 // BC: removing a parameter without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_RemovedParameterForAlpha(t *testing.T) {
-	s1, err := open(getParameterDeprecationFile("base-alpha-stability.yaml"))
+	s1, err := open(paramDeprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("sunset-alpha-stability.yaml"))
+	s2, err := open(paramDeprecationFile("sunset-alpha-stability.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -90,10 +90,10 @@ func TestBreaking_RemovedParameterForAlpha(t *testing.T) {
 // BC: removing a deprecated parameter with an invalid date is breaking
 func TestBreaking_RemoveParameterWithInvalidSunset(t *testing.T) {
 
-	s1, err := open(getParameterDeprecationFile("deprecated-invalid.yaml"))
+	s1, err := open(paramDeprecationFile("deprecated-invalid.yaml"))
 	require.NoError(t, err)
 
-	s2, err := open(getParameterDeprecationFile("sunset.yaml"))
+	s2, err := open(paramDeprecationFile("sunset.yaml"))
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)

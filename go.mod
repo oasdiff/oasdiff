@@ -5,7 +5,7 @@ go 1.26
 require (
 	cloud.google.com/go v0.123.0
 	github.com/TwiN/go-color v1.4.1
-	github.com/getkin/kin-openapi v0.138.1-0.20260509160422-e8145f8f4d2b
+	github.com/getkin/kin-openapi v0.138.1-0.20260514150620-69492dff6b62
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
@@ -51,9 +51,3 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
 )
-
-// TEMPORARY: point at oasdiff/kin-openapi feat/yaml-disable-timestamps until
-// kin cuts a release tag containing #1181 (DisableTimestamps integration).
-// Remove this directive and bump the require above to the released kin
-// version before merge.
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260513092218-b8149b53d36a
