@@ -302,3 +302,28 @@ func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
 	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId())
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
+
+// CL: removing the format constraint of a request path parameter is a generalization, not breaking
+func TestRequestPathParamFormatRemoved(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	s1.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[0].Value.Schema.Value.Format = "uuid"
+	// s2 has no format set (empty string), simulating the removal
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ApiChange{
+		Id:          checker.RequestParameterTypeGeneralizedId,
+		Args:        []any{"path", "groupId", []string{"string"}, "uuid", []string{"string"}, ""},
+		Level:       checker.INFO,
+		Operation:   "POST",
+		Path:        "/api/v1.0/groups",
+		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
+		OperationId: "createOneGroup",
+	}, errs[0])
+}
