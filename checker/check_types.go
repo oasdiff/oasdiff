@@ -127,8 +127,8 @@ func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 			(to == "bigint" && from == "int64")
 	case "string":
 		return to == "" || // removing a format constraint is a generalization
-			to == "date-time" && from == "date" ||
-			to == "date-time" && from == "time"
+			(to == "date-time" && from == "date") ||
+			(to == "date-time" && from == "time")
 	}
 
 	return false
