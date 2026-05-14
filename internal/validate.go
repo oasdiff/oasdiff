@@ -152,7 +152,7 @@ func mapKinErrors(source string, err error) []Finding {
 	path, operation := pathOperationForKinError(err)
 	f := Finding{
 		Id:        id,
-		Text:      err.Error(),
+		Text:      unwrapContext(err).Error(),
 		Level:     checker.ERR,
 		Operation: operation,
 		Path:      path,
@@ -183,6 +183,29 @@ func pathOperationForKinError(err error) (path, operation string) {
 		operation = ove.Method
 	}
 	return path, operation
+}
+
+// unwrapContext strips kin's structural context wrappers
+// (SectionValidationError / PathValidationError / OperationValidationError,
+// kin #1183) from the front of the chain. That section/path/operation scope
+// is captured in the Finding's typed fields, so Text should carry only the
+// underlying message, without the redundant "invalid <scope>:" prefixes
+// those wrappers add to Error().
+func unwrapContext(err error) error {
+	for {
+		switch err.(type) {
+		case *openapi3.SectionValidationError,
+			*openapi3.PathValidationError,
+			*openapi3.OperationValidationError:
+			u := errors.Unwrap(err)
+			if u == nil {
+				return err
+			}
+			err = u
+		default:
+			return err
+		}
+	}
 }
 
 // sectionForKinError maps a typed kin error to its logical doc section,

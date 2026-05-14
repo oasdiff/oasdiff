@@ -114,6 +114,9 @@ func Test_ValidateCmd_PathOperationScope(t *testing.T) {
 	require.Equal(t, "GET", findings[0]["operation"])
 	require.Equal(t, "/things", findings[0]["path"])
 	require.Equal(t, "paths", findings[0]["section"])
+	// text carries only the leaf message — the section/path/operation
+	// prefixes are stripped, since that scope is in the typed fields above.
+	require.Equal(t, "value of responses must be an object", findings[0]["text"])
 }
 
 // YAML format produces a marshalled list of Finding records that round-
