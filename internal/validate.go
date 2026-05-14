@@ -149,11 +149,14 @@ func mapKinErrors(source string, err error) []Finding {
 		return out
 	}
 	id := ruleIDForKinError(err)
+	path, operation := pathOperationForKinError(err)
 	f := Finding{
-		Id:      id,
-		Text:    err.Error(),
-		Level:   checker.ERR,
-		Section: sectionForKinError(err),
+		Id:        id,
+		Text:      err.Error(),
+		Level:     checker.ERR,
+		Operation: operation,
+		Path:      path,
+		Section:   sectionForKinError(err),
 		Source: Source{
 			File:   source,
 			Line:   lineForKinError(err),
@@ -165,6 +168,23 @@ func mapKinErrors(source string, err error) []Finding {
 	return []Finding{f}
 }
 
+// pathOperationForKinError extracts the path template and HTTP method
+// from kin's typed context wrappers (PathValidationError and
+// OperationValidationError, added in getkin/kin-openapi #1183). Either
+// return value is "" when the error chain carries no such scope, e.g.
+// doc-root findings like info-version-required.
+func pathOperationForKinError(err error) (path, operation string) {
+	var pve *openapi3.PathValidationError
+	if errors.As(err, &pve) {
+		path = pve.Path
+	}
+	var ove *openapi3.OperationValidationError
+	if errors.As(err, &ove) {
+		operation = ove.Method
+	}
+	return path, operation
+}
+
 // sectionForKinError maps a typed kin error to its logical doc section,
 // matching the values used by ApiChange / ComponentChange / SecurityChange
 // in the existing changelog output (`paths`, `components`, `security`).
@@ -174,6 +194,16 @@ func mapKinErrors(source string, err error) []Finding {
 // Doc-root findings without a natural section (e.g. *RequiredFieldError
 // {Field: "openapi"}) get the empty string.
 func sectionForKinError(err error) string {
+	// SectionValidationError (kin #1183) names the section directly and
+	// authoritatively; prefer it over the cluster heuristics below, which
+	// predate it and only approximate (e.g. they miscount inline component
+	// schemas as "paths"). The cluster logic remains the fallback for
+	// doc-root errors that aren't wrapped in a section at all.
+	var secErr *openapi3.SectionValidationError
+	if errors.As(err, &secErr) {
+		return secErr.Section
+	}
+
 	// Cluster types that have a structural section regardless of payload.
 	var ppe *openapi3.PathParametersError
 	if errors.As(err, &ppe) {

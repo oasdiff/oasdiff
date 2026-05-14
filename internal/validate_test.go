@@ -98,6 +98,24 @@ func Test_ValidateCmd_PathParametersMismatch(t *testing.T) {
 	require.Contains(t, stdout.String(), "path-parameters-mismatch")
 }
 
+// An error originating inside an operation (here: a missing responses
+// object) is wrapped by kin in SectionValidationError + PathValidationError
+// + OperationValidationError (getkin/kin-openapi #1183). validate lifts
+// those into the typed section / path / operation fields instead of
+// leaving them buried in the message text.
+func Test_ValidateCmd_PathOperationScope(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/operation-missing-responses.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "operation-responses-required", findings[0]["id"])
+	require.Equal(t, "GET", findings[0]["operation"])
+	require.Equal(t, "/things", findings[0]["path"])
+	require.Equal(t, "paths", findings[0]["section"])
+}
+
 // YAML format produces a marshalled list of Finding records that round-
 // trips through yaml.Unmarshal. Field names match changelog's:
 // id, text, level, source (object with file/line/column), fingerprint.
