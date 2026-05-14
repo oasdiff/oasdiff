@@ -120,9 +120,11 @@ func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 	// we don't support multiple types currenty, so just take the first one
 	switch getSingleType(revisionType) {
 	case "number":
-		return to == "double" && from == "float"
+		return to == "" ||
+        	(to == "double" && from == "float")
 	case "integer":
-		return (to == "int64" && from == "int32") ||
+		return to == "" ||
+			(to == "int64" && from == "int32") ||
 			(to == "bigint" && from == "int32") ||
 			(to == "bigint" && from == "int64")
 	case "string":
