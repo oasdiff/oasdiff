@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 	"unicode"
 
@@ -150,14 +149,11 @@ func mapKinErrors(source string, err error) []Finding {
 		return out
 	}
 	id := ruleIDForKinError(err)
-	operation, path, text := extractPathOperation(err.Error())
 	f := Finding{
-		Id:        id,
-		Text:      text,
-		Level:     checker.ERR,
-		Operation: operation,
-		Path:      path,
-		Section:   sectionForKinError(err),
+		Id:      id,
+		Text:    err.Error(),
+		Level:   checker.ERR,
+		Section: sectionForKinError(err),
 		Source: Source{
 			File:   source,
 			Line:   lineForKinError(err),
@@ -167,36 +163,6 @@ func mapKinErrors(source string, err error) []Finding {
 	// Fingerprint last so it sees the populated fields it hashes over.
 	f.Fingerprint = fingerprintFor(f, argsForKinError(err))
 	return []Finding{f}
-}
-
-// kin wraps validation errors in nested fmt.Errorf("...: %w") layers
-// that carry path / operation context as plain text rather than typed
-// fields. The rendered message looks like:
-//
-//	invalid paths: invalid path /thing: invalid operation GET: <inner>
-//
-// extractPathOperation strips those three optional layers, returning
-// the operation, path, and the cleaned inner text. Empty strings if
-// the layer was absent. Mirrors the changelog convention of presenting
-// operation/path as separate Finding fields rather than inline in Text.
-var (
-	pathsPrefixRE   = regexp.MustCompile(`^invalid paths: `)
-	pathPrefixRE    = regexp.MustCompile(`^invalid path (\S+): `)
-	operPrefixRE    = regexp.MustCompile(`^invalid operation (\S+): `)
-)
-
-func extractPathOperation(text string) (operation, path, clean string) {
-	clean = text
-	clean = pathsPrefixRE.ReplaceAllString(clean, "")
-	if m := pathPrefixRE.FindStringSubmatchIndex(clean); m != nil {
-		path = clean[m[2]:m[3]]
-		clean = clean[m[1]:]
-	}
-	if m := operPrefixRE.FindStringSubmatchIndex(clean); m != nil {
-		operation = clean[m[2]:m[3]]
-		clean = clean[m[1]:]
-	}
-	return operation, path, clean
 }
 
 // sectionForKinError maps a typed kin error to its logical doc section,
@@ -621,23 +587,10 @@ func writeFindingsText(w io.Writer, findings []Finding, colorMode checker.ColorM
 		if useColor {
 			id = color.InYellow(f.Id)
 		}
-		// Operation + path render on a second header line when the
-		// finding scopes to one, matching the changelog command's
-		// "in API GET /thing" convention. Empty for doc-root findings.
-		var scope string
-		if f.Path != "" || f.Operation != "" {
-			op := f.Operation
-			path := f.Path
-			if useColor {
-				op = color.InGreen(op)
-				path = color.InGreen(path)
-			}
-			scope = fmt.Sprintf("\n\tin API %s %s", op, path)
-		}
 		// Some kin errors (notably *SchemaError) embed newlines in the
 		// message — Schema:\n... + Value:\n... blocks. Indent every
 		// non-empty continuation line so the finding stays visually
 		// grouped, while leaving blank lines blank (not "\t").
-		fmt.Fprintf(w, "%s\t[%s] at %s%s\n\t%s\n\n", f.Level.StringCond(colorMode), id, loc, scope, indentContinuation(f.Text))
+		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.StringCond(colorMode), id, loc, indentContinuation(f.Text))
 	}
 }
