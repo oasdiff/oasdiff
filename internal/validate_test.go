@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"strings"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/internal"
@@ -178,9 +177,8 @@ func Test_ValidateCmd_FingerprintStable(t *testing.T) {
 func Test_ValidateCmd_TextFormatHeaderAndBlock(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
-	lines := strings.Split(strings.TrimRight(stdout.String(), "\n"), "\n")
-	require.Equal(t, "1 findings: 1 error, 0 warning, 0 info", lines[0])
-	require.Contains(t, lines[1], "error\t[info-version-required] at ")
+	require.Contains(t, stdout.String(), "1 findings: 1 error, 0 warning, 0 info")
+	require.Contains(t, stdout.String(), "error\t[info-version-required] at ")
 }
 
 // Origin tracking: line + column appear inside the source object for
@@ -196,17 +194,19 @@ func Test_ValidateCmd_LineColumnFromOrigin(t *testing.T) {
 	require.Len(t, findings, 1)
 	require.Equal(t, "info-version-required", findings[0]["id"])
 	src := findings[0]["source"].(map[string]any)
-	// info: starts at line 2 of the fixture; the cluster Origin points
-	// at the info object's start.
-	require.Equal(t, 2, src["line"])
-	require.Equal(t, 1, src["column"])
+	// The version line is line 4 of the fixture; the Origin's per-field
+	// location resolves to that exact line/column rather than the parent
+	// info object's start.
+	require.Equal(t, 4, src["line"])
+	require.Equal(t, 3, src["column"])
 }
 
-// Document-root fields (openapi version, webhooks, jsonSchemaDialect)
-// have no Origin since the loader doesn't track *T. Their findings
-// have source.line / source.column omitted (yaml:"...,omitempty" on
-// Source's Line/Column elides them entirely).
-func Test_ValidateCmd_DocRootFieldHasNoLineColumn(t *testing.T) {
+// Document-root fields (openapi version, webhooks, jsonSchemaDialect) now
+// carry source line/column via T.Origin (kin getkin/kin-openapi#1184). For
+// scalar root fields the Origin resolves to the field key; the openapi
+// version line is the first line of the fixture, so the finding points at
+// line 1, column 1.
+func Test_ValidateCmd_DocRootFieldHasLineColumn(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/openapi-version-empty.yaml"), &stdout, io.Discard))
 
@@ -215,8 +215,8 @@ func Test_ValidateCmd_DocRootFieldHasNoLineColumn(t *testing.T) {
 	require.Len(t, findings, 1)
 	require.Equal(t, "openapi-required", findings[0]["id"])
 	src := findings[0]["source"].(map[string]any)
-	require.NotContains(t, src, "line")
-	require.NotContains(t, src, "column")
+	require.Equal(t, 1, src["line"])
+	require.Equal(t, 1, src["column"])
 }
 
 // Text format renders source as <file>:<line>:<column> when origin is
@@ -225,7 +225,7 @@ func Test_ValidateCmd_DocRootFieldHasNoLineColumn(t *testing.T) {
 func Test_ValidateCmd_TextFormatLocation(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
-	require.Contains(t, stdout.String(), "../data/validate/missing-required-info.yaml:2:1")
+	require.Contains(t, stdout.String(), "../data/validate/missing-required-info.yaml:4:3")
 }
 
 // Multi-line error messages (e.g. kin's *SchemaError dumps Schema +

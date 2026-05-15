@@ -79,7 +79,7 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 		return false, getErrFailedToLoadSpec("original", flags.getBase(), err)
 	}
 
-	verr := spec.Spec.Validate(context.Background())
+	verr := spec.Spec.Validate(context.Background(), openapi3.EnableMultiError())
 	if verr == nil {
 		return false, nil
 	}
@@ -469,6 +469,17 @@ func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
 	}
 	if loc, ok := origin.Fields[field]; ok {
 		return &loc
+	}
+	// Cluster errors carry dotted Field names (e.g. "info.version") for
+	// disambiguation in the rule ID, but kin's Origin.Fields is keyed by
+	// the leaf name as it appears in the YAML mapping ("version"). When
+	// the full name doesn't match, fall back to the suffix after the
+	// last dot so we still resolve to the precise field location instead
+	// of the parent object's Key.
+	if i := strings.LastIndex(field, "."); i >= 0 {
+		if loc, ok := origin.Fields[field[i+1:]]; ok {
+			return &loc
+		}
 	}
 	return origin.Key
 }
