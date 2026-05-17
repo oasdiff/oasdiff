@@ -121,7 +121,7 @@ func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 	switch getSingleType(revisionType) {
 	case "number":
 		return to == "" ||
-        	(to == "double" && from == "float")
+			(to == "double" && from == "float")
 	case "integer":
 		return to == "" ||
 			(to == "int64" && from == "int32") ||
