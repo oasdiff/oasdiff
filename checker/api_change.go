@@ -183,7 +183,7 @@ func (c ApiChange) SingleLineError(l Localizer, colorMode ColorMode) string {
 }
 
 func (c ApiChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s] %s %s\t\n\t%s API %s %s\n\t\t%s%s"
+	const format = "%s\t[%s] %s %s\n\t%s API %s %s\n\t\t%s%s"
 
 	if isColorEnabled(colorMode) {
 		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("at"), c.GetSource(), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), multiLineComment(c.GetComment(l)))

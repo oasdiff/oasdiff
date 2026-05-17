@@ -76,12 +76,12 @@ func TestApiChange_MatchIgnore(t *testing.T) {
 }
 
 func TestApiChange_MultiLineError(t *testing.T) {
-	require.Equal(t, "error\t[change_id] at source\t\n\tin API GET /test\n\t\tThis is a breaking change.\n\t\tcomment", apiChange.MultiLineError(MockLocalizer, checker.ColorNever))
+	require.Equal(t, "error\t[change_id] at source\n\tin API GET /test\n\t\tThis is a breaking change.\n\t\tcomment", apiChange.MultiLineError(MockLocalizer, checker.ColorNever))
 }
 
 func TestApiChange_MultiLineError_NoComment(t *testing.T) {
 	apiChangeNoComment := apiChange
 	apiChangeNoComment.Comment = ""
 
-	require.Equal(t, "error\t[change_id] at source\t\n\tin API GET /test\n\t\tThis is a breaking change.", apiChangeNoComment.MultiLineError(MockLocalizer, checker.ColorNever))
+	require.Equal(t, "error\t[change_id] at source\n\tin API GET /test\n\t\tThis is a breaking change.", apiChangeNoComment.MultiLineError(MockLocalizer, checker.ColorNever))
 }

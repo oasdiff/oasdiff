@@ -244,9 +244,11 @@ func Test_ValidateCmd_SchemaValueError(t *testing.T) {
 	require.Contains(t, out, "[example-violates-schema]")
 	// Origin from parameter.Origin produces a line:column suffix.
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
-	// Multi-line content stays indented.
-	require.Contains(t, out, "\n\tSchema:")
-	require.Contains(t, out, "\n\tValue:")
+	// Multi-line content stays indented. This finding carries operation
+	// context so the message body and its continuation lines indent at
+	// "\t\t" (one level deeper than the "in API ..." line).
+	require.Contains(t, out, "\n\t\tSchema:")
+	require.Contains(t, out, "\n\t\tValue:")
 }
 
 // A defect in a shared components schema referenced from multiple

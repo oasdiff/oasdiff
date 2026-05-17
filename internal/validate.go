@@ -540,16 +540,17 @@ func columnForKinError(err error) int {
 }
 
 // indentContinuation prefixes every non-empty continuation line of s
-// with a tab. The first line is left as-is (the caller's format string
-// already supplies its leading tab), and blank lines stay blank rather
-// than becoming stray "\t" lines. Trailing whitespace is trimmed.
-func indentContinuation(s string) string {
+// with prefix. The first line is left as-is (the caller's format string
+// already supplies its leading indent), and blank lines stay blank
+// rather than becoming stray prefix-only lines. Trailing whitespace is
+// trimmed.
+func indentContinuation(s, prefix string) string {
 	lines := strings.Split(s, "\n")
 	for i, line := range lines {
 		if i == 0 || line == "" {
 			continue
 		}
-		lines[i] = "\t" + line
+		lines[i] = prefix + line
 	}
 	return strings.TrimRight(strings.Join(lines, "\n"), " \t\n")
 }
@@ -973,10 +974,22 @@ func writeFindingsText(w io.Writer, findings []Finding, colorMode checker.ColorM
 		if useColor {
 			id = color.InYellow(f.Id)
 		}
-		// Some kin errors (notably *SchemaError) embed newlines in the
-		// message — Schema:\n... + Value:\n... blocks. Indent every
-		// non-empty continuation line so the finding stays visually
-		// grouped, while leaving blank lines blank (not "\t").
-		fmt.Fprintf(w, "%s\t[%s] at %s\n\t%s\n\n", f.Level.StringCond(colorMode), id, loc, indentContinuation(f.Text))
+		// Some validation errors (notably nested schema failures) embed
+		// newlines in the message — Schema:\n... + Value:\n... blocks.
+		// Indent every non-empty continuation line so the finding stays
+		// visually grouped, while leaving blank lines blank (not "\t").
+		fmt.Fprintf(w, "%s\t[%s] at %s\n", f.Level.StringCond(colorMode), id, loc)
+		// Operation/path context appears on its own indented line,
+		// matching the changelog text format ("in API METHOD /path").
+		// Omitted for findings without operation context (doc-root,
+		// components-rooted), which is the majority after dedup. When
+		// present, the message body indents one level deeper so it
+		// reads as a child of the operation context.
+		msgIndent := "\t"
+		if f.Operation != "" && f.Path != "" {
+			fmt.Fprintf(w, "\tin API %s %s\n", f.Operation, f.Path)
+			msgIndent = "\t\t"
+		}
+		fmt.Fprintf(w, "%s%s\n\n", msgIndent, indentContinuation(f.Text, msgIndent))
 	}
 }
