@@ -46,16 +46,18 @@ func getValidateCmd() *cobra.Command {
 		Long: `Validate an OpenAPI spec, reporting per-RFC violations such as invalid
 type values, missing required fields, malformed paths, and unresolved $refs.
 
-Phase 1 wraps kin-openapi's Validate() walker and dispatches each typed
-error to a stable kebab-case rule ID via errors.As against kin's
-RequiredFieldError and FieldVersionMismatchError clusters. Findings are
-emitted in the chosen format (text by default; -f yaml for structured
-output). Field names match the changelog command's output
-(id, text, level, source) so a single CI script can parse both.
+Each finding has a stable rule ID, a human-readable message, and a
+source location (file:line:column when the loader tracks origins).
+Output format is selectable: text by default, '-f yaml' or '-f json'
+for structured output. Field names match the changelog command's
+output (id, text, level, source) so a single CI script can parse both.
 
-Exit code is 0 if no findings, 1 if any finding is reported.
+Exit codes:
+  0 — no findings
+  1 — at least one finding
+  102 — failed to load the spec
 
-Spec can be a path to a file, a URL or '-' to read standard input.
+Spec can be a path to a file, a URL, or '-' to read standard input.
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: getRun(runValidate),
