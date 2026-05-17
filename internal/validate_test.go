@@ -249,6 +249,25 @@ func Test_ValidateCmd_SchemaValueError(t *testing.T) {
 	require.Contains(t, out, "\n\tValue:")
 }
 
+// A defect in a shared components schema referenced from multiple
+// operations is reported once, not once per reference. The components-
+// rooted finding wins; the path-rooted cascade is dropped. Pins the
+// dedupePreferringComponents behavior — without it, this fixture
+// produces 4 identical findings (one from components/schemas/Status,
+// three from each operation that $refs it).
+func Test_ValidateCmd_DedupePreferringComponents(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/shared-schema-bad-example.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	// Exactly one finding (not four).
+	require.Contains(t, out, "1 findings:")
+	// The surviving finding's location is the components-schema definition
+	// (line 38 — the `example:` line inside components/schemas/Status),
+	// not any of the operation-side $ref sites.
+	require.Contains(t, out, "[example-violates-schema] at ../data/validate/shared-schema-bad-example.yaml:38:7")
+	require.Contains(t, out, "invalid example: value must be a number")
+}
+
 // Invalid file path → exit 102 (failed-to-load), not 1 (validation finding).
 // Distinguishing these matters for CI: load failures and validation
 // failures are different incidents.

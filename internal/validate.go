@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -140,13 +141,23 @@ type Source struct {
 // Findings. kin can return either a single error or a MultiError; the
 // MultiError can itself contain MultiErrors, so we recurse.
 func mapKinErrors(source string, err error) []Finding {
+	return dedupePreferringComponents(flattenKinErrors(source, err))
+}
+
+// flattenKinErrors walks the kin error tree (MultiError → leaves) and
+// produces one Finding per leaf. Findings may include duplicates of
+// the same defect when a shared definition (e.g. a schema in
+// components) is referenced from multiple operations — the validator
+// re-visits the definition under each $ref. dedupePreferringComponents
+// collapses those into a single finding.
+func flattenKinErrors(source string, err error) []Finding {
 	if err == nil {
 		return nil
 	}
 	if me, ok := err.(openapi3.MultiError); ok {
 		var out []Finding
 		for _, sub := range me {
-			out = append(out, mapKinErrors(source, sub)...)
+			out = append(out, flattenKinErrors(source, sub)...)
 		}
 		return out
 	}
@@ -168,6 +179,52 @@ func mapKinErrors(source string, err error) []Finding {
 	// Fingerprint last so it sees the populated fields it hashes over.
 	f.Fingerprint = fingerprintFor(f, argsForKinError(err))
 	return []Finding{f}
+}
+
+// dedupePreferringComponents groups findings by their underlying
+// defect identity (Id + Source location + Text — which carries the
+// args-derived discriminator) and keeps one representative per group.
+// When the group has a components-rooted finding (Section ==
+// "components"), prefer it: the components-rooted version points at
+// the definition site and has empty Operation/Path, giving a stable
+// fingerprint across reference-graph changes.
+//
+// This covers the common case where a defect in components/schemas/X
+// (or any components sub-section) is reported once from the components
+// walk and once from each operation that $refs it. Path-level shared
+// parameters don't need handling here because kin only validates them
+// once at the PathItem level (no per-operation re-validation).
+func dedupePreferringComponents(in []Finding) []Finding {
+	type group struct {
+		first  int // index into `in` of the first finding for this key
+		chosen int // index of the current best representative
+	}
+	keyOf := func(f Finding) string {
+		return f.Id + "\x00" + f.Source.File + "\x00" +
+			strconv.Itoa(f.Source.Line) + "\x00" +
+			strconv.Itoa(f.Source.Column) + "\x00" + f.Text
+	}
+	groups := make(map[string]*group)
+	var order []string // preserve first-seen order for stable output
+	for i, f := range in {
+		k := keyOf(f)
+		g, ok := groups[k]
+		if !ok {
+			groups[k] = &group{first: i, chosen: i}
+			order = append(order, k)
+			continue
+		}
+		// Already have a candidate; prefer this one only if it's
+		// components-rooted and the current pick isn't.
+		if f.Section == "components" && in[g.chosen].Section != "components" {
+			g.chosen = i
+		}
+	}
+	out := make([]Finding, 0, len(order))
+	for _, k := range order {
+		out = append(out, in[groups[k].chosen])
+	}
+	return out
 }
 
 // pathOperationForKinError extracts the path template and HTTP method
