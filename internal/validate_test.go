@@ -257,3 +257,56 @@ func Test_ValidateCmd_LoadFailure(t *testing.T) {
 	require.Equal(t, 102, internal.Run(cmdToArgs("oasdiff validate ../data/validate/does-not-exist.yaml"), io.Discard, &stderr))
 	require.Contains(t, stderr.String(), "failed to load")
 }
+
+// Path parameter declared with in: path but without required: true →
+// kin returns *PathParameterRequiredError{Param:"id"} (added in
+// getkin/kin-openapi #1187). Rule ID: "path-parameter-required".
+// Origin pins the finding to the parameter object.
+func Test_ValidateCmd_PathParameterRequired(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/path-parameter-not-required.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[path-parameter-required]")
+	require.Contains(t, out, `path parameter "id" must be required`)
+	// Origin should resolve to the parameter's line:col, not file-only.
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+}
+
+// Two operations sharing the same operationId across paths → kin
+// returns *DuplicateOperationIDError (added in #1187). Rule ID:
+// "duplicate-operation-id". Origin (also added in #1187) pins to the
+// second operation's operationId field, not the operation block start.
+func Test_ValidateCmd_DuplicateOperationID(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/duplicate-operation-id.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[duplicate-operation-id]")
+	require.Contains(t, out, `operations "GET /a" and "GET /b" have the same operation id "shared"`)
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+}
+
+// Fields appearing as siblings of $ref where the spec disallows them →
+// kin returns *ExtraSiblingFieldsError{Fields:[...]} (added in #1187).
+// Rule ID: "extra-sibling-fields". Origin (also added in #1187) pins
+// to the parent object holding the unexpected siblings.
+func Test_ValidateCmd_ExtraSiblingFields(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/extra-sibling-fields.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[extra-sibling-fields]")
+	require.Contains(t, out, "extra sibling fields: [description]")
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+}
+
+// Schema with an unsupported 'type' value (e.g. "foobar" instead of
+// "string"/"integer"/...) → kin returns *SchemaTypeError{Type:"foobar"}
+// (added in #1187). Rule ID: "schema-type-unsupported". Origin pins to
+// the offending `type:` field.
+func Test_ValidateCmd_SchemaTypeUnsupported(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/schema-type-unsupported.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[schema-type-unsupported]")
+	require.Contains(t, out, `unsupported 'type' value "foobar"`)
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+}

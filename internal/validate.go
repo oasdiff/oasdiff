@@ -240,6 +240,14 @@ func sectionForKinError(err error) string {
 	if errors.As(err, &sute) {
 		return "servers"
 	}
+	var pre *openapi3.PathParameterRequiredError
+	if errors.As(err, &pre) {
+		return "paths"
+	}
+	var doid *openapi3.DuplicateOperationIDError
+	if errors.As(err, &doid) {
+		return "paths"
+	}
 
 	// Cluster types with a Field that hints at the section.
 	var rfe *openapi3.RequiredFieldError
@@ -331,6 +339,22 @@ func argsForKinError(err error) []any {
 	var sve *openapi3.SchemaValueError
 	if errors.As(err, &sve) {
 		return []any{sve.ValueKind}
+	}
+	var pre *openapi3.PathParameterRequiredError
+	if errors.As(err, &pre) {
+		return []any{pre.Param}
+	}
+	var doid *openapi3.DuplicateOperationIDError
+	if errors.As(err, &doid) {
+		return []any{doid.OperationID}
+	}
+	var esf *openapi3.ExtraSiblingFieldsError
+	if errors.As(err, &esf) {
+		return []any{strings.Join(esf.Fields, ",")}
+	}
+	var ste *openapi3.SchemaTypeError
+	if errors.As(err, &ste) {
+		return []any{ste.Type}
 	}
 	return nil
 }
@@ -454,6 +478,37 @@ func locationForKinError(err error) *openapi3.Location {
 	if errors.As(err, &sec) && sec.Origin != nil {
 		return fieldLoc(sec.Origin, sec.Subject)
 	}
+	var pre *openapi3.PathParameterRequiredError
+	if errors.As(err, &pre) && pre.Origin != nil {
+		// PathParameterRequiredError fires on a parameter declared with
+		// in: path but without required: true. The Key of the parameter
+		// object pins the finding correctly; the `required` field would
+		// be more precise but is absent (that's the whole bug).
+		return pre.Origin.Key
+	}
+	var ste *openapi3.SchemaTypeError
+	if errors.As(err, &ste) && ste.Origin != nil {
+		// SchemaTypeError fires on the offending `type:` field of a
+		// schema. Pin to the type field if the Origin tracks it,
+		// otherwise to the schema's Key.
+		return fieldLoc(ste.Origin, "type")
+	}
+	var doid *openapi3.DuplicateOperationIDError
+	if errors.As(err, &doid) && doid.Origin != nil {
+		// Pin to the offending operationId scalar inside the second
+		// operation (not the operation's start), since the duplicate
+		// is the field value, not the surrounding block. Falls back
+		// to the operation Key if the loader didn't track the field.
+		return fieldLoc(doid.Origin, "operationId")
+	}
+	var esf *openapi3.ExtraSiblingFieldsError
+	if errors.As(err, &esf) && esf.Origin != nil {
+		// Origin points at the parent object carrying the unexpected
+		// sibling fields. The fields themselves may not have Origin
+		// entries (Yaml parser tracks structural keys, not the
+		// offending ones), so the object Key is the best pin.
+		return esf.Origin.Key
+	}
 	// WebhookNilError carries no Origin (the offending key is on the
 	// document root, which the loader doesn't track per-key).
 	return nil
@@ -557,6 +612,26 @@ func ruleIDForKinError(err error) string {
 	var wne *openapi3.WebhookNilError
 	if errors.As(err, &wne) {
 		return "webhook-nil"
+	}
+
+	var pre *openapi3.PathParameterRequiredError
+	if errors.As(err, &pre) {
+		return "path-parameter-required"
+	}
+
+	var doid *openapi3.DuplicateOperationIDError
+	if errors.As(err, &doid) {
+		return "duplicate-operation-id"
+	}
+
+	var esf *openapi3.ExtraSiblingFieldsError
+	if errors.As(err, &esf) {
+		return "extra-sibling-fields"
+	}
+
+	var ste *openapi3.SchemaTypeError
+	if errors.As(err, &ste) {
+		return "schema-type-unsupported"
 	}
 
 	return kinUnknownID

@@ -1,0 +1,17 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: "1"
+paths:
+  /a:
+    get:
+      operationId: shared
+      responses:
+        '200':
+          description: ok
+  /b:
+    get:
+      operationId: shared
+      responses:
+        '200':
+          description: ok

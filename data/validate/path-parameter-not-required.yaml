@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: "1"
+paths:
+  /users/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ok
