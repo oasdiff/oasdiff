@@ -302,3 +302,46 @@ func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
 	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId())
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
+
+// CL: removing the format constraint of a request path parameter is a generalization, not breaking
+func TestRequestPathParamFormatRemoved(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	s1.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[0].Value.Schema.Value.Format = "uuid"
+	// s2 has no format set (empty string), simulating the removal
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ApiChange{
+		Id:          checker.RequestParameterTypeGeneralizedId,
+		Args:        []any{"path", "groupId", []string{"string"}, "uuid", []string{"string"}, ""},
+		Level:       checker.INFO,
+		Operation:   "POST",
+		Path:        "/api/v1.0/groups",
+		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
+		OperationId: "createOneGroup",
+	}, errs[0])
+}
+
+// BC: removing the format constraint of a response property is breaking,
+// since clients may depend on the declared format for parsing.
+func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
+	s1, err := open("../data/checker/response_schema_format_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_schema_format_changed_base.yaml")
+	require.NoError(t, err)
+
+	s2.Spec.Paths.Value("/api/v1.0/groups").Post.Responses.Value("200").Value.Content["application/json"].Schema.Value.Properties["data"].Value.Properties["name"].Value.Format = ""
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ResponsePropertyTypeChangedId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}
