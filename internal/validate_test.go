@@ -310,3 +310,33 @@ func Test_ValidateCmd_SchemaTypeUnsupported(t *testing.T) {
 	require.Contains(t, out, `unsupported 'type' value "foobar"`)
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
 }
+
+// Parameter with `in:` set to a non-3.x value (e.g. "body", a Swagger
+// 2.0 leftover) → kin returns *InvalidParameterInError{Value:"body"}
+// (added in #1187). Rule ID: "parameter-in-invalid". Origin pins to
+// the parameter's `in` field.
+func Test_ValidateCmd_InvalidParameterIn(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/parameter-in-invalid.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[parameter-in-invalid]")
+	require.Contains(t, out, `parameter can't have 'in' value "body"`)
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+}
+
+// Schema with a Perl-only regex feature in `pattern:` (e.g. lookahead
+// `(?!...)`) → kin's RE2 rejects compilation; cluster
+// *SchemaPatternRegexError carries the offending Pattern and chains
+// through to the legacy *SchemaError via Unwrap (added in #1187).
+// Rule ID: "schema-pattern-regex-invalid". Origin pins to the
+// schema's `pattern` field. The rendered message is byte-identical
+// to the legacy *SchemaError's, so this test asserts the typed
+// dispatch only, not a message change.
+func Test_ValidateCmd_SchemaPatternRegexInvalid(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/schema-pattern-regex-invalid.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[schema-pattern-regex-invalid]")
+	require.Contains(t, out, "error parsing regexp")
+	require.Regexp(t, `at \S+:\d+:\d+`, out)
+}

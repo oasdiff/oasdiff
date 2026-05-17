@@ -248,6 +248,10 @@ func sectionForKinError(err error) string {
 	if errors.As(err, &doid) {
 		return "paths"
 	}
+	var ipe *openapi3.InvalidParameterInError
+	if errors.As(err, &ipe) {
+		return "paths"
+	}
 
 	// Cluster types with a Field that hints at the section.
 	var rfe *openapi3.RequiredFieldError
@@ -355,6 +359,14 @@ func argsForKinError(err error) []any {
 	var ste *openapi3.SchemaTypeError
 	if errors.As(err, &ste) {
 		return []any{ste.Type}
+	}
+	var ipe *openapi3.InvalidParameterInError
+	if errors.As(err, &ipe) {
+		return []any{ipe.Value}
+	}
+	var spre *openapi3.SchemaPatternRegexError
+	if errors.As(err, &spre) {
+		return []any{spre.Pattern}
 	}
 	return nil
 }
@@ -509,6 +521,18 @@ func locationForKinError(err error) *openapi3.Location {
 		// offending ones), so the object Key is the best pin.
 		return esf.Origin.Key
 	}
+	var ipe *openapi3.InvalidParameterInError
+	if errors.As(err, &ipe) && ipe.Origin != nil {
+		// Pin to the parameter's `in` field if the loader tracks it,
+		// otherwise the parameter object's Key.
+		return fieldLoc(ipe.Origin, "in")
+	}
+	var spre *openapi3.SchemaPatternRegexError
+	if errors.As(err, &spre) && spre.Origin != nil {
+		// Pin to the schema's `pattern` field where the bad regex
+		// lives, otherwise the schema's Key.
+		return fieldLoc(spre.Origin, "pattern")
+	}
 	// WebhookNilError carries no Origin (the offending key is on the
 	// document root, which the loader doesn't track per-key).
 	return nil
@@ -632,6 +656,16 @@ func ruleIDForKinError(err error) string {
 	var ste *openapi3.SchemaTypeError
 	if errors.As(err, &ste) {
 		return "schema-type-unsupported"
+	}
+
+	var ipe *openapi3.InvalidParameterInError
+	if errors.As(err, &ipe) {
+		return "parameter-in-invalid"
+	}
+
+	var spre *openapi3.SchemaPatternRegexError
+	if errors.As(err, &spre) {
+		return "schema-pattern-regex-invalid"
 	}
 
 	return kinUnknownID
