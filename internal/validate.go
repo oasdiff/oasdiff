@@ -21,13 +21,15 @@ import (
 
 const validateCmd = "validate"
 
-// kinUnknownID is the fallback rule ID for any kin-openapi error that
-// hasn't yet been migrated to the typed RequiredFieldError /
-// FieldVersionMismatchError clusters in kin's openapi3 package. The
-// intentionally awkward name signals that the finding wants typing on
-// the kin side; leaving findings stuck under this catchall is a smell,
-// not a steady state. Each new kin release converts more sites.
-const kinUnknownID = "kin-validation-error"
+// unknownValidationID is the fallback rule ID for any spec-validation
+// error our dispatcher doesn't yet have a typed cluster for. User-
+// facing because the catchall does fire on the bleeding edge of kin
+// upgrades; the underlying library is an oasdiff implementation detail
+// and the rule ID should not name it. Leaving findings stuck under
+// this catchall is a smell, not a steady state — each new kin release
+// converts more sites, and the dispatcher in this file should grow a
+// matching errors.As case whenever a finding lands here.
+const unknownValidationID = "spec-validation-error"
 
 const (
 	formatText = "text"
@@ -196,7 +198,17 @@ func unwrapContext(err error) error {
 		switch err.(type) {
 		case *openapi3.SectionValidationError,
 			*openapi3.PathValidationError,
-			*openapi3.OperationValidationError:
+			*openapi3.OperationValidationError,
+			*openapi3.ComponentValidationError,
+			*openapi3.ExternalDocsURLValidationError,
+			*openapi3.HeaderFieldValidationError,
+			*openapi3.MediaTypeExampleValidationError,
+			*openapi3.WebhookValidationError,
+			*openapi3.ParameterFieldValidationError,
+			*openapi3.ParameterExampleValidationError,
+			*openapi3.SecuritySchemeFlowValidationError,
+			*openapi3.OAuthFlowValidationError,
+			*openapi3.OAuthFlowFieldValidationError:
 			u := errors.Unwrap(err)
 			if u == nil {
 				return err
@@ -250,6 +262,30 @@ func sectionForKinError(err error) string {
 	}
 	var ipe *openapi3.InvalidParameterInError
 	if errors.As(err, &ipe) {
+		return "paths"
+	}
+	var isste *openapi3.InvalidSecuritySchemeTypeError
+	if errors.As(err, &isste) {
+		return "components"
+	}
+	var ihse *openapi3.InvalidHTTPSchemeError
+	if errors.As(err, &ihse) {
+		return "components"
+	}
+	var akie *openapi3.APIKeyInInvalidError
+	if errors.As(err, &akie) {
+		return "components"
+	}
+	var pmss *openapi3.PathMustStartWithSlashError
+	if errors.As(err, &pmss) {
+		return "paths"
+	}
+	var cpe *openapi3.ConflictingPathsError
+	if errors.As(err, &cpe) {
+		return "paths"
+	}
+	var dpe *openapi3.DuplicateParameterError
+	if errors.As(err, &dpe) {
 		return "paths"
 	}
 
@@ -367,6 +403,44 @@ func argsForKinError(err error) []any {
 	var spre *openapi3.SchemaPatternRegexError
 	if errors.As(err, &spre) {
 		return []any{spre.Pattern}
+	}
+	var isste *openapi3.InvalidSecuritySchemeTypeError
+	if errors.As(err, &isste) {
+		return []any{isste.Type}
+	}
+	var ihse *openapi3.InvalidHTTPSchemeError
+	if errors.As(err, &ihse) {
+		return []any{ihse.Scheme}
+	}
+	var ure *openapi3.UnresolvedRefError
+	if errors.As(err, &ure) {
+		return []any{ure.Ref}
+	}
+	var akie *openapi3.APIKeyInInvalidError
+	if errors.As(err, &akie) {
+		return []any{akie.Value}
+	}
+	var pmss *openapi3.PathMustStartWithSlashError
+	if errors.As(err, &pmss) {
+		return []any{pmss.Path}
+	}
+	var cpe *openapi3.ConflictingPathsError
+	if errors.As(err, &cpe) {
+		// Fingerprint by both paths in sorted order so flipped
+		// argument order produces a stable identity.
+		p1, p2 := cpe.Path1, cpe.Path2
+		if p1 > p2 {
+			p1, p2 = p2, p1
+		}
+		return []any{p1 + "|" + p2}
+	}
+	var dpe *openapi3.DuplicateParameterError
+	if errors.As(err, &dpe) {
+		return []any{dpe.In + ":" + dpe.Name}
+	}
+	var isme *openapi3.InvalidSerializationMethodError
+	if errors.As(err, &isme) {
+		return []any{isme.Subject, isme.Style, isme.Explode}
 	}
 	return nil
 }
@@ -533,6 +607,46 @@ func locationForKinError(err error) *openapi3.Location {
 		// lives, otherwise the schema's Key.
 		return fieldLoc(spre.Origin, "pattern")
 	}
+	var isste *openapi3.InvalidSecuritySchemeTypeError
+	if errors.As(err, &isste) && isste.Origin != nil {
+		return fieldLoc(isste.Origin, "type")
+	}
+	var ihse *openapi3.InvalidHTTPSchemeError
+	if errors.As(err, &ihse) && ihse.Origin != nil {
+		return fieldLoc(ihse.Origin, "scheme")
+	}
+	var ure *openapi3.UnresolvedRefError
+	if errors.As(err, &ure) && ure.Origin != nil {
+		// Pin to the $ref field if the loader tracks it, otherwise
+		// the ref-bearing object's Key.
+		return fieldLoc(ure.Origin, "$ref")
+	}
+	var akie *openapi3.APIKeyInInvalidError
+	if errors.As(err, &akie) && akie.Origin != nil {
+		return fieldLoc(akie.Origin, "in")
+	}
+	var pmss *openapi3.PathMustStartWithSlashError
+	if errors.As(err, &pmss) && pmss.Origin != nil {
+		// Origin is the paths object; the offending path key lives
+		// inside it but Fields tracks struct fields, not map keys, so
+		// fall back to the paths object's Key.
+		return pmss.Origin.Key
+	}
+	var cpe *openapi3.ConflictingPathsError
+	if errors.As(err, &cpe) && cpe.Origin != nil {
+		return cpe.Origin.Key
+	}
+	var dpe *openapi3.DuplicateParameterError
+	if errors.As(err, &dpe) && dpe.Origin != nil {
+		// Origin is on the second (offending) parameter; pin to its Key.
+		return dpe.Origin.Key
+	}
+	var isme *openapi3.InvalidSerializationMethodError
+	if errors.As(err, &isme) && isme.Origin != nil {
+		// Pin to the `style` field if the loader tracks it on the
+		// encoding/parameter/header object.
+		return fieldLoc(isme.Origin, "style")
+	}
 	// WebhookNilError carries no Origin (the offending key is on the
 	// document root, which the loader doesn't track per-key).
 	return nil
@@ -569,7 +683,7 @@ func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
 // leaves wrapped by that cluster.
 //
 // kin errors not yet migrated to a cluster fall through to
-// kinUnknownID. Where a cluster carries field-name metadata, the rule
+// unknownValidationID. Where a cluster carries field-name metadata, the rule
 // ID is derived from that — the per-leaf type isn't consulted because
 // (a) the cluster carries enough metadata, and (b) deriving from a
 // single field keeps the dispatch stable as kin adds new leaves.
@@ -668,7 +782,47 @@ func ruleIDForKinError(err error) string {
 		return "schema-pattern-regex-invalid"
 	}
 
-	return kinUnknownID
+	var isste *openapi3.InvalidSecuritySchemeTypeError
+	if errors.As(err, &isste) {
+		return "security-scheme-type-invalid"
+	}
+
+	var ihse *openapi3.InvalidHTTPSchemeError
+	if errors.As(err, &ihse) {
+		return "security-scheme-http-scheme-invalid"
+	}
+
+	var ure *openapi3.UnresolvedRefError
+	if errors.As(err, &ure) {
+		return "unresolved-ref"
+	}
+
+	var akie *openapi3.APIKeyInInvalidError
+	if errors.As(err, &akie) {
+		return "security-scheme-apikey-in-invalid"
+	}
+
+	var pmss *openapi3.PathMustStartWithSlashError
+	if errors.As(err, &pmss) {
+		return "path-must-start-with-slash"
+	}
+
+	var cpe *openapi3.ConflictingPathsError
+	if errors.As(err, &cpe) {
+		return "conflicting-paths"
+	}
+
+	var dpe *openapi3.DuplicateParameterError
+	if errors.As(err, &dpe) {
+		return "duplicate-parameter"
+	}
+
+	var isme *openapi3.InvalidSerializationMethodError
+	if errors.As(err, &isme) {
+		return "serialization-method-invalid"
+	}
+
+	return unknownValidationID
 }
 
 // joinFieldsForRuleID renders an N-field "any/exactly one of" rule ID
