@@ -100,6 +100,23 @@ func TestRequestPropertyAnyOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
+// BC: refactoring an anyOf branch from inline enum to an equivalent $ref is not breaking
+func TestRequestPropertyAnyOfInlineEnumRefactorToRef(t *testing.T) {
+	s1, err := open("../data/checker/request_property_any_of_ref_inline_enum_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_any_of_ref_inline_enum_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	breakingChanges := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Empty(t, breakingChanges)
+
+	anyOfChanges := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAnyOfUpdatedCheck), d, osm, checker.INFO)
+	require.False(t, containsId(anyOfChanges, checker.RequestPropertyAnyOfRemovedId))
+}
+
 // CL: no changes when paths diff is nil
 func TestRequestPropertyAnyOfNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
