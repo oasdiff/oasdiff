@@ -17,113 +17,101 @@ func SchemaRefsValidationEquivalent(schemaRef1, schemaRef2 *openapi3.SchemaRef) 
 }
 
 func schemaDiffHasValidationChanges(schemaDiff *SchemaDiff) bool {
-	if schemaDiff == nil {
-		return false
-	}
-
-	if schemaDiff.SchemaAdded ||
-		schemaDiff.SchemaDeleted ||
-		schemaDiff.CircularRefDiff ||
-		!schemaDiff.ExtensionsDiff.Empty() ||
-		subschemasDiffHasValidationChanges(schemaDiff.OneOfDiff) ||
-		subschemasDiffHasValidationChanges(schemaDiff.AnyOfDiff) ||
-		subschemasDiffHasValidationChanges(schemaDiff.AllOfDiff) ||
-		schemaDiffHasValidationChanges(schemaDiff.NotDiff) ||
-		!schemaDiff.TypeDiff.Empty() ||
-		!schemaDiff.ListOfTypesDiff.Empty() ||
-		!schemaDiff.FormatDiff.Empty() ||
-		!schemaDiff.EnumDiff.Empty() ||
-		!schemaDiff.AdditionalPropertiesAllowedDiff.Empty() ||
-		!schemaDiff.UniqueItemsDiff.Empty() ||
-		!schemaDiff.ExclusiveMinDiff.Empty() ||
-		!schemaDiff.ExclusiveMaxDiff.Empty() ||
-		!schemaDiff.NullableDiff.Empty() ||
-		!schemaDiff.ReadOnlyDiff.Empty() ||
-		!schemaDiff.WriteOnlyDiff.Empty() ||
-		!schemaDiff.AllowEmptyValueDiff.Empty() ||
-		!schemaDiff.XMLDiff.Empty() ||
-		!schemaDiff.DeprecatedDiff.Empty() ||
-		!schemaDiff.MinDiff.Empty() ||
-		!schemaDiff.MaxDiff.Empty() ||
-		!schemaDiff.MultipleOfDiff.Empty() ||
-		!schemaDiff.MinLengthDiff.Empty() ||
-		!schemaDiff.MaxLengthDiff.Empty() ||
-		!schemaDiff.PatternDiff.Empty() ||
-		!schemaDiff.MinItemsDiff.Empty() ||
-		!schemaDiff.MaxItemsDiff.Empty() ||
-		schemaDiffHasValidationChanges(schemaDiff.ItemsDiff) ||
-		!schemaDiff.RequiredDiff.Empty() ||
-		schemasDiffHasValidationChanges(schemaDiff.PropertiesDiff) ||
-		!schemaDiff.MinPropsDiff.Empty() ||
-		!schemaDiff.MaxPropsDiff.Empty() ||
-		schemaDiffHasValidationChanges(schemaDiff.AdditionalPropertiesDiff) ||
-		!schemaDiff.DiscriminatorDiff.Empty() ||
-		!schemaDiff.ConstDiff.Empty() ||
-		subschemasDiffHasValidationChanges(schemaDiff.PrefixItemsDiff) ||
-		schemaDiffHasValidationChanges(schemaDiff.ContainsDiff) ||
-		!schemaDiff.MinContainsDiff.Empty() ||
-		!schemaDiff.MaxContainsDiff.Empty() ||
-		schemasDiffHasValidationChanges(schemaDiff.PatternPropertiesDiff) ||
-		schemasDiffHasValidationChanges(schemaDiff.DependentSchemasDiff) ||
-		schemaDiffHasValidationChanges(schemaDiff.PropertyNamesDiff) ||
-		!schemaDiff.UnevaluatedItemsAllowedDiff.Empty() ||
-		schemaDiffHasValidationChanges(schemaDiff.UnevaluatedItemsDiff) ||
-		!schemaDiff.UnevaluatedPropertiesAllowedDiff.Empty() ||
-		schemaDiffHasValidationChanges(schemaDiff.UnevaluatedPropertiesDiff) ||
-		schemaDiffHasValidationChanges(schemaDiff.IfDiff) ||
-		schemaDiffHasValidationChanges(schemaDiff.ThenDiff) ||
-		schemaDiffHasValidationChanges(schemaDiff.ElseDiff) ||
-		!schemaDiff.DependentRequiredDiff.Empty() ||
-		!schemaDiff.SchemaIDDiff.Empty() ||
-		!schemaDiff.AnchorDiff.Empty() ||
-		!schemaDiff.DynamicRefDiff.Empty() ||
-		!schemaDiff.DynamicAnchorDiff.Empty() ||
-		!schemaDiff.ContentMediaTypeDiff.Empty() ||
-		!schemaDiff.ContentEncodingDiff.Empty() ||
-		schemaDiffHasValidationChanges(schemaDiff.ContentSchemaDiff) ||
-		schemasDiffHasValidationChanges(schemaDiff.DefsDiff) ||
-		!schemaDiff.SchemaDialectDiff.Empty() {
-		return true
-	}
-
-	return false
+	validationDiff := schemaDiffWithoutAnnotationChanges(schemaDiff)
+	return !validationDiff.Empty()
 }
 
-func subschemasDiffHasValidationChanges(subschemasDiff *SubschemasDiff) bool {
-	if subschemasDiff == nil {
-		return false
+func schemaDiffWithoutAnnotationChanges(schemaDiff *SchemaDiff) *SchemaDiff {
+	if schemaDiff == nil {
+		return nil
 	}
 
-	if len(subschemasDiff.Added) > 0 || len(subschemasDiff.Deleted) > 0 {
-		return true
+	result := *schemaDiff
+
+	result.TitleDiff = nil
+	result.DescriptionDiff = nil
+	result.DefaultDiff = nil
+	result.ExampleDiff = nil
+	result.ExternalDocsDiff = nil
+	result.ExamplesDiff = nil
+	result.CommentDiff = nil
+
+	result.OneOfDiff = subschemasDiffWithoutAnnotationChanges(schemaDiff.OneOfDiff)
+	result.AnyOfDiff = subschemasDiffWithoutAnnotationChanges(schemaDiff.AnyOfDiff)
+	result.AllOfDiff = subschemasDiffWithoutAnnotationChanges(schemaDiff.AllOfDiff)
+	result.NotDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.NotDiff)
+	result.ItemsDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.ItemsDiff)
+	result.PropertiesDiff = schemasDiffWithoutAnnotationChanges(schemaDiff.PropertiesDiff)
+	result.AdditionalPropertiesDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.AdditionalPropertiesDiff)
+	result.PrefixItemsDiff = subschemasDiffWithoutAnnotationChanges(schemaDiff.PrefixItemsDiff)
+	result.ContainsDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.ContainsDiff)
+	result.PatternPropertiesDiff = schemasDiffWithoutAnnotationChanges(schemaDiff.PatternPropertiesDiff)
+	result.DependentSchemasDiff = schemasDiffWithoutAnnotationChanges(schemaDiff.DependentSchemasDiff)
+	result.PropertyNamesDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.PropertyNamesDiff)
+	result.UnevaluatedItemsDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.UnevaluatedItemsDiff)
+	result.UnevaluatedPropertiesDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.UnevaluatedPropertiesDiff)
+	result.IfDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.IfDiff)
+	result.ThenDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.ThenDiff)
+	result.ElseDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.ElseDiff)
+	result.ContentSchemaDiff = schemaDiffWithoutAnnotationChanges(schemaDiff.ContentSchemaDiff)
+	result.DefsDiff = schemasDiffWithoutAnnotationChanges(schemaDiff.DefsDiff)
+
+	if result.Empty() {
+		return nil
 	}
+
+	return &result
+}
+
+func subschemasDiffWithoutAnnotationChanges(subschemasDiff *SubschemasDiff) *SubschemasDiff {
+	if subschemasDiff == nil {
+		return nil
+	}
+
+	result := *subschemasDiff
+	result.Modified = ModifiedSubschemas{}
 
 	for _, modified := range subschemasDiff.Modified {
 		if modified == nil {
 			continue
 		}
-		if schemaDiffHasValidationChanges(modified.Diff) {
-			return true
+
+		schemaDiff := schemaDiffWithoutAnnotationChanges(modified.Diff)
+		if schemaDiff == nil {
+			continue
 		}
+
+		modifiedCopy := *modified
+		modifiedCopy.Diff = schemaDiff
+		result.Modified = append(result.Modified, &modifiedCopy)
 	}
 
-	return false
+	if result.Empty() {
+		return nil
+	}
+
+	return &result
 }
 
-func schemasDiffHasValidationChanges(schemasDiff *SchemasDiff) bool {
+func schemasDiffWithoutAnnotationChanges(schemasDiff *SchemasDiff) *SchemasDiff {
 	if schemasDiff == nil {
-		return false
+		return nil
 	}
 
-	if len(schemasDiff.Added) > 0 || len(schemasDiff.Deleted) > 0 {
-		return true
-	}
+	result := *schemasDiff
+	result.Modified = ModifiedSchemasMap{}
 
-	for _, schemaDiff := range schemasDiff.Modified {
-		if schemaDiffHasValidationChanges(schemaDiff) {
-			return true
+	for name, schemaDiff := range schemasDiff.Modified {
+		validationDiff := schemaDiffWithoutAnnotationChanges(schemaDiff)
+		if validationDiff == nil {
+			continue
 		}
+		result.Modified[name] = validationDiff
 	}
 
-	return false
+	if result.Empty() {
+		return nil
+	}
+
+	return &result
 }

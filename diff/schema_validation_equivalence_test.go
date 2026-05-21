@@ -18,9 +18,14 @@ func TestSchemaRefsValidationEquivalent_IgnoresTitle(t *testing.T) {
 	revision := &openapi3.SchemaRef{
 		Ref: "#/components/schemas/UserRole",
 		Value: &openapi3.Schema{
-			Type:  &openapi3.Types{"string"},
-			Enum:  []any{"user", "superadmin"},
-			Title: "UserRole",
+			Type:        &openapi3.Types{"string"},
+			Enum:        []any{"user", "superadmin"},
+			Title:       "UserRole",
+			Description: "Named role enum",
+			Default:     "user",
+			Example:     "superadmin",
+			Examples:    []any{"user", "superadmin"},
+			Comment:     "generated from a named enum",
 		},
 	}
 
