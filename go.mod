@@ -5,7 +5,7 @@ go 1.26
 require (
 	cloud.google.com/go v0.123.0
 	github.com/TwiN/go-color v1.4.1
-	github.com/getkin/kin-openapi v0.138.1-0.20260516000221-e56c2c71f4cc
+	github.com/getkin/kin-openapi v0.138.1-0.20260521145330-8381bfc73ce3
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
@@ -51,5 +51,3 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
 )
-
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260517152646-78a66ac5f3b0
