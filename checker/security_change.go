@@ -114,7 +114,7 @@ func (c SecurityChange) SingleLineError(l Localizer, colorMode ColorMode) string
 }
 
 func (c SecurityChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s] \t\n\t%s security\n\t\t%s%s"
+	const format = "%s\t[%s]\n\t%s security\n\t\t%s%s"
 
 	if isColorEnabled(colorMode) {
 		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("in"), c.GetText(l), multiLineComment(c.GetComment(l)))

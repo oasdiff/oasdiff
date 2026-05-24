@@ -42,5 +42,5 @@ func TestSecurityChange_SingleLineError(t *testing.T) {
 }
 
 func TestSecurityChange_MultiLineError_NoColor(t *testing.T) {
-	require.Equal(t, "error\t[change_id] \t\n\tin security\n\t\tThis is a breaking change.\n\t\tcomment", securityChange.MultiLineError(MockLocalizer, checker.ColorNever))
+	require.Equal(t, "error\t[change_id]\n\tin security\n\t\tThis is a breaking change.\n\t\tcomment", securityChange.MultiLineError(MockLocalizer, checker.ColorNever))
 }

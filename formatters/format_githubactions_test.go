@@ -186,6 +186,47 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 	assert.Contains(t, string(outputFile), "info_count=1\n")
 }
 
+// Property values are escaped per GitHub's workflow-command rules: ':' and
+// ',' (which a git-ref source path can contain) must not leak through, or
+// they would break the annotation's property syntax.
+func TestGitHubActionsFormatter_RenderChangelog_EscapesProperties(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Id:        "change_id",
+			Level:     checker.ERR,
+			Operation: http.MethodGet,
+			Path:      "/api/test",
+			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "main:spec,v2.yaml", Line: 1, Column: 1},
+			},
+		},
+	}
+
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	require.NoError(t, err)
+	expectedOutput := "::error title=change_id,file=main%3Aspec%2Cv2.yaml,line=1,col=1::in API GET /api/test This is a breaking change.\n"
+	assert.Equal(t, expectedOutput, string(output))
+}
+
+// validate findings escape both the message ('%' and newlines) and the
+// property values (a git-ref source's ':').
+func TestGitHubActionsFormatter_RenderValidate_Escaping(t *testing.T) {
+	findings := formatters.Findings{
+		{
+			Id:     "rule-id",
+			Text:   "bad value 50% off\nsecond line",
+			Level:  checker.ERR,
+			Source: formatters.Source{File: "main:openapi.yaml", Line: 3, Column: 5},
+		},
+	}
+
+	output, err := gitHubFormatter.RenderValidate(findings, formatters.NewRenderOpts())
+	require.NoError(t, err)
+	expectedOutput := "::error title=rule-id,file=main%3Aopenapi.yaml,line=3,col=5::bad value 50%25 off%0Asecond line\n"
+	assert.Equal(t, expectedOutput, string(output))
+}
+
 func TestGitHubActionsFormatter_NotImplemented(t *testing.T) {
 	var err error
 	_, err = gitHubFormatter.RenderDiff(nil, formatters.NewRenderOpts())

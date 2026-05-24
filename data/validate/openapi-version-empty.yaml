@@ -1,0 +1,5 @@
+openapi: ""
+info:
+  title: Validate-test openapi-version-empty
+  version: 1.0.0
+paths: {}

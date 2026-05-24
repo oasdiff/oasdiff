@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: Validate-test license-identifier-in-3-0
+  version: 1.0.0
+  license:
+    name: MIT
+    identifier: MIT
+paths: {}

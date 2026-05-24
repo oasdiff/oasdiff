@@ -1,0 +1,19 @@
+openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+paths:
+  /pets:
+    get:
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: ok

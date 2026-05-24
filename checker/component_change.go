@@ -115,7 +115,7 @@ func (c ComponentChange) SingleLineError(l Localizer, colorMode ColorMode) strin
 }
 
 func (c ComponentChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s] \t\n\t%s components/%s\n\t\t%s%s"
+	const format = "%s\t[%s]\n\t%s components/%s\n\t\t%s%s"
 
 	if isColorEnabled(colorMode) {
 		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("in"), c.Component, c.GetText(l), multiLineComment(c.GetComment(l)))

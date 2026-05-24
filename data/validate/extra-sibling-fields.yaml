@@ -1,0 +1,19 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: "1"
+paths:
+  /x:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/T'
+                description: should-not-be-here
+components:
+  schemas:
+    T:
+      type: string

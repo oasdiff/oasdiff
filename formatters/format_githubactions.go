@@ -43,10 +43,10 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 	// generate messages for each change (source file, line and column are optional)
 	for _, change := range changes {
 		var params = []string{
-			"title=" + change.GetId(),
+			"title=" + escapeProperty(change.GetId()),
 		}
 		if rev := change.GetRevisionSource(); rev != nil && rev.File != "" && !isHTTPSource(rev.File) {
-			params = append(params, "file="+rev.File)
+			params = append(params, "file="+escapeProperty(rev.File))
 			if rev.Line != 0 {
 				params = append(params, "line="+strconv.Itoa(rev.Line))
 			}
@@ -55,7 +55,7 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 			}
 		} else if sourceFile := change.GetSourceFile(); sourceFile != "" {
 			// Fallback: operation source file when no revision source is available
-			params = append(params, "file="+sourceFile)
+			params = append(params, "file="+escapeProperty(sourceFile))
 		}
 
 		fmt.Fprintf(&buf, "::%s %s::%s\n", githubActionsSeverity[change.GetLevel()], strings.Join(params, ","), getMessage(change, f.Localizer))
@@ -65,12 +65,79 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 }
 
 func getMessage(change checker.Change, l checker.Localizer) string {
-	message := strings.ReplaceAll(change.GetUncolorizedText(l), "\n", "%0A")
-	return fmt.Sprintf("in API %s %s %s", change.GetOperation(), change.GetPath(), message)
+	return escapeData(fmt.Sprintf("in API %s %s %s", change.GetOperation(), change.GetPath(), change.GetUncolorizedText(l)))
+}
+
+// escapeData escapes a string for use as a GitHub Actions annotation
+// message, per the workflow-command rules. % is escaped first so the
+// %0D/%0A sequences it introduces are not themselves double-escaped.
+func escapeData(s string) string {
+	s = strings.ReplaceAll(s, "%", "%25")
+	s = strings.ReplaceAll(s, "\r", "%0D")
+	s = strings.ReplaceAll(s, "\n", "%0A")
+	return s
+}
+
+// escapeProperty escapes a string for use as a GitHub Actions annotation
+// property value (title, file): escapeData plus the property delimiters
+// ':' and ',' (e.g. a git-ref source like "main:openapi.yaml").
+func escapeProperty(s string) string {
+	s = escapeData(s)
+	s = strings.ReplaceAll(s, ":", "%3A")
+	s = strings.ReplaceAll(s, ",", "%2C")
+	return s
+}
+
+// RenderValidate emits one GitHub Actions annotation per finding so the
+// oasdiff-action validate wrapper can surface violations inline on the
+// PR's Files Changed tab, and publishes per-severity counts as step
+// outputs. Findings carry exact file/line/column, which the annotation
+// uses to anchor itself.
+func (f GitHubActionsFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byte, error) {
+	var buf bytes.Buffer
+
+	count := findings.GetLevelCount()
+	err := writeGitHubActionsJobOutputParameters(map[string]string{
+		"error_count":   fmt.Sprint(count[checker.ERR]),
+		"warning_count": fmt.Sprint(count[checker.WARN]),
+		"info_count":    fmt.Sprint(count[checker.INFO]),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, finding := range findings {
+		params := []string{"title=" + escapeProperty(finding.Id)}
+		if finding.Source.File != "" && !isHTTPSource(finding.Source.File) {
+			params = append(params, "file="+escapeProperty(finding.Source.File))
+			if finding.Source.Line != 0 {
+				params = append(params, "line="+strconv.Itoa(finding.Source.Line))
+			}
+			if finding.Source.Column != 0 {
+				params = append(params, "col="+strconv.Itoa(finding.Source.Column))
+			}
+		}
+
+		fmt.Fprintf(&buf, "::%s %s::%s\n", githubActionsSeverity[finding.Level], strings.Join(params, ","), getFindingMessage(finding))
+	}
+
+	return buf.Bytes(), nil
+}
+
+// getFindingMessage renders a finding's annotation body. The "in API
+// METHOD /path" prefix is added only when the finding has operation
+// context; doc-root and components-rooted findings (the majority) have
+// none, so prefixing would emit a stray "in API  ".
+func getFindingMessage(finding Finding) string {
+	message := finding.Text
+	if finding.Operation != "" && finding.Path != "" {
+		message = fmt.Sprintf("in API %s %s %s", finding.Operation, finding.Path, message)
+	}
+	return escapeData(message)
 }
 
 func (f GitHubActionsFormatter) SupportedOutputs() []Output {
-	return []Output{OutputChangelog}
+	return []Output{OutputChangelog, OutputValidate}
 }
 
 func isHTTPSource(file string) bool {

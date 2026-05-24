@@ -34,6 +34,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 		getFlattenCmd(),
 		getUpgradeCmd(),
 		getChecksCmd(),
+		getValidateCmd(),
 	)
 
 	return run(rootCmd)

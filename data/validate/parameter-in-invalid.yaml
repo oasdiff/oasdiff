@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: "1"
+paths:
+  /x:
+    post:
+      parameters:
+        - name: payload
+          in: body
+          schema:
+            type: object
+      responses:
+        '200':
+          description: ok

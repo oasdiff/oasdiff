@@ -1,0 +1,7 @@
+openapi: 3.0.3
+info:
+  title: Validate-test server-url-mismatched-braces
+  version: 1.0.0
+servers:
+  - url: https://example.com/{tenant
+paths: {}
