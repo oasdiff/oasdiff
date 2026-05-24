@@ -3,8 +3,6 @@ package internal
 import (
 	"fmt"
 	"strings"
-
-	"slices"
 )
 
 type enumVal interface {
@@ -32,11 +30,17 @@ func (v *enumValue) String() string {
 	return string(*v.value)
 }
 
-// Set must have pointer receiver so it doesn't change the value of a copy
+// Set must have pointer receiver so it doesn't change the value of a copy.
+// Matching is case-insensitive; the stored value is normalized to the
+// canonical allowed value, so a user can type "warn" or "yaml" in any case
+// and downstream lookups (formatters.Lookup, checker.NewLevel) still receive
+// a known string.
 func (v *enumValue) Set(s string) error {
-	if slices.Contains(v.allowedValues, s) {
-		*v.value = s
-		return nil
+	for _, allowed := range v.allowedValues {
+		if strings.EqualFold(s, allowed) {
+			*v.value = allowed
+			return nil
+		}
 	}
 	return fmt.Errorf("%s is not one of the allowed values: %s", s, v.listOf())
 }
