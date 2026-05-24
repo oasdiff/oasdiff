@@ -39,7 +39,7 @@ func getVersion(spec *openapi3.T) string {
 	return spec.Info.Version
 }
 
-// NewSpecInfo creates a SpecInfo from a local file path, a URL, or stdin
+// NewSpecInfo creates a SpecInfo from a local file path, a URL, a git revision, or stdin
 func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
 	specInfo, err := loadSpecInfo(loader, source)
 	if err != nil {

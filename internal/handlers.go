@@ -9,13 +9,13 @@ import (
 )
 
 const specHelp = `
-Base and revision can be a path to a file, a URL, or '-' to read standard input.
+Base and revision can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input.
 In 'composed' mode, base and revision can be a glob and oasdiff will compare matching endpoints between the two sets of files.`
 
 func getParseArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 {
-			return errors.New("please specify base and revision arguments as a path to a file, a glob (in composed mode), a URL, or '-' to read standard input")
+			return errors.New("please specify base and revision arguments as a path to a file, a glob (in composed mode), a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input")
 		}
 		if len(args) > 2 {
 			return errors.New("invalid arguments after base and revision")

@@ -25,7 +25,7 @@ boolean exclusiveMinimum/Maximum -> numeric, example -> examples, and similar),
 then updates the openapi version string. The transforms are idempotent: an
 already-canonical spec is unchanged aside from a possible version-string bump.
 
-Spec can be a path to a file, a URL or '-' to read standard input.
+Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input.
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: getRun(runUpgrade),
