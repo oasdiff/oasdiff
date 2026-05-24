@@ -12,7 +12,7 @@ This is distinct from `breaking` / `changelog`, which compare two specs. `valida
 oasdiff validate openapi.yaml
 ```
 
-The spec can be a file path, a URL, or `-` to read from standard input:
+The spec can be a file path, a URL, a git ref (e.g. `main:openapi.yaml`, see [Git revisions](GIT-REVISION.md)), or `-` to read from standard input:
 
 ```bash
 oasdiff validate https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml

@@ -23,13 +23,9 @@ import (
 const validateCmd = "validate"
 
 // unknownValidationID is the fallback rule ID for any spec-validation
-// error our dispatcher doesn't yet have a typed cluster for. User-
-// facing because the catchall does fire on the bleeding edge of kin
-// upgrades; the underlying library is an oasdiff implementation detail
-// and the rule ID should not name it. Leaving findings stuck under
-// this catchall is a smell, not a steady state — each new kin release
-// converts more sites, and the dispatcher in this file should grow a
-// matching errors.As case whenever a finding lands here.
+// error our dispatcher (ruleIDForKinError) has no errors.As arm for.
+// if we encounter this in the output, we should replace it with a more
+// specific ID.
 const unknownValidationID = "spec-validation-error"
 
 const (
@@ -49,15 +45,14 @@ type values, missing required fields, malformed paths, and unresolved $refs.
 Each finding has a stable rule ID, a human-readable message, and a
 source location (file:line:column when the loader tracks origins).
 Output format is selectable: text by default, '-f yaml' or '-f json'
-for structured output. Field names match the changelog command's
-output (id, text, level, source) so a single CI script can parse both.
+for structured output.
 
 Exit codes:
   0 — no findings
   1 — at least one finding
   102 — failed to load the spec
 
-Spec can be a path to a file, a URL, or '-' to read standard input.
+Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input.
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: getRun(runValidate),
