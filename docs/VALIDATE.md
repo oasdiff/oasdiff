@@ -31,11 +31,13 @@ error	[security-scheme-type-invalid] at openapi.yaml:88:9
 	...
 ```
 
-Use `-f yaml` or `-f json` for structured output. Each finding carries `id`, `text`, `level`, `section`, `source` (`file` / `line` / `column`), and a stable `fingerprint`. The field names match the `changelog` command's output, so a single CI script can parse both.
+Use `-f yaml` or `-f json` for structured output. Each finding carries `id`, `text`, `level`, `section`, `source` (`file` / `line` / `column`), and a stable `fingerprint`.
 
 ```bash
 oasdiff validate -f json openapi.yaml
 ```
+
+In CI, `-f githubactions` emits a GitHub Actions annotation per finding (anchored to its file/line/column) so violations show up inline on the pull request's Files Changed tab, and publishes `error_count` / `warning_count` / `info_count` as step outputs.
 
 All findings are reported in one pass (multi-error), not just the first one.
 
@@ -43,7 +45,7 @@ All findings are reported in one pass (multi-error), not just the first one.
 
 | Flag | Default | Description |
 |---|---|---|
-| `-f, --format` | `text` | output format: `text`, `yaml`, or `json` |
+| `-f, --format` | `text` | output format: `text`, `yaml`, `json`, or `githubactions` |
 | `--color` | `auto` | when to colorize text output: `auto`, `always`, `never` |
 | `--allow-external-refs` | `true` | resolve external `$ref`s; set to `false` to prevent SSRF when validating untrusted specs |
 

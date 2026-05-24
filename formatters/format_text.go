@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"text/tabwriter"
 
+	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/report"
@@ -61,6 +62,56 @@ func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 	return result.Bytes(), nil
 }
 
+// RenderValidate emits a summary line ("N findings: ...") followed by one
+// changelog-style block per finding. Each block is:
+//
+//	error	[<rule-id>] at <file:line:column>
+//		<text>
+//
+// Findings with operation context add an "in API METHOD /path" line and
+// indent the message one level deeper. Level is colorized and the rule ID
+// rendered yellow when --color is on, matching changelog / breaking.
+func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byte, error) {
+	result := bytes.NewBuffer(nil)
+
+	count := findings.GetLevelCount()
+	// Color the severity labels in the summary line, matching the changelog
+	// command's title (getChangelogTitle).
+	_, _ = fmt.Fprintf(result, "%d findings: %d %s, %d %s, %d %s\n",
+		len(findings),
+		count[checker.ERR], checker.ERR.StringCond(opts.ColorMode),
+		count[checker.WARN], checker.WARN.StringCond(opts.ColorMode),
+		count[checker.INFO], checker.INFO.StringCond(opts.ColorMode),
+	)
+
+	useColor := checker.IsColorEnabled(opts.ColorMode)
+	for _, finding := range findings {
+		loc := finding.Source.File
+		if finding.Source.Line > 0 {
+			loc = fmt.Sprintf("%s:%d:%d", finding.Source.File, finding.Source.Line, finding.Source.Column)
+		}
+		id := finding.Id
+		if useColor {
+			id = color.InYellow(finding.Id)
+		}
+		_, _ = fmt.Fprintf(result, "%s\t[%s] at %s\n", finding.Level.StringCond(opts.ColorMode), id, loc)
+
+		msgIndent := "\t"
+		if finding.Operation != "" && finding.Path != "" {
+			operation, path := finding.Operation, finding.Path
+			if useColor {
+				// Color the endpoint green, matching ApiChange.MultiLineError.
+				operation, path = color.InGreen(operation), color.InGreen(path)
+			}
+			_, _ = fmt.Fprintf(result, "\tin API %s %s\n", operation, path)
+			msgIndent = "\t\t"
+		}
+		_, _ = fmt.Fprintf(result, "%s%s\n\n", msgIndent, indentContinuation(finding.Text, msgIndent))
+	}
+
+	return result.Bytes(), nil
+}
+
 func (f TEXTFormatter) SupportedOutputs() []Output {
-	return []Output{OutputDiff, OutputChangelog, OutputChecks}
+	return []Output{OutputDiff, OutputChangelog, OutputChecks, OutputValidate}
 }

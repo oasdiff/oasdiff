@@ -2,9 +2,6 @@ package internal
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,12 +9,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/TwiN/go-color"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/spf13/cobra"
-	"go.yaml.in/yaml/v3"
 )
 
 const validateCmd = "validate"
@@ -27,12 +23,6 @@ const validateCmd = "validate"
 // if we encounter this in the output, we should replace it with a more
 // specific ID.
 const unknownValidationID = "spec-validation-error"
-
-const (
-	formatText = "text"
-	formatYAML = "yaml"
-	formatJSON = "json"
-)
 
 func getValidateCmd() *cobra.Command {
 
@@ -45,7 +35,8 @@ type values, missing required fields, malformed paths, and unresolved $refs.
 Each finding has a stable rule ID, a human-readable message, and a
 source location (file:line:column when the loader tracks origins).
 Output format is selectable: text by default, '-f yaml' or '-f json'
-for structured output.
+for structured output, or '-f githubactions' to emit CI annotations
+that surface each finding inline on the pull request.
 
 Exit codes:
   0 — no findings
@@ -58,7 +49,7 @@ Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' 
 		RunE: getRun(runValidate),
 	}
 
-	enumWithOptions(&cmd, newEnumValue([]string{formatText, formatYAML, formatJSON}, formatText), "format", "f", "output format")
+	enumWithOptions(&cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputValidate), string(formatters.FormatText)), "format", "f", "output format")
 	enumWithOptions(&cmd, newEnumValue(checker.GetSupportedColorValues(), "auto"), "color", "", "when to colorize textual output")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 
@@ -85,97 +76,90 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	}
 
 	findings := mapKinErrors(flags.getBase().String(), verr)
-	colorMode, cerr := checker.NewColorMode(flags.getColor())
-	if cerr != nil {
-		return false, getErrFailedPrint(validateCmd+" color", cerr)
+	if len(findings) == 0 {
+		return false, nil
 	}
-	if err := writeFindings(stdout, findings, flags.getFormat(), colorMode); err != nil {
-		return false, getErrFailedPrint(validateCmd+" "+flags.getFormat(), err)
+
+	if returnErr := outputFindings(flags, stdout, findings); returnErr != nil {
+		return false, returnErr
 	}
 
 	return true, nil
 }
 
-// Finding is a single validation finding. The JSON / YAML shape mirrors
-// the changelog command's output so consumers can parse both with the
-// same data structure.
-//
-// Comment, Operation, and Path use omitempty because doc-root findings
-// (e.g. info-version-required) have no operation/path scope.
-//
-// Source.Line and Source.Column are populated when kin-openapi tracks
-// origins (Loader.IncludeOrigin = true) and the underlying typed error
-// carries the offending element's Origin. Both are 0 when the element
-// doesn't have origin metadata (doc-root fields like openapi version)
-// or origin tracking is off.
-//
-// Fingerprint is a stable 12-char identifier that lets a downstream
-// tool match the same logical finding across base/revision spec
-// versions (used by the Pro PR-comment for new/pre-existing/fixed
-// partitioning). Format mirrors formatters/changes.go:computeFingerprint.
-type Finding struct {
-	Id          string        `yaml:"id"                    json:"id"`
-	Text        string        `yaml:"text"                  json:"text"`
-	Comment     string        `yaml:"comment,omitempty"     json:"comment,omitempty"`
-	Level       checker.Level `yaml:"level"                 json:"level"`
-	Operation   string        `yaml:"operation,omitempty"   json:"operation,omitempty"`
-	Path        string        `yaml:"path,omitempty"        json:"path,omitempty"`
-	Section     string        `yaml:"section"               json:"section"`
-	Source      Source        `yaml:"source"                json:"source"`
-	Fingerprint string        `yaml:"fingerprint"           json:"fingerprint"`
-}
+// outputFindings renders the findings through the shared formatters, the
+// same path changelog/breaking/flatten use: look up the formatter for the
+// requested format and call its render method. RenderValidate is
+// implemented only by the text, yaml, and json formatters, matching the
+// formats the command advertises.
+func outputFindings(flags *Flags, stdout io.Writer, findings formatters.Findings) *ReturnError {
 
-// Source identifies the spec location of a finding. File is the spec
-// path; Line and Column come from kin's Origin tracking and are 0 for
-// doc-root findings that have no per-key origin.
-type Source struct {
-	File   string `yaml:"file"             json:"file"`
-	Line   int    `yaml:"line,omitempty"   json:"line,omitempty"`
-	Column int    `yaml:"column,omitempty" json:"column,omitempty"`
+	formatter, err := formatters.Lookup(flags.getFormat(), formatters.FormatterOpts{
+		Language: flags.getLang(),
+	})
+	if err != nil {
+		return getErrUnsupportedFormat(flags.getFormat(), validateCmd)
+	}
+
+	colorMode, err := checker.NewColorMode(flags.getColor())
+	if err != nil {
+		return getErrInvalidColorMode(err)
+	}
+
+	bytes, err := formatter.RenderValidate(findings, formatters.RenderOpts{ColorMode: colorMode})
+	if err != nil {
+		return getErrFailedPrint(validateCmd+" "+flags.getFormat(), err)
+	}
+
+	_, _ = fmt.Fprintf(stdout, "%s\n", bytes)
+
+	return nil
 }
 
 // mapKinErrors flattens kin-openapi's MultiError tree into a list of
-// Findings. kin can return either a single error or a MultiError; the
+// findings. kin can return either a single error or a MultiError; the
 // MultiError can itself contain MultiErrors, so we recurse.
-func mapKinErrors(source string, err error) []Finding {
+func mapKinErrors(source string, err error) formatters.Findings {
 	return dedupePreferringComponents(flattenKinErrors(source, err))
 }
 
 // flattenKinErrors walks the kin error tree (MultiError → leaves) and
-// produces one Finding per leaf. Findings may include duplicates of
-// the same defect when a shared definition (e.g. a schema in
-// components) is referenced from multiple operations — the validator
-// re-visits the definition under each $ref. dedupePreferringComponents
-// collapses those into a single finding.
-func flattenKinErrors(source string, err error) []Finding {
+// produces one finding per leaf. Findings may include duplicates of the
+// same defect when a shared definition (e.g. a schema in components) is
+// referenced from multiple operations — the validator re-visits the
+// definition under each $ref. dedupePreferringComponents collapses those
+// into a single finding.
+func flattenKinErrors(source string, err error) formatters.Findings {
 	if err == nil {
 		return nil
 	}
 	if me, ok := err.(openapi3.MultiError); ok {
-		var out []Finding
+		var out formatters.Findings
 		for _, sub := range me {
 			out = append(out, flattenKinErrors(source, sub)...)
 		}
 		return out
 	}
-	id := ruleIDForKinError(err)
 	path, operation := pathOperationForKinError(err)
-	f := Finding{
-		Id:        id,
+	f := formatters.Finding{
+		Id:        ruleIDForKinError(err),
 		Text:      unwrapContext(err).Error(),
 		Level:     checker.ERR,
 		Operation: operation,
 		Path:      path,
 		Section:   sectionForKinError(err),
-		Source: Source{
+		Source: formatters.Source{
 			File:   source,
 			Line:   lineForKinError(err),
 			Column: columnForKinError(err),
 		},
 	}
-	// Fingerprint last so it sees the populated fields it hashes over.
-	f.Fingerprint = fingerprintFor(f, argsForKinError(err))
-	return []Finding{f}
+	// Fingerprint last so it hashes over the populated fields. validate and
+	// changelog share ComputeFingerprint so a downstream tool can match
+	// findings across spec versions; the args carry the per-finding
+	// disambiguator (formatters/changes.go).
+	f.Fingerprint = formatters.ComputeFingerprint(f.Id, f.Operation, f.Path, argsForKinError(err))
+	return formatters.Findings{f}
 }
 
 // dedupePreferringComponents groups findings by their underlying
@@ -191,12 +175,12 @@ func flattenKinErrors(source string, err error) []Finding {
 // walk and once from each operation that $refs it. Path-level shared
 // parameters don't need handling here because kin only validates them
 // once at the PathItem level (no per-operation re-validation).
-func dedupePreferringComponents(in []Finding) []Finding {
+func dedupePreferringComponents(in formatters.Findings) formatters.Findings {
 	type group struct {
 		first  int // index into `in` of the first finding for this key
 		chosen int // index of the current best representative
 	}
-	keyOf := func(f Finding) string {
+	keyOf := func(f formatters.Finding) string {
 		return f.Id + "\x00" + f.Source.File + "\x00" +
 			strconv.Itoa(f.Source.Line) + "\x00" +
 			strconv.Itoa(f.Source.Column) + "\x00" + f.Text
@@ -217,7 +201,7 @@ func dedupePreferringComponents(in []Finding) []Finding {
 			g.chosen = i
 		}
 	}
-	out := make([]Finding, 0, len(order))
+	out := make(formatters.Findings, 0, len(order))
 	for _, k := range order {
 		out = append(out, in[groups[k].chosen])
 	}
@@ -499,22 +483,6 @@ func argsForKinError(err error) []any {
 	return nil
 }
 
-// fingerprintFor produces a stable 12-char identifier for a finding.
-// Format mirrors formatters/changes.go:computeFingerprint:
-// sha256("{id}:{operation}:{path}:{args}") truncated to 12 hex chars.
-// Inputs are structured rather than the rendered text so rendering
-// changes (locale, message edits) don't invalidate stored fingerprints
-// used for new/pre-existing/fixed partitioning across spec versions.
-func fingerprintFor(f Finding, args []any) string {
-	parts := make([]string, len(args))
-	for i, a := range args {
-		parts[i] = fmt.Sprintf("%v", a)
-	}
-	h := fmt.Sprintf("%s:%s:%s:%s", f.Id, f.Operation, f.Path, strings.Join(parts, ";"))
-	sum := sha256.Sum256([]byte(h))
-	return hex.EncodeToString(sum[:])[:12]
-}
-
 // lineForKinError extracts the line number from the typed cluster
 // errors' Origin. Returns 0 when origin metadata isn't available
 // (untyped error, doc-root field, or loader.IncludeOrigin = false).
@@ -532,22 +500,6 @@ func columnForKinError(err error) int {
 		return k.Column
 	}
 	return 0
-}
-
-// indentContinuation prefixes every non-empty continuation line of s
-// with prefix. The first line is left as-is (the caller's format string
-// already supplies its leading indent), and blank lines stay blank
-// rather than becoming stray prefix-only lines. Trailing whitespace is
-// trimmed.
-func indentContinuation(s, prefix string) string {
-	lines := strings.Split(s, "\n")
-	for i, line := range lines {
-		if i == 0 || line == "" {
-			continue
-		}
-		lines[i] = prefix + line
-	}
-	return strings.TrimRight(strings.Join(lines, "\n"), " \t\n")
 }
 
 // locationForKinError returns the most-specific *Location available
@@ -907,84 +859,4 @@ func ruleIDFromField(field string) string {
 		b.WriteRune(unicode.ToLower(r))
 	}
 	return b.String()
-}
-
-func writeFindings(w io.Writer, findings []Finding, format string, colorMode checker.ColorMode) error {
-	switch format {
-	case formatYAML:
-		bytes, err := yaml.Marshal(findings)
-		if err != nil {
-			return err
-		}
-		_, err = w.Write(bytes)
-		return err
-	case formatJSON:
-		bytes, err := json.Marshal(findings)
-		if err != nil {
-			return err
-		}
-		_, err = w.Write(bytes)
-		return err
-	case formatText, "":
-		writeFindingsText(w, findings, colorMode)
-		return nil
-	default:
-		return fmt.Errorf("unsupported format %q", format)
-	}
-}
-
-// writeFindingsText emits the changelog-style header summary line
-// followed by one block per finding. The block format mirrors
-// checker.ApiChange's MultiLineError output minus the operation/path
-// line that doesn't apply to validate findings:
-//
-//	error	[<rule-id>] at <source>
-//		<text>
-//
-// When color is enabled, level is rendered red/purple/cyan via
-// Level.StringCond and the rule ID is rendered yellow, matching
-// changelog / breaking. The color decision honours the --color flag
-// (auto/always/never) via checker.IsColorEnabled.
-func writeFindingsText(w io.Writer, findings []Finding, colorMode checker.ColorMode) {
-	var nErr, nWarn, nInfo int
-	for _, f := range findings {
-		switch f.Level {
-		case checker.ERR:
-			nErr++
-		case checker.WARN:
-			nWarn++
-		case checker.INFO:
-			nInfo++
-		}
-	}
-	fmt.Fprintf(w, "%d findings: %d error, %d warning, %d info\n", len(findings), nErr, nWarn, nInfo)
-
-	useColor := checker.IsColorEnabled(colorMode)
-	for _, f := range findings {
-		loc := f.Source.File
-		if f.Source.Line > 0 {
-			loc = fmt.Sprintf("%s:%d:%d", f.Source.File, f.Source.Line, f.Source.Column)
-		}
-		id := f.Id
-		if useColor {
-			id = color.InYellow(f.Id)
-		}
-		// Some validation errors (notably nested schema failures) embed
-		// newlines in the message — Schema:\n... + Value:\n... blocks.
-		// Indent every non-empty continuation line so the finding stays
-		// visually grouped, while leaving blank lines blank (not "\t").
-		fmt.Fprintf(w, "%s\t[%s] at %s\n", f.Level.StringCond(colorMode), id, loc)
-		// Operation/path context appears on its own indented line,
-		// matching the changelog text format ("in API METHOD /path").
-		// Omitted for findings without operation context (doc-root,
-		// components-rooted), which is the majority after dedup. When
-		// present, the message body indents one level deeper so it
-		// reads as a child of the operation context.
-		msgIndent := "\t"
-		if f.Operation != "" && f.Path != "" {
-			fmt.Fprintf(w, "\tin API %s %s\n", f.Operation, f.Path)
-			msgIndent = "\t\t"
-		}
-		fmt.Fprintf(w, "%s%s\n\n", msgIndent, indentContinuation(f.Text, msgIndent))
-	}
 }

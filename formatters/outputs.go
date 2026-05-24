@@ -8,4 +8,5 @@ const (
 	OutputChangelog
 	OutputChecks
 	OutputFlatten
+	OutputValidate
 )

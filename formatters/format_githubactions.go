@@ -69,8 +69,56 @@ func getMessage(change checker.Change, l checker.Localizer) string {
 	return fmt.Sprintf("in API %s %s %s", change.GetOperation(), change.GetPath(), message)
 }
 
+// RenderValidate emits one GitHub Actions annotation per finding so the
+// oasdiff-action validate wrapper can surface violations inline on the
+// PR's Files Changed tab, and publishes per-severity counts as step
+// outputs. Findings carry exact file/line/column, which the annotation
+// uses to anchor itself.
+func (f GitHubActionsFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byte, error) {
+	var buf bytes.Buffer
+
+	count := findings.GetLevelCount()
+	err := writeGitHubActionsJobOutputParameters(map[string]string{
+		"error_count":   fmt.Sprint(count[checker.ERR]),
+		"warning_count": fmt.Sprint(count[checker.WARN]),
+		"info_count":    fmt.Sprint(count[checker.INFO]),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for _, finding := range findings {
+		params := []string{"title=" + finding.Id}
+		if finding.Source.File != "" && !isHTTPSource(finding.Source.File) {
+			params = append(params, "file="+finding.Source.File)
+			if finding.Source.Line != 0 {
+				params = append(params, "line="+strconv.Itoa(finding.Source.Line))
+			}
+			if finding.Source.Column != 0 {
+				params = append(params, "col="+strconv.Itoa(finding.Source.Column))
+			}
+		}
+
+		fmt.Fprintf(&buf, "::%s %s::%s\n", githubActionsSeverity[finding.Level], strings.Join(params, ","), getFindingMessage(finding))
+	}
+
+	return buf.Bytes(), nil
+}
+
+// getFindingMessage renders a finding's annotation body. The "in API
+// METHOD /path" prefix is added only when the finding has operation
+// context; doc-root and components-rooted findings (the majority) have
+// none, so prefixing would emit a stray "in API  ".
+func getFindingMessage(finding Finding) string {
+	message := strings.ReplaceAll(finding.Text, "\n", "%0A")
+	if finding.Operation != "" && finding.Path != "" {
+		return fmt.Sprintf("in API %s %s %s", finding.Operation, finding.Path, message)
+	}
+	return message
+}
+
 func (f GitHubActionsFormatter) SupportedOutputs() []Output {
-	return []Output{OutputChangelog}
+	return []Output{OutputChangelog, OutputValidate}
 }
 
 func isHTTPSource(file string) bool {

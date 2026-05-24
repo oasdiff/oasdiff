@@ -118,9 +118,9 @@ func Test_ValidateCmd_PathOperationScope(t *testing.T) {
 	require.Equal(t, "value of responses must be an object", findings[0]["text"])
 }
 
-// YAML format produces a marshalled list of Finding records that round-
-// trips through yaml.Unmarshal. Field names match changelog's:
-// id, text, level, source (object with file/line/column), fingerprint.
+// YAML format produces a marshalled list of findings that round-trips
+// through yaml.Unmarshal. Field names match changelog's: id, text, level,
+// source (object with file/line/column), fingerprint.
 func Test_ValidateCmd_YAMLFormat(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
@@ -169,6 +169,22 @@ func Test_ValidateCmd_FingerprintStable(t *testing.T) {
 	require.NoError(t, json.Unmarshal(out1.Bytes(), &f1))
 	require.NoError(t, json.Unmarshal(out2.Bytes(), &f2))
 	require.Equal(t, f1[0]["fingerprint"], f2[0]["fingerprint"])
+}
+
+// githubactions format emits one CI annotation per finding so the
+// oasdiff-action validate wrapper can surface violations inline on the
+// PR's Files Changed tab. The annotation carries the rule ID as title
+// and the finding's file/line/column for anchoring.
+func Test_ValidateCmd_GitHubActionsFormat(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f githubactions ../data/validate/missing-required-info.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "::error ")
+	require.Contains(t, out, "title=info-version-required")
+	require.Contains(t, out, "file=../data/validate/missing-required-info.yaml")
+	require.Contains(t, out, "line=4")
+	require.Contains(t, out, "col=3")
+	require.Contains(t, out, "value of version must be a non-empty string")
 }
 
 // Text format: header summary line + changelog-style multi-line block.

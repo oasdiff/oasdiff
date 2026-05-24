@@ -47,21 +47,23 @@ func NewChanges(originalChanges checker.Changes, l checker.Localizer) Changes {
 			Attributes:     change.GetAttributes(),
 			BaseSource:     change.GetBaseSource(),
 			RevisionSource: change.GetRevisionSource(),
-			Fingerprint:    computeFingerprint(id, operation, path, change.GetArgs()),
+			Fingerprint:    ComputeFingerprint(id, operation, path, change.GetArgs()),
 		}
 	}
 	return changes
 }
 
-// computeFingerprint produces a short, stable identifier for a change. It is
-// used to match the same logical change across spec versions (carry-forward of
-// review state in oasdiff-service) and to look up review records at view time.
+// ComputeFingerprint produces a short, stable identifier for a change or
+// finding. It is used to match the same logical item across spec versions
+// (carry-forward of review state in oasdiff-service) and to look up review
+// records at view time. The changelog and validate commands share it so a
+// downstream tool can match findings produced by either.
 //
 // Inputs are the structured rule arguments rather than the rendered text:
 // rendered text varies with locale and copy edits to the message templates,
 // which would silently invalidate every stored fingerprint. The args carry the
 // same per-change disambiguation power without that fragility.
-func computeFingerprint(id, operation, path string, args []any) string {
+func ComputeFingerprint(id, operation, path string, args []any) string {
 	h := fmt.Sprintf("%s:%s:%s:%s", id, operation, path, serializeArgs(args))
 	sum := sha256.Sum256([]byte(h))
 	return hex.EncodeToString(sum[:])[:12]

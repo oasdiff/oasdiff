@@ -17,6 +17,7 @@ type Formatter interface {
 	RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error)
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
+	RenderValidate(findings Findings, opts RenderOpts) ([]byte, error)
 	SupportedOutputs() []Output
 	SupportsTemplate() bool
 }
