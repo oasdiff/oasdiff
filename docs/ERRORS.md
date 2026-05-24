@@ -9,6 +9,8 @@ Error: failed to load base spec from "spec.yaml": error converting YAML to JSON:
 ```
 The reason for this error is that the underlying library, [kin-openapi](https://github.com/getkin/kin-openapi), converts YAML specs to JSON before parsing them.
 
+When a spec fails to load, oasdiff exits with code `102` (`101` for invalid flags, `103` when a glob matches no specs).
+
 ## Invalid specs vs. spec violations
 
 `diff`, `breaking`, `changelog`, and `summary` fail only on specs they can't load or parse (the error above). They're otherwise lenient: a spec that loads but violates the OpenAPI or JSON Schema rules is still diffed.
