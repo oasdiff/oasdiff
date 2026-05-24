@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"slices"
 	"strings"
-
-	"github.com/oasdiff/oasdiff/utils"
 )
 
 // enumSliceValue is like stringSliceValue with allowed values
@@ -51,15 +49,41 @@ func writeAsCSV(vals []string) (string, error) {
 	return strings.TrimSuffix(b.String(), "\n"), nil
 }
 
-func (s *enumSliceValue) checkAllowedValues(values []string) error {
-	if notAllowed := utils.StringSetFromSlice(values).Minus(utils.StringSetFromSlice(s.allowedValues)); !notAllowed.Empty() {
+// normalizeAllowedValues maps each value to its canonical allowed value,
+// matching case-insensitively so a caller can pass any case and downstream
+// consumers still receive the exact allowed string. Values with no
+// case-insensitive match are reported as not allowed.
+func (s *enumSliceValue) normalizeAllowedValues(values []string) ([]string, error) {
+	normalized := make([]string, 0, len(values))
+	var notAllowed []string
+	for _, v := range values {
+		if canonical, ok := s.canonicalValue(v); ok {
+			normalized = append(normalized, canonical)
+		} else {
+			notAllowed = append(notAllowed, v)
+		}
+	}
+
+	if len(notAllowed) > 0 {
 		verb := "are"
 		if len(notAllowed) == 1 {
 			verb = "is"
 		}
-		return fmt.Errorf("%s %s not one of the allowed values: %s", strings.Join(notAllowed.ToStringList(), ","), verb, s.listOf())
+		return nil, fmt.Errorf("%s %s not one of the allowed values: %s", strings.Join(notAllowed, ","), verb, s.listOf())
 	}
-	return nil
+
+	return normalized, nil
+}
+
+// canonicalValue returns the allowed value equal to value (case-insensitive)
+// and whether one was found.
+func (s *enumSliceValue) canonicalValue(value string) (string, bool) {
+	for _, allowed := range s.allowedValues {
+		if strings.EqualFold(value, allowed) {
+			return allowed, true
+		}
+	}
+	return "", false
 }
 
 func (s *enumSliceValue) listOf() string {
@@ -82,7 +106,8 @@ func (s *enumSliceValue) Set(val string) error {
 		return err
 	}
 
-	if err := s.checkAllowedValues(value); err != nil {
+	value, err = s.normalizeAllowedValues(value)
+	if err != nil {
 		return err
 	}
 
