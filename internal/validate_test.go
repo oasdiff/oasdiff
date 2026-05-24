@@ -47,7 +47,7 @@ func Test_ValidateCmd_OpenAPIVersionRequired(t *testing.T) {
 // offending line, 7:5).
 func Test_ValidateCmd_FieldVersionMismatch_LicenseIdentifier(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/license-identifier-in-3-0.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml --fail-on INFO ../data/validate/license-identifier-in-3-0.yaml"), &stdout, io.Discard))
 
 	var findings []map[string]any
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
@@ -62,7 +62,7 @@ func Test_ValidateCmd_FieldVersionMismatch_LicenseIdentifier(t *testing.T) {
 // *FieldVersionMismatchError{Field:"webhooks"}.
 func Test_ValidateCmd_FieldVersionMismatch_Webhooks(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/webhooks-in-3-0.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/webhooks-in-3-0.yaml"), &stdout, io.Discard))
 	require.Contains(t, stdout.String(), "webhooks-field-for-3-1-plus")
 }
 
@@ -72,7 +72,7 @@ func Test_ValidateCmd_FieldVersionMismatch_Webhooks(t *testing.T) {
 // using %w (not %v) at every wrap site.
 func Test_ValidateCmd_FieldVersionMismatch_SchemaKeyword(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/schema-3-1-keyword-in-3-0.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/schema-3-1-keyword-in-3-0.yaml"), &stdout, io.Discard))
 	require.Contains(t, stdout.String(), "const-field-for-3-1-plus")
 }
 
@@ -187,6 +187,36 @@ func Test_ValidateCmd_GitHubActionsFormat(t *testing.T) {
 	require.Contains(t, out, "value of version must be a non-empty string")
 }
 
+// Severity: a 3.1-only field in an older doc is a portability warning, not a
+// hard error. By default (--fail-on error) a warning-only spec passes (exit
+// 0) while still printing the finding; --fail-on warning escalates the same
+// finding to a failure (exit 1).
+func Test_ValidateCmd_SeverityWarnAndFailOn(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 0, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/webhooks-in-3-0.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "webhooks-field-for-3-1-plus", findings[0]["id"])
+	require.Equal(t, 2, findings[0]["level"]) // checker.WARN
+
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on WARN ../data/validate/webhooks-in-3-0.yaml"), io.Discard, io.Discard))
+}
+
+// Severity: an example that violates its schema is doc-accuracy only, so it
+// is info and doesn't fail the command by default.
+func Test_ValidateCmd_SeverityInfo(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 0, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/shared-schema-bad-example.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "example-violates-schema", findings[0]["id"])
+	require.Equal(t, 1, findings[0]["level"]) // checker.INFO
+}
+
 // Text format: header summary line + changelog-style multi-line block.
 // The block begins with "error\t[<id>]" so users grep'ing for severity
 // can match across both validate and changelog output.
@@ -254,7 +284,7 @@ func Test_ValidateCmd_SchemaValueError(t *testing.T) {
 	// (36 chars) but maxLength: 29. kin's SchemaError dumps Schema +
 	// Value; SchemaValueError wraps it and supplies parameter.Origin.
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/openapi-test1.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/openapi-test1.yaml"), &stdout, io.Discard))
 	out := stdout.String()
 	// Cluster dispatch: ValueKind "example" → "example-violates-schema".
 	require.Contains(t, out, "[example-violates-schema]")
@@ -275,7 +305,7 @@ func Test_ValidateCmd_SchemaValueError(t *testing.T) {
 // three from each operation that $refs it).
 func Test_ValidateCmd_DedupePreferringComponents(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/shared-schema-bad-example.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/shared-schema-bad-example.yaml"), &stdout, io.Discard))
 	out := stdout.String()
 	// Exactly one finding (not four).
 	require.Contains(t, out, "1 findings:")
@@ -328,7 +358,7 @@ func Test_ValidateCmd_DuplicateOperationID(t *testing.T) {
 // to the parent object holding the unexpected siblings.
 func Test_ValidateCmd_ExtraSiblingFields(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/extra-sibling-fields.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/extra-sibling-fields.yaml"), &stdout, io.Discard))
 	out := stdout.String()
 	require.Contains(t, out, "[extra-sibling-fields]")
 	require.Contains(t, out, "extra sibling fields: [description]")

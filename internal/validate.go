@@ -32,15 +32,22 @@ func getValidateCmd() *cobra.Command {
 		Long: `Validate an OpenAPI spec, reporting per-RFC violations such as invalid
 type values, missing required fields, malformed paths, and unresolved $refs.
 
-Each finding has a stable rule ID, a human-readable message, and a
-source location (file:line:column when the loader tracks origins).
-Output format is selectable: text by default, '-f yaml' or '-f json'
-for structured output, or '-f githubactions' to emit CI annotations
-that surface each finding inline on the pull request.
+Each finding has a stable rule ID, a severity (error, warning, or info), a
+human-readable message, and a source location (file:line:column when the
+loader tracks origins). Output format is selectable: text by default,
+'-f yaml' or '-f json' for structured output, or '-f githubactions' to emit
+CI annotations that surface each finding inline on the pull request.
+
+Most findings are errors (the spec can't be reliably consumed). A few are
+downgraded: version-portability issues (a 3.1 field in an older doc),
+ambiguity or redundancy (conflicting paths, duplicate parameters), and a
+default value that doesn't match its schema are warnings; an example that
+doesn't match its schema is info. Use --fail-on to control which severities
+fail the command.
 
 Exit codes:
-  0 — no findings
-  1 — at least one finding
+  0 — no findings at or above the --fail-on level
+  1 — at least one finding at or above the --fail-on level
   102 — failed to load the spec
 
 Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input.
@@ -51,6 +58,7 @@ Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' 
 
 	enumWithOptions(&cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputValidate), string(formatters.FormatText)), "format", "f", "output format")
 	enumWithOptions(&cmd, newEnumValue(checker.GetSupportedColorValues(), "auto"), "color", "", "when to colorize textual output")
+	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), LevelErr), "fail-on", "o", "exit with code 1 when a finding has this severity or higher")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 
 	return &cmd
@@ -84,7 +92,15 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 		return false, returnErr
 	}
 
-	return true, nil
+	// Findings are always printed; the --fail-on level decides whether they
+	// also fail the command. Default is error, so warnings and info surface
+	// without failing CI unless the caller lowers the threshold.
+	failOn, err := checker.NewLevel(flags.getFailOn())
+	if err != nil {
+		return false, getErrInvalidFlags(fmt.Errorf("invalid fail-on value: %q", flags.getFailOn()))
+	}
+
+	return findings.HasLevelOrHigher(failOn), nil
 }
 
 // outputFindings renders the findings through the shared formatters, the
@@ -144,7 +160,7 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 	f := formatters.Finding{
 		Id:        ruleIDForKinError(err),
 		Text:      unwrapContext(err).Error(),
-		Level:     checker.ERR,
+		Level:     severityForKinError(err),
 		Operation: operation,
 		Path:      path,
 		Section:   sectionForKinError(err),
@@ -160,6 +176,57 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 	// disambiguator (formatters/changes.go).
 	f.Fingerprint = formatters.ComputeFingerprint(f.Id, f.Operation, f.Path, argsForKinError(err))
 	return formatters.Findings{f}
+}
+
+// severityForKinError classifies a kin validation error into a severity.
+// The default is ERR: every kin Validate result is a spec violation, so
+// errors are the safe default and any kin cluster we don't recognise (or a
+// newly-typed one) stays an error. A few clusters are downgraded because
+// the spec still parses and the issue is a portability or doc-accuracy
+// concern rather than a structural break.
+//
+// The mapping is hardcoded for now. Per-rule severity customization (like
+// the changelog command's --severity-levels) can be layered on later, so
+// these classifications aren't engraved in stone.
+//
+// Deliberately kept as errors despite being downgrade candidates:
+// duplicate-operation-id violates the spec's uniqueness MUST and breaks
+// code generators that key method names off operationId.
+func severityForKinError(err error) checker.Level {
+	// INFO: an example that doesn't match its schema is a documentation
+	// accuracy nit; the contract (the schema) is still valid. A default,
+	// by contrast, is consumed at runtime by some tooling, so a mismatch
+	// there is a real risk and stays a warning.
+	var sve *openapi3.SchemaValueError
+	if errors.As(err, &sve) {
+		if sve.ValueKind == "example" {
+			return checker.INFO
+		}
+		return checker.WARN
+	}
+
+	// WARN: structurally valid but a portability or correctness risk.
+	var fvm *openapi3.FieldVersionMismatchError
+	if errors.As(err, &fvm) {
+		// e.g. a 3.1-only field in a doc that declares an older version.
+		return checker.WARN
+	}
+	var esf *openapi3.ExtraSiblingFieldsError
+	if errors.As(err, &esf) {
+		// Fields alongside a $ref are silently ignored in 3.0 rather than
+		// breaking the spec; the author's intent is lost, not the document.
+		return checker.WARN
+	}
+	var cpe *openapi3.ConflictingPathsError
+	if errors.As(err, &cpe) {
+		return checker.WARN
+	}
+	var dpe *openapi3.DuplicateParameterError
+	if errors.As(err, &dpe) {
+		return checker.WARN
+	}
+
+	return checker.ERR
 }
 
 // dedupePreferringComponents groups findings by their underlying

@@ -52,6 +52,18 @@ func (findings Findings) GetLevelCount() map[checker.Level]int {
 	return counts
 }
 
+// HasLevelOrHigher reports whether any finding is at least as severe as
+// level, mirroring checker.Changes.HasLevelOrHigher. Used to decide the
+// validate command's exit code against its --fail-on threshold.
+func (findings Findings) HasLevelOrHigher(level checker.Level) bool {
+	for _, finding := range findings {
+		if finding.Level >= level {
+			return true
+		}
+	}
+	return false
+}
+
 // indentContinuation prefixes every non-empty continuation line of s
 // with prefix. The first line is left as-is (the caller's format string
 // already supplies its leading indent), and blank lines stay blank
