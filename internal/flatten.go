@@ -18,7 +18,7 @@ func getFlattenCmd() *cobra.Command {
 		Use:   "flatten spec",
 		Short: "Merge allOf",
 		Long: `Display a flattened version of the given OpenAPI spec by merging all instances of allOf.
-Spec can be a path to a file, a URL or '-' to read standard input.
+Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input.
 `,
 		Args: cobra.ExactArgs(1),
 		RunE: getRun(runFlatten),
