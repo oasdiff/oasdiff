@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+paths: {}
+components:
+  securitySchemes:
+    badType:
+      type: bogus
+    badHttp:
+      type: http
+      scheme: bogus
+    badApiKey:
+      type: apiKey
+      name: key
+      in: bogus

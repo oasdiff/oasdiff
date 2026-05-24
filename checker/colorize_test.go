@@ -30,3 +30,8 @@ func TestColorMode_Invalid(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, colorMode, checker.ColorInvalid)
 }
+
+func TestIsColorEnabled(t *testing.T) {
+	require.True(t, checker.IsColorEnabled(checker.ColorAlways))
+	require.False(t, checker.IsColorEnabled(checker.ColorNever))
+}

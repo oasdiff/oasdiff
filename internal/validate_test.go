@@ -415,3 +415,57 @@ func Test_ValidateCmd_SchemaPatternRegexInvalid(t *testing.T) {
 	require.Contains(t, out, "error parsing regexp")
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
 }
+
+// A spec violating several rules exercises the multi-cluster dispatch in one
+// pass: EitherFieldRequiredError and ExactlyOneFieldError (both via
+// joinFieldsForRuleID), a RequiredFieldError on an OAuth flow, and a
+// SchemaValueError.
+func Test_ValidateCmd_MultipleClusters(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO -f json ../data/openapi-test3.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	ids := map[string]bool{}
+	for _, f := range findings {
+		ids[f["id"].(string)] = true
+	}
+	require.True(t, ids["value-or-external-value-required"], "EitherFieldRequiredError via joinFieldsForRuleID")
+	require.True(t, ids["operation-id-or-operation-ref-required"], "ExactlyOneFieldError via joinFieldsForRuleID")
+	require.True(t, ids["o-auth-flow-scopes-required"])
+	require.True(t, ids["example-violates-schema"])
+}
+
+// Two path templates that differ only by parameter name → ConflictingPathsError
+// (a warning: the spec parses but routing is ambiguous).
+func Test_ValidateCmd_ConflictingPaths(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/conflicting-paths.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "[conflicting-paths]")
+}
+
+// The same parameter (name + in) declared twice → DuplicateParameterError
+// (a warning: redundant, tools usually take the last).
+func Test_ValidateCmd_DuplicateParameter(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/duplicate-parameter.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "[duplicate-parameter]")
+}
+
+// A path key without a leading slash → PathMustStartWithSlashError.
+func Test_ValidateCmd_PathMustStartWithSlash(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/path-must-start-with-slash.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "[path-must-start-with-slash]")
+}
+
+// Invalid security scheme definitions dispatch three distinct cluster types in
+// one pass: a bad type, a bad http scheme, and a bad apiKey 'in'.
+func Test_ValidateCmd_InvalidSecuritySchemes(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/security-schemes-invalid.yaml"), &stdout, io.Discard))
+	out := stdout.String()
+	require.Contains(t, out, "[security-scheme-type-invalid]")
+	require.Contains(t, out, "[security-scheme-http-scheme-invalid]")
+	require.Contains(t, out, "[security-scheme-apikey-in-invalid]")
+}
