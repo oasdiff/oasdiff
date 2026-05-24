@@ -73,3 +73,7 @@ This makes it usable as a CI gate: by default `oasdiff validate openapi.yaml` fa
 ## Rule IDs
 
 Each finding has a stable, kebab-case rule ID derived from the violation, for example `path-parameters-mismatch`, `duplicate-operation-id`, `unresolved-ref`, `schema-pattern-regex-invalid`, and `security-scheme-type-invalid`. Violations that do not yet have a dedicated ID surface under the catchall `spec-validation-error`.
+
+## Feedback
+
+Found an issue? [Open one here](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[validate]%20) with `[validate]` in the title.
