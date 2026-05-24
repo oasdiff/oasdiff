@@ -316,6 +316,14 @@ func Test_ValidateCmd_DedupePreferringComponents(t *testing.T) {
 	require.Contains(t, out, "invalid example: value must be a number")
 }
 
+// --color only affects the text output, so pairing it with a non-text
+// format is rejected rather than silently ignored (matching changelog).
+func Test_ValidateCmd_ColorWithNonTextFormatRejected(t *testing.T) {
+	var stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff validate --color always -f json ../data/validate/valid.yaml"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "--color is only relevant with the 'text' format")
+}
+
 // Invalid file path → exit 102 (failed-to-load), not 1 (validation finding).
 // Distinguishing these matters for CI: load failures and validation
 // failures are different incidents.

@@ -52,7 +52,19 @@ Exit codes:
 
 Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' to read standard input.
 `,
-		Args: cobra.ExactArgs(1),
+		Args: func(cmd *cobra.Command, args []string) error {
+			if err := cobra.ExactArgs(1)(cmd, args); err != nil {
+				return err
+			}
+			// color only affects the text output; yaml/json/githubactions
+			// ignore it, so flag the mismatch rather than silently dropping it.
+			if cmd.Flags().Changed("color") {
+				if format, _ := cmd.Flags().GetString("format"); format != string(formatters.FormatText) {
+					return errors.New("--color is only relevant with the 'text' format")
+				}
+			}
+			return nil
+		},
 		RunE: getRun(runValidate),
 	}
 
