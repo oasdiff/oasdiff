@@ -13,109 +13,70 @@ const (
 
 func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		schemaDiff := info.schemaDiff
+		typeDiff := schemaDiff.TypeDiff
+		formatDiff := schemaDiff.FormatDiff
+
+		if !typeDiff.Empty() || !formatDiff.Empty() {
+			// Body-level suppression also skips the property walk for this
+			// media type (the pre-migration code used a `continue` in the
+			// media-type for-loop, which had that effect). Preserved.
+			if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
+				return
+			}
+			// Suppress null-only type changes (handled by nullable checkers).
+			if isNullTypeChange(typeDiff) && formatDiff.Empty() {
+				return
 			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				schemaDiff := mediaTypeDiff.SchemaDiff
-				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, schemaDiff, "type")
-				typeDiff := schemaDiff.TypeDiff
-				formatDiff := schemaDiff.FormatDiff
-
-				if !typeDiff.Empty() || !formatDiff.Empty() {
-
-					id := RequestBodyTypeGeneralizedId
-
-					// Check for suppression by ListOfTypes checker
-					if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
-						continue
-					}
-
-					// Suppress null-only type changes (handled by nullable checkers)
-					if isNullTypeChange(typeDiff) && formatDiff.Empty() {
-						continue
-					}
-
-					if breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
-						id = RequestBodyTypeChangedId
-					}
-
-					result = append(result, NewApiChange(
-						id,
-						config,
-						[]any{getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff)},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-				}
-
-				CheckModifiedPropertiesDiff(
-					schemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						if propertyDiff.Revision == nil {
-							return
-						}
-						if propertyDiff.Revision.ReadOnly {
-							return
-						}
-
-						// Check for suppression by ListOfTypes checker
-						if shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff) {
-							return
-						}
-
-						// Suppress null-only type changes (handled by nullable checkers)
-						if isNullTypeChange(propertyDiff.TypeDiff) && propertyDiff.FormatDiff.Empty() {
-							return
-						}
-
-						schemaDiff := propertyDiff
-						typeDiff := schemaDiff.TypeDiff
-						formatDiff := schemaDiff.FormatDiff
-
-						if !typeDiff.Empty() || !formatDiff.Empty() {
-
-							id := RequestPropertyTypeGeneralizedId
-
-							if breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
-								id = RequestPropertyTypeChangedId
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff)},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+			id := RequestBodyTypeGeneralizedId
+			if breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, info.mediaType, schemaDiff) {
+				id = RequestBodyTypeChangedId
 			}
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
+			result = append(result, info.newChange(
+				id,
+				[]any{getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff)},
+				"",
+			).WithSources(baseSource, revisionSource))
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.Revision == nil {
+				return
+			}
+			if p.propertyDiff.Revision.ReadOnly {
+				return
+			}
+
+			if shouldSuppressPropertyTypeChangedForListOfTypes(p.propertyDiff) {
+				return
+			}
+			if isNullTypeChange(p.propertyDiff.TypeDiff) && p.propertyDiff.FormatDiff.Empty() {
+				return
+			}
+
+			propSchemaDiff := p.propertyDiff
+			propTypeDiff := propSchemaDiff.TypeDiff
+			propFormatDiff := propSchemaDiff.FormatDiff
+
+			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
+				id := RequestPropertyTypeGeneralizedId
+				if breakingTypeFormatChangedInRequestProperty(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
+					id = RequestPropertyTypeChangedId
+				}
+
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
+				result = append(result, p.newChange(
+					id,
+					[]any{propertyFullName(p.propertyPath, p.propertyName), getBaseType(propSchemaDiff), getBaseFormat(propSchemaDiff), getRevisionType(propSchemaDiff), getRevisionFormat(propSchemaDiff)},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
