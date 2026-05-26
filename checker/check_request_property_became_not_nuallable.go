@@ -17,6 +17,7 @@ const (
 //   - Body-level OpenAPI-3.1 type-array transitions do not.
 //   - Property-level NullableDiff emissions do not.
 //   - Property-level OpenAPI-3.1 type-array transitions do.
+//
 // This inconsistency predates the walker; preserved as-is to keep the
 // migration a pure refactor.
 func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
