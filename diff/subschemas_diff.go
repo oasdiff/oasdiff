@@ -142,7 +142,7 @@ func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schem
 	if !config.MatchInlineRefs {
 		return combined
 	}
-	if combined == nil || len(combined.Added) == 0 || len(combined.Deleted) == 0 {
+	if combined.Empty() {
 		return combined
 	}
 
