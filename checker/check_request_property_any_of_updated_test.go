@@ -119,6 +119,42 @@ func TestRequestPropertyAnyOfInlineEnumRefactorToRef(t *testing.T) {
 	require.Empty(t, anyOfChanges)
 }
 
+// CL: body-level anyOf added/removed changes carry media-type details so
+// reports can tell which media type each change belongs to when a request
+// body has more than one. Without WithDetails the entries are identical
+// and visitors can't tell apart "added Rabbit on application/json" from
+// "added Rabbit on application/xml".
+func TestRequestBodyAnyOfMultiMediaTypeDetails(t *testing.T) {
+	s1, err := open("../data/checker/request_body_any_of_media_type_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_body_any_of_media_type_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAnyOfUpdatedCheck), d, osm, checker.INFO)
+
+	var addedDetails, removedDetails []string
+	for _, e := range errs {
+		c := e.(checker.ApiChange)
+		switch c.Id {
+		case checker.RequestBodyAnyOfAddedId:
+			addedDetails = append(addedDetails, c.Details)
+		case checker.RequestBodyAnyOfRemovedId:
+			removedDetails = append(removedDetails, c.Details)
+		}
+	}
+
+	require.ElementsMatch(t, []string{
+		"(media type: application/json)",
+		"(media type: application/xml)",
+	}, addedDetails)
+	require.ElementsMatch(t, []string{
+		"(media type: application/json)",
+		"(media type: application/xml)",
+	}, removedDetails)
+}
+
 // CL: no changes when paths diff is nil
 func TestRequestPropertyAnyOfNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}

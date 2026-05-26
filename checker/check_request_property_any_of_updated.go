@@ -56,7 +56,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 							operationItem.Revision,
 							operation,
 							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 
 					deleted := filterValidationEquivalentDeletedSubschemas(
@@ -75,7 +75,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 							operationItem.Revision,
 							operation,
 							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 					}
 				}
 
