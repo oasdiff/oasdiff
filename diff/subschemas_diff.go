@@ -11,7 +11,7 @@ import (
 SubschemasDiff describes the changes between a pair of subschemas under AllOf, AnyOf or OneOf
 [oneOf, anyOf, allOf]: https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/
 [Schema Objects]: https://swagger.io/specification/#schema-object
-SubschemasDiff is a combination of two diffs:
+SubschemasDiff is a combination of three diffs:
 
  1. Diff of referenced schemas: subschemas under AllOf, AnyOf or OneOf defined as references to schemas under components/schemas
     - schemas with the same $ref across base and revision are compared to each other and based on the result are considered as modified or unmodified
@@ -23,7 +23,10 @@ SubschemasDiff is a combination of two diffs:
     - schemas with the same title across base and revision are compared to each other and based on the result are considered as modified or unmodified
     - other schemas are considered added/deleted
 
-Special case:
+ 3. Reconciliation of inline/$ref refactors (AnyOf and OneOf only, when Config.MatchInlineRefs is true):
+    after passes 1 and 2, any unmatched Added/Deleted pair that crosses the inline/$ref boundary and is validation-equivalent (annotation-only differences ignored) is paired and removed from Added and Deleted. Matching is pair-based: each Deleted matches at most one Added.
+
+Special case (in pass 2):
 If there remains exactly one added schema and one deleted schema without a reference and without a title, they will be be compared to eachother and considered as modified or unmodified
 */
 type SubschemasDiff struct {
