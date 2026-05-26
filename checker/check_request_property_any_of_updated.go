@@ -1,8 +1,6 @@
 package checker
 
-import (
-	"github.com/oasdiff/oasdiff/diff"
-)
+import "github.com/oasdiff/oasdiff/diff"
 
 const (
 	RequestBodyAnyOfAddedId       = "request-body-any-of-added"
@@ -41,32 +39,44 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 					continue
 				}
 
-				if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AnyOfDiff.Added) > 0 {
-					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf", -1, mediaTypeDiff.SchemaDiff.AnyOfDiff.Added[0].Index)
-					result = append(result, NewApiChange(
-						RequestBodyAnyOfAddedId,
-						config,
-						[]any{mediaTypeDiff.SchemaDiff.AnyOfDiff.Added.String()},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
-				}
+				if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil {
+					added := filterValidationEquivalentAddedSubschemas(
+						mediaTypeDiff.SchemaDiff.AnyOfDiff.Added,
+						mediaTypeDiff.SchemaDiff.Base.AnyOf,
+						mediaTypeDiff.SchemaDiff.Revision.AnyOf,
+					)
+					if len(added) > 0 {
+						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf", -1, added[0].Index)
+						result = append(result, NewApiChange(
+							RequestBodyAnyOfAddedId,
+							config,
+							[]any{added.String()},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+					}
 
-				if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted) > 0 {
-					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf", mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted[0].Index, -1)
-					result = append(result, NewApiChange(
-						RequestBodyAnyOfRemovedId,
-						config,
-						[]any{mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted.String()},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
+					deleted := filterValidationEquivalentDeletedSubschemas(
+						mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted,
+						mediaTypeDiff.SchemaDiff.Base.AnyOf,
+						mediaTypeDiff.SchemaDiff.Revision.AnyOf,
+					)
+					if len(deleted) > 0 {
+						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "anyOf", deleted[0].Index, -1)
+						result = append(result, NewApiChange(
+							RequestBodyAnyOfRemovedId,
+							config,
+							[]any{deleted.String()},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+					}
 				}
 
 				CheckModifiedPropertiesDiff(
@@ -83,12 +93,17 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 
 						propName := propertyFullName(propertyPath, propertyName)
 
-						if len(propertyDiff.AnyOfDiff.Added) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "anyOf", -1, propertyDiff.AnyOfDiff.Added[0].Index)
+						added := filterValidationEquivalentAddedSubschemas(
+							propertyDiff.AnyOfDiff.Added,
+							propertyDiff.Base.AnyOf,
+							propertyDiff.Revision.AnyOf,
+						)
+						if len(added) > 0 {
+							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "anyOf", -1, added[0].Index)
 							result = append(result, NewApiChange(
 								RequestPropertyAnyOfAddedId,
 								config,
-								[]any{propertyDiff.AnyOfDiff.Added.String(), propName},
+								[]any{added.String(), propName},
 								"",
 								operationsSources,
 								operationItem.Revision,
@@ -97,12 +112,17 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 						}
 
-						if len(propertyDiff.AnyOfDiff.Deleted) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "anyOf", propertyDiff.AnyOfDiff.Deleted[0].Index, -1)
+						deleted := filterValidationEquivalentDeletedSubschemas(
+							propertyDiff.AnyOfDiff.Deleted,
+							propertyDiff.Base.AnyOf,
+							propertyDiff.Revision.AnyOf,
+						)
+						if len(deleted) > 0 {
+							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "anyOf", deleted[0].Index, -1)
 							result = append(result, NewApiChange(
 								RequestPropertyAnyOfRemovedId,
 								config,
-								[]any{propertyDiff.AnyOfDiff.Deleted.String(), propName},
+								[]any{deleted.String(), propName},
 								"",
 								operationsSources,
 								operationItem.Revision,
