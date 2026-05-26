@@ -48,7 +48,7 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 		return getErrConfigFileProblem(err)
 	}
 
-	if err := validate(v); err != nil {
+	if err := validateViperConfig(v); err != nil {
 		return getErrConfigFileProblem(err)
 	}
 
@@ -210,9 +210,9 @@ type Config struct {
 	Template               string   `mapstructure:"template"`
 }
 
-// validate checks that each of the provided configuration values is one of the generally accepted values
+// validateViperConfig checks that each of the provided configuration values is one of the generally accepted values
 // note that validataion ignores the specific sub-command that was used and is therefor not as strict as the command-specific validation
-func validate(v IViper) error {
+func validateViperConfig(v IViper) error {
 	var config Config
 
 	if err := v.UnmarshalExact(&config); err != nil {
