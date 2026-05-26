@@ -41,18 +41,25 @@ func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 					continue
 				}
 
-				if mediaTypeDiff.SchemaDiff.OneOfDiff != nil && len(mediaTypeDiff.SchemaDiff.OneOfDiff.Added) > 0 {
-					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", -1, mediaTypeDiff.SchemaDiff.OneOfDiff.Added[0].Index)
-					result = append(result, NewApiChange(
-						RequestBodyOneOfAddedId,
-						config,
-						[]any{mediaTypeDiff.SchemaDiff.OneOfDiff.Added.String()},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+				if mediaTypeDiff.SchemaDiff.OneOfDiff != nil {
+					added := filterValidationEquivalentAddedSubschemas(
+						mediaTypeDiff.SchemaDiff.OneOfDiff.Added,
+						mediaTypeDiff.SchemaDiff.Base.OneOf,
+						mediaTypeDiff.SchemaDiff.Revision.OneOf,
+					)
+					if len(added) > 0 {
+						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", -1, added[0].Index)
+						result = append(result, NewApiChange(
+							RequestBodyOneOfAddedId,
+							config,
+							[]any{added.String()},
+							"",
+							operationsSources,
+							operationItem.Revision,
+							operation,
+							path,
+						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
+					}
 				}
 
 				if mediaTypeDiff.SchemaDiff.OneOfDiff != nil {
@@ -90,12 +97,17 @@ func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 
 						propName := propertyFullName(propertyPath, propertyName)
 
-						if len(propertyDiff.OneOfDiff.Added) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", -1, propertyDiff.OneOfDiff.Added[0].Index)
+						added := filterValidationEquivalentAddedSubschemas(
+							propertyDiff.OneOfDiff.Added,
+							propertyDiff.Base.OneOf,
+							propertyDiff.Revision.OneOf,
+						)
+						if len(added) > 0 {
+							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", -1, added[0].Index)
 							result = append(result, NewApiChange(
 								RequestPropertyOneOfAddedId,
 								config,
-								[]any{propertyDiff.OneOfDiff.Added.String(), propName},
+								[]any{added.String(), propName},
 								"",
 								operationsSources,
 								operationItem.Revision,

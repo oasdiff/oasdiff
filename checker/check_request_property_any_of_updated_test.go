@@ -114,7 +114,9 @@ func TestRequestPropertyAnyOfInlineEnumRefactorToRef(t *testing.T) {
 	require.Empty(t, breakingChanges)
 
 	anyOfChanges := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAnyOfUpdatedCheck), d, osm, checker.INFO)
+	require.False(t, containsId(anyOfChanges, checker.RequestPropertyAnyOfAddedId))
 	require.False(t, containsId(anyOfChanges, checker.RequestPropertyAnyOfRemovedId))
+	require.Empty(t, anyOfChanges)
 }
 
 // CL: no changes when paths diff is nil

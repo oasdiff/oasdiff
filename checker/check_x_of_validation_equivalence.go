@@ -23,8 +23,26 @@ func filterValidationEquivalentDeletedSubschemas(deleted diff.Subschemas, baseRe
 	return result
 }
 
+func filterValidationEquivalentAddedSubschemas(added diff.Subschemas, baseRefs, revisionRefs openapi3.SchemaRefs) diff.Subschemas {
+	result := diff.Subschemas{}
+	for _, addedSubschema := range added {
+		if addedSubschema.Index < 0 || addedSubschema.Index >= len(revisionRefs) {
+			result = append(result, addedSubschema)
+			continue
+		}
+
+		if hasValidationEquivalentSubschema(revisionRefs[addedSubschema.Index], baseRefs) {
+			continue
+		}
+
+		result = append(result, addedSubschema)
+	}
+
+	return result
+}
+
 func hasValidationEquivalentSubschema(schemaRef *openapi3.SchemaRef, schemaRefs openapi3.SchemaRefs) bool {
-	// This is O(deleted x revision); x-of lists are typically short, and the
+	// This is O(source x candidate); x-of lists are typically short, and the
 	// conservative inline/$ref boundary keeps the extra diffing scoped.
 	for _, candidateRef := range schemaRefs {
 		if !isInlineRefactor(schemaRef, candidateRef) {

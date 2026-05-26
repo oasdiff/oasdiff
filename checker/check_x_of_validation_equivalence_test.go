@@ -13,10 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
+func TestXOfInlineEnumRefactorToRefDoesNotReportAddedOrRemoved(t *testing.T) {
 	tests := []struct {
 		name      string
 		check     checker.BackwardCompatibilityCheck
+		addedID   string
 		removedID string
 		base      string
 		revision  string
@@ -24,6 +25,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "request body anyOf",
 			check:     checker.RequestPropertyAnyOfUpdatedCheck,
+			addedID:   checker.RequestBodyAnyOfAddedId,
 			removedID: checker.RequestBodyAnyOfRemovedId,
 			base:      xOfBodySpec("request", "anyOf", false),
 			revision:  xOfBodySpec("request", "anyOf", true),
@@ -31,6 +33,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "request property anyOf",
 			check:     checker.RequestPropertyAnyOfUpdatedCheck,
+			addedID:   checker.RequestPropertyAnyOfAddedId,
 			removedID: checker.RequestPropertyAnyOfRemovedId,
 			base:      xOfPropertySpec("request", "anyOf", false),
 			revision:  xOfPropertySpec("request", "anyOf", true),
@@ -38,6 +41,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "response body anyOf",
 			check:     checker.ResponsePropertyAnyOfUpdatedCheck,
+			addedID:   checker.ResponseBodyAnyOfAddedId,
 			removedID: checker.ResponseBodyAnyOfRemovedId,
 			base:      xOfBodySpec("response", "anyOf", false),
 			revision:  xOfBodySpec("response", "anyOf", true),
@@ -45,6 +49,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "response property anyOf",
 			check:     checker.ResponsePropertyAnyOfUpdatedCheck,
+			addedID:   checker.ResponsePropertyAnyOfAddedId,
 			removedID: checker.ResponsePropertyAnyOfRemovedId,
 			base:      xOfPropertySpec("response", "anyOf", false),
 			revision:  xOfPropertySpec("response", "anyOf", true),
@@ -52,6 +57,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "request body oneOf",
 			check:     checker.RequestPropertyOneOfUpdatedCheck,
+			addedID:   checker.RequestBodyOneOfAddedId,
 			removedID: checker.RequestBodyOneOfRemovedId,
 			base:      xOfBodySpec("request", "oneOf", false),
 			revision:  xOfBodySpec("request", "oneOf", true),
@@ -59,6 +65,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "request property oneOf",
 			check:     checker.RequestPropertyOneOfUpdatedCheck,
+			addedID:   checker.RequestPropertyOneOfAddedId,
 			removedID: checker.RequestPropertyOneOfRemovedId,
 			base:      xOfPropertySpec("request", "oneOf", false),
 			revision:  xOfPropertySpec("request", "oneOf", true),
@@ -66,6 +73,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "response body oneOf",
 			check:     checker.ResponsePropertyOneOfUpdated,
+			addedID:   checker.ResponseBodyOneOfAddedId,
 			removedID: checker.ResponseBodyOneOfRemovedId,
 			base:      xOfBodySpec("response", "oneOf", false),
 			revision:  xOfBodySpec("response", "oneOf", true),
@@ -73,6 +81,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 		{
 			name:      "response property oneOf",
 			check:     checker.ResponsePropertyOneOfUpdated,
+			addedID:   checker.ResponsePropertyOneOfAddedId,
 			removedID: checker.ResponsePropertyOneOfRemovedId,
 			base:      xOfPropertySpec("response", "oneOf", false),
 			revision:  xOfPropertySpec("response", "oneOf", true),
@@ -86,6 +95,7 @@ func TestXOfInlineEnumRefactorToRefDoesNotReportRemoved(t *testing.T) {
 			require.NoError(t, err)
 
 			changes := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(test.check), diffReport, operationsSources, checker.INFO)
+			require.False(t, containsId(changes, test.addedID))
 			require.False(t, containsId(changes, test.removedID))
 		})
 	}
