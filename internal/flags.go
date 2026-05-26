@@ -31,6 +31,7 @@ func (flags *Flags) toConfig() *diff.Config {
 	config.PathStripPrefixBase = flags.v.GetString("strip-prefix-base")
 	config.PathStripPrefixRevision = flags.v.GetString("strip-prefix-revision")
 	config.IncludePathParams = flags.v.GetBool("include-path-params")
+	config.MatchInlineRefs = flags.v.GetBool("match-inline-refs")
 
 	return config
 }

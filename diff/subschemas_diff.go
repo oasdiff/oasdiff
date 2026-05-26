@@ -123,7 +123,94 @@ func getSubschemasDiffInternal(config *Config, state *state, schemaRefs1, schema
 		return nil, err
 	}
 
-	return diffRefs.combine(diffInline)
+	combined, err := diffRefs.combine(diffInline)
+	if err != nil {
+		return nil, err
+	}
+
+	return reconcileInlineRefRefactors(config, combined, schemaRefs1, schemaRefs2), nil
+}
+
+// reconcileInlineRefRefactors pairs unmatched Added and Deleted entries that
+// cross the inline/$ref boundary and are validation-equivalent under the
+// caller's config, then removes both members of each pair. Each Deleted
+// matches at most one Added (first-fit), so a standalone addition that
+// happens to duplicate an existing still-present branch is preserved.
+//
+// Gated on config.MatchInlineRefs; default true.
+func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
+	if !config.MatchInlineRefs {
+		return combined
+	}
+	if combined == nil || len(combined.Added) == 0 || len(combined.Deleted) == 0 {
+		return combined
+	}
+
+	matchedAdded := map[int]bool{}
+	matchedDeleted := map[int]bool{}
+
+	for di, deletedSubschema := range combined.Deleted {
+		if deletedSubschema.Index < 0 || deletedSubschema.Index >= len(schemaRefs1) {
+			continue
+		}
+		deletedRef := schemaRefs1[deletedSubschema.Index]
+
+		for ai, addedSubschema := range combined.Added {
+			if matchedAdded[ai] {
+				continue
+			}
+			if addedSubschema.Index < 0 || addedSubschema.Index >= len(schemaRefs2) {
+				continue
+			}
+			addedRef := schemaRefs2[addedSubschema.Index]
+
+			if !isInlineRefactorBoundary(deletedRef, addedRef) {
+				continue
+			}
+			if !SchemaRefsValidationEquivalent(config, deletedRef, addedRef) {
+				continue
+			}
+
+			matchedAdded[ai] = true
+			matchedDeleted[di] = true
+			break
+		}
+	}
+
+	if len(matchedAdded) == 0 {
+		return combined
+	}
+
+	result := &SubschemasDiff{
+		Added:    make(Subschemas, 0, len(combined.Added)-len(matchedAdded)),
+		Deleted:  make(Subschemas, 0, len(combined.Deleted)-len(matchedDeleted)),
+		Modified: combined.Modified,
+	}
+	for ai, addedSubschema := range combined.Added {
+		if matchedAdded[ai] {
+			continue
+		}
+		result.Added = append(result.Added, addedSubschema)
+	}
+	for di, deletedSubschema := range combined.Deleted {
+		if matchedDeleted[di] {
+			continue
+		}
+		result.Deleted = append(result.Deleted, deletedSubschema)
+	}
+
+	return result
+}
+
+// isInlineRefactorBoundary reports whether the two refs sit on opposite sides
+// of the inline/$ref boundary. An inline-to-inline edit (or $ref-to-$ref
+// rename) is intentionally out of scope: only the cross-boundary refactor is
+// recognised as form-only.
+func isInlineRefactorBoundary(schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
+	if schemaRef1 == nil || schemaRef2 == nil {
+		return false
+	}
+	return (schemaRef1.Ref == "") != (schemaRef2.Ref == "")
 }
 
 type schemaRefsFilter func(schemaRef *openapi3.SchemaRef) bool

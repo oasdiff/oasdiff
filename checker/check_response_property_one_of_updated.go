@@ -45,12 +45,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 					}
 
 					if mediaTypeDiff.SchemaDiff.OneOfDiff != nil {
-						added := filterValidationEquivalentAddedSubschemas(
-							mediaTypeDiff.SchemaDiff.OneOfDiff.Added,
-							mediaTypeDiff.SchemaDiff.Base.OneOf,
-							mediaTypeDiff.SchemaDiff.Revision.OneOf,
-						)
-						if len(added) > 0 {
+						if added := mediaTypeDiff.SchemaDiff.OneOfDiff.Added; len(added) > 0 {
 							baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", -1, added[0].Index)
 							result = append(result, NewApiChange(
 								ResponseBodyOneOfAddedId,
@@ -64,12 +59,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
 						}
 
-						deleted := filterValidationEquivalentDeletedSubschemas(
-							mediaTypeDiff.SchemaDiff.OneOfDiff.Deleted,
-							mediaTypeDiff.SchemaDiff.Base.OneOf,
-							mediaTypeDiff.SchemaDiff.Revision.OneOf,
-						)
-						if len(deleted) > 0 {
+						if deleted := mediaTypeDiff.SchemaDiff.OneOfDiff.Deleted; len(deleted) > 0 {
 							baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", deleted[0].Index, -1)
 							result = append(result, NewApiChange(
 								ResponseBodyOneOfRemovedId,
@@ -98,12 +88,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 
 							propName := propertyFullName(propertyPath, propertyName)
 
-							added := filterValidationEquivalentAddedSubschemas(
-								propertyDiff.OneOfDiff.Added,
-								propertyDiff.Base.OneOf,
-								propertyDiff.Revision.OneOf,
-							)
-							if len(added) > 0 {
+							if added := propertyDiff.OneOfDiff.Added; len(added) > 0 {
 								propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", -1, added[0].Index)
 								result = append(result, NewApiChange(
 									ResponsePropertyOneOfAddedId,
@@ -117,12 +102,7 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
 							}
 
-							deleted := filterValidationEquivalentDeletedSubschemas(
-								propertyDiff.OneOfDiff.Deleted,
-								propertyDiff.Base.OneOf,
-								propertyDiff.Revision.OneOf,
-							)
-							if len(deleted) > 0 {
+							if deleted := propertyDiff.OneOfDiff.Deleted; len(deleted) > 0 {
 								propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", deleted[0].Index, -1)
 								result = append(result, NewApiChange(
 									ResponsePropertyOneOfRemovedId,

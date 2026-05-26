@@ -112,6 +112,33 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
+## Matching Inline and `$ref` Subschemas
+
+Under `anyOf` and `oneOf`, oasdiff treats an inline subschema and a `$ref` to a validation-equivalent component as the same branch by default. This catches a common codegen pattern where a tool extracts an inline schema (often an enum) into a named component without changing the accepted payloads:
+
+```yaml
+# base
+role:
+  anyOf:
+    - type: string
+      enum: [user, admin]
+    - type: "null"
+
+# revision (UserRole is { type: string, enum: [user, admin] })
+role:
+  anyOf:
+    - $ref: "#/components/schemas/UserRole"
+    - type: "null"
+```
+
+The diff reports no change for the `anyOf` list because the union of accepted payloads is identical. The same behaviour applies to `breaking` and `changelog`, which run on the same diff engine.
+
+To restore the pre-1.17 behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
+
+Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
+
+The matching is pair-based: each deleted branch matches at most one added branch. An added `$ref` that happens to be equivalent to an inline branch already present on the base (a standalone addition that overlaps an existing branch, rather than a refactor) is still reported as added.
+
 ## Usage Examples
 
 ### Diff as YAML

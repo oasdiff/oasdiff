@@ -205,3 +205,79 @@ func TestAnyOf_ExcludeDescriptions(t *testing.T) {
 	require.Empty(t, anyOfDiff.Deleted)
 	require.Empty(t, anyOfDiff.Modified)
 }
+
+// Inline -> $ref refactor of an equivalent component is not reported by
+// default (MatchInlineRefs=true). The Added/Deleted pair is paired up in the
+// subschema matcher and removed.
+func TestAnyOf_InlineRefRefactor_MatchedByDefault(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-to-ref-refactor-base.yaml"))
+	require.NoError(t, err)
+	s2, err := loader.LoadFromFile(getXOfFile("inline-to-ref-refactor-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	// The refactor reconciles away the only structural change. The whole
+	// PathsDiff (or the AnyOfDiff inside it) should be absent.
+	if dd.PathsDiff == nil {
+		return
+	}
+	pathDiff, ok := dd.PathsDiff.Modified["/pets"]
+	if !ok || pathDiff.OperationsDiff == nil {
+		return
+	}
+	opDiff, ok := pathDiff.OperationsDiff.Modified["POST"]
+	if !ok || opDiff.RequestBodyDiff == nil || opDiff.RequestBodyDiff.ContentDiff == nil {
+		return
+	}
+	mediaTypeDiff, ok := opDiff.RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"]
+	if !ok || mediaTypeDiff.SchemaDiff == nil {
+		return
+	}
+	require.Nil(t, mediaTypeDiff.SchemaDiff.AnyOfDiff,
+		"inline-to-$ref refactor of an equivalent component must not produce an AnyOfDiff")
+}
+
+// With --match-inline-refs=false (WithMatchInlineRefs(false)) the matcher
+// falls back to the pre-1.17 behaviour: the inline branch is reported as
+// Deleted and the $ref branch as Added.
+func TestAnyOf_InlineRefRefactor_OptOut(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-to-ref-refactor-base.yaml"))
+	require.NoError(t, err)
+	s2, err := loader.LoadFromFile(getXOfFile("inline-to-ref-refactor-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(diff.WithMatchInlineRefs(false)), s1, s2)
+	require.NoError(t, err)
+
+	anyOfDiff := dd.PathsDiff.Modified["/pets"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+	require.NotNil(t, anyOfDiff)
+	require.Len(t, anyOfDiff.Added, 1, "the new $ref branch must be reported as added")
+	require.Len(t, anyOfDiff.Deleted, 1, "the old inline branch must be reported as deleted")
+}
+
+// Pair-based matching: a standalone added $ref that happens to be equivalent
+// to an existing still-present inline branch is *not* suppressed, because
+// there is no deleted branch to pair it with. Verifies the matcher does not
+// collapse anything that is not actually a refactor.
+func TestAnyOf_StandaloneEquivalentAddedRefIsReported(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-ref-standalone-add-base.yaml"))
+	require.NoError(t, err)
+	s2, err := loader.LoadFromFile(getXOfFile("inline-ref-standalone-add-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	anyOfDiff := dd.PathsDiff.Modified["/pets"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+	require.NotNil(t, anyOfDiff, "the standalone $ref addition is a real change and must be reported")
+	require.Len(t, anyOfDiff.Added, 1, "the new $ref branch must be reported as added")
+	require.Empty(t, anyOfDiff.Deleted, "nothing was removed on the base side")
+}

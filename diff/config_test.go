@@ -24,3 +24,13 @@ func TestConfig_ExcludeElements(t *testing.T) {
 	require.True(t, c.IsExcludeTitle())
 	require.True(t, c.IsExcludeSummary())
 }
+
+func TestConfig_MatchInlineRefsDefault(t *testing.T) {
+	c := diff.NewConfig()
+	require.True(t, c.MatchInlineRefs)
+}
+
+func TestConfig_WithMatchInlineRefsOff(t *testing.T) {
+	c := diff.NewConfig(diff.WithMatchInlineRefs(false))
+	require.False(t, c.MatchInlineRefs)
+}
