@@ -19,179 +19,91 @@ const (
 
 func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
-			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minimum")
-				if mediaTypeDiff.SchemaDiff.MinDiff != nil {
-					minDiff := mediaTypeDiff.SchemaDiff.MinDiff
-					if minDiff.From != nil &&
-						minDiff.To != nil {
-						if IsIncreasedValue(minDiff) {
-							result = append(result, NewApiChange(
-								RequestBodyMinIncreasedId,
-								config,
-								[]any{minDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestBodyMinDecreasedId,
-								config,
-								[]any{minDiff.From, minDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-					}
-				}
-				if mediaTypeDiff.SchemaDiff.ExclusiveMinDiff != nil {
-					exMinDiff := mediaTypeDiff.SchemaDiff.ExclusiveMinDiff
-					if exMinDiff.From != nil &&
-						exMinDiff.To != nil {
-						exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "exclusiveMinimum")
-						if IsIncreasedValue(exMinDiff) {
-							result = append(result, NewApiChange(
-								RequestBodyExclusiveMinIncreasedId,
-								config,
-								[]any{exMinDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestBodyExclusiveMinDecreasedId,
-								config,
-								[]any{exMinDiff.From, exMinDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(exBaseSource, exRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						minDiff := propertyDiff.MinDiff
-						if minDiff == nil {
-							return
-						}
-						if minDiff.From == nil ||
-							minDiff.To == nil {
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minimum")
-
-						if IsIncreasedValue(minDiff) {
-
-							id := RequestPropertyMinIncreasedId
-
-							if propertyDiff.Revision.ReadOnly {
-								id = RequestReadOnlyPropertyMinIncreasedId
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propName, minDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestPropertyMinDecreasedId,
-								config,
-								[]any{propName, minDiff.From, minDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						exMinDiff := propertyDiff.ExclusiveMinDiff
-						if exMinDiff == nil {
-							return
-						}
-						if exMinDiff.From == nil ||
-							exMinDiff.To == nil {
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "exclusiveMinimum")
-
-						if IsIncreasedValue(exMinDiff) {
-							id := RequestPropertyExclusiveMinIncreasedId
-							if propertyDiff.Revision.ReadOnly {
-								id = RequestReadOnlyPropertyExclusiveMinIncreasedId
-							}
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propName, exMinDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestPropertyExclusiveMinDecreasedId,
-								config,
-								[]any{propName, exMinDiff.From, exMinDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
+			minDiff.From != nil && minDiff.To != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
+			if IsIncreasedValue(minDiff) {
+				result = append(result, info.newChange(
+					RequestBodyMinIncreasedId,
+					[]any{minDiff.To},
+					"",
+				).WithSources(baseSource, revisionSource))
+			} else {
+				result = append(result, info.newChange(
+					RequestBodyMinDecreasedId,
+					[]any{minDiff.From, minDiff.To},
+					"",
+				).WithSources(baseSource, revisionSource))
 			}
 		}
-	}
+		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
+			exMinDiff.From != nil && exMinDiff.To != nil {
+			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
+			if IsIncreasedValue(exMinDiff) {
+				result = append(result, info.newChange(
+					RequestBodyExclusiveMinIncreasedId,
+					[]any{exMinDiff.To},
+					"",
+				).WithSources(exBaseSource, exRevisionSource))
+			} else {
+				result = append(result, info.newChange(
+					RequestBodyExclusiveMinDecreasedId,
+					[]any{exMinDiff.From, exMinDiff.To},
+					"",
+				).WithSources(exBaseSource, exRevisionSource))
+			}
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
+				minDiff.From != nil && minDiff.To != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
+				if IsIncreasedValue(minDiff) {
+					id := RequestPropertyMinIncreasedId
+					if p.propertyDiff.Revision.ReadOnly {
+						id = RequestReadOnlyPropertyMinIncreasedId
+					}
+					result = append(result, p.newChange(
+						id,
+						[]any{propName, minDiff.To},
+						"",
+					).WithSources(propBaseSource, propRevisionSource))
+				} else {
+					result = append(result, p.newChange(
+						RequestPropertyMinDecreasedId,
+						[]any{propName, minDiff.From, minDiff.To},
+						"",
+					).WithSources(propBaseSource, propRevisionSource))
+				}
+			}
+
+			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
+				exMinDiff.From != nil && exMinDiff.To != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
+				if IsIncreasedValue(exMinDiff) {
+					id := RequestPropertyExclusiveMinIncreasedId
+					if p.propertyDiff.Revision.ReadOnly {
+						id = RequestReadOnlyPropertyExclusiveMinIncreasedId
+					}
+					result = append(result, p.newChange(
+						id,
+						[]any{propName, exMinDiff.To},
+						"",
+					).WithSources(propBaseSource, propRevisionSource))
+				} else {
+					result = append(result, p.newChange(
+						RequestPropertyExclusiveMinDecreasedId,
+						[]any{propName, exMinDiff.From, exMinDiff.To},
+						"",
+					).WithSources(propBaseSource, propRevisionSource))
+				}
+			}
+		})
+	})
+
 	return result
 }
