@@ -7,10 +7,10 @@ import "github.com/getkin/kin-openapi/openapi3"
 // Annotation-only changes such as title, description, examples, default, and
 // comments are ignored; checker-significant metadata such as deprecated is
 // treated as a contract change.
-//
-// Uses a fresh diff state so this predicate does not interact with any
-// in-progress diff traversal.
 func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
+	// Use a fresh diff state (cycle-detection sets + schema-diff cache)
+	// rather than the caller's, so a call made from inside another diff
+	// traversal is not affected by what that traversal has already visited.
 	schemaDiff, err := getSchemaDiff(config, newState(), schemaRef1, schemaRef2)
 	if err != nil {
 		return false
