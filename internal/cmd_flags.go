@@ -17,6 +17,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("strip-prefix-base", "", "strip this prefix from paths in base-spec before comparison")
 	cmd.PersistentFlags().String("strip-prefix-revision", "", "strip this prefix from paths in revised-spec before comparison")
 	cmd.PersistentFlags().Bool("include-path-params", false, "include path parameter names in endpoint matching")
+	cmd.PersistentFlags().Bool("match-inline-refs", true, "match validation-equivalent inline/$ref subschemas as the same anyOf/oneOf branch")
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
 	cmd.PersistentFlags().Bool("case-insensitive-headers", false, "case-insensitive header name comparison")

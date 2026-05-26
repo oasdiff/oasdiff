@@ -11,7 +11,7 @@ import (
 SubschemasDiff describes the changes between a pair of subschemas under AllOf, AnyOf or OneOf
 [oneOf, anyOf, allOf]: https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/
 [Schema Objects]: https://swagger.io/specification/#schema-object
-SubschemasDiff is a combination of two diffs:
+SubschemasDiff is a combination of three diffs:
 
  1. Diff of referenced schemas: subschemas under AllOf, AnyOf or OneOf defined as references to schemas under components/schemas
     - schemas with the same $ref across base and revision are compared to each other and based on the result are considered as modified or unmodified
@@ -23,7 +23,10 @@ SubschemasDiff is a combination of two diffs:
     - schemas with the same title across base and revision are compared to each other and based on the result are considered as modified or unmodified
     - other schemas are considered added/deleted
 
-Special case:
+ 3. Reconciliation of inline/$ref refactors (AnyOf and OneOf only, when Config.MatchInlineRefs is true):
+    after passes 1 and 2, any unmatched Added/Deleted pair that crosses the inline/$ref boundary and is validation-equivalent (annotation-only differences ignored) is paired and removed from Added and Deleted. Matching is pair-based: each Deleted matches at most one Added.
+
+Special case (in pass 2):
 If there remains exactly one added schema and one deleted schema without a reference and without a title, they will be be compared to eachother and considered as modified or unmodified
 */
 type SubschemasDiff struct {
@@ -123,7 +126,103 @@ func getSubschemasDiffInternal(config *Config, state *state, schemaRefs1, schema
 		return nil, err
 	}
 
-	return diffRefs.combine(diffInline)
+	combined, err := diffRefs.combine(diffInline)
+	if err != nil {
+		return nil, err
+	}
+
+	return reconcileInlineRefRefactors(config, combined, schemaRefs1, schemaRefs2), nil
+}
+
+// reconcileInlineRefRefactors pairs unmatched Added and Deleted entries that
+// cross the inline/$ref boundary and are validation-equivalent under the
+// caller's config, then removes both members of each pair. Each Deleted
+// matches at most one Added (first-fit), so a standalone addition that
+// happens to duplicate an existing still-present branch is preserved.
+//
+// Gated on config.MatchInlineRefs; default true.
+func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
+	if !config.MatchInlineRefs {
+		return combined
+	}
+	if combined.Empty() {
+		return combined
+	}
+
+	matchedAdded := map[int]bool{}
+	matchedDeleted := map[int]bool{}
+
+	for di, deletedSubschema := range combined.Deleted {
+		// Defensive: Subschema.Index is set from a walk over schemaRefs1 by the
+		// earlier passes, so out-of-range is an upstream invariant violation.
+		// Skip rather than panic; the entry stays in combined unchanged.
+		if deletedSubschema.Index < 0 || deletedSubschema.Index >= len(schemaRefs1) {
+			continue
+		}
+		deletedRef := schemaRefs1[deletedSubschema.Index]
+
+		for ai, addedSubschema := range combined.Added {
+			if matchedAdded[ai] {
+				continue
+			}
+			// Same defensive guard against an upstream invariant violation,
+			// this time for the revision-side index.
+			if addedSubschema.Index < 0 || addedSubschema.Index >= len(schemaRefs2) {
+				continue
+			}
+			addedRef := schemaRefs2[addedSubschema.Index]
+
+			// Skip inline-to-inline and $ref-to-$ref pairs because the earlier
+			// passes already tried byte-identity (inline) and ref-name match
+			// ($ref), and failed for substantive reasons. A rename like
+			// UserRoleV1 -> UserRole is still a change the user wants to see.
+			if !isInlineRefactorBoundary(deletedRef, addedRef) {
+				continue
+			}
+			if !SchemaRefsValidationEquivalent(config, deletedRef, addedRef) {
+				continue
+			}
+
+			matchedAdded[ai] = true
+			matchedDeleted[di] = true
+			break
+		}
+	}
+
+	if len(matchedAdded) == 0 {
+		return combined
+	}
+
+	result := &SubschemasDiff{
+		Added:    make(Subschemas, 0, len(combined.Added)-len(matchedAdded)),
+		Deleted:  make(Subschemas, 0, len(combined.Deleted)-len(matchedDeleted)),
+		Modified: combined.Modified,
+	}
+	for ai, addedSubschema := range combined.Added {
+		if matchedAdded[ai] {
+			continue
+		}
+		result.Added = append(result.Added, addedSubschema)
+	}
+	for di, deletedSubschema := range combined.Deleted {
+		if matchedDeleted[di] {
+			continue
+		}
+		result.Deleted = append(result.Deleted, deletedSubschema)
+	}
+
+	return result
+}
+
+// isInlineRefactorBoundary reports whether the two refs sit on opposite sides
+// of the inline/$ref boundary. An inline-to-inline edit (or $ref-to-$ref
+// rename) is intentionally out of scope: only the cross-boundary refactor is
+// recognised as form-only.
+func isInlineRefactorBoundary(schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
+	if schemaRef1 == nil || schemaRef2 == nil {
+		return false
+	}
+	return (schemaRef1.Ref == "") != (schemaRef2.Ref == "")
 }
 
 type schemaRefsFilter func(schemaRef *openapi3.SchemaRef) bool
@@ -286,7 +385,10 @@ func getNonContainedInlineSchemas(config *Config, state *state, schemaRefs1, sch
 
 func findIndenticalSchema(config *Config, state *state, schemaRef1 *openapi3.SchemaRef, schemasRefs2 openapi3.SchemaRefs, matched map[int]struct{}, filter schemaRefsFilter) (bool, int, error) {
 	for index2, schemaRef2 := range schemasRefs2 {
-		if !filter(schemaRef1) {
+		// Restrict candidates to those matching the filter. schemaRef1 is
+		// the caller's already-filtered source; only the candidate side
+		// needs filtering here.
+		if !filter(schemaRef2) {
 			continue
 		}
 		if alreadyMatched(index2, matched) {

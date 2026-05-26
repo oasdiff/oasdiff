@@ -16,6 +16,7 @@ type Config struct {
 	ExcludeElements         utils.StringSet
 	ExcludeExtensions       utils.StringSet
 	IncludePathParams       bool
+	MatchInlineRefs         bool
 }
 
 const (
@@ -49,11 +50,23 @@ func NewConfig(opts ...Option) *Config {
 	c := &Config{
 		ExcludeElements:   utils.StringSet{},
 		ExcludeExtensions: utils.StringSet{},
+		MatchInlineRefs:   true,
 	}
 	for _, opt := range opts {
 		opt(c)
 	}
 	return c
+}
+
+// WithMatchInlineRefs controls whether validation-equivalent inline/$ref
+// subschemas under anyOf/oneOf are matched as the same branch.
+// Default true. Set to false to restore the pre-1.17 behaviour where an
+// inline-to-$ref refactor of an equivalent component is reported as one
+// branch added and one branch removed.
+func WithMatchInlineRefs(matchInlineRefs bool) Option {
+	return func(c *Config) {
+		c.MatchInlineRefs = matchInlineRefs
+	}
 }
 
 // WithExcludeElements sets the elements (description, summary,

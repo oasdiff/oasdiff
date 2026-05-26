@@ -29,7 +29,7 @@ func TestSchemaRefsValidationEquivalent_IgnoresTitle(t *testing.T) {
 		},
 	}
 
-	require.True(t, diff.SchemaRefsValidationEquivalent(base, revision))
+	require.True(t, diff.SchemaRefsValidationEquivalent(diff.NewConfig(), base, revision))
 }
 
 func TestSchemaRefsValidationEquivalent_DetectsValidationChange(t *testing.T) {
@@ -48,7 +48,7 @@ func TestSchemaRefsValidationEquivalent_DetectsValidationChange(t *testing.T) {
 		},
 	}
 
-	require.False(t, diff.SchemaRefsValidationEquivalent(base, revision))
+	require.False(t, diff.SchemaRefsValidationEquivalent(diff.NewConfig(), base, revision))
 }
 
 func TestSchemaRefsValidationEquivalent_DetectsDeprecatedChange(t *testing.T) {
@@ -81,5 +81,5 @@ func TestSchemaRefsValidationEquivalent_DetectsDeprecatedChange(t *testing.T) {
 		},
 	}
 
-	require.False(t, diff.SchemaRefsValidationEquivalent(base, revision))
+	require.False(t, diff.SchemaRefsValidationEquivalent(diff.NewConfig(), base, revision))
 }
