@@ -145,7 +145,7 @@ role:
 
 The diff reports no change for the `anyOf` list because the union of accepted payloads is identical. The same behaviour applies to `breaking` and `changelog`, which run on the same diff engine.
 
-To restore the pre-1.17 behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
+To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
 Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
 

@@ -301,7 +301,7 @@ func Test_BreakingChangesCaseInsensitiveHeadersDefault(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --fail-on-diff"), io.Discard, io.Discard))
 }
 
-// --case-insensitive-headers=false restores the pre-1.18 behaviour: the
+// --case-insensitive-headers=false restores the previous behaviour: the
 // case-only header difference is reported and --fail-on-diff exits non-zero.
 func Test_DiffCaseSensitiveHeadersOptOut(t *testing.T) {
 	exit := internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers=false --fail-on-diff"), io.Discard, io.Discard)

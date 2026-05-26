@@ -242,7 +242,7 @@ func TestAnyOf_InlineRefRefactor_MatchedByDefault(t *testing.T) {
 }
 
 // With --match-inline-refs=false (WithMatchInlineRefs(false)) the matcher
-// falls back to the pre-1.17 behaviour: the inline branch is reported as
+// falls back to the previous behaviour: the inline branch is reported as
 // Deleted and the $ref branch as Added.
 func TestAnyOf_InlineRefRefactor_OptOut(t *testing.T) {
 	loader := openapi3.NewLoader()
