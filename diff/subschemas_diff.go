@@ -150,6 +150,9 @@ func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schem
 	matchedDeleted := map[int]bool{}
 
 	for di, deletedSubschema := range combined.Deleted {
+		// Defensive: Subschema.Index is set from a walk over schemaRefs1 by the
+		// earlier passes, so out-of-range is an upstream invariant violation.
+		// Skip rather than panic; the entry stays in combined unchanged.
 		if deletedSubschema.Index < 0 || deletedSubschema.Index >= len(schemaRefs1) {
 			continue
 		}
@@ -159,6 +162,8 @@ func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schem
 			if matchedAdded[ai] {
 				continue
 			}
+			// Same defensive guard against an upstream invariant violation,
+			// this time for the revision-side index.
 			if addedSubschema.Index < 0 || addedSubschema.Index >= len(schemaRefs2) {
 				continue
 			}
