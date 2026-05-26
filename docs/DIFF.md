@@ -5,6 +5,18 @@ This commmand is typically used to generate a structured diff report which can b
 
 > **Note:** `summary`, `breaking`, and `changelog` are built on the same diff engine. Most concepts and flags described here apply to those commands too. Exceptions are called out inline.
 
+## Default Comparison Behaviour
+
+oasdiff applies a few opt-out defaults so its diff matches what most users expect from a real-world API comparison, not a literal byte-level spec comparison. Each can be disabled with `--<flag>=false` if your use case needs the stricter behaviour.
+
+| Flag | Default | What it does | Detail |
+|---|---|---|---|
+| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Matching Inline and `$ref` Subschemas](#matching-inline-and-ref-subschemas) |
+| `--case-insensitive-headers` | `true` | Compare header names case-insensitively. `Content-Type` and `content-type` are the same header per RFC 7230 / 9110. | [HEADER-DIFF.md](HEADER-DIFF.md) |
+| `--allow-external-refs` | `true` | Allow the parser to resolve external `$ref`s when loading specs. Disable when processing untrusted specs to prevent SSRF. | (CLI help) |
+
+All other comparison-tuning flags (`--flatten-allof`, `--flatten-params`, `--include-path-params`, `--auto-upgrade`, ...) are opt-in (default `false`) because they transform the input or change matching semantics in ways that not every spec wants.
+
 ## Output Formats
 The default diff output format is `yaml`.  
 Additional formats can be generated using the `--format` flag:
@@ -133,7 +145,7 @@ role:
 
 The diff reports no change for the `anyOf` list because the union of accepted payloads is identical. The same behaviour applies to `breaking` and `changelog`, which run on the same diff engine.
 
-To restore the pre-1.17 behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
+To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
 Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
 

@@ -60,7 +60,7 @@ func NewConfig(opts ...Option) *Config {
 
 // WithMatchInlineRefs controls whether validation-equivalent inline/$ref
 // subschemas under anyOf/oneOf are matched as the same branch.
-// Default true. Set to false to restore the pre-1.17 behaviour where an
+// Default true. Set to false to restore the previous behaviour where an
 // inline-to-$ref refactor of an equivalent component is reported as one
 // branch added and one branch removed.
 func WithMatchInlineRefs(matchInlineRefs bool) Option {

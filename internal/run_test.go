@@ -295,6 +295,19 @@ func Test_BreakingChangesCaseInsensitiveHeaders(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers --fail-on-diff"), io.Discard, io.Discard))
 }
 
+// Case-insensitive header comparison is now the default; specs that differ
+// only in header case should produce no diff without any flag.
+func Test_BreakingChangesCaseInsensitiveHeadersDefault(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --fail-on-diff"), io.Discard, io.Discard))
+}
+
+// --case-insensitive-headers=false restores the previous behaviour: the
+// case-only header difference is reported and --fail-on-diff exits non-zero.
+func Test_DiffCaseSensitiveHeadersOptOut(t *testing.T) {
+	exit := internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers=false --fail-on-diff"), io.Discard, io.Discard)
+	require.NotZero(t, exit, "expected non-zero exit when case-only header differences are surfaced")
+}
+
 func Test_FlattenCmdOK(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff flatten ../data/allof/simple.yaml"), io.Discard, io.Discard))
 }
