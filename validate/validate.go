@@ -3,10 +3,6 @@
 // of findings (rule IDs, severities, source locations) so any caller can
 // surface validation results in the same shape as `oasdiff validate` does
 // on the command line.
-//
-// This mirrors how diff.Get and checker.CheckBackwardCompatibility are
-// callable from any consumer (CLI, oasdiff-service, third-party tools)
-// rather than being locked inside the CLI's internal package.
 package validate
 
 import (
