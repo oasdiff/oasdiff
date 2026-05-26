@@ -169,6 +169,10 @@ func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schem
 			}
 			addedRef := schemaRefs2[addedSubschema.Index]
 
+			// Only inline/$ref boundary pairs are reconciled here. Inline-to-inline
+			// pairs failed byte-identity in the inline pass for a real reason;
+			// $ref-to-$ref pairs failed ref-name match for a real reason (a rename
+			// is still a change the user wants to see).
 			if !isInlineRefactorBoundary(deletedRef, addedRef) {
 				continue
 			}
