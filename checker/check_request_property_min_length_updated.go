@@ -13,98 +13,41 @@ const (
 
 func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if minLengthDiff := info.schemaDiff.MinLengthDiff; minLengthDiff != nil &&
+			minLengthDiff.From != nil && minLengthDiff.To != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
+			id := RequestBodyMinLengthDecreasedId
+			if IsIncreasedValue(minLengthDiff) {
+				id = RequestBodyMinLengthIncreasedId
+			}
+			result = append(result, info.newChange(
+				id,
+				[]any{minLengthDiff.From, minLengthDiff.To},
+				"",
+			).WithSources(baseSource, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+
+		info.walkProperties(func(p propertyInfo) {
+			minLengthDiff := p.propertyDiff.MinLengthDiff
+			if minLengthDiff == nil || minLengthDiff.From == nil || minLengthDiff.To == nil {
+				return
 			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minLength")
-				if mediaTypeDiff.SchemaDiff.MinLengthDiff != nil {
-					minLengthDiff := mediaTypeDiff.SchemaDiff.MinLengthDiff
-					if minLengthDiff.From != nil &&
-						minLengthDiff.To != nil {
-						if IsIncreasedValue(minLengthDiff) {
-							result = append(result, NewApiChange(
-								RequestBodyMinLengthIncreasedId,
-								config,
-								[]any{minLengthDiff.From, minLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestBodyMinLengthDecreasedId,
-								config,
-								[]any{minLengthDiff.From, minLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						minLengthDiff := propertyDiff.MinLengthDiff
-						if minLengthDiff == nil {
-							return
-						}
-						if minLengthDiff.From == nil ||
-							minLengthDiff.To == nil {
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minLength")
-
-						if IsDecreasedValue(minLengthDiff) {
-							result = append(result, NewApiChange(
-								RequestPropertyMinLengthDecreasedId,
-								config,
-								[]any{propName, minLengthDiff.From, minLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestPropertyMinLengthIncreasedId,
-								config,
-								[]any{propName, minLengthDiff.From, minLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minLength")
+			id := RequestPropertyMinLengthIncreasedId
+			if IsDecreasedValue(minLengthDiff) {
+				id = RequestPropertyMinLengthDecreasedId
 			}
-		}
-	}
+			result = append(result, p.newChange(
+				id,
+				[]any{propName, minLengthDiff.From, minLengthDiff.To},
+				"",
+			).WithSources(propBaseSource, propRevisionSource))
+		})
+	})
+
 	return result
 }

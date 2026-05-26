@@ -15,84 +15,43 @@ const (
 
 func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.DefaultDiff != nil {
+			defaultValueDiff := info.schemaDiff.DefaultDiff
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "default")
+			append1 := func(messageId string, a ...any) {
+				result = append(result, info.newChange(messageId, a, "").WithSources(baseSource, revisionSource))
 			}
-
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "default")
-				appendResultItem := func(messageId string, a ...any) {
-					result = append(result, NewApiChange(
-						messageId,
-						config,
-						a,
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-				}
-				if mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
-					defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff
-
-					if defaultValueDiff.From == nil {
-						appendResultItem(RequestBodyDefaultValueAddedId, mediaType, defaultValueDiff.To)
-					} else if defaultValueDiff.To == nil {
-						appendResultItem(RequestBodyDefaultValueRemovedId, mediaType, defaultValueDiff.From)
-					} else {
-						appendResultItem(RequestBodyDefaultValueChangedId, mediaType, defaultValueDiff.From, defaultValueDiff.To)
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						if propertyDiff == nil || propertyDiff.DefaultDiff == nil {
-							return
-						}
-
-						defaultValueDiff := propertyDiff.DefaultDiff
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "default")
-
-						appendPropResultItem := func(messageId string, a ...any) {
-							result = append(result, NewApiChange(
-								messageId,
-								config,
-								a,
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-
-						if defaultValueDiff.From == nil {
-							appendPropResultItem(RequestPropertyDefaultValueAddedId, propertyName, defaultValueDiff.To)
-						} else if defaultValueDiff.To == nil {
-							appendPropResultItem(RequestPropertyDefaultValueRemovedId, propertyName, defaultValueDiff.From)
-						} else {
-							appendPropResultItem(RequestPropertyDefaultValueChangedId, propertyName, defaultValueDiff.From, defaultValueDiff.To)
-						}
-					})
+			if defaultValueDiff.From == nil {
+				append1(RequestBodyDefaultValueAddedId, info.mediaType, defaultValueDiff.To)
+			} else if defaultValueDiff.To == nil {
+				append1(RequestBodyDefaultValueRemovedId, info.mediaType, defaultValueDiff.From)
+			} else {
+				append1(RequestBodyDefaultValueChangedId, info.mediaType, defaultValueDiff.From, defaultValueDiff.To)
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff == nil || p.propertyDiff.DefaultDiff == nil {
+				return
+			}
+
+			defaultValueDiff := p.propertyDiff.DefaultDiff
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "default")
+			appendProp := func(messageId string, a ...any) {
+				result = append(result, p.newChange(messageId, a, "").WithSources(propBaseSource, propRevisionSource))
+			}
+
+			if defaultValueDiff.From == nil {
+				appendProp(RequestPropertyDefaultValueAddedId, p.propertyName, defaultValueDiff.To)
+			} else if defaultValueDiff.To == nil {
+				appendProp(RequestPropertyDefaultValueRemovedId, p.propertyName, defaultValueDiff.From)
+			} else {
+				appendProp(RequestPropertyDefaultValueChangedId, p.propertyName, defaultValueDiff.From, defaultValueDiff.To)
+			}
+		})
+	})
+
 	return result
 }

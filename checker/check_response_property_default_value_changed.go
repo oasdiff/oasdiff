@@ -15,83 +15,42 @@ const (
 
 func ResponsePropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.DefaultDiff != nil {
+			defaultValueDiff := info.schemaDiff.DefaultDiff
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "default")
+			append1 := func(messageId string, a ...any) {
+				result = append(result, info.newChange(messageId, a, "").WithSources(baseSource, revisionSource))
 			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DefaultDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "default")
-						appendResultItem := func(messageId string, a ...any) {
-							result = append(result, NewApiChange(
-								messageId,
-								config,
-								a,
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						defaultValueDiff := mediaTypeDiff.SchemaDiff.DefaultDiff
-						if defaultValueDiff.From == nil {
-							appendResultItem(ResponseBodyDefaultValueAddedId, mediaType, defaultValueDiff.To, responseStatus)
-						} else if defaultValueDiff.To == nil {
-							appendResultItem(ResponseBodyDefaultValueRemovedId, mediaType, defaultValueDiff.From, responseStatus)
-						} else {
-							appendResultItem(ResponseBodyDefaultValueChangedId, mediaType, defaultValueDiff.From, defaultValueDiff.To, responseStatus)
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if propertyDiff == nil || propertyDiff.Revision == nil || propertyDiff.DefaultDiff == nil {
-								return
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "default")
-							appendResultItem := func(messageId string, a ...any) {
-								result = append(result, NewApiChange(
-									messageId,
-									config,
-									a,
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-							defaultValueDiff := propertyDiff.DefaultDiff
-							if defaultValueDiff.From == nil {
-								appendResultItem(ResponsePropertyDefaultValueAddedId, propertyName, defaultValueDiff.To, responseStatus)
-							} else if defaultValueDiff.To == nil {
-								appendResultItem(ResponsePropertyDefaultValueRemovedId, propertyName, defaultValueDiff.From, responseStatus)
-							} else {
-								appendResultItem(ResponsePropertyDefaultValueChangedId, propertyName, defaultValueDiff.From, defaultValueDiff.To, responseStatus)
-							}
-						})
-				}
+			if defaultValueDiff.From == nil {
+				append1(ResponseBodyDefaultValueAddedId, info.mediaType, defaultValueDiff.To, info.responseStatus)
+			} else if defaultValueDiff.To == nil {
+				append1(ResponseBodyDefaultValueRemovedId, info.mediaType, defaultValueDiff.From, info.responseStatus)
+			} else {
+				append1(ResponseBodyDefaultValueChangedId, info.mediaType, defaultValueDiff.From, defaultValueDiff.To, info.responseStatus)
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff == nil || p.propertyDiff.Revision == nil || p.propertyDiff.DefaultDiff == nil {
+				return
+			}
+
+			defaultValueDiff := p.propertyDiff.DefaultDiff
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "default")
+			appendProp := func(messageId string, a ...any) {
+				result = append(result, p.newChange(messageId, a, "").WithSources(propBaseSource, propRevisionSource))
+			}
+			if defaultValueDiff.From == nil {
+				appendProp(ResponsePropertyDefaultValueAddedId, p.propertyName, defaultValueDiff.To, info.responseStatus)
+			} else if defaultValueDiff.To == nil {
+				appendProp(ResponsePropertyDefaultValueRemovedId, p.propertyName, defaultValueDiff.From, info.responseStatus)
+			} else {
+				appendProp(ResponsePropertyDefaultValueChangedId, p.propertyName, defaultValueDiff.From, defaultValueDiff.To, info.responseStatus)
+			}
+		})
+	})
+
 	return result
 }
