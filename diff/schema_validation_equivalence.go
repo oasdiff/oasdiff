@@ -11,12 +11,10 @@ import "github.com/getkin/kin-openapi/openapi3"
 // config controls what counts as a contract change: caller-set exclusions
 // (e.g. --exclude-extensions) flow through to the underlying schema diff so
 // the equivalence test honours the user's view of "meaningful change". Pass
-// NewConfig() for default behaviour. A fresh diff state is used so this
-// predicate does not interact with any in-progress diff traversal.
+// NewConfig() for default behaviour; config must be non-nil. A fresh diff
+// state is used so this predicate does not interact with any in-progress
+// diff traversal.
 func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
-	if config == nil {
-		config = NewConfig()
-	}
 	schemaDiff, err := getSchemaDiff(config, newState(), schemaRef1, schemaRef2)
 	if err != nil {
 		return false
