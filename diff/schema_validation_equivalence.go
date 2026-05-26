@@ -5,15 +5,11 @@ import "github.com/getkin/kin-openapi/openapi3"
 // SchemaRefsValidationEquivalent reports whether two resolved schema refs have
 // the same validation contract according to oasdiff's schema diff model.
 // Annotation-only changes such as title, description, examples, default, and
-// comments are ignored. Checker-significant metadata such as deprecated is
+// comments are ignored; checker-significant metadata such as deprecated is
 // treated as a contract change.
 //
-// config controls what counts as a contract change: caller-set exclusions
-// (e.g. --exclude-extensions) flow through to the underlying schema diff so
-// the equivalence test honours the user's view of "meaningful change". Pass
-// NewConfig() for default behaviour; config must be non-nil. A fresh diff
-// state is used so this predicate does not interact with any in-progress
-// diff traversal.
+// Uses a fresh diff state so this predicate does not interact with any
+// in-progress diff traversal.
 func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
 	schemaDiff, err := getSchemaDiff(config, newState(), schemaRef1, schemaRef2)
 	if err != nil {
