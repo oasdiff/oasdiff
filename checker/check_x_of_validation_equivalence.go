@@ -6,36 +6,30 @@ import (
 )
 
 func filterValidationEquivalentDeletedSubschemas(deleted diff.Subschemas, baseRefs, revisionRefs openapi3.SchemaRefs) diff.Subschemas {
-	result := diff.Subschemas{}
-	for _, deletedSubschema := range deleted {
-		if deletedSubschema.Index < 0 || deletedSubschema.Index >= len(baseRefs) {
-			result = append(result, deletedSubschema)
-			continue
-		}
-
-		if hasValidationEquivalentSubschema(baseRefs[deletedSubschema.Index], revisionRefs) {
-			continue
-		}
-
-		result = append(result, deletedSubschema)
-	}
-
-	return result
+	return filterValidationEquivalentSubschemas(deleted, baseRefs, revisionRefs)
 }
 
 func filterValidationEquivalentAddedSubschemas(added diff.Subschemas, baseRefs, revisionRefs openapi3.SchemaRefs) diff.Subschemas {
+	return filterValidationEquivalentSubschemas(added, revisionRefs, baseRefs)
+}
+
+// filterValidationEquivalentSubschemas keeps entries from subschemas whose
+// origin-side ref has no validation-equivalent inline/$ref peer on the other
+// side. originRefs is the side the entries came from (base for deleted,
+// revision for added); peerRefs is the side searched for a peer.
+func filterValidationEquivalentSubschemas(subschemas diff.Subschemas, originRefs, peerRefs openapi3.SchemaRefs) diff.Subschemas {
 	result := diff.Subschemas{}
-	for _, addedSubschema := range added {
-		if addedSubschema.Index < 0 || addedSubschema.Index >= len(revisionRefs) {
-			result = append(result, addedSubschema)
+	for _, subschema := range subschemas {
+		if subschema.Index < 0 || subschema.Index >= len(originRefs) {
+			result = append(result, subschema)
 			continue
 		}
 
-		if hasValidationEquivalentSubschema(revisionRefs[addedSubschema.Index], baseRefs) {
+		if hasValidationEquivalentSubschema(originRefs[subschema.Index], peerRefs) {
 			continue
 		}
 
-		result = append(result, addedSubschema)
+		result = append(result, subschema)
 	}
 
 	return result
