@@ -382,13 +382,9 @@ func getNonContainedInlineSchemas(config *Config, state *state, schemaRefs1, sch
 
 func findIndenticalSchema(config *Config, state *state, schemaRef1 *openapi3.SchemaRef, schemasRefs2 openapi3.SchemaRefs, matched map[int]struct{}, filter schemaRefsFilter) (bool, int, error) {
 	for index2, schemaRef2 := range schemasRefs2 {
-		// Filter the candidate (schemaRef2), not the source (schemaRef1).
-		// schemaRef1 is already filtered by the caller and does not change
-		// inside this loop. Checking schemaRef1 here was a misplaced guard
-		// that allowed cross-boundary candidates to slip through and caused
-		// byte-identical inline/$ref pairs to be silently absorbed, leaving
-		// the reconciliation pass nothing to match. See the byte-identical
-		// inline-to-$ref refactor regression test.
+		// Restrict candidates to those matching the filter. schemaRef1 is
+		// the caller's already-filtered source; only the candidate side
+		// needs filtering here.
 		if !filter(schemaRef2) {
 			continue
 		}
