@@ -20,6 +20,9 @@ func filterValidationEquivalentAddedSubschemas(added diff.Subschemas, baseRefs, 
 func filterValidationEquivalentSubschemas(subschemas diff.Subschemas, originRefs, peerRefs openapi3.SchemaRefs) diff.Subschemas {
 	result := diff.Subschemas{}
 	for _, subschema := range subschemas {
+		// Subschema.Index is set by the diff engine from a walk over originRefs,
+		// so out-of-range is an upstream invariant violation. Pass the entry
+		// through unfiltered rather than silently suppressing.
 		if subschema.Index < 0 || subschema.Index >= len(originRefs) {
 			result = append(result, subschema)
 			continue
