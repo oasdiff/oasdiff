@@ -58,9 +58,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 							path,
 						).WithSources(baseSource, revisionSource))
 					}
-				}
 
-				if mediaTypeDiff.SchemaDiff.AnyOfDiff != nil {
 					deleted := filterValidationEquivalentDeletedSubschemas(
 						mediaTypeDiff.SchemaDiff.AnyOfDiff.Deleted,
 						mediaTypeDiff.SchemaDiff.Base.AnyOf,
