@@ -53,6 +53,48 @@ func (ctx MediaTypeChangeCtx) NewChange(id string, args []any, comment string) A
 	).WithDetails(ctx.MediaTypeDetails)
 }
 
+// WalkProperties walks every modified property under ctx.SchemaDiff and
+// invokes processor with a PropertyChangeCtx for each. It delegates to
+// CheckModifiedPropertiesDiff, so the recursion covers AllOf / AnyOf /
+// OneOf / Items / PatternProperties / DependentSchemas and the OpenAPI 3.1
+// sub-schema fields exactly as that primitive does.
+//
+// p.NewChange in the processor produces an ApiChange with the same
+// plumbing as ctx.NewChange (config, operationsSources, operation, method,
+// path, MediaTypeDetails); the caller chains
+// WithSources(propBaseSource, propRevisionSource) with the property-
+// specific sources.
+func (ctx MediaTypeChangeCtx) WalkProperties(processor func(p PropertyChangeCtx)) {
+	CheckModifiedPropertiesDiff(ctx.SchemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff) {
+		processor(PropertyChangeCtx{
+			MediaTypeChangeCtx: ctx,
+			PropertyPath:       propertyPath,
+			PropertyName:       propertyName,
+			PropertyDiff:       propertyDiff,
+			Parent:             parent,
+		})
+	})
+}
+
+// PropertyChangeCtx is the per-property context delivered by
+// MediaTypeChangeCtx.WalkProperties. It embeds the originating
+// MediaTypeChangeCtx so p.NewChange resolves to the body-level helper via
+// field promotion: the same plumbing is pre-filled, and the same
+// MediaTypeDetails is auto-attached. Override Details with a further
+// WithDetails(...) when a property check needs a combined detail string
+// (e.g. deprecation + media-type).
+//
+// PropertyPath, PropertyName, and PropertyDiff are the same triple
+// CheckModifiedPropertiesDiff passes to its processor; Parent is the
+// containing schema diff.
+type PropertyChangeCtx struct {
+	MediaTypeChangeCtx
+	PropertyPath string
+	PropertyName string
+	PropertyDiff *diff.SchemaDiff
+	Parent       *diff.SchemaDiff
+}
+
 // WalkModifiedRequestBodySchemas invokes processor once for each modified
 // request-body media type across the diff, with the per-media-type schema
 // diff and the plumbing needed to emit ApiChange values. Skips media types

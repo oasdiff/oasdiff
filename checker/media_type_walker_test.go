@@ -193,6 +193,116 @@ func TestMediaTypeChangeCtx_NewChange_PreFillsPlumbingAndDetails(t *testing.T) {
 	require.Equal(t, []string{"(media type: application/json)", "(media type: application/xml)"}, details)
 }
 
+// ctx.WalkProperties must visit every modified property in the schema diff
+// and deliver a PropertyChangeCtx whose embedded MediaTypeChangeCtx carries
+// the same plumbing as the outer ctx (so p.NewChange via field promotion
+// produces an ApiChange with the right config / operation / method / path /
+// MediaTypeDetails).
+func TestMediaTypeChangeCtx_WalkProperties_VisitsEveryProperty(t *testing.T) {
+	op := methodDiffWithRevision("updatePets")
+	op.RequestBodyDiff = &diff.RequestBodyDiff{
+		ContentDiff: &diff.ContentDiff{
+			MediaTypeModified: diff.ModifiedMediaTypes{
+				"application/json": &diff.MediaTypeDiff{
+					SchemaDiff: &diff.SchemaDiff{
+						PropertiesDiff: &diff.SchemasDiff{
+							Modified: diff.ModifiedSchemasMap{
+								"name": &diff.SchemaDiff{},
+								"age":  &diff.SchemaDiff{},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/pets": &diff.PathDiff{
+					OperationsDiff: &diff.OperationsDiff{
+						Modified: diff.ModifiedOperations{"POST": op},
+					},
+				},
+			},
+		},
+	}
+
+	var properties []string
+	checker.WalkModifiedRequestBodySchemas(d, &diff.OperationsSourcesMap{}, allChecksConfig(), func(ctx checker.MediaTypeChangeCtx) {
+		ctx.WalkProperties(func(p checker.PropertyChangeCtx) {
+			properties = append(properties, p.PropertyName)
+			require.NotNil(t, p.PropertyDiff)
+			// The embedded ctx must carry the same media-type-level plumbing.
+			require.Equal(t, "/pets", p.Path)
+			require.Equal(t, "POST", p.Method)
+			require.Equal(t, "application/json", p.MediaType)
+		})
+	})
+
+	sort.Strings(properties)
+	require.Equal(t, []string{"age", "name"}, properties)
+}
+
+// p.NewChange must produce an ApiChange equivalent to ctx.NewChange (via
+// field promotion of MediaTypeChangeCtx). This is the bug-class prevention
+// at property level: callers cannot accidentally drop the media-type details
+// on a property-level emission.
+func TestPropertyChangeCtx_NewChange_DelegatesToMediaTypeChangeCtx(t *testing.T) {
+	op := methodDiffWithRevision("updatePets")
+	op.RequestBodyDiff = &diff.RequestBodyDiff{
+		ContentDiff: &diff.ContentDiff{
+			MediaTypeModified: diff.ModifiedMediaTypes{
+				"application/json": &diff.MediaTypeDiff{
+					SchemaDiff: &diff.SchemaDiff{
+						PropertiesDiff: &diff.SchemasDiff{
+							Modified: diff.ModifiedSchemasMap{
+								"role": &diff.SchemaDiff{},
+							},
+						},
+					},
+				},
+				"application/xml": &diff.MediaTypeDiff{
+					SchemaDiff: &diff.SchemaDiff{
+						PropertiesDiff: &diff.SchemasDiff{
+							Modified: diff.ModifiedSchemasMap{
+								"role": &diff.SchemaDiff{},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	d := &diff.Diff{
+		PathsDiff: &diff.PathsDiff{
+			Modified: diff.ModifiedPaths{
+				"/pets": &diff.PathDiff{
+					OperationsDiff: &diff.OperationsDiff{
+						Modified: diff.ModifiedOperations{"POST": op},
+					},
+				},
+			},
+		},
+	}
+
+	var details []string
+	checker.WalkModifiedRequestBodySchemas(d, &diff.OperationsSourcesMap{}, allChecksConfig(), func(ctx checker.MediaTypeChangeCtx) {
+		ctx.WalkProperties(func(p checker.PropertyChangeCtx) {
+			c := p.NewChange("request-property-any-of-added", []any{"#/components/schemas/Rabbit", p.PropertyName}, "")
+			require.Equal(t, "POST", c.Operation)
+			require.Equal(t, "/pets", c.Path)
+			require.Equal(t, "updatePets", c.OperationId)
+			details = append(details, c.Details)
+		})
+	})
+
+	// One emission per (media type) since each media type has the same
+	// single modified property; details must distinguish them.
+	sort.Strings(details)
+	require.Equal(t, []string{"(media type: application/json)", "(media type: application/xml)"}, details)
+}
+
 // Single media type means formatMediaTypeDetails returns the empty string;
 // the helper must still produce a valid ApiChange (Details just empty).
 func TestMediaTypeChangeCtx_NewChange_SingleMediaTypeHasEmptyDetails(t *testing.T) {
