@@ -33,9 +33,9 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts,
 		if opts.DiffEmpty {
 			_, _ = fmt.Fprint(result, "No changes detected")
 		} else if opts.IsBreaking {
-			_, _ = fmt.Fprint(result, "No breaking changes to report, but the specs are different")
+			_, _ = fmt.Fprint(result, "No breaking changes to report, but the specs are different.\nRun 'oasdiff diff' to see structural differences.")
 		} else {
-			_, _ = fmt.Fprint(result, "No changes to report, but the specs are different")
+			_, _ = fmt.Fprint(result, "No changes to report, but the specs are different.\nRun 'oasdiff diff' to see structural differences.")
 		}
 		return result.Bytes(), nil
 	}
