@@ -12,68 +12,31 @@ const (
 
 func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.ResponsesDiff == nil {
-				continue
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			patternDiff := p.propertyDiff.PatternDiff
+			if patternDiff == nil {
+				return
 			}
 
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "pattern")
+			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							patternDiff := propertyDiff.PatternDiff
-							if patternDiff == nil {
-								return
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "pattern")
-
-							propName := propertyFullName(propertyPath, propertyName)
-
-							id := ResponsePropertyPatternChangedId
-							args := []any{propName, patternDiff.From, patternDiff.To, responseStatus}
-							if patternDiff.To == "" || patternDiff.To == nil {
-								id = ResponsePropertyPatternRemovedId
-								args = []any{propName, patternDiff.From, responseStatus}
-							} else if patternDiff.From == "" || patternDiff.From == nil {
-								id = ResponsePropertyPatternAddedId
-								args = []any{propName, patternDiff.To, responseStatus}
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								args,
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						})
-				}
+			id := ResponsePropertyPatternChangedId
+			args := []any{propName, patternDiff.From, patternDiff.To, info.responseStatus}
+			if patternDiff.To == "" || patternDiff.To == nil {
+				id = ResponsePropertyPatternRemovedId
+				args = []any{propName, patternDiff.From, info.responseStatus}
+			} else if patternDiff.From == "" || patternDiff.From == nil {
+				id = ResponsePropertyPatternAddedId
+				args = []any{propName, patternDiff.To, info.responseStatus}
 			}
-		}
-	}
+
+			result = append(result, p.newChange(id, args, "").
+				WithSources(propBaseSource, propRevisionSource))
+		})
+	})
+
 	return result
 }
