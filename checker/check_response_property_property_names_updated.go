@@ -13,94 +13,36 @@ const (
 
 func ResponsePropertyPropertyNamesUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.PropertyNamesDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "propertyNames")
+			if info.schemaDiff.PropertyNamesDiff.SchemaAdded {
+				result = append(result, info.newChange(ResponseBodyPropertyNamesAddedId, []any{info.responseStatus}, "").
+					WithSources(nil, revisionSource))
 			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil || responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					if mediaTypeDiff.SchemaDiff.PropertyNamesDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "propertyNames")
-						if mediaTypeDiff.SchemaDiff.PropertyNamesDiff.SchemaAdded {
-							result = append(result, NewApiChange(
-								ResponseBodyPropertyNamesAddedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						if mediaTypeDiff.SchemaDiff.PropertyNamesDiff.SchemaDeleted {
-							result = append(result, NewApiChange(
-								ResponseBodyPropertyNamesRemovedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if propertyDiff.PropertyNamesDiff == nil {
-								return
-							}
-							propName := propertyFullName(propertyPath, propertyName)
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "propertyNames")
-							if propertyDiff.PropertyNamesDiff.SchemaAdded {
-								result = append(result, NewApiChange(
-									ResponsePropertyPropertyNamesAddedId,
-									config,
-									[]any{propName, responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-							if propertyDiff.PropertyNamesDiff.SchemaDeleted {
-								result = append(result, NewApiChange(
-									ResponsePropertyPropertyNamesRemovedId,
-									config,
-									[]any{propName, responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-							}
-						})
-				}
+			if info.schemaDiff.PropertyNamesDiff.SchemaDeleted {
+				result = append(result, info.newChange(ResponseBodyPropertyNamesRemovedId, []any{info.responseStatus}, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.PropertyNamesDiff == nil {
+				return
+			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "propertyNames")
+			if p.propertyDiff.PropertyNamesDiff.SchemaAdded {
+				result = append(result, p.newChange(ResponsePropertyPropertyNamesAddedId, []any{propName, info.responseStatus}, "").
+					WithSources(nil, propRevisionSource))
+			}
+			if p.propertyDiff.PropertyNamesDiff.SchemaDeleted {
+				result = append(result, p.newChange(ResponsePropertyPropertyNamesRemovedId, []any{propName, info.responseStatus}, "").
+					WithSources(propBaseSource, nil))
+			}
+		})
+	})
+
 	return result
 }
