@@ -11,80 +11,38 @@ const (
 
 func ResponsePropertyMinItemsDecreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if minItemsDiff := info.schemaDiff.MinItemsDiff; minItemsDiff != nil &&
+			minItemsDiff.From != nil && minItemsDiff.To != nil && IsDecreasedValue(minItemsDiff) {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
+			result = append(result, info.newChange(
+				ResponseBodyMinItemsDecreasedId,
+				[]any{minItemsDiff.From, minItemsDiff.To},
+				"",
+			).WithSources(baseSource, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+		info.walkProperties(func(p propertyInfo) {
+			minItemsDiff := p.propertyDiff.MinItemsDiff
+			if minItemsDiff == nil || minItemsDiff.To == nil || minItemsDiff.From == nil {
+				return
 			}
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff == nil ||
-					responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MinItemsDiff != nil {
-						minItemsDiff := mediaTypeDiff.SchemaDiff.MinItemsDiff
-						if minItemsDiff.From != nil &&
-							minItemsDiff.To != nil {
-							if IsDecreasedValue(minItemsDiff) {
-								baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minItems")
-								result = append(result, NewApiChange(
-									ResponseBodyMinItemsDecreasedId,
-									config,
-									[]any{minItemsDiff.From, minItemsDiff.To},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-							}
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							minItemsDiff := propertyDiff.MinItemsDiff
-							if minItemsDiff == nil {
-								return
-							}
-							if minItemsDiff.To == nil ||
-								minItemsDiff.From == nil {
-								return
-							}
-							if !IsDecreasedValue(minItemsDiff) {
-								return
-							}
-
-							if propertyDiff.Revision.WriteOnly {
-								return
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minItems")
-							result = append(result, NewApiChange(
-								ResponsePropertyMinItemsDecreasedId,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), minItemsDiff.From, minItemsDiff.To, responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						})
-				}
+			if !IsDecreasedValue(minItemsDiff) {
+				return
 			}
-		}
-	}
+			if p.propertyDiff.Revision.WriteOnly {
+				return
+			}
+
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
+			result = append(result, p.newChange(
+				ResponsePropertyMinItemsDecreasedId,
+				[]any{propertyFullName(p.propertyPath, p.propertyName), minItemsDiff.From, minItemsDiff.To, info.responseStatus},
+				"",
+			).WithSources(propBaseSource, propRevisionSource))
+		})
+	})
+
 	return result
 }

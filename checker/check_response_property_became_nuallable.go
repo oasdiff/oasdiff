@@ -11,96 +11,42 @@ const (
 
 func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
+		if info.schemaDiff.NullableDiff != nil && info.schemaDiff.NullableDiff.To == true {
+			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
+				WithSources(baseSource, revisionSource))
+		} else if nullAddedToTypeArray(info.schemaDiff.TypeDiff) {
+			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
+			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
+				WithSources(baseSource, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.ResponsesDiff == nil {
-				continue
-			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
+		info.walkProperties(func(p propertyInfo) {
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
+			nullableDiff := p.propertyDiff.NullableDiff
+			if nullableDiff != nil {
+				if nullableDiff.To != true {
+					return
 				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					if mediaTypeDiff.SchemaDiff.NullableDiff != nil && mediaTypeDiff.SchemaDiff.NullableDiff.To == true {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "nullable")
-						result = append(result, NewApiChange(
-							ResponseBodyBecameNullableId,
-							config,
-							nil,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					} else if nullAddedToTypeArray(mediaTypeDiff.SchemaDiff.TypeDiff) {
-						// OpenAPI 3.1: type changed from "string" to ["string", "null"]
-						result = append(result, NewApiChange(
-							ResponseBodyBecameNullableId,
-							config,
-							nil,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithDetails(mediaTypeDetails))
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							nullableDiff := propertyDiff.NullableDiff
-							if nullableDiff != nil {
-								if nullableDiff.To != true {
-									return
-								}
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "nullable")
-								result = append(result, NewApiChange(
-									ResponsePropertyBecameNullableId,
-									config,
-									[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-								return
-							}
-							// OpenAPI 3.1: type changed from "string" to ["string", "null"]
-							if nullAddedToTypeArray(propertyDiff.TypeDiff) {
-								result = append(result, NewApiChange(
-									ResponsePropertyBecameNullableId,
-									config,
-									[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithDetails(mediaTypeDetails))
-							}
-						})
-				}
+				result = append(result, p.newChange(
+					ResponsePropertyBecameNullableId,
+					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+				return
 			}
-		}
-	}
+			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
+			if nullAddedToTypeArray(p.propertyDiff.TypeDiff) {
+				result = append(result, p.newChange(
+					ResponsePropertyBecameNullableId,
+					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }

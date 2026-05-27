@@ -11,97 +11,60 @@ const (
 
 func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		schemaDiff := info.schemaDiff
+
+		// Body-level suppression also skips the property walk for this
+		// media type (the pre-migration code used `continue` in the
+		// media-type for-loop, which had that effect). Preserved.
+		if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+		typeDiff := schemaDiff.TypeDiff
+		formatDiff := schemaDiff.FormatDiff
+
+		// Suppress null-only type changes (handled by nullable checkers).
+		if isNullTypeChange(typeDiff) && formatDiff.Empty() {
+			return
+		}
+
+		if breakingTypeFormatChangedInResponseProperty(typeDiff, formatDiff, info.mediaType, schemaDiff) {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
+			result = append(result, info.newChange(
+				ResponseBodyTypeChangedId,
+				[]any{getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff), info.responseStatus},
+				"",
+			).WithSources(baseSource, revisionSource))
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff == nil || p.propertyDiff.Revision == nil {
+				return
 			}
 
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff != nil {
-						// Check for suppression by ListOfTypes checker
-						if shouldSuppressTypeChangedForListOfTypes(mediaTypeDiff.SchemaDiff) {
-							continue
-						}
-
-						schemaDiff := mediaTypeDiff.SchemaDiff
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, schemaDiff, "type")
-						typeDiff := schemaDiff.TypeDiff
-						formatDiff := schemaDiff.FormatDiff
-
-						// Suppress null-only type changes (handled by nullable checkers)
-						if isNullTypeChange(typeDiff) && formatDiff.Empty() {
-							continue
-						}
-
-						if breakingTypeFormatChangedInResponseProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
-
-							result = append(result, NewApiChange(
-								ResponseBodyTypeChangedId,
-								config,
-								[]any{getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if propertyDiff == nil || propertyDiff.Revision == nil {
-								return
-							}
-
-							// Check for suppression by ListOfTypes checker
-							if shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff) {
-								return
-							}
-
-							// Suppress null-only type changes (handled by nullable checkers)
-							if isNullTypeChange(propertyDiff.TypeDiff) && propertyDiff.FormatDiff.Empty() {
-								return
-							}
-
-							schemaDiff := propertyDiff
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
-							typeDiff := schemaDiff.TypeDiff
-							formatDiff := schemaDiff.FormatDiff
-
-							if breakingTypeFormatChangedInResponseProperty(typeDiff, formatDiff, mediaType, schemaDiff) {
-
-								result = append(result, NewApiChange(
-									ResponsePropertyTypeChangedId,
-									config,
-									[]any{propertyFullName(propertyPath, propertyName), getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff), responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-						})
-				}
+			if shouldSuppressPropertyTypeChangedForListOfTypes(p.propertyDiff) {
+				return
 			}
-		}
-	}
+			if isNullTypeChange(p.propertyDiff.TypeDiff) && p.propertyDiff.FormatDiff.Empty() {
+				return
+			}
+
+			propSchemaDiff := p.propertyDiff
+			propTypeDiff := propSchemaDiff.TypeDiff
+			propFormatDiff := propSchemaDiff.FormatDiff
+
+			if breakingTypeFormatChangedInResponseProperty(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
+				result = append(result, p.newChange(
+					ResponsePropertyTypeChangedId,
+					[]any{propertyFullName(p.propertyPath, p.propertyName), getBaseType(propSchemaDiff), getBaseFormat(propSchemaDiff), getRevisionType(propSchemaDiff), getRevisionFormat(propSchemaDiff), info.responseStatus},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
