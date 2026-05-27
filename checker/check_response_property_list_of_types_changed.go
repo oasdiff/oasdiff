@@ -13,63 +13,35 @@ const (
 
 func ResponsePropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		opInfo := newOpInfoFromDiff(config, info.operationItem, operationsSources, info.method, info.path)
+
+		// Body-level
+		result = append(result, checkBodyListOfTypesChange(
+			opInfo,
+			info.schemaDiff,
+			info.mediaType,
+			info.responseStatus,
+			false, // isRequest
+		)...)
+
+		// Property-level
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff == nil || p.propertyDiff.Revision == nil {
+				return
 			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+			result = append(result, checkPropertyListOfTypesChange(
+				opInfo,
+				p.propertyPath,
+				p.propertyName,
+				p.propertyDiff,
+				info.mediaType,
+				info.responseStatus,
+				false, // isRequest
+			)...)
+		})
+	})
 
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					// Check response body schema
-					changes := checkBodyListOfTypesChange(
-						opInfo,
-						mediaTypeDiff.SchemaDiff,
-						mediaType,
-						responseStatus,
-						false, // isRequest
-					)
-					result = append(result, changes...)
-
-					// Check response body properties
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if propertyDiff == nil || propertyDiff.Revision == nil {
-								return
-							}
-
-							changes := checkPropertyListOfTypesChange(
-								opInfo,
-								propertyPath,
-								propertyName,
-								propertyDiff,
-								mediaType,
-								responseStatus,
-								false, // isRequest
-							)
-							result = append(result, changes...)
-						})
-				}
-			}
-		}
-	}
 	return result
 }
