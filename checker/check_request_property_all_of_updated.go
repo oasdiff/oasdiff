@@ -13,96 +13,37 @@ const (
 
 func RequestPropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.AllOfDiff != nil && len(info.schemaDiff.AllOfDiff.Added) > 0 {
+			baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", -1, info.schemaDiff.AllOfDiff.Added[0].Index)
+			result = append(result, info.newChange(RequestBodyAllOfAddedId, []any{info.schemaDiff.AllOfDiff.Added.String()}, "").
+				WithSources(baseSource, revisionSource))
+		}
+		if info.schemaDiff.AllOfDiff != nil && len(info.schemaDiff.AllOfDiff.Deleted) > 0 {
+			baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", info.schemaDiff.AllOfDiff.Deleted[0].Index, -1)
+			result = append(result, info.newChange(RequestBodyAllOfRemovedId, []any{info.schemaDiff.AllOfDiff.Deleted.String()}, "").
+				WithSources(baseSource, revisionSource))
 		}
 
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.AllOfDiff == nil {
+				return
 			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				if mediaTypeDiff.SchemaDiff.AllOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AllOfDiff.Added) > 0 {
-					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "allOf", -1, mediaTypeDiff.SchemaDiff.AllOfDiff.Added[0].Index)
-					result = append(result, NewApiChange(
-						RequestBodyAllOfAddedId,
-						config,
-						[]any{mediaTypeDiff.SchemaDiff.AllOfDiff.Added.String()},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
-				}
-
-				if mediaTypeDiff.SchemaDiff.AllOfDiff != nil && len(mediaTypeDiff.SchemaDiff.AllOfDiff.Deleted) > 0 {
-					baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "allOf", mediaTypeDiff.SchemaDiff.AllOfDiff.Deleted[0].Index, -1)
-					result = append(result, NewApiChange(
-						RequestBodyAllOfRemovedId,
-						config,
-						[]any{mediaTypeDiff.SchemaDiff.AllOfDiff.Deleted.String()},
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						if propertyDiff.AllOfDiff == nil {
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-
-						if len(propertyDiff.AllOfDiff.Added) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "allOf", -1, propertyDiff.AllOfDiff.Added[0].Index)
-							result = append(result, NewApiChange(
-								RequestPropertyAllOfAddedId,
-								config,
-								[]any{propertyDiff.AllOfDiff.Added.String(), propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-
-						if len(propertyDiff.AllOfDiff.Deleted) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "allOf", propertyDiff.AllOfDiff.Deleted[0].Index, -1)
-							result = append(result, NewApiChange(
-								RequestPropertyAllOfRemovedId,
-								config,
-								[]any{propertyDiff.AllOfDiff.Deleted.String(), propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+			if len(p.propertyDiff.AllOfDiff.Added) > 0 {
+				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", -1, p.propertyDiff.AllOfDiff.Added[0].Index)
+				result = append(result, p.newChange(RequestPropertyAllOfAddedId, []any{p.propertyDiff.AllOfDiff.Added.String(), propName}, "").
+					WithSources(propBaseSource, propRevisionSource))
 			}
-		}
-	}
+			if len(p.propertyDiff.AllOfDiff.Deleted) > 0 {
+				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", p.propertyDiff.AllOfDiff.Deleted[0].Index, -1)
+				result = append(result, p.newChange(RequestPropertyAllOfRemovedId, []any{p.propertyDiff.AllOfDiff.Deleted.String(), propName}, "").
+					WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }

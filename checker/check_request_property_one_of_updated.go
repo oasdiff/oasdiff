@@ -13,108 +13,49 @@ const (
 
 func RequestPropertyOneOfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		// Body-level suppression also skips the property walk for this
+		// media type (pre-migration code used `continue` in the
+		// media-type for-loop). Preserved.
+		if shouldSuppressOneOfSchemaChangedForListOfTypes(info.schemaDiff) {
+			return
 		}
 
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+		if info.schemaDiff.OneOfDiff != nil {
+			if added := info.schemaDiff.OneOfDiff.Added; len(added) > 0 {
+				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "oneOf", -1, added[0].Index)
+				result = append(result, info.newChange(RequestBodyOneOfAddedId, []any{added.String()}, "").
+					WithSources(baseSource, revisionSource))
 			}
-
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				// Check for suppression by ListOfTypes checker
-				if shouldSuppressOneOfSchemaChangedForListOfTypes(mediaTypeDiff.SchemaDiff) {
-					continue
-				}
-
-				if mediaTypeDiff.SchemaDiff.OneOfDiff != nil {
-					if added := mediaTypeDiff.SchemaDiff.OneOfDiff.Added; len(added) > 0 {
-						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", -1, added[0].Index)
-						result = append(result, NewApiChange(
-							RequestBodyOneOfAddedId,
-							config,
-							[]any{added.String()},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-
-					if deleted := mediaTypeDiff.SchemaDiff.OneOfDiff.Deleted; len(deleted) > 0 {
-						baseSource, revisionSource := SubschemaSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "oneOf", deleted[0].Index, -1)
-						result = append(result, NewApiChange(
-							RequestBodyOneOfRemovedId,
-							config,
-							[]any{deleted.String()},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						if propertyDiff.OneOfDiff == nil {
-							return
-						}
-
-						// Check for suppression by ListOfTypes checker
-						if shouldSuppressPropertyOneOfSchemaChangedForListOfTypes(propertyDiff) {
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-
-						if added := propertyDiff.OneOfDiff.Added; len(added) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", -1, added[0].Index)
-							result = append(result, NewApiChange(
-								RequestPropertyOneOfAddedId,
-								config,
-								[]any{added.String(), propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-
-						if deleted := propertyDiff.OneOfDiff.Deleted; len(deleted) > 0 {
-							propBaseSource, propRevisionSource := SubschemaSources(operationsSources, operationItem, propertyDiff, "oneOf", deleted[0].Index, -1)
-							result = append(result, NewApiChange(
-								RequestPropertyOneOfRemovedId,
-								config,
-								[]any{deleted.String(), propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+			if deleted := info.schemaDiff.OneOfDiff.Deleted; len(deleted) > 0 {
+				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "oneOf", deleted[0].Index, -1)
+				result = append(result, info.newChange(RequestBodyOneOfRemovedId, []any{deleted.String()}, "").
+					WithSources(baseSource, revisionSource))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.OneOfDiff == nil {
+				return
+			}
+			if shouldSuppressPropertyOneOfSchemaChangedForListOfTypes(p.propertyDiff) {
+				return
+			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if added := p.propertyDiff.OneOfDiff.Added; len(added) > 0 {
+				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "oneOf", -1, added[0].Index)
+				result = append(result, p.newChange(RequestPropertyOneOfAddedId, []any{added.String(), propName}, "").
+					WithSources(propBaseSource, propRevisionSource))
+			}
+			if deleted := p.propertyDiff.OneOfDiff.Deleted; len(deleted) > 0 {
+				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "oneOf", deleted[0].Index, -1)
+				result = append(result, p.newChange(RequestPropertyOneOfRemovedId, []any{deleted.String(), propName}, "").
+					WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
