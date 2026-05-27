@@ -50,13 +50,21 @@ func TestTextFormatter_RenderChecks(t *testing.T) {
 func TestTextFormatter_RenderChangelog_EmptyChangesDifferentSpecs(t *testing.T) {
 	out, err := textFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{}, "", "")
 	require.NoError(t, err)
-	require.Equal(t, "No changes to report, but the specs are different", string(out))
+	require.Equal(t, "No changes to report, but the specs are different.\nRun 'oasdiff diff' to see structural differences.", string(out))
 }
 
 func TestTextFormatter_RenderChangelog_EmptyChangesDifferentSpecs_BreakingMode(t *testing.T) {
 	out, err := textFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{IsBreaking: true}, "", "")
 	require.NoError(t, err)
-	require.Equal(t, "No breaking changes to report, but the specs are different", string(out))
+	require.Equal(t, "No breaking changes to report, but the specs are different.\nRun 'oasdiff diff' to see structural differences.", string(out))
+}
+
+func TestTextFormatter_RenderChangelog_EmptyChangesIdenticalSpecs(t *testing.T) {
+	// DiffEmpty=true takes precedence; suggestion is suppressed because
+	// there's nothing for `oasdiff diff` to show.
+	out, err := textFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{DiffEmpty: true, IsBreaking: true}, "", "")
+	require.NoError(t, err)
+	require.Equal(t, "No changes detected", string(out))
 }
 
 func TestTextFormatter_RenderDiff(t *testing.T) {

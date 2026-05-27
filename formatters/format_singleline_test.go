@@ -36,13 +36,14 @@ func TestSingleLineFormatter_RenderChangelog(t *testing.T) {
 func TestSingleLineFormatter_RenderChangelog_EmptyChangesDifferentSpecs(t *testing.T) {
 	out, err := singleLineFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{}, "", "")
 	require.NoError(t, err)
-	require.Equal(t, "No changes to report, but the specs are different", string(out))
+	// Singleline keeps everything on one line: period separator, no newline.
+	require.Equal(t, "No changes to report, but the specs are different. Run 'oasdiff diff' to see structural differences.", string(out))
 }
 
 func TestSingleLineFormatter_RenderChangelog_EmptyChangesDifferentSpecs_BreakingMode(t *testing.T) {
 	out, err := singleLineFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{IsBreaking: true}, "", "")
 	require.NoError(t, err)
-	require.Equal(t, "No breaking changes to report, but the specs are different", string(out))
+	require.Equal(t, "No breaking changes to report, but the specs are different. Run 'oasdiff diff' to see structural differences.", string(out))
 }
 
 func TestSingleLineFormatter_NotImplemented(t *testing.T) {

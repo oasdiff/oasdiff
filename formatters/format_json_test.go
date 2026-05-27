@@ -68,6 +68,27 @@ func TestJsonFormatter_RenderSummary(t *testing.T) {
 	require.Equal(t, `{"diff":false}`, string(out))
 }
 
+func TestJsonFormatter_RenderChangelog_WrappedCarriesDiffEmpty(t *testing.T) {
+	// When WrapInObject is set, the JSON wrapper carries diff_empty alongside
+	// the changes list so HTTP consumers can distinguish "specs are identical"
+	// from "specs differ but no rule fired."
+	emptyOut, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{WrapInObject: true, DiffEmpty: true}, "", "")
+	require.NoError(t, err)
+	require.JSONEq(t, `{"changes":[], "diff_empty":true}`, string(emptyOut))
+
+	differOut, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{WrapInObject: true, DiffEmpty: false}, "", "")
+	require.NoError(t, err)
+	require.JSONEq(t, `{"changes":[], "diff_empty":false}`, string(differOut))
+}
+
+func TestJsonFormatter_RenderChangelog_BareArrayIgnoresOpts(t *testing.T) {
+	// Without WrapInObject the output is a bare JSON array. DiffEmpty has
+	// nowhere to live and is ignored, preserving the existing CLI shape.
+	out, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{DiffEmpty: false}, "", "")
+	require.NoError(t, err)
+	require.Equal(t, "[]", string(out))
+}
+
 func TestJsonFormatter_RenderChangelog_WithSources(t *testing.T) {
 	testChanges := checker.Changes{
 		checker.ApiChange{

@@ -25,9 +25,9 @@ func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts Rende
 		if opts.DiffEmpty {
 			_, _ = fmt.Fprint(result, "No changes detected")
 		} else if opts.IsBreaking {
-			_, _ = fmt.Fprint(result, "No breaking changes to report, but the specs are different")
+			_, _ = fmt.Fprint(result, "No breaking changes to report, but the specs are different. Run 'oasdiff diff' to see structural differences.")
 		} else {
-			_, _ = fmt.Fprint(result, "No changes to report, but the specs are different")
+			_, _ = fmt.Fprint(result, "No changes to report, but the specs are different. Run 'oasdiff diff' to see structural differences.")
 		}
 		return result.Bytes(), nil
 	}

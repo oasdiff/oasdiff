@@ -30,7 +30,7 @@ func (f JSONFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 }
 
 func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
-	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts.WrapInObject))
+	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts))
 }
 
 func (f JSONFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
@@ -62,10 +62,20 @@ func printJSON(output any) ([]byte, error) {
 	return bytes, nil
 }
 
-func adaptStructure(output any, wrapInObject bool) any {
-	if wrapInObject {
-		output = map[string]any{"changes": output}
+// adaptStructure wraps the changes list in an object when the caller asks
+// for the wrapped shape (used by oasdiff-service so the response carries
+// extra signals alongside the change list). The bare-array shape ignores
+// opts to preserve the existing CLI JSON output.
+//
+// diff_empty is true when the underlying diff found no changes at all,
+// so consumers can distinguish "specs are identical" from "specs differ
+// but no breaking-change / changelog rule fired."
+func adaptStructure(output any, opts RenderOpts) any {
+	if opts.WrapInObject {
+		return map[string]any{
+			"changes":    output,
+			"diff_empty": opts.DiffEmpty,
+		}
 	}
-
 	return output
 }
