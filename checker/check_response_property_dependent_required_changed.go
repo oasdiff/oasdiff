@@ -17,172 +17,64 @@ const (
 
 func ResponsePropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.DependentRequiredDiff != nil {
+			depReqDiff := info.schemaDiff.DependentRequiredDiff
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "dependentRequired")
+			for key, values := range depReqDiff.Added {
+				result = append(result, info.newChange(
+					ResponseBodyDependentRequiredAddedId,
+					[]any{info.responseStatus, key, strings.Join(values, ", ")},
+					"",
+				).WithSources(nil, revisionSource))
 			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil || responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.DependentRequiredDiff != nil {
-						depReqDiff := mediaTypeDiff.SchemaDiff.DependentRequiredDiff
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "dependentRequired")
-						result = append(result, responseBodyDependentRequiredChanges(
-							depReqDiff, config, operationsSources, operationItem, operation, path,
-							responseStatus, baseSource, revisionSource, mediaTypeDetails,
-						)...)
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if propertyDiff == nil || propertyDiff.DependentRequiredDiff == nil {
-								return
-							}
-
-							depReqDiff := propertyDiff.DependentRequiredDiff
-							propName := propertyFullName(propertyPath, propertyName)
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "dependentRequired")
-							result = append(result, responsePropertyDependentRequiredChanges(
-								depReqDiff, config, operationsSources, operationItem, operation, path,
-								responseStatus, propName, propBaseSource, propRevisionSource, mediaTypeDetails,
-							)...)
-						})
-				}
+			for key, values := range depReqDiff.Deleted {
+				result = append(result, info.newChange(
+					ResponseBodyDependentRequiredRemovedId,
+					[]any{info.responseStatus, key, strings.Join(values, ", ")},
+					"",
+				).WithSources(baseSource, nil))
+			}
+			for key, stringsDiff := range depReqDiff.Modified {
+				result = append(result, info.newChange(
+					ResponseBodyDependentRequiredChangedId,
+					[]any{key, info.responseStatus, formatDependentRequiredModification(stringsDiff)},
+					"",
+				).WithSources(baseSource, revisionSource))
 			}
 		}
-	}
-	return result
-}
 
-func responseBodyDependentRequiredChanges(
-	depReqDiff *diff.DependentRequiredDiff,
-	config *Config,
-	operationsSources *diff.OperationsSourcesMap,
-	operationItem *diff.MethodDiff,
-	operation string,
-	path string,
-	responseStatus string,
-	baseSource *Source,
-	revisionSource *Source,
-	mediaTypeDetails string,
-) Changes {
-	result := make(Changes, 0)
-
-	// message: "the response body dependentRequired was added for the status %s: when '%s' is present, '%s' are required"
-	for key, values := range depReqDiff.Added {
-		result = append(result, NewApiChange(
-			ResponseBodyDependentRequiredAddedId,
-			config,
-			[]any{responseStatus, key, strings.Join(values, ", ")},
-			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
-		).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-	}
-
-	// message: "the response body dependentRequired was removed for the status %s: when '%s' was present, '%s' were required"
-	for key, values := range depReqDiff.Deleted {
-		result = append(result, NewApiChange(
-			ResponseBodyDependentRequiredRemovedId,
-			config,
-			[]any{responseStatus, key, strings.Join(values, ", ")},
-			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
-		).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-	}
-
-	// message: "the response body dependentRequired for '%s' was updated for the status %s: %s"
-	for key, stringsDiff := range depReqDiff.Modified {
-		result = append(result, NewApiChange(
-			ResponseBodyDependentRequiredChangedId,
-			config,
-			[]any{key, responseStatus, formatDependentRequiredModification(stringsDiff)},
-			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
-		).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-	}
-
-	return result
-}
-
-func responsePropertyDependentRequiredChanges(
-	depReqDiff *diff.DependentRequiredDiff,
-	config *Config,
-	operationsSources *diff.OperationsSourcesMap,
-	operationItem *diff.MethodDiff,
-	operation string,
-	path string,
-	responseStatus string,
-	propName string,
-	baseSource *Source,
-	revisionSource *Source,
-	mediaTypeDetails string,
-) Changes {
-	result := make(Changes, 0)
-
-	// message: "the %s response property dependentRequired was added for the status %s: when '%s' is present, '%s' are required"
-	for key, values := range depReqDiff.Added {
-		result = append(result, NewApiChange(
-			ResponsePropertyDependentRequiredAddedId,
-			config,
-			[]any{propName, responseStatus, key, strings.Join(values, ", ")},
-			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
-		).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-	}
-
-	// message: "the %s response property dependentRequired was removed for the status %s: when '%s' was present, '%s' were required"
-	for key, values := range depReqDiff.Deleted {
-		result = append(result, NewApiChange(
-			ResponsePropertyDependentRequiredRemovedId,
-			config,
-			[]any{propName, responseStatus, key, strings.Join(values, ", ")},
-			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
-		).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-	}
-
-	// message: "the %s response property dependentRequired for '%s' was updated for the status %s: %s"
-	for key, stringsDiff := range depReqDiff.Modified {
-		result = append(result, NewApiChange(
-			ResponsePropertyDependentRequiredChangedId,
-			config,
-			[]any{propName, key, responseStatus, formatDependentRequiredModification(stringsDiff)},
-			"",
-			operationsSources,
-			operationItem.Revision,
-			operation,
-			path,
-		).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-	}
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.DependentRequiredDiff == nil {
+				return
+			}
+			depReqDiff := p.propertyDiff.DependentRequiredDiff
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "dependentRequired")
+			for key, values := range depReqDiff.Added {
+				result = append(result, p.newChange(
+					ResponsePropertyDependentRequiredAddedId,
+					[]any{propName, info.responseStatus, key, strings.Join(values, ", ")},
+					"",
+				).WithSources(nil, propRevisionSource))
+			}
+			for key, values := range depReqDiff.Deleted {
+				result = append(result, p.newChange(
+					ResponsePropertyDependentRequiredRemovedId,
+					[]any{propName, info.responseStatus, key, strings.Join(values, ", ")},
+					"",
+				).WithSources(propBaseSource, nil))
+			}
+			for key, stringsDiff := range depReqDiff.Modified {
+				result = append(result, p.newChange(
+					ResponsePropertyDependentRequiredChangedId,
+					[]any{propName, key, info.responseStatus, formatDependentRequiredModification(stringsDiff)},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
 
 	return result
 }

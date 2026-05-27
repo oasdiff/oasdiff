@@ -12,90 +12,45 @@ const (
 
 func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		processRequiredDiff := func(schemaDiff *diff.SchemaDiff, propertyPath string, propertyName string) {
+			if schemaDiff.RequiredDiff == nil {
+				return
 			}
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
+			for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Added {
+				if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
 					continue
 				}
-
-				processRequestPropertyRequiredDiff := func(schemaDiff *diff.SchemaDiff, propertyPath string, propertyName string) {
-					if schemaDiff.RequiredDiff != nil {
-						for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Added {
-							if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
-								continue
-							}
-
-							srcBase, srcRevision := SchemaAddedItemSources(operationsSources, operationItem, schemaDiff, "required", changedRequiredPropertyName)
-							if schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.Default == nil {
-								result = append(result, NewApiChange(
-									RequestPropertyBecameRequiredId,
-									config,
-									[]any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(srcBase, srcRevision).WithDetails(mediaTypeDetails))
-							} else {
-								// property has a default value, so making it required is not a breaking change
-								result = append(result, NewApiChange(
-									RequestPropertyBecameRequiredWithDefaultId,
-									config,
-									[]any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(srcBase, srcRevision).WithDetails(mediaTypeDetails))
-							}
-						}
-						for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Deleted {
-							if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
-								continue
-							}
-
-							srcBase, srcRevision := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "required", changedRequiredPropertyName)
-							result = append(result, NewApiChange(
-								RequestPropertyBecameOptionalId,
-								config,
-								[]any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(srcBase, srcRevision).WithDetails(mediaTypeDetails))
-						}
-					}
+				srcBase, srcRevision := SchemaAddedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
+				args := []any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))}
+				if schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.Default == nil {
+					result = append(result, info.newChange(RequestPropertyBecameRequiredId, args, "").
+						WithSources(srcBase, srcRevision))
+				} else {
+					// property has a default value, so making it required is not a breaking change
+					result = append(result, info.newChange(RequestPropertyBecameRequiredWithDefaultId, args, "").
+						WithSources(srcBase, srcRevision))
 				}
-
-				processRequestPropertyRequiredDiff(mediaTypeDiff.SchemaDiff, "", "")
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, _ *diff.SchemaDiff) {
-						processRequestPropertyRequiredDiff(propertyDiff, propertyPath, propertyName)
-					})
+			}
+			for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Deleted {
+				if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
+					continue
+				}
+				srcBase, srcRevision := SchemaDeletedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
+				args := []any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))}
+				result = append(result, info.newChange(RequestPropertyBecameOptionalId, args, "").
+					WithSources(srcBase, srcRevision))
 			}
 		}
-	}
+
+		processRequiredDiff(info.schemaDiff, "", "")
+
+		info.walkProperties(func(p propertyInfo) {
+			processRequiredDiff(p.propertyDiff, p.propertyPath, p.propertyName)
+		})
+	})
+
 	return result
 }
 
