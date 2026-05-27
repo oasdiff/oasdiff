@@ -22,116 +22,60 @@ const (
 
 func RequestPropertyIfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		for _, entry := range []struct {
+			schemaDiff *diff.SchemaDiff
+			addedId    string
+			removedId  string
+			field      string
+		}{
+			{info.schemaDiff.IfDiff, RequestBodyIfAddedId, RequestBodyIfRemovedId, "if"},
+			{info.schemaDiff.ThenDiff, RequestBodyThenAddedId, RequestBodyThenRemovedId, "then"},
+			{info.schemaDiff.ElseDiff, RequestBodyElseAddedId, RequestBodyElseRemovedId, "else"},
+		} {
+			if entry.schemaDiff == nil {
 				continue
 			}
-
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				for _, entry := range []struct {
-					schemaDiff *diff.SchemaDiff
-					addedId    string
-					removedId  string
-					field      string
-				}{
-					{mediaTypeDiff.SchemaDiff.IfDiff, RequestBodyIfAddedId, RequestBodyIfRemovedId, "if"},
-					{mediaTypeDiff.SchemaDiff.ThenDiff, RequestBodyThenAddedId, RequestBodyThenRemovedId, "then"},
-					{mediaTypeDiff.SchemaDiff.ElseDiff, RequestBodyElseAddedId, RequestBodyElseRemovedId, "else"},
-				} {
-					if entry.schemaDiff == nil {
-						continue
-					}
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, entry.field)
-					if entry.schemaDiff.SchemaAdded {
-						result = append(result, NewApiChange(
-							entry.addedId,
-							config,
-							nil,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-					}
-					if entry.schemaDiff.SchemaDeleted {
-						result = append(result, NewApiChange(
-							entry.removedId,
-							config,
-							nil,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						propName := propertyFullName(propertyPath, propertyName)
-
-						for _, entry := range []struct {
-							schemaDiff *diff.SchemaDiff
-							addedId    string
-							removedId  string
-							field      string
-						}{
-							{propertyDiff.IfDiff, RequestPropertyIfAddedId, RequestPropertyIfRemovedId, "if"},
-							{propertyDiff.ThenDiff, RequestPropertyThenAddedId, RequestPropertyThenRemovedId, "then"},
-							{propertyDiff.ElseDiff, RequestPropertyElseAddedId, RequestPropertyElseRemovedId, "else"},
-						} {
-							if entry.schemaDiff == nil {
-								continue
-							}
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, entry.field)
-							if entry.schemaDiff.SchemaAdded {
-								result = append(result, NewApiChange(
-									entry.addedId,
-									config,
-									[]any{propName},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-							if entry.schemaDiff.SchemaDeleted {
-								result = append(result, NewApiChange(
-									entry.removedId,
-									config,
-									[]any{propName},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-							}
-						}
-					})
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, entry.field)
+			if entry.schemaDiff.SchemaAdded {
+				result = append(result, info.newChange(entry.addedId, nil, "").
+					WithSources(nil, revisionSource))
+			}
+			if entry.schemaDiff.SchemaDeleted {
+				result = append(result, info.newChange(entry.removedId, nil, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			for _, entry := range []struct {
+				schemaDiff *diff.SchemaDiff
+				addedId    string
+				removedId  string
+				field      string
+			}{
+				{p.propertyDiff.IfDiff, RequestPropertyIfAddedId, RequestPropertyIfRemovedId, "if"},
+				{p.propertyDiff.ThenDiff, RequestPropertyThenAddedId, RequestPropertyThenRemovedId, "then"},
+				{p.propertyDiff.ElseDiff, RequestPropertyElseAddedId, RequestPropertyElseRemovedId, "else"},
+			} {
+				if entry.schemaDiff == nil {
+					continue
+				}
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, entry.field)
+				if entry.schemaDiff.SchemaAdded {
+					result = append(result, p.newChange(entry.addedId, []any{propName}, "").
+						WithSources(nil, propRevisionSource))
+				}
+				if entry.schemaDiff.SchemaDeleted {
+					result = append(result, p.newChange(entry.removedId, []any{propName}, "").
+						WithSources(propBaseSource, nil))
+				}
+			}
+		})
+	})
+
 	return result
 }

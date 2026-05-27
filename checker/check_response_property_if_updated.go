@@ -22,120 +22,60 @@ const (
 
 func ResponsePropertyIfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		for _, entry := range []struct {
+			schemaDiff *diff.SchemaDiff
+			addedId    string
+			removedId  string
+			field      string
+		}{
+			{info.schemaDiff.IfDiff, ResponseBodyIfAddedId, ResponseBodyIfRemovedId, "if"},
+			{info.schemaDiff.ThenDiff, ResponseBodyThenAddedId, ResponseBodyThenRemovedId, "then"},
+			{info.schemaDiff.ElseDiff, ResponseBodyElseAddedId, ResponseBodyElseRemovedId, "else"},
+		} {
+			if entry.schemaDiff == nil {
 				continue
 			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil || responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					for _, entry := range []struct {
-						schemaDiff *diff.SchemaDiff
-						addedId    string
-						removedId  string
-						field      string
-					}{
-						{mediaTypeDiff.SchemaDiff.IfDiff, ResponseBodyIfAddedId, ResponseBodyIfRemovedId, "if"},
-						{mediaTypeDiff.SchemaDiff.ThenDiff, ResponseBodyThenAddedId, ResponseBodyThenRemovedId, "then"},
-						{mediaTypeDiff.SchemaDiff.ElseDiff, ResponseBodyElseAddedId, ResponseBodyElseRemovedId, "else"},
-					} {
-						if entry.schemaDiff == nil {
-							continue
-						}
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, entry.field)
-						if entry.schemaDiff.SchemaAdded {
-							result = append(result, NewApiChange(
-								entry.addedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						if entry.schemaDiff.SchemaDeleted {
-							result = append(result, NewApiChange(
-								entry.removedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							propName := propertyFullName(propertyPath, propertyName)
-
-							for _, entry := range []struct {
-								schemaDiff *diff.SchemaDiff
-								addedId    string
-								removedId  string
-								field      string
-							}{
-								{propertyDiff.IfDiff, ResponsePropertyIfAddedId, ResponsePropertyIfRemovedId, "if"},
-								{propertyDiff.ThenDiff, ResponsePropertyThenAddedId, ResponsePropertyThenRemovedId, "then"},
-								{propertyDiff.ElseDiff, ResponsePropertyElseAddedId, ResponsePropertyElseRemovedId, "else"},
-							} {
-								if entry.schemaDiff == nil {
-									continue
-								}
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, entry.field)
-								if entry.schemaDiff.SchemaAdded {
-									result = append(result, NewApiChange(
-										entry.addedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-								}
-								if entry.schemaDiff.SchemaDeleted {
-									result = append(result, NewApiChange(
-										entry.removedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-								}
-							}
-						})
-				}
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, entry.field)
+			if entry.schemaDiff.SchemaAdded {
+				result = append(result, info.newChange(entry.addedId, []any{info.responseStatus}, "").
+					WithSources(nil, revisionSource))
+			}
+			if entry.schemaDiff.SchemaDeleted {
+				result = append(result, info.newChange(entry.removedId, []any{info.responseStatus}, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			for _, entry := range []struct {
+				schemaDiff *diff.SchemaDiff
+				addedId    string
+				removedId  string
+				field      string
+			}{
+				{p.propertyDiff.IfDiff, ResponsePropertyIfAddedId, ResponsePropertyIfRemovedId, "if"},
+				{p.propertyDiff.ThenDiff, ResponsePropertyThenAddedId, ResponsePropertyThenRemovedId, "then"},
+				{p.propertyDiff.ElseDiff, ResponsePropertyElseAddedId, ResponsePropertyElseRemovedId, "else"},
+			} {
+				if entry.schemaDiff == nil {
+					continue
+				}
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, entry.field)
+				if entry.schemaDiff.SchemaAdded {
+					result = append(result, p.newChange(entry.addedId, []any{propName, info.responseStatus}, "").
+						WithSources(nil, propRevisionSource))
+				}
+				if entry.schemaDiff.SchemaDeleted {
+					result = append(result, p.newChange(entry.removedId, []any{propName, info.responseStatus}, "").
+						WithSources(propBaseSource, nil))
+				}
+			}
+		})
+	})
+
 	return result
 }

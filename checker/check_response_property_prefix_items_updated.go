@@ -13,100 +13,37 @@ const (
 
 func ResponsePropertyPrefixItemsUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.PrefixItemsDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "prefixItems")
+			if len(info.schemaDiff.PrefixItemsDiff.Added) > 0 {
+				result = append(result, info.newChange(ResponseBodyPrefixItemsAddedId, []any{info.schemaDiff.PrefixItemsDiff.Added.String(), info.responseStatus}, "").
+					WithSources(nil, revisionSource))
 			}
-
-			for responseStatus, responsesDiff := range operationItem.ResponsesDiff.Modified {
-				if responsesDiff.ContentDiff == nil || responsesDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responsesDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					if mediaTypeDiff.SchemaDiff.PrefixItemsDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "prefixItems")
-						if len(mediaTypeDiff.SchemaDiff.PrefixItemsDiff.Added) > 0 {
-							result = append(result, NewApiChange(
-								ResponseBodyPrefixItemsAddedId,
-								config,
-								[]any{mediaTypeDiff.SchemaDiff.PrefixItemsDiff.Added.String(), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-
-						if len(mediaTypeDiff.SchemaDiff.PrefixItemsDiff.Deleted) > 0 {
-							result = append(result, NewApiChange(
-								ResponseBodyPrefixItemsRemovedId,
-								config,
-								[]any{mediaTypeDiff.SchemaDiff.PrefixItemsDiff.Deleted.String(), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if propertyDiff.PrefixItemsDiff == nil {
-								return
-							}
-
-							propName := propertyFullName(propertyPath, propertyName)
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "prefixItems")
-
-							if len(propertyDiff.PrefixItemsDiff.Added) > 0 {
-								result = append(result, NewApiChange(
-									ResponsePropertyPrefixItemsAddedId,
-									config,
-									[]any{propertyDiff.PrefixItemsDiff.Added.String(), propName, responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-
-							if len(propertyDiff.PrefixItemsDiff.Deleted) > 0 {
-								result = append(result, NewApiChange(
-									ResponsePropertyPrefixItemsRemovedId,
-									config,
-									[]any{propertyDiff.PrefixItemsDiff.Deleted.String(), propName, responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-							}
-						})
-				}
+			if len(info.schemaDiff.PrefixItemsDiff.Deleted) > 0 {
+				result = append(result, info.newChange(ResponseBodyPrefixItemsRemovedId, []any{info.schemaDiff.PrefixItemsDiff.Deleted.String(), info.responseStatus}, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.PrefixItemsDiff == nil {
+				return
+			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "prefixItems")
+
+			if len(p.propertyDiff.PrefixItemsDiff.Added) > 0 {
+				result = append(result, p.newChange(ResponsePropertyPrefixItemsAddedId, []any{p.propertyDiff.PrefixItemsDiff.Added.String(), propName, info.responseStatus}, "").
+					WithSources(nil, propRevisionSource))
+			}
+			if len(p.propertyDiff.PrefixItemsDiff.Deleted) > 0 {
+				result = append(result, p.newChange(ResponsePropertyPrefixItemsRemovedId, []any{p.propertyDiff.PrefixItemsDiff.Deleted.String(), propName, info.responseStatus}, "").
+					WithSources(propBaseSource, nil))
+			}
+		})
+	})
+
 	return result
 }

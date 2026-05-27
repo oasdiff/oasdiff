@@ -13,94 +13,40 @@ const (
 
 func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.DependentSchemasDiff != nil {
+			depSchemasDiff := info.schemaDiff.DependentSchemasDiff
+			for _, name := range depSchemasDiff.Added {
+				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				result = append(result, info.newChange(RequestBodyDependentSchemaAddedId, []any{name}, "").
+					WithSources(nil, revisionSource))
 			}
-
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				if mediaTypeDiff.SchemaDiff.DependentSchemasDiff != nil {
-					depSchemasDiff := mediaTypeDiff.SchemaDiff.DependentSchemasDiff
-					for _, name := range depSchemasDiff.Added {
-						revisionSource := SchemaMapItemSource(operationsSources, operationItem.Revision, depSchemasDiff.Revision, name)
-						result = append(result, NewApiChange(
-							RequestBodyDependentSchemaAddedId,
-							config,
-							[]any{name},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-					}
-					for _, name := range depSchemasDiff.Deleted {
-						baseSource := SchemaMapItemSource(operationsSources, operationItem.Base, depSchemasDiff.Base, name)
-						result = append(result, NewApiChange(
-							RequestBodyDependentSchemaRemovedId,
-							config,
-							[]any{name},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						if propertyDiff.DependentSchemasDiff == nil {
-							return
-						}
-						propName := propertyFullName(propertyPath, propertyName)
-						depSchemasDiff := propertyDiff.DependentSchemasDiff
-						for _, name := range depSchemasDiff.Added {
-							revisionSource := SchemaMapItemSource(operationsSources, operationItem.Revision, depSchemasDiff.Revision, name)
-							result = append(result, NewApiChange(
-								RequestPropertyDependentSchemaAddedId,
-								config,
-								[]any{name, propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						for _, name := range depSchemasDiff.Deleted {
-							baseSource := SchemaMapItemSource(operationsSources, operationItem.Base, depSchemasDiff.Base, name)
-							result = append(result, NewApiChange(
-								RequestPropertyDependentSchemaRemovedId,
-								config,
-								[]any{name, propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					})
+			for _, name := range depSchemasDiff.Deleted {
+				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				result = append(result, info.newChange(RequestBodyDependentSchemaRemovedId, []any{name}, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.DependentSchemasDiff == nil {
+				return
+			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			depSchemasDiff := p.propertyDiff.DependentSchemasDiff
+			for _, name := range depSchemasDiff.Added {
+				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				result = append(result, p.newChange(RequestPropertyDependentSchemaAddedId, []any{name, propName}, "").
+					WithSources(nil, revisionSource))
+			}
+			for _, name := range depSchemasDiff.Deleted {
+				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				result = append(result, p.newChange(RequestPropertyDependentSchemaRemovedId, []any{name, propName}, "").
+					WithSources(baseSource, nil))
+			}
+		})
+	})
+
 	return result
 }
