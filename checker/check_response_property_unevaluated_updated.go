@@ -18,150 +18,60 @@ const (
 
 func ResponsePropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.UnevaluatedItemsDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedItems")
+			if info.schemaDiff.UnevaluatedItemsDiff.SchemaAdded {
+				result = append(result, info.newChange(ResponseBodyUnevaluatedItemsAddedId, []any{info.responseStatus}, "").
+					WithSources(nil, revisionSource))
 			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil || responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					if mediaTypeDiff.SchemaDiff.UnevaluatedItemsDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "unevaluatedItems")
-						if mediaTypeDiff.SchemaDiff.UnevaluatedItemsDiff.SchemaAdded {
-							result = append(result, NewApiChange(
-								ResponseBodyUnevaluatedItemsAddedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						if mediaTypeDiff.SchemaDiff.UnevaluatedItemsDiff.SchemaDeleted {
-							result = append(result, NewApiChange(
-								ResponseBodyUnevaluatedItemsRemovedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					if mediaTypeDiff.SchemaDiff.UnevaluatedPropertiesDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "unevaluatedProperties")
-						if mediaTypeDiff.SchemaDiff.UnevaluatedPropertiesDiff.SchemaAdded {
-							result = append(result, NewApiChange(
-								ResponseBodyUnevaluatedPropertiesAddedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						if mediaTypeDiff.SchemaDiff.UnevaluatedPropertiesDiff.SchemaDeleted {
-							result = append(result, NewApiChange(
-								ResponseBodyUnevaluatedPropertiesRemovedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							propName := propertyFullName(propertyPath, propertyName)
-
-							if propertyDiff.UnevaluatedItemsDiff != nil {
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "unevaluatedItems")
-								if propertyDiff.UnevaluatedItemsDiff.SchemaAdded {
-									result = append(result, NewApiChange(
-										ResponsePropertyUnevaluatedItemsAddedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-								}
-								if propertyDiff.UnevaluatedItemsDiff.SchemaDeleted {
-									result = append(result, NewApiChange(
-										ResponsePropertyUnevaluatedItemsRemovedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-								}
-							}
-
-							if propertyDiff.UnevaluatedPropertiesDiff != nil {
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "unevaluatedProperties")
-								if propertyDiff.UnevaluatedPropertiesDiff.SchemaAdded {
-									result = append(result, NewApiChange(
-										ResponsePropertyUnevaluatedPropertiesAddedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-								}
-								if propertyDiff.UnevaluatedPropertiesDiff.SchemaDeleted {
-									result = append(result, NewApiChange(
-										ResponsePropertyUnevaluatedPropertiesRemovedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-								}
-							}
-						})
-				}
+			if info.schemaDiff.UnevaluatedItemsDiff.SchemaDeleted {
+				result = append(result, info.newChange(ResponseBodyUnevaluatedItemsRemovedId, []any{info.responseStatus}, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		if info.schemaDiff.UnevaluatedPropertiesDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedProperties")
+			if info.schemaDiff.UnevaluatedPropertiesDiff.SchemaAdded {
+				result = append(result, info.newChange(ResponseBodyUnevaluatedPropertiesAddedId, []any{info.responseStatus}, "").
+					WithSources(nil, revisionSource))
+			}
+			if info.schemaDiff.UnevaluatedPropertiesDiff.SchemaDeleted {
+				result = append(result, info.newChange(ResponseBodyUnevaluatedPropertiesRemovedId, []any{info.responseStatus}, "").
+					WithSources(baseSource, nil))
+			}
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if p.propertyDiff.UnevaluatedItemsDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedItems")
+				if p.propertyDiff.UnevaluatedItemsDiff.SchemaAdded {
+					result = append(result, p.newChange(ResponsePropertyUnevaluatedItemsAddedId, []any{propName, info.responseStatus}, "").
+						WithSources(nil, propRevisionSource))
+				}
+				if p.propertyDiff.UnevaluatedItemsDiff.SchemaDeleted {
+					result = append(result, p.newChange(ResponsePropertyUnevaluatedItemsRemovedId, []any{propName, info.responseStatus}, "").
+						WithSources(propBaseSource, nil))
+				}
+			}
+
+			if p.propertyDiff.UnevaluatedPropertiesDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedProperties")
+				if p.propertyDiff.UnevaluatedPropertiesDiff.SchemaAdded {
+					result = append(result, p.newChange(ResponsePropertyUnevaluatedPropertiesAddedId, []any{propName, info.responseStatus}, "").
+						WithSources(nil, propRevisionSource))
+				}
+				if p.propertyDiff.UnevaluatedPropertiesDiff.SchemaDeleted {
+					result = append(result, p.newChange(ResponsePropertyUnevaluatedPropertiesRemovedId, []any{propName, info.responseStatus}, "").
+						WithSources(propBaseSource, nil))
+				}
+			}
+		})
+	})
+
 	return result
 }

@@ -18,154 +18,64 @@ const (
 
 func ResponsePropertyContentUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.ContentSchemaDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contentSchema")
+			if info.schemaDiff.ContentSchemaDiff.SchemaAdded {
+				result = append(result, info.newChange(ResponseBodyContentSchemaAddedId, []any{info.responseStatus}, "").
+					WithSources(nil, revisionSource))
 			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil || responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					if mediaTypeDiff.SchemaDiff.ContentSchemaDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "contentSchema")
-						if mediaTypeDiff.SchemaDiff.ContentSchemaDiff.SchemaAdded {
-							result = append(result, NewApiChange(
-								ResponseBodyContentSchemaAddedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						}
-						if mediaTypeDiff.SchemaDiff.ContentSchemaDiff.SchemaDeleted {
-							result = append(result, NewApiChange(
-								ResponseBodyContentSchemaRemovedId,
-								config,
-								[]any{responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					if mediaTypeDiff.SchemaDiff.ContentMediaTypeDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "contentMediaType")
-						d := mediaTypeDiff.SchemaDiff.ContentMediaTypeDiff
-						result = append(result, NewApiChange(
-							ResponseBodyContentMediaTypeChangedId,
-							config,
-							[]any{d.From, d.To, responseStatus},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-
-					if mediaTypeDiff.SchemaDiff.ContentEncodingDiff != nil {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "contentEncoding")
-						d := mediaTypeDiff.SchemaDiff.ContentEncodingDiff
-						result = append(result, NewApiChange(
-							ResponseBodyContentEncodingChangedId,
-							config,
-							[]any{d.From, d.To, responseStatus},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							propName := propertyFullName(propertyPath, propertyName)
-
-							if propertyDiff.ContentSchemaDiff != nil {
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "contentSchema")
-								if propertyDiff.ContentSchemaDiff.SchemaAdded {
-									result = append(result, NewApiChange(
-										ResponsePropertyContentSchemaAddedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-								}
-								if propertyDiff.ContentSchemaDiff.SchemaDeleted {
-									result = append(result, NewApiChange(
-										ResponsePropertyContentSchemaRemovedId,
-										config,
-										[]any{propName, responseStatus},
-										"",
-										operationsSources,
-										operationItem.Revision,
-										operation,
-										path,
-									).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-								}
-							}
-
-							if propertyDiff.ContentMediaTypeDiff != nil {
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "contentMediaType")
-								d := propertyDiff.ContentMediaTypeDiff
-								result = append(result, NewApiChange(
-									ResponsePropertyContentMediaTypeChangedId,
-									config,
-									[]any{propName, d.From, d.To, responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-
-							if propertyDiff.ContentEncodingDiff != nil {
-								propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "contentEncoding")
-								d := propertyDiff.ContentEncodingDiff
-								result = append(result, NewApiChange(
-									ResponsePropertyContentEncodingChangedId,
-									config,
-									[]any{propName, d.From, d.To, responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-						})
-				}
+			if info.schemaDiff.ContentSchemaDiff.SchemaDeleted {
+				result = append(result, info.newChange(ResponseBodyContentSchemaRemovedId, []any{info.responseStatus}, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		if info.schemaDiff.ContentMediaTypeDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contentMediaType")
+			d := info.schemaDiff.ContentMediaTypeDiff
+			result = append(result, info.newChange(ResponseBodyContentMediaTypeChangedId, []any{d.From, d.To, info.responseStatus}, "").
+				WithSources(baseSource, revisionSource))
+		}
+
+		if info.schemaDiff.ContentEncodingDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contentEncoding")
+			d := info.schemaDiff.ContentEncodingDiff
+			result = append(result, info.newChange(ResponseBodyContentEncodingChangedId, []any{d.From, d.To, info.responseStatus}, "").
+				WithSources(baseSource, revisionSource))
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if p.propertyDiff.ContentSchemaDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contentSchema")
+				if p.propertyDiff.ContentSchemaDiff.SchemaAdded {
+					result = append(result, p.newChange(ResponsePropertyContentSchemaAddedId, []any{propName, info.responseStatus}, "").
+						WithSources(nil, propRevisionSource))
+				}
+				if p.propertyDiff.ContentSchemaDiff.SchemaDeleted {
+					result = append(result, p.newChange(ResponsePropertyContentSchemaRemovedId, []any{propName, info.responseStatus}, "").
+						WithSources(propBaseSource, nil))
+				}
+			}
+
+			if p.propertyDiff.ContentMediaTypeDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contentMediaType")
+				d := p.propertyDiff.ContentMediaTypeDiff
+				result = append(result, p.newChange(ResponsePropertyContentMediaTypeChangedId, []any{propName, d.From, d.To, info.responseStatus}, "").
+					WithSources(propBaseSource, propRevisionSource))
+			}
+
+			if p.propertyDiff.ContentEncodingDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contentEncoding")
+				d := p.propertyDiff.ContentEncodingDiff
+				result = append(result, p.newChange(ResponsePropertyContentEncodingChangedId, []any{propName, d.From, d.To, info.responseStatus}, "").
+					WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
