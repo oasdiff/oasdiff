@@ -271,6 +271,109 @@ func TestLoadInfo_GitRevisionNoGit(t *testing.T) {
 	require.ErrorContains(t, err, "is git installed and in PATH?")
 }
 
+// TestLoadInfo_BlobHashRef verifies that the `<blob-hex>:<path>` form loads the
+// blob's content directly, which is the form git's external-diff driver passes
+// (git sends blob hashes, not commit hashes). The path portion is preserved on
+// the ref for display purposes but not used to navigate a tree.
+func TestLoadInfo_BlobHashRef(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+		return string(out)
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	specPath := filepath.Join(dir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(specPath, []byte(minimalSpec), 0644))
+	run("git", "add", "openapi.yaml")
+	run("git", "commit", "-m", "add spec")
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	// Get the blob hash for the committed openapi.yaml.
+	blobHex := run("git", "rev-parse", "HEAD:openapi.yaml")
+	blobHex = blobHex[:len(blobHex)-1] // strip trailing newline
+	require.Len(t, blobHex, 40, "git rev-parse should return a 40-char SHA-1")
+
+	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(blobHex+":openapi.yaml"))
+	require.NoError(t, err)
+	require.Equal(t, "1.0", specInfo.GetVersion())
+}
+
+// TestLoadInfo_BlobHashRef_TwoBlobsSharedLoader verifies that loading two
+// different blob hashes for the same path on the same loader returns distinct
+// specs. This is the exact shape git invokes the external-diff driver with:
+// old and new blob hashes, both notionally at the same in-tree path. Without
+// unique cache keys per ref the loader would return the cached first spec for
+// the second load.
+func TestLoadInfo_BlobHashRef_TwoBlobsSharedLoader(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) string {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+		return string(out)
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	specV1 := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths: {}
+`
+	specV2 := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "2.0"
+paths: {}
+`
+	specPath := filepath.Join(dir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(specPath, []byte(specV1), 0644))
+	run("git", "add", "openapi.yaml")
+	run("git", "commit", "-m", "v1")
+
+	require.NoError(t, os.WriteFile(specPath, []byte(specV2), 0644))
+	run("git", "add", "openapi.yaml")
+	run("git", "commit", "-m", "v2")
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	baseHex := run("git", "rev-parse", "HEAD~1:openapi.yaml")
+	baseHex = baseHex[:len(baseHex)-1]
+	revHex := run("git", "rev-parse", "HEAD:openapi.yaml")
+	revHex = revHex[:len(revHex)-1]
+
+	loader := openapi3.NewLoader()
+	s1, err := load.NewSpecInfo(loader, load.NewSource(baseHex+":openapi.yaml"))
+	require.NoError(t, err)
+	s2, err := load.NewSpecInfo(loader, load.NewSource(revHex+":openapi.yaml"))
+	require.NoError(t, err)
+
+	require.Equal(t, "1.0", s1.GetVersion(), "base blob should be v1")
+	require.Equal(t, "2.0", s2.GetVersion(), "revision blob should be v2")
+}
+
 // TestLoadInfo_GitRevisionWithExternalRef verifies that $ref chains are resolved via
 // "git show" when loading from a git revision, not opened as literal file paths.
 func TestLoadInfo_GitRevisionWithExternalRef(t *testing.T) {
