@@ -17,11 +17,20 @@ Replace `openapi.yaml` with the actual spec path (or a glob like `**/openapi.yam
 
 ## Usage
 
+The driver kicks in on any git command that emits a diff, as long as `--ext-diff` is passed. Three common cases:
+
 ```bash
+# Browse the full history of a spec
 git log --patch --ext-diff -- openapi.yaml
+
+# Inspect a single commit
+git show --ext-diff <commit>
+
+# See what you're about to commit (working tree vs HEAD)
+git diff --ext-diff -- openapi.yaml
 ```
 
-For each commit that touched `openapi.yaml`, instead of the raw YAML hunks you'll see the same human-readable changelog `oasdiff changelog` would emit:
+In each case, the YAML hunks are replaced by the human-readable changelog `oasdiff changelog` would emit. For `git log` against the example above:
 
 ```
 commit aed51e7b25195d82c3edd76caab75c4e1a2a2922
@@ -45,7 +54,7 @@ Date:   Thu May 28 15:14:56 2026 +0300
 Added openapi.yaml
 ```
 
-`--ext-diff` activates the configured diff driver. Without it, git shows the raw text diff. You can make `--ext-diff` the default for a workflow by setting `diff.external` in git config (see git's docs).
+Without `--ext-diff`, git falls back to the raw text diff. To make `--ext-diff` the default for a workflow, set `diff.external` in git config (see git's docs).
 
 ## What's handled
 
@@ -57,14 +66,13 @@ Added openapi.yaml
 | Mode-only change (chmod) | Empty — git's own machinery already prints the mode delta |
 | Load error (malformed spec, etc.) | Error surfaced inline; the diff pipeline continues for other files |
 
-## Why GET, not git's temp files
+## Why `cat-file`, not git's temp files
 
 `git-diff-driver` ignores the temp file paths git passes (`/tmp/.git-blob-xxxxx`) and re-reads each blob directly via `git cat-file blob <hex>`. The source labels in the output are the short hex of the blob plus the in-tree path (e.g. `abc1234:openapi.yaml`) rather than meaningless tempfile paths.
 
 ## Limitations
 
 - The `--ext-diff` flag is a git design choice — there's no way for the driver to opt-in automatically.
-- v1 doesn't ship an installer subcommand. The two config lines above are manual.
 
 ## See also
 
