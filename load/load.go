@@ -34,8 +34,12 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 // Relative $refs (e.g. "./schemas/pet.yaml") are resolved by kin-openapi; we install a
 // JoinFunc so the "<rev>:" prefix is preserved (the default path.Dir strips it), and a
 // ReadFromURIFunc so referenced files are read via "git show" too.
+//
+// Blob-hash refs (e.g. "abc1234:openapi.yaml" where abc1234 is a git blob object hash)
+// are supported via readGitRefContent. The path portion is preserved on the ref string
+// passed downstream for source labels and relative $ref resolution.
 func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, error) {
-	out, err := gitShow(gitRef)
+	out, err := readGitRefContent(gitRef)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
 	}
@@ -81,6 +85,41 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 	// the loader would return the cached base spec for the revision.
 	u := &url.URL{Path: filepath.ToSlash(gitRef)}
 	return loaderCopy.LoadFromDataWithPath(out, u)
+}
+
+// readGitRefContent fetches the OpenAPI spec bytes for a git ref. For the
+// `<commit-or-tag>:<path>` form it runs `git show <ref>:<path>`. For the
+// `<blob-hex>:<path>` form (where the part before `:` is a blob object hash
+// rather than a commit/tree/tag) it runs `git show <blob-hex>` directly, since
+// `git show <blob-hex>:<path>` is not valid git syntax. Callers keep the full
+// `<ref>:<path>` string for the loader's URL key so source labels and relative
+// $ref resolution stay correct.
+func readGitRefContent(gitRef string) ([]byte, error) {
+	if hex, ok := blobHashFromRef(gitRef); ok {
+		return gitShow(hex)
+	}
+	return gitShow(gitRef)
+}
+
+// blobHashFromRef returns (hex, true) when the part before `:` in gitRef names
+// a git blob object (a stored file content, not a commit/tree/tag). Returns
+// ("", false) when the ref isn't a blob, when git cannot resolve it, or when
+// the input has no `:` separator. The cost is one extra `git cat-file -t` call
+// per spec load on the git path, which git serves in single-digit milliseconds.
+func blobHashFromRef(gitRef string) (string, bool) {
+	idx := strings.Index(gitRef, ":")
+	if idx < 0 {
+		return "", false
+	}
+	ref := gitRef[:idx]
+	out, err := exec.Command("git", "cat-file", "-t", ref).Output()
+	if err != nil {
+		return "", false
+	}
+	if strings.TrimSpace(string(out)) != "blob" {
+		return "", false
+	}
+	return ref, true
 }
 
 // gitShow runs "git show <ref>" and returns its stdout, or a descriptive error.
