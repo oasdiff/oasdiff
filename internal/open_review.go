@@ -37,9 +37,16 @@ func oasdiffSiteURL() string {
 // terminal changelog/breaking output has already been printed by the caller;
 // --open is purely additive.
 //
+// isBreaking is the visitor's subcommand intent: true when invoked via
+// `oasdiff breaking`, false via `oasdiff changelog`. We forward this as the
+// upload's `mode` field so the rendered /review/local page filters its
+// severity view to match what the visitor saw in their terminal — the same
+// reasoning that semantic comparison flags (flatten-params etc.) are
+// forwarded but filtering / presentation flags are not.
+//
 // Sign-in: if no access token is stored locally, the CLI runs the first-run
 // browser handshake. See enterprise/docs/cli-local-review.md for the design.
-func uploadAndOpen(flags *Flags, stdout io.Writer) error {
+func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool) error {
 	baseBytes, baseName, err := readSpecSource(flags.getBase())
 	if err != nil {
 		return fmt.Errorf("read base spec: %w", err)
@@ -56,7 +63,11 @@ func uploadAndOpen(flags *Flags, stdout io.Writer) error {
 		return err
 	}
 
-	reviewURL, expiresAt, err := postPreviewReview(accessToken, baseName, baseBytes, revName, revBytes, options)
+	mode := "changelog"
+	if isBreaking {
+		mode = "breaking"
+	}
+	reviewURL, expiresAt, err := postPreviewReview(accessToken, baseName, baseBytes, revName, revBytes, options, mode)
 	if err != nil {
 		return err
 	}
@@ -172,8 +183,10 @@ func buildSemanticOptionsJSON(flags *Flags) string {
 }
 
 // postPreviewReview uploads the two spec files to oasdiff.com and returns
-// the rendered review URL plus its TTL expiry timestamp.
-func postPreviewReview(accessToken, baseName string, baseBytes []byte, revName string, revBytes []byte, options string) (string, time.Time, error) {
+// the rendered review URL plus its TTL expiry timestamp. mode is "breaking"
+// or "changelog"; the server uses it to default the rendered /review/local
+// page's severity filter.
+func postPreviewReview(accessToken, baseName string, baseBytes []byte, revName string, revBytes []byte, options, mode string) (string, time.Time, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -186,6 +199,11 @@ func postPreviewReview(accessToken, baseName string, baseBytes []byte, revName s
 	if options != "" {
 		if err := writer.WriteField("options", options); err != nil {
 			return "", time.Time{}, fmt.Errorf("write options field: %w", err)
+		}
+	}
+	if mode != "" {
+		if err := writer.WriteField("mode", mode); err != nil {
+			return "", time.Time{}, fmt.Errorf("write mode field: %w", err)
 		}
 	}
 	if err := writer.Close(); err != nil {
