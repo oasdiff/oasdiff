@@ -244,20 +244,21 @@ func TestUploadAndOpen_401ClearsCredentials(t *testing.T) {
 
 func TestSignInViaBrowser_CapturesCallback(t *testing.T) {
 	// We can't easily fake the browser opening, but we can short-circuit
-	// the wait by having a goroutine POST to the listener right after the
+	// the wait by having a goroutine GET the listener right after the
 	// CLI starts it. To find the port, monkey-patch openBrowser via the
 	// environment: OASDIFF_URL is a stub server that, when /cli-login is
-	// hit, immediately POSTs back to the local listener.
+	// hit, immediately GETs back to the local listener.
 	const issuedToken = "deadbeef-dead-beef-dead-beefdeadbeef"
 
 	// httptest stub that imitates the /cli-login page: when the CLI calls
-	// openBrowser, we instead end up here, parse the port, and POST back.
+	// openBrowser, we instead end up here, parse the port, and call back.
+	// The production page uses a meta-refresh + JS navigation to the
+	// loopback URL; the test approximates that with an http.Get.
 	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		port := r.URL.Query().Get("port")
 		require.NotEmpty(t, port)
 		go func() {
-			form := "access_token=" + issuedToken
-			_, err := http.Post("http://127.0.0.1:"+port+"/callback", "application/x-www-form-urlencoded", bytes.NewBufferString(form))
+			_, err := http.Get("http://127.0.0.1:" + port + "/callback?access_token=" + issuedToken)
 			require.NoError(t, err)
 		}()
 		w.WriteHeader(http.StatusOK)
