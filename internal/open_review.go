@@ -223,8 +223,8 @@ func postPreviewReview(accessToken, baseName string, baseBytes []byte, revName s
 	}
 
 	var parsed struct {
-		ReviewId  string `json:"review_id"`
-		ExpiresAt int64  `json:"expires_at"`
+		ReviewId  string `json:"review_id" yaml:"review_id"`
+		ExpiresAt int64  `json:"expires_at" yaml:"expires_at"`
 	}
 	if err := json.Unmarshal(respBody, &parsed); err != nil {
 		return "", time.Time{}, fmt.Errorf("parse response: %w", err)
