@@ -21,73 +21,32 @@ const (
 
 func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		bodyBaseSource, bodyRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "discriminator")
+		appendBodyResultItem := func(messageId string, a ...any) {
+			result = append(result, info.newChange(messageId, a, "").
+				WithSources(bodyBaseSource, bodyRevisionSource))
 		}
 
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+		processDiscriminatorDiffForRequest(
+			info.schemaDiff.DiscriminatorDiff,
+			"",
+			appendBodyResultItem)
+
+		info.walkProperties(func(p propertyInfo) {
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "discriminator")
+			appendPropResultItem := func(messageId string, a ...any) {
+				result = append(result, p.newChange(messageId, a, "").
+					WithSources(propBaseSource, propRevisionSource))
 			}
+			processDiscriminatorDiffForRequest(
+				p.propertyDiff.DiscriminatorDiff,
+				propertyFullName(p.propertyPath, p.propertyName),
+				appendPropResultItem)
+		})
+	})
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				bodyBaseSource, bodyRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "discriminator")
-				appendBodyResultItem := func(messageId string, a ...any) {
-					result = append(result, NewApiChange(
-						messageId,
-						config,
-						a,
-						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(bodyBaseSource, bodyRevisionSource).WithDetails(mediaTypeDetails))
-				}
-
-				processDiscriminatorDiffForRequest(
-					mediaTypeDiff.SchemaDiff.DiscriminatorDiff,
-					"",
-					appendBodyResultItem)
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "discriminator")
-						appendPropResultItem := func(messageId string, a ...any) {
-							result = append(result, NewApiChange(
-								messageId,
-								config,
-								a,
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-						processDiscriminatorDiffForRequest(
-							propertyDiff.DiscriminatorDiff,
-							propertyFullName(propertyPath, propertyName),
-							appendPropResultItem)
-					})
-
-			}
-		}
-	}
 	return result
 }
 
