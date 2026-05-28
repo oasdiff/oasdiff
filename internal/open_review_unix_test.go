@@ -147,6 +147,7 @@ func TestUploadAndOpen_PostsToServer(t *testing.T) {
 		revFilename  string
 		username     string
 		options      string
+		mode         string
 	}{}
 
 	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -165,6 +166,7 @@ func TestUploadAndOpen_PostsToServer(t *testing.T) {
 		captured.revFilename = revHdr.Filename
 		captured.username = r.PostFormValue("github_username")
 		captured.options = r.PostFormValue("options")
+		captured.mode = r.PostFormValue("mode")
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"review_id":"abc-123","expires_at":1700000000}`))
 	}))
@@ -192,7 +194,7 @@ func TestUploadAndOpen_PostsToServer(t *testing.T) {
 	flags.getViper().Set("flatten-params", true)
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out))
+	require.NoError(t, uploadAndOpen(flags, &out, false))
 
 	require.Equal(t, "Bearer 11111111-1111-1111-1111-111111111111", captured.auth,
 		"the stored access token must be sent as Bearer auth, not in a form field")
@@ -202,11 +204,48 @@ func TestUploadAndOpen_PostsToServer(t *testing.T) {
 	require.Equal(t, "openapi.yaml", captured.revFilename)
 	require.JSONEq(t, `{"flatten-params":true}`, captured.options,
 		"semantic flags must round-trip into the options field; filtering and presentation flags must not appear here")
+	require.Equal(t, "changelog", captured.mode,
+		"isBreaking=false maps to mode=changelog so the rendered page shows every change")
 	// The CLI builds the URL from the stub's base, not hard-coded, so we
 	// just check it appears in stdout for the user to follow.
 	require.Contains(t, out.String(), "/review/local/abc-123")
 	_ = revPath // silence unused (kept for symmetry with the earlier path)
 	_ = viper.New()
+}
+
+func TestUploadAndOpen_BreakingSendsModeBreaking(t *testing.T) {
+	// When the visitor ran `oasdiff breaking --open`, the upload must carry
+	// mode=breaking so the rendered /review/local page defaults its severity
+	// filter to breaking-only and matches the terminal output.
+	var capturedMode string
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.NoError(t, r.ParseMultipartForm(8<<20))
+		capturedMode = r.PostFormValue("mode")
+		_, _ = w.Write([]byte(`{"review_id":"r1","expires_at":0}`))
+	}))
+	defer stub.Close()
+
+	dir := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", dir)
+	t.Setenv("HOME", dir)
+	t.Setenv("OASDIFF_URL", stub.URL)
+	require.NoError(t, writeStoredAccessToken("11111111-1111-1111-1111-111111111111"))
+
+	tmpdir := t.TempDir()
+	basePath := filepath.Join(tmpdir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(basePath, []byte("openapi: 3.0.0\n"), 0644))
+	revFileDir := t.TempDir()
+	revPath := filepath.Join(revFileDir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(revPath, []byte("openapi: 3.0.0\n"), 0644))
+
+	flags := NewFlags()
+	flags.setBase(load.NewSource(basePath))
+	flags.setRevision(load.NewSource(revPath))
+
+	var out bytes.Buffer
+	require.NoError(t, uploadAndOpen(flags, &out, true))
+	require.Equal(t, "breaking", capturedMode,
+		"isBreaking=true must propagate as mode=breaking on the upload")
 }
 
 func TestUploadAndOpen_401ClearsCredentials(t *testing.T) {
@@ -233,7 +272,7 @@ func TestUploadAndOpen_401ClearsCredentials(t *testing.T) {
 	flags.setRevision(load.NewSource(revPath))
 
 	var out bytes.Buffer
-	err := uploadAndOpen(flags, &out)
+	err := uploadAndOpen(flags, &out, false)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "credentials")
 
@@ -303,7 +342,7 @@ func TestPostPreviewReviewSendsMultipart(t *testing.T) {
 	defer stub.Close()
 	t.Setenv("OASDIFF_URL", stub.URL)
 
-	url, _, err := postPreviewReview("tok", "base.yaml", []byte("openapi: 3.0.0\nbase\n"), "rev.yaml", []byte("openapi: 3.0.0\nrev\n"), `{"flatten-params":true}`)
+	url, _, err := postPreviewReview("tok", "base.yaml", []byte("openapi: 3.0.0\nbase\n"), "rev.yaml", []byte("openapi: 3.0.0\nrev\n"), `{"flatten-params":true}`, "changelog")
 	require.NoError(t, err)
 	require.Contains(t, url, "/review/local/x")
 	require.True(t, strings.HasPrefix(received.contentType, "multipart/form-data"),
