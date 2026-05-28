@@ -17,6 +17,7 @@ Examples:
 | `origin/main:openapi.yaml` | Spec at `openapi.yaml` on the remote `main` branch |
 | `v2.3.0:api/openapi.yaml` | Spec at `api/openapi.yaml` at tag `v2.3.0` |
 | `abc1234:openapi.yaml` | Spec at a specific commit SHA |
+| `e69de29:openapi.yaml` | Spec at a specific blob SHA (the form git's external-diff protocol passes — see [Git Diff Driver](GIT-DIFF-DRIVER.md)) |
 
 ## Usage
 
@@ -69,3 +70,7 @@ jobs:
 ```
 
 > **Note:** `fetch-depth: 0` is required. The default shallow clone used by `actions/checkout` does not contain the history or remote refs that git revision syntax relies on.
+
+## See also
+
+- [Git Diff Driver](GIT-DIFF-DRIVER.md) — wire oasdiff into git as an external diff driver so `git log --patch` and `git diff` render a human-readable OpenAPI changelog inline.
