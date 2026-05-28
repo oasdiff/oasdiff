@@ -57,7 +57,7 @@ Added openapi.yaml
 | Mode-only change (chmod) | Empty — git's own machinery already prints the mode delta |
 | Load error (malformed spec, etc.) | Error surfaced inline; the diff pipeline continues for other files |
 
-## Why GET, not git's temp files
+## Why `cat-file`, not git's temp files
 
 `git-diff-driver` ignores the temp file paths git passes (`/tmp/.git-blob-xxxxx`) and re-reads each blob directly via `git cat-file blob <hex>`. The source labels in the output are the short hex of the blob plus the in-tree path (e.g. `abc1234:openapi.yaml`) rather than meaningless tempfile paths.
 
