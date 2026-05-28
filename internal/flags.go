@@ -76,6 +76,10 @@ func (flags *Flags) getAutoUpgrade() bool {
 	return flags.v.GetBool("auto-upgrade")
 }
 
+func (flags *Flags) getOpen() bool {
+	return flags.v.GetBool("open")
+}
+
 func (flags *Flags) getIncludeChecks() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("include-checks"))
 }

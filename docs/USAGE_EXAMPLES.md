@@ -66,6 +66,13 @@ oasdiff changelog base.yaml revision.yaml --template my-template.html -f html
 ```
 See [CHANGELOG-TEMPLATE.md](CHANGELOG-TEMPLATE.md) for full documentation and examples.
 
+## Side-by-side review in your browser
+```bash
+oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
+oasdiff breaking HEAD~1:openapi.yaml HEAD:openapi.yaml --open
+```
+After printing the changelog, uploads both specs to oasdiff.com and opens the rendered side-by-side review in your browser. First run prompts for GitHub sign-in; subsequent runs skip it. See [BREAKING-CHANGES.md](BREAKING-CHANGES.md#side-by-side-review-in-your-browser-open) for the full flow.
+
 ## OpenAPI diff for endpoints containing "/api" in the path
 ```bash
 oasdiff diff https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml -f text -p "/api"

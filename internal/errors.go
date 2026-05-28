@@ -118,6 +118,13 @@ func getErrCantProcessIgnoreFile(what string, err error) *ReturnError {
 	)
 }
 
+func getErrUploadAndOpenFailed(err error) *ReturnError {
+	return getError(
+		fmt.Errorf("--open failed: %w", err),
+		130,
+	)
+}
+
 func getError(err error, code int) *ReturnError {
 	return &ReturnError{err, code}
 }

@@ -18,6 +18,17 @@ oasdiff breaking https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/ope
 oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
 ```
 
+## Side-by-side review in your browser (`--open`)
+Both `breaking` and `changelog` accept an `--open` flag. After printing the usual terminal output, the CLI uploads the two specs to [oasdiff.com](https://www.oasdiff.com) and opens the rendered side-by-side review in your browser — the same view paying customers see, with approve/reject buttons present (disabled on the free tier) and the diff anchored at each change site.
+
+```
+oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
+```
+
+The first run on a new machine opens a browser to sign in with GitHub and stores a credential at `~/.config/oasdiff/credentials` (or the platform equivalent on macOS / Windows). Subsequent runs skip the sign-in step.
+
+The resulting URL is unguessable and shareable for 7 days — paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Only semantic comparison flags (`--flatten-allof`, `--flatten-params`, `--match-inline-refs`, `--case-insensitive-headers`, `--auto-upgrade`, `--include-path-params`) are applied to the uploaded comparison; presentation and filtering flags (`--format`, `--color`, `--lang`, `--fail-on`, `--level`, `--include-checks`, `--severity-levels`) only affect the terminal output.
+
 ## Checks
 Oasdiff supports over 250 checks, categorized into three levels:  
 - `ERR` - Errors are definite breaking changes which should be avoided
