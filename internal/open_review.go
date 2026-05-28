@@ -329,8 +329,8 @@ func deleteStoredAccessToken() error {
 // readOrMintAccessToken returns the stored access token, or runs the
 // first-run browser sign-in if none is stored. The sign-in flow opens a
 // random-port HTTP listener on 127.0.0.1, opens the visitor's browser at
-// /cli-login?port=N, waits for the POST callback, captures the token from
-// the form body, and writes it to credentialsPath() before returning.
+// /cli-login?port=N, waits for the GET callback with the token in the
+// query string, and writes it to credentialsPath() before returning.
 func readOrMintAccessToken(stdout io.Writer) (string, error) {
 	token, err := readStoredAccessToken()
 	if err != nil {
@@ -354,8 +354,14 @@ func readOrMintAccessToken(stdout io.Writer) (string, error) {
 
 // signInViaBrowser runs the localhost-handoff dance. Binds to 127.0.0.1 on a
 // random high port; opens the visitor's browser at /cli-login?port=N; waits
-// up to 5 minutes for a POST whose body contains the access_token form field;
+// up to 5 minutes for a GET callback whose query string carries access_token;
 // returns the token.
+//
+// The handoff is a GET (top-level navigation) rather than a POST because
+// browsers warn on HTTPS → HTTP form submissions even when the destination
+// is loopback. Top-level navigations to HTTP are silently allowed. The
+// listener's response page uses history.replaceState to scrub the token
+// from the address bar.
 //
 // Edge cases (SSH / WSL / Codespaces where the browser and CLI run on
 // different hosts) are not handled in v1; the listener times out and the
@@ -374,22 +380,21 @@ func signInViaBrowser(stdout io.Writer) (string, error) {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
+		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
-		if err := r.ParseForm(); err != nil {
-			http.Error(w, "bad request", http.StatusBadRequest)
-			errCh <- fmt.Errorf("parse callback form: %w", err)
-			return
-		}
-		token := strings.TrimSpace(r.PostFormValue("access_token"))
+		token := strings.TrimSpace(r.URL.Query().Get("access_token"))
 		if token == "" {
 			http.Error(w, "missing access_token", http.StatusBadRequest)
 			errCh <- errors.New("callback missing access_token")
 			return
 		}
-		fmt.Fprintln(w, "<!doctype html><html><body style=\"font-family:sans-serif;text-align:center;padding:4rem\"><h2>oasdiff CLI is signed in</h2><p>You can close this tab and return to your terminal.</p></body></html>")
+		// Scrub the token from the address bar before the visitor can read
+		// or share it. history.replaceState replaces the loopback URL
+		// (which carried the token in its query string) with a clean path
+		// on the same loopback origin.
+		fmt.Fprintln(w, `<!doctype html><html><head><script>history.replaceState(null,'','/');</script></head><body style="font-family:sans-serif;text-align:center;padding:4rem"><h2>oasdiff CLI is signed in</h2><p>You can close this tab and return to your terminal.</p></body></html>`)
 		tokenCh <- token
 	})
 
