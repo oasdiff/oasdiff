@@ -7,8 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const gitDiffDriverCmd = "git-diff-driver"
-
 // nullFile is the path git passes when one side of a diff doesn't exist
 // (file added on this commit, file deleted on this commit, or one side of
 // a root-commit diff). It's the reliable signal — git's hash field varies
