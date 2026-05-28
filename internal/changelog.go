@@ -26,6 +26,7 @@ func getChangelogCmd() *cobra.Command {
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), LevelInfo), "level", "", "output errors with this level or higher")
+	cmd.PersistentFlags().Bool("open", false, "after printing the changelog, upload the comparison to oasdiff.com and open the side-by-side review in a browser")
 
 	return &cmd
 }
@@ -78,6 +79,12 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 
 	if returnErr := outputChangelog(flags, stdout, errs, diffResult.specInfoPair, diffResult.diffReport.Empty(), isBreaking); returnErr != nil {
 		return false, returnErr
+	}
+
+	if flags.getOpen() {
+		if err := uploadAndOpen(flags, stdout); err != nil {
+			return false, getErrUploadAndOpenFailed(err)
+		}
 	}
 
 	if flags.getFailOn() != "" {
