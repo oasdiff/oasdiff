@@ -64,7 +64,6 @@ Added openapi.yaml
 ## Limitations
 
 - The `--ext-diff` flag is a git design choice — there's no way for the driver to opt-in automatically.
-- v1 doesn't ship an installer subcommand. The two config lines above are manual.
 
 ## See also
 
