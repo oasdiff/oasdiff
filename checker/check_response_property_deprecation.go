@@ -19,140 +19,87 @@ const (
 // ResponsePropertyDeprecationCheck detects deprecated properties in response bodies
 func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		op := info.operationItem.Revision
+
+		stability, err := getStabilityLevel(op.Extensions)
+		if err != nil {
+			// handled in CheckBackwardCompatibility
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+		deprecationDays := getDeprecationDays(config, stability)
+
+		info.walkProperties(func(p propertyInfo) {
+			// Check if deprecation status changed
+			if p.propertyDiff.DeprecatedDiff == nil {
+				return
 			}
 
-			op := operationItem.Revision
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "deprecated")
 
-			stability, err := getStabilityLevel(op.Extensions)
+			// Check if property was reactivated (un-deprecated)
+			if p.propertyDiff.DeprecatedDiff.To == nil || p.propertyDiff.DeprecatedDiff.To == false {
+				result = append(result, p.newChange(
+					ResponsePropertyReactivatedId,
+					[]any{propName},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+				return
+			}
+
+			// Property was newly deprecated (To=true means deprecated now)
+			sunset, ok := getSunset(p.propertyDiff.Revision.Extensions)
+			if !ok {
+				// if deprecation policy is defined and sunset is missing, it's a breaking change
+				if deprecationDays > 0 {
+					result = append(result, p.newChange(
+						ResponsePropertyDeprecatedSunsetMissingId,
+						[]any{propName},
+						"",
+					).WithSources(propBaseSource, propRevisionSource))
+				} else {
+					// no policy, report deprecation without sunset as INFO
+					result = append(result, p.newChange(
+						ResponsePropertyDeprecatedId,
+						[]any{propName},
+						"",
+					).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails)))
+				}
+				return
+			}
+
+			date, err := getSunsetDate(sunset)
 			if err != nil {
-				// handled in CheckBackwardCompatibility
-				continue
+				result = append(result, p.newChange(
+					ResponsePropertyDeprecatedInvalidId,
+					[]any{propName, err},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+				return
 			}
 
-			deprecationDays := getDeprecationDays(config, stability)
+			days := date.DaysSince(civil.DateOf(time.Now()))
 
-			for _, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff == nil ||
-					responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							// Check if deprecation status changed
-							if propertyDiff.DeprecatedDiff == nil {
-								return
-							}
-
-							propName := propertyFullName(propertyPath, propertyName)
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "deprecated")
-
-							// Check if property was reactivated (un-deprecated)
-							if propertyDiff.DeprecatedDiff.To == nil || propertyDiff.DeprecatedDiff.To == false {
-								result = append(result, NewApiChange(
-									ResponsePropertyReactivatedId,
-									config,
-									[]any{propName},
-									"",
-									operationsSources,
-									op,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-								return
-							}
-
-							// Property was newly deprecated (To=true means deprecated now)
-							sunset, ok := getSunset(propertyDiff.Revision.Extensions)
-							if !ok {
-								// if deprecation policy is defined and sunset is missing, it's a breaking change
-								if deprecationDays > 0 {
-									result = append(result, NewApiChange(
-										ResponsePropertyDeprecatedSunsetMissingId,
-										config,
-										[]any{propName},
-										"",
-										operationsSources,
-										op,
-										operation,
-										path,
-									).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-								} else {
-									// no policy, report deprecation without sunset as INFO
-									result = append(result, NewApiChange(
-										ResponsePropertyDeprecatedId,
-										config,
-										[]any{propName},
-										"",
-										operationsSources,
-										op,
-										operation,
-										path,
-									).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
-								}
-								return
-							}
-
-							date, err := getSunsetDate(sunset)
-							if err != nil {
-								result = append(result, NewApiChange(
-									ResponsePropertyDeprecatedInvalidId,
-									config,
-									[]any{propName, err},
-									"",
-									operationsSources,
-									op,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-								return
-							}
-
-							days := date.DaysSince(civil.DateOf(time.Now()))
-
-							if days < int(deprecationDays) {
-								result = append(result, NewApiChange(
-									ResponsePropertySunsetDateTooSmallId,
-									config,
-									[]any{propName, date, deprecationDays},
-									"",
-									operationsSources,
-									op,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-								return
-							}
-
-							// not breaking changes
-							result = append(result, NewApiChange(
-								ResponsePropertyDeprecatedWithSunsetId,
-								config,
-								[]any{propName, date},
-								"",
-								operationsSources,
-								op,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), mediaTypeDetails)))
-						})
-				}
+			if days < int(deprecationDays) {
+				result = append(result, p.newChange(
+					ResponsePropertySunsetDateTooSmallId,
+					[]any{propName, date, deprecationDays},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+				return
 			}
-		}
-	}
+
+			// not breaking changes
+			result = append(result, p.newChange(
+				ResponsePropertyDeprecatedWithSunsetId,
+				[]any{propName, date},
+				"",
+			).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails)))
+		})
+	})
+
 	return result
 }
