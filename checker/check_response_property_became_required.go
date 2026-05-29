@@ -11,99 +11,60 @@ const (
 
 func ResponsePropertyBecameRequiredCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.ResponsesDiff == nil {
-				continue
-			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if requiredDiff := info.schemaDiff.RequiredDiff; requiredDiff != nil {
+			for _, changedRequiredPropertyName := range requiredDiff.Added {
+				if info.schemaDiff.Base.Properties[changedRequiredPropertyName] == nil {
+					// added properties are processed by ResponseRequiredPropertyUpdatedCheck check
 					continue
 				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					if mediaTypeDiff.SchemaDiff.RequiredDiff != nil {
-						for _, changedRequiredPropertyName := range mediaTypeDiff.SchemaDiff.RequiredDiff.Added {
-							if mediaTypeDiff.SchemaDiff.Base.Properties[changedRequiredPropertyName] == nil {
-								// added properties are processed by ResponseRequiredPropertyUpdatedCheck check
-								continue
-							}
-							if mediaTypeDiff.SchemaDiff.Revision.Properties[changedRequiredPropertyName] == nil {
-								// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
-								continue
-							}
-							id := ResponsePropertyBecameRequiredId
-							if mediaTypeDiff.SchemaDiff.Revision.Properties[changedRequiredPropertyName].Value.WriteOnly {
-								id = ResponseWriteOnlyPropertyBecameRequiredId
-							}
-
-							baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "required", changedRequiredPropertyName)
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propertyFullName("", changedRequiredPropertyName), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							requiredDiff := propertyDiff.RequiredDiff
-							if requiredDiff == nil {
-								return
-							}
-							for _, changedRequiredPropertyName := range requiredDiff.Added {
-								if propertyDiff.Base.Properties[changedRequiredPropertyName] == nil {
-									// added properties are processed by ResponseRequiredPropertyUpdatedCheck check
-									continue
-								}
-								if propertyDiff.Revision.Properties[changedRequiredPropertyName] == nil {
-									// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
-									continue
-								}
-								id := ResponsePropertyBecameRequiredId
-								if propertyDiff.Base.Properties[changedRequiredPropertyName].Value.WriteOnly {
-									id = ResponseWriteOnlyPropertyBecameRequiredId
-								}
-
-								propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "required", changedRequiredPropertyName)
-								result = append(result, NewApiChange(
-									id,
-									config,
-									[]any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName)), responseStatus},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-						})
+				if info.schemaDiff.Revision.Properties[changedRequiredPropertyName] == nil {
+					// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
+					continue
+				}
+				id := ResponsePropertyBecameRequiredId
+				if info.schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.WriteOnly {
+					id = ResponseWriteOnlyPropertyBecameRequiredId
 				}
 
+				baseSource, revisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, info.schemaDiff, "required", changedRequiredPropertyName)
+				result = append(result, info.newChange(
+					id,
+					[]any{propertyFullName("", changedRequiredPropertyName), info.responseStatus},
+					"",
+				).WithSources(baseSource, revisionSource))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			requiredDiff := p.propertyDiff.RequiredDiff
+			if requiredDiff == nil {
+				return
+			}
+			for _, changedRequiredPropertyName := range requiredDiff.Added {
+				if p.propertyDiff.Base.Properties[changedRequiredPropertyName] == nil {
+					// added properties are processed by ResponseRequiredPropertyUpdatedCheck check
+					continue
+				}
+				if p.propertyDiff.Revision.Properties[changedRequiredPropertyName] == nil {
+					// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
+					continue
+				}
+				id := ResponsePropertyBecameRequiredId
+				if p.propertyDiff.Base.Properties[changedRequiredPropertyName].Value.WriteOnly {
+					id = ResponseWriteOnlyPropertyBecameRequiredId
+				}
+
+				propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "required", changedRequiredPropertyName)
+				result = append(result, p.newChange(
+					id,
+					[]any{propertyFullName(p.propertyPath, propertyFullName(p.propertyName, changedRequiredPropertyName)), info.responseStatus},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
