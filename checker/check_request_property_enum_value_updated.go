@@ -14,69 +14,41 @@ const (
 
 func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			enumDiff := p.propertyDiff.EnumDiff
+			if enumDiff == nil {
+				return
 			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						enumDiff := propertyDiff.EnumDiff
-						if enumDiff == nil {
-							return
-						}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-						propName := propertyFullName(propertyPath, propertyName)
+			for _, enumVal := range enumDiff.Deleted {
+				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 
-						for _, enumVal := range enumDiff.Deleted {
-							baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
+				id := RequestPropertyEnumValueRemovedId
+				if p.propertyDiff.Revision.ReadOnly {
+					id = RequestReadOnlyPropertyEnumValueRemovedId
+				}
 
-							id := RequestPropertyEnumValueRemovedId
-							if propertyDiff.Revision.ReadOnly {
-								id = RequestReadOnlyPropertyEnumValueRemovedId
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{enumVal, propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-
-						for _, enumVal := range enumDiff.Added {
-							baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
-							result = append(result, NewApiChange(
-								RequestPropertyEnumValueAddedId,
-								config,
-								[]any{enumVal, propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+				result = append(result, p.newChange(
+					id,
+					[]any{enumVal, propName},
+					"",
+				).WithSources(baseSource, revisionSource))
 			}
-		}
-	}
+
+			for _, enumVal := range enumDiff.Added {
+				baseSource, revisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
+				result = append(result, p.newChange(
+					RequestPropertyEnumValueAddedId,
+					[]any{enumVal, propName},
+					"",
+				).WithSources(baseSource, revisionSource))
+			}
+		})
+	})
+
 	return result
 }
