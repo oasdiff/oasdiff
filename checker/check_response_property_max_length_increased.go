@@ -11,80 +11,45 @@ const (
 
 func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
+			maxLengthDiff.From != nil &&
+			maxLengthDiff.To != nil &&
+			IsIncreasedValue(maxLengthDiff) {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
+			result = append(result, info.newChange(
+				ResponseBodyMaxLengthIncreasedId,
+				[]any{maxLengthDiff.From, maxLengthDiff.To},
+				"",
+			).WithSources(baseSource, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+
+		info.walkProperties(func(p propertyInfo) {
+			maxLengthDiff := p.propertyDiff.MaxLengthDiff
+			if maxLengthDiff == nil {
+				return
 			}
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff == nil ||
-					responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff != nil && mediaTypeDiff.SchemaDiff.MaxLengthDiff != nil {
-						maxLengthDiff := mediaTypeDiff.SchemaDiff.MaxLengthDiff
-						if maxLengthDiff.From != nil &&
-							maxLengthDiff.To != nil {
-							if IsIncreasedValue(maxLengthDiff) {
-								baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maxLength")
-								result = append(result, NewApiChange(
-									ResponseBodyMaxLengthIncreasedId,
-									config,
-									[]any{maxLengthDiff.From, maxLengthDiff.To},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-							}
-						}
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							maxLengthDiff := propertyDiff.MaxLengthDiff
-							if maxLengthDiff == nil {
-								return
-							}
-							if maxLengthDiff.To == nil ||
-								maxLengthDiff.From == nil {
-								return
-							}
-							if !IsIncreasedValue(maxLengthDiff) {
-								return
-							}
-
-							if propertyDiff.Revision.WriteOnly {
-								return
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maxLength")
-							result = append(result, NewApiChange(
-								ResponsePropertyMaxLengthIncreasedId,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), maxLengthDiff.From, maxLengthDiff.To, responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						})
-				}
+			if maxLengthDiff.To == nil ||
+				maxLengthDiff.From == nil {
+				return
 			}
-		}
-	}
+			if !IsIncreasedValue(maxLengthDiff) {
+				return
+			}
+
+			if p.propertyDiff.Revision.WriteOnly {
+				return
+			}
+
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
+			result = append(result, p.newChange(
+				ResponsePropertyMaxLengthIncreasedId,
+				[]any{propertyFullName(p.propertyPath, p.propertyName), maxLengthDiff.From, maxLengthDiff.To, info.responseStatus},
+				"",
+			).WithSources(propBaseSource, propRevisionSource))
+		})
+	})
+
 	return result
 }

@@ -13,118 +13,58 @@ const (
 
 func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
+		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
+			minDiff.From == nil &&
+			minDiff.To != nil {
+			result = append(result, info.newChange(
+				RequestBodyMinSetId,
+				[]any{minDiff.To},
+				commentId(RequestBodyMinSetId),
+			).WithSources(nil, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
+			exMinDiff.From == nil &&
+			exMinDiff.To != nil {
+			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
+			result = append(result, info.newChange(
+				RequestBodyExclusiveMinSetId,
+				[]any{exMinDiff.To},
+				commentId(RequestBodyExclusiveMinSetId),
+			).WithSources(nil, exRevisionSource))
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.Revision.ReadOnly {
+				return
+			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
+				minDiff.From == nil &&
+				minDiff.To != nil {
+				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
+				result = append(result, p.newChange(
+					RequestPropertyMinSetId,
+					[]any{propName, minDiff.To},
+					commentId(RequestPropertyMinSetId),
+				).WithSources(nil, propRevisionSource))
 			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				_, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minimum")
-				if mediaTypeDiff.SchemaDiff.MinDiff != nil {
-					minDiff := mediaTypeDiff.SchemaDiff.MinDiff
-					if minDiff.From == nil &&
-						minDiff.To != nil {
-						result = append(result, NewApiChange(
-							RequestBodyMinSetId,
-							config,
-							[]any{minDiff.To},
-							commentId(RequestBodyMinSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-				if mediaTypeDiff.SchemaDiff.ExclusiveMinDiff != nil {
-					exMinDiff := mediaTypeDiff.SchemaDiff.ExclusiveMinDiff
-					if exMinDiff.From == nil &&
-						exMinDiff.To != nil {
-						_, exRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "exclusiveMinimum")
-						result = append(result, NewApiChange(
-							RequestBodyExclusiveMinSetId,
-							config,
-							[]any{exMinDiff.To},
-							commentId(RequestBodyExclusiveMinSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, exRevisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						minDiff := propertyDiff.MinDiff
-						if minDiff == nil {
-							return
-						}
-						if minDiff.From != nil ||
-							minDiff.To == nil {
-							return
-						}
-						if propertyDiff.Revision.ReadOnly {
-							return
-						}
-
-						_, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minimum")
-						result = append(result, NewApiChange(
-							RequestPropertyMinSetId,
-							config,
-							[]any{propertyFullName(propertyPath, propertyName), minDiff.To},
-							commentId(RequestPropertyMinSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-					})
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						exMinDiff := propertyDiff.ExclusiveMinDiff
-						if exMinDiff == nil {
-							return
-						}
-						if exMinDiff.From != nil ||
-							exMinDiff.To == nil {
-							return
-						}
-						if propertyDiff.Revision.ReadOnly {
-							return
-						}
-
-						_, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "exclusiveMinimum")
-						result = append(result, NewApiChange(
-							RequestPropertyExclusiveMinSetId,
-							config,
-							[]any{propertyFullName(propertyPath, propertyName), exMinDiff.To},
-							commentId(RequestPropertyExclusiveMinSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-					})
+			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
+				exMinDiff.From == nil &&
+				exMinDiff.To != nil {
+				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
+				result = append(result, p.newChange(
+					RequestPropertyExclusiveMinSetId,
+					[]any{propName, exMinDiff.To},
+					commentId(RequestPropertyExclusiveMinSetId),
+				).WithSources(nil, propRevisionSource))
 			}
-		}
-	}
+		})
+	})
+
 	return result
 }
