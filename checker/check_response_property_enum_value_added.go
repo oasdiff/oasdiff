@@ -13,62 +13,33 @@ const (
 
 func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff == nil ||
-					responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							enumDiff := propertyDiff.EnumDiff
-							if enumDiff == nil || enumDiff.Added == nil {
-								return
-							}
 
-							id := ResponsePropertyEnumValueAddedId
-							comment := commentId(ResponsePropertyEnumValueAddedId)
-
-							if propertyDiff.Revision.WriteOnly {
-								// Document write-only enum update
-								id = ResponseWriteOnlyPropertyEnumValueAddedId
-								comment = ""
-							}
-
-							for _, enumVal := range enumDiff.Added {
-								baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
-								result = append(result, NewApiChange(
-									id,
-									config,
-									[]any{enumVal, propertyFullName(propertyPath, propertyName), responseStatus},
-									comment,
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-							}
-						})
-				}
-
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			enumDiff := p.propertyDiff.EnumDiff
+			if enumDiff == nil || enumDiff.Added == nil {
+				return
 			}
 
-		}
-	}
+			id := ResponsePropertyEnumValueAddedId
+			comment := commentId(ResponsePropertyEnumValueAddedId)
+
+			if p.propertyDiff.Revision.WriteOnly {
+				// Document write-only enum update
+				id = ResponseWriteOnlyPropertyEnumValueAddedId
+				comment = ""
+			}
+
+			for _, enumVal := range enumDiff.Added {
+				baseSource, revisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
+				result = append(result, p.newChange(
+					id,
+					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					comment,
+				).WithSources(baseSource, revisionSource))
+			}
+		})
+	})
+
 	return result
 }

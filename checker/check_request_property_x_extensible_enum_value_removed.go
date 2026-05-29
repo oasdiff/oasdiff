@@ -1,8 +1,9 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/diff"
 	"slices"
+
+	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
@@ -11,80 +12,57 @@ const (
 
 func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.ExtensionsDiff == nil {
+				return
+			}
+			if p.propertyDiff.ExtensionsDiff.Modified == nil {
+				return
+			}
+			if p.propertyDiff.ExtensionsDiff.Modified[diff.XExtensibleEnumExtension] == nil {
+				return
+			}
+			from, ok := p.propertyDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]any)
+			if !ok {
+				return
+			}
+			to, ok := p.propertyDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]any)
+			if !ok {
+				return
 			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						if propertyDiff.ExtensionsDiff == nil {
-							return
-						}
-						if propertyDiff.ExtensionsDiff.Modified == nil {
-							return
-						}
-						if propertyDiff.ExtensionsDiff.Modified[diff.XExtensibleEnumExtension] == nil {
-							return
-						}
-						from, ok := propertyDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]any)
-						if !ok {
-							return
-						}
-						to, ok := propertyDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]any)
-						if !ok {
-							return
-						}
-
-						fromSlice := make([]string, len(from))
-						for i, item := range from {
-							fromSlice[i] = item.(string)
-						}
-
-						toSlice := make([]string, len(to))
-						for i, item := range to {
-							toSlice[i] = item.(string)
-						}
-
-						deletedVals := make([]string, 0)
-						for _, fromVal := range fromSlice {
-							if !slices.Contains(toSlice, fromVal) {
-								deletedVals = append(deletedVals, fromVal)
-							}
-						}
-
-						if propertyDiff.Revision.ReadOnly {
-							return
-						}
-						propBaseSource, propRevisionSource := SchemaSources(operationsSources, operationItem, propertyDiff)
-						for _, enumVal := range deletedVals {
-							result = append(result, NewApiChange(
-								RequestPropertyXExtensibleEnumValueRemovedId,
-								config,
-								[]any{enumVal, propertyFullName(propertyPath, propertyName)},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-					})
+			fromSlice := make([]string, len(from))
+			for i, item := range from {
+				fromSlice[i] = item.(string)
 			}
-		}
-	}
+
+			toSlice := make([]string, len(to))
+			for i, item := range to {
+				toSlice[i] = item.(string)
+			}
+
+			deletedVals := make([]string, 0)
+			for _, fromVal := range fromSlice {
+				if !slices.Contains(toSlice, fromVal) {
+					deletedVals = append(deletedVals, fromVal)
+				}
+			}
+
+			if p.propertyDiff.Revision.ReadOnly {
+				return
+			}
+			propBaseSource, propRevisionSource := SchemaSources(operationsSources, info.operationItem, p.propertyDiff)
+			for _, enumVal := range deletedVals {
+				result = append(result, p.newChange(
+					RequestPropertyXExtensibleEnumValueRemovedId,
+					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName)},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
