@@ -411,3 +411,33 @@ func IsDecreased(from any, to any) bool {
 	}
 	return false
 }
+
+// filterAnnotationOnlySubschemas returns the subset of subschemas whose
+// bodies (looked up in schemaRefs by Subschema.Index) carry at least one
+// validation-significant keyword. Subschemas that hold only annotation
+// keywords (title, description, examples, default, externalDocs, $comment)
+// are validation-equivalent to {} and don't reject any previously-valid
+// instance, so emitting them as breaking changes is a false positive on
+// the wire-contract view (oasdiff diff still shows the document change).
+//
+// Motivating case: handrews on OAS discussion #3793 — adding an
+// `allOf: [{title: "..."}]` is not a breaking change the way adding a
+// real constraint is, but the original allOf-added check fired ERR on it.
+func filterAnnotationOnlySubschemas(subschemas diff.Subschemas, schemaRefs openapi3.SchemaRefs) diff.Subschemas {
+	if len(subschemas) == 0 {
+		return subschemas
+	}
+	filtered := make(diff.Subschemas, 0, len(subschemas))
+	emptyRef := &openapi3.SchemaRef{Value: &openapi3.Schema{}}
+	for _, s := range subschemas {
+		if s.Index >= 0 && s.Index < len(schemaRefs) {
+			ref := schemaRefs[s.Index]
+			if ref != nil && ref.Value != nil &&
+				diff.SchemaRefsValidationEquivalent(diff.NewConfig(), emptyRef, ref) {
+				continue
+			}
+		}
+		filtered = append(filtered, s)
+	}
+	return filtered
+}

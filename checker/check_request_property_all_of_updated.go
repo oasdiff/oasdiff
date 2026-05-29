@@ -15,15 +15,19 @@ func RequestPropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if info.schemaDiff.AllOfDiff != nil && len(info.schemaDiff.AllOfDiff.Added) > 0 {
-			baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", -1, info.schemaDiff.AllOfDiff.Added[0].Index)
-			result = append(result, info.newChange(RequestBodyAllOfAddedId, []any{info.schemaDiff.AllOfDiff.Added.String()}, "").
-				WithSources(baseSource, revisionSource))
-		}
-		if info.schemaDiff.AllOfDiff != nil && len(info.schemaDiff.AllOfDiff.Deleted) > 0 {
-			baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", info.schemaDiff.AllOfDiff.Deleted[0].Index, -1)
-			result = append(result, info.newChange(RequestBodyAllOfRemovedId, []any{info.schemaDiff.AllOfDiff.Deleted.String()}, "").
-				WithSources(baseSource, revisionSource))
+		if info.schemaDiff.AllOfDiff != nil {
+			added := filterAnnotationOnlySubschemas(info.schemaDiff.AllOfDiff.Added, info.schemaDiff.Revision.AllOf)
+			if len(added) > 0 {
+				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", -1, added[0].Index)
+				result = append(result, info.newChange(RequestBodyAllOfAddedId, []any{added.String()}, "").
+					WithSources(baseSource, revisionSource))
+			}
+			deleted := filterAnnotationOnlySubschemas(info.schemaDiff.AllOfDiff.Deleted, info.schemaDiff.Base.AllOf)
+			if len(deleted) > 0 {
+				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", deleted[0].Index, -1)
+				result = append(result, info.newChange(RequestBodyAllOfRemovedId, []any{deleted.String()}, "").
+					WithSources(baseSource, revisionSource))
+			}
 		}
 
 		info.walkProperties(func(p propertyInfo) {
@@ -32,14 +36,16 @@ func RequestPropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-			if len(p.propertyDiff.AllOfDiff.Added) > 0 {
-				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", -1, p.propertyDiff.AllOfDiff.Added[0].Index)
-				result = append(result, p.newChange(RequestPropertyAllOfAddedId, []any{p.propertyDiff.AllOfDiff.Added.String(), propName}, "").
+			added := filterAnnotationOnlySubschemas(p.propertyDiff.AllOfDiff.Added, p.propertyDiff.Revision.AllOf)
+			if len(added) > 0 {
+				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", -1, added[0].Index)
+				result = append(result, p.newChange(RequestPropertyAllOfAddedId, []any{added.String(), propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
-			if len(p.propertyDiff.AllOfDiff.Deleted) > 0 {
-				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", p.propertyDiff.AllOfDiff.Deleted[0].Index, -1)
-				result = append(result, p.newChange(RequestPropertyAllOfRemovedId, []any{p.propertyDiff.AllOfDiff.Deleted.String(), propName}, "").
+			deleted := filterAnnotationOnlySubschemas(p.propertyDiff.AllOfDiff.Deleted, p.propertyDiff.Base.AllOf)
+			if len(deleted) > 0 {
+				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", deleted[0].Index, -1)
+				result = append(result, p.newChange(RequestPropertyAllOfRemovedId, []any{deleted.String(), propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
 		})
