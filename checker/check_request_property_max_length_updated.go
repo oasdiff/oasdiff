@@ -14,106 +14,62 @@ const (
 
 func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
-			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maxLength")
-				if mediaTypeDiff.SchemaDiff.MaxLengthDiff != nil {
-					maxLengthDiff := mediaTypeDiff.SchemaDiff.MaxLengthDiff
-					if maxLengthDiff.From != nil &&
-						maxLengthDiff.To != nil {
-						if IsDecreasedValue(maxLengthDiff) {
-							result = append(result, NewApiChange(
-								RequestBodyMaxLengthDecreasedId,
-								config,
-								[]any{maxLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestBodyMaxLengthIncreasedId,
-								config,
-								[]any{maxLengthDiff.From, maxLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-						}
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						maxLengthDiff := propertyDiff.MaxLengthDiff
-						if maxLengthDiff == nil {
-							return
-						}
-						if maxLengthDiff.From == nil ||
-							maxLengthDiff.To == nil {
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maxLength")
-
-						if IsDecreasedValue(maxLengthDiff) {
-
-							id := RequestPropertyMaxLengthDecreasedId
-
-							if propertyDiff.Revision.ReadOnly {
-								id = RequestReadOnlyPropertyMaxLengthDecreasedId
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propName, maxLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						} else {
-							result = append(result, NewApiChange(
-								RequestPropertyMaxLengthIncreasedId,
-								config,
-								[]any{propName, maxLengthDiff.From, maxLengthDiff.To},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						}
-
-					})
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
+		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
+			maxLengthDiff.From != nil &&
+			maxLengthDiff.To != nil {
+			if IsDecreasedValue(maxLengthDiff) {
+				result = append(result, info.newChange(
+					RequestBodyMaxLengthDecreasedId,
+					[]any{maxLengthDiff.To},
+					"",
+				).WithSources(baseSource, revisionSource))
+			} else {
+				result = append(result, info.newChange(
+					RequestBodyMaxLengthIncreasedId,
+					[]any{maxLengthDiff.From, maxLengthDiff.To},
+					"",
+				).WithSources(baseSource, revisionSource))
 			}
 		}
-	}
+
+		info.walkProperties(func(p propertyInfo) {
+			maxLengthDiff := p.propertyDiff.MaxLengthDiff
+			if maxLengthDiff == nil {
+				return
+			}
+			if maxLengthDiff.From == nil ||
+				maxLengthDiff.To == nil {
+				return
+			}
+
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
+
+			if IsDecreasedValue(maxLengthDiff) {
+
+				id := RequestPropertyMaxLengthDecreasedId
+
+				if p.propertyDiff.Revision.ReadOnly {
+					id = RequestReadOnlyPropertyMaxLengthDecreasedId
+				}
+
+				result = append(result, p.newChange(
+					id,
+					[]any{propName, maxLengthDiff.To},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			} else {
+				result = append(result, p.newChange(
+					RequestPropertyMaxLengthIncreasedId,
+					[]any{propName, maxLengthDiff.From, maxLengthDiff.To},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }

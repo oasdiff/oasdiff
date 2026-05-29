@@ -13,118 +13,58 @@ const (
 
 func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
+		if maxDiff := info.schemaDiff.MaxDiff; maxDiff != nil &&
+			maxDiff.From == nil &&
+			maxDiff.To != nil {
+			result = append(result, info.newChange(
+				RequestBodyMaxSetId,
+				[]any{maxDiff.To},
+				commentId(RequestBodyMaxSetId),
+			).WithSources(nil, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+		if exMaxDiff := info.schemaDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
+			exMaxDiff.From == nil &&
+			exMaxDiff.To != nil {
+			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
+			result = append(result, info.newChange(
+				RequestBodyExclusiveMaxSetId,
+				[]any{exMaxDiff.To},
+				commentId(RequestBodyExclusiveMaxSetId),
+			).WithSources(nil, exRevisionSource))
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			if p.propertyDiff.Revision.ReadOnly {
+				return
+			}
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if maxDiff := p.propertyDiff.MaxDiff; maxDiff != nil &&
+				maxDiff.From == nil &&
+				maxDiff.To != nil {
+				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
+				result = append(result, p.newChange(
+					RequestPropertyMaxSetId,
+					[]any{propName, maxDiff.To},
+					commentId(RequestPropertyMaxSetId),
+				).WithSources(nil, propRevisionSource))
 			}
 
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				_, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maximum")
-				if mediaTypeDiff.SchemaDiff.MaxDiff != nil {
-					maxDiff := mediaTypeDiff.SchemaDiff.MaxDiff
-					if maxDiff.From == nil &&
-						maxDiff.To != nil {
-						result = append(result, NewApiChange(
-							RequestBodyMaxSetId,
-							config,
-							[]any{maxDiff.To},
-							commentId(RequestBodyMaxSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-				if mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff != nil {
-					exMaxDiff := mediaTypeDiff.SchemaDiff.ExclusiveMaxDiff
-					if exMaxDiff.From == nil &&
-						exMaxDiff.To != nil {
-						_, exRevisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "exclusiveMaximum")
-						result = append(result, NewApiChange(
-							RequestBodyExclusiveMaxSetId,
-							config,
-							[]any{exMaxDiff.To},
-							commentId(RequestBodyExclusiveMaxSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, exRevisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						maxDiff := propertyDiff.MaxDiff
-						if maxDiff == nil {
-							return
-						}
-						if maxDiff.From != nil ||
-							maxDiff.To == nil {
-							return
-						}
-						if propertyDiff.Revision.ReadOnly {
-							return
-						}
-
-						_, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maximum")
-						result = append(result, NewApiChange(
-							RequestPropertyMaxSetId,
-							config,
-							[]any{propertyFullName(propertyPath, propertyName), maxDiff.To},
-							commentId(RequestPropertyMaxSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-					})
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						exMaxDiff := propertyDiff.ExclusiveMaxDiff
-						if exMaxDiff == nil {
-							return
-						}
-						if exMaxDiff.From != nil ||
-							exMaxDiff.To == nil {
-							return
-						}
-						if propertyDiff.Revision.ReadOnly {
-							return
-						}
-
-						_, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "exclusiveMaximum")
-						result = append(result, NewApiChange(
-							RequestPropertyExclusiveMaxSetId,
-							config,
-							[]any{propertyFullName(propertyPath, propertyName), exMaxDiff.To},
-							commentId(RequestPropertyExclusiveMaxSetId),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-					})
+			if exMaxDiff := p.propertyDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
+				exMaxDiff.From == nil &&
+				exMaxDiff.To != nil {
+				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
+				result = append(result, p.newChange(
+					RequestPropertyExclusiveMaxSetId,
+					[]any{propName, exMaxDiff.To},
+					commentId(RequestPropertyExclusiveMaxSetId),
+				).WithSources(nil, propRevisionSource))
 			}
-		}
-	}
+		})
+	})
+
 	return result
 }
