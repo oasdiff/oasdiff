@@ -27,38 +27,22 @@ func getErrFailedToLoadSpec(what string, source *load.Source, err error) *Return
 	if flatErr := asFlattenError(err); flatErr != nil {
 		return getErrFailedToFlatten(flatErr)
 	}
-	return getError(
-		fmt.Errorf("failed to load %s spec from %s: %w", what, source.Out(), err),
-		102,
-	)
+	wrapped := fmt.Errorf("failed to load %s spec from %s: %w", what, source.Out(), err)
+	if isExternalRefError(err) {
+		return getErrDisallowedExternalRef(wrapped)
+	}
+	return getError(wrapped, 102)
 }
 
 func getErrFailedToLoadSpecs(what string, path string, err error) *ReturnError {
 	if flatErr := asFlattenError(err); flatErr != nil {
 		return getErrFailedToFlatten(flatErr)
 	}
-	return getError(
-		fmt.Errorf("failed to load %s specs from glob %q: %w", what, path, err),
-		103,
-	)
-}
-
-// asFlattenError returns the *load.FlattenError in err's chain, or nil
-// if err is a genuine load failure. Centralised so every spec-loading
-// site stays a single line at the call site.
-func asFlattenError(err error) *load.FlattenError {
-	var flatErr *load.FlattenError
-	if errors.As(err, &flatErr) {
-		return flatErr
+	wrapped := fmt.Errorf("failed to load %s specs from glob %q: %w", what, path, err)
+	if isExternalRefError(err) {
+		return getErrDisallowedExternalRef(wrapped)
 	}
-	return nil
-}
-
-// getErrFailedToFlatten returns the FlattenError unwrapped — its Error()
-// already reports the offending file and the merge failure. The outer
-// "failed to load spec" wrap is misleading because loading succeeded.
-func getErrFailedToFlatten(err *load.FlattenError) *ReturnError {
-	return getError(err, 122)
+	return getError(wrapped, 103)
 }
 
 func getErrDiffFailed(err error) *ReturnError {
@@ -118,11 +102,44 @@ func getErrCantProcessIgnoreFile(what string, err error) *ReturnError {
 	)
 }
 
+// getErrFailedToFlatten returns the FlattenError unwrapped — its Error()
+// already reports the offending file and the merge failure. The outer
+// "failed to load spec" wrap is misleading because loading succeeded.
+func getErrFailedToFlatten(err *load.FlattenError) *ReturnError {
+	return getError(err, 122)
+}
+
+// getErrDisallowedExternalRef returns the dedicated exit code (123) for a spec
+// that resolved an external $ref while --allow-external-refs=false. Callers
+// (e.g. the GitHub Action) key off this code to surface a precise
+// "set allow-external-refs" remedy without matching error text. 123 is kept
+// under 125 to stay clear of the shell's reserved 126/127/128+ range.
+func getErrDisallowedExternalRef(err error) *ReturnError {
+	return getError(err, 123)
+}
+
 func getErrUploadAndOpenFailed(err error) *ReturnError {
 	return getError(
 		fmt.Errorf("--open failed: %w", err),
 		130,
 	)
+}
+
+// asFlattenError returns the *load.FlattenError in err's chain, or nil if err is
+// a genuine load failure. Centralised so every spec-loading site stays a single
+// line at the call site.
+func asFlattenError(err error) *load.FlattenError {
+	var flatErr *load.FlattenError
+	if errors.As(err, &flatErr) {
+		return flatErr
+	}
+	return nil
+}
+
+// isExternalRefError reports whether err's chain contains a *load.ExternalRefError.
+func isExternalRefError(err error) bool {
+	var extErr *load.ExternalRefError
+	return errors.As(err, &extErr)
 }
 
 func getError(err error, code int) *ReturnError {
