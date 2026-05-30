@@ -1,8 +1,9 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/diff"
 	"slices"
+
+	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
@@ -14,109 +15,49 @@ const (
 
 func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.ResponsesDiff == nil {
-				continue
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			if p.parent.Revision.Properties[p.propertyName] == nil {
+				// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
+				return
+			}
+			if !slices.Contains(p.parent.Base.Required, p.propertyName) {
+				// skip non-required properties
+				return
 			}
 
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "writeOnly")
+				id := ResponseRequiredPropertyBecameNonWriteOnlyId
+				comment := commentId(ResponseRequiredPropertyBecameNonWriteOnlyId)
+				if writeOnlyDiff.To == true {
+					id = ResponseRequiredPropertyBecameWriteOnlyId
+					comment = ""
 				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					if mediaTypeDiff.SchemaDiff == nil {
-						continue
-					}
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							writeOnlyDiff := propertyDiff.WriteOnlyDiff
-							if writeOnlyDiff == nil {
-								return
-							}
-							if parent.Revision.Properties[propertyName] == nil {
-								// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
-								return
-							}
-							if !slices.Contains(parent.Base.Required, propertyName) {
-								// skip non-required properties
-								return
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "writeOnly")
-
-							id := ResponseRequiredPropertyBecameNonWriteOnlyId
-							comment := commentId(ResponseRequiredPropertyBecameNonWriteOnlyId)
-
-							if writeOnlyDiff.To == true {
-								id = ResponseRequiredPropertyBecameWriteOnlyId
-								comment = ""
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-								comment,
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						})
-
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							readOnlyDiff := propertyDiff.ReadOnlyDiff
-							if readOnlyDiff == nil {
-								return
-							}
-							if parent.Revision.Properties[propertyName] == nil {
-								// removed properties processed by the ResponseRequiredPropertyUpdatedCheck check
-								return
-							}
-							if !slices.Contains(parent.Base.Required, propertyName) {
-								// skip non-required properties
-								return
-							}
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "readOnly")
-
-							id := ResponseRequiredPropertyBecameNonReadOnlyId
-
-							if readOnlyDiff.To == true {
-								id = ResponseRequiredPropertyBecameReadOnlyId
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-						})
-				}
+				result = append(result, p.newChange(
+					id,
+					[]any{propName, info.responseStatus},
+					comment,
+				).WithSources(propBaseSource, propRevisionSource))
 			}
-		}
-	}
+
+			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
+				id := ResponseRequiredPropertyBecameNonReadOnlyId
+				if readOnlyDiff.To == true {
+					id = ResponseRequiredPropertyBecameReadOnlyId
+				}
+				result = append(result, p.newChange(
+					id,
+					[]any{propName, info.responseStatus},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
 
 	return result
 }
