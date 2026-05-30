@@ -68,13 +68,22 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 		return &result
 	}
 
-	// kin-openapi calls ReadFromURIFunc before checking IsExternalRefsAllowed, so the
-	// caller's --allow-external-refs setting is still enforced for non-git refs via
-	// DefaultReadFromURI.
+	// kin-openapi skips its own allowsExternalRefs policy check whenever a custom
+	// ReadFromURIFunc is installed (see openapi3.Loader.resolveComponent), so we
+	// must enforce IsExternalRefsAllowed here. Intra-git relative $refs keep their
+	// "<rev>:" prefix (via JoinFunc above) and are read with "git show". Any other
+	// $ref is genuinely external — an http(s) URL or a local file path outside the
+	// git tree — so honor IsExternalRefsAllowed: with --allow-external-refs=false a
+	// spec loaded from an (attacker-controlled) git blob must not be able to read
+	// local files or reach arbitrary URLs (SSRF). This matches the non-git load
+	// path, where kin-openapi enforces the same policy itself.
 	loaderCopy.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		p := filepath.FromSlash(location.Path)
 		if isGitRevision(p) {
 			return gitShow(p)
+		}
+		if !loader.IsExternalRefsAllowed {
+			return nil, fmt.Errorf("external $ref not allowed (enable --allow-external-refs to permit): %s", location.String())
 		}
 		return openapi3.DefaultReadFromURI(loader, location)
 	}

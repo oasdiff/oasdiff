@@ -444,3 +444,57 @@ properties:
 	schema := specInfo.Spec.Paths.Value("/pets").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value
 	require.NotNil(t, schema.Properties["id"], "id property from $ref chain should be resolved")
 }
+
+// TestLoadInfo_GitRevisionExternalRefBlocked verifies that loading a spec from a
+// git revision honors IsExternalRefsAllowed=false: a genuinely external $ref (an
+// http(s) URL or a local path outside the git tree) must be refused, not fetched.
+// Without the guard, kin-openapi skips its own policy check whenever a custom
+// ReadFromURIFunc is installed, so the git path would read local files / reach
+// arbitrary URLs (SSRF) even with --allow-external-refs=false.
+func TestLoadInfo_GitRevisionExternalRefBlocked(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	// A spec whose $ref points off-tree to an external URL.
+	topLevel := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "http://169.254.169.254/latest/meta-data/schema.yaml"
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(topLevel), 0644))
+	run("git", "add", ".")
+	run("git", "commit", "-m", "add spec with external ref")
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = false
+	_, err = load.NewSpecInfo(loader, load.NewSource("HEAD:openapi.yaml"))
+	require.Error(t, err, "external $ref must be refused on the git path when IsExternalRefsAllowed=false")
+	require.ErrorContains(t, err, "external $ref not allowed")
+}
