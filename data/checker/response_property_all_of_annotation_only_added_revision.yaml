@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: ACME
+  version: 1.0.0
+
+paths:
+  /pets:
+    get:
+      operationId: getPets
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                allOf:
+                  - title: "annotation-only subschema"
+                    description: "no validation effect — accepts every instance the parent does"

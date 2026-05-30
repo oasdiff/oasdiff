@@ -241,6 +241,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestBodyAllOfRemovedId, WARN, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
 		newBackwardCompatibilityRule(RequestPropertyAllOfAddedId, ERR, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
 		newBackwardCompatibilityRule(RequestPropertyAllOfRemovedId, WARN, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(RequestBodyAllOfAddedAnnotationOnlyId, INFO, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyAllOfRemovedAnnotationOnlyId, INFO, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(RequestPropertyAllOfAddedAnnotationOnlyId, INFO, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(RequestPropertyAllOfRemovedAnnotationOnlyId, INFO, RequestPropertyAllOfUpdatedCheck, DirectionRequest, LocationProperties, ActionRemove),
 		// RequestPropertyAnyOfUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyAnyOfAddedId, INFO, RequestPropertyAnyOfUpdatedCheck, DirectionRequest, LocationBody, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyAnyOfRemovedId, ERR, RequestPropertyAnyOfUpdatedCheck, DirectionRequest, LocationBody, ActionRemove),
@@ -402,6 +406,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyAllOfRemovedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
 		newBackwardCompatibilityRule(ResponsePropertyAllOfAddedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
 		newBackwardCompatibilityRule(ResponsePropertyAllOfRemovedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyAllOfAddedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyAllOfRemovedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyAllOfAddedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationProperties, ActionAdd),
+		newBackwardCompatibilityRule(ResponsePropertyAllOfRemovedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, LocationProperties, ActionRemove),
 		// ResponsePropertyAnyOfUpdatedCheck
 		newBackwardCompatibilityRule(ResponseBodyAnyOfAddedId, INFO, ResponsePropertyAnyOfUpdatedCheck, DirectionResponse, LocationBody, ActionAdd),
 		newBackwardCompatibilityRule(ResponseBodyAnyOfRemovedId, INFO, ResponsePropertyAnyOfUpdatedCheck, DirectionResponse, LocationBody, ActionRemove),

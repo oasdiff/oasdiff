@@ -938,3 +938,25 @@ response-body-exclusive-max-increased-description: response body exclusiveMaximu
 response-property-exclusive-max-increased-description: response property exclusiveMaximum increased
 response-body-exclusive-min-decreased-description: response body exclusiveMinimum decreased
 response-property-exclusive-min-decreased-description: response property exclusiveMinimum decreased
+
+# Изменения allOf только для аннотаций — выводятся как INFO, когда
+# добавленная/удалённая подсхема содержит только ключевые слова аннотаций
+# (title, description, examples, default, externalDocs, $comment).
+# Не влияют на контракт API; отображаются в журнале изменений для аудита
+# документальных правок. См. обсуждение OAS #3793.
+request-body-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` тела запроса
+request-body-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` тела запроса
+request-property-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` свойства запроса %s
+request-property-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` свойства запроса %s
+response-body-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` тела ответа для статуса ответа %s
+response-body-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` тела ответа для статуса ответа %s
+response-property-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` свойства ответа %s для статуса ответа %s
+response-property-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` свойства ответа %s для статуса ответа %s
+request-body-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в теле запроса (без влияния на валидацию)
+request-body-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в теле запроса (без влияния на валидацию)
+request-property-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в свойстве запроса (без влияния на валидацию)
+request-property-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в свойстве запроса (без влияния на валидацию)
+response-body-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в теле ответа (без влияния на валидацию)
+response-body-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в теле ответа (без влияния на валидацию)
+response-property-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в свойстве ответа (без влияния на валидацию)
+response-property-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в свойстве ответа (без влияния на валидацию)
