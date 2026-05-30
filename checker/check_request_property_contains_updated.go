@@ -21,208 +21,84 @@ const (
 
 func RequestPropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
 
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if containsDiff := info.schemaDiff.ContainsDiff; containsDiff != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contains")
+			if containsDiff.SchemaAdded {
+				result = append(result, info.newChange(RequestBodyContainsAddedId, nil, "").
+					WithSources(nil, revisionSource))
 			}
-
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-
-				if mediaTypeDiff.SchemaDiff.ContainsDiff != nil {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "contains")
-					if mediaTypeDiff.SchemaDiff.ContainsDiff.SchemaAdded {
-						result = append(result, NewApiChange(
-							RequestBodyContainsAddedId,
-							config,
-							nil,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-					}
-					if mediaTypeDiff.SchemaDiff.ContainsDiff.SchemaDeleted {
-						result = append(result, NewApiChange(
-							RequestBodyContainsRemovedId,
-							config,
-							nil,
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				if mediaTypeDiff.SchemaDiff.MinContainsDiff != nil {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "minContains")
-					d := mediaTypeDiff.SchemaDiff.MinContainsDiff
-					if IsIncreasedValue(d) {
-						result = append(result, NewApiChange(
-							RequestBodyMinContainsIncreasedId,
-							config,
-							[]any{d.From, d.To},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-					if IsDecreasedValue(d) {
-						result = append(result, NewApiChange(
-							RequestBodyMinContainsDecreasedId,
-							config,
-							[]any{d.From, d.To},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				if mediaTypeDiff.SchemaDiff.MaxContainsDiff != nil {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, mediaTypeDiff.SchemaDiff, "maxContains")
-					d := mediaTypeDiff.SchemaDiff.MaxContainsDiff
-					if IsIncreasedValue(d) {
-						result = append(result, NewApiChange(
-							RequestBodyMaxContainsIncreasedId,
-							config,
-							[]any{d.From, d.To},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-					if IsDecreasedValue(d) {
-						result = append(result, NewApiChange(
-							RequestBodyMaxContainsDecreasedId,
-							config,
-							[]any{d.From, d.To},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-					}
-				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						propName := propertyFullName(propertyPath, propertyName)
-
-						if propertyDiff.ContainsDiff != nil {
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "contains")
-							if propertyDiff.ContainsDiff.SchemaAdded {
-								result = append(result, NewApiChange(
-									RequestPropertyContainsAddedId,
-									config,
-									[]any{propName},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(nil, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-							if propertyDiff.ContainsDiff.SchemaDeleted {
-								result = append(result, NewApiChange(
-									RequestPropertyContainsRemovedId,
-									config,
-									[]any{propName},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, nil).WithDetails(mediaTypeDetails))
-							}
-						}
-
-						if propertyDiff.MinContainsDiff != nil {
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "minContains")
-							d := propertyDiff.MinContainsDiff
-							if IsIncreasedValue(d) {
-								result = append(result, NewApiChange(
-									RequestPropertyMinContainsIncreasedId,
-									config,
-									[]any{propName, d.From, d.To},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-							if IsDecreasedValue(d) {
-								result = append(result, NewApiChange(
-									RequestPropertyMinContainsDecreasedId,
-									config,
-									[]any{propName, d.From, d.To},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-						}
-
-						if propertyDiff.MaxContainsDiff != nil {
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "maxContains")
-							d := propertyDiff.MaxContainsDiff
-							if IsIncreasedValue(d) {
-								result = append(result, NewApiChange(
-									RequestPropertyMaxContainsIncreasedId,
-									config,
-									[]any{propName, d.From, d.To},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-							if IsDecreasedValue(d) {
-								result = append(result, NewApiChange(
-									RequestPropertyMaxContainsDecreasedId,
-									config,
-									[]any{propName, d.From, d.To},
-									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
-								).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							}
-						}
-					})
+			if containsDiff.SchemaDeleted {
+				result = append(result, info.newChange(RequestBodyContainsRemovedId, nil, "").
+					WithSources(baseSource, nil))
 			}
 		}
-	}
+
+		if d := info.schemaDiff.MinContainsDiff; d != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
+			if IsIncreasedValue(d) {
+				result = append(result, info.newChange(RequestBodyMinContainsIncreasedId, []any{d.From, d.To}, "").
+					WithSources(baseSource, revisionSource))
+			}
+			if IsDecreasedValue(d) {
+				result = append(result, info.newChange(RequestBodyMinContainsDecreasedId, []any{d.From, d.To}, "").
+					WithSources(baseSource, revisionSource))
+			}
+		}
+
+		if d := info.schemaDiff.MaxContainsDiff; d != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxContains")
+			if IsIncreasedValue(d) {
+				result = append(result, info.newChange(RequestBodyMaxContainsIncreasedId, []any{d.From, d.To}, "").
+					WithSources(baseSource, revisionSource))
+			}
+			if IsDecreasedValue(d) {
+				result = append(result, info.newChange(RequestBodyMaxContainsDecreasedId, []any{d.From, d.To}, "").
+					WithSources(baseSource, revisionSource))
+			}
+		}
+
+		info.walkProperties(func(p propertyInfo) {
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if containsDiff := p.propertyDiff.ContainsDiff; containsDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contains")
+				if containsDiff.SchemaAdded {
+					result = append(result, p.newChange(RequestPropertyContainsAddedId, []any{propName}, "").
+						WithSources(nil, propRevisionSource))
+				}
+				if containsDiff.SchemaDeleted {
+					result = append(result, p.newChange(RequestPropertyContainsRemovedId, []any{propName}, "").
+						WithSources(propBaseSource, nil))
+				}
+			}
+
+			if d := p.propertyDiff.MinContainsDiff; d != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
+				if IsIncreasedValue(d) {
+					result = append(result, p.newChange(RequestPropertyMinContainsIncreasedId, []any{propName, d.From, d.To}, "").
+						WithSources(propBaseSource, propRevisionSource))
+				}
+				if IsDecreasedValue(d) {
+					result = append(result, p.newChange(RequestPropertyMinContainsDecreasedId, []any{propName, d.From, d.To}, "").
+						WithSources(propBaseSource, propRevisionSource))
+				}
+			}
+
+			if d := p.propertyDiff.MaxContainsDiff; d != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxContains")
+				if IsIncreasedValue(d) {
+					result = append(result, p.newChange(RequestPropertyMaxContainsIncreasedId, []any{propName, d.From, d.To}, "").
+						WithSources(propBaseSource, propRevisionSource))
+				}
+				if IsDecreasedValue(d) {
+					result = append(result, p.newChange(RequestPropertyMaxContainsDecreasedId, []any{propName, d.From, d.To}, "").
+						WithSources(propBaseSource, propRevisionSource))
+				}
+			}
+		})
+	})
+
 	return result
 }
