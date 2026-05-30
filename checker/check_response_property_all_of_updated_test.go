@@ -121,3 +121,20 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 			OperationId: "listPets",
 		}}, errs)
 }
+
+// CL: adding an allOf subschema to a response body whose body is annotation
+// only (title, description, examples, default, externalDocs, $comment) is
+// a wire-contract no-op and must not be reported. Mirrors the request-side
+// regression test; see OAS discussion #3793 for the motivating case.
+func TestResponsePropertyAllOfAdded_AnnotationOnly_Suppressed(t *testing.T) {
+	s1, err := open("../data/checker/response_property_all_of_annotation_only_added_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_all_of_annotation_only_added_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyAllOfUpdatedCheck), d, osm, checker.INFO)
+
+	require.Empty(t, errs, "annotation-only allOf addition on a response body must not emit any change records")
+}
