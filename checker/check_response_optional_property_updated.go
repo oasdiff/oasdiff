@@ -1,9 +1,10 @@
 package checker
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"slices"
 )
 
 const (
@@ -15,80 +16,50 @@ const (
 
 func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.ResponsesDiff == nil {
-				continue
-			}
-
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		// CheckDeletedPropertiesDiff / CheckAddedPropertiesDiff handle the
+		// added/removed property sides; info.walkProperties only delegates
+		// to CheckModifiedPropertiesDiff so the primitives are called
+		// directly inside the walker callback.
+		CheckDeletedPropertiesDiff(
+			info.schemaDiff,
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
+				if slices.Contains(parent.Base.Required, propertyName) {
+					// covered by response-required-property-removed
+					return
 				}
-
-				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
-				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-					CheckDeletedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
-							id := ResponseOptionalPropertyRemovedId
-							if propertyItem.WriteOnly {
-								id = ResponseOptionalWriteOnlyPropertyRemovedId
-							}
-							if slices.Contains(parent.Base.Required, propertyName) {
-								// covered by response-required-property-removed
-								return
-							}
-
-							baseSource := propertySource(operationsSources, operationItem.Base, propertyItem)
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(baseSource, nil).WithDetails(mediaTypeDetails))
-						})
-					CheckAddedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
-							id := ResponseOptionalPropertyAddedId
-							if propertyItem.WriteOnly {
-								id = ResponseOptionalWriteOnlyPropertyAddedId
-							}
-
-							if slices.Contains(parent.Revision.Required, propertyName) {
-								// covered by response-required-property-added
-								return
-							}
-
-							revisionSource := propertySource(operationsSources, operationItem.Revision, propertyItem)
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propertyFullName(propertyPath, propertyName), responseStatus},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(nil, revisionSource).WithDetails(mediaTypeDetails))
-						})
+				id := ResponseOptionalPropertyRemovedId
+				if propertyItem.WriteOnly {
+					id = ResponseOptionalWriteOnlyPropertyRemovedId
 				}
-			}
-		}
-	}
+				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				result = append(result, info.newChange(
+					id,
+					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					"",
+				).WithSources(baseSource, nil))
+			})
+
+		CheckAddedPropertiesDiff(
+			info.schemaDiff,
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
+				if slices.Contains(parent.Revision.Required, propertyName) {
+					// covered by response-required-property-added
+					return
+				}
+				id := ResponseOptionalPropertyAddedId
+				if propertyItem.WriteOnly {
+					id = ResponseOptionalWriteOnlyPropertyAddedId
+				}
+				revisionSource := propertySource(operationsSources, info.operationItem.Revision, propertyItem)
+				result = append(result, info.newChange(
+					id,
+					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					"",
+				).WithSources(nil, revisionSource))
+			})
+	})
+
 	return result
 }
