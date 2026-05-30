@@ -939,24 +939,24 @@ response-property-exclusive-max-increased-description: response property exclusi
 response-body-exclusive-min-decreased-description: response body exclusiveMinimum decreased
 response-property-exclusive-min-decreased-description: response property exclusiveMinimum decreased
 
-# annotation-only allOf changes — emitted at INFO when the added/removed
-# subschema body holds only annotation keywords (title, description,
-# examples, default, externalDocs, $comment). No wire-contract effect;
-# surfaced for changelog auditability. English placeholders pending
-# translation. See OAS discussion #3793.
-request-body-all-of-added-annotation-only: added annotation-only %s to the request body `allOf` list
-request-body-all-of-removed-annotation-only: removed annotation-only %s from the request body `allOf` list
-request-property-all-of-added-annotation-only: added annotation-only %s to the %s request property `allOf` list
-request-property-all-of-removed-annotation-only: removed annotation-only %s from the %s request property `allOf` list
-response-body-all-of-added-annotation-only: added annotation-only %s to the response body `allOf` list for the response status %s
-response-body-all-of-removed-annotation-only: removed annotation-only %s from the response body `allOf` list for the response status %s
-response-property-all-of-added-annotation-only: added annotation-only %s to the %s response property `allOf` list for the response status %s
-response-property-all-of-removed-annotation-only: removed annotation-only %s from the %s response property `allOf` list for the response status %s
-request-body-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in request body (no wire-contract effect)
-request-body-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in request body (no wire-contract effect)
-request-property-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in request property (no wire-contract effect)
-request-property-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in request property (no wire-contract effect)
-response-body-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in response body (no wire-contract effect)
-response-body-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in response body (no wire-contract effect)
-response-property-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in response property (no wire-contract effect)
-response-property-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in response property (no wire-contract effect)
+# Изменения allOf только для аннотаций — выводятся как INFO, когда
+# добавленная/удалённая подсхема содержит только ключевые слова аннотаций
+# (title, description, examples, default, externalDocs, $comment).
+# Не влияют на контракт API; отображаются в журнале изменений для аудита
+# документальных правок. См. обсуждение OAS #3793.
+request-body-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` тела запроса
+request-body-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` тела запроса
+request-property-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` свойства запроса %s
+request-property-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` свойства запроса %s
+response-body-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` тела ответа для статуса ответа %s
+response-body-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` тела ответа для статуса ответа %s
+response-property-all-of-added-annotation-only: добавлено %s (только аннотация) в список `allOf` свойства ответа %s для статуса ответа %s
+response-property-all-of-removed-annotation-only: удалён %s (только аннотация) из списка `allOf` свойства ответа %s для статуса ответа %s
+request-body-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в теле запроса (без влияния на валидацию)
+request-body-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в теле запроса (без влияния на валидацию)
+request-property-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в свойстве запроса (без влияния на валидацию)
+request-property-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в свойстве запроса (без влияния на валидацию)
+response-body-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в теле ответа (без влияния на валидацию)
+response-body-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в теле ответа (без влияния на валидацию)
+response-property-all-of-added-annotation-only-description: подсхема только с аннотациями добавлена к allOf в свойстве ответа (без влияния на валидацию)
+response-property-all-of-removed-annotation-only-description: подсхема только с аннотациями удалена из allOf в свойстве ответа (без влияния на валидацию)

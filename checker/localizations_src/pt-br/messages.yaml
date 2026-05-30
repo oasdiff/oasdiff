@@ -936,24 +936,24 @@ response-property-exclusive-max-increased-description: response property exclusi
 response-body-exclusive-min-decreased-description: response body exclusiveMinimum decreased
 response-property-exclusive-min-decreased-description: response property exclusiveMinimum decreased
 
-# annotation-only allOf changes — emitted at INFO when the added/removed
-# subschema body holds only annotation keywords (title, description,
-# examples, default, externalDocs, $comment). No wire-contract effect;
-# surfaced for changelog auditability. English placeholders pending
-# translation. See OAS discussion #3793.
-request-body-all-of-added-annotation-only: added annotation-only %s to the request body `allOf` list
-request-body-all-of-removed-annotation-only: removed annotation-only %s from the request body `allOf` list
-request-property-all-of-added-annotation-only: added annotation-only %s to the %s request property `allOf` list
-request-property-all-of-removed-annotation-only: removed annotation-only %s from the %s request property `allOf` list
-response-body-all-of-added-annotation-only: added annotation-only %s to the response body `allOf` list for the response status %s
-response-body-all-of-removed-annotation-only: removed annotation-only %s from the response body `allOf` list for the response status %s
-response-property-all-of-added-annotation-only: added annotation-only %s to the %s response property `allOf` list for the response status %s
-response-property-all-of-removed-annotation-only: removed annotation-only %s from the %s response property `allOf` list for the response status %s
-request-body-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in request body (no wire-contract effect)
-request-body-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in request body (no wire-contract effect)
-request-property-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in request property (no wire-contract effect)
-request-property-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in request property (no wire-contract effect)
-response-body-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in response body (no wire-contract effect)
-response-body-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in response body (no wire-contract effect)
-response-property-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in response property (no wire-contract effect)
-response-property-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in response property (no wire-contract effect)
+# Alterações allOf apenas de anotação — emitidas em INFO quando o subesquema
+# adicionado/removido contém somente palavras-chave de anotação
+# (title, description, examples, default, externalDocs, $comment).
+# Sem efeito sobre o contrato da API; expostas para que o changelog
+# mantenha o registro da alteração documental. Discussão da OAS #3793.
+request-body-all-of-added-annotation-only: "%s (apenas de anotação) foi adicionado à lista `allOf` do corpo da requisição"
+request-body-all-of-removed-annotation-only: "%s (apenas de anotação) foi removido da lista `allOf` do corpo da requisição"
+request-property-all-of-added-annotation-only: "%s (apenas de anotação) foi adicionado à lista `allOf` da propriedade de requisição %s"
+request-property-all-of-removed-annotation-only: "%s (apenas de anotação) foi removido da lista `allOf` da propriedade de requisição %s"
+response-body-all-of-added-annotation-only: "%s (apenas de anotação) foi adicionado à lista `allOf` do corpo da resposta para o status %s"
+response-body-all-of-removed-annotation-only: "%s (apenas de anotação) foi removido da lista `allOf` do corpo da resposta para o status %s"
+response-property-all-of-added-annotation-only: "%s (apenas de anotação) foi adicionado à lista `allOf` da propriedade de resposta %s para o status %s"
+response-property-all-of-removed-annotation-only: "%s (apenas de anotação) foi removido da lista `allOf` da propriedade de resposta %s para o status %s"
+request-body-all-of-added-annotation-only-description: subesquema apenas de anotação adicionado ao allOf no corpo da requisição (sem efeito na validação)
+request-body-all-of-removed-annotation-only-description: subesquema apenas de anotação removido do allOf no corpo da requisição (sem efeito na validação)
+request-property-all-of-added-annotation-only-description: subesquema apenas de anotação adicionado ao allOf na propriedade de requisição (sem efeito na validação)
+request-property-all-of-removed-annotation-only-description: subesquema apenas de anotação removido do allOf na propriedade de requisição (sem efeito na validação)
+response-body-all-of-added-annotation-only-description: subesquema apenas de anotação adicionado ao allOf no corpo da resposta (sem efeito na validação)
+response-body-all-of-removed-annotation-only-description: subesquema apenas de anotação removido do allOf no corpo da resposta (sem efeito na validação)
+response-property-all-of-added-annotation-only-description: subesquema apenas de anotação adicionado ao allOf na propriedade de resposta (sem efeito na validação)
+response-property-all-of-removed-annotation-only-description: subesquema apenas de anotação removido do allOf na propriedade de resposta (sem efeito na validação)
