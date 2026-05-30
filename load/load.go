@@ -77,13 +77,20 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 	// spec loaded from an (attacker-controlled) git blob must not be able to read
 	// local files or reach arbitrary URLs (SSRF). This matches the non-git load
 	// path, where kin-openapi enforces the same policy itself.
+	// blockedRef records the first external $ref we refuse, so loadFromGitRevision
+	// can return a typed *ExternalRefError regardless of how kin-openapi wraps the
+	// error from ReadFromURIFunc — callers map the type to a dedicated exit code.
+	var blockedRef string
 	loaderCopy.ReadFromURIFunc = func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		p := filepath.FromSlash(location.Path)
 		if isGitRevision(p) {
 			return gitShow(p)
 		}
 		if !loader.IsExternalRefsAllowed {
-			return nil, fmt.Errorf("external $ref not allowed (enable --allow-external-refs to permit): %s", location.String())
+			if blockedRef == "" {
+				blockedRef = location.String()
+			}
+			return nil, &ExternalRefError{Ref: location.String()}
 		}
 		return openapi3.DefaultReadFromURI(loader, location)
 	}
@@ -93,7 +100,13 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 	// Using only the file portion would cause both refs to share the key "openapi.yaml" and
 	// the loader would return the cached base spec for the revision.
 	u := &url.URL{Path: filepath.ToSlash(gitRef)}
-	return loaderCopy.LoadFromDataWithPath(out, u)
+	t, err := loaderCopy.LoadFromDataWithPath(out, u)
+	if err != nil && blockedRef != "" {
+		// Return the typed error even if kin-openapi wrapped ours in plain text,
+		// so callers can errors.As it to a dedicated exit code.
+		return nil, &ExternalRefError{Ref: blockedRef}
+	}
+	return t, err
 }
 
 // readGitRefContent fetches the OpenAPI spec bytes for a git ref. For the

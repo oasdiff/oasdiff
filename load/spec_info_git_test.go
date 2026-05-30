@@ -497,4 +497,8 @@ paths:
 	_, err = load.NewSpecInfo(loader, load.NewSource("HEAD:openapi.yaml"))
 	require.Error(t, err, "external $ref must be refused on the git path when IsExternalRefsAllowed=false")
 	require.ErrorContains(t, err, "external $ref not allowed")
+	// Callers map the typed error to a dedicated exit code, so it must survive
+	// kin-openapi's error wrapping and be reachable via errors.As.
+	var extErr *load.ExternalRefError
+	require.ErrorAs(t, err, &extErr)
 }

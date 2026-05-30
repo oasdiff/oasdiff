@@ -16,3 +16,16 @@ func (e *FlattenError) Error() string {
 }
 
 func (e *FlattenError) Unwrap() error { return e.Err }
+
+// ExternalRefError reports that a spec resolved an external $ref (an http(s)
+// URL or a local file outside the git tree) while external refs were disallowed
+// (IsExternalRefsAllowed=false, i.e. --allow-external-refs=false). Returned as a
+// distinct type so callers can use errors.As to map it to a dedicated exit code,
+// rather than matching the message text.
+type ExternalRefError struct {
+	Ref string
+}
+
+func (e *ExternalRefError) Error() string {
+	return fmt.Sprintf("external $ref not allowed (enable --allow-external-refs to permit): %s", e.Ref)
+}
