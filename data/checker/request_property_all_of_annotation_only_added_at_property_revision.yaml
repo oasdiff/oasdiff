@@ -1,0 +1,26 @@
+openapi: 3.0.0
+info:
+  title: ACME
+  version: 1.0.0
+
+paths:
+  /pets:
+    post:
+      operationId: updatePets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pet:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  allOf:
+                    - title: "annotation-only subschema on a property"
+                      description: "no validation effect"
+      responses:
+        "200":
+          description: Updated

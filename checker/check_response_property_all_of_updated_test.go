@@ -122,11 +122,14 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding an allOf subschema to a response body whose body is annotation
-// only (title, description, examples, default, externalDocs, $comment) is
-// a wire-contract no-op and must not be reported. Mirrors the request-side
-// regression test; see OAS discussion #3793 for the motivating case.
-func TestResponsePropertyAllOfAdded_AnnotationOnly_Suppressed(t *testing.T) {
+// CL: adding an allOf subschema to a response body whose body is
+// annotation-only is emitted as a distinct INFO change instead of the
+// original allOf-added INFO. The response-side severity is unchanged
+// (INFO either way), but the new ID makes the wire-contract-neutral
+// nature of the change explicit in tooling and audit trails. Mirrors
+// the request-side test; see OAS discussion #3793 for the motivating
+// case.
+func TestResponsePropertyAllOfAdded_AnnotationOnly_EmitsInfoWithDistinctId(t *testing.T) {
 	s1, err := open("../data/checker/response_property_all_of_annotation_only_added_base.yaml")
 	require.NoError(t, err)
 	s2, err := open("../data/checker/response_property_all_of_annotation_only_added_revision.yaml")
@@ -136,5 +139,9 @@ func TestResponsePropertyAllOfAdded_AnnotationOnly_Suppressed(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
-	require.Empty(t, errs, "annotation-only allOf addition on a response body must not emit any change records")
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ResponseBodyAllOfAddedAnnotationOnlyId, errs[0].GetId())
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	// Distinct from the original allOf-added INFO ID.
+	require.NotEqual(t, checker.ResponseBodyAllOfAddedId, errs[0].GetId())
 }

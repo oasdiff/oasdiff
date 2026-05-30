@@ -125,12 +125,16 @@ func TestRequestPropertyAllOfRemoved(t *testing.T) {
 
 // CL: adding an allOf subschema whose body is annotation-only (title,
 // description, examples, default, externalDocs, $comment) is a wire-
-// contract no-op and must not be reported as a breaking change. See
-// OAS discussion https://github.com/OAI/OpenAPI-Specification/discussions/3793
-// (handrews: "if you add an allOf that only includes annotation keywords
-// (like title), that's not really a breaking change the way it is if you
-// add another constraint that invalidates previously-valid instances.")
-func TestRequestPropertyAllOfAdded_AnnotationOnly_Suppressed(t *testing.T) {
+// contract no-op. We don't emit it at the original ERR severity (that
+// would be a false positive on the breaking-change view), but we do
+// emit it at INFO so the document-level change stays auditable in
+// `oasdiff changelog`. See OAS discussion
+// https://github.com/OAI/OpenAPI-Specification/discussions/3793
+// (handrews: "if you add an allOf that only includes annotation
+// keywords (like title), that's not really a breaking change the way
+// it is if you add another constraint that invalidates previously-
+// valid instances.")
+func TestRequestPropertyAllOfAdded_AnnotationOnly_EmitsInfo(t *testing.T) {
 	s1, err := open("../data/checker/request_property_all_of_annotation_only_added_base.yaml")
 	require.NoError(t, err)
 	s2, err := open("../data/checker/request_property_all_of_annotation_only_added_revision.yaml")
@@ -140,5 +144,28 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_Suppressed(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
-	require.Empty(t, errs, "annotation-only allOf addition must not emit any change records")
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestBodyAllOfAddedAnnotationOnlyId, errs[0].GetId())
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	// And critically: not the original ERR-level breaking-change ID.
+	require.NotEqual(t, checker.RequestBodyAllOfAddedId, errs[0].GetId())
+}
+
+// CL: same as above but the annotation-only allOf lives on a nested
+// property's schema, not on the body. Covers the info.walkProperties
+// code path; the body-level test only exercises the outer walker.
+func TestRequestPropertyAllOfAdded_AnnotationOnly_AtProperty_EmitsInfo(t *testing.T) {
+	s1, err := open("../data/checker/request_property_all_of_annotation_only_added_at_property_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_all_of_annotation_only_added_at_property_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAllOfUpdatedCheck), d, osm, checker.INFO)
+
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestPropertyAllOfAddedAnnotationOnlyId, errs[0].GetId())
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.NotEqual(t, checker.RequestPropertyAllOfAddedId, errs[0].GetId())
 }

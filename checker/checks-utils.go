@@ -412,32 +412,44 @@ func IsDecreased(from any, to any) bool {
 	return false
 }
 
-// filterAnnotationOnlySubschemas returns the subset of subschemas whose
-// bodies (looked up in schemaRefs by Subschema.Index) carry at least one
-// validation-significant keyword. Subschemas that hold only annotation
-// keywords (title, description, examples, default, externalDocs, $comment)
-// are validation-equivalent to {} and don't reject any previously-valid
-// instance, so emitting them as breaking changes is a false positive on
-// the wire-contract view (oasdiff diff still shows the document change).
+// splitSubschemasByAnnotationOnly partitions subschemas into two disjoint
+// sets according to whether the body at Subschema.Index in schemaRefs
+// carries a validation-significant keyword.
+//
+//   - kept: subschemas with at least one constraint, type, property,
+//     enum, etc. These drive the original allOf-changed emission at its
+//     conventional severity (ERR / WARN for request, INFO for response).
+//   - annotationOnly: subschemas that hold only annotation keywords
+//     (title, description, examples, default, externalDocs, $comment).
+//     Validation-equivalent to {} — they don't reject any previously-
+//     valid instance. Callers emit them at INFO so the document-level
+//     change stays auditable in the changelog without contaminating
+//     breaking.
 //
 // Motivating case: handrews on OAS discussion #3793 — adding an
 // `allOf: [{title: "..."}]` is not a breaking change the way adding a
 // real constraint is, but the original allOf-added check fired ERR on it.
-func filterAnnotationOnlySubschemas(subschemas diff.Subschemas, schemaRefs openapi3.SchemaRefs) diff.Subschemas {
+func splitSubschemasByAnnotationOnly(subschemas diff.Subschemas, schemaRefs openapi3.SchemaRefs) (kept diff.Subschemas, annotationOnly diff.Subschemas) {
 	if len(subschemas) == 0 {
-		return subschemas
+		return subschemas, nil
 	}
-	filtered := make(diff.Subschemas, 0, len(subschemas))
+	kept = make(diff.Subschemas, 0, len(subschemas))
+	annotationOnly = make(diff.Subschemas, 0, len(subschemas))
 	emptyRef := &openapi3.SchemaRef{Value: &openapi3.Schema{}}
 	for _, s := range subschemas {
+		isAnnotationOnly := false
 		if s.Index >= 0 && s.Index < len(schemaRefs) {
 			ref := schemaRefs[s.Index]
 			if ref != nil && ref.Value != nil &&
 				diff.SchemaRefsValidationEquivalent(diff.NewConfig(), emptyRef, ref) {
-				continue
+				isAnnotationOnly = true
 			}
 		}
-		filtered = append(filtered, s)
+		if isAnnotationOnly {
+			annotationOnly = append(annotationOnly, s)
+		} else {
+			kept = append(kept, s)
+		}
 	}
-	return filtered
+	return kept, annotationOnly
 }
