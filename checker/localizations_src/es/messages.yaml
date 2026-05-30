@@ -206,36 +206,36 @@ response-body-max-increased: el valor máximo del cuerpo de respuesta fue aument
 response-property-max-increased: el valor máximo de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 response-body-min-decreased: el valor mínimo del cuerpo de respuesta fue disminuido de %s a %s
 response-property-min-decreased: el valor mínimo de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s
-request-body-exclusive-min-increased: the request's body exclusiveMinimum was increased to %s
-request-body-exclusive-min-decreased: the request's body exclusiveMinimum was decreased from %s to %s
-request-property-exclusive-min-increased: the %s request property's exclusiveMinimum was increased to %s
-request-read-only-property-exclusive-min-increased: the %s request read-only property's exclusiveMinimum was increased to %s
-request-property-exclusive-min-decreased: the %s request property's exclusiveMinimum was decreased from %s to %s
-request-body-exclusive-min-set: the request's body exclusiveMinimum was set to %s
-request-body-exclusive-min-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-property-exclusive-min-set: the %s request property's exclusiveMinimum was set to %s
-request-property-exclusive-min-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-body-exclusive-max-decreased: the request's body exclusiveMaximum was decreased to %s
-request-body-exclusive-max-increased: the request's body exclusiveMaximum was increased from %s to %s
-request-property-exclusive-max-decreased: the %s request property's exclusiveMaximum was decreased to %s
-request-read-only-property-exclusive-max-decreased: the %s request read-only property's exclusiveMaximum was decreased to %s
-request-property-exclusive-max-increased: the %s request property's exclusiveMaximum was increased from %s to %s
-request-body-exclusive-max-set: the request's body exclusiveMaximum was set to %s
-request-body-exclusive-max-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-property-exclusive-max-set: the %s request property's exclusiveMaximum was set to %s
-request-property-exclusive-max-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-parameter-exclusive-min-increased: for the %s request parameter %s, the exclusiveMinimum was increased from %s to %s
-request-parameter-exclusive-min-decreased: for the %s request parameter %s, the exclusiveMinimum was decreased from %s to %s
-request-parameter-exclusive-min-set: for the %s request parameter %s, the exclusiveMinimum was set to %s
-request-parameter-exclusive-min-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-request-parameter-exclusive-max-decreased: for the %s request parameter %s, the exclusiveMaximum was decreased from %s to %s
-request-parameter-exclusive-max-increased: for the %s request parameter %s, the exclusiveMaximum was increased from %s to %s
-request-parameter-exclusive-max-set: for the %s request parameter %s, the exclusiveMaximum was set to %s
-request-parameter-exclusive-max-set-comment: This is a warning because sometimes it is required to be set. But good clients should be checked to support this restriction before such change in specification.
-response-body-exclusive-max-increased: the response's body exclusiveMaximum was increased from %s to %s
-response-property-exclusive-max-increased: the %s response property's exclusiveMaximum was increased from %s to %s for the response status %s
-response-body-exclusive-min-decreased: the response's body exclusiveMinimum was decreased from %s to %s
-response-property-exclusive-min-decreased: the %s response property's exclusiveMinimum was decreased from %s to %s for the response status %s
+request-body-exclusive-min-increased: el valor exclusiveMinimum del cuerpo de solicitud fue aumentado a %s
+request-body-exclusive-min-decreased: el valor exclusiveMinimum del cuerpo de solicitud fue disminuido de %s a %s
+request-property-exclusive-min-increased: el valor exclusiveMinimum de la propiedad de solicitud %s fue aumentado a %s
+request-read-only-property-exclusive-min-increased: el valor exclusiveMinimum de la propiedad de solicitud de solo lectura %s fue aumentado a %s
+request-property-exclusive-min-decreased: el valor exclusiveMinimum de la propiedad de solicitud %s fue disminuido de %s a %s
+request-body-exclusive-min-set: el valor exclusiveMinimum del cuerpo de solicitud fue establecido en %s
+request-body-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-exclusive-min-set: el valor exclusiveMinimum de la propiedad de solicitud %s fue establecido en %s
+request-property-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-exclusive-max-decreased: el valor exclusiveMaximum del cuerpo de solicitud fue disminuido a %s
+request-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de solicitud fue aumentado de %s a %s
+request-property-exclusive-max-decreased: el valor exclusiveMaximum de la propiedad de solicitud %s fue disminuido a %s
+request-read-only-property-exclusive-max-decreased: el valor exclusiveMaximum de la propiedad de solicitud de solo lectura %s fue disminuido a %s
+request-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de solicitud %s fue aumentado de %s a %s
+request-body-exclusive-max-set: el valor exclusiveMaximum del cuerpo de solicitud fue establecido en %s
+request-body-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-exclusive-max-set: el valor exclusiveMaximum de la propiedad de solicitud %s fue establecido en %s
+request-property-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-exclusive-min-increased: para el parámetro %s de solicitud %s, el exclusiveMinimum fue aumentado de %s a %s
+request-parameter-exclusive-min-decreased: para el parámetro %s de solicitud %s, el exclusiveMinimum fue disminuido de %s a %s
+request-parameter-exclusive-min-set: para el parámetro %s de solicitud %s, exclusiveMinimum fue establecido en %s
+request-parameter-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación.
+request-parameter-exclusive-max-decreased: para el parámetro %s de solicitud %s, el exclusiveMaximum fue disminuido de %s a %s
+request-parameter-exclusive-max-increased: para el parámetro %s de solicitud %s, el exclusiveMaximum fue aumentado de %s a %s
+request-parameter-exclusive-max-set: para el parámetro %s de solicitud %s, exclusiveMaximum fue establecido en %s
+request-parameter-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación.
+response-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de respuesta fue aumentado de %s a %s
+response-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
+response-body-exclusive-min-decreased: el valor exclusiveMinimum del cuerpo de respuesta fue disminuido de %s a %s
+response-property-exclusive-min-decreased: el valor exclusiveMinimum de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s
 api-security-added: el esquema de seguridad %s fue agregado al endpoint de la api
 api-security-removed: el esquema de seguridad %s fue removido del endpoint de la api
 api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
@@ -911,30 +911,30 @@ response-property-content-schema-added-description: contentSchema added to respo
 response-property-content-schema-removed-description: contentSchema removed from response property
 response-property-content-media-type-changed-description: response property contentMediaType changed
 response-property-content-encoding-changed-description: response property contentEncoding changed
-request-body-exclusive-min-increased-description: request body exclusiveMinimum increased
-request-body-exclusive-min-decreased-description: request body exclusiveMinimum decreased
-request-property-exclusive-min-increased-description: request property exclusiveMinimum increased
-request-read-only-property-exclusive-min-increased-description: request read-only property exclusiveMinimum increased
-request-property-exclusive-min-decreased-description: request property exclusiveMinimum decreased
-request-body-exclusive-min-set-description: request body exclusiveMinimum set
-request-property-exclusive-min-set-description: request property exclusiveMinimum set
-request-body-exclusive-max-decreased-description: request body exclusiveMaximum decreased
-request-body-exclusive-max-increased-description: request body exclusiveMaximum increased
-request-property-exclusive-max-decreased-description: request property exclusiveMaximum decreased
-request-read-only-property-exclusive-max-decreased-description: request read-only property exclusiveMaximum decreased
-request-property-exclusive-max-increased-description: request property exclusiveMaximum increased
-request-body-exclusive-max-set-description: request body exclusiveMaximum set
-request-property-exclusive-max-set-description: request property exclusiveMaximum set
-request-parameter-exclusive-min-increased-description: request parameter exclusiveMinimum increased
-request-parameter-exclusive-min-decreased-description: request parameter exclusiveMinimum decreased
-request-parameter-exclusive-min-set-description: request parameter exclusiveMinimum set
-request-parameter-exclusive-max-decreased-description: request parameter exclusiveMaximum decreased
-request-parameter-exclusive-max-increased-description: request parameter exclusiveMaximum increased
-request-parameter-exclusive-max-set-description: request parameter exclusiveMaximum set
-response-body-exclusive-max-increased-description: response body exclusiveMaximum increased
-response-property-exclusive-max-increased-description: response property exclusiveMaximum increased
-response-body-exclusive-min-decreased-description: response body exclusiveMinimum decreased
-response-property-exclusive-min-decreased-description: response property exclusiveMinimum decreased
+request-body-exclusive-min-increased-description: valor exclusiveMinimum del cuerpo de solicitud aumentado
+request-body-exclusive-min-decreased-description: valor exclusiveMinimum del cuerpo de solicitud reducido
+request-property-exclusive-min-increased-description: valor exclusiveMinimum de la propiedad de solicitud aumentado
+request-read-only-property-exclusive-min-increased-description: valor exclusiveMinimum de la propiedad de solo lectura de solicitud aumentado
+request-property-exclusive-min-decreased-description: valor exclusiveMinimum de la propiedad de solicitud reducido
+request-body-exclusive-min-set-description: valor exclusiveMinimum del cuerpo de solicitud establecido
+request-property-exclusive-min-set-description: valor exclusiveMinimum de la propiedad de solicitud establecido
+request-body-exclusive-max-decreased-description: valor exclusiveMaximum del cuerpo de solicitud reducido
+request-body-exclusive-max-increased-description: valor exclusiveMaximum del cuerpo de solicitud aumentado
+request-property-exclusive-max-decreased-description: valor exclusiveMaximum de la propiedad de solicitud reducido
+request-read-only-property-exclusive-max-decreased-description: valor exclusiveMaximum de la propiedad de solicitud de solo lectura reducido
+request-property-exclusive-max-increased-description: valor exclusiveMaximum de la propiedad de solicitud aumentado
+request-body-exclusive-max-set-description: valor exclusiveMaximum del cuerpo de solicitud establecido
+request-property-exclusive-max-set-description: valor exclusiveMaximum de la propiedad de solicitud establecido
+request-parameter-exclusive-min-increased-description: valor exclusiveMinimum del parámetro de solicitud aumentado
+request-parameter-exclusive-min-decreased-description: valor exclusiveMinimum del parámetro de solicitud reducido
+request-parameter-exclusive-min-set-description: valor exclusiveMinimum del parámetro de solicitud establecido
+request-parameter-exclusive-max-decreased-description: valor exclusiveMaximum del parámetro de solicitud reducido
+request-parameter-exclusive-max-increased-description: valor exclusiveMaximum del parámetro de solicitud aumentado
+request-parameter-exclusive-max-set-description: valor exclusiveMaximum del parámetro de solicitud establecido
+response-body-exclusive-max-increased-description: valor exclusiveMaximum del cuerpo de respuesta aumentado
+response-property-exclusive-max-increased-description: valor exclusiveMaximum de la propiedad de respuesta aumentado
+response-body-exclusive-min-decreased-description: valor exclusiveMinimum del cuerpo de respuesta reducido
+response-property-exclusive-min-decreased-description: valor exclusiveMinimum de la propiedad de respuesta reducido
 # Cambios allOf solo de anotación — emitidos en INFO cuando el subesquema
 # agregado/removido contiene únicamente palabras clave de anotación
 # (title, description, examples, default, externalDocs, $comment).
