@@ -1,8 +1,9 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/diff"
 	"slices"
+
+	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
@@ -18,127 +19,59 @@ const (
 
 func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			if p.parent.Revision.Properties[p.propertyName] == nil {
+				// removed properties processed by the RequestOptionalPropertyUpdatedCheck check
+				return
 			}
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
+			required := slices.Contains(p.parent.Base.Required, p.propertyName)
+			propName := propertyFullName(p.propertyPath, p.propertyName)
+
+			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "writeOnly")
+				var id string
+				if required {
+					id = RequestRequiredPropertyBecameNonWriteOnlyCheckId
+					if writeOnlyDiff.To == true {
+						id = RequestRequiredPropertyBecameWriteOnlyCheckId
+					}
+				} else {
+					id = RequestOptionalPropertyBecameNonWriteOnlyCheckId
+					if writeOnlyDiff.To == true {
+						id = RequestOptionalPropertyBecameWriteOnlyCheckId
+					}
 				}
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						writeOnlyDiff := propertyDiff.WriteOnlyDiff
-						if writeOnlyDiff == nil {
-							return
-						}
-						if parent.Revision.Properties[propertyName] == nil {
-							// removed properties processed by the RequestOptionalPropertyUpdatedCheck check
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "writeOnly")
-
-						if slices.Contains(parent.Base.Required, propertyName) {
-							id := RequestRequiredPropertyBecameNonWriteOnlyCheckId
-							if writeOnlyDiff.To == true {
-								id = RequestRequiredPropertyBecameWriteOnlyCheckId
-							}
-
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							return
-						}
-
-						id := RequestOptionalPropertyBecameNonWriteOnlyCheckId
-						if writeOnlyDiff.To == true {
-							id = RequestOptionalPropertyBecameWriteOnlyCheckId
-						}
-						result = append(result, NewApiChange(
-							id,
-							config,
-							[]any{propName},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-					})
-
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						readOnlyDiff := propertyDiff.ReadOnlyDiff
-						if readOnlyDiff == nil {
-							return
-						}
-						if parent.Revision.Properties[propertyName] == nil {
-							// removed properties processed by the RequestOptionalPropertyUpdatedCheck check
-							return
-						}
-
-						propName := propertyFullName(propertyPath, propertyName)
-						propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "readOnly")
-
-						if slices.Contains(parent.Base.Required, propertyName) {
-							id := RequestRequiredPropertyBecameNonReadOnlyCheckId
-							if readOnlyDiff.To == true {
-								id = RequestRequiredPropertyBecameReadOnlyCheckId
-							}
-							result = append(result, NewApiChange(
-								id,
-								config,
-								[]any{propName},
-								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
-							).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-							return
-						}
-
-						id := RequestOptionalPropertyBecameNonReadOnlyCheckId
-						if readOnlyDiff.To == true {
-							id = RequestOptionalPropertyBecameReadOnlyCheckId
-						}
-						result = append(result, NewApiChange(
-							id,
-							config,
-							[]any{propName},
-							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(propBaseSource, propRevisionSource).WithDetails(mediaTypeDetails))
-					})
+				result = append(result, p.newChange(
+					id,
+					[]any{propName},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
 			}
-		}
-	}
+
+			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
+				var id string
+				if required {
+					id = RequestRequiredPropertyBecameNonReadOnlyCheckId
+					if readOnlyDiff.To == true {
+						id = RequestRequiredPropertyBecameReadOnlyCheckId
+					}
+				} else {
+					id = RequestOptionalPropertyBecameNonReadOnlyCheckId
+					if readOnlyDiff.To == true {
+						id = RequestOptionalPropertyBecameReadOnlyCheckId
+					}
+				}
+				result = append(result, p.newChange(
+					id,
+					[]any{propName},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+		})
+	})
+
 	return result
 }
