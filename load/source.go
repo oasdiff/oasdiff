@@ -3,6 +3,7 @@ package load
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -112,4 +113,22 @@ func (source *Source) DisplayPath() string {
 		return source.Path
 	}
 	return source.Path[strings.Index(source.Path, ":")+1:]
+}
+
+// ReadRaw returns the raw, unparsed bytes of the spec source. Unlike the
+// loaders in this package (which parse into an openapi3.T), ReadRaw is for
+// callers that need the original document bytes verbatim, e.g. uploading the
+// spec to a remote service. It supports file and git-revision sources; for git
+// revisions it reuses the same "git show" plumbing as the loaders, including
+// authoritative blob-hash handling. Stdin and URL sources are not supported and
+// return an error.
+func (source *Source) ReadRaw() ([]byte, error) {
+	switch source.Type {
+	case SourceTypeGitRevision:
+		return readGitRefContent(source.Path)
+	case SourceTypeFile:
+		return os.ReadFile(source.Path)
+	default:
+		return nil, fmt.Errorf("cannot read raw bytes from source %q", source.Path)
+	}
 }
