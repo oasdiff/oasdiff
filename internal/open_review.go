@@ -56,7 +56,7 @@ func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool) error {
 		return fmt.Errorf("read revision spec: %w", err)
 	}
 
-	options := buildSemanticOptionsJSON(flags)
+	options := flags.semanticOptionsJSON()
 
 	accessToken, err := readOrMintAccessToken(stdout)
 	if err != nil {
@@ -80,106 +80,27 @@ func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool) error {
 }
 
 // readSpecSource returns the raw bytes of a spec source and a display
-// filename. For files: ReadFile + basename. For git refs: `git show` and
-// the filename portion. URL and stdin sources are not supported by --open
-// in v1 — the upload requires bytes the CLI can attribute to a filename.
+// filename for the upload. --open supports file and git-ref sources (the
+// git-ref read, including blob-hash handling, lives in the load package);
+// stdin and URL sources are rejected here because the upload requires bytes
+// the CLI can attribute to a filename.
 func readSpecSource(source *load.Source) ([]byte, string, error) {
 	if source == nil {
 		return nil, "", errors.New("spec source is required")
 	}
-	switch {
-	case source.IsStdin():
+	if source.IsStdin() {
 		return nil, "", errors.New("--open does not support stdin (use a file path or git ref)")
-	case source.IsGitRevision():
-		raw := source.Path
-		// "<ref>:<path>". For blob hashes, `git show <hex>:<path>` is invalid
-		// — the path is for display only. NewSpecInfo handles this distinction
-		// internally; here we just call git show <full-ref> and let it speak.
-		cmd := exec.Command("git", "show", raw)
-		out, err := cmd.Output()
-		if err != nil {
-			var exitErr *exec.ExitError
-			if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
-				return nil, "", fmt.Errorf("git show %s: %s", raw, strings.TrimSpace(string(exitErr.Stderr)))
-			}
-			// Blob-hash refs require the explicit blob-only call.
-			if hex, _, ok := splitRefPath(raw); ok && looksLikeHex(hex) {
-				out2, err2 := exec.Command("git", "show", hex).Output()
-				if err2 == nil {
-					return out2, displayNameFromRef(raw), nil
-				}
-			}
-			return nil, "", fmt.Errorf("git show %s: %w", raw, err)
-		}
-		return out, displayNameFromRef(raw), nil
-	case source.IsFile():
-		body, err := os.ReadFile(source.Path)
-		if err != nil {
-			return nil, "", fmt.Errorf("read %s: %w", source.Path, err)
-		}
-		return body, filepath.Base(source.Path), nil
-	default:
+	}
+	if !source.IsFile() && !source.IsGitRevision() {
 		return nil, "", fmt.Errorf("--open does not support source type for %q", source.Path)
 	}
-}
-
-func splitRefPath(s string) (string, string, bool) {
-	idx := strings.Index(s, ":")
-	if idx < 0 {
-		return "", "", false
+	body, err := source.ReadRaw()
+	if err != nil {
+		return nil, "", err
 	}
-	return s[:idx], s[idx+1:], true
-}
-
-func looksLikeHex(s string) bool {
-	if len(s) < 4 || len(s) > 40 {
-		return false
-	}
-	for _, r := range s {
-		if !((r >= '0' && r <= '9') || (r >= 'a' && r <= 'f') || (r >= 'A' && r <= 'F')) {
-			return false
-		}
-	}
-	return true
-}
-
-func displayNameFromRef(ref string) string {
-	if _, path, ok := splitRefPath(ref); ok && path != "" {
-		return filepath.Base(path)
-	}
-	return ref
-}
-
-// buildSemanticOptionsJSON returns a JSON blob of the semantic comparison
-// flags the visitor passed (flatten-allof, flatten-params, etc.). Filtering
-// and presentation flags are deliberately not included — the web UI handles
-// those interactively. See enterprise/docs/cli-local-review.md.
-func buildSemanticOptionsJSON(flags *Flags) string {
-	opts := map[string]any{}
-	if flags.getFlattenAllOf() {
-		opts["flatten-allof"] = true
-	}
-	if flags.getFlattenParams() {
-		opts["flatten-params"] = true
-	}
-	if flags.getCaseInsensitiveHeaders() {
-		opts["case-insensitive-headers"] = true
-	}
-	if flags.getAutoUpgrade() {
-		opts["auto-upgrade"] = true
-	}
-	v := flags.getViper()
-	if v.GetBool("match-inline-refs") {
-		opts["match-inline-refs"] = true
-	}
-	if v.GetBool("include-path-params") {
-		opts["include-path-params"] = true
-	}
-	if len(opts) == 0 {
-		return ""
-	}
-	b, _ := json.Marshal(opts)
-	return string(b)
+	// DisplayPath strips the "<ref>:" prefix for git sources; Base trims any
+	// directory so the upload's filename is just "openapi.yaml".
+	return body, filepath.Base(source.DisplayPath()), nil
 }
 
 // postPreviewReview uploads the two spec files to oasdiff.com and returns

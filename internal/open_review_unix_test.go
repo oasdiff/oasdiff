@@ -22,7 +22,7 @@ import (
 
 func TestBuildSemanticOptionsJSON_OmitsEmpty(t *testing.T) {
 	flags := NewFlags()
-	require.Equal(t, "", buildSemanticOptionsJSON(flags),
+	require.Equal(t, "", flags.semanticOptionsJSON(),
 		"empty options must serialize to an empty string so the upload form skips the field rather than sending {}")
 }
 
@@ -32,7 +32,7 @@ func TestBuildSemanticOptionsJSON_IncludesSemanticFlags(t *testing.T) {
 	v.Set("flatten-params", true)
 	v.Set("match-inline-refs", true)
 	v.Set("auto-upgrade", true)
-	out := buildSemanticOptionsJSON(flags)
+	out := flags.semanticOptionsJSON()
 
 	var parsed map[string]any
 	require.NoError(t, json.Unmarshal([]byte(out), &parsed))
@@ -52,7 +52,7 @@ func TestBuildSemanticOptionsJSON_DoesNotLeakFilteringFlags(t *testing.T) {
 	v.Set("format", "yaml")
 	v.Set("color", "always")
 
-	out := buildSemanticOptionsJSON(flags)
+	out := flags.semanticOptionsJSON()
 	require.Equal(t, "", out, "no semantic flags set — output must be empty even when filtering/presentation flags are present")
 }
 
