@@ -20,16 +20,27 @@ release:
 universal_binaries:
  - replace: true
 
-brews:
+homebrew_casks:
  -
    name: oasdiff
    homepage: "https://github.com/oasdiff/oasdiff"
+   description: "A diff tool for OpenAPI Specification."
    repository:
      owner: oasdiff
      name: homebrew-oasdiff
    commit_author:
      name: Reuven Harrison
      email: reuvenharrison@gmail.com
+   # The binary is unsigned. Homebrew quarantines cask artifacts (formulae, the
+   # previous `brews` output, were not quarantined), so without this Gatekeeper
+   # blocks it with "oasdiff is damaged and cannot be opened". Strip the
+   # com.apple.quarantine xattr on install.
+   hooks:
+     post:
+       install: |
+         if OS.mac?
+           system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/oasdiff"]
+         end
 
 nfpms:
   # note that this is an array of nfpm configs
