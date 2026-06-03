@@ -16,4 +16,11 @@ jobs:
           - id: govulncheck
             uses: golang/govulncheck-action@v1
             with:
-                go-version-input: 1.26
+                # Pin the exact patch release that fixes the current stdlib
+                # advisories (GO-2026-5037 crypto/x509, GO-2026-5039
+                # net/textproto, both fixed in go1.26.4). A floating "1.26"
+                # resolved to 1.26.3 here because the setup-go version manifest
+                # lagged the release; an exact version is fetched directly, so
+                # it isn't subject to that lag. Bump when a newer patch fixes
+                # the next stdlib advisory.
+                go-version-input: '1.26.4'
