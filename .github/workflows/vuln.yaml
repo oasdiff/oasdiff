@@ -18,17 +18,21 @@ jobs:
             with:
                 go-version: '1.26'
           - name: Run govulncheck
-            # go1.26.4 fixes GO-2026-5037 (crypto/x509) and GO-2026-5039
-            # (net/textproto). It is released but not yet in the
-            # actions/go-versions manifest that setup-go installs from
-            # (setup-go 403s on the exact version), so we let setup-go install
-            # the manifest's latest 1.26 above and force the patched toolchain
-            # via GOTOOLCHAIN, which Go fetches from the module proxy. Bump
-            # this when a newer patch fixes the next stdlib advisory; once
-            # 1.26.4 reaches the setup-go manifest this can revert to the
-            # golang/govulncheck-action with a plain go-version-input.
-            env:
-                GOTOOLCHAIN: go1.26.4
+            # Run govulncheck against the latest released patch of the go.mod
+            # minor, resolved at runtime from go.dev and pulled via GOTOOLCHAIN
+            # (the Go module proxy). This avoids two pitfalls: (1) new Go
+            # security patches lag the actions/go-versions manifest setup-go
+            # installs from, so a fixed-in-1.26.x advisory would otherwise fail
+            # the check until the manifest catches up; (2) a hard-pinned
+            # GOTOOLCHAIN needs a manual bump for every new stdlib advisory.
+            # Tracking the go.mod minor means this also follows a go directive
+            # bump automatically.
             run: |
+                set -eo pipefail
+                minor=$(awk '/^go /{split($2,a,"."); print a[1]"."a[2]; exit}' go.mod)
+                latest=$(curl -fsSL "https://go.dev/dl/?mode=json&include=all" \
+                  | python3 -c "import sys,json; vs=[r['version'] for r in json.load(sys.stdin) if r.get('stable') and r['version'].startswith('go${minor}.')]; vs.sort(key=lambda v:[int(x) for x in v[2:].split('.')]); print(vs[-1])")
+                echo "Resolved latest go${minor} patch: ${latest}"
+                export GOTOOLCHAIN=${latest}
                 go install golang.org/x/vuln/cmd/govulncheck@latest
                 govulncheck ./...
