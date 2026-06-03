@@ -13,14 +13,22 @@ jobs:
         runs-on: ubuntu-latest
         name: Run govulncheck
         steps:
-          - id: govulncheck
-            uses: golang/govulncheck-action@v1
+          - uses: actions/checkout@v6
+          - uses: actions/setup-go@v6
             with:
-                # Pin the exact patch release that fixes the current stdlib
-                # advisories (GO-2026-5037 crypto/x509, GO-2026-5039
-                # net/textproto, both fixed in go1.26.4). A floating "1.26"
-                # resolved to 1.26.3 here because the setup-go version manifest
-                # lagged the release; an exact version is fetched directly, so
-                # it isn't subject to that lag. Bump when a newer patch fixes
-                # the next stdlib advisory.
-                go-version-input: '1.26.4'
+                go-version: '1.26'
+          - name: Run govulncheck
+            # go1.26.4 fixes GO-2026-5037 (crypto/x509) and GO-2026-5039
+            # (net/textproto). It is released but not yet in the
+            # actions/go-versions manifest that setup-go installs from
+            # (setup-go 403s on the exact version), so we let setup-go install
+            # the manifest's latest 1.26 above and force the patched toolchain
+            # via GOTOOLCHAIN, which Go fetches from the module proxy. Bump
+            # this when a newer patch fixes the next stdlib advisory; once
+            # 1.26.4 reaches the setup-go manifest this can revert to the
+            # golang/govulncheck-action with a plain go-version-input.
+            env:
+                GOTOOLCHAIN: go1.26.4
+            run: |
+                go install golang.org/x/vuln/cmd/govulncheck@latest
+                govulncheck ./...
