@@ -78,6 +78,8 @@ func kindString(k checker.Kind) string {
 		return "existence"
 	case checker.KindRequiredness:
 		return "requiredness"
+	case checker.KindMutability:
+		return "mutability"
 	case checker.KindType:
 		return "type"
 	case checker.KindConstraints:

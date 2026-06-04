@@ -32,7 +32,7 @@ Checks are categorized into three severity levels:
 Every check is categorized along independent axes, emitted as fields in the `json` and `yaml` output:
 
 - `area` — the OpenAPI object the check concerns, aligned with the OpenAPI specification's object model: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`.
-- `kind` — the aspect of the API contract that changed: `existence` (an element added or removed), `requiredness` (required / optional / nullable / read-only / write-only), `type` (data type or format), `constraints` (bounds such as min/max, length, pattern, items), `values` (enum, const, default), `structure` (composition and applicator keywords such as allOf/anyOf/oneOf, discriminator, if/then/else, contains), and `lifecycle` (deprecation, sunset, stability).
+- `kind` — the aspect of the API contract that changed: `existence` (an element added or removed), `requiredness` (required / optional / nullable), `mutability` (read-only / write-only), `type` (data type or format), `constraints` (bounds such as min/max, length, pattern, items), `values` (enum, const, default), `structure` (composition and applicator keywords such as allOf/anyOf/oneOf, discriminator, if/then/else, contains), and `lifecycle` (deprecation, sunset, stability).
 - `action` — the verb: `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`.
 - `direction` — `request`, `response`, or `none`.
 
@@ -43,7 +43,7 @@ oasdiff checks --tags request,parameters
 oasdiff checks --tags schema,constraints
 ```
 
-Available tags: `request`, `response`, `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `type`, `constraints`, `values`, `structure`, `lifecycle`.
+Available tags: `request`, `response`, `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`.
 
 Multiple tags are combined with AND — only checks that match all specified tags are shown.
 

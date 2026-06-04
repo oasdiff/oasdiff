@@ -11,7 +11,7 @@ func getAllTags() []string {
 		// area (OpenAPI object)
 		"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components",
 		// kind (aspect of the contract)
-		"existence", "requiredness", "type", "constraints", "values", "structure", "lifecycle",
+		"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle",
 	}
 }
 
@@ -115,6 +115,8 @@ func matchKindTag(tag string, kind checker.Kind) bool {
 		return kind == checker.KindExistence
 	case "requiredness":
 		return kind == checker.KindRequiredness
+	case "mutability":
+		return kind == checker.KindMutability
 	case "type":
 		return kind == checker.KindType
 	case "constraints":

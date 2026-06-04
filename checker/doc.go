@@ -35,8 +35,8 @@ Rules are defined in rules.go with metadata including:
   - Direction: whether the rule applies to requests, responses, or neither
   - Area: the OpenAPI object the rule concerns (schema, parameters, requestBody,
     responses, paths, headers, security, tags, or components)
-  - Kind: the aspect of the contract that changed (existence, requiredness, type,
-    constraints, values, structure, or lifecycle)
+  - Kind: the aspect of the contract that changed (existence, requiredness,
+    mutability, type, constraints, values, structure, or lifecycle)
   - Action: add, remove, change, generalize, specialize, increase, decrease, set
 
 This metadata enables filtering and categorization of changes.

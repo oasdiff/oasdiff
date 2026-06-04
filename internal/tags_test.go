@@ -43,6 +43,7 @@ func Test_ChecksTagsArea(t *testing.T) {
 func Test_ChecksTagsKind(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags existence"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags requiredness"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags mutability"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags type"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags constraints"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags values"), io.Discard, io.Discard))
