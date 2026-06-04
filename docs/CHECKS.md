@@ -28,15 +28,24 @@ Checks are categorized into three severity levels:
 - `warn` — potential breaking changes which cannot be confirmed programmatically (~24 checks)
 - `info` — non-breaking changes (~170 checks)
 
+## Categorization
+Every check is categorized along independent axes, emitted as fields in the `json` and `yaml` output:
+
+- `area` — the OpenAPI object the check concerns, aligned with the OpenAPI specification's object model: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`.
+- `kind` — the aspect of the API contract that changed: `existence` (an element added or removed), `requiredness` (required / optional / nullable / read-only / write-only), `type` (data type or format), `constraints` (bounds such as min/max, length, pattern, items), `values` (enum, const, default), `structure` (composition and applicator keywords such as allOf/anyOf/oneOf, discriminator, if/then/else, contains), and `lifecycle` (deprecation, sunset, stability).
+- `action` — the verb: `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`.
+- `direction` — `request`, `response`, or `none`.
+
 ## Filtering by Tag
-Use `--tags` to show only checks related to a specific area:
+Use `--tags` to show only checks in a specific area, kind, action, or direction:
 ```
 oasdiff checks --tags request,parameters
+oasdiff checks --tags schema,constraints
 ```
 
-Available tags include: `add`, `body`, `change`, `components`, `decrease`, `generalize`, `headers`, `increase`, `parameters`, `properties`, `remove`, `request`, `response`, `security`, `set`, `specialize`.
+Available tags: `request`, `response`, `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `type`, `constraints`, `values`, `structure`, `lifecycle`.
 
-Multiple tags are combined with AND — only checks that have all specified tags are shown.
+Multiple tags are combined with AND — only checks that match all specified tags are shown.
 
 ## Localization
 Use `--lang` to view check descriptions in a supported language:

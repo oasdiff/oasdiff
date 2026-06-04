@@ -28,11 +28,24 @@ func Test_ChecksTagsAction(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags set"), io.Discard, io.Discard))
 }
 
-func Test_ChecksTagsLocation(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags body"), io.Discard, io.Discard))
+func Test_ChecksTagsArea(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags schema"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags parameters"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags properties"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags requestBody"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags responses"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags paths"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags headers"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags security"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags tags"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags components"), io.Discard, io.Discard))
+}
+
+func Test_ChecksTagsKind(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags existence"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags requiredness"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags type"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags constraints"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags values"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags structure"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags lifecycle"), io.Discard, io.Discard))
 }

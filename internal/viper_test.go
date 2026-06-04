@@ -142,7 +142,7 @@ func TestViper_InvalidTags(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid tags \"invalid\", allowed values: request, response, add, remove, change, generalize, specialize, increase, decrease, set, body, parameters, properties, headers, security, components")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid tags \"invalid\", allowed values: request, response, add, remove, change, generalize, specialize, increase, decrease, set, schema, parameters, requestBody, responses, paths, headers, security, tags, components, existence, requiredness, type, constraints, values, structure, lifecycle")
 }
 
 func TestViper_ValidTags(t *testing.T) {

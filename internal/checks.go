@@ -47,22 +47,49 @@ func directionString(d checker.Direction) string {
 	}
 }
 
-func locationString(l checker.Location) string {
-	switch l {
-	case checker.LocationBody:
-		return "body"
-	case checker.LocationParameters:
+func areaString(a checker.Area) string {
+	switch a {
+	case checker.AreaSchema:
+		return "schema"
+	case checker.AreaParameters:
 		return "parameters"
-	case checker.LocationProperties:
-		return "properties"
-	case checker.LocationHeaders:
+	case checker.AreaRequestBody:
+		return "requestBody"
+	case checker.AreaResponses:
+		return "responses"
+	case checker.AreaPaths:
+		return "paths"
+	case checker.AreaHeaders:
 		return "headers"
-	case checker.LocationSecurity:
+	case checker.AreaSecurity:
 		return "security"
-	case checker.LocationComponents:
+	case checker.AreaTags:
+		return "tags"
+	case checker.AreaComponents:
 		return "components"
 	default:
-		return "endpoint"
+		return "none"
+	}
+}
+
+func kindString(k checker.Kind) string {
+	switch k {
+	case checker.KindExistence:
+		return "existence"
+	case checker.KindRequiredness:
+		return "requiredness"
+	case checker.KindType:
+		return "type"
+	case checker.KindConstraints:
+		return "constraints"
+	case checker.KindValues:
+		return "values"
+	case checker.KindStructure:
+		return "structure"
+	case checker.KindLifecycle:
+		return "lifecycle"
+	default:
+		return "none"
 	}
 }
 
@@ -135,7 +162,8 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 			Id:          rule.Id,
 			Level:       rule.Level.String(),
 			Direction:   directionString(rule.Direction),
-			Location:    locationString(rule.Location),
+			Area:        areaString(rule.Area),
+			Kind:        kindString(rule.Kind),
 			Action:      actionString(rule.Action),
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,

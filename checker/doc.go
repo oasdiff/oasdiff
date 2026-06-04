@@ -33,7 +33,10 @@ Each rule has a default severity level:
 
 Rules are defined in rules.go with metadata including:
   - Direction: whether the rule applies to requests, responses, or neither
-  - Location: body, parameters, properties, headers, security, or components
+  - Area: the OpenAPI object the rule concerns (schema, parameters, requestBody,
+    responses, paths, headers, security, tags, or components)
+  - Kind: the aspect of the contract that changed (existence, requiredness, type,
+    constraints, values, structure, or lifecycle)
   - Action: add, remove, change, generalize, specialize, increase, decrease, set
 
 This metadata enables filtering and categorization of changes.
