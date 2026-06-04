@@ -22,7 +22,7 @@ func TestBreaking_DeletedParameter(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterRemovedId, errs[0].GetId())
 	require.Equal(t, "deleted the `query` request parameter `id`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "This is a warning because some apps may return an error when receiving a parameter that they do not expect. It is recommended to deprecate the parameter first.", errs[0].GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, "This is a warning because some clients may return an error when receiving an unexpected parameter. It is recommended to deprecate the parameter first.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
 // BC: deleting a parameter after sunset date is not breaking

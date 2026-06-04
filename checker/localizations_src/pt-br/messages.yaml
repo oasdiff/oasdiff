@@ -73,9 +73,9 @@ request-parameter-max-length-increased: no parâmetro de requisição do tipo %s
 request-parameter-min-length-increased: no parâmetro de requisição do tipo %s e nome %s teve seu comprimento mínimo aumentado de %s para %s
 request-parameter-min-length-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu comprimento mínimo reduzido de %s para %s
 request-parameter-max-length-set: no parâmetro de requisição do tipo %s e nome %s, o comprimento máximo foi definido como %s
-request-parameter-max-length-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-max-length-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-max-set: no parâmetro de requisição do tipo %s e nome %s, o valor máximo foi definido como %s
-request-parameter-max-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-max-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-min-increased: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi aumentado de %s para %s
 request-parameter-min-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi reduzido de %s para %s
 request-parameter-max-items-decreased: no parâmetro de requisição do tipo %s e nome %s, o número máximo de itens foi reduzido de %s para %s
@@ -83,9 +83,9 @@ request-parameter-max-items-increased: no parâmetro de requisição do tipo %s 
 request-parameter-min-items-increased: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi aumentado de %s para %s
 request-parameter-min-items-decreased: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi reduzido de %s para %s
 request-parameter-min-items-set: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi definido como %s
-request-parameter-min-items-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-min-items-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi definido como %s
-request-parameter-min-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-min-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-type-changed: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato foi alterado de %s/%s para %s/%s
 request-parameter-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato foi generalizado de %s/%s para %s/%s
 request-parameter-property-type-changed: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato da propriedade %s foi alterado de %s/%s para %s/%s
@@ -224,11 +224,11 @@ request-property-exclusive-max-set-comment: Este é um aviso porque às vezes é
 request-parameter-exclusive-min-increased: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi aumentado de %s para %s
 request-parameter-exclusive-min-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi reduzido de %s para %s
 request-parameter-exclusive-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi definido como %s
-request-parameter-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-exclusive-max-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu valor exclusiveMaximum foi reduzido de %s para %s
 request-parameter-exclusive-max-increased: no parâmetro de requisição do tipo %s e nome %s teve seu valor exclusiveMaximum foi aumentado de %s para %s
 request-parameter-exclusive-max-set: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMaximum foi definido como %s
-request-parameter-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 response-body-exclusive-max-increased: o valor exclusiveMaximum do corpo da resposta foi aumentado de %s para %s
 response-property-exclusive-max-increased: o valor exclusiveMaximum da propriedade de resposta %s foi aumentado de %s para %s para o status %s
 response-body-exclusive-min-decreased: o valor exclusiveMinimum do corpo da resposta foi reduzido de %s para %s
@@ -957,3 +957,32 @@ response-body-all-of-added-annotation-only-description: subesquema apenas de ano
 response-body-all-of-removed-annotation-only-description: subesquema apenas de anotação removido do allOf no corpo da resposta (sem efeito na validação)
 response-property-all-of-added-annotation-only-description: subesquema apenas de anotação adicionado ao allOf na propriedade de resposta (sem efeito na validação)
 response-property-all-of-removed-annotation-only-description: subesquema apenas de anotação removido do allOf na propriedade de resposta (sem efeito na validação)
+api-path-removed-with-deprecation-description: caminho e endpoint removidos com depreciação
+api-removed-with-deprecation-description: endpoint removido com depreciação
+endpoint-deprecated-with-sunset-description: endpoint depreciado com data de expiração
+request-body-min-items-increased-description: itens mínimos do corpo da requisição aumentados
+request-body-min-items-set-description: itens mínimos do corpo da requisição definidos
+request-parameter-deprecated-description: parâmetro da requisição depreciado
+request-parameter-deprecated-sunset-missing-description: parâmetro da requisição depreciado sem data de expiração
+request-parameter-reactivated-description: parâmetro da requisição reativado (depreciação definida como falsa)
+request-parameter-removed-before-sunset-description: parâmetro da requisição removido antes da data de expiração
+request-parameter-removed-with-deprecation-description: parâmetro da requisição removido com depreciação
+request-parameter-sunset-date-changed-too-small-description: a data de expiração modificada do parâmetro da requisição não atende ao número mínimo de dias exigidos
+request-parameter-sunset-date-too-small-description: parâmetro da requisição depreciado antes do número mínimo de dias exigidos
+request-parameter-sunset-deleted-description: data de expiração do parâmetro da requisição removida enquanto ainda depreciado
+request-parameter-sunset-parse-description: parâmetro da requisição depreciado com data de expiração inválida
+request-property-deprecated-description: propriedade de requisição depreciada
+request-property-deprecated-sunset-invalid-description: propriedade de requisição depreciada com data de expiração inválida
+request-property-deprecated-sunset-missing-description: propriedade de requisição depreciada sem data de expiração
+request-property-deprecated-with-sunset-description: propriedade de requisição depreciada com data de expiração
+request-property-reactivated-description: propriedade de requisição reativada (depreciação definida como falsa)
+request-property-sunset-date-too-small-description: propriedade de requisição depreciada antes do número mínimo de dias exigidos
+response-media-type-name-changed-description: tipo de mídia da resposta alterado
+response-media-type-name-generalized-description: tipo de mídia da resposta alterado para um tipo mais geral
+response-media-type-name-specialized-description: tipo de mídia da resposta alterado para um tipo mais específico
+response-property-deprecated-description: propriedade de resposta depreciada
+response-property-deprecated-sunset-invalid-description: propriedade de resposta depreciada com data de expiração inválida
+response-property-deprecated-sunset-missing-description: propriedade de resposta depreciada sem data de expiração
+response-property-deprecated-with-sunset-description: propriedade de resposta depreciada com data de expiração
+response-property-reactivated-description: propriedade de resposta reativada (depreciação definida como falsa)
+response-property-sunset-date-too-small-description: propriedade de resposta depreciada antes do número mínimo de dias exigidos

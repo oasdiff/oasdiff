@@ -73,9 +73,9 @@ request-parameter-max-length-increased: para el parámetro %s de solicitud %s, m
 request-parameter-min-length-increased: para el parámetro %s de solicitud %s, minLength fue aumentado de %s a %s
 request-parameter-min-length-decreased: para el parámetro %s de solicitud %s, minLength fue disminuido de %s a %s
 request-parameter-max-length-set: para el parámetro %s de solicitud %s, maxLength fue establecido en %s
-request-parameter-max-length-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación."
+request-parameter-max-length-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-max-set: para el parámetro %s de solicitud %s, máximo fue establecido en %s
-request-parameter-max-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación."
+request-parameter-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-min-increased: para el parámetro %s de solicitud %s, el mínimo fue aumentado de %s a %s
 request-parameter-min-decreased: para el parámetro %s de solicitud %s, el mínimo fue disminuido de %s a %s
 request-parameter-max-items-decreased: para el parámetro %s de solicitud %s, maxItems fue disminuido de %s a %s
@@ -83,9 +83,9 @@ request-parameter-max-items-increased: para el parámetro %s de solicitud %s, ma
 request-parameter-min-items-increased: para el parámetro %s de solicitud %s, minItems fue aumentado de %s a %s
 request-parameter-min-items-decreased: para el parámetro %s de solicitud %s, minItems fue disminuido de %s a %s
 request-parameter-min-items-set: para el parámetro %s de solicitud %s, minItems fue establecido en %s
-request-parameter-min-items-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación."
+request-parameter-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-min-set: para el parámetro %s de solicitud %s, mínimo fue establecido en %s
-request-parameter-min-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación."
+request-parameter-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-type-changed: para el parámetro %s de solicitud %s, el tipo/formato fue cambiado de %s/%s a %s/%s
 request-parameter-type-generalized: para el parámetro %s de solicitud %s, el tipo/formato fue generalizado de %s/%s a %s/%s
 request-parameter-property-type-changed: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue cambiado de %s/%s a %s/%s
@@ -131,13 +131,13 @@ request-property-max-increased: el valor máximo de la propiedad de solicitud %s
 request-body-max-length-increased: la longitud máxima del cuerpo de solicitud fue aumentada de %s a %s
 request-property-max-length-increased: la longitud máxima de la propiedad de solicitud %s fue aumentada de %s a %s
 request-body-max-length-set: la longitud máxima del cuerpo de solicitud fue establecida en %s
-request-body-max-length-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-body-max-length-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-max-length-set: la longitud máxima de la propiedad de solicitud %s fue establecida en %s
-request-property-max-length-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-property-max-length-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-body-max-set: el valor máximo del cuerpo de solicitud fue establecido en %s
-request-body-max-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-body-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-max-set: el valor máximo de la propiedad de solicitud %s fue establecido en %s
-request-property-max-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-property-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-body-min-increased: el valor mínimo del cuerpo de solicitud fue aumentado a %s
 request-property-min-increased: el valor mínimo de la propiedad de solicitud %s fue aumentado a %s
 request-read-only-property-min-increased: el valor mínimo de la propiedad de solicitud de solo lectura %s fue aumentado a %s
@@ -148,13 +148,13 @@ request-property-min-decreased: el valor mínimo de la propiedad de solicitud %s
 request-body-min-items-decreased: el número mínimo de elementos del cuerpo de solicitud fue disminuido de %s a %s
 request-property-min-items-decreased: el número mínimo de elementos de la propiedad de solicitud %s fue disminuido de %s a %s
 request-body-min-items-set: el número mínimo de elementos del cuerpo de solicitud fue establecido en %s
-request-body-min-items-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-body-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-min-items-set: el número mínimo de elementos de la propiedad de solicitud %s fue establecido en %s
-request-property-min-items-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-property-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-body-min-set: el valor mínimo del cuerpo de solicitud fue establecido en %s
-request-body-min-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-body-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-min-set: el valor mínimo de la propiedad de solicitud %s fue establecido en %s
-request-property-min-set-comment: "Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación."
+request-property-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-removed: removida la propiedad de solicitud %s
 request-body-type-changed: el tipo/formato del cuerpo de solicitud fue cambiado de %s/%s a %s/%s
 request-body-type-generalized: el tipo/formato del cuerpo de solicitud fue generalizado de %s/%s a %s/%s
@@ -195,7 +195,7 @@ response-property-min-length-decreased: la longitud mínima de la propiedad de r
 response-body-type-changed: el tipo/formato del cuerpo de respuesta fue cambiado de %s/%s a %s/%s para el estado %s
 response-property-type-changed: el tipo/formato de la propiedad de respuesta %s fue cambiado de %s/%s a %s/%s para el estado %s
 response-required-property-became-not-write-only: la propiedad requerida de respuesta %s dejó de ser de solo escritura para el estado %s
-response-required-property-became-not-write-only-comment: "Esto es válido solo si la propiedad SIEMPRE fue retornada ANTES de que la especificación fuera cambiada."
+response-required-property-became-not-write-only-comment: Esto es válido solo si la propiedad siempre fue retornada antes de que la especificación fuera cambiada.
 response-required-property-removed: removida la propiedad requerida %s de la respuesta con estado %s
 response-required-property-added: agregada la propiedad requerida %s a la respuesta con estado %s
 response-success-status-removed: removido el estado de respuesta exitosa %s
@@ -227,11 +227,11 @@ request-property-exclusive-max-set-comment: Esto es una advertencia porque a vec
 request-parameter-exclusive-min-increased: para el parámetro %s de solicitud %s, el exclusiveMinimum fue aumentado de %s a %s
 request-parameter-exclusive-min-decreased: para el parámetro %s de solicitud %s, el exclusiveMinimum fue disminuido de %s a %s
 request-parameter-exclusive-min-set: para el parámetro %s de solicitud %s, exclusiveMinimum fue establecido en %s
-request-parameter-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación.
+request-parameter-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-exclusive-max-decreased: para el parámetro %s de solicitud %s, el exclusiveMaximum fue disminuido de %s a %s
 request-parameter-exclusive-max-increased: para el parámetro %s de solicitud %s, el exclusiveMaximum fue aumentado de %s a %s
 request-parameter-exclusive-max-set: para el parámetro %s de solicitud %s, exclusiveMaximum fue establecido en %s
-request-parameter-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o debido a un error actual en la especificación. Pero buenos clientes deben ser verificados para soportar esta restricción antes de hacer tales cambios en la especificación.
+request-parameter-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 response-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de respuesta fue aumentado de %s a %s
 response-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 response-body-exclusive-min-decreased: el valor exclusiveMinimum del cuerpo de respuesta fue disminuido de %s a %s
@@ -956,3 +956,32 @@ response-body-all-of-added-annotation-only-description: subesquema de solo anota
 response-body-all-of-removed-annotation-only-description: subesquema de solo anotación removido del allOf en el cuerpo de respuesta (sin efecto en la validación)
 response-property-all-of-added-annotation-only-description: subesquema de solo anotación agregado al allOf en la propiedad de respuesta (sin efecto en la validación)
 response-property-all-of-removed-annotation-only-description: subesquema de solo anotación removido del allOf en la propiedad de respuesta (sin efecto en la validación)
+api-path-removed-with-deprecation-description: path y endpoint removidos con deprecación
+api-removed-with-deprecation-description: endpoint removido con deprecación
+endpoint-deprecated-with-sunset-description: endpoint deprecado con fecha de expiración
+request-body-min-items-increased-description: elementos mínimos del cuerpo de solicitud aumentados
+request-body-min-items-set-description: elementos mínimos del cuerpo de solicitud establecidos
+request-parameter-deprecated-description: parámetro de solicitud deprecado
+request-parameter-deprecated-sunset-missing-description: parámetro de solicitud deprecado sin fecha de expiración
+request-parameter-reactivated-description: parámetro de solicitud reactivado (deprecación establecida como falsa)
+request-parameter-removed-before-sunset-description: parámetro de solicitud removido antes de la fecha de expiración
+request-parameter-removed-with-deprecation-description: parámetro de solicitud removido con deprecación
+request-parameter-sunset-date-changed-too-small-description: la fecha de expiración modificada del parámetro de solicitud no cumple el número mínimo de días requeridos
+request-parameter-sunset-date-too-small-description: parámetro de solicitud deprecado antes del número mínimo de días requeridos
+request-parameter-sunset-deleted-description: fecha de expiración del parámetro de solicitud removida estando aún deprecado
+request-parameter-sunset-parse-description: parámetro de solicitud deprecado con fecha de expiración inválida
+request-property-deprecated-description: propiedad de solicitud deprecada
+request-property-deprecated-sunset-invalid-description: propiedad de solicitud deprecada con fecha de expiración inválida
+request-property-deprecated-sunset-missing-description: propiedad de solicitud deprecada sin fecha de expiración
+request-property-deprecated-with-sunset-description: propiedad de solicitud deprecada con fecha de expiración
+request-property-reactivated-description: propiedad de solicitud reactivada (deprecación establecida como falsa)
+request-property-sunset-date-too-small-description: propiedad de solicitud deprecada antes del número mínimo de días requeridos
+response-media-type-name-changed-description: tipo de media de respuesta cambiado
+response-media-type-name-generalized-description: tipo de media de respuesta cambiado a un tipo más general
+response-media-type-name-specialized-description: tipo de media de respuesta cambiado a un tipo más específico
+response-property-deprecated-description: propiedad de respuesta deprecada
+response-property-deprecated-sunset-invalid-description: propiedad de respuesta deprecada con fecha de expiración inválida
+response-property-deprecated-sunset-missing-description: propiedad de respuesta deprecada sin fecha de expiración
+response-property-deprecated-with-sunset-description: propiedad de respuesta deprecada con fecha de expiración
+response-property-reactivated-description: propiedad de respuesta reactivada (deprecación establecida como falsa)
+response-property-sunset-date-too-small-description: propiedad de respuesta deprecada antes del número mínimo de días requeridos
