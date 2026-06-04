@@ -956,3 +956,32 @@ response-body-all-of-added-annotation-only-description: subesquema de solo anota
 response-body-all-of-removed-annotation-only-description: subesquema de solo anotación removido del allOf en el cuerpo de respuesta (sin efecto en la validación)
 response-property-all-of-added-annotation-only-description: subesquema de solo anotación agregado al allOf en la propiedad de respuesta (sin efecto en la validación)
 response-property-all-of-removed-annotation-only-description: subesquema de solo anotación removido del allOf en la propiedad de respuesta (sin efecto en la validación)
+api-path-removed-with-deprecation-description: path y endpoint removidos con deprecación
+api-removed-with-deprecation-description: endpoint removido con deprecación
+endpoint-deprecated-with-sunset-description: endpoint deprecado con fecha de expiración
+request-body-min-items-increased-description: elementos mínimos del cuerpo de solicitud aumentados
+request-body-min-items-set-description: elementos mínimos del cuerpo de solicitud establecidos
+request-parameter-deprecated-description: parámetro de solicitud deprecado
+request-parameter-deprecated-sunset-missing-description: parámetro de solicitud deprecado sin fecha de expiración
+request-parameter-reactivated-description: parámetro de solicitud reactivado (deprecación establecida como falsa)
+request-parameter-removed-before-sunset-description: parámetro de solicitud removido antes de la fecha de expiración
+request-parameter-removed-with-deprecation-description: parámetro de solicitud removido con deprecación
+request-parameter-sunset-date-changed-too-small-description: la fecha de expiración modificada del parámetro de solicitud no cumple el número mínimo de días requeridos
+request-parameter-sunset-date-too-small-description: parámetro de solicitud deprecado antes del número mínimo de días requeridos
+request-parameter-sunset-deleted-description: fecha de expiración del parámetro de solicitud removida estando aún deprecado
+request-parameter-sunset-parse-description: parámetro de solicitud deprecado con fecha de expiración inválida
+request-property-deprecated-description: propiedad de solicitud deprecada
+request-property-deprecated-sunset-invalid-description: propiedad de solicitud deprecada con fecha de expiración inválida
+request-property-deprecated-sunset-missing-description: propiedad de solicitud deprecada sin fecha de expiración
+request-property-deprecated-with-sunset-description: propiedad de solicitud deprecada con fecha de expiración
+request-property-reactivated-description: propiedad de solicitud reactivada (deprecación establecida como falsa)
+request-property-sunset-date-too-small-description: propiedad de solicitud deprecada antes del número mínimo de días requeridos
+response-media-type-name-changed-description: tipo de media de respuesta cambiado
+response-media-type-name-generalized-description: tipo de media de respuesta cambiado a un tipo más general
+response-media-type-name-specialized-description: tipo de media de respuesta cambiado a un tipo más específico
+response-property-deprecated-description: propiedad de respuesta deprecada
+response-property-deprecated-sunset-invalid-description: propiedad de respuesta deprecada con fecha de expiración inválida
+response-property-deprecated-sunset-missing-description: propiedad de respuesta deprecada sin fecha de expiración
+response-property-deprecated-with-sunset-description: propiedad de respuesta deprecada con fecha de expiración
+response-property-reactivated-description: propiedad de respuesta reactivada (deprecación establecida como falsa)
+response-property-sunset-date-too-small-description: propiedad de respuesta deprecada antes del número mínimo de días requeridos
