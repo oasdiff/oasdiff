@@ -26,7 +26,11 @@ jobs:
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: latest
+          # Pin to the v2 major. goreleaser-action no longer treats `latest`
+          # as the absolute latest (it warns and locks to `~> v2` anyway), and
+          # an unpinned `latest` risks a future goreleaser v3 silently breaking
+          # releases via config-schema changes. Bump deliberately when adopting v3.
+          version: "~> v2"
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
