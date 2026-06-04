@@ -32,7 +32,7 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs[0])
-	require.Equal(t, "Adding new enum values to response could be unexpected for clients, use x-extensible-enum instead.", errs[0].GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, "Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
 // CL: adding an enum value to a response write-only property
