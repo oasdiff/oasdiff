@@ -73,9 +73,9 @@ request-parameter-max-length-increased: no parâmetro de requisição do tipo %s
 request-parameter-min-length-increased: no parâmetro de requisição do tipo %s e nome %s teve seu comprimento mínimo aumentado de %s para %s
 request-parameter-min-length-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu comprimento mínimo reduzido de %s para %s
 request-parameter-max-length-set: no parâmetro de requisição do tipo %s e nome %s, o comprimento máximo foi definido como %s
-request-parameter-max-length-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-max-length-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-max-set: no parâmetro de requisição do tipo %s e nome %s, o valor máximo foi definido como %s
-request-parameter-max-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-max-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-min-increased: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi aumentado de %s para %s
 request-parameter-min-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi reduzido de %s para %s
 request-parameter-max-items-decreased: no parâmetro de requisição do tipo %s e nome %s, o número máximo de itens foi reduzido de %s para %s
@@ -83,9 +83,9 @@ request-parameter-max-items-increased: no parâmetro de requisição do tipo %s 
 request-parameter-min-items-increased: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi aumentado de %s para %s
 request-parameter-min-items-decreased: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi reduzido de %s para %s
 request-parameter-min-items-set: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi definido como %s
-request-parameter-min-items-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-min-items-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi definido como %s
-request-parameter-min-set-comment: "Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação."
+request-parameter-min-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-type-changed: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato foi alterado de %s/%s para %s/%s
 request-parameter-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato foi generalizado de %s/%s para %s/%s
 request-parameter-property-type-changed: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato da propriedade %s foi alterado de %s/%s para %s/%s
@@ -224,11 +224,11 @@ request-property-exclusive-max-set-comment: Este é um aviso porque às vezes é
 request-parameter-exclusive-min-increased: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi aumentado de %s para %s
 request-parameter-exclusive-min-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi reduzido de %s para %s
 request-parameter-exclusive-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi definido como %s
-request-parameter-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-exclusive-max-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu valor exclusiveMaximum foi reduzido de %s para %s
 request-parameter-exclusive-max-increased: no parâmetro de requisição do tipo %s e nome %s teve seu valor exclusiveMaximum foi aumentado de %s para %s
 request-parameter-exclusive-max-set: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMaximum foi definido como %s
-request-parameter-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou devido a um erro atual na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 response-body-exclusive-max-increased: o valor exclusiveMaximum do corpo da resposta foi aumentado de %s para %s
 response-property-exclusive-max-increased: o valor exclusiveMaximum da propriedade de resposta %s foi aumentado de %s para %s para o status %s
 response-body-exclusive-min-decreased: o valor exclusiveMinimum do corpo da resposta foi reduzido de %s para %s
