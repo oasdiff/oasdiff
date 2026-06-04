@@ -477,10 +477,10 @@ request-parameter-type-generalized-description: request parameter type generaliz
 request-parameter-property-type-changed-description: request parameter property type changed
 request-parameter-property-type-generalized-description: request parameter property type generalized
 request-parameter-property-type-specialized-description: request parameter property type specialized
-request-parameter-x-extensible-enum-value-removed-description: request parameter-x-extensible-enum value deleted
+request-parameter-x-extensible-enum-value-removed-description: request parameter x-extensible-enum value deleted
 request-property-all-of-added-description: sub-schema added to allOf in request property 
 request-property-all-of-removed-description: sub-schema deleted from allOf in request property 
-request-property-any-of-added-description: sub-schema deleted from anyOf in request property
+request-property-any-of-added-description: sub-schema added to anyOf in request property
 request-property-any-of-removed-description: sub-schema deleted from anyOf in request property
 request-property-became-enum-description: request property restricted to enum
 request-property-became-not-nullable-description: request property became not nullable
@@ -967,3 +967,32 @@ response-body-all-of-added-annotation-only-description: annotation-only sub-sche
 response-body-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in response body (no wire-contract effect)
 response-property-all-of-added-annotation-only-description: annotation-only sub-schema added to allOf in response property (no wire-contract effect)
 response-property-all-of-removed-annotation-only-description: annotation-only sub-schema removed from allOf in response property (no wire-contract effect)
+api-path-removed-with-deprecation-description: path and endpoint deleted after deprecation
+api-removed-with-deprecation-description: endpoint deleted after deprecation
+endpoint-deprecated-with-sunset-description: endpoint deprecated with sunset date
+request-body-min-items-increased-description: request body min items increased
+request-body-min-items-set-description: request body min items set
+request-parameter-deprecated-description: request parameter deprecated
+request-parameter-deprecated-sunset-missing-description: request parameter deprecated without sunset date
+request-parameter-reactivated-description: request parameter reactivated (deprecation set to false)
+request-parameter-removed-before-sunset-description: request parameter deleted before sunset date
+request-parameter-removed-with-deprecation-description: request parameter deleted after deprecation
+request-parameter-sunset-date-changed-too-small-description: request parameter sunset date moved below min required deprecation days
+request-parameter-sunset-date-too-small-description: deprecated request parameter sunset before min required deprecation days
+request-parameter-sunset-deleted-description: request parameter sunset date deleted while still deprecated
+request-parameter-sunset-parse-description: request parameter deprecated with invalid sunset date
+request-property-deprecated-description: request property deprecated
+request-property-deprecated-sunset-invalid-description: request property deprecated with invalid sunset date
+request-property-deprecated-sunset-missing-description: request property deprecated without sunset date
+request-property-deprecated-with-sunset-description: request property deprecated with sunset date
+request-property-reactivated-description: request property reactivated (deprecation set to false)
+request-property-sunset-date-too-small-description: deprecated request property sunset before min required deprecation days
+response-media-type-name-changed-description: response media type changed
+response-media-type-name-generalized-description: response media type changed to a more general type
+response-media-type-name-specialized-description: response media type changed to a more specific type
+response-property-deprecated-description: response property deprecated
+response-property-deprecated-sunset-invalid-description: response property deprecated with invalid sunset date
+response-property-deprecated-sunset-missing-description: response property deprecated without sunset date
+response-property-deprecated-with-sunset-description: response property deprecated with sunset date
+response-property-reactivated-description: response property reactivated (deprecation set to false)
+response-property-sunset-date-too-small-description: deprecated response property sunset before min required deprecation days
