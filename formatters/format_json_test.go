@@ -38,7 +38,8 @@ func TestJsonFormatter_RenderChecks(t *testing.T) {
 			Id:          "change_id",
 			Level:       "info",
 			Direction:   "request",
-			Location:    "body",
+			Area:        "schema",
+			Kind:        "existence",
 			Action:      "remove",
 			Description: "This is a breaking change.",
 			Mitigation:  "Fix it.",
@@ -47,7 +48,7 @@ func TestJsonFormatter_RenderChecks(t *testing.T) {
 
 	out, err := jsonFormatter.RenderChecks(checks, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Equal(t, `[{"id":"change_id","level":"info","direction":"request","location":"body","action":"remove","description":"This is a breaking change.","mitigation":"Fix it."}]`, string(out))
+	require.Equal(t, `[{"id":"change_id","level":"info","direction":"request","area":"schema","kind":"existence","action":"remove","description":"This is a breaking change.","mitigation":"Fix it."}]`, string(out))
 }
 
 func TestJsonFormatter_RenderDiff(t *testing.T) {

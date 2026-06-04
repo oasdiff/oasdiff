@@ -3,7 +3,16 @@ package internal
 import "github.com/oasdiff/oasdiff/checker"
 
 func getAllTags() []string {
-	return []string{"request", "response", "add", "remove", "change", "generalize", "specialize", "increase", "decrease", "set", "body", "parameters", "properties", "headers", "security", "components"}
+	return []string{
+		// direction
+		"request", "response",
+		// action
+		"add", "remove", "change", "generalize", "specialize", "increase", "decrease", "set",
+		// area (OpenAPI object)
+		"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components",
+		// kind (aspect of the contract)
+		"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle",
+	}
 }
 
 // matchTags returns true if the rule matches all the tags
@@ -22,7 +31,11 @@ func matchTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
 }
 
 func matchTag(tag string, rule checker.BackwardCompatibilityRule) bool {
-	if matchLocationTag(tag, rule.Location) {
+	if matchAreaTag(tag, rule.Area) {
+		return true
+	}
+
+	if matchKindTag(tag, rule.Kind) {
 		return true
 	}
 
@@ -71,20 +84,49 @@ func matchActionTag(tag string, action checker.Action) bool {
 	return false
 }
 
-func matchLocationTag(tag string, location checker.Location) bool {
+func matchAreaTag(tag string, area checker.Area) bool {
 	switch tag {
-	case "body":
-		return location == checker.LocationBody
+	case "schema":
+		return area == checker.AreaSchema
 	case "parameters":
-		return location == checker.LocationParameters
-	case "properties":
-		return location == checker.LocationProperties
+		return area == checker.AreaParameters
+	case "requestBody":
+		return area == checker.AreaRequestBody
+	case "responses":
+		return area == checker.AreaResponses
+	case "paths":
+		return area == checker.AreaPaths
 	case "headers":
-		return location == checker.LocationHeaders
+		return area == checker.AreaHeaders
 	case "security":
-		return location == checker.LocationSecurity
+		return area == checker.AreaSecurity
+	case "tags":
+		return area == checker.AreaTags
 	case "components":
-		return location == checker.LocationComponents
+		return area == checker.AreaComponents
+	}
+
+	return false
+}
+
+func matchKindTag(tag string, kind checker.Kind) bool {
+	switch tag {
+	case "existence":
+		return kind == checker.KindExistence
+	case "requiredness":
+		return kind == checker.KindRequiredness
+	case "mutability":
+		return kind == checker.KindMutability
+	case "type":
+		return kind == checker.KindType
+	case "constraints":
+		return kind == checker.KindConstraints
+	case "values":
+		return kind == checker.KindValues
+	case "structure":
+		return kind == checker.KindStructure
+	case "lifecycle":
+		return kind == checker.KindLifecycle
 	}
 
 	return false

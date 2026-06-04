@@ -52,7 +52,8 @@ func TestYamlFormatter_RenderChecks(t *testing.T) {
 			Id:          "change_id",
 			Level:       "info",
 			Direction:   "request",
-			Location:    "body",
+			Area:        "schema",
+			Kind:        "existence",
 			Action:      "remove",
 			Description: "This is a breaking change.",
 			Mitigation:  "Fix it.",
@@ -61,7 +62,7 @@ func TestYamlFormatter_RenderChecks(t *testing.T) {
 
 	out, err := yamlFormatter.RenderChecks(checks, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Equal(t, "- id: change_id\n  level: info\n  direction: request\n  location: body\n  action: remove\n  description: This is a breaking change.\n  mitigation: Fix it.\n", string(out))
+	require.Equal(t, "- id: change_id\n  level: info\n  direction: request\n  area: schema\n  kind: existence\n  action: remove\n  description: This is a breaking change.\n  mitigation: Fix it.\n", string(out))
 }
 
 func TestYamlFormatter_RenderDiff(t *testing.T) {
