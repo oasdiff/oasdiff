@@ -80,6 +80,45 @@ func TestLoadInfo_GitRevisionNotFound(t *testing.T) {
 
 	_, err = load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("HEAD:nonexistent.yaml"))
 	require.ErrorContains(t, err, "failed to load spec from git revision")
+	// A path that doesn't exist within an existing commit is already a clear
+	// error; it must not be rewritten into a fetch hint.
+	require.NotContains(t, err.Error(), "git fetch origin")
+}
+
+// TestLoadInfo_GitRevisionMissingCommit verifies that referencing a commit that
+// is not present in the local clone yields an actionable "git fetch" hint, and
+// that oasdiff leaves the repository untouched rather than fetching the commit
+// itself.
+func TestLoadInfo_GitRevisionMissingCommit(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	specPath := filepath.Join(dir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(specPath, []byte(minimalSpec), 0644))
+	run("git", "add", "openapi.yaml")
+	run("git", "commit", "-m", "add spec")
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	// A syntactically valid SHA that names no object in this clone.
+	missing := "0123456789012345678901234567890123456789"
+	_, err = load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(missing+":openapi.yaml"))
+	require.ErrorContains(t, err, "git fetch origin "+missing)
+	require.ErrorContains(t, err, "does not modify your repository")
 }
 
 // TestLoadInfo_TwoGitRevisionsSharedLoader verifies that loading two different git revisions
