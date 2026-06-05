@@ -120,7 +120,50 @@ func readGitRefContent(gitRef string) ([]byte, error) {
 	if hex, ok := blobHashFromRef(gitRef); ok {
 		return gitShow(hex)
 	}
-	return gitShow(gitRef)
+	out, err := gitShow(gitRef)
+	if err != nil {
+		return nil, hintMissingObject(gitRef, err)
+	}
+	return out, nil
+}
+
+// hintMissingObject augments a "git show" failure with a recovery hint when the
+// failure is that the commit named before the colon is not present in the local
+// clone. oasdiff resolves "<ref>:<path>" against local objects only and
+// deliberately never fetches or otherwise mutates the repository, so a reviewer
+// who hasn't fetched the PR branch (or a shallow clone lacking the base commit)
+// would otherwise be left with git's terse error. We hand them the exact command
+// to fetch the commit themselves; the repository stays untouched.
+//
+// The hint fires only when the commit genuinely doesn't resolve locally. A path
+// that doesn't exist within an existing commit is returned unchanged (its message
+// is already actionable), and so is a "git not installed" failure (there is
+// nothing to fetch). git's own "git show" message conflates the missing-commit
+// and missing-path cases when the path happens to exist in the working tree, so
+// we probe the object directly rather than parse the message text.
+func hintMissingObject(gitRef string, err error) error {
+	if strings.Contains(err.Error(), "is git installed") {
+		return err
+	}
+	ref := gitRef
+	if before, _, found := strings.Cut(gitRef, ":"); found {
+		ref = before
+	}
+	if commitExistsLocally(ref) {
+		return err
+	}
+	return fmt.Errorf("%w\n\n"+
+		"oasdiff reads git revisions from local objects only and does not modify your repository.\n"+
+		"Commit %q is not in this clone. Fetch it yourself with:\n\n"+
+		"    git fetch origin %s\n\n"+
+		"then re-run oasdiff", err, ref, ref)
+}
+
+// commitExistsLocally reports whether ref names an object already present in the
+// local repository, via "git cat-file -e". Returns false when the object is
+// absent or when git cannot run.
+func commitExistsLocally(ref string) bool {
+	return exec.Command("git", "cat-file", "-e", ref).Run() == nil
 }
 
 // blobHashFromRef returns (hex, true) when the part before `:` in gitRef names
