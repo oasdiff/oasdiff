@@ -8,18 +8,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// #916: the property-diff traversal helpers must descend into the `not`
-// sub-schema, like they do for if/then/else and the other sub-schema fields.
-// Before the fix, a change inside `not` was populated in NotDiff but never
-// reached the visitor, so every check built on those helpers silently missed
-// it.
-//
-// Exercised through the public CheckBackwardCompatibility rather than the
-// traversal helpers directly, so the test does not depend on those helpers
-// staying exported (they are slated to be privatized; see #953). Every property
-// in the fixtures lives under `not`, so each of these findings firing proves
-// the traversal reached inside the `not` sub-schema (a deleted, an added, and a
-// modified property respectively); without the fix none of them fire.
+// Property changes nested inside a `not` sub-schema are detected by the
+// backward-compatibility checks, the same as changes under if/then/else and the
+// other sub-schemas. The fixtures place a removed, an added-required, and a
+// modified property under `not` and nothing at the top level, so each finding
+// firing confirms the check descended into `not`; every finding also carries
+// the `not/` path.
 func TestBackwardCompatibility_TraversesNotSubSchema(t *testing.T) {
 	s1, err := open("../data/checker/not_base.yaml")
 	require.NoError(t, err)
