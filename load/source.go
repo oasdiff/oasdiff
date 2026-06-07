@@ -20,6 +20,12 @@ type Source struct {
 	Path string
 	Uri  *url.URL
 	Type SourceType
+
+	// Fetch, when true, lets a git-revision source fetch a missing commit from
+	// the "origin" remote before reading it (see the --fetch flag). It mutates
+	// the local repository by downloading objects, so it is opt-in and defaults
+	// to false; only SourceTypeGitRevision sources consult it.
+	Fetch bool
 }
 
 // NewSource creates a Source by categorizing the input path as stdin, URL, git revision, or file.
@@ -125,7 +131,7 @@ func (source *Source) DisplayPath() string {
 func (source *Source) ReadRaw() ([]byte, error) {
 	switch source.Type {
 	case SourceTypeGitRevision:
-		return readGitRefContent(source.Path)
+		return readGitRefContent(source.Path, source.Fetch)
 	case SourceTypeFile:
 		return os.ReadFile(source.Path)
 	default:

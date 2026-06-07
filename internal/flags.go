@@ -111,6 +111,10 @@ func (flags *Flags) getAutoUpgrade() bool {
 	return flags.v.GetBool("auto-upgrade")
 }
 
+func (flags *Flags) getFetch() bool {
+	return flags.v.GetBool("fetch")
+}
+
 func (flags *Flags) getIncludePathParams() bool {
 	return flags.v.GetBool("include-path-params")
 }

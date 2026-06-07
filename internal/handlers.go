@@ -44,11 +44,15 @@ func getRun(runner runner) cobra.PositionalArgs {
 		}
 
 		if len(args) > 0 {
-			flags.setBase(load.NewSource(args[0]))
+			base := load.NewSource(args[0])
+			base.Fetch = flags.getFetch()
+			flags.setBase(base)
 		}
 
 		if len(args) > 1 {
-			flags.setRevision(load.NewSource(args[1]))
+			revision := load.NewSource(args[1])
+			revision.Fetch = flags.getFetch()
+			flags.setRevision(revision)
 		}
 
 		// by now flags have been parsed successfully so we don't need to show usage on any errors

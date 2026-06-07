@@ -45,6 +45,22 @@ oasdiff detects the `<ref>:<path>` pattern and runs `git show <ref>:<path>` inte
 
 The command must be run from within the git repository that contains the spec.
 
+## Fetching missing commits (`--fetch`)
+
+oasdiff reads git revisions from your local object store only; it does not modify your repository by default. If the commit you reference is not in the local clone (a common case when reviewing someone else's PR commit, or in a shallow clone), `git show` fails and oasdiff prints the exact command to fetch it:
+
+```
+git fetch origin <ref>
+```
+
+Pass `--fetch` to let oasdiff run that fetch for you, against the `origin` remote, before reading the spec:
+
+```bash
+oasdiff changelog --fetch <base-sha>:openapi.yaml <revision-sha>:openapi.yaml
+```
+
+`--fetch` downloads the missing git objects into your local repository (it does not move any branch or ref). Because it mutates the repository, it is opt-in. Only revisions whose commit is genuinely missing trigger a fetch; commits already present are read directly.
+
 ## GitHub Actions
 
 Git revision syntax is particularly useful in CI/CD. The following workflow detects breaking changes between the base branch and the PR branch without needing a separate checkout step or temp files:
