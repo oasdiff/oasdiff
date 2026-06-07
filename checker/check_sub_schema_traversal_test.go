@@ -105,3 +105,51 @@ func TestSubSchemaTraversalMinChanged(t *testing.T) {
 	// minimum change in then sub-schema should be detected
 	require.True(t, containsId(errs, checker.RequestPropertyMinIncreasedId), "expected min increased in then sub-schema")
 }
+
+// CL: exercise processModifiedPropertiesDiff traversal through the `not` sub-schema
+func TestNotSubSchemaTraversalModifiedProperty(t *testing.T) {
+	s1, err := open("../data/checker/not_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/not_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	// maxLength change inside `not` should be detected
+	require.True(t, containsId(errs, checker.RequestPropertyMaxLengthDecreasedId), "expected maxLength decreased via not sub-schema traversal")
+}
+
+// CL: exercise processAddedPropertiesDiff traversal through the `not` sub-schema
+func TestNotSubSchemaTraversalAddedProperty(t *testing.T) {
+	s1, err := open("../data/checker/not_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/not_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	// new required property added inside `not` should be detected
+	require.True(t, containsId(errs, checker.NewRequiredRequestPropertyId), "expected new-required-request-property via not sub-schema traversal")
+}
+
+// CL: exercise processDeletedPropertiesDiff traversal through the `not` sub-schema
+func TestNotSubSchemaTraversalDeletedProperty(t *testing.T) {
+	s1, err := open("../data/checker/not_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/not_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	// property removed from inside `not` should be detected
+	require.True(t, containsId(errs, checker.RequestPropertyRemovedId), "expected request-property-removed via not sub-schema traversal")
+}
