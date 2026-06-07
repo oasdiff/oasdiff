@@ -207,6 +207,7 @@ type Config struct {
 	IncludePathParams      bool     `mapstructure:"include-path-params"`
 	AllowExternalRefs      bool     `mapstructure:"allow-external-refs"`
 	AutoUpgrade            bool     `mapstructure:"auto-upgrade"`
+	Fetch                  bool     `mapstructure:"fetch"`
 	Template               string   `mapstructure:"template"`
 }
 

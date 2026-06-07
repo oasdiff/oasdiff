@@ -21,7 +21,7 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 	case SourceTypeURL:
 		return loader.LoadFromURI(source.Uri)
 	case SourceTypeGitRevision:
-		return loadFromGitRevision(loader, source.Path)
+		return loadFromGitRevision(loader, source.Path, source.Fetch)
 	default:
 		return loader.LoadFromFile(source.Path)
 	}
@@ -38,8 +38,8 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 // Blob-hash refs (e.g. "abc1234:openapi.yaml" where abc1234 is a git blob object hash)
 // are supported via readGitRefContent. The path portion is preserved on the ref string
 // passed downstream for source labels and relative $ref resolution.
-func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, error) {
-	out, err := readGitRefContent(gitRef)
+func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool) (*openapi3.T, error) {
+	out, err := readGitRefContent(gitRef, fetch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
 	}
@@ -116,24 +116,45 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string) (*openapi3.T, e
 // `git show <blob-hex>:<path>` is not valid git syntax. Callers keep the full
 // `<ref>:<path>` string for the loader's URL key so source labels and relative
 // $ref resolution stay correct.
-func readGitRefContent(gitRef string) ([]byte, error) {
+func readGitRefContent(gitRef string, fetch bool) ([]byte, error) {
 	if hex, ok := blobHashFromRef(gitRef); ok {
 		return gitShow(hex)
 	}
 	out, err := gitShow(gitRef)
-	if err != nil {
-		return nil, hintMissingObject(gitRef, err)
+	if err == nil {
+		return out, nil
 	}
-	return out, nil
+	// "git show" failed. When --fetch is set and the only problem is that the
+	// commit isn't in this clone, fetch that commit from origin and retry once.
+	// This is the opt-in counterpart to hintMissingObject: instead of telling
+	// the reviewer to run "git fetch origin <ref>" themselves, oasdiff runs it
+	// for them (mutating the repo by downloading objects). A path that doesn't
+	// exist within an already-local commit is not a fetch problem, so we only
+	// fetch when the commit itself is absent.
+	if fetch {
+		ref := refBeforeColon(gitRef)
+		if !commitExistsLocally(ref) {
+			if ferr := gitFetch(ref); ferr != nil {
+				return nil, fmt.Errorf(
+					"failed to fetch git revision %q from origin: %w\n\noriginal error: %v",
+					ref, ferr, err)
+			}
+			if out, err = gitShow(gitRef); err == nil {
+				return out, nil
+			}
+		}
+	}
+	return nil, hintMissingObject(gitRef, err)
 }
 
 // hintMissingObject augments a "git show" failure with a recovery hint when the
 // failure is that the commit named before the colon is not present in the local
-// clone. oasdiff resolves "<ref>:<path>" against local objects only and
-// deliberately never fetches or otherwise mutates the repository, so a reviewer
-// who hasn't fetched the PR branch (or a shallow clone lacking the base commit)
+// clone. By default oasdiff resolves "<ref>:<path>" against local objects only
+// and does not fetch or otherwise mutate the repository, so a reviewer who
+// hasn't fetched the PR branch (or a shallow clone lacking the base commit)
 // would otherwise be left with git's terse error. We hand them the exact command
-// to fetch the commit themselves; the repository stays untouched.
+// to fetch the commit themselves, and point at the --fetch flag that does it
+// automatically; the repository stays untouched unless they opt in.
 //
 // The hint fires only when the commit genuinely doesn't resolve locally. A path
 // that doesn't exist within an existing commit is returned unchanged (its message
@@ -145,10 +166,7 @@ func hintMissingObject(gitRef string, err error) error {
 	if strings.Contains(err.Error(), "is git installed") {
 		return err
 	}
-	ref := gitRef
-	if before, _, found := strings.Cut(gitRef, ":"); found {
-		ref = before
-	}
+	ref := refBeforeColon(gitRef)
 	if commitExistsLocally(ref) {
 		return err
 	}
@@ -156,7 +174,28 @@ func hintMissingObject(gitRef string, err error) error {
 		"oasdiff reads git revisions from local objects only and does not modify your repository.\n"+
 		"Commit %q is not in this clone. Fetch it yourself with:\n\n"+
 		"    git fetch origin %s\n\n"+
-		"then re-run oasdiff", err, ref, ref)
+		"then re-run oasdiff, or re-run with --fetch to let oasdiff fetch it for you", err, ref, ref)
+}
+
+// refBeforeColon returns the "<ref>" portion of a "<ref>:<path>" git revision,
+// or the whole string when there is no colon.
+func refBeforeColon(gitRef string) string {
+	if before, _, found := strings.Cut(gitRef, ":"); found {
+		return before
+	}
+	return gitRef
+}
+
+// gitFetch downloads the named commit/ref from the "origin" remote into the
+// local object store so a subsequent "git show <ref>:<path>" can resolve it. It
+// mutates the repository (adds objects; no local ref or branch is moved), which
+// is why it runs only under the opt-in --fetch flag. It mirrors the manual
+// "git fetch origin <ref>" that hintMissingObject suggests when --fetch is off.
+func gitFetch(ref string) error {
+	if out, err := exec.Command("git", "fetch", "origin", ref).CombinedOutput(); err != nil {
+		return fmt.Errorf("%s", strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 // commitExistsLocally reports whether ref names an object already present in the
