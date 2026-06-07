@@ -70,6 +70,29 @@ func NewSpecInfoFromGlob(loader *openapi3.Loader, glob string, options ...Option
 	return specInfos, nil
 }
 
+// NewSpecInfoFromData creates a SpecInfo from raw OpenAPI bytes already held in
+// memory, labeling its source as name. name is loaded as the spec's path, so
+// source-location reporting (e.g. the file name shown for each change) uses it
+// rather than a temp path or an empty value. It is the in-memory counterpart to
+// NewSpecInfo: no filesystem access, so relative file $refs are not resolved
+// (intra-spec "#/..." refs still are). As elsewhere in this package, callers
+// comparing two specs should use a fresh loader per spec so the loader's
+// document cache does not collide when both share a name.
+func NewSpecInfoFromData(loader *openapi3.Loader, data []byte, name string, options ...Option) (*SpecInfo, error) {
+	spec, err := loader.LoadFromDataWithPath(data, &url.URL{Path: name})
+	if err != nil {
+		return nil, err
+	}
+
+	specInfos := []*SpecInfo{newSpecInfo(spec, name)}
+	for _, option := range options {
+		if specInfos, err = option(loader, specInfos); err != nil {
+			return nil, err
+		}
+	}
+	return specInfos[0], nil
+}
+
 func loadSpecInfo(loader *openapi3.Loader, source *Source) (*SpecInfo, error) {
 	s, err := from(loader, source)
 	if err != nil {
