@@ -17,7 +17,6 @@ type Change struct {
 	Operation      string          `json:"operation,omitempty" yaml:"operation,omitempty"`
 	OperationId    string          `json:"operationId,omitempty" yaml:"operationId,omitempty"`
 	Path           string          `json:"path,omitempty" yaml:"path,omitempty"`
-	Source         string          `json:"source,omitempty" yaml:"source,omitempty"`
 	Section        string          `json:"section,omitempty" yaml:"section,omitempty"`
 	IsBreaking     bool            `json:"-" yaml:"-"`
 	Attributes     map[string]any  `json:"attributes,omitempty" yaml:"attributes,omitempty"`
@@ -43,7 +42,6 @@ func NewChanges(originalChanges checker.Changes, l checker.Localizer) Changes {
 			Operation:      operation,
 			OperationId:    change.GetOperationId(),
 			Path:           path,
-			Source:         change.GetSource(),
 			Attributes:     change.GetAttributes(),
 			BaseSource:     change.GetBaseSource(),
 			RevisionSource: change.GetRevisionSource(),
