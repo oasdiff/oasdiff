@@ -24,7 +24,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 	cmd.PersistentFlags().Bool("auto-upgrade", false, "canonicalize both specs to the latest OpenAPI 3.x before diffing; useful for cross-version comparisons (e.g. 3.0 vs 3.1)")
-	cmd.PersistentFlags().Bool("fetch", false, "when a base or revision is a git revision whose commit is missing locally, fetch it from the 'origin' remote first (downloads git objects into your local repository)")
+	cmd.PersistentFlags().Bool("fetch", false, "fetch missing git revisions from the 'origin' remote (writes objects to your local repo)")
 
 	addHiddenFlattenFlag(cmd)
 	addHiddenCircularDepFlag(cmd)
