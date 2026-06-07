@@ -1,0 +1,26 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              not:
+                type: object
+                required: [added_prop, modified_prop]
+                properties:
+                  added_prop:
+                    type: string
+                  modified_prop:
+                    type: string
+                    maxLength: 5
+      responses:
+        "200":
+          description: OK

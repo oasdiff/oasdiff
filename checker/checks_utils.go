@@ -153,6 +153,10 @@ func processModifiedPropertiesDiff(propertyPath string, propertyName string, sch
 		processModifiedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, schemaDiff, processor)
 	}
 
+	if schemaDiff.NotDiff != nil {
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, schemaDiff, processor)
+	}
+
 	if schemaDiff.ContentSchemaDiff != nil {
 		processModifiedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, schemaDiff, processor)
 	}
@@ -256,6 +260,10 @@ func processAddedPropertiesDiff(propertyPath string, propertyName string, schema
 		processAddedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, processor)
 	}
 
+	if schemaDiff.NotDiff != nil {
+		processAddedPropertiesDiff(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, processor)
+	}
+
 	if schemaDiff.ContentSchemaDiff != nil {
 		processAddedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, processor)
 	}
@@ -357,6 +365,10 @@ func processDeletedPropertiesDiff(propertyPath string, propertyName string, sche
 
 	if schemaDiff.ElseDiff != nil {
 		processDeletedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, processor)
+	}
+
+	if schemaDiff.NotDiff != nil {
+		processDeletedPropertiesDiff(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, processor)
 	}
 
 	if schemaDiff.ContentSchemaDiff != nil {
