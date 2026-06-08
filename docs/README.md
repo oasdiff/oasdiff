@@ -8,7 +8,7 @@
 ![oasdiff banner](https://github.com/yonatanmgr/oasdiff/assets/31913495/ac9b154e-72d1-4969-bc3b-f527bbe7751d)
 
 
-Command-line and Go package to compare and detect breaking changes in OpenAPI specs.
+Command-line tool to compare and detect breaking changes in OpenAPI specs.
 
 Run it locally, in CI via the [GitHub Action](https://github.com/oasdiff/oasdiff-action), or use the hosted PR review workflow at [oasdiff.com](https://www.oasdiff.com) to approve or reject each change with a CI commit status.
 
