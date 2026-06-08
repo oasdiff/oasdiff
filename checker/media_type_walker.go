@@ -67,6 +67,16 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 // specific sources.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	CheckModifiedPropertiesDiff(info.schemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff) {
+		// The traversal also descends into single-valued sub-schemas (items,
+		// not, if/then/else, contentSchema, ...). When such a sub-schema exists
+		// on only one side (e.g. `items` removed in the revision), its diff has
+		// a nil Base or Revision schema. The property-level checks all read
+		// Base/Revision (ReadOnly, WriteOnly, Extensions, ...) and have nothing
+		// actionable to say about a side that doesn't exist, so guard once here
+		// rather than in every check.
+		if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
+			return
+		}
 		processor(propertyInfo{
 			mediaTypeInfo: info,
 			propertyPath:  propertyPath,
