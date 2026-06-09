@@ -121,7 +121,7 @@ func TestSpecInfo_Options(t *testing.T) {
 }
 
 func TestSpecInfo_GlobOptions(t *testing.T) {
-	_, err := load.NewSpecInfoFromGlob(openapi3.NewLoader(), "../data/*.yaml", load.WithIdentity(), load.WithFlattenAllOf(), load.WithFlattenParams())
+	_, err := load.NewSpecInfoFromGlob(openapi3.NewLoader(), "../data/*.yaml", load.WithFlattenAllOf(), load.WithFlattenParams())
 	require.NoError(t, err)
 }
 
