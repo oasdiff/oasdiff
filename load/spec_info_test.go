@@ -139,3 +139,28 @@ func TestSpecInfo_FlattenError_Typed(t *testing.T) {
 
 	require.EqualError(t, err, `failed to flatten allOf in "../data/allof/invalid.yaml": unable to resolve Type conflict: all Type values must be identical`)
 }
+
+func TestSpecInfo_FromData(t *testing.T) {
+	data, err := os.ReadFile("../data/openapi-test1.yaml")
+	require.NoError(t, err)
+
+	specInfo, err := load.NewSpecInfoFromData(openapi3.NewLoader(), data, "myspec.yaml")
+	require.NoError(t, err)
+	require.NotNil(t, specInfo.Spec)
+	// The provided name is the source label, not a temp path.
+	require.Equal(t, "myspec.yaml", specInfo.Url)
+	require.Equal(t, specInfo.Spec.Info.Version, specInfo.GetVersion())
+}
+
+func TestSpecInfo_FromData_InvalidData(t *testing.T) {
+	_, err := load.NewSpecInfoFromData(openapi3.NewLoader(), []byte("not: [valid"), "myspec.yaml")
+	require.Error(t, err)
+}
+
+func TestSpecInfo_FromData_Options(t *testing.T) {
+	data, err := os.ReadFile("../data/openapi-test1.yaml")
+	require.NoError(t, err)
+
+	_, err = load.NewSpecInfoFromData(openapi3.NewLoader(), data, "myspec.yaml", load.WithFlattenAllOf(), load.WithFlattenParams())
+	require.NoError(t, err)
+}
