@@ -10,17 +10,12 @@ import (
 // Option functions can be used to preprocess specs after loading them
 type Option func(*openapi3.Loader, []*SpecInfo) ([]*SpecInfo, error)
 
-// WithIdentity returns the original SpecInfos
-func WithIdentity() Option {
-	return func(loader *openapi3.Loader, specInfos []*SpecInfo) ([]*SpecInfo, error) {
-		return specInfos, nil
-	}
-}
-
-// GetOption returns the requested option or the identity option
+// GetOption returns the requested option, or a no-op option when disabled.
 func GetOption(option Option, enable bool) Option {
 	if !enable {
-		return WithIdentity()
+		return func(_ *openapi3.Loader, specInfos []*SpecInfo) ([]*SpecInfo, error) {
+			return specInfos, nil
+		}
 	}
 	return option
 }
