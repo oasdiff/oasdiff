@@ -32,7 +32,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 			}
 
 			id := RequestBodyTypeGeneralizedId
-			if breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, info.mediaType, schemaDiff) {
+			if !isRequestTypeGeneralization(typeDiff, schemaDiff) && breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, info.mediaType, schemaDiff) {
 				id = RequestBodyTypeChangedId
 			}
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
@@ -64,7 +64,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 
 			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
 				id := RequestPropertyTypeGeneralizedId
-				if breakingTypeFormatChangedInRequestProperty(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
+				if !isRequestTypeGeneralization(propTypeDiff, propSchemaDiff) && breakingTypeFormatChangedInRequestProperty(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
 					id = RequestPropertyTypeChangedId
 				}
 

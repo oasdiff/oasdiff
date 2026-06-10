@@ -83,6 +83,46 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	}, errs[0])
 }
 
+// CL: narrowing a request property union type is breaking
+func TestRequestPropertyTypeUnionNarrowedCheck(t *testing.T) {
+	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	s1.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Type = &openapi3.Types{"string", "integer"}
+	s1.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Format = ""
+	s2.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Type = &openapi3.Types{"string"}
+	s2.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Format = ""
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestPropertyTypeChangedId, errs[0].GetId())
+}
+
+// CL: removing a request property type constraint is not breaking
+func TestRequestPropertyTypeDeletedCheck(t *testing.T) {
+	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	s1.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Type = &openapi3.Types{"string"}
+	s1.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Format = ""
+	s2.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Type = nil
+	s2.Spec.Paths.Value("/pets").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["age"].Value.Format = ""
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestPropertyTypeGeneralizedId, errs[0].GetId())
+}
+
 // CL: changing request body and property types from array to object
 func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base_array_to_object.yaml")

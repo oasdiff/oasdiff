@@ -89,6 +89,45 @@ func TestBreaking_ReqTypeIntegerToNumber(t *testing.T) {
 	require.Equal(t, "the request's body type/format was generalized from `integer`/`` to `number`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
+// BC: narrowing a request's body schema union type is breaking (server rejects previously-valid values)
+func TestBreaking_ReqTypeUnionNarrowed(t *testing.T) {
+	file := "../data/type-change/simple-request.yaml"
+
+	s1, err := open(file)
+	require.NoError(t, err)
+	s1.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = &openapi3.Types{"string", "integer"}
+
+	s2, err := open(file)
+	require.NoError(t, err)
+	s2.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = &openapi3.Types{"string"}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestBodyTypeChangedId, errs[0].GetId())
+}
+
+// BC: removing request's body schema type is not breaking (server becomes more permissive)
+func TestBreaking_ReqTypeStringDeleted(t *testing.T) {
+	file := "../data/type-change/simple-request.yaml"
+
+	s1, err := open(file)
+	require.NoError(t, err)
+	s1.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = &openapi3.Types{"string"}
+
+	s2, err := open(file)
+	require.NoError(t, err)
+	s2.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = nil
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestBodyTypeGeneralizedId, errs[0].GetId())
+	require.Equal(t, "the request's body type/format was generalized from `string`/`` to ``/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
 // BC: changing request's body schema type from number/none to integer/int32 is breaking
 func TestBreaking_ReqTypeNumberToInt32(t *testing.T) {
 	file := "../data/type-change/simple-request.yaml"
