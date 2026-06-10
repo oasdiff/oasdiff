@@ -3,12 +3,14 @@ package internal
 import (
 	"bytes"
 	"context"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"mime/multipart"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -18,6 +20,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 )
 
@@ -31,22 +35,47 @@ func oasdiffSiteURL() string {
 	return "https://www.oasdiff.com"
 }
 
+// encryptedReviewBlobVersion is the first byte of the uploaded blob. It lets
+// the browser decryptor reject a format it doesn't understand instead of
+// trying to decrypt garbage. Bump it only on an incompatible layout change.
+const encryptedReviewBlobVersion = 1
+
+// reviewPayload is the cleartext bundle the CLI encrypts and uploads. It is
+// never seen by oasdiff.com in cleartext: the CLI AES-256-GCM-encrypts the
+// JSON below with a fresh random key, uploads only the ciphertext, and puts
+// the key in the review URL's #fragment (which browsers never send to a
+// server). The browser decrypts and renders.
+//
+// BaseSpec / RevisionSpec hold each spec's bytes verbatim as a string. A YAML
+// spec stays YAML text and a JSON spec stays JSON text -- this JSON object is
+// only the envelope that bundles the several fields into one blob; it does not
+// reformat or reparse the spec content.
+//
+// Changes is the JSON changelog the CLI already computed, embedded raw. The
+// server can't recompute it (it can't read the specs), so the CLI ships it.
+// It is byte-identical to what oasdiff-service's /public/changelog returns for
+// the plaintext path, so the review page renders it the same way.
+type reviewPayload struct {
+	BaseSpec         string          `json:"base_spec"`
+	RevisionSpec     string          `json:"revision_spec"`
+	BaseFilename     string          `json:"base_filename"`
+	RevisionFilename string          `json:"revision_filename"`
+	Changes          json.RawMessage `json:"changes"`
+	Mode             string          `json:"mode"`
+}
+
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
-// `breaking --open`): uploads the two spec sources to oasdiff.com, prints
-// the resulting review URL, and opens it in the default browser. The
-// terminal changelog/breaking output has already been printed by the caller;
-// --open is purely additive.
+// `breaking --open`): it bundles the two specs and the computed changelog,
+// encrypts the bundle with a fresh key, uploads only the ciphertext to
+// oasdiff.com, prints the resulting review URL (with the key in its
+// #fragment), and opens it in the default browser. The terminal
+// changelog/breaking output has already been printed by the caller; --open is
+// purely additive.
 //
-// isBreaking is the visitor's subcommand intent: true when invoked via
-// `oasdiff breaking`, false via `oasdiff changelog`. We forward this as the
-// upload's `mode` field so the rendered /review/local page filters its
-// severity view to match what the visitor saw in their terminal — the same
-// reasoning that semantic comparison flags (flatten-params etc.) are
-// forwarded but filtering / presentation flags are not.
-//
-// Sign-in: if no access token is stored locally, the CLI runs the first-run
-// browser handshake. See enterprise/docs/cli-local-review.md for the design.
-func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool) error {
+// There is no sign-in: the upload is zero-knowledge, so oasdiff.com stores an
+// opaque blob it cannot read and never needs to know who the visitor is. The
+// decryption key lives only in the URL fragment on the visitor's machine.
+func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
 	baseBytes, baseName, err := readSpecSource(flags.getBase())
 	if err != nil {
 		return fmt.Errorf("read base spec: %w", err)
@@ -56,27 +85,140 @@ func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool) error {
 		return fmt.Errorf("read revision spec: %w", err)
 	}
 
-	options := flags.semanticOptionsJSON()
-
-	accessToken, err := readOrMintAccessToken(stdout)
+	changesJSON, err := renderChangelogJSON(flags, errs, specInfoPair, isBreaking, diffEmpty)
 	if err != nil {
-		return err
+		return fmt.Errorf("render changelog: %w", err)
 	}
 
 	mode := "changelog"
 	if isBreaking {
 		mode = "breaking"
 	}
-	reviewURL, expiresAt, err := postPreviewReview(accessToken, baseName, baseBytes, revName, revBytes, options, mode)
+
+	plaintext, err := json.Marshal(reviewPayload{
+		BaseSpec:         string(baseBytes),
+		RevisionSpec:     string(revBytes),
+		BaseFilename:     baseName,
+		RevisionFilename: revName,
+		Changes:          changesJSON,
+		Mode:             mode,
+	})
+	if err != nil {
+		return fmt.Errorf("marshal review payload: %w", err)
+	}
+
+	blob, key, err := encryptReviewPayload(plaintext)
+	if err != nil {
+		return fmt.Errorf("encrypt review: %w", err)
+	}
+
+	reviewID, expiresAt, err := postEncryptedReview(blob)
 	if err != nil {
 		return err
 	}
+
+	// The key rides in the URL #fragment. Browsers never transmit the
+	// fragment to a server (not in the request path, query, or Referer), so
+	// neither oasdiff.com nor any intermediary sees the key -- only code
+	// running in the visitor's own browser can read it.
+	reviewURL := fmt.Sprintf("%s/review/e/%s#k=%s",
+		oasdiffSiteURL(),
+		url.PathEscape(reviewID),
+		base64.RawURLEncoding.EncodeToString(key),
+	)
 
 	fmt.Fprintf(stdout, "\nOpening %s (expires %s)\n", reviewURL, expiresAt.Format("2006-01-02 15:04 MST"))
 	if err := openBrowser(reviewURL); err != nil {
 		fmt.Fprintf(stdout, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
 	}
 	return nil
+}
+
+// renderChangelogJSON produces the JSON changelog bytes embedded in the
+// encrypted payload. It mirrors oasdiff-service's /public/changelog rendering
+// (FormatJSON + WrapInObject) so the review page consumes identical bytes
+// whether the review came through the plaintext path or the encrypted one.
+// Color is forced off: the output is data, not a terminal render.
+func renderChangelogJSON(flags *Flags, errs checker.Changes, specInfoPair *load.SpecInfoPair, isBreaking, diffEmpty bool) ([]byte, error) {
+	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{Language: flags.getLang()})
+	if err != nil {
+		return nil, err
+	}
+	return formatter.RenderChangelog(
+		errs,
+		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
+		specInfoPair.GetBaseVersion(),
+		specInfoPair.GetRevisionVersion(),
+	)
+}
+
+// encryptReviewPayload encrypts plaintext with a freshly generated 256-bit key
+// using AES-256-GCM. It returns the upload blob and the key. The blob layout
+// is: version(1) || nonce(12) || ciphertext+tag. The key is returned to the
+// caller (it goes in the URL fragment) and is never uploaded.
+func encryptReviewPayload(plaintext []byte) (blob, key []byte, err error) {
+	key = make([]byte, 32) // AES-256
+	if _, err := rand.Read(key); err != nil {
+		return nil, nil, fmt.Errorf("generate key: %w", err)
+	}
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, nil, err
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
+		return nil, nil, fmt.Errorf("generate nonce: %w", err)
+	}
+	ciphertext := gcm.Seal(nil, nonce, plaintext, nil)
+
+	blob = make([]byte, 0, 1+len(nonce)+len(ciphertext))
+	blob = append(blob, encryptedReviewBlobVersion)
+	blob = append(blob, nonce...)
+	blob = append(blob, ciphertext...)
+	return blob, key, nil
+}
+
+// postEncryptedReview uploads the opaque ciphertext blob to oasdiff.com and
+// returns the assigned review id plus its TTL expiry. The request is
+// anonymous (no credentials): the server stores a blob it cannot read, so it
+// has nothing to attribute to a user. The body is the raw blob; the response
+// is JSON {review_id, expires_at}.
+func postEncryptedReview(blob []byte) (string, time.Time, error) {
+	endpoint := oasdiffSiteURL() + "/api/encrypted-review"
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, bytes.NewReader(blob))
+	if err != nil {
+		return "", time.Time{}, err
+	}
+	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Set("User-Agent", "oasdiff-cli")
+
+	client := &http.Client{Timeout: 5 * time.Minute}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", time.Time{}, fmt.Errorf("upload to %s: %w", endpoint, err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", time.Time{}, fmt.Errorf("upload failed (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+
+	var parsed struct {
+		ReviewID  string `json:"review_id" yaml:"review_id"`
+		ExpiresAt int64  `json:"expires_at" yaml:"expires_at"`
+	}
+	if err := json.Unmarshal(respBody, &parsed); err != nil {
+		return "", time.Time{}, fmt.Errorf("parse response: %w", err)
+	}
+	if parsed.ReviewID == "" {
+		return "", time.Time{}, fmt.Errorf("response missing review_id: %s", string(respBody))
+	}
+	return parsed.ReviewID, time.Unix(parsed.ExpiresAt, 0).UTC(), nil
 }
 
 // readSpecSource returns the raw bytes of a spec source and a display
@@ -103,90 +245,6 @@ func readSpecSource(source *load.Source) ([]byte, string, error) {
 	return body, filepath.Base(source.DisplayPath()), nil
 }
 
-// postPreviewReview uploads the two spec files to oasdiff.com and returns
-// the rendered review URL plus its TTL expiry timestamp. mode is "breaking"
-// or "changelog"; the server uses it to default the rendered /review/local
-// page's severity filter.
-func postPreviewReview(accessToken, baseName string, baseBytes []byte, revName string, revBytes []byte, options, mode string) (string, time.Time, error) {
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-
-	if err := addFilePart(writer, "base", baseName, baseBytes); err != nil {
-		return "", time.Time{}, err
-	}
-	if err := addFilePart(writer, "revision", revName, revBytes); err != nil {
-		return "", time.Time{}, err
-	}
-	if options != "" {
-		if err := writer.WriteField("options", options); err != nil {
-			return "", time.Time{}, fmt.Errorf("write options field: %w", err)
-		}
-	}
-	if mode != "" {
-		if err := writer.WriteField("mode", mode); err != nil {
-			return "", time.Time{}, fmt.Errorf("write mode field: %w", err)
-		}
-	}
-	if err := writer.Close(); err != nil {
-		return "", time.Time{}, fmt.Errorf("close multipart writer: %w", err)
-	}
-
-	endpoint := oasdiffSiteURL() + "/api/preview-review"
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, body)
-	if err != nil {
-		return "", time.Time{}, err
-	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("User-Agent", "oasdiff-cli")
-
-	client := &http.Client{Timeout: 5 * time.Minute}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", time.Time{}, fmt.Errorf("upload to %s: %w", endpoint, err)
-	}
-	defer resp.Body.Close()
-
-	respBody, _ := io.ReadAll(resp.Body)
-
-	if resp.StatusCode == http.StatusUnauthorized {
-		// Stale token. Clear it and ask the user to retry, which will trigger
-		// a fresh first-run handshake. We do not retry automatically because
-		// running the OAuth dance silently after a successful diff would
-		// surprise the user.
-		_ = deleteStoredAccessToken()
-		return "", time.Time{}, fmt.Errorf("stored credentials are no longer valid; cleared them. Run the command again to sign in")
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", time.Time{}, fmt.Errorf("upload failed (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
-	}
-
-	var parsed struct {
-		ReviewId  string `json:"review_id" yaml:"review_id"`
-		ExpiresAt int64  `json:"expires_at" yaml:"expires_at"`
-	}
-	if err := json.Unmarshal(respBody, &parsed); err != nil {
-		return "", time.Time{}, fmt.Errorf("parse response: %w", err)
-	}
-	if parsed.ReviewId == "" {
-		return "", time.Time{}, fmt.Errorf("response missing review_id: %s", string(respBody))
-	}
-	reviewURL := oasdiffSiteURL() + "/review/local/" + url.PathEscape(parsed.ReviewId)
-	expiresAt := time.Unix(parsed.ExpiresAt, 0).UTC()
-	return reviewURL, expiresAt, nil
-}
-
-func addFilePart(writer *multipart.Writer, fieldName, fileName string, body []byte) error {
-	part, err := writer.CreateFormFile(fieldName, fileName)
-	if err != nil {
-		return fmt.Errorf("create form file %s: %w", fieldName, err)
-	}
-	if _, err := part.Write(body); err != nil {
-		return fmt.Errorf("write %s body: %w", fieldName, err)
-	}
-	return nil
-}
-
 // openBrowser opens the URL in the default browser. xdg-open / open / start
 // cover Linux, macOS, and Windows. Non-zero exit from the opener is treated
 // as a soft failure — the caller prints the URL for the user to follow
@@ -209,151 +267,4 @@ func openBrowser(targetURL string) error {
 		return fmt.Errorf("don't know how to open a browser on %s", runtime.GOOS)
 	}
 	return cmd.Start()
-}
-
-// credentialsPath returns the platform-appropriate path to the CLI auth
-// credentials file. Linux: $XDG_CONFIG_HOME/oasdiff/credentials. macOS:
-// ~/Library/Application Support/oasdiff/credentials. Windows:
-// %AppData%\oasdiff\credentials.
-func credentialsPath() (string, error) {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", fmt.Errorf("locate user config dir: %w", err)
-	}
-	return filepath.Join(configDir, "oasdiff", "credentials"), nil
-}
-
-// readStoredAccessToken loads a previously issued access token. Returns
-// ("", nil) when no token is stored (first run). Returns ("", err) for
-// real filesystem failures (permission denied, etc.).
-func readStoredAccessToken() (string, error) {
-	path, err := credentialsPath()
-	if err != nil {
-		return "", err
-	}
-	body, err := os.ReadFile(path)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return "", nil
-		}
-		return "", fmt.Errorf("read credentials: %w", err)
-	}
-	return strings.TrimSpace(string(body)), nil
-}
-
-// writeStoredAccessToken persists a freshly minted access token. File mode
-// 0600 because the token is a credential — same care as ~/.ssh/id_*.
-func writeStoredAccessToken(token string) error {
-	path, err := credentialsPath()
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
-		return fmt.Errorf("create config dir: %w", err)
-	}
-	return os.WriteFile(path, []byte(token+"\n"), 0600)
-}
-
-func deleteStoredAccessToken() error {
-	path, err := credentialsPath()
-	if err != nil {
-		return err
-	}
-	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return err
-	}
-	return nil
-}
-
-// readOrMintAccessToken returns the stored access token, or runs the
-// first-run browser sign-in if none is stored. The sign-in flow opens a
-// random-port HTTP listener on 127.0.0.1, opens the visitor's browser at
-// /cli-login?port=N, waits for the GET callback with the token in the
-// query string, and writes it to credentialsPath() before returning.
-func readOrMintAccessToken(stdout io.Writer) (string, error) {
-	token, err := readStoredAccessToken()
-	if err != nil {
-		return "", err
-	}
-	if token != "" {
-		return token, nil
-	}
-	fmt.Fprintf(stdout, "\nFirst time on this machine. Opening browser to sign in...\n")
-	token, err = signInViaBrowser(stdout)
-	if err != nil {
-		return "", err
-	}
-	if err := writeStoredAccessToken(token); err != nil {
-		return "", err
-	}
-	path, _ := credentialsPath()
-	fmt.Fprintf(stdout, "Stored credentials at %s\n", path)
-	return token, nil
-}
-
-// signInViaBrowser runs the localhost-handoff dance. Binds to 127.0.0.1 on a
-// random high port; opens the visitor's browser at /cli-login?port=N; waits
-// up to 5 minutes for a GET callback whose query string carries access_token;
-// returns the token.
-//
-// The handoff is a GET (top-level navigation) rather than a POST because
-// browsers warn on HTTPS → HTTP form submissions even when the destination
-// is loopback. Top-level navigations to HTTP are silently allowed. The
-// listener's response page uses history.replaceState to scrub the token
-// from the address bar.
-//
-// Edge cases (SSH / WSL / Codespaces where the browser and CLI run on
-// different hosts) are not handled in v1; the listener times out and the
-// caller surfaces the failure to the visitor. The deferred v2 fix is a
-// copy-paste fallback — see enterprise/docs/cli-local-review.md.
-func signInViaBrowser(stdout io.Writer) (string, error) {
-	ln, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		return "", fmt.Errorf("bind local listener: %w", err)
-	}
-	defer ln.Close()
-	port := ln.Addr().(*net.TCPAddr).Port
-
-	tokenCh := make(chan string, 1)
-	errCh := make(chan error, 1)
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-		token := strings.TrimSpace(r.URL.Query().Get("access_token"))
-		if token == "" {
-			http.Error(w, "missing access_token", http.StatusBadRequest)
-			errCh <- errors.New("callback missing access_token")
-			return
-		}
-		// Scrub the token from the address bar before the visitor can read
-		// or share it. history.replaceState replaces the loopback URL
-		// (which carried the token in its query string) with a clean path
-		// on the same loopback origin.
-		fmt.Fprintln(w, `<!doctype html><html><head><script>history.replaceState(null,'','/');</script></head><body style="font-family:sans-serif;text-align:center;padding:4rem"><h2>oasdiff CLI is signed in</h2><p>You can close this tab and return to your terminal.</p></body></html>`)
-		tokenCh <- token
-	})
-
-	server := &http.Server{Handler: mux, ReadHeaderTimeout: 10 * time.Second}
-	go func() { _ = server.Serve(ln) }()
-	defer func() { _ = server.Shutdown(context.Background()) }()
-
-	loginURL := fmt.Sprintf("%s/cli-login?port=%d", oasdiffSiteURL(), port)
-	if err := openBrowser(loginURL); err != nil {
-		fmt.Fprintf(stdout, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, loginURL)
-	} else {
-		fmt.Fprintf(stdout, "  -> %s\n", loginURL)
-	}
-
-	select {
-	case token := <-tokenCh:
-		return token, nil
-	case err := <-errCh:
-		return "", err
-	case <-time.After(5 * time.Minute):
-		return "", errors.New("sign-in timed out after 5 minutes — no callback received from the browser")
-	}
 }
