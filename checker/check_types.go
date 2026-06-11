@@ -32,6 +32,15 @@ func breakingTypeFormatChangedInRequestProperty(typeDiff *diff.StringsDiff, form
 	return breakingTypeFormatChangedInRequest(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
 }
 
+// isRequestTypeGeneralization checks if a type diff represents a complete removal of the type constraint
+func isRequestTypeGeneralization(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	if typeDiff == nil {
+		return false
+	}
+	rev := schemaDiff.Revision.Type
+	return rev == nil || len(*rev) == 0
+}
+
 // breakingTypeFormatChangedInRequest checks if the type or format of a request was changed in a breaking way
 func breakingTypeFormatChangedInRequest(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, schemaDiff *diff.SchemaDiff) bool {
 
