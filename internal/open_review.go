@@ -25,9 +25,12 @@ import (
 	"github.com/oasdiff/oasdiff/load"
 )
 
-// oasdiffSiteURL is the base URL of the web product. Overridable via the
-// OASDIFF_URL env var for local development and tests; in production this
-// is the canonical oasdiff.com.
+// oasdiffSiteURL is the base URL of the web product. Defaults to the canonical
+// oasdiff.com; set the OASDIFF_URL env var to point --open at a different
+// deployment -- a local dev server, or a self-hosted oasdiff. The target must
+// be a full web deployment: --open uploads to its /api/encrypted-review route
+// and the review renders at /review/e, so a bare API service (api.oasdiff.com)
+// won't work.
 func oasdiffSiteURL() string {
 	if u := os.Getenv("OASDIFF_URL"); u != "" {
 		return strings.TrimRight(u, "/")
