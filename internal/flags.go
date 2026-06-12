@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"encoding/json"
-
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/spf13/viper"
@@ -36,39 +34,6 @@ func (flags *Flags) toConfig() *diff.Config {
 	config.MatchInlineRefs = flags.getMatchInlineRefs()
 
 	return config
-}
-
-// semanticOptionsJSON returns a JSON object of the semantic comparison flags
-// the visitor passed (flatten-allof, flatten-params, etc.), for callers that
-// forward comparison settings to another renderer (the --open web review
-// upload). Filtering and presentation flags are deliberately excluded: the web
-// UI owns those interactively. Returns "" when no semantic flags are set, so
-// the upload omits the field rather than sending an empty object.
-func (flags *Flags) semanticOptionsJSON() string {
-	opts := map[string]any{}
-	if flags.getFlattenAllOf() {
-		opts["flatten-allof"] = true
-	}
-	if flags.getFlattenParams() {
-		opts["flatten-params"] = true
-	}
-	if flags.getCaseInsensitiveHeaders() {
-		opts["case-insensitive-headers"] = true
-	}
-	if flags.getAutoUpgrade() {
-		opts["auto-upgrade"] = true
-	}
-	if flags.getMatchInlineRefs() {
-		opts["match-inline-refs"] = true
-	}
-	if flags.getIncludePathParams() {
-		opts["include-path-params"] = true
-	}
-	if len(opts) == 0 {
-		return ""
-	}
-	b, _ := json.Marshal(opts)
-	return string(b)
 }
 
 func (flags *Flags) getViper() *viper.Viper {

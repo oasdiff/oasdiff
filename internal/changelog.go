@@ -82,7 +82,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getOpen() {
-		if err := uploadAndOpen(flags, stdout, isBreaking); err != nil {
+		if err := uploadAndOpen(flags, stdout, isBreaking, errs, diffResult.specInfoPair, diffResult.diffReport.Empty()); err != nil {
 			return false, getErrUploadAndOpenFailed(err)
 		}
 	}
