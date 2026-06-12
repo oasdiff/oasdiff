@@ -59,12 +59,12 @@ const encryptedReviewBlobVersion = 1
 // It is byte-identical to what oasdiff-service's /public/changelog returns for
 // the plaintext path, so the review page renders it the same way.
 type reviewPayload struct {
-	BaseSpec         string          `json:"base_spec"`
-	RevisionSpec     string          `json:"revision_spec"`
-	BaseFilename     string          `json:"base_filename"`
-	RevisionFilename string          `json:"revision_filename"`
-	Changes          json.RawMessage `json:"changes"`
-	Mode             string          `json:"mode"`
+	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
+	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
+	BaseFilename     string          `json:"base_filename" yaml:"base_filename"`
+	RevisionFilename string          `json:"revision_filename" yaml:"revision_filename"`
+	Changes          json.RawMessage `json:"changes" yaml:"changes"`
+	Mode             string          `json:"mode" yaml:"mode"`
 }
 
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
