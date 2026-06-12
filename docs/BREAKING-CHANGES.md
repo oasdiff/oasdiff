@@ -19,18 +19,18 @@ oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/op
 ```
 
 ## Side-by-side review in your browser (`--open`)
-Both `breaking` and `changelog` accept an `--open` flag. After printing the usual terminal output, the CLI uploads the two specs to [oasdiff.com](https://www.oasdiff.com) and opens the rendered side-by-side review in your browser — the same view paying customers see, with approve/reject buttons present (disabled on the free tier) and the diff anchored at each change site.
+Both `breaking` and `changelog` accept an `--open` flag. After printing the usual terminal output, the CLI uploads the comparison to [oasdiff.com](https://www.oasdiff.com) and opens the rendered side-by-side review in your browser, with the diff anchored at each change site. The approve/reject buttons are shown but disabled; they are enabled only with [oasdiff Pro](https://www.oasdiff.com/pricing).
 
 ```
 oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
 ```
 
-The first run on a new machine opens a browser to sign in with GitHub and stores a credential at `~/.config/oasdiff/credentials` (or the platform equivalent on macOS / Windows). Subsequent runs skip the sign-in step.
+The comparison is encrypted on your machine before upload, with a one-time key that lives only in the review link (the part after the `#`) and is never sent to our servers, so what we store we cannot read. There is no sign-in and no account.
 
-The resulting URL is unguessable and shareable for 7 days — paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Only semantic comparison flags (`--flatten-allof`, `--flatten-params`, `--match-inline-refs`, `--case-insensitive-headers`, `--auto-upgrade`, `--include-path-params`) are applied to the uploaded comparison; presentation and filtering flags (`--format`, `--color`, `--lang`, `--fail-on`, `--level`, `--include-checks`, `--severity-levels`) only affect the terminal output.
+The resulting URL works for 7 days. Paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Anyone you give the full link to can open it (the part after the `#` is the decryption key), so treat it like a secret. Only semantic comparison flags (`--flatten-allof`, `--flatten-params`, `--match-inline-refs`, `--case-insensitive-headers`, `--auto-upgrade`, `--include-path-params`) are applied to the uploaded comparison; presentation and filtering flags (`--format`, `--color`, `--lang`, `--fail-on`, `--level`, `--include-checks`, `--severity-levels`) only affect the terminal output.
 
 ## Checks
-Oasdiff supports over 250 checks, categorized into three levels:  
+Oasdiff supports hundreds of checks (browse the full catalog at [oasdiff.com/checks](https://www.oasdiff.com/checks)), categorized into three levels:  
 - `ERR` - Errors are definite breaking changes which should be avoided
 - `WARN` - Warnings are potential breaking changes which developers should be aware of, but cannot be confirmed programmatically as breaking
 - `INFO` - Non-breaking changes
