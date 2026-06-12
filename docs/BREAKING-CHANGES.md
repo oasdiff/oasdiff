@@ -30,7 +30,7 @@ The comparison is encrypted on your machine before upload, with a one-time key t
 The resulting URL works for 7 days. Paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Anyone you give the full link to can open it (the part after the `#` is the decryption key), so treat it like a secret.
 
 ## Checks
-Oasdiff supports hundreds of checks (browse the full catalog at [oasdiff.com/checks](https://www.oasdiff.com/checks)), categorized into three levels:  
+Oasdiff supports hundreds of checks (run `oasdiff checks` for the current list, or browse the full catalog at [oasdiff.com/checks](https://www.oasdiff.com/checks)), categorized into three levels:  
 - `ERR` - Errors are definite breaking changes which should be avoided
 - `WARN` - Warnings are potential breaking changes which developers should be aware of, but cannot be confirmed programmatically as breaking
 - `INFO` - Non-breaking changes
