@@ -27,7 +27,7 @@ oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
 
 The comparison is encrypted on your machine before upload, with a one-time key that lives only in the review link (the part after the `#`) and is never sent to our servers, so what we store we cannot read. There is no sign-in and no account.
 
-The resulting URL works for 7 days. Paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Anyone you give the full link to can open it (the part after the `#` is the decryption key), so treat it like a secret. Only semantic comparison flags (`--flatten-allof`, `--flatten-params`, `--match-inline-refs`, `--case-insensitive-headers`, `--auto-upgrade`, `--include-path-params`) are applied to the uploaded comparison; presentation and filtering flags (`--format`, `--color`, `--lang`, `--fail-on`, `--level`, `--include-checks`, `--severity-levels`) only affect the terminal output.
+The resulting URL works for 7 days. Paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Anyone you give the full link to can open it (the part after the `#` is the decryption key), so treat it like a secret.
 
 ## Checks
 Oasdiff supports hundreds of checks (browse the full catalog at [oasdiff.com/checks](https://www.oasdiff.com/checks)), categorized into three levels:  
