@@ -71,7 +71,7 @@ See [CHANGELOG-TEMPLATE.md](CHANGELOG-TEMPLATE.md) for full documentation and ex
 oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
 oasdiff breaking HEAD~1:openapi.yaml HEAD:openapi.yaml --open
 ```
-After printing the changelog, uploads both specs to oasdiff.com and opens the rendered side-by-side review in your browser. First run prompts for GitHub sign-in; subsequent runs skip it. See [BREAKING-CHANGES.md](BREAKING-CHANGES.md#side-by-side-review-in-your-browser-open) for the full flow.
+After printing the changelog, encrypts the comparison on your machine, uploads only the ciphertext to oasdiff.com, and opens the rendered side-by-side review in your browser. No sign-in: the decryption key stays in the review link's `#` fragment and is never sent to our servers. The link works for 7 days and is shareable with anyone (the key is part of it). See [BREAKING-CHANGES.md](BREAKING-CHANGES.md#side-by-side-review-in-your-browser-open) for the full flow.
 
 ## OpenAPI diff for endpoints containing "/api" in the path
 ```bash
