@@ -80,8 +80,9 @@ type reviewPayload struct {
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
 func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
-	// Composed mode (-c) is rejected up front in getChangelog (--open compares
-	// exactly two specs), so it never reaches here.
+	// Composed mode (-c) is rejected up front in argument validation
+	// (checkOpenWithComposed: --open compares exactly two specs), so it never
+	// reaches here.
 	baseBytes, baseName, err := readSpecSource(flags.getBase())
 	if err != nil {
 		return fmt.Errorf("read base spec: %w", err)
