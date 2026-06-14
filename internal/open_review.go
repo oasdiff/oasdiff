@@ -72,14 +72,18 @@ type reviewPayload struct {
 // `breaking --open`): it bundles the two specs and the computed changelog,
 // encrypts the bundle with a fresh key, uploads only the ciphertext to the
 // configured server (oasdiff.com by default; see oasdiffSiteURL), prints the
-// resulting review URL (with the key in its #fragment), and opens it in the
-// default browser. The terminal changelog/breaking output has already been
-// printed by the caller; --open is purely additive.
+// resulting review URL (with the key in its #fragment) to stderr, and opens it
+// in the default browser. The terminal changelog/breaking output has already
+// been printed by the caller; --open is purely additive.
+//
+// The review URL and browser-fallback notice go to stderr, never stdout, so
+// they can't corrupt piped machine-readable output (e.g. changelog
+// --format json --open > out.json). stderr is passed in by the caller.
 //
 // There is no sign-in: the upload is zero-knowledge, so the server stores an
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
-func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
+func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
 	// Composed mode (-c) is rejected up front in argument validation
 	// (checkOpenWithComposed: --open compares exactly two specs), so it never
 	// reaches here.
@@ -134,9 +138,9 @@ func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker
 		base64.RawURLEncoding.EncodeToString(key),
 	)
 
-	fmt.Fprintf(stdout, "\nOpening %s (expires %s)\n", reviewURL, expiresAt.Format("2006-01-02 15:04 MST"))
+	fmt.Fprintf(stderr, "\nOpening %s (expires %s)\n", reviewURL, expiresAt.Format("2006-01-02 15:04 MST"))
 	if err := openBrowser(reviewURL); err != nil {
-		fmt.Fprintf(stdout, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
+		fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
 	}
 	return nil
 }
