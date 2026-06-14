@@ -34,9 +34,8 @@ var flagsNotInConfigFile = map[string]bool{
 // Config field, so users can put any real flag in .oasdiff.* without surprise.
 func Test_ConfigFileCoversAllFlags(t *testing.T) {
 	configKeys := map[string]bool{}
-	ct := reflect.TypeFor[Config]()
-	for i := range ct.NumField() {
-		if tag := ct.Field(i).Tag.Get("mapstructure"); tag != "" {
+	for field := range reflect.TypeFor[Config]().Fields() {
+		if tag := field.Tag.Get("mapstructure"); tag != "" {
 			configKeys[tag] = true
 		}
 	}
