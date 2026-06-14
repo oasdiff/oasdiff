@@ -118,13 +118,6 @@ func getErrDisallowedExternalRef(err error) *ReturnError {
 	return getError(err, 123)
 }
 
-func getErrUploadAndOpenFailed(err error) *ReturnError {
-	return getError(
-		fmt.Errorf("--open failed: %w", err),
-		130,
-	)
-}
-
 // asFlattenError returns the *load.FlattenError in err's chain, or nil if err is
 // a genuine load failure. Centralised so every spec-loading site stays a single
 // line at the call site.

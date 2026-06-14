@@ -79,6 +79,13 @@ type reviewPayload struct {
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
 func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
+	// The encrypted review carries exactly two specs; composed mode (-c) diffs
+	// globs of many files, which the payload and the review page can't represent.
+	// Fail with a clear message instead of letting readSpecSource try to read the
+	// literal glob string from disk ("no such file or directory").
+	if flags.getComposed() {
+		return fmt.Errorf("--open does not support composed mode (-c)")
+	}
 	baseBytes, baseName, err := readSpecSource(flags.getBase())
 	if err != nil {
 		return fmt.Errorf("read base spec: %w", err)
