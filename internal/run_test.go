@@ -43,6 +43,19 @@ func Test_InvalidFlag(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --invalid"), io.Discard, io.Discard))
 }
 
+func Test_OpenWithComposedRejected(t *testing.T) {
+	// --open compares exactly two specs, so it can't be combined with composed
+	// mode (-c). Rejected at argument validation before any diff runs.
+	for _, cmd := range []string{
+		"oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test1.yaml --composed --open",
+		"oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test1.yaml -c --open",
+	} {
+		var stderr bytes.Buffer
+		require.Equal(t, 100, internal.Run(cmdToArgs(cmd), io.Discard, &stderr), cmd)
+		require.Contains(t, stderr.String(), "--open cannot be used with composed mode (-c)", cmd)
+	}
+}
+
 func Test_BasicDiff(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml --exclude-elements endpoints"), &stdout, io.Discard))

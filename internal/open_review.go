@@ -43,11 +43,12 @@ func oasdiffSiteURL() string {
 // trying to decrypt garbage. Bump it only on an incompatible layout change.
 const encryptedReviewBlobVersion = 1
 
-// reviewPayload is the cleartext bundle the CLI encrypts and uploads. It is
-// never seen by oasdiff.com in cleartext: the CLI AES-256-GCM-encrypts the
-// JSON below with a fresh random key, uploads only the ciphertext, and puts
-// the key in the review URL's #fragment (which browsers never send to a
-// server). The browser decrypts and renders.
+// reviewPayload is the cleartext bundle the CLI encrypts and uploads. The
+// server (oasdiff.com by default, or whatever OASDIFF_URL points at) never
+// sees it in cleartext: the CLI AES-256-GCM-encrypts the JSON below with a
+// fresh random key, uploads only the ciphertext, and puts the key in the
+// review URL's #fragment (which browsers never send to a server). The browser
+// decrypts and renders.
 //
 // BaseSpec / RevisionSpec hold each spec's bytes verbatim as a string. A YAML
 // spec stays YAML text and a JSON spec stays JSON text -- this JSON object is
@@ -56,8 +57,8 @@ const encryptedReviewBlobVersion = 1
 //
 // Changes is the JSON changelog the CLI already computed, embedded raw. The
 // server can't recompute it (it can't read the specs), so the CLI ships it.
-// It is byte-identical to what oasdiff-service's /public/changelog returns for
-// the plaintext path, so the review page renders it the same way.
+// It is byte-identical to what the service's /public/changelog returns for the
+// plaintext path, so the review page renders it the same way.
 type reviewPayload struct {
 	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
 	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
@@ -69,16 +70,19 @@ type reviewPayload struct {
 
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
 // `breaking --open`): it bundles the two specs and the computed changelog,
-// encrypts the bundle with a fresh key, uploads only the ciphertext to
-// oasdiff.com, prints the resulting review URL (with the key in its
-// #fragment), and opens it in the default browser. The terminal
-// changelog/breaking output has already been printed by the caller; --open is
-// purely additive.
+// encrypts the bundle with a fresh key, uploads only the ciphertext to the
+// configured server (oasdiff.com by default; see oasdiffSiteURL), prints the
+// resulting review URL (with the key in its #fragment), and opens it in the
+// default browser. The terminal changelog/breaking output has already been
+// printed by the caller; --open is purely additive.
 //
-// There is no sign-in: the upload is zero-knowledge, so oasdiff.com stores an
+// There is no sign-in: the upload is zero-knowledge, so the server stores an
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
 func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
+	// Composed mode (-c) is rejected up front in argument validation
+	// (checkOpenWithComposed: --open compares exactly two specs), so it never
+	// reaches here.
 	baseBytes, baseName, err := readSpecSource(flags.getBase())
 	if err != nil {
 		return fmt.Errorf("read base spec: %w", err)
@@ -122,7 +126,7 @@ func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker
 
 	// The key rides in the URL #fragment. Browsers never transmit the
 	// fragment to a server (not in the request path, query, or Referer), so
-	// neither oasdiff.com nor any intermediary sees the key -- only code
+	// neither the server nor any intermediary sees the key -- only code
 	// running in the visitor's own browser can read it.
 	reviewURL := fmt.Sprintf("%s/review/e/%s#k=%s",
 		oasdiffSiteURL(),
@@ -138,7 +142,7 @@ func uploadAndOpen(flags *Flags, stdout io.Writer, isBreaking bool, errs checker
 }
 
 // renderChangelogJSON produces the JSON changelog bytes embedded in the
-// encrypted payload. It mirrors oasdiff-service's /public/changelog rendering
+// encrypted payload. It mirrors the service's /public/changelog rendering
 // (FormatJSON + WrapInObject) so the review page consumes identical bytes
 // whether the review came through the plaintext path or the encrypted one.
 // Color is forced off: the output is data, not a terminal render.
@@ -185,11 +189,11 @@ func encryptReviewPayload(plaintext []byte) (blob, key []byte, err error) {
 	return blob, key, nil
 }
 
-// postEncryptedReview uploads the opaque ciphertext blob to oasdiff.com and
-// returns the assigned review id plus its TTL expiry. The request is
-// anonymous (no credentials): the server stores a blob it cannot read, so it
-// has nothing to attribute to a user. The body is the raw blob; the response
-// is JSON {review_id, expires_at}.
+// postEncryptedReview uploads the opaque ciphertext blob to the configured
+// server (see oasdiffSiteURL) and returns the assigned review id plus its TTL
+// expiry. The request is anonymous (no credentials): the server stores a blob
+// it cannot read, so it has nothing to attribute to a user. The body is the
+// raw blob; the response is JSON {review_id, expires_at}.
 func postEncryptedReview(blob []byte) (string, time.Time, error) {
 	endpoint := oasdiffSiteURL() + "/api/encrypted-review"
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, bytes.NewReader(blob))
