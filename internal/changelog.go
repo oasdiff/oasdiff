@@ -48,6 +48,15 @@ func runChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
 
+	// --open builds a side-by-side review of exactly two specs; composed mode
+	// (-c) diffs a glob of many files, which the review can't represent. This is
+	// a static flag incompatibility (unlike a runtime upload problem, which is
+	// non-fatal below), so reject it up front instead of running the whole diff
+	// and then warning.
+	if flags.getOpen() && flags.getComposed() {
+		return false, getErrInvalidFlags(fmt.Errorf("--open cannot be used with composed mode (-c): the side-by-side review compares exactly two specs"))
+	}
+
 	diffResult, returnErr := calcDiff(flags)
 	if returnErr != nil {
 		return false, returnErr
