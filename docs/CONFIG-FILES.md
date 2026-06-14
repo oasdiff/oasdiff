@@ -28,7 +28,7 @@ export OASDIFF_CONFIG=./my-config.yaml
 oasdiff diff base.yaml revision.yaml
 ```
 
-The configuration file supports the exact same flags that are supported by the command-line.
+The configuration file supports the same flags that are supported by the command-line, except `--open`. `--open` uploads the comparison and opens an interactive side-by-side review in a browser, so it is a command-line-only action and is not read from a config file (a config file is shared and committed, and would otherwise upload and open a review on every run).
 Notes:
 1. Command-line flags take precedence over configuration file settings.
 2. **Boolean flags**: to set a boolean flag to `false` on the command line, use `=` syntax: `--flag=false`.
