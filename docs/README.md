@@ -123,6 +123,7 @@ Shape and enrich the report.
 - [Configuration file](CONFIG-FILES.md)
 - [Embed in a Go program](GO.md)
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI — and [oasdiff.com](https://www.oasdiff.com) for teams, which adds a per-change PR comment with approve/reject and commit-status checks
+- [MCP server](MCP.md) — call oasdiff from an AI assistant (Claude, Cursor, ...) via the hosted server at `https://api.oasdiff.com/mcp`
 
 ### Reference
 - [OpenAPI 3.1 support](OPENAPI-31.md) — what's supported
