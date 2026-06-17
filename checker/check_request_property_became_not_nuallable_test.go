@@ -267,3 +267,21 @@ func TestRequestBodyTypeRemovedEntirelyStaysNullable(t *testing.T) {
 	require.False(t, containsId(errs, checker.RequestBodyBecomeNotNullableId),
 		"removing the type entirely leaves the schema nullable (untyped accepts null); must not report became-not-nullable")
 }
+
+// CL: adding an explicit type (including null) to a previously untyped body must
+// NOT report became-nullable. An untyped schema already accepts null, so adding
+// [object, null] does not introduce nullability. Mirror of the type-removed case. (#1004)
+func TestRequestBodyTypeAddedFromUntypedStaysNullable(t *testing.T) {
+	s1, err := open("../data/checker/request_body_nullable_31_revision.yaml") // type: [object, "null"]
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_body_nullable_31_revision.yaml")
+	require.NoError(t, err)
+	// Base is untyped; revision keeps [object, null]. Untyped already accepts null.
+	s1.Spec.Paths.Value("/products").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = nil
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
+	require.False(t, containsId(errs, checker.RequestBodyBecomeNullableId),
+		"adding a type to a previously untyped schema does not add nullability (untyped already accepts null)")
+}

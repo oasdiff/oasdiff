@@ -13,9 +13,17 @@ func isNullTypeChange(typeDiff *diff.StringsDiff) bool {
 	return onlyNull(typeDiff.Added) && onlyNull(typeDiff.Deleted)
 }
 
-// nullAddedToTypeArray returns true if "null" was added to the type array (OpenAPI 3.1 nullable)
-func nullAddedToTypeArray(typeDiff *diff.StringsDiff) bool {
+// nullAddedToTypeArray returns true if "null" was added to the type array and the
+// base already constrained the type (OpenAPI 3.1 became nullable). If the base had
+// no type keyword, it was untyped and already accepted any value, including null,
+// so introducing an explicit type that contains null does NOT make it newly
+// nullable, even though "null" appears in the added set. baseType is the base
+// schema's type. Mirror of nullRemovedFromTypeArray; see #1004.
+func nullAddedToTypeArray(typeDiff *diff.StringsDiff, baseType *openapi3.Types) bool {
 	if typeDiff == nil {
+		return false
+	}
+	if baseType == nil || len(*baseType) == 0 {
 		return false
 	}
 	for _, t := range typeDiff.Added {
