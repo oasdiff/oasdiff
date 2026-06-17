@@ -24,11 +24,11 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 				result = append(result, info.newChange(RequestBodyBecomeNullableId, nil, "").
 					WithSources(baseSource, revisionSource))
 			}
-		} else if nullRemovedFromTypeArray(info.schemaDiff.TypeDiff) {
+		} else if nullRemovedFromTypeArray(info.schemaDiff.TypeDiff, info.schemaDiff.Revision.Type) {
 			// OpenAPI 3.1: type changed from ["string", "null"] to "string"
 			result = append(result, info.newChange(RequestBodyBecomeNotNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
-		} else if nullAddedToTypeArray(info.schemaDiff.TypeDiff) {
+		} else if nullAddedToTypeArray(info.schemaDiff.TypeDiff, info.schemaDiff.Base.Type) {
 			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
 			result = append(result, info.newChange(RequestBodyBecomeNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
@@ -47,10 +47,10 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 					result = append(result, p.newChange(RequestPropertyBecomeNullableId, []any{propName}, "").
 						WithSources(propBaseSource, propRevisionSource))
 				}
-			} else if nullRemovedFromTypeArray(p.propertyDiff.TypeDiff) {
+			} else if nullRemovedFromTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Revision.Type) {
 				result = append(result, p.newChange(RequestPropertyBecomeNotNullableId, []any{propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
-			} else if nullAddedToTypeArray(p.propertyDiff.TypeDiff) {
+			} else if nullAddedToTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Base.Type) {
 				result = append(result, p.newChange(RequestPropertyBecomeNullableId, []any{propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
