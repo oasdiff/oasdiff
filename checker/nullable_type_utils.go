@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -26,12 +28,7 @@ func nullAddedToTypeArray(typeDiff *diff.StringsDiff, baseType *openapi3.Types) 
 	if baseType == nil || len(*baseType) == 0 {
 		return false
 	}
-	for _, t := range typeDiff.Added {
-		if t == "null" {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(typeDiff.Added, "null")
 }
 
 // nullRemovedFromTypeArray returns true if "null" was removed from the type array
@@ -47,12 +44,7 @@ func nullRemovedFromTypeArray(typeDiff *diff.StringsDiff, revisionType *openapi3
 	if revisionType == nil || len(*revisionType) == 0 {
 		return false
 	}
-	for _, t := range typeDiff.Deleted {
-		if t == "null" {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(typeDiff.Deleted, "null")
 }
 
 func onlyNull(types []string) bool {
