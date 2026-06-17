@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -25,9 +26,17 @@ func nullAddedToTypeArray(typeDiff *diff.StringsDiff) bool {
 	return false
 }
 
-// nullRemovedFromTypeArray returns true if "null" was removed from the type array (OpenAPI 3.1 became not-nullable)
-func nullRemovedFromTypeArray(typeDiff *diff.StringsDiff) bool {
+// nullRemovedFromTypeArray returns true if "null" was removed from the type array
+// and the revision still constrains the type (OpenAPI 3.1 became not-nullable).
+// If the revision dropped the type keyword entirely, the schema is untyped and
+// accepts any value, including null, so it did NOT become non-nullable, even
+// though "null" appears in the deleted set. revisionType is the revision
+// schema's type. See #1004.
+func nullRemovedFromTypeArray(typeDiff *diff.StringsDiff, revisionType *openapi3.Types) bool {
 	if typeDiff == nil {
+		return false
+	}
+	if revisionType == nil || len(*revisionType) == 0 {
 		return false
 	}
 	for _, t := range typeDiff.Deleted {
