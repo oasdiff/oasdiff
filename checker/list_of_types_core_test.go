@@ -210,6 +210,62 @@ func TestListOfTypesIntegration_ParameterChanges(t *testing.T) {
 	require.Empty(t, paramChanges, "No parameter changes expected for identical files")
 }
 
+// TestListOfTypes_SuppressionWhenRunWithTypeAndOneOfChecks is a strict
+// regression guard: a single<->oneOf/anyOf transition on a body property must be
+// reported only by the list-of-types checker, even when the type-changed and
+// oneOf/anyOf-updated checkers run alongside it. Those checkers each suppress
+// their own report for this transition; without the suppression the same change
+// is reported two or three times. The other list-of-types tests run a single
+// checker in isolation, so they would not catch the suppression regressing.
+func TestListOfTypes_SuppressionWhenRunWithTypeAndOneOfChecks(t *testing.T) {
+	config := checker.NewConfig(checker.BackwardCompatibilityChecks{
+		checker.RequestPropertyTypeChangedCheck,
+		checker.ResponsePropertyTypeChangedCheck,
+		checker.RequestPropertyOneOfUpdatedCheck,
+		checker.ResponsePropertyOneOfUpdated,
+		checker.RequestPropertyAnyOfUpdatedCheck,
+		checker.ResponsePropertyAnyOfUpdatedCheck,
+		checker.RequestPropertyListOfTypesChangedCheck,
+		checker.ResponsePropertyListOfTypesChangedCheck,
+	})
+
+	for _, tc := range []struct {
+		name       string
+		base, rev  string
+		expectedId string
+	}{
+		{
+			"single-to-list reports only response-property-list-of-types-widened",
+			"../data/list-of-types/single-to-list-base.yaml",
+			"../data/list-of-types/single-to-list-revision.yaml",
+			checker.ResponsePropertyListOfTypesWidenedId,
+		},
+		{
+			"list-to-single reports only request-property-list-of-types-narrowed",
+			"../data/list-of-types/list-to-single-base.yaml",
+			"../data/list-of-types/list-to-single-revision.yaml",
+			checker.RequestPropertyListOfTypesNarrowedId,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s1, err := open(tc.base)
+			require.NoError(t, err)
+			s2, err := open(tc.rev)
+			require.NoError(t, err)
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+
+			errs := checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
+			require.NotEmpty(t, errs)
+			for _, e := range errs {
+				require.Equal(t, tc.expectedId, e.GetId(),
+					"only the list-of-types checker should report a single<->list transition; got a duplicate from another checker")
+			}
+		})
+	}
+}
+
 func TestListOfTypesIntegration_CoreFunctionsExecution(t *testing.T) {
 	// Test that covers the core internal functions by creating scenarios that exercise them
 	s1, err := open("../data/list-of-types/list-to-single-base.yaml")
