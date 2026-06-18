@@ -173,6 +173,38 @@ func TestFormatRemovedWithTypeChangeNotBreaking(t *testing.T) {
 	notBreaking(t, typeDiff, formatDiff, false, revisionType)
 }
 
+// Removing the type constraint from a request body is a non-breaking
+// generalization: the server then accepts any value. This holds even for a
+// strongly-typed (JSON) media type, where isTypeContained alone would not grant
+// it.
+func TestRequestTypeConstraintRemovedNotBreaking(t *testing.T) {
+	typeDiff := &diff.StringsDiff{
+		Deleted: []string{"object"},
+	}
+	schemaDiff := &diff.SchemaDiff{
+		Base:     &openapi3.Schema{Type: &openapi3.Types{"object"}},
+		Revision: &openapi3.Schema{},
+		TypeDiff: typeDiff,
+	}
+	require.False(t, requestTypeFormatBreaking(typeDiff, nil, "application/json", schemaDiff))
+}
+
+// Adding a type constraint to a response body where there was none is a
+// non-breaking specialization: the server then returns a subset of what it
+// could before. This is the covariant mirror of removing the constraint on the
+// request side, and likewise holds for a strongly-typed (JSON) media type.
+func TestResponseTypeConstraintAddedNotBreaking(t *testing.T) {
+	typeDiff := &diff.StringsDiff{
+		Added: []string{"object"},
+	}
+	schemaDiff := &diff.SchemaDiff{
+		Base:     &openapi3.Schema{},
+		Revision: &openapi3.Schema{Type: &openapi3.Types{"object"}},
+		TypeDiff: typeDiff,
+	}
+	require.False(t, responseTypeFormatBreaking(typeDiff, nil, "application/json", schemaDiff))
+}
+
 func TestIsJsonMediaType(t *testing.T) {
 	require.True(t, isJsonMediaType("application/json"))
 	require.True(t, isJsonMediaType("application/problem+json"))

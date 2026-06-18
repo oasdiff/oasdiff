@@ -20,8 +20,13 @@ func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Valu
 
 // responseTypeFormatBreaking reports whether a response type/format change is
 // breaking. Responses are covariant, so it is the same core check with the
-// base/revision direction reversed.
+// base/revision direction reversed. Adding a type constraint where there was
+// none narrows what the server returns, so it is a non-breaking specialization
+// (the mirror of removing the constraint on the request side).
 func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+	if isTypeConstraintAdded(typeDiff, schemaDiff) {
+		return false
+	}
 	return typeOrFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff)
 }
 
@@ -33,6 +38,16 @@ func isTypeConstraintRemoved(typeDiff *diff.StringsDiff, schemaDiff *diff.Schema
 	}
 	rev := schemaDiff.Revision.Type
 	return rev == nil || len(*rev) == 0
+}
+
+// isTypeConstraintAdded reports whether the type changed and the base had no
+// type, i.e. a type constraint was added where there was none.
+func isTypeConstraintAdded(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	if typeDiff == nil {
+		return false
+	}
+	base := schemaDiff.Base.Type
+	return base == nil || len(*base) == 0
 }
 
 // typeOrFormatBreaking reports whether a type change or a format change is
