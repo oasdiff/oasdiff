@@ -30,7 +30,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 			return
 		}
 
-		if breakingTypeFormatChangedInResponseProperty(typeDiff, formatDiff, info.mediaType, schemaDiff) {
+		if responseTypeFormatBreaking(typeDiff, formatDiff, info.mediaType, schemaDiff) {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
 				ResponseBodyTypeChangedId,
@@ -55,7 +55,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 			propTypeDiff := propSchemaDiff.TypeDiff
 			propFormatDiff := propSchemaDiff.FormatDiff
 
-			if breakingTypeFormatChangedInResponseProperty(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
+			if responseTypeFormatBreaking(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					ResponsePropertyTypeChangedId,

@@ -78,7 +78,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 						id := RequestParameterTypeGeneralizedId
 
-						if breakingTypeFormatChangedInRequest(typeDiff, formatDiff, false, schemaDiff) &&
+						if typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff) &&
 							!isParameterScalarToFormExplodeArray(paramDiff, typeDiff) {
 							id = RequestParameterTypeChangedId
 						}
