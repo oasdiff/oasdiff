@@ -333,3 +333,104 @@ func TestRequestPropertyTypeChangedReadOnlyProperty(t *testing.T) {
 	errs := checker.RequestPropertyTypeChangedCheck(d, osm, &checker.Config{})
 	require.Len(t, errs, 0)
 }
+
+// setRequestBodyType sets the request body schema type on the /test POST.
+func setRequestBodyType(t *testing.T, s *load.SpecInfo, types *openapi3.Types) {
+	t.Helper()
+	s.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = types
+}
+
+// BC: widening a request type set ([string] -> [string, integer]) is backward
+// compatible (the server accepts every type it did before plus more) and must
+// NOT be reported as a breaking request-body-type-changed. Mirror of the
+// response narrowing case.
+func TestRequestBodyTypeWideningMultiTypeNotBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	setRequestBodyType(t, s1, &openapi3.Types{"string"})
+	setRequestBodyType(t, s2, &openapi3.Types{"string", "integer"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
+	require.False(t, containsId(errs, checker.RequestBodyTypeChangedId),
+		"widening a request type set is non-breaking; must not report request-body-type-changed")
+}
+
+// BC: removing the type entirely from a request ([string] -> no type) is a
+// generalization (the server now accepts any value), so it is backward compatible.
+func TestRequestBodyTypeRemovedNotBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	setRequestBodyType(t, s1, &openapi3.Types{"string"})
+	setRequestBodyType(t, s2, nil)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
+	require.False(t, containsId(errs, checker.RequestBodyTypeChangedId),
+		"removing the type from a request accepts any value; non-breaking")
+}
+
+// BC (guard): narrowing a request type set ([string, integer] -> [string]) IS
+// breaking under a strongly-typed media type; a client sending integer is now
+// rejected.
+func TestRequestBodyTypeNarrowingStillBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	setRequestBodyType(t, s1, &openapi3.Types{"string", "integer"})
+	setRequestBodyType(t, s2, &openapi3.Types{"string"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.True(t, containsId(errs, checker.RequestBodyTypeChangedId),
+		"narrowing a request type set is breaking")
+}
+
+// BC (guard): adding a type constraint to a previously untyped request
+// (no type -> [string]) restricts the accepted values, so it is breaking.
+func TestRequestBodyTypeAddedFromUntypedStillBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	setRequestBodyType(t, s1, nil)
+	setRequestBodyType(t, s2, &openapi3.Types{"string"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.True(t, containsId(errs, checker.RequestBodyTypeChangedId),
+		"constraining a previously untyped request is breaking")
+}
+
+// BC (guard): a request type widening that co-occurs with a breaking format
+// change must still be reported; the safe type axis must not mask the format
+// axis. [integer] -> [integer, string] widens the type (backward compatible),
+// but int64 -> int32 narrows the format (a client sending an int64 value is now
+// rejected), which is breaking.
+func TestRequestBodyTypeWidenWithBreakingFormatStillBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-request.yaml")
+	require.NoError(t, err)
+	base := s1.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value
+	base.Type = &openapi3.Types{"integer"}
+	base.Format = "int64"
+	rev := s2.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value
+	rev.Type = &openapi3.Types{"integer", "string"}
+	rev.Format = "int32"
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.True(t, containsId(errs, checker.RequestBodyTypeChangedId),
+		"a type widening must not mask a co-occurring breaking format change (int64 -> int32)")
+}

@@ -11,7 +11,17 @@ import (
 // requestTypeFormatBreaking reports whether a request type/format change is
 // breaking. Requests are contravariant, so the change is evaluated toward the
 // revision type.
+//
+// A type-set widening (the revision accepts every type the base did, plus
+// possibly more) is backward compatible on the type axis, but the diff-based
+// core only sees the added/removed types and would still flag a multi-type
+// widening. We detect it from the full type sets and drop the type axis; the
+// format axis is evaluated independently, so a co-occurring breaking format
+// change is still reported.
 func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+	if isRequestTypeWidening(typeDiff, schemaDiff) {
+		typeDiff = nil
+	}
 	return typeFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff.Revision.Type)
 }
 
@@ -20,12 +30,9 @@ func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Valu
 // base/revision direction reversed: the diffs are reversed and the change is
 // evaluated toward the base type.
 //
-// A type-set narrowing (the revision type set is contained in the base set) is
-// backward compatible on the type axis, but the diff-based core only sees the
-// added/removed types and would still flag a multi-type narrowing. We detect the
-// narrowing from the full type sets and drop the type axis; the format axis is
-// evaluated independently, so a co-occurring breaking format change is still
-// reported.
+// The mirror of the request widening case: a type-set narrowing (the revision
+// returns only types the base could) is backward compatible on the type axis,
+// and is detected and dropped the same way.
 func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
 	if isResponseTypeNarrowing(typeDiff, schemaDiff) {
 		typeDiff = nil
@@ -33,29 +40,31 @@ func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Val
 	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff.Base.Type)
 }
 
-// isResponseTypeNarrowing reports whether a response type change is a narrowing:
-// the revision type set is contained in the base type set, so the server returns
-// a subset of the value kinds it returned before. That is backward compatible for
-// a response (a client prepared for the wider set still handles the narrower one).
-//
-// It requires an actual type change (typeDiff != nil). A revision that dropped
-// the type entirely (untyped) is the opposite, the server may now return
-// anything, so it is not a narrowing. A previously untyped base narrowed to a
-// concrete type is a narrowing.
+// isRequestTypeWidening reports whether a request type change widens the accepted
+// type set: the base set is contained in the revision set, so the server accepts
+// every type it did before plus possibly more. Backward compatible for a request.
+func isRequestTypeWidening(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	return typeDiff != nil && isTypeSetSubset(getBaseType(schemaDiff), getRevisionType(schemaDiff))
+}
+
+// isResponseTypeNarrowing reports whether a response type change narrows the
+// returned type set: the revision set is contained in the base set, so the server
+// returns only types it could before. Backward compatible for a response. Mirror
+// of isRequestTypeWidening.
 func isResponseTypeNarrowing(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
-	if typeDiff == nil {
+	return typeDiff != nil && isTypeSetSubset(getRevisionType(schemaDiff), getBaseType(schemaDiff))
+}
+
+// isTypeSetSubset reports whether both sets are non-empty and every type in sub is
+// covered by some type in super (using the integer-within-number lattice). An
+// empty set means no type constraint (any value); that universe case is handled
+// by the empty-target-type short-circuit in typeFormatBreaking, not here.
+func isTypeSetSubset(sub, super []string) bool {
+	if len(sub) == 0 || len(super) == 0 {
 		return false
 	}
-	base := getBaseType(schemaDiff)
-	revision := getRevisionType(schemaDiff)
-	if len(revision) == 0 {
-		return false
-	}
-	if len(base) == 0 {
-		return true
-	}
-	for _, t := range revision {
-		if !typeCoveredBy(t, base) {
+	for _, t := range sub {
+		if !typeCoveredBy(t, super) {
 			return false
 		}
 	}
