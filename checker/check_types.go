@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -18,8 +19,61 @@ func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Valu
 // breaking. Responses are covariant, so it is the same check with the
 // base/revision direction reversed: the diffs are reversed and the change is
 // evaluated toward the base type.
+//
+// A type-set narrowing (the revision type set is contained in the base set) is
+// backward compatible on the type axis, but the diff-based core only sees the
+// added/removed types and would still flag a multi-type narrowing. We detect the
+// narrowing from the full type sets and drop the type axis; the format axis is
+// evaluated independently, so a co-occurring breaking format change is still
+// reported.
 func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+	if isResponseTypeNarrowing(typeDiff, schemaDiff) {
+		typeDiff = nil
+	}
 	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff.Base.Type)
+}
+
+// isResponseTypeNarrowing reports whether a response type change is a narrowing:
+// the revision type set is contained in the base type set, so the server returns
+// a subset of the value kinds it returned before. That is backward compatible for
+// a response (a client prepared for the wider set still handles the narrower one).
+//
+// It requires an actual type change (typeDiff != nil). A revision that dropped
+// the type entirely (untyped) is the opposite, the server may now return
+// anything, so it is not a narrowing. A previously untyped base narrowed to a
+// concrete type is a narrowing.
+func isResponseTypeNarrowing(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	if typeDiff == nil {
+		return false
+	}
+	base := getBaseType(schemaDiff)
+	revision := getRevisionType(schemaDiff)
+	if len(revision) == 0 {
+		return false
+	}
+	if len(base) == 0 {
+		return true
+	}
+	for _, t := range revision {
+		if !typeCoveredBy(t, base) {
+			return false
+		}
+	}
+	return true
+}
+
+// isSubtype reports whether every value of type sub is also a valid value of
+// type super: the same type, or "integer" within "number" (every integer is a
+// number). This is the single source of the type-compatibility lattice, shared
+// by isTypeContained (diff-shaped) and typeCoveredBy (set-membership).
+func isSubtype(sub, super string) bool {
+	return sub == super || (sub == "integer" && super == "number")
+}
+
+// typeCoveredBy reports whether type t is covered by one of the base types (t is
+// a subtype of some base type).
+func typeCoveredBy(t string, base []string) bool {
+	return slices.ContainsFunc(base, func(b string) bool { return isSubtype(t, b) })
 }
 
 // typeFormatBreaking reports whether a type/format change toward toType is
@@ -54,7 +108,10 @@ note that we don't support multiple types currenty
 */
 func isTypeContained(to, from []string, stronglyTyped bool) bool {
 
-	if len(to) == 1 && to[0] == "number" && len(from) == 1 && from[0] == "integer" {
+	// from (the old type) is a subtype of to (the new type): the new type still
+	// accepts every value the old one did. Added and Deleted are disjoint, so
+	// to[0] == from[0] cannot occur here, leaving the integer-within-number case.
+	if len(to) == 1 && len(from) == 1 && isSubtype(from[0], to[0]) {
 		return true
 	}
 
