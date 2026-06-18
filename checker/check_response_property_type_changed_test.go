@@ -196,9 +196,9 @@ func setResponseBodyType(t *testing.T, s *load.SpecInfo, types *openapi3.Types) 
 	s.Spec.Paths.Value("/test").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value.Type = types
 }
 
-// BC: narrowing a response type set ([string, integer] -> [string]) is backward
-// compatible (the server returns fewer kinds of values) and must NOT be reported
-// as a breaking response-body-type-changed. (#1003 / #989 Gap 2)
+// BC: narrowing a response type set ([string, integer] -> [string]) is not
+// breaking; the server returns fewer kinds of values, all of which the client
+// already handled. (#1003 / #989 Gap 2)
 func TestResponseBodyTypeNarrowingMultiTypeNotBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
 	require.NoError(t, err)
@@ -214,8 +214,8 @@ func TestResponseBodyTypeNarrowingMultiTypeNotBreaking(t *testing.T) {
 		"narrowing a response type set is non-breaking; must not report response-body-type-changed")
 }
 
-// BC: adding a type constraint to a previously untyped response (no type -> [string])
-// narrows what the server returns, so it is backward compatible.
+// BC: narrowing a previously untyped response to a concrete type (no type ->
+// [string]) is not breaking; the server returns fewer kinds of values.
 func TestResponseBodyTypeAddedFromUntypedNotBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
 	require.NoError(t, err)
@@ -231,7 +231,7 @@ func TestResponseBodyTypeAddedFromUntypedNotBreaking(t *testing.T) {
 		"narrowing an untyped response to a concrete type is non-breaking")
 }
 
-// BC (guard): widening a response type set ([string] -> [string, integer]) IS breaking;
+// BC: widening a response type set ([string] -> [string, integer]) is breaking;
 // the server may now return a type the client did not handle.
 func TestResponseBodyTypeWideningStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
@@ -248,7 +248,7 @@ func TestResponseBodyTypeWideningStillBreaking(t *testing.T) {
 		"widening a response type set is breaking")
 }
 
-// BC (guard): removing the type entirely from a response ([string] -> no type) IS
+// BC: removing the type entirely from a response ([string] -> no type) is
 // breaking; the server may now return any value.
 func TestResponseBodyTypeRemovedStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
@@ -265,11 +265,11 @@ func TestResponseBodyTypeRemovedStillBreaking(t *testing.T) {
 		"removing the type from a response is breaking")
 }
 
-// BC (guard): a response type narrowing that co-occurs with a breaking format
-// change must still be reported; the safe type axis must not mask the format
-// axis. [string, integer] -> [integer] narrows the type (backward compatible),
-// but int32 -> int64 widens the format (the server may now return values outside
-// the range a client expecting int32 can hold), which is breaking.
+// BC: a response type narrowing that co-occurs with a breaking format change is
+// breaking; the safe type axis must not mask the format axis. [string, integer]
+// -> [integer] narrows the type (not breaking on its own), but int32 -> int64
+// widens the format (the server may now return values outside the range a client
+// expecting int32 can hold), which is breaking.
 func TestResponseBodyTypeNarrowWithBreakingFormatStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
 	require.NoError(t, err)

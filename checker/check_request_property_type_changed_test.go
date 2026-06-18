@@ -340,9 +340,8 @@ func setRequestBodyType(t *testing.T, s *load.SpecInfo, types *openapi3.Types) {
 	s.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = types
 }
 
-// BC: widening a request type set ([string] -> [string, integer]) is backward
-// compatible (the server accepts every type it did before plus more) and must
-// NOT be reported as a breaking request-body-type-changed. Mirror of the
+// BC: widening a request type set ([string] -> [string, integer]) is not
+// breaking; the server accepts every type it did before plus more. Mirror of the
 // response narrowing case.
 func TestRequestBodyTypeWideningMultiTypeNotBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
@@ -359,8 +358,8 @@ func TestRequestBodyTypeWideningMultiTypeNotBreaking(t *testing.T) {
 		"widening a request type set is non-breaking; must not report request-body-type-changed")
 }
 
-// BC: removing the type entirely from a request ([string] -> no type) is a
-// generalization (the server now accepts any value), so it is backward compatible.
+// BC: removing the type entirely from a request ([string] -> no type) is not
+// breaking; the server now accepts any value (a generalization).
 func TestRequestBodyTypeRemovedNotBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
 	require.NoError(t, err)
@@ -376,9 +375,8 @@ func TestRequestBodyTypeRemovedNotBreaking(t *testing.T) {
 		"removing the type from a request accepts any value; non-breaking")
 }
 
-// BC (guard): narrowing a request type set ([string, integer] -> [string]) IS
-// breaking under a strongly-typed media type; a client sending integer is now
-// rejected.
+// BC: narrowing a request type set ([string, integer] -> [string]) is breaking
+// under a strongly-typed media type; a client sending integer is now rejected.
 func TestRequestBodyTypeNarrowingStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
 	require.NoError(t, err)
@@ -394,8 +392,8 @@ func TestRequestBodyTypeNarrowingStillBreaking(t *testing.T) {
 		"narrowing a request type set is breaking")
 }
 
-// BC (guard): adding a type constraint to a previously untyped request
-// (no type -> [string]) restricts the accepted values, so it is breaking.
+// BC: adding a type constraint to a previously untyped request (no type ->
+// [string]) is breaking; it restricts the accepted values.
 func TestRequestBodyTypeAddedFromUntypedStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
 	require.NoError(t, err)
@@ -411,11 +409,11 @@ func TestRequestBodyTypeAddedFromUntypedStillBreaking(t *testing.T) {
 		"constraining a previously untyped request is breaking")
 }
 
-// BC (guard): a request type widening that co-occurs with a breaking format
-// change must still be reported; the safe type axis must not mask the format
-// axis. [integer] -> [integer, string] widens the type (backward compatible),
-// but int64 -> int32 narrows the format (a client sending an int64 value is now
-// rejected), which is breaking.
+// BC: a request type widening that co-occurs with a breaking format change is
+// breaking; the safe type axis must not mask the format axis. [integer] ->
+// [integer, string] widens the type (not breaking on its own), but int64 ->
+// int32 narrows the format (a client sending an int64 value is now rejected),
+// which is breaking.
 func TestRequestBodyTypeWidenWithBreakingFormatStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
 	require.NoError(t, err)
