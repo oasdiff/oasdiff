@@ -78,7 +78,12 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 						id := RequestParameterTypeGeneralizedId
 
-						if breakingTypeFormatChangedInRequest(typeDiff, formatDiff, false, schemaDiff) &&
+						// The parameter's own value is serialized as a string on the wire
+						// (query/path/header/cookie), so it is non-strongly-typed: a binary
+						// generalized/changed verdict with stronglyTyped=false. This differs
+						// on purpose from the property-level check below, which cannot tell
+						// how an object parameter is serialized and therefore forks three ways.
+						if typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type) &&
 							!isParameterScalarToFormExplodeArray(paramDiff, typeDiff) {
 							id = RequestParameterTypeChangedId
 						}

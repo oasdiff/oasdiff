@@ -7,52 +7,45 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// breakingTypeFormatChangedInResponseProperty checks if the type or format of a response property was changed in a breaking way
-func breakingTypeFormatChangedInResponseProperty(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-
-	if typeDiff != nil {
-		typeDiff = &diff.StringsDiff{
-			Added:   typeDiff.Deleted,
-			Deleted: typeDiff.Added,
-		}
-	}
-
-	if formatDiff != nil {
-		formatDiff = &diff.ValueDiff{
-			From: formatDiff.To,
-			To:   formatDiff.From,
-		}
-	}
-
-	return breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, mediaType, schemaDiff)
+// requestTypeFormatBreaking reports whether a request type/format change is
+// breaking. Requests are contravariant, so the change is evaluated toward the
+// revision type.
+func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+	return typeFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff.Revision.Type)
 }
 
-// breakingTypeFormatChangedInRequestProperty checks if the type or format of a request property was changed in a breaking way
-func breakingTypeFormatChangedInRequestProperty(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-	return breakingTypeFormatChangedInRequest(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
+// responseTypeFormatBreaking reports whether a response type/format change is
+// breaking. Responses are covariant, so it is the same check with the
+// base/revision direction reversed: the diffs are reversed and the change is
+// evaluated toward the base type.
+func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff.Base.Type)
 }
 
-// isRequestTypeGeneralization checks if a type diff represents a complete removal of the type constraint
-func isRequestTypeGeneralization(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
-	if typeDiff == nil {
+// typeFormatBreaking reports whether a type/format change toward toType is
+// breaking. An empty toType means the type constraint is gone: removing it on
+// the request side (the server then accepts any value), or, in the reversed
+// response frame, adding one (the server then returns a subset). Both are
+// non-breaking generalizations. Otherwise the two axes are evaluated by the
+// direction-agnostic core.
+func typeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, toType *openapi3.Types) bool {
+	if typeDiff != nil && len(toType.Slice()) == 0 {
 		return false
 	}
-	rev := schemaDiff.Revision.Type
-	return rev == nil || len(*rev) == 0
+	return typeOrFormatBreaking(typeDiff, formatDiff, stronglyTyped, toType)
 }
 
-// breakingTypeFormatChangedInRequest checks if the type or format of a request was changed in a breaking way
-func breakingTypeFormatChangedInRequest(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, schemaDiff *diff.SchemaDiff) bool {
-
-	if typeDiff != nil {
-		return !isTypeContained(typeDiff.Added, typeDiff.Deleted, stronglyTyped)
-	}
-
-	if formatDiff != nil {
-		return !isFormatContained(schemaDiff.Revision.Type, formatDiff.To, formatDiff.From)
-	}
-
-	return false
+// typeOrFormatBreaking reports whether a type change or a format change is
+// breaking, evaluating the two axes independently toward toType: the change is
+// breaking if either the type or the format is breaking on its own. It does not
+// treat a removed type constraint specially; callers that need that go through
+// typeFormatBreaking.
+// stronglyTyped reflects the media type (see isStronglyTyped); callers that
+// can't resolve it (request parameters) pass it explicitly.
+func typeOrFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, toType *openapi3.Types) bool {
+	typeBreaking := typeDiff != nil && !isTypeContained(typeDiff.Added, typeDiff.Deleted, stronglyTyped)
+	formatBreaking := formatDiff != nil && !isFormatContained(toType, formatDiff.To, formatDiff.From)
+	return typeBreaking || formatBreaking
 }
 
 /*
@@ -84,12 +77,20 @@ The "params" object has two properties: "id" and "color", both with type "string
 Imagine that the OpenAPI type of property "id" was changed from "number" to "string".
 In the first example, the change is non-breaking, because the PHP format for numbers and strings is the same: we refer to this as non-strongly-typed.
 But in the second example, the change is breaking, because the JSON format requires quotes for strings: we refer to this as strongly-typed.
+
+This is the only request type location that forks three ways
+(generalized / specialized / changed-as-a-warning). The other request type
+locations resolve strong-vs-non-strong definitively (the body and body
+properties from a known media type; a scalar parameter is always a string on
+the wire), so a binary generalized/changed verdict is correct there. Only an
+object parameter's serialization is unknown here, so when the two verdicts
+disagree we can't be sure it's breaking and report a warning.
 */
 func checkRequestParameterPropertyTypeChanged(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, schemaDiff *diff.SchemaDiff) (string, string) {
 
 	// since we don't know if the object is strogly-typed or not, we check both
-	stronglyTyped := breakingTypeFormatChangedInRequest(typeDiff, formatDiff, true, schemaDiff)
-	nonStronglyTyped := breakingTypeFormatChangedInRequest(typeDiff, formatDiff, false, schemaDiff)
+	stronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, true, schemaDiff.Revision.Type)
+	nonStronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type)
 
 	// if strongly-typed and non-strongly-typed don't agree, it's a warning since we can't be sure that it's breaking
 	if stronglyTyped != nonStronglyTyped {
@@ -122,6 +123,13 @@ func isJsonMediaType(mediaType string) bool {
 // isFormatContained checks if from is contained in to
 func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 
+	// Removing a format constraint is a generalization (non-breaking), whatever
+	// the type, including when the type was removed too (revisionType is nil).
+	// Checked before the type switch so it applies for any revision type.
+	if to == "" {
+		return true
+	}
+
 	if revisionType == nil || len(*revisionType) > 1 {
 		return false
 	}
@@ -129,16 +137,13 @@ func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 	// we don't support multiple types currenty, so just take the first one
 	switch getSingleType(revisionType) {
 	case "number":
-		return to == "" ||
-			(to == "double" && from == "float")
+		return to == "double" && from == "float"
 	case "integer":
-		return to == "" ||
-			(to == "int64" && from == "int32") ||
+		return (to == "int64" && from == "int32") ||
 			(to == "bigint" && from == "int32") ||
 			(to == "bigint" && from == "int64")
 	case "string":
-		return to == "" || // removing a format constraint is a generalization
-			(to == "date-time" && from == "date") ||
+		return (to == "date-time" && from == "date") ||
 			(to == "date-time" && from == "time")
 	}
 

@@ -25,6 +25,19 @@ func (stringsDiff *StringsDiff) Empty() bool {
 		len(stringsDiff.Deleted) == 0
 }
 
+// Reverse returns the diff with base and revision swapped (Added<->Deleted).
+// A nil diff has no direction to reverse and is returned nil.
+func (stringsDiff *StringsDiff) Reverse() *StringsDiff {
+	if stringsDiff == nil {
+		return nil
+	}
+
+	return &StringsDiff{
+		Added:   stringsDiff.Deleted,
+		Deleted: stringsDiff.Added,
+	}
+}
+
 func getStringsDiff(strings1, strings2 []string) *StringsDiff {
 	diff := getStringsDiffInternal(strings1, strings2)
 

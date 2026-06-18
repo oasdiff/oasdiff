@@ -21,8 +21,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 
 		if !typeDiff.Empty() || !formatDiff.Empty() {
 			// Body-level suppression also skips the property walk for this
-			// media type (the pre-migration code used a `continue` in the
-			// media-type for-loop, which had that effect). Preserved.
+			// media type.
 			if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
 				return
 			}
@@ -32,7 +31,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 			}
 
 			id := RequestBodyTypeGeneralizedId
-			if !isRequestTypeGeneralization(typeDiff, schemaDiff) && breakingTypeFormatChangedInRequestProperty(typeDiff, formatDiff, info.mediaType, schemaDiff) {
+			if requestTypeFormatBreaking(typeDiff, formatDiff, info.mediaType, schemaDiff) {
 				id = RequestBodyTypeChangedId
 			}
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
@@ -64,7 +63,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 
 			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
 				id := RequestPropertyTypeGeneralizedId
-				if !isRequestTypeGeneralization(propTypeDiff, propSchemaDiff) && breakingTypeFormatChangedInRequestProperty(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
+				if requestTypeFormatBreaking(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff) {
 					id = RequestPropertyTypeChangedId
 				}
 
