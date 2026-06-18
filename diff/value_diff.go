@@ -15,6 +15,19 @@ func (diff *ValueDiff) Empty() bool {
 	return diff == nil
 }
 
+// Reverse returns the diff with base and revision swapped (From<->To).
+// A nil diff has no direction to reverse and is returned nil.
+func (diff *ValueDiff) Reverse() *ValueDiff {
+	if diff == nil {
+		return nil
+	}
+
+	return &ValueDiff{
+		From: diff.To,
+		To:   diff.From,
+	}
+}
+
 func getValueDiff(value1, value2 any) *ValueDiff {
 
 	diff := getValueDiffInternal(value1, value2)
