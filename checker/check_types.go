@@ -55,12 +55,16 @@ func isResponseTypeNarrowing(typeDiff *diff.StringsDiff, schemaDiff *diff.Schema
 	return typeDiff != nil && isTypeSetSubset(getRevisionType(schemaDiff), getBaseType(schemaDiff))
 }
 
-// isTypeSetSubset reports whether both sets are non-empty and every type in sub is
-// covered by some type in super (using the integer-within-number lattice). An
-// empty set means no type constraint (any value); that universe case is handled
-// by the empty-target-type short-circuit in typeFormatBreaking, not here.
+// isTypeSetSubset reports whether sub is non-empty and every type in it is
+// covered by some type in super (using the integer-within-number lattice).
+//
+// An empty sub is treated as not-a-subset rather than the vacuous "empty set is
+// a subset of anything": that keeps the empty-source cases (a type removed from
+// a response, or a constraint added to a previously untyped request) on the
+// breaking path. The empty-target case (no type constraint = any value) is
+// handled by the empty-target-type short-circuit in typeFormatBreaking, not here.
 func isTypeSetSubset(sub, super []string) bool {
-	if len(sub) == 0 || len(super) == 0 {
+	if len(sub) == 0 {
 		return false
 	}
 	for _, t := range sub {
