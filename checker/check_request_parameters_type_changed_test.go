@@ -204,6 +204,36 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	}, errs[0])
 }
 
+// CL: a query parameter changing from a single type to a oneOf list of types is
+// reported once, by the list-of-types checker. RequestParameterTypeChangedCheck
+// suppresses its own report for the same change so it is not duplicated when both
+// checks run together.
+func TestRequestQueryParamSingleToListOfTypesNotDuplicated(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	queryParam := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
+	queryParam.Schema.Value.Type = nil
+	queryParam.Schema.Value.Format = ""
+	queryParam.Schema.Value.OneOf = openapi3.SchemaRefs{
+		openapi3.NewSchemaRef("", openapi3.NewStringSchema()),
+		openapi3.NewSchemaRef("", openapi3.NewIntegerSchema()),
+	}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	config := checker.NewConfig(checker.BackwardCompatibilityChecks{
+		checker.RequestParameterTypeChangedCheck,
+		checker.RequestParameterListOfTypesChangedCheck,
+	})
+	errs := checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterListOfTypesWidenedId, errs[0].GetId())
+}
+
 // BC: changing request's query param property type from number to string is breaking
 func TestBreaking_ReqQueryParamTypeNumberToString(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_type_changed_base_num.yaml")
