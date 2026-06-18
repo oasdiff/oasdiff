@@ -12,7 +12,7 @@ import (
 // generalization (the server then accepts any value); otherwise defer to the
 // direction-agnostic core.
 func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-	if isRequestTypeGeneralization(typeDiff, schemaDiff) {
+	if isTypeConstraintRemoved(typeDiff, schemaDiff) {
 		return false
 	}
 	return typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
@@ -31,8 +31,9 @@ func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Val
 	return typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
 }
 
-// isRequestTypeGeneralization checks if a type diff represents a complete removal of the type constraint
-func isRequestTypeGeneralization(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+// isTypeConstraintRemoved reports whether the type changed and the revision has
+// no type, i.e. the type constraint was removed entirely.
+func isTypeConstraintRemoved(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
 	if typeDiff == nil {
 		return false
 	}
