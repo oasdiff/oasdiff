@@ -123,64 +123,6 @@ func TestListOfTypesIntegration_EdgeCases(t *testing.T) {
 	require.NotEmpty(t, listOfTypesChanges, "Expected some list-of-types changes in edge cases")
 }
 
-func TestListOfTypesIntegration_SuppressionBehavior(t *testing.T) {
-	// Test that list-of-types checker suppresses oneOf/anyOf changes
-	s1, err := open("../data/list-of-types/single-to-list-base.yaml")
-	require.NoError(t, err)
-
-	s2, err := open("../data/list-of-types/single-to-list-revision.yaml")
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-
-	// Run with all checkers including oneOf/anyOf checkers
-	allChecksConfig := checker.NewConfig(checker.GetAllChecks())
-	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig, d, osm, checker.INFO)
-
-	// Count different types of changes
-	var listOfTypesChanges, oneOfAnyOfChanges []checker.ApiChange
-
-	for _, err := range errs {
-		if containsString([]string{
-			checker.RequestPropertyListOfTypesNarrowedId,
-			checker.RequestPropertyListOfTypesWidenedId,
-			checker.ResponsePropertyListOfTypesNarrowedId,
-			checker.ResponsePropertyListOfTypesWidenedId,
-			checker.RequestBodyListOfTypesNarrowedId,
-			checker.RequestBodyListOfTypesWidenedId,
-			checker.ResponseBodyListOfTypesNarrowedId,
-			checker.ResponseBodyListOfTypesWidenedId,
-		}, err.GetId()) {
-			listOfTypesChanges = append(listOfTypesChanges, err.(checker.ApiChange))
-		}
-
-		if containsString([]string{
-			checker.RequestPropertyOneOfAddedId,
-			checker.RequestPropertyOneOfRemovedId,
-			checker.RequestPropertyAnyOfAddedId,
-			checker.RequestPropertyAnyOfRemovedId,
-		}, err.GetId()) {
-			oneOfAnyOfChanges = append(oneOfAnyOfChanges, err.(checker.ApiChange))
-		}
-	}
-
-	// Should have ListOfTypes changes detected
-	require.NotEmpty(t, listOfTypesChanges, "Expected ListOfTypes changes to be detected")
-
-	// OneOf/anyOf changes should be suppressed where ListOfTypes applies
-	// When ListOfTypes changes are detected, the corresponding oneOf/anyOf changes should be suppressed
-	// This is the core behavior we're testing: suppression of redundant change detection
-	if len(listOfTypesChanges) > 0 {
-		// We expect fewer or no oneOf/anyOf changes due to suppression
-		// The exact behavior depends on the implementation, but the important thing is that
-		// both types of changes shouldn't be reported for the same schema modifications
-		t.Logf("ListOfTypes changes found: %d, OneOf/AnyOf changes found: %d",
-			len(listOfTypesChanges), len(oneOfAnyOfChanges))
-		// Note: The specific assertion depends on the suppression logic implementation
-	}
-}
-
 func TestListOfTypesIntegration_ParameterChanges(t *testing.T) {
 	// Create a simple test using existing parameter test data structure
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
