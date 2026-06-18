@@ -20,15 +20,23 @@ func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Valu
 
 // responseTypeFormatBreaking reports whether a response type/format change is
 // breaking. Responses are covariant, so it is the same core check with the
-// base/revision direction reversed (Added<->Deleted, From<->To).
+// base/revision direction reversed.
 func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+	typeDiff, formatDiff = reversed(typeDiff, formatDiff)
+	return typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
+}
+
+// reversed swaps the base/revision direction of the type and format diffs
+// (Added<->Deleted, From<->To). A nil diff has no direction to reverse and is
+// returned unchanged.
+func reversed(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff) (*diff.StringsDiff, *diff.ValueDiff) {
 	if typeDiff != nil {
 		typeDiff = &diff.StringsDiff{Added: typeDiff.Deleted, Deleted: typeDiff.Added}
 	}
 	if formatDiff != nil {
 		formatDiff = &diff.ValueDiff{From: formatDiff.To, To: formatDiff.From}
 	}
-	return typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
+	return typeDiff, formatDiff
 }
 
 // isTypeConstraintRemoved reports whether the type changed and the revision has
