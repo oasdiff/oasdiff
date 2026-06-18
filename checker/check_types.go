@@ -8,56 +8,43 @@ import (
 )
 
 // requestTypeFormatBreaking reports whether a request type/format change is
-// breaking. Removing the type constraint entirely is a non-breaking
-// generalization (the server then accepts any value); otherwise defer to the
-// direction-agnostic core.
+// breaking. Requests are contravariant, so the change is evaluated toward the
+// revision type.
 func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-	if isTypeConstraintRemoved(typeDiff, schemaDiff) {
-		return false
-	}
-	return typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff)
+	return typeFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff.Revision.Type)
 }
 
 // responseTypeFormatBreaking reports whether a response type/format change is
-// breaking. Responses are covariant, so it is the same core check with the
-// base/revision direction reversed. Adding a type constraint where there was
-// none narrows what the server returns, so it is a non-breaking specialization
-// (the mirror of removing the constraint on the request side).
+// breaking. Responses are covariant, so it is the same check with the
+// base/revision direction reversed: the diffs are reversed and the change is
+// evaluated toward the base type.
 func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-	if isTypeConstraintAdded(typeDiff, schemaDiff) {
-		return false
-	}
-	return typeOrFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff)
+	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff.Base.Type)
 }
 
-// isTypeConstraintRemoved reports whether the type changed and the revision has
-// no type, i.e. the type constraint was removed entirely.
-func isTypeConstraintRemoved(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
-	if typeDiff == nil {
+// typeFormatBreaking reports whether a type/format change toward toType is
+// breaking. An empty toType means the type constraint is gone: removing it on
+// the request side (the server then accepts any value), or, in the reversed
+// response frame, adding one (the server then returns a subset). Both are
+// non-breaking generalizations. Otherwise the two axes are evaluated by the
+// direction-agnostic core.
+func typeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, toType *openapi3.Types) bool {
+	if typeDiff != nil && len(toType.Slice()) == 0 {
 		return false
 	}
-	rev := schemaDiff.Revision.Type
-	return rev == nil || len(*rev) == 0
-}
-
-// isTypeConstraintAdded reports whether the type changed and the base had no
-// type, i.e. a type constraint was added where there was none.
-func isTypeConstraintAdded(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
-	if typeDiff == nil {
-		return false
-	}
-	base := schemaDiff.Base.Type
-	return base == nil || len(*base) == 0
+	return typeOrFormatBreaking(typeDiff, formatDiff, stronglyTyped, toType)
 }
 
 // typeOrFormatBreaking reports whether a type change or a format change is
-// breaking. The two axes are evaluated independently: the change is breaking if
-// either the type or the format is breaking on its own.
+// breaking, evaluating the two axes independently toward toType: the change is
+// breaking if either the type or the format is breaking on its own. It does not
+// treat a removed type constraint specially; callers that need that go through
+// typeFormatBreaking.
 // stronglyTyped reflects the media type (see isStronglyTyped); callers that
 // can't resolve it (request parameters) pass it explicitly.
-func typeOrFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, schemaDiff *diff.SchemaDiff) bool {
+func typeOrFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, toType *openapi3.Types) bool {
 	typeBreaking := typeDiff != nil && !isTypeContained(typeDiff.Added, typeDiff.Deleted, stronglyTyped)
-	formatBreaking := formatDiff != nil && !isFormatContained(schemaDiff.Revision.Type, formatDiff.To, formatDiff.From)
+	formatBreaking := formatDiff != nil && !isFormatContained(toType, formatDiff.To, formatDiff.From)
 	return typeBreaking || formatBreaking
 }
 
@@ -102,8 +89,8 @@ disagree we can't be sure it's breaking and report a warning.
 func checkRequestParameterPropertyTypeChanged(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, schemaDiff *diff.SchemaDiff) (string, string) {
 
 	// since we don't know if the object is strogly-typed or not, we check both
-	stronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, true, schemaDiff)
-	nonStronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff)
+	stronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, true, schemaDiff.Revision.Type)
+	nonStronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type)
 
 	// if strongly-typed and non-strongly-typed don't agree, it's a warning since we can't be sure that it's breaking
 	if stronglyTyped != nonStronglyTyped {

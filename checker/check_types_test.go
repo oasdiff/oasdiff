@@ -11,33 +11,22 @@ import (
 func breaking(t *testing.T, typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, isJson bool, revisionTypes *openapi3.Types) {
 	t.Helper()
 
-	schemaDiff := &diff.SchemaDiff{
-		Revision: &openapi3.Schema{
-			Type: revisionTypes,
-		},
-	}
-
 	mediaType := ""
 	if isJson {
 		mediaType = "application/json"
 	}
 
-	require.True(t, typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff), "typeOrFormatBreaking failed")
+	require.True(t, typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), revisionTypes), "typeOrFormatBreaking failed")
 }
 
 func notBreaking(t *testing.T, typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, isJson bool, revisionTypes *openapi3.Types) {
-
-	schemaDiff := &diff.SchemaDiff{
-		Revision: &openapi3.Schema{
-			Type: revisionTypes,
-		},
-	}
+	t.Helper()
 
 	mediaType := ""
 	if isJson {
 		mediaType = "application/json"
 	}
-	require.False(t, typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff), "typeOrFormatBreaking failed")
+	require.False(t, typeOrFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), revisionTypes), "typeOrFormatBreaking failed")
 }
 
 func TestStringtoInt(t *testing.T) {
