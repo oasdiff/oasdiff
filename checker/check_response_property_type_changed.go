@@ -16,8 +16,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 		schemaDiff := info.schemaDiff
 
 		// Body-level suppression also skips the property walk for this
-		// media type (the pre-migration code used `continue` in the
-		// media-type for-loop, which had that effect). Preserved.
+		// media type.
 		if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
 			return
 		}

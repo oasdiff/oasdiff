@@ -21,8 +21,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 
 		if !typeDiff.Empty() || !formatDiff.Empty() {
 			// Body-level suppression also skips the property walk for this
-			// media type (the pre-migration code used a `continue` in the
-			// media-type for-loop, which had that effect). Preserved.
+			// media type.
 			if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
 				return
 			}

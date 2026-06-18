@@ -41,9 +41,8 @@ func isRequestTypeGeneralization(typeDiff *diff.StringsDiff, schemaDiff *diff.Sc
 }
 
 // typeOrFormatBreaking reports whether a type change or a format change is
-// breaking, with the two axes evaluated independently and combined. A breaking
-// format change is reported even when the type also changed (previously the type
-// took precedence and a co-occurring breaking format change was dropped).
+// breaking. The two axes are evaluated independently: the change is breaking if
+// either the type or the format is breaking on its own.
 // stronglyTyped reflects the media type (see isStronglyTyped); callers that
 // can't resolve it (request parameters) pass it explicitly.
 func typeOrFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, schemaDiff *diff.SchemaDiff) bool {
@@ -82,14 +81,13 @@ Imagine that the OpenAPI type of property "id" was changed from "number" to "str
 In the first example, the change is non-breaking, because the PHP format for numbers and strings is the same: we refer to this as non-strongly-typed.
 But in the second example, the change is breaking, because the JSON format requires quotes for strings: we refer to this as strongly-typed.
 
-This is intentionally the only request type location that forks three ways
+This is the only request type location that forks three ways
 (generalized / specialized / changed-as-a-warning). The other request type
 locations resolve strong-vs-non-strong definitively (the body and body
 properties from a known media type; a scalar parameter is always a string on
 the wire), so a binary generalized/changed verdict is correct there. Only an
 object parameter's serialization is unknown here, so when the two verdicts
-disagree we can't be sure it's breaking and report a warning. Do not unify this
-with the binary paths; see oasdiff/oasdiff#989.
+disagree we can't be sure it's breaking and report a warning.
 */
 func checkRequestParameterPropertyTypeChanged(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, schemaDiff *diff.SchemaDiff) (string, string) {
 
@@ -130,7 +128,7 @@ func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 
 	// Removing a format constraint is a generalization (non-breaking), whatever
 	// the type, including when the type was removed too (revisionType is nil).
-	// Hoisted above the type switch so it isn't skipped by the nil/multi guard.
+	// Checked before the type switch so it applies for any revision type.
 	if to == "" {
 		return true
 	}

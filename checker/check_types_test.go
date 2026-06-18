@@ -133,12 +133,11 @@ func TestFormatAdded(t *testing.T) {
 	breaking(t, typeDiff, formatDiff, false, revisionType)
 }
 
-// The type axis and the format axis are evaluated independently and combined
-// (#1018). A breaking format change is reported even when the type also changed.
-// Here the type change (integer -> number) is a non-breaking generalization, but
-// the format narrows (double -> float), so the overall change is breaking. Before
-// #1018 the type took precedence and the co-occurring breaking format change was
-// dropped, so this case was incorrectly reported as non-breaking.
+// The type axis and the format axis are breaking independently: a breaking
+// format change makes the overall change breaking even when the type change on
+// its own is not. Here the type change (integer -> number) is a non-breaking
+// generalization, but the format narrows (double -> float), so the overall
+// change is breaking.
 func TestBreakingFormatNotMaskedByTypeChange(t *testing.T) {
 	typeDiff := &diff.StringsDiff{
 		Deleted: []string{"integer"},
@@ -154,11 +153,10 @@ func TestBreakingFormatNotMaskedByTypeChange(t *testing.T) {
 	breaking(t, typeDiff, formatDiff, false, revisionType)
 }
 
-// Removing a format constraint is a non-breaking generalization even when the
-// type also changes (#1018). The format-removal rule is hoisted above the
-// per-type switch in isFormatContained, so it applies regardless of the revision
-// type. Here the type generalizes (integer -> number) and the format is removed
-// (int64 -> ""), so the overall change is non-breaking.
+// Removing a format constraint is a non-breaking generalization for any revision
+// type, and it stays non-breaking when the type also changes. Here the type
+// generalizes (integer -> number) and the format is removed (int64 -> ""), so
+// the overall change is non-breaking.
 func TestFormatRemovedWithTypeChangeNotBreaking(t *testing.T) {
 	typeDiff := &diff.StringsDiff{
 		Deleted: []string{"integer"},
