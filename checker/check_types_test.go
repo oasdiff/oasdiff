@@ -135,20 +135,21 @@ func TestFormatAdded(t *testing.T) {
 
 // The type axis and the format axis are breaking independently: a breaking
 // format change makes the overall change breaking even when the type change on
-// its own is not. Here the type change (integer -> number) is a non-breaking
-// generalization, but adding a format constraint (none -> float) restricts the
-// accepted values and is breaking, so the overall change is breaking.
+// its own is not. Here the parameter type changes integer -> string, which is
+// not breaking on its own (the value is a string on the wire either way), but
+// the added date-time format rejects values that were previously accepted (e.g.
+// "123"), so the overall change is breaking.
 func TestBreakingFormatNotMaskedByTypeChange(t *testing.T) {
 	typeDiff := &diff.StringsDiff{
 		Deleted: []string{"integer"},
-		Added:   []string{"number"},
+		Added:   []string{"string"},
 	}
 	formatDiff := &diff.ValueDiff{
 		From: nil,
-		To:   "float",
+		To:   "date-time",
 	}
 	revisionType := &openapi3.Types{
-		"number",
+		"string",
 	}
 	breaking(t, typeDiff, formatDiff, false, revisionType)
 }
