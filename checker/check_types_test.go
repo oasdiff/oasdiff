@@ -133,6 +133,47 @@ func TestFormatAdded(t *testing.T) {
 	breaking(t, typeDiff, formatDiff, false, revisionType)
 }
 
+// The type axis and the format axis are evaluated independently and combined
+// (#1018). A breaking format change is reported even when the type also changed.
+// Here the type change (integer -> number) is a non-breaking generalization, but
+// the format narrows (double -> float), so the overall change is breaking. Before
+// #1018 the type took precedence and the co-occurring breaking format change was
+// dropped, so this case was incorrectly reported as non-breaking.
+func TestBreakingFormatNotMaskedByTypeChange(t *testing.T) {
+	typeDiff := &diff.StringsDiff{
+		Deleted: []string{"integer"},
+		Added:   []string{"number"},
+	}
+	formatDiff := &diff.ValueDiff{
+		From: "double",
+		To:   "float",
+	}
+	revisionType := &openapi3.Types{
+		"number",
+	}
+	breaking(t, typeDiff, formatDiff, false, revisionType)
+}
+
+// Removing a format constraint is a non-breaking generalization even when the
+// type also changes (#1018). The format-removal rule is hoisted above the
+// per-type switch in isFormatContained, so it applies regardless of the revision
+// type. Here the type generalizes (integer -> number) and the format is removed
+// (int64 -> ""), so the overall change is non-breaking.
+func TestFormatRemovedWithTypeChangeNotBreaking(t *testing.T) {
+	typeDiff := &diff.StringsDiff{
+		Deleted: []string{"integer"},
+		Added:   []string{"number"},
+	}
+	formatDiff := &diff.ValueDiff{
+		From: "int64",
+		To:   "",
+	}
+	revisionType := &openapi3.Types{
+		"number",
+	}
+	notBreaking(t, typeDiff, formatDiff, false, revisionType)
+}
+
 func TestIsJsonMediaType(t *testing.T) {
 	require.True(t, isJsonMediaType("application/json"))
 	require.True(t, isJsonMediaType("application/problem+json"))

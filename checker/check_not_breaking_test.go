@@ -163,30 +163,31 @@ func TestBreaking_NewRequiredResponseHeader(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing operation ID is not breaking
+// BC: changing an operation's operationId is not breaking
 func TestBreaking_OperationID(t *testing.T) {
-	r := d(t, diff.NewConfig(), 3, 1)
-	require.Len(t, r, 4)
-	require.Equal(t, checker.RequestParameterMaxLengthDecreasedId, r[0].GetId())
-	require.Equal(t, checker.RequestParameterPatternAddedId, r[1].GetId())
-	// the image query parameter gains a "general string" format; adding a format
-	// constraint to a request is breaking and was previously masked because the
-	// type also changed (the type/format check now evaluates the axes independently)
-	require.Equal(t, checker.RequestParameterTypeChangedId, r[2].GetId())
-	require.Equal(t, checker.RequestParameterEnumValueRemovedId, r[3].GetId())
+	s1 := l(t, 1)
+	s2 := l(t, 1)
+
+	s2.Spec.Paths.Value(securityScorePath).Get.OperationID = "GetSecurityScoresRenamed"
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Empty(t, errs)
 }
 
-// BC: changing a link to operation ID is not breaking
+// BC: changing a link's operationId is not breaking
 func TestBreaking_LinkOperationID(t *testing.T) {
-	r := d(t, diff.NewConfig(), 3, 1)
-	require.Len(t, r, 4)
-	require.Equal(t, checker.RequestParameterMaxLengthDecreasedId, r[0].GetId())
-	require.Equal(t, checker.RequestParameterPatternAddedId, r[1].GetId())
-	// the image query parameter gains a "general string" format; adding a format
-	// constraint to a request is breaking and was previously masked because the
-	// type also changed (the type/format check now evaluates the axes independently)
-	require.Equal(t, checker.RequestParameterTypeChangedId, r[2].GetId())
-	require.Equal(t, checker.RequestParameterEnumValueRemovedId, r[3].GetId())
+	s1 := l(t, 1)
+	s2 := l(t, 1)
+
+	link := s2.Spec.Paths.Value("/subscribe").Post.Callbacks["myEvent"].Value.Map()["hi"].Post.Responses.Value("200").Value.Links["test"].Value
+	link.OperationID = "GetSecurityScoresRenamed"
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Empty(t, errs)
 }
 
 // BC: adding a media-type to response is not breaking
