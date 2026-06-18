@@ -81,6 +81,15 @@ The "params" object has two properties: "id" and "color", both with type "string
 Imagine that the OpenAPI type of property "id" was changed from "number" to "string".
 In the first example, the change is non-breaking, because the PHP format for numbers and strings is the same: we refer to this as non-strongly-typed.
 But in the second example, the change is breaking, because the JSON format requires quotes for strings: we refer to this as strongly-typed.
+
+This is intentionally the only request type location that forks three ways
+(generalized / specialized / changed-as-a-warning). The other request type
+locations resolve strong-vs-non-strong definitively (the body and body
+properties from a known media type; a scalar parameter is always a string on
+the wire), so a binary generalized/changed verdict is correct there. Only an
+object parameter's serialization is unknown here, so when the two verdicts
+disagree we can't be sure it's breaking and report a warning. Do not unify this
+with the binary paths; see oasdiff/oasdiff#989.
 */
 func checkRequestParameterPropertyTypeChanged(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, schemaDiff *diff.SchemaDiff) (string, string) {
 
