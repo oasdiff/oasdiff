@@ -71,6 +71,11 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 					if !typeDiff.Empty() || !formatDiff.Empty() {
 
+						// Suppress single<->oneOf/anyOf transitions (handled by the list-of-types checker)
+						if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
+							continue
+						}
+
 						// Suppress null-only type changes (handled by nullable checkers)
 						if isNullTypeChange(typeDiff) && formatDiff.Empty() {
 							continue
@@ -110,6 +115,11 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 							formatDiff := schemaDiff.FormatDiff
 
 							if !typeDiff.Empty() || !formatDiff.Empty() {
+
+								// Suppress single<->oneOf/anyOf transitions (handled by the list-of-types checker)
+								if shouldSuppressPropertyTypeChangedForListOfTypes(schemaDiff) {
+									return
+								}
 
 								// Suppress null-only type changes (handled by nullable checkers)
 								if isNullTypeChange(typeDiff) && formatDiff.Empty() {
