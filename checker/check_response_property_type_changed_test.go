@@ -189,3 +189,102 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 		OperationId: "get_value",
 	}, errs[0])
 }
+
+// setResponseBodyType sets the 200 response body schema type on the /test GET.
+func setResponseBodyType(t *testing.T, s *load.SpecInfo, types *openapi3.Types) {
+	t.Helper()
+	s.Spec.Paths.Value("/test").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value.Type = types
+}
+
+// BC: narrowing a response type set ([string, integer] -> [string]) is not
+// breaking; the server returns fewer kinds of values, all of which the client
+// already handled. (#1003 / #989 Gap 2)
+func TestResponseBodyTypeNarrowingMultiTypeNotBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	setResponseBodyType(t, s1, &openapi3.Types{"string", "integer"})
+	setResponseBodyType(t, s2, &openapi3.Types{"string"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
+	require.False(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+		"narrowing a response type set is non-breaking; must not report response-body-type-changed")
+}
+
+// BC: narrowing a previously untyped response to a concrete type (no type ->
+// [string]) is not breaking; the server returns fewer kinds of values.
+func TestResponseBodyTypeAddedFromUntypedNotBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	setResponseBodyType(t, s1, nil)
+	setResponseBodyType(t, s2, &openapi3.Types{"string"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
+	require.False(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+		"narrowing an untyped response to a concrete type is non-breaking")
+}
+
+// BC: widening a response type set ([string] -> [string, integer]) is breaking;
+// the server may now return a type the client did not handle.
+func TestResponseBodyTypeWideningStillBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	setResponseBodyType(t, s1, &openapi3.Types{"string"})
+	setResponseBodyType(t, s2, &openapi3.Types{"string", "integer"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.True(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+		"widening a response type set is breaking")
+}
+
+// BC: removing the type entirely from a response ([string] -> no type) is
+// breaking; the server may now return any value.
+func TestResponseBodyTypeRemovedStillBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	setResponseBodyType(t, s1, &openapi3.Types{"string"})
+	setResponseBodyType(t, s2, nil)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.True(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+		"removing the type from a response is breaking")
+}
+
+// BC: a response type narrowing that co-occurs with a breaking format change is
+// breaking; the safe type axis must not mask the format axis. [string, integer]
+// -> [integer] narrows the type (not breaking on its own), but int32 -> int64
+// widens the format (the server may now return values outside the range a client
+// expecting int32 can hold), which is breaking.
+func TestResponseBodyTypeNarrowWithBreakingFormatStillBreaking(t *testing.T) {
+	s1, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	base := s1.Spec.Paths.Value("/test").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value
+	base.Type = &openapi3.Types{"string", "integer"}
+	base.Format = "int32"
+	rev := s2.Spec.Paths.Value("/test").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value
+	rev.Type = &openapi3.Types{"integer"}
+	rev.Format = "int64"
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
+	require.True(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+		"a type narrowing must not mask a co-occurring breaking format change (int32 -> int64)")
+}
