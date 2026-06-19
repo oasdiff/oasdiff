@@ -149,3 +149,31 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 		OperationId: "addProduct",
 	}, errs[0])
 }
+
+// BC: wrapping a request body object into a oneOf of object alternatives is not
+// a removal of its properties: they move into the alternatives. The spurious
+// request-property-removed findings must be suppressed, and a base-required
+// property that is no longer required in every alternative is reported as
+// became-optional. Reproduces oasdiff/oasdiff#702.
+func TestRequestPropertyOneOfWrappingNotRemoved(t *testing.T) {
+	s1, err := open("../data/checker/request_property_one_of_wrapped_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_one_of_wrapped_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
+
+	require.False(t, containsId(errs, checker.RequestPropertyRemovedId),
+		"properties moved into a oneOf wrapping must not be reported as removed (#702)")
+
+	var becameOptional []string
+	for _, e := range errs {
+		require.Equal(t, checker.RequestPropertyBecameOptionalId, e.GetId(),
+			"the only findings from wrapping should be became-optional")
+		require.Equal(t, checker.INFO, e.GetLevel())
+		becameOptional = append(becameOptional, e.GetArgs()[0].(string))
+	}
+	require.ElementsMatch(t, []string{"foo", "bar"}, becameOptional)
+}

@@ -24,14 +24,33 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 		CheckDeletedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
-				if !propertyItem.ReadOnly {
-					baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
-					result = append(result, info.newChange(
-						RequestPropertyRemovedId,
-						[]any{propertyFullName(propertyPath, propertyName)},
-						"",
-					).WithSources(baseSource, nil))
+				if propertyItem.ReadOnly {
+					return
 				}
+
+				// A property that moved into a oneOf wrapping (#702) was not
+				// removed from the contract, so the raw "property removed" finding
+				// is a false positive. Suppress it; if the property was required
+				// and is no longer required in every alternative, report that it
+				// became optional instead.
+				if w := parent.OneOfWrappingDiff; w != nil && slices.Contains(w.MovedProperties, propertyName) {
+					if slices.Contains(w.RequiredBecameOptional, propertyName) {
+						baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+						result = append(result, info.newChange(
+							RequestPropertyBecameOptionalId,
+							[]any{propertyFullName(propertyPath, propertyName)},
+							"",
+						).WithSources(baseSource, nil))
+					}
+					return
+				}
+
+				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				result = append(result, info.newChange(
+					RequestPropertyRemovedId,
+					[]any{propertyFullName(propertyPath, propertyName)},
+					"",
+				).WithSources(baseSource, nil))
 			})
 
 		CheckAddedPropertiesDiff(

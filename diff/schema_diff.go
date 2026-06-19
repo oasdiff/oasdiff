@@ -18,6 +18,7 @@ type SchemaDiff struct {
 	NotDiff                         *SchemaDiff             `json:"not,omitempty" yaml:"not,omitempty"`
 	TypeDiff                        *StringsDiff            `json:"type,omitempty" yaml:"type,omitempty"`
 	ListOfTypesDiff                 *ListOfTypesDiff        `json:"listOfTypes,omitempty" yaml:"listOfTypes,omitempty"`
+	OneOfWrappingDiff               *OneOfWrappingDiff      `json:"oneOfWrapping,omitempty" yaml:"oneOfWrapping,omitempty"`
 	TitleDiff                       *ValueDiff              `json:"title,omitempty" yaml:"title,omitempty"`
 	FormatDiff                      *ValueDiff              `json:"format,omitempty" yaml:"format,omitempty"`
 	DescriptionDiff                 *ValueDiff              `json:"description,omitempty" yaml:"description,omitempty"`
@@ -176,6 +177,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 	result.TypeDiff = getTypeDiff(value1.Type, value2.Type)
 	result.ListOfTypesDiff = getListOfTypesDiff(value1, value2)
+	result.OneOfWrappingDiff = getOneOfWrappingDiff(value1, value2)
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)
