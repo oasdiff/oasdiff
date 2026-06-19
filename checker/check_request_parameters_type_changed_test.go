@@ -375,3 +375,71 @@ func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 	require.Equal(t, checker.ResponsePropertyTypeChangedId, errs[0].GetId())
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
+
+// CL: under OpenAPI 3.1, widening a nullable scalar query parameter to a
+// nullable form/explode array of the same scalar is still backwards-compatible
+// (#918). "null" is stripped from both sides before the scalar-to-array check,
+// so preserving or adding nullability does not turn a safe widening into a
+// breaking change.
+func TestRequestQueryParamScalarToFormExplodeArray_31Nullable(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		baseType  *openapi3.Types
+		revType   *openapi3.Types
+		itemTypes *openapi3.Types
+	}{
+		{"add null on the array side", &openapi3.Types{"string"}, &openapi3.Types{"array", "null"}, &openapi3.Types{"string"}},
+		{"nullable both sides", &openapi3.Types{"string", "null"}, &openapi3.Types{"array", "null"}, &openapi3.Types{"string", "null"}},
+		{"nullable items", &openapi3.Types{"string", "null"}, &openapi3.Types{"array", "null"}, &openapi3.Types{"string", "null"}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+			require.NoError(t, err)
+			s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+			require.NoError(t, err)
+
+			base := s1.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
+			base.Schema.Value.Type = tc.baseType
+			base.Schema.Value.Format = ""
+
+			rev := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
+			rev.Schema.Value.Type = tc.revType
+			rev.Schema.Value.Format = ""
+			rev.Schema.Value.Items = &openapi3.SchemaRef{Value: &openapi3.Schema{Type: tc.itemTypes}}
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+			errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+			require.Len(t, errs, 1)
+			require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId(),
+				"nullable scalar->form/explode array widening must be a generalization, not breaking")
+			require.Equal(t, checker.INFO, errs[0].GetLevel())
+		})
+	}
+}
+
+// CL (guard): the null-stripping relaxation must not over-apply. A multi-non-null
+// base type ([string, integer] -> array) is genuinely breaking and must stay so.
+func TestRequestQueryParamMultiTypeToArrayStillBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	require.NoError(t, err)
+
+	base := s1.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
+	base.Schema.Value.Type = &openapi3.Types{"string", "integer"}
+	base.Schema.Value.Format = ""
+
+	rev := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
+	rev.Schema.Value.Type = &openapi3.Types{"array"}
+	rev.Schema.Value.Format = ""
+	rev.Schema.Value.Items = &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
+		"a multi-non-null base type to array is breaking; the null relaxation must not apply")
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}

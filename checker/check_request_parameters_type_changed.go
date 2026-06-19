@@ -24,9 +24,22 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 	if paramDiff == nil || paramDiff.Revision == nil || paramDiff.SchemaDiff == nil {
 		return false
 	}
-	if typeDiff == nil ||
-		len(typeDiff.Added) != 1 || typeDiff.Added[0] != "array" ||
-		len(typeDiff.Deleted) != 1 || typeDiff.Deleted[0] == "array" {
+	if typeDiff == nil {
+		return false
+	}
+
+	// Compare modulo "null". Under OpenAPI 3.1 the type can be a JSON-Schema
+	// array, so a nullable scalar is ["string","null"] and a nullable array is
+	// ["array","null"]. Preserving or adding nullability around a
+	// scalar-to-form/explode-array widening is still backwards-compatible, so
+	// strip "null" from both the type diff and the item types before applying
+	// the 3.0 single-type equality. Multi-non-null types and item-type
+	// mismatches still fail the len==1 / equality checks, so the relaxation
+	// never declares an unsafe change safe.
+	deletedSansNull := withoutNull(typeDiff.Deleted)
+	addedSansNull := withoutNull(typeDiff.Added)
+	if len(addedSansNull) != 1 || addedSansNull[0] != "array" ||
+		len(deletedSansNull) != 1 || deletedSansNull[0] == "array" {
 		return false
 	}
 
@@ -40,8 +53,21 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 	if revSchema == nil || revSchema.Items == nil || revSchema.Items.Value == nil {
 		return false
 	}
-	itemTypes := revSchema.Items.Value.Type.Slice()
-	return len(itemTypes) == 1 && itemTypes[0] == typeDiff.Deleted[0]
+	itemTypes := withoutNull(revSchema.Items.Value.Type.Slice())
+	return len(itemTypes) == 1 && itemTypes[0] == deletedSansNull[0]
+}
+
+// withoutNull returns the type list with the JSON-Schema "null" type removed,
+// so OpenAPI 3.1 nullable types (e.g. ["string","null"]) compare by their
+// non-null type.
+func withoutNull(types []string) []string {
+	out := make([]string, 0, len(types))
+	for _, t := range types {
+		if t != "null" {
+			out = append(out, t)
+		}
+	}
+	return out
 }
 
 func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
