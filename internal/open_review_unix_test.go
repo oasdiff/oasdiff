@@ -239,11 +239,11 @@ func TestParseReviewMeta(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, want, got)
 	}
-	bad := func(t *testing.T, entries ...string) {
+	bad := func(t *testing.T, wantMsg string, entries ...string) {
 		t.Helper()
 		_, err := parseReviewMeta(entries)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "expected key=value")
+		require.Contains(t, err.Error(), wantMsg)
 	}
 
 	t.Run("simple key=value", func(t *testing.T) {
@@ -261,14 +261,14 @@ func TestParseReviewMeta(t *testing.T) {
 	t.Run("nil input yields empty map", func(t *testing.T) {
 		ok(t, map[string]string{})
 	})
-	t.Run("later entry wins for duplicate key", func(t *testing.T) {
-		ok(t, map[string]string{"a": "second"}, "a=first", "a=second")
-	})
 	t.Run("entry without = is an error, not silently dropped", func(t *testing.T) {
-		bad(t, "a=b", "noequals")
+		bad(t, "expected key=value", "a=b", "noequals")
 	})
 	t.Run("leading = (empty key) is an error", func(t *testing.T) {
-		bad(t, "=value")
+		bad(t, "expected key=value", "=value")
+	})
+	t.Run("duplicate key is an error, not last-wins", func(t *testing.T) {
+		bad(t, "duplicate", "a=first", "a=second")
 	})
 }
 
