@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/formatters"
@@ -69,11 +71,19 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
+}
 
-	// Review-upload flags. Inert without --open; --review-token's presence is the
-	// only switch between the free anonymous upload and the authenticated one.
-	// Deliberately vocabulary-neutral: a token and an opaque key=value metadata
-	// bag the CLI never interprets. getParseArgs rejects them without --open.
+// addOpenFlags registers --open and its companion review-upload flags. They live
+// together, and only on breaking/changelog, because the review flags are inert
+// without --open: --review-token's presence is the only switch between the free
+// anonymous upload and the authenticated one. The review flags are deliberately
+// vocabulary-neutral (a token and an opaque key=value metadata bag the CLI never
+// interprets); getParseArgs rejects them without --open. This is kept out of
+// addCommonBreakingFlags so the git-diff driver (which shares that helper but has
+// no --open) doesn't inherit these. outputName names what was printed before the
+// upload ("breaking changes" or "changelog").
+func addOpenFlags(cmd *cobra.Command, outputName string) {
+	cmd.PersistentFlags().Bool("open", false, fmt.Sprintf("after printing the %s, encrypt the comparison and upload it to oasdiff.com, then open the side-by-side review in a browser", outputName))
 	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
 	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
 }
