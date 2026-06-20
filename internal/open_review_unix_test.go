@@ -148,6 +148,7 @@ func TestPostEncryptedReview_ServerError(t *testing.T) {
 var keyFragmentRe = regexp.MustCompile(`#k=([A-Za-z0-9_-]+)`)
 
 func TestUploadAndOpen_EncryptsSpecsAndEmitsFragmentURL(t *testing.T) {
+	stubBrowser(t)
 	// End-to-end: stand up a stub /api/encrypted-review, run uploadAndOpen
 	// against two real spec files, capture the uploaded blob, pull the key
 	// out of the emitted #fragment, decrypt, and assert the payload carries
@@ -203,6 +204,7 @@ func TestUploadAndOpen_EncryptsSpecsAndEmitsFragmentURL(t *testing.T) {
 }
 
 func TestUploadAndOpen_BreakingSetsModeBreaking(t *testing.T) {
+	stubBrowser(t)
 	var uploadedBlob []byte
 	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		uploadedBlob, _ = io.ReadAll(r.Body)
@@ -282,6 +284,15 @@ func TestUploadAuthenticatedReview_InvalidMetaIsError(t *testing.T) {
 	require.Contains(t, err.Error(), "expected key=value")
 }
 
+// stubBrowser replaces openBrowser with a no-op for the test, so the upload
+// tests don't actually launch a browser on the dev machine.
+func stubBrowser(t *testing.T) {
+	t.Helper()
+	orig := openBrowser
+	openBrowser = func(string) error { return nil }
+	t.Cleanup(func() { openBrowser = orig })
+}
+
 // writeSpecPair writes two minimal specs to fresh temp dirs and returns a Flags
 // pointed at them. The two dirs keep the basenames identical (openapi.yaml)
 // without colliding, mirroring the existing --open tests.
@@ -317,6 +328,7 @@ func TestReviewManifest(t *testing.T) {
 }
 
 func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
+	stubBrowser(t)
 	var (
 		gotPath        string
 		gotMethod      string
@@ -378,6 +390,7 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 }
 
 func TestUploadAndOpen_FreePathWhenNoToken(t *testing.T) {
+	stubBrowser(t)
 	// With no token, --open must hit the free endpoint on the site base, not the
 	// authenticated one. Fail loudly if the authenticated endpoint is touched.
 	var freeHit bool

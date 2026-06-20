@@ -392,7 +392,10 @@ func readSpecSource(source *load.Source) ([]byte, string, error) {
 // manually. Notable absence: a CI / headless detection. CI users wouldn't
 // run --open in the first place; if they do, they get a non-fatal error
 // and the printed URL.
-func openBrowser(targetURL string) error {
+//
+// A var so tests can stub it: the upload path's tests exercise the upload, not
+// an actual browser launch.
+var openBrowser = func(targetURL string) error {
 	if _, err := url.Parse(targetURL); err != nil {
 		return fmt.Errorf("invalid URL: %w", err)
 	}
