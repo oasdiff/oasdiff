@@ -26,6 +26,9 @@ func getParseArgs() cobra.PositionalArgs {
 		if err := checkOpenWithComposed(cmd); err != nil {
 			return err
 		}
+		if err := checkReviewFlagsRequireOpen(cmd); err != nil {
+			return err
+		}
 		if err := checkColor(cmd); err != nil {
 			return err
 		}
@@ -115,6 +118,36 @@ func checkOpenWithComposed(cmd *cobra.Command) error {
 		// mode (-c) diffs a glob of many files, which the review can't
 		// represent.
 		return errors.New("--open cannot be used with composed mode (-c): the side-by-side review compares exactly two specs")
+	}
+
+	return nil
+}
+
+func checkReviewFlagsRequireOpen(cmd *cobra.Command) error {
+
+	// review flags exist only on breaking and changelog (added by
+	// addCommonBreakingFlags); diff and summary share getParseArgs but don't
+	// define them.
+	if cmd.Flags().Lookup("review-token") == nil {
+		return nil
+	}
+
+	// --open is registered alongside the review flags on breaking and changelog,
+	// so where review-token exists, open does too. If it somehow doesn't, treat
+	// that as "open not set".
+	open := false
+	if cmd.Flags().Lookup("open") != nil {
+		var err error
+		if open, err = cmd.Flags().GetBool("open"); err != nil {
+			return errors.New("failed to get open flag")
+		}
+	}
+	if open {
+		return nil
+	}
+
+	if cmd.Flags().Changed("review-token") || cmd.Flags().Changed("review-meta") {
+		return errors.New("--review-token and --review-meta require --open")
 	}
 
 	return nil

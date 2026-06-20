@@ -404,3 +404,62 @@ func TestUploadAuthenticatedReview_UnreachableIsNonFatal(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "upload to")
 }
+
+func TestUploadAuthenticatedReview_InvalidJSONResponse(t *testing.T) {
+	// A 2xx whose body isn't the expected JSON must surface a parse error, not a
+	// bogus review URL.
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("not json"))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_API_URL", stub.URL)
+
+	var out bytes.Buffer
+	err := uploadAuthenticatedReview("tok", nil, []byte{encryptedReviewBlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "parse response")
+	require.NotContains(t, out.String(), "Opening", "no URL is emitted when the response can't be parsed")
+}
+
+func TestUploadAuthenticatedReview_MissingReviewURL(t *testing.T) {
+	// A 2xx that omits review_url can't produce a usable link, so it must error
+	// rather than print a keyless or malformed URL.
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"review_token":"rt","gate":{"state":"pending"}}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_API_URL", stub.URL)
+
+	var out bytes.Buffer
+	err := uploadAuthenticatedReview("tok", nil, []byte{encryptedReviewBlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "review_url")
+}
+
+func TestUploadAndOpen_ReadBaseSpecError(t *testing.T) {
+	// A missing base spec fails before any upload; the error must name the base.
+	flags := NewFlags()
+	flags.setBase(load.NewSource(filepath.Join(t.TempDir(), "does-not-exist.yaml")))
+	flags.setRevision(load.NewSource(filepath.Join(t.TempDir(), "also-missing.yaml")))
+
+	var out bytes.Buffer
+	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "read base spec")
+}
+
+func TestUploadAndOpen_ReadRevisionSpecError(t *testing.T) {
+	// Base reads fine but the revision is missing: the error must name the revision.
+	dir := t.TempDir()
+	basePath := filepath.Join(dir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(basePath, []byte("openapi: 3.0.0\n"), 0644))
+
+	flags := NewFlags()
+	flags.setBase(load.NewSource(basePath))
+	flags.setRevision(load.NewSource(filepath.Join(t.TempDir(), "missing.yaml")))
+
+	var out bytes.Buffer
+	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "read revision spec")
+}

@@ -23,7 +23,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/spf13/cobra"
 )
 
 // oasdiffSiteURL is the base URL of the web product. Defaults to the canonical
@@ -49,16 +48,6 @@ func oasdiffAPIBaseURL() string {
 		return strings.TrimRight(u, "/")
 	}
 	return "https://api.oasdiff.com"
-}
-
-// addReviewFlags registers the flags that turn the additive --open upload into
-// an authenticated one. They are inert without --open; --review-token's presence
-// is the only switch between the free anonymous upload and the authenticated
-// one. The flags are deliberately vocabulary-neutral: a token and an opaque
-// key=value metadata bag the CLI never interprets.
-func addReviewFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
-	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
 }
 
 // encryptedReviewBlobVersion is the first byte of the uploaded blob. It lets

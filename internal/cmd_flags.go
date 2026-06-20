@@ -69,4 +69,11 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
+
+	// Review-upload flags. Inert without --open; --review-token's presence is the
+	// only switch between the free anonymous upload and the authenticated one.
+	// Deliberately vocabulary-neutral: a token and an opaque key=value metadata
+	// bag the CLI never interprets. getParseArgs rejects them without --open.
+	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
+	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
 }
