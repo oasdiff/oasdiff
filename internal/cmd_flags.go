@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/formatters"
@@ -69,4 +71,18 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
+}
+
+// addOpenFlags registers --open and its companion review-upload flags. Kept out
+// of addCommonBreakingFlags so the git-diff driver (which shares that helper but
+// has no --open) doesn't inherit them.
+func addOpenFlags(cmd *cobra.Command, outputName string) {
+	cmd.PersistentFlags().Bool("open", false, fmt.Sprintf("after printing the %s, encrypt the comparison and upload it to oasdiff.com, then open the side-by-side review in a browser", outputName))
+	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
+	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
+
+	// Hidden from --help: the authenticated review is assembled by the Action,
+	// not hand-typed, so these are an automation interface. They still work.
+	hideFlag(cmd, "review-token")
+	hideFlag(cmd, "review-meta")
 }
