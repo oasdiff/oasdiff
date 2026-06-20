@@ -251,14 +251,10 @@ func postEncryptedReview(blob []byte) (string, time.Time, error) {
 	return parsed.ReviewID, time.Unix(parsed.ExpiresAt, 0).UTC(), nil
 }
 
-// parseReviewMeta splits each "key=value" entry on the first '=' into a map.
-// The bag is opaque: the CLI assigns no meaning to any key. Anything that would
-// silently lose or override caller intent is an error rather than swallowed:
-//   - an entry that isn't a key=value pair (no '=', or an empty key);
-//   - a duplicate key (the server's metadata is single-valued, so a repeat is a
-//     caller mistake, not a multi-value, and last-wins would discard the first).
-//
-// An empty value is allowed.
+// parseReviewMeta splits each "key=value" entry on the first '=' into an opaque
+// map (the CLI assigns no meaning to any key). It rejects entries that would
+// silently lose or override caller intent rather than swallowing them; see
+// TestParseReviewMeta for the exact cases.
 func parseReviewMeta(entries []string) (map[string]string, error) {
 	meta := make(map[string]string, len(entries))
 	for _, e := range entries {
