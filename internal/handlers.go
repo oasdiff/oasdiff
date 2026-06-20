@@ -125,16 +125,13 @@ func checkOpenWithComposed(cmd *cobra.Command) error {
 
 func checkReviewFlagsRequireOpen(cmd *cobra.Command) error {
 
-	// The review flags exist only on breaking and changelog, added by
-	// addOpenFlags. Commands that share getParseArgs but not addOpenFlags (diff,
-	// summary) don't define them, so there's nothing to check.
+	// Only breaking/changelog define these (via addOpenFlags); skip elsewhere.
 	if cmd.Flags().Lookup("review-token") == nil {
 		return nil
 	}
 
-	// addOpenFlags registers --open together with the review flags, so wherever
-	// review-token exists --open does too. The Lookup guard is belt-and-suspenders
-	// for that invariant: if --open were ever absent, treat it as not set.
+	// --open is registered alongside the review flags; the Lookup is defensive
+	// in case it ever isn't.
 	open := false
 	if cmd.Flags().Lookup("open") != nil {
 		var err error

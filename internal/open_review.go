@@ -38,11 +38,9 @@ func oasdiffSiteURL() string {
 	return "https://www.oasdiff.com"
 }
 
-// oasdiffAPIBaseURL is the base URL of the backend API service. It is used only
-// by the authenticated review upload (--review-token); the free anonymous path
-// posts to the web product instead (see oasdiffSiteURL). Defaults to
-// api.oasdiff.com; set the OASDIFF_API_URL env var to point the authenticated
-// upload at a different deployment (a local dev service, or a self-hosted one).
+// oasdiffAPIBaseURL is the backend API base, used only by the authenticated
+// review upload (the free path posts to oasdiffSiteURL). Override with
+// OASDIFF_API_URL; defaults to api.oasdiff.com.
 func oasdiffAPIBaseURL() string {
 	if u := os.Getenv("OASDIFF_API_URL"); u != "" {
 		return strings.TrimRight(u, "/")
@@ -135,9 +133,8 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		return fmt.Errorf("encrypt review: %w", err)
 	}
 
-	// When a token is supplied, --open does the authenticated upload instead of
-	// the free anonymous one. The encrypted bundle and key are identical; only
-	// the endpoint, the request shape, and the response differ.
+	// A token switches --open to the authenticated upload; the bundle and key
+	// are the same as the free path.
 	if token := flags.getReviewToken(); token != "" {
 		return uploadAuthenticatedReview(token, flags.getReviewMeta(), blob, key, errs, stderr)
 	}
@@ -260,7 +257,6 @@ func parseReviewMeta(entries []string) (map[string]string, error) {
 	for _, e := range entries {
 		i := strings.IndexByte(e, '=')
 		if i <= 0 {
-			// i == -1: no '=' separator. i == 0: empty key.
 			return nil, fmt.Errorf("invalid --review-meta entry %q: expected key=value", e)
 		}
 		key := e[:i]
@@ -272,21 +268,16 @@ func parseReviewMeta(entries []string) (map[string]string, error) {
 	return meta, nil
 }
 
-// reviewChange is one entry in the change manifest sent alongside the encrypted
-// bundle on the authenticated path. The fingerprint matches a logical change
-// across spec versions (see formatters.ComputeFingerprint); the level is the
-// change's severity as an int.
+// reviewChange is one manifest entry sent alongside the encrypted bundle: a
+// change's fingerprint (see formatters.ComputeFingerprint) and its level.
 type reviewChange struct {
 	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
 	Level       int    `json:"level" yaml:"level"`
 }
 
-// reviewManifest extracts the change manifest from the computed changes: one
-// entry per change carrying its fingerprint and level. The fingerprint is
-// computed exactly as the JSON formatter computes it (formatters.ComputeFingerprint),
-// so the manifest matches the fingerprints embedded in the encrypted changelog.
-// A fingerprint is the only handle the server has on a change; ComputeFingerprint
-// always returns a non-empty 12-char hash, so an entry is emitted for every change.
+// reviewManifest builds the {fingerprint, level} manifest. Fingerprints are
+// computed as the JSON formatter does, so they match the ones in the encrypted
+// changelog the page renders.
 func reviewManifest(errs checker.Changes) []reviewChange {
 	manifest := make([]reviewChange, 0, len(errs))
 	for _, change := range errs {
@@ -298,11 +289,9 @@ func reviewManifest(errs checker.Changes) []reviewChange {
 	return manifest
 }
 
-// uploadAuthenticatedReview posts the encrypted bundle to the token-authenticated
-// endpoint, builds the final review URL with the key in its #fragment (encoded
-// identically to the free path), prints it, and prints the returned status
-// verbatim. It mirrors the free path's additive error model: any failure warns
-// and returns non-fatally so --open never changes the command's exit code.
+// uploadAuthenticatedReview posts the encrypted bundle to the token endpoint and
+// prints the returned review URL (key in its #fragment) plus the status. Errors
+// are returned for the caller to demote to a warning, like the free path.
 func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []byte, errs checker.Changes, stderr io.Writer) error {
 	metadata, err := parseReviewMeta(metaEntries)
 	if err != nil {
@@ -314,8 +303,6 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 		Metadata   map[string]string `json:"metadata" yaml:"metadata"`
 		Changes    []reviewChange    `json:"changes" yaml:"changes"`
 	}{
-		// encoding/json base64-encodes a []byte field automatically, matching
-		// the raw-blob handling of the free path.
 		Ciphertext: blob,
 		Metadata:   metadata,
 		Changes:    reviewManifest(errs),

@@ -73,25 +73,16 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
 }
 
-// addOpenFlags registers --open and its companion review-upload flags. They live
-// together, and only on breaking/changelog, because the review flags are inert
-// without --open: --review-token's presence is the only switch between the free
-// anonymous upload and the authenticated one. The review flags are deliberately
-// vocabulary-neutral (a token and an opaque key=value metadata bag the CLI never
-// interprets); getParseArgs rejects them without --open. This is kept out of
-// addCommonBreakingFlags so the git-diff driver (which shares that helper but has
-// no --open) doesn't inherit these. outputName names what was printed before the
-// upload ("breaking changes" or "changelog").
+// addOpenFlags registers --open and its companion review-upload flags. Kept out
+// of addCommonBreakingFlags so the git-diff driver (which shares that helper but
+// has no --open) doesn't inherit them.
 func addOpenFlags(cmd *cobra.Command, outputName string) {
 	cmd.PersistentFlags().Bool("open", false, fmt.Sprintf("after printing the %s, encrypt the comparison and upload it to oasdiff.com, then open the side-by-side review in a browser", outputName))
 	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
 	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
 
-	// Hide the review-upload flags from --help: the authenticated review is
-	// assembled by the GitHub Action from its environment, not hand-typed, so
-	// these are an automation interface, not a human one. They still parse and
-	// work; a person sees only --open (the free review). Hidden as a pair because
-	// they're only useful together.
+	// Hidden from --help: the authenticated review is assembled by the Action,
+	// not hand-typed, so these are an automation interface. They still work.
 	hideFlag(cmd, "review-token")
 	hideFlag(cmd, "review-meta")
 }
