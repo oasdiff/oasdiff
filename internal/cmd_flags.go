@@ -86,4 +86,12 @@ func addOpenFlags(cmd *cobra.Command, outputName string) {
 	cmd.PersistentFlags().Bool("open", false, fmt.Sprintf("after printing the %s, encrypt the comparison and upload it to oasdiff.com, then open the side-by-side review in a browser", outputName))
 	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
 	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
+
+	// Hide the review-upload flags from --help: the authenticated review is
+	// assembled by the GitHub Action from its environment, not hand-typed, so
+	// these are an automation interface, not a human one. They still parse and
+	// work; a person sees only --open (the free review). Hidden as a pair because
+	// they're only useful together.
+	hideFlag(cmd, "review-token")
+	hideFlag(cmd, "review-meta")
 }
