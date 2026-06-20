@@ -152,6 +152,14 @@ func checkReviewFlagsRequireOpen(cmd *cobra.Command) error {
 
 func checkStdinWithComposed(cmd *cobra.Command, args []string) error {
 
+	// Every command using getParseArgs registers composed (via addCommonDiffFlags),
+	// but guard with Lookup so this check degrades gracefully instead of erroring
+	// with "failed to get composed flag" if it's ever run on a command without it.
+	// Same pattern as checkOpenWithComposed.
+	if cmd.Flags().Lookup("composed") == nil {
+		return nil
+	}
+
 	composed, err := cmd.Flags().GetBool("composed")
 	if err != nil {
 		return errors.New("failed to get composed flag")
