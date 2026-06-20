@@ -233,30 +233,53 @@ func TestUploadAndOpen_BreakingSetsModeBreaking(t *testing.T) {
 }
 
 func TestParseReviewMeta(t *testing.T) {
+	ok := func(t *testing.T, want map[string]string, entries ...string) {
+		t.Helper()
+		got, err := parseReviewMeta(entries)
+		require.NoError(t, err)
+		require.Equal(t, want, got)
+	}
+	bad := func(t *testing.T, entries ...string) {
+		t.Helper()
+		_, err := parseReviewMeta(entries)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "expected key=value")
+	}
+
 	t.Run("simple key=value", func(t *testing.T) {
-		require.Equal(t, map[string]string{"a": "b"}, parseReviewMeta([]string{"a=b"}))
+		ok(t, map[string]string{"a": "b"}, "a=b")
 	})
 	t.Run("value containing = splits on the first only", func(t *testing.T) {
-		require.Equal(t, map[string]string{"k": "a=b=c"}, parseReviewMeta([]string{"k=a=b=c"}))
+		ok(t, map[string]string{"k": "a=b=c"}, "k=a=b=c")
 	})
 	t.Run("multiple entries", func(t *testing.T) {
-		require.Equal(t, map[string]string{"a": "1", "b": "2"}, parseReviewMeta([]string{"a=1", "b=2"}))
+		ok(t, map[string]string{"a": "1", "b": "2"}, "a=1", "b=2")
 	})
 	t.Run("empty value is allowed", func(t *testing.T) {
-		require.Equal(t, map[string]string{"a": ""}, parseReviewMeta([]string{"a="}))
-	})
-	t.Run("malformed entry without = is skipped", func(t *testing.T) {
-		require.Equal(t, map[string]string{"a": "b"}, parseReviewMeta([]string{"noequals", "a=b"}))
-	})
-	t.Run("leading = (empty key) is skipped", func(t *testing.T) {
-		require.Equal(t, map[string]string{}, parseReviewMeta([]string{"=value"}))
+		ok(t, map[string]string{"a": ""}, "a=")
 	})
 	t.Run("nil input yields empty map", func(t *testing.T) {
-		require.Equal(t, map[string]string{}, parseReviewMeta(nil))
+		ok(t, map[string]string{})
 	})
 	t.Run("later entry wins for duplicate key", func(t *testing.T) {
-		require.Equal(t, map[string]string{"a": "second"}, parseReviewMeta([]string{"a=first", "a=second"}))
+		ok(t, map[string]string{"a": "second"}, "a=first", "a=second")
 	})
+	t.Run("entry without = is an error, not silently dropped", func(t *testing.T) {
+		bad(t, "a=b", "noequals")
+	})
+	t.Run("leading = (empty key) is an error", func(t *testing.T) {
+		bad(t, "=value")
+	})
+}
+
+func TestUploadAuthenticatedReview_InvalidMetaIsError(t *testing.T) {
+	// A malformed --review-meta entry must surface (the caller demotes it to a
+	// warning), not be silently dropped. Fails during parsing, before any HTTP
+	// call, so no server is needed.
+	var out bytes.Buffer
+	err := uploadAuthenticatedReview("tok", []string{"noequals"}, []byte{encryptedReviewBlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "expected key=value")
 }
 
 // writeSpecPair writes two minimal specs to fresh temp dirs and returns a Flags

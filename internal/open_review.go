@@ -252,21 +252,22 @@ func postEncryptedReview(blob []byte) (string, time.Time, error) {
 }
 
 // parseReviewMeta splits each "key=value" entry on the first '=' into a map.
-// The bag is opaque: the CLI assigns no meaning to any key. An entry with no
-// '=' has no value and is skipped (there is nothing to attach); an empty key is
-// likewise skipped. Later entries with the same key win.
-func parseReviewMeta(entries []string) map[string]string {
+// The bag is opaque: the CLI assigns no meaning to any key. An entry that isn't
+// a key=value pair (no '=', or an empty key) is an error rather than silently
+// dropped: dropping it would lose metadata the caller meant to send and surface
+// later as a confusing server-side rejection. An empty value is allowed. Later
+// entries with the same key win.
+func parseReviewMeta(entries []string) (map[string]string, error) {
 	meta := make(map[string]string, len(entries))
 	for _, e := range entries {
 		i := strings.IndexByte(e, '=')
 		if i <= 0 {
-			// No '=' (i == -1): no value to attach. Leading '=' (i == 0):
-			// empty key. Skip both.
-			continue
+			// i == -1: no '=' separator. i == 0: empty key.
+			return nil, fmt.Errorf("invalid --review-meta entry %q: expected key=value", e)
 		}
 		meta[e[:i]] = e[i+1:]
 	}
-	return meta
+	return meta, nil
 }
 
 // reviewChange is one entry in the change manifest sent alongside the encrypted
@@ -301,6 +302,11 @@ func reviewManifest(errs checker.Changes) []reviewChange {
 // verbatim. It mirrors the free path's additive error model: any failure warns
 // and returns non-fatally so --open never changes the command's exit code.
 func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []byte, errs checker.Changes, stderr io.Writer) error {
+	metadata, err := parseReviewMeta(metaEntries)
+	if err != nil {
+		return err
+	}
+
 	body, err := json.Marshal(struct {
 		Ciphertext []byte            `json:"ciphertext" yaml:"ciphertext"`
 		Metadata   map[string]string `json:"metadata" yaml:"metadata"`
@@ -309,7 +315,7 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 		// encoding/json base64-encodes a []byte field automatically, matching
 		// the raw-blob handling of the free path.
 		Ciphertext: blob,
-		Metadata:   parseReviewMeta(metaEntries),
+		Metadata:   metadata,
 		Changes:    reviewManifest(errs),
 	})
 	if err != nil {
