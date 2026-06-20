@@ -14,13 +14,20 @@ import (
 //   - open: an interactive one-shot action (encrypt the comparison, upload it,
 //     and open a browser). Persisting it in a committed config would upload and
 //     open a review on every run, so it is command-line only.
+//   - review-token / review-meta: per-invocation parameters of the --open upload
+//     (the auth token and its opaque metadata bag). They are meaningless without
+//     --open, which is itself command-line only, and the token is a credential
+//     that should never be committed to a config file. So they are command-line
+//     only too.
 //   - config: the path to the config file itself.
 //
 // Hidden (deprecated) flags are skipped separately via flag.Hidden, so they
 // don't need to be listed here.
 var flagsNotInConfigFile = map[string]bool{
-	"open":   true,
-	"config": true,
+	"open":         true,
+	"review-token": true,
+	"review-meta":  true,
+	"config":       true,
 }
 
 // Test_ConfigFileCoversAllFlags guards against config drift.

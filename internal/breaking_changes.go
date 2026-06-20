@@ -21,6 +21,7 @@ func getBreakingChangesCmd() *cobra.Command {
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetBreakingLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
 	cmd.PersistentFlags().Bool("open", false, "after printing the breaking changes, encrypt the comparison and upload it to oasdiff.com, then open the side-by-side review in a browser")
+	addReviewFlags(&cmd)
 
 	return &cmd
 }

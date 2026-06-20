@@ -23,6 +23,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
+	"github.com/spf13/cobra"
 )
 
 // oasdiffSiteURL is the base URL of the web product. Defaults to the canonical
@@ -36,6 +37,28 @@ func oasdiffSiteURL() string {
 		return strings.TrimRight(u, "/")
 	}
 	return "https://www.oasdiff.com"
+}
+
+// oasdiffAPIBaseURL is the base URL of the backend API service. It is used only
+// by the authenticated review upload (--review-token); the free anonymous path
+// posts to the web product instead (see oasdiffSiteURL). Defaults to
+// api.oasdiff.com; set the OASDIFF_API_URL env var to point the authenticated
+// upload at a different deployment (a local dev service, or a self-hosted one).
+func oasdiffAPIBaseURL() string {
+	if u := os.Getenv("OASDIFF_API_URL"); u != "" {
+		return strings.TrimRight(u, "/")
+	}
+	return "https://api.oasdiff.com"
+}
+
+// addReviewFlags registers the flags that turn the additive --open upload into
+// an authenticated one. They are inert without --open; --review-token's presence
+// is the only switch between the free anonymous upload and the authenticated
+// one. The flags are deliberately vocabulary-neutral: a token and an opaque
+// key=value metadata bag the CLI never interprets.
+func addReviewFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().String("review-token", "", "with --open, upload an authenticated review using this token instead of the free anonymous one")
+	cmd.PersistentFlags().StringSlice("review-meta", nil, "with --open and --review-token, attach repeatable key=value metadata to the authenticated review (opaque; not interpreted by the CLI)")
 }
 
 // encryptedReviewBlobVersion is the first byte of the uploaded blob. It lets
@@ -121,6 +144,13 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	blob, key, err := encryptReviewPayload(plaintext)
 	if err != nil {
 		return fmt.Errorf("encrypt review: %w", err)
+	}
+
+	// When a token is supplied, --open does the authenticated upload instead of
+	// the free anonymous one. The encrypted bundle and key are identical; only
+	// the endpoint, the request shape, and the response differ.
+	if token := flags.getReviewToken(); token != "" {
+		return uploadAuthenticatedReview(token, flags.getReviewMeta(), blob, key, errs, stderr)
 	}
 
 	reviewID, expiresAt, err := postEncryptedReview(blob)
@@ -230,6 +260,122 @@ func postEncryptedReview(blob []byte) (string, time.Time, error) {
 		return "", time.Time{}, fmt.Errorf("response missing review_id: %s", string(respBody))
 	}
 	return parsed.ReviewID, time.Unix(parsed.ExpiresAt, 0).UTC(), nil
+}
+
+// parseReviewMeta splits each "key=value" entry on the first '=' into a map.
+// The bag is opaque: the CLI assigns no meaning to any key. An entry with no
+// '=' has no value and is skipped (there is nothing to attach); an empty key is
+// likewise skipped. Later entries with the same key win.
+func parseReviewMeta(entries []string) map[string]string {
+	meta := make(map[string]string, len(entries))
+	for _, e := range entries {
+		i := strings.IndexByte(e, '=')
+		if i <= 0 {
+			// No '=' (i == -1): no value to attach. Leading '=' (i == 0):
+			// empty key. Skip both.
+			continue
+		}
+		meta[e[:i]] = e[i+1:]
+	}
+	return meta
+}
+
+// reviewChange is one entry in the change manifest sent alongside the encrypted
+// bundle on the authenticated path. The fingerprint matches a logical change
+// across spec versions (see formatters.ComputeFingerprint); the level is the
+// change's severity as an int.
+type reviewChange struct {
+	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
+	Level       int    `json:"level" yaml:"level"`
+}
+
+// reviewManifest extracts the change manifest from the computed changes: one
+// entry per change carrying its fingerprint and level. The fingerprint is
+// computed exactly as the JSON formatter computes it (formatters.ComputeFingerprint),
+// so the manifest matches the fingerprints embedded in the encrypted changelog.
+// A fingerprint is the only handle the server has on a change; ComputeFingerprint
+// always returns a non-empty 12-char hash, so an entry is emitted for every change.
+func reviewManifest(errs checker.Changes) []reviewChange {
+	manifest := make([]reviewChange, 0, len(errs))
+	for _, change := range errs {
+		manifest = append(manifest, reviewChange{
+			Fingerprint: formatters.ComputeFingerprint(change.GetId(), change.GetOperation(), change.GetPath(), change.GetArgs()),
+			Level:       int(change.GetLevel()),
+		})
+	}
+	return manifest
+}
+
+// uploadAuthenticatedReview posts the encrypted bundle to the token-authenticated
+// endpoint, builds the final review URL with the key in its #fragment (encoded
+// identically to the free path), prints it, and prints the returned status
+// verbatim. It mirrors the free path's additive error model: any failure warns
+// and returns non-fatally so --open never changes the command's exit code.
+func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []byte, errs checker.Changes, stderr io.Writer) error {
+	body, err := json.Marshal(struct {
+		Ciphertext []byte            `json:"ciphertext" yaml:"ciphertext"`
+		Metadata   map[string]string `json:"metadata" yaml:"metadata"`
+		Changes    []reviewChange    `json:"changes" yaml:"changes"`
+	}{
+		// encoding/json base64-encodes a []byte field automatically, matching
+		// the raw-blob handling of the free path.
+		Ciphertext: blob,
+		Metadata:   parseReviewMeta(metaEntries),
+		Changes:    reviewManifest(errs),
+	})
+	if err != nil {
+		return fmt.Errorf("marshal authenticated review: %w", err)
+	}
+
+	endpoint := fmt.Sprintf("%s/tenants/%s/encrypted-pr-review", oasdiffAPIBaseURL(), url.PathEscape(token))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "oasdiff-cli")
+
+	client := &http.Client{Timeout: 5 * time.Minute}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("upload to %s: %w", endpoint, err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("upload failed (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+
+	var parsed struct {
+		ReviewToken string `json:"review_token" yaml:"review_token"`
+		ReviewURL   string `json:"review_url" yaml:"review_url"`
+		Gate        struct {
+			State            string `json:"state" yaml:"state"`
+			BreakingTotal    int    `json:"breaking_total" yaml:"breaking_total"`
+			BreakingApproved int    `json:"breaking_approved" yaml:"breaking_approved"`
+		} `json:"gate" yaml:"gate"`
+	}
+	if err := json.Unmarshal(respBody, &parsed); err != nil {
+		return fmt.Errorf("parse response: %w", err)
+	}
+	if parsed.ReviewURL == "" {
+		return fmt.Errorf("response missing review_url: %s", string(respBody))
+	}
+
+	// The key rides in the URL #fragment exactly as the free path encodes it:
+	// browsers never transmit the fragment, so the server stores ciphertext it
+	// cannot read.
+	reviewURL := parsed.ReviewURL + "#k=" + base64.RawURLEncoding.EncodeToString(key)
+
+	fmt.Fprintf(stderr, "\nOpening %s\n", reviewURL)
+	// The status is printed verbatim, on its own grep-friendly line. The CLI
+	// does not interpret or branch on it; the caller acts on it.
+	fmt.Fprintf(stderr, "oasdiff: review status: %s\n", parsed.Gate.State)
+	if err := openBrowser(reviewURL); err != nil {
+		fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
+	}
+	return nil
 }
 
 // readSpecSource returns the raw bytes of a spec source and a display

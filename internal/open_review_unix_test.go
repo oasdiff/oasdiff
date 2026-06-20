@@ -231,3 +231,176 @@ func TestUploadAndOpen_BreakingSetsModeBreaking(t *testing.T) {
 	require.NoError(t, json.Unmarshal(decryptBlob(t, uploadedBlob, key), &payload))
 	require.Equal(t, "breaking", payload.Mode, "isBreaking=true must propagate as mode=breaking")
 }
+
+func TestParseReviewMeta(t *testing.T) {
+	t.Run("simple key=value", func(t *testing.T) {
+		require.Equal(t, map[string]string{"a": "b"}, parseReviewMeta([]string{"a=b"}))
+	})
+	t.Run("value containing = splits on the first only", func(t *testing.T) {
+		require.Equal(t, map[string]string{"k": "a=b=c"}, parseReviewMeta([]string{"k=a=b=c"}))
+	})
+	t.Run("multiple entries", func(t *testing.T) {
+		require.Equal(t, map[string]string{"a": "1", "b": "2"}, parseReviewMeta([]string{"a=1", "b=2"}))
+	})
+	t.Run("empty value is allowed", func(t *testing.T) {
+		require.Equal(t, map[string]string{"a": ""}, parseReviewMeta([]string{"a="}))
+	})
+	t.Run("malformed entry without = is skipped", func(t *testing.T) {
+		require.Equal(t, map[string]string{"a": "b"}, parseReviewMeta([]string{"noequals", "a=b"}))
+	})
+	t.Run("leading = (empty key) is skipped", func(t *testing.T) {
+		require.Equal(t, map[string]string{}, parseReviewMeta([]string{"=value"}))
+	})
+	t.Run("nil input yields empty map", func(t *testing.T) {
+		require.Equal(t, map[string]string{}, parseReviewMeta(nil))
+	})
+	t.Run("later entry wins for duplicate key", func(t *testing.T) {
+		require.Equal(t, map[string]string{"a": "second"}, parseReviewMeta([]string{"a=first", "a=second"}))
+	})
+}
+
+// writeSpecPair writes two minimal specs to fresh temp dirs and returns a Flags
+// pointed at them. The two dirs keep the basenames identical (openapi.yaml)
+// without colliding, mirroring the existing --open tests.
+func writeSpecPair(t *testing.T) *Flags {
+	t.Helper()
+	baseDir := t.TempDir()
+	basePath := filepath.Join(baseDir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(basePath, []byte("openapi: 3.0.0\nbase\n"), 0644))
+	revDir := t.TempDir()
+	revPath := filepath.Join(revDir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(revPath, []byte("openapi: 3.0.0\nrev\n"), 0644))
+
+	flags := NewFlags()
+	flags.setBase(load.NewSource(basePath))
+	flags.setRevision(load.NewSource(revPath))
+	return flags
+}
+
+func TestReviewManifest(t *testing.T) {
+	changes := checker.Changes{
+		checker.ApiChange{Id: "id-a", Operation: "GET", Path: "/a", Level: checker.ERR},
+		checker.ApiChange{Id: "id-b", Operation: "POST", Path: "/b", Level: checker.INFO},
+	}
+	manifest := reviewManifest(changes)
+	require.Len(t, manifest, 2)
+	for _, m := range manifest {
+		require.NotEmpty(t, m.Fingerprint, "every entry must carry a fingerprint")
+		require.Len(t, m.Fingerprint, 12, "fingerprint is the 12-char ComputeFingerprint output")
+	}
+	require.Equal(t, int(checker.ERR), manifest[0].Level, "level is the change's severity as an int")
+	require.Equal(t, int(checker.INFO), manifest[1].Level)
+	require.NotEqual(t, manifest[0].Fingerprint, manifest[1].Fingerprint, "distinct changes must have distinct fingerprints")
+}
+
+func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
+	var (
+		gotPath        string
+		gotMethod      string
+		gotContentType string
+		gotBody        []byte
+	)
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotMethod = r.Method
+		gotContentType = r.Header.Get("Content-Type")
+		gotBody, _ = io.ReadAll(r.Body)
+		_, _ = w.Write([]byte(`{"review_token":"rt-1","review_url":"https://www.oasdiff.com/review/e/auth-1","gate":{"state":"approved","breaking_total":3,"breaking_approved":3}}`))
+	}))
+	defer stub.Close()
+	// The authenticated upload targets the API base, not the site base.
+	t.Setenv("OASDIFF_API_URL", stub.URL)
+	// Point the site env elsewhere to prove the auth path does not use it.
+	t.Setenv("OASDIFF_URL", "https://should-not-be-used.example.com")
+
+	flags := writeSpecPair(t)
+	flags.v.Set("review-token", "tok-123")
+	flags.v.Set("review-meta", []string{"owner=acme", "pr=42"})
+
+	var out bytes.Buffer
+	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, true))
+
+	require.Equal(t, http.MethodPost, gotMethod)
+	require.Equal(t, "/tenants/tok-123/encrypted-pr-review", gotPath, "the token is path-authenticated")
+	require.Equal(t, "application/json", gotContentType)
+
+	var body struct {
+		Ciphertext []byte            `json:"ciphertext"`
+		Metadata   map[string]string `json:"metadata"`
+		Changes    []reviewChange    `json:"changes"`
+	}
+	require.NoError(t, json.Unmarshal(gotBody, &body))
+	require.NotEmpty(t, body.Ciphertext, "the encrypted bundle must ride in ciphertext")
+	require.Equal(t, byte(encryptedReviewBlobVersion), body.Ciphertext[0], "ciphertext is the same blob layout as the free path")
+	require.Equal(t, map[string]string{"owner": "acme", "pr": "42"}, body.Metadata, "the opaque metadata bag is forwarded verbatim")
+
+	// The output carries the returned URL with the key in its #fragment and the
+	// gate state printed verbatim.
+	require.Contains(t, out.String(), "https://www.oasdiff.com/review/e/auth-1#k=")
+	require.Contains(t, out.String(), "oasdiff: review status: approved")
+	require.NotContains(t, out.String(), "should-not-be-used", "the authenticated path must not use the site base URL")
+
+	m := keyFragmentRe.FindStringSubmatch(out.String())
+	require.Len(t, m, 2, "the URL must contain a #k= fragment")
+	key, err := base64.RawURLEncoding.DecodeString(m[1])
+	require.NoError(t, err)
+	require.Len(t, key, 32)
+
+	// The fragment key must decrypt the uploaded ciphertext: same zero-knowledge
+	// contract as the free path.
+	var payload reviewPayload
+	require.NoError(t, json.Unmarshal(decryptBlob(t, body.Ciphertext, key), &payload))
+	require.Equal(t, "openapi: 3.0.0\nbase\n", payload.BaseSpec)
+	require.Equal(t, "openapi: 3.0.0\nrev\n", payload.RevisionSpec)
+}
+
+func TestUploadAndOpen_FreePathWhenNoToken(t *testing.T) {
+	// With no token, --open must hit the free endpoint on the site base, not the
+	// authenticated one. Fail loudly if the authenticated endpoint is touched.
+	var freeHit bool
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "/api/encrypted-review", r.URL.Path, "no token means the free anonymous endpoint")
+		freeHit = true
+		_, _ = w.Write([]byte(`{"review_id":"free-1","expires_at":0}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_URL", stub.URL)
+	// If the auth path were wrongly taken, this base would be used; point it at a
+	// dead address so the test would error rather than silently pass.
+	t.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
+
+	flags := writeSpecPair(t)
+
+	var out bytes.Buffer
+	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true))
+	require.True(t, freeHit, "the free endpoint must be used when --review-token is empty")
+	require.Contains(t, out.String(), "/review/e/free-1#k=")
+}
+
+func TestUploadAuthenticatedReview_ServerErrorIsNonFatal(t *testing.T) {
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = w.Write([]byte(`{"error":"tenant not found"}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_API_URL", stub.URL)
+
+	blob := []byte{encryptedReviewBlobVersion, 1, 2, 3}
+	key := make([]byte, 32)
+	var out bytes.Buffer
+	err := uploadAuthenticatedReview("tok", nil, blob, key, checker.Changes{}, &out)
+	require.Error(t, err, "the function returns the error; the caller (getChangelog) demotes it to a warning")
+	require.Contains(t, err.Error(), "403")
+	require.Contains(t, err.Error(), "tenant not found", "the server's error body must surface in the warning")
+}
+
+func TestUploadAuthenticatedReview_UnreachableIsNonFatal(t *testing.T) {
+	// Port 0 is not connectable; the upload must return an error (which the
+	// caller demotes to a warning) rather than panicking.
+	t.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
+	blob := []byte{encryptedReviewBlobVersion, 1, 2, 3}
+	var out bytes.Buffer
+	err := uploadAuthenticatedReview("tok", nil, blob, make([]byte, 32), checker.Changes{}, &out)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "upload to")
+}
