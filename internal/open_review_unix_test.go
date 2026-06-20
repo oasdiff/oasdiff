@@ -340,7 +340,9 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 		gotMethod = r.Method
 		gotContentType = r.Header.Get("Content-Type")
 		gotBody, _ = io.ReadAll(r.Body)
-		_, _ = w.Write([]byte(`{"review_token":"rt-1","review_url":"https://www.oasdiff.com/review/e/auth-1","gate":{"state":"approved","breaking_total":3,"breaking_approved":3}}`))
+		// A deliberately distinct host + the Pro /review/ep route: it proves the
+		// CLI echoes the server-returned review_url verbatim, not OASDIFF_URL.
+		_, _ = w.Write([]byte(`{"review_token":"rt-1","review_url":"https://review.example.test/review/ep/auth-1","gate":{"state":"approved","breaking_total":3,"breaking_approved":3}}`))
 	}))
 	defer stub.Close()
 	// The authenticated upload targets the API base, not the site base.
@@ -371,7 +373,7 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 
 	// The output carries the returned URL with the key in its #fragment and the
 	// gate state printed verbatim.
-	require.Contains(t, out.String(), "https://www.oasdiff.com/review/e/auth-1#k=")
+	require.Contains(t, out.String(), "https://review.example.test/review/ep/auth-1#k=", "the CLI appends #k= to the server-returned review_url verbatim")
 	require.Contains(t, out.String(), "oasdiff: review status: approved")
 	require.NotContains(t, out.String(), "should-not-be-used", "the authenticated path must not use the site base URL")
 
