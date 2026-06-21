@@ -99,7 +99,7 @@ func TestBreaking_DeprecationNoSunset(t *testing.T) {
 func TestBreaking_RemovedPathForAlpha(t *testing.T) {
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
-	alpha := toJson(t, checker.STABILITY_ALPHA)
+	alpha := toJson(t, checker.StabilityAlpha)
 	s1.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = alpha
 	s1.Spec.Paths.Value("/api/test").Post.Extensions = map[string]any{"x-stability-level": alpha}
 
@@ -118,7 +118,7 @@ func TestBreaking_RemovedPathForAlpha(t *testing.T) {
 func TestBreaking_RemovedPathForDraft(t *testing.T) {
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
-	draft := toJson(t, checker.STABILITY_DRAFT)
+	draft := toJson(t, checker.StabilityDraft)
 	s1.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = draft
 	s1.Spec.Paths.Value("/api/test").Post.Extensions = map[string]any{"x-stability-level": draft}
 
