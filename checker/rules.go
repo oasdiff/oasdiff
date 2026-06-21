@@ -59,6 +59,88 @@ const (
 	ActionNone
 )
 
+func (d Direction) String() string {
+	switch d {
+	case DirectionRequest:
+		return "request"
+	case DirectionResponse:
+		return "response"
+	default:
+		return "none"
+	}
+}
+
+func (a Area) String() string {
+	switch a {
+	case AreaSchema:
+		return "schema"
+	case AreaParameters:
+		return "parameters"
+	case AreaRequestBody:
+		return "requestBody"
+	case AreaResponses:
+		return "responses"
+	case AreaPaths:
+		return "paths"
+	case AreaHeaders:
+		return "headers"
+	case AreaSecurity:
+		return "security"
+	case AreaTags:
+		return "tags"
+	case AreaComponents:
+		return "components"
+	default:
+		return "none"
+	}
+}
+
+func (k Kind) String() string {
+	switch k {
+	case KindExistence:
+		return "existence"
+	case KindRequiredness:
+		return "requiredness"
+	case KindMutability:
+		return "mutability"
+	case KindType:
+		return "type"
+	case KindConstraints:
+		return "constraints"
+	case KindValues:
+		return "values"
+	case KindStructure:
+		return "structure"
+	case KindLifecycle:
+		return "lifecycle"
+	default:
+		return "none"
+	}
+}
+
+func (a Action) String() string {
+	switch a {
+	case ActionAdd:
+		return "add"
+	case ActionRemove:
+		return "remove"
+	case ActionChange:
+		return "change"
+	case ActionGeneralize:
+		return "generalize"
+	case ActionSpecialize:
+		return "specialize"
+	case ActionIncrease:
+		return "increase"
+	case ActionDecrease:
+		return "decrease"
+	case ActionSet:
+		return "set"
+	default:
+		return "none"
+	}
+}
+
 type BackwardCompatibilityRule struct {
 	Id          string
 	Level       Level
