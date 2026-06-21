@@ -190,10 +190,10 @@ func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 	}
 }
 
-// normalizedStability returns STABILITY_STABLE for an empty label, otherwise the label itself.
+// normalizedStability returns StabilityStable for an empty label, otherwise the label itself.
 func normalizedStability(label string) string {
 	if label == "" {
-		return STABILITY_STABLE
+		return StabilityStable
 	}
 	return label
 }
@@ -229,11 +229,11 @@ func getStabilityLevel(i map[string]any) (string, error) {
 		}
 	}
 
-	if stabilityLevel != STABILITY_DRAFT &&
-		stabilityLevel != STABILITY_ALPHA &&
-		stabilityLevel != STABILITY_BETA &&
-		stabilityLevel != STABILITY_STABLE {
-		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %q", STABILITY_DRAFT, STABILITY_ALPHA, STABILITY_BETA, STABILITY_STABLE, stabilityLevel)
+	if stabilityLevel != StabilityDraft &&
+		stabilityLevel != StabilityAlpha &&
+		stabilityLevel != StabilityBeta &&
+		stabilityLevel != StabilityStable {
+		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %q", StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable, stabilityLevel)
 	}
 
 	return stabilityLevel, nil

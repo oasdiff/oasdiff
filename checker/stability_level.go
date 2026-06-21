@@ -24,13 +24,13 @@ const DefaultStabilityLevel = StabilityLevelBeta
 // An empty string is treated as stable (implicit stable).
 func ParseStabilityLevel(s string) StabilityLevel {
 	switch s {
-	case STABILITY_DRAFT:
+	case StabilityDraft:
 		return StabilityLevelDraft
-	case STABILITY_ALPHA:
+	case StabilityAlpha:
 		return StabilityLevelAlpha
-	case STABILITY_BETA:
+	case StabilityBeta:
 		return StabilityLevelBeta
-	case STABILITY_STABLE:
+	case StabilityStable:
 		return StabilityLevelStable
 	default:
 		// empty string or unknown → treat as stable
@@ -48,5 +48,5 @@ func (sl StabilityLevel) IsIncluded(stability string) bool {
 
 // GetSupportedStabilityLevels returns the list of valid stability level strings.
 func GetSupportedStabilityLevels() []string {
-	return []string{STABILITY_DRAFT, STABILITY_ALPHA, STABILITY_BETA, STABILITY_STABLE}
+	return []string{StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable}
 }
