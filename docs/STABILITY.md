@@ -35,14 +35,16 @@ The same detection applies to request and response properties:
 - `request-property-stability-decreased` / `request-property-stability-increased`
 - `response-property-stability-decreased` / `response-property-stability-increased`
 
-These changes are only reported when at least one side (base or revision) meets the configured stability threshold.
+These changes are only reported when the base stability (the level being left) meets the configured threshold. A destabilization from an in-scope level is reported, while a change to an element that was already below the threshold is not.
 
 ### Programmatic usage
-The `WithStabilityLevel` method on `Config` lets you set the threshold in a fluent chain:
+Pass `WithStabilityLevel` as an option to `NewConfig`:
 ```go
-config := checker.NewConfig(checker.GetAllChecks()).
-    WithOptionalChecks(optionalChecks).
-    WithStabilityLevel("alpha")
+config := checker.NewConfig(
+    checker.GetAllChecks(),
+    checker.WithOptionalChecks(optionalChecks),
+    checker.WithStabilityLevel("alpha"),
+)
 ```
 
 ### Example

@@ -1,157 +1,240 @@
 package checker
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
-	RequestPropertyStabilityDecreasedId  = "request-property-stability-decreased"
-	RequestPropertyStabilityIncreasedId  = "request-property-stability-increased"
-	ResponsePropertyStabilityDecreasedId = "response-property-stability-decreased"
-	ResponsePropertyStabilityIncreasedId = "response-property-stability-increased"
+	APIStabilityDecreasedId = "api-stability-decreased"
+	APIStabilityIncreasedId = "api-stability-increased"
 )
 
-// RequestPropertyStabilityUpdatedCheck detects request properties where x-stability-level changed.
-// Only emits changes when the property's base stability meets the configured threshold.
-func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
-	result := make(Changes, 0)
-	if config == nil || diffReport.PathsDiff == nil {
+// applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
+func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources *diff.OperationsSourcesMap) Changes {
+	if diffReport.PathsDiff == nil {
 		return result
 	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
-			}
-			op := operationItem.Revision
-			for _, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
-				CheckModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						checkPropertyStabilityChange(propertyDiff, propertyPath, propertyName,
-							RequestPropertyStabilityDecreasedId, RequestPropertyStabilityIncreasedId,
-							config, operationsSources, op, operation, path, &result)
-					})
-			}
-		}
-	}
+	result = append(result, checkInvalidStabilityLevels(config, diffReport, operationsSources)...)
+	result = append(result, checkStabilityLevelChanged(config, diffReport, operationsSources)...)
+	filterBelowStabilityThreshold(config, diffReport)
+	// Detect property-level stability changes after filtering, so a property
+	// change on an operation below the threshold (already removed from the diff)
+	// is not reported. Unlike an endpoint stability change, a property change
+	// never moves its operation out of scope, so an in-scope operation survives
+	// the filter and its property changes are still seen here.
+	result = append(result, RequestPropertyStabilityUpdatedCheck(diffReport, operationsSources, config)...)
+	result = append(result, ResponsePropertyStabilityUpdatedCheck(diffReport, operationsSources, config)...)
 	return result
 }
 
-// ResponsePropertyStabilityUpdatedCheck detects response properties where x-stability-level changed.
-// Only emits changes when the property's base stability meets the configured threshold.
-func ResponsePropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
-	result := make(Changes, 0)
-	if config == nil || diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
+// checkInvalidStabilityLevels emits change records for unparseable x-stability-level values.
+func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
+	var result Changes
+
+	for path, pathDiff := range diffReport.PathsDiff.Modified {
+		if pathDiff.OperationsDiff == nil {
 			continue
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
+		for operation, operationItem := range pathDiff.OperationsDiff.Modified {
+			if _, err := getStabilityLevel(pathDiff.Base.GetOperation(operation).Extensions); err != nil {
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Base, operationsSources, operation, path, err))
 			}
-			op := operationItem.Revision
-			for _, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff == nil ||
-					responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				for _, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
-					CheckModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							checkPropertyStabilityChange(propertyDiff, propertyPath, propertyName,
-								ResponsePropertyStabilityDecreasedId, ResponsePropertyStabilityIncreasedId,
-								config, operationsSources, op, operation, path, &result)
-						})
-				}
+			if _, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions); err != nil {
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Revision, operationsSources, operation, path, err))
+			}
+		}
+		for _, operation := range pathDiff.OperationsDiff.Deleted {
+			operationItem := pathDiff.Base.GetOperation(operation)
+			if _, err := getStabilityLevel(operationItem.Extensions); err != nil {
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
 			}
 		}
 	}
+
+	// Also check deleted paths for invalid stability
+	for _, path := range diffReport.PathsDiff.Deleted {
+		pathVal := diffReport.PathsDiff.Base.Value(path)
+		for operation, operationItem := range pathVal.Operations() {
+			if _, err := getStabilityLevel(pathVal.GetOperation(operation).Extensions); err != nil {
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
+			}
+		}
+	}
+
 	return result
 }
 
-func checkPropertyStabilityChange(
-	propertyDiff *diff.SchemaDiff,
-	propertyPath string, propertyName string,
-	decreasedId string, increasedId string,
-	config *Config, operationsSources *diff.OperationsSourcesMap,
-	op *openapi3.Operation, operation string, path string,
-	result *Changes,
-) {
-	if propertyDiff.ExtensionsDiff == nil {
-		return
-	}
+// checkStabilityLevelChanged emits APIStabilityDecreasedId / APIStabilityIncreasedId changes.
+func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
+	var result Changes
 
-	var baseStability, revisionStability string
-	var err error
+	for path, pathDiff := range diffReport.PathsDiff.Modified {
+		if pathDiff.OperationsDiff == nil {
+			continue
+		}
+		for operation, operationItem := range pathDiff.OperationsDiff.Modified {
+			baseStability, err := getStabilityLevel(pathDiff.Base.GetOperation(operation).Extensions)
+			if err != nil {
+				continue // already reported by checkInvalidStabilityLevels
+			}
+			revisionStability, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions)
+			if err != nil {
+				continue // already reported by checkInvalidStabilityLevels
+			}
 
-	if propertyDiff.Base != nil {
-		baseStability, err = getStabilityLevel(propertyDiff.Base.Extensions)
-		if err != nil {
-			return
+			baseLabel := normalizedStability(baseStability)
+			revisionLabel := normalizedStability(revisionStability)
+			baseLevel := ParseStabilityLevel(baseLabel)
+			revisionLevel := ParseStabilityLevel(revisionLabel)
+
+			if baseLevel == revisionLevel {
+				continue
+			}
+
+			// Gate on the base stability (the level the element is leaving), not the
+			// lower of the two. This reports changes to elements that were within the
+			// configured threshold before the change: a stable->draft destabilization
+			// is reported (base stable meets the threshold), while a draft->stable
+			// change of a previously out-of-scope element is not. Using the lower
+			// level instead would drop stable->draft by default, which regresses the
+			// existing api-stability-decreased ERR.
+			if config != nil && !config.StabilityLevel.IsIncluded(baseLabel) {
+				continue
+			}
+
+			changeId := APIStabilityIncreasedId
+			if revisionLevel < baseLevel {
+				changeId = APIStabilityDecreasedId
+			}
+
+			result = append(result, NewApiChange(
+				changeId,
+				config,
+				[]any{baseLabel, revisionLabel},
+				"",
+				operationsSources,
+				operationItem.Revision,
+				operation,
+				path,
+			))
 		}
 	}
-	if propertyDiff.Revision != nil {
-		revisionStability, err = getStabilityLevel(propertyDiff.Revision.Extensions)
-		if err != nil {
-			return
+
+	return result
+}
+
+// filterBelowStabilityThreshold mutates diffReport by removing paths and operations
+// that fall below the configured stability threshold. It emits no Changes.
+func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
+	if config == nil {
+		return
+	}
+
+	// Filter deleted paths
+	iPath := 0
+	for _, path := range diffReport.PathsDiff.Deleted {
+		keep := false
+		pathVal := diffReport.PathsDiff.Base.Value(path)
+		for operation := range pathVal.Operations() {
+			baseStability, err := getStabilityLevel(pathVal.GetOperation(operation).Extensions)
+			if err != nil {
+				continue
+			}
+			if config.StabilityLevel.IsIncluded(baseStability) {
+				keep = true
+				break
+			}
+		}
+		if keep {
+			diffReport.PathsDiff.Deleted[iPath] = path
+			iPath++
 		}
 	}
+	diffReport.PathsDiff.Deleted = diffReport.PathsDiff.Deleted[:iPath]
 
-	// Normalize: no x-stability-level is treated as implicit "stable"
-	baseLabel := baseStability
-	if baseLabel == "" {
-		baseLabel = STABILITY_STABLE
+	// Filter modified paths → deleted operations and modified operations
+	for _, pathDiff := range diffReport.PathsDiff.Modified {
+		if pathDiff.OperationsDiff == nil {
+			continue
+		}
+
+		// Filter deleted operations
+		iOperation := 0
+		for _, operation := range pathDiff.OperationsDiff.Deleted {
+			operationItem := pathDiff.Base.GetOperation(operation)
+			baseStability, err := getStabilityLevel(operationItem.Extensions)
+			if err != nil {
+				continue
+			}
+			if config.StabilityLevel.IsIncluded(baseStability) {
+				pathDiff.OperationsDiff.Deleted[iOperation] = operation
+				iOperation++
+			}
+		}
+		pathDiff.OperationsDiff.Deleted = pathDiff.OperationsDiff.Deleted[:iOperation]
+
+		// Filter modified operations below threshold
+		for operation := range pathDiff.OperationsDiff.Modified {
+			revisionStability, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions)
+			if err != nil {
+				continue
+			}
+			if !config.StabilityLevel.IsIncluded(revisionStability) {
+				delete(pathDiff.OperationsDiff.Modified, operation)
+			}
+		}
 	}
-	revisionLabel := revisionStability
-	if revisionLabel == "" {
-		revisionLabel = STABILITY_STABLE
+}
+
+// normalizedStability returns STABILITY_STABLE for an empty label, otherwise the label itself.
+func normalizedStability(label string) string {
+	if label == "" {
+		return STABILITY_STABLE
 	}
+	return label
+}
 
-	baseLevel := ParseStabilityLevel(baseLabel)
-	revisionLevel := ParseStabilityLevel(revisionLabel)
-
-	if baseLevel == revisionLevel {
-		return
-	}
-
-	// Gate on the base stability (the level the property is leaving), consistent
-	// with the endpoint-level check, so a destabilization from a tracked level is
-	// reported rather than dropped.
-	if !config.StabilityLevel.IsIncluded(baseLabel) {
-		return
-	}
-
-	isDecrease := revisionLevel < baseLevel
-
-	propName := propertyFullName(propertyPath, propertyName)
-
-	var changeId string
-	if isDecrease {
-		changeId = decreasedId
-	} else {
-		changeId = increasedId
-	}
-
-	*result = append(*result, NewApiChange(
-		changeId,
+func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method string, path string, err error) Change {
+	return NewApiChange(
+		APIInvalidStabilityLevelId,
 		config,
-		[]any{propName, baseLabel, revisionLabel},
+		[]any{err},
 		"",
 		operationsSources,
-		op,
 		operation,
+		method,
 		path,
-	))
+	)
+}
+
+func getStabilityLevel(i map[string]any) (string, error) {
+	if i == nil || i[diff.XStabilityLevelExtension] == nil {
+		return "", nil
+	}
+	var stabilityLevel string
+
+	stabilityLevel, ok := i[diff.XStabilityLevelExtension].(string)
+	if !ok {
+		jsonStabilityRaw, ok := i[diff.XStabilityLevelExtension].(json.RawMessage)
+		if !ok {
+			return "", fmt.Errorf("x-stability-level isn't a string nor valid json")
+		}
+		err := json.Unmarshal(jsonStabilityRaw, &stabilityLevel)
+		if err != nil {
+			return "", fmt.Errorf("failed to unmarshal x-stability-level json")
+		}
+	}
+
+	if stabilityLevel != STABILITY_DRAFT &&
+		stabilityLevel != STABILITY_ALPHA &&
+		stabilityLevel != STABILITY_BETA &&
+		stabilityLevel != STABILITY_STABLE {
+		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %q", STABILITY_DRAFT, STABILITY_ALPHA, STABILITY_BETA, STABILITY_STABLE, stabilityLevel)
+	}
+
+	return stabilityLevel, nil
 }

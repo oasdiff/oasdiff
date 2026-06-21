@@ -18,7 +18,7 @@ const (
 
 // DefaultStabilityLevel is the default stability level when none is specified.
 // This matches the documented CLI default of "beta".
-var DefaultStabilityLevel = StabilityLevelBeta
+const DefaultStabilityLevel = StabilityLevelBeta
 
 // ParseStabilityLevel converts a stability string to a StabilityLevel.
 // An empty string is treated as stable (implicit stable).
@@ -43,12 +43,7 @@ func ParseStabilityLevel(s string) StabilityLevel {
 // If the threshold is StabilityLevelAlpha, draft is excluded but alpha/beta/stable are included.
 // An empty stability string is treated as "stable".
 func (sl StabilityLevel) IsIncluded(stability string) bool {
-	// Empty string means no x-stability-level → treat as implicit stable, always included
-	if stability == "" {
-		return true
-	}
-	level := ParseStabilityLevel(stability)
-	return level >= sl
+	return ParseStabilityLevel(stability) >= sl
 }
 
 // GetSupportedStabilityLevels returns the list of valid stability level strings.

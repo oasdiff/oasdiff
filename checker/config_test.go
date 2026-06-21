@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	numOfChecks = 123
+	numOfChecks = 121
 	numOfIds    = 479
 )
 
