@@ -236,8 +236,11 @@ func TestEndpointStability_DraftToStable_Increased(t *testing.T) {
 	requireChange(t, errs, checker.APIStabilityIncreasedId)
 }
 
-// When StabilityLevel is Beta (default), stable→draft decrease is NOT detected because revision (draft) is below threshold
-func TestEndpointStability_BetaLevel_StableToDraftNotDetected(t *testing.T) {
+// When StabilityLevel is Beta (default), a stable→draft decrease IS detected:
+// the base (stable) is within the threshold, so leaving it is reported. Gating
+// on the lower (draft) level instead would drop this and regress the existing
+// api-stability-decreased ERR.
+func TestEndpointStability_BetaLevel_StableToDraftDetected(t *testing.T) {
 	s1, err := open(getStabilityFile("base-endpoint-stable.yaml"))
 	require.NoError(t, err)
 	s2, err := open(getStabilityFile("revision-endpoint-draft.yaml"))
@@ -250,7 +253,7 @@ func TestEndpointStability_BetaLevel_StableToDraftNotDetected(t *testing.T) {
 	// StabilityLevel defaults to Beta
 	errs := checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
 
-	requireNoChange(t, errs, checker.APIStabilityDecreasedId)
+	requireChange(t, errs, checker.APIStabilityDecreasedId)
 }
 
 // When StabilityLevel is Stable, draft→stable is NOT reported because base (draft) is below threshold

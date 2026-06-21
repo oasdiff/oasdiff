@@ -80,14 +80,6 @@ func normalizedStability(label string) string {
 	return label
 }
 
-// lowerStability returns the stability label with the lower level (by ParseStabilityLevel ordering).
-func lowerStability(baseLabel, revisionLabel string) string {
-	if ParseStabilityLevel(baseLabel) <= ParseStabilityLevel(revisionLabel) {
-		return baseLabel
-	}
-	return revisionLabel
-}
-
 // checkInvalidStabilityLevels emits change records for unparseable x-stability-level values.
 // It does not mutate diffReport.
 func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
@@ -160,7 +152,14 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 				continue
 			}
 
-			if config != nil && !config.StabilityLevel.IsIncluded(lowerStability(baseLabel, revisionLabel)) {
+			// Gate on the base stability (the level the element is leaving), not the
+			// lower of the two. This reports changes to elements that were within the
+			// configured threshold before the change: a stable->draft destabilization
+			// is reported (base stable meets the threshold), while a draft->stable
+			// change of a previously out-of-scope element is not. Using the lower
+			// level instead would drop stable->draft by default, which regresses the
+			// existing api-stability-decreased ERR.
+			if config != nil && !config.StabilityLevel.IsIncluded(baseLabel) {
 				continue
 			}
 

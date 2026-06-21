@@ -126,8 +126,10 @@ func checkPropertyStabilityChange(
 		return
 	}
 
-	// Report only if both base and revision meet the configured threshold
-	if !config.StabilityLevel.IsIncluded(lowerStability(baseLabel, revisionLabel)) {
+	// Gate on the base stability (the level the property is leaving), consistent
+	// with the endpoint-level check, so a destabilization from a tracked level is
+	// reported rather than dropped.
+	if !config.StabilityLevel.IsIncluded(baseLabel) {
 		return
 	}
 
