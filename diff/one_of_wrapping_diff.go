@@ -14,11 +14,15 @@ import (
 // being removed, and a base-required property that is not required in every
 // alternative becomes optional (a client may omit it in some valid branch).
 //
-// This mirrors ListOfTypesDiff (the single<->oneOf pattern for scalar type
-// sets); here the alternatives are object subschemas. The checker reads it to
-// suppress the spurious "property removed" findings the raw property diff would
-// otherwise produce, and to report "became optional" instead. See
-// oasdiff/oasdiff#702.
+// It follows the precedent of ListOfTypesDiff, which promotes a single<->oneOf
+// transition to a first-class diff so the checker can avoid naive field-level
+// false positives. The two are complementary, not reflections: ListOfTypesDiff
+// handles the scalar type-set case (oneOf alternatives that differ by type, and
+// its detector skips schemas with properties), while OneOfWrappingDiff handles
+// the object case it skips (alternatives that are objects differing by
+// properties/required). The checker reads it to suppress the spurious "property
+// removed" findings the raw property diff would otherwise produce, and to report
+// "became optional" instead. See oasdiff/oasdiff#702.
 type OneOfWrappingDiff struct {
 	// NumAlternatives is the number of oneOf alternatives on the revision side.
 	NumAlternatives int `json:"numAlternatives,omitempty" yaml:"numAlternatives,omitempty"`
