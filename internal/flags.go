@@ -185,3 +185,7 @@ func (flags *Flags) getTags() []string {
 func (flags *Flags) getTemplate() string {
 	return flags.v.GetString("template")
 }
+
+func (flags *Flags) getStabilityLevel() string {
+	return flags.v.GetString("stability-level")
+}

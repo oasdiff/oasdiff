@@ -125,8 +125,13 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityAddedCheckId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionRemove),
-		// Stability Descreased Check is run as part of CheckBackwardCompatibility
+		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, AreaPaths, KindLifecycle, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityDecreasedId, ERR, nil, DirectionRequest, AreaSchema, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityIncreasedId, INFO, nil, DirectionRequest, AreaSchema, KindLifecycle, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityDecreasedId, ERR, nil, DirectionResponse, AreaSchema, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityIncreasedId, INFO, nil, DirectionResponse, AreaSchema, KindLifecycle, ActionIncrease),
 		// APIDeprecationCheck
 		newBackwardCompatibilityRule(EndpointReactivatedId, INFO, APIDeprecationCheck, DirectionNone, AreaPaths, KindLifecycle, ActionChange),
 		newBackwardCompatibilityRule(APIDeprecatedSunsetParseId, ERR, APIDeprecationCheck, DirectionNone, AreaPaths, KindLifecycle, ActionChange),
