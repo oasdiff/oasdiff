@@ -23,7 +23,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 		// breaking restructuring: under oneOf a previously valid payload can
 		// match multiple overlapping alternatives and be rejected. Emit one
 		// breaking finding per wrapped body (not per property).
-		if w := info.schemaDiff.OneOfWrappingDiff; w != nil && !w.Empty() {
+		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
 			result = append(result, info.newChange(
 				RequestBodyWrappedInOneOfId,
 				nil,
