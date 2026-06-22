@@ -12,12 +12,27 @@ const (
 	ResponseRequiredWriteOnlyPropertyRemovedId = "response-required-write-only-property-removed"
 	ResponseRequiredPropertyAddedId            = "response-required-property-added"
 	ResponseRequiredWriteOnlyPropertyAddedId   = "response-required-write-only-property-added"
+	ResponseBodyWrappedInOneOfId               = "response-body-wrapped-in-one-of"
 )
 
 func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		// Wrapping a concrete object response body into a oneOf (#702) is a
+		// breaking restructuring: a field that was previously guaranteed in the
+		// response may now be absent depending on which alternative matches.
+		// Emit one breaking finding per wrapped body (not per property). This
+		// is the single emission point for the response side, mirroring the
+		// request side which emits in RequestPropertyUpdatedCheck.
+		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
+			result = append(result, info.newChange(
+				ResponseBodyWrappedInOneOfId,
+				nil,
+				"",
+			).WithSources(nil, nil))
+		}
+
 		// CheckDeletedPropertiesDiff / CheckAddedPropertiesDiff walk
 		// properties that were dropped or introduced entirely, not just
 		// modified ones — different from info.walkProperties, which
@@ -31,6 +46,15 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				}
 				if !slices.Contains(parent.Base.Required, propertyName) {
 					// Covered by response-optional-property-removed
+					return
+				}
+
+				// A property that moved into a oneOf wrapping (#702) was not
+				// removed from the contract, so the raw "property removed"
+				// finding is a false positive. Suppress it; the breaking nature
+				// of the wrapping is reported once per body as
+				// response-body-wrapped-in-one-of.
+				if w := parent.OneOfWrappingDiff; w != nil && slices.Contains(w.MovedProperties, propertyName) {
 					return
 				}
 

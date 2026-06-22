@@ -9,7 +9,7 @@ import (
 
 const (
 	numOfChecks = 121
-	numOfIds    = 480
+	numOfIds    = 481
 )
 
 func TestNewConfig(t *testing.T) {
