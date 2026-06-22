@@ -49,6 +49,7 @@ type SchemaDiff struct {
 	MaxPropsDiff                    *ValueDiff              `json:"maxProps,omitempty" yaml:"maxProps,omitempty"`
 	AdditionalPropertiesDiff        *SchemaDiff             `json:"additionalProperties,omitempty" yaml:"additionalProperties,omitempty"`
 	DiscriminatorDiff               *DiscriminatorDiff      `json:"discriminatorDiff,omitempty" yaml:"discriminatorDiff,omitempty"`
+
 	// OpenAPI 3.1 / JSON Schema 2020-12 fields
 	ConstDiff                        *ValueDiff             `json:"const,omitempty" yaml:"const,omitempty"`
 	ExamplesDiff                     *ValueDiff             `json:"examples,omitempty" yaml:"examples,omitempty"`
@@ -77,6 +78,7 @@ type SchemaDiff struct {
 	DefsDiff                         *SchemasDiff           `json:"$defs,omitempty" yaml:"$defs,omitempty"`
 	SchemaDialectDiff                *ValueDiff             `json:"$schema,omitempty" yaml:"$schema,omitempty"`
 	CommentDiff                      *ValueDiff             `json:"$comment,omitempty" yaml:"$comment,omitempty"`
+
 	// Derived pattern recognitions, not OpenAPI keywords. They reinterpret the
 	// type/oneOf/properties/required changes above for the checker so it can
 	// avoid field-level false positives on single<->oneOf and
@@ -85,8 +87,10 @@ type SchemaDiff struct {
 	// checker reads.
 	ListOfTypesDiff   *ListOfTypesDiff   `json:"listOfTypes,omitempty" yaml:"listOfTypes,omitempty"`
 	OneOfWrappingDiff *OneOfWrappingDiff `json:"oneOfWrapping,omitempty" yaml:"oneOfWrapping,omitempty"`
-	Base              *openapi3.Schema   `json:"-" yaml:"-"`
-	Revision          *openapi3.Schema   `json:"-" yaml:"-"`
+
+	// Base and Revision point to the compared schema objects for reference in checkers
+	Base     *openapi3.Schema `json:"-" yaml:"-"`
+	Revision *openapi3.Schema `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
