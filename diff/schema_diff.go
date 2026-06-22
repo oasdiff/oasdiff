@@ -17,8 +17,6 @@ type SchemaDiff struct {
 	AllOfDiff                       *SubschemasDiff         `json:"allOf,omitempty" yaml:"allOf,omitempty"`
 	NotDiff                         *SchemaDiff             `json:"not,omitempty" yaml:"not,omitempty"`
 	TypeDiff                        *StringsDiff            `json:"type,omitempty" yaml:"type,omitempty"`
-	ListOfTypesDiff                 *ListOfTypesDiff        `json:"listOfTypes,omitempty" yaml:"listOfTypes,omitempty"`
-	OneOfWrappingDiff               *OneOfWrappingDiff      `json:"oneOfWrapping,omitempty" yaml:"oneOfWrapping,omitempty"`
 	TitleDiff                       *ValueDiff              `json:"title,omitempty" yaml:"title,omitempty"`
 	FormatDiff                      *ValueDiff              `json:"format,omitempty" yaml:"format,omitempty"`
 	DescriptionDiff                 *ValueDiff              `json:"description,omitempty" yaml:"description,omitempty"`
@@ -79,8 +77,16 @@ type SchemaDiff struct {
 	DefsDiff                         *SchemasDiff           `json:"$defs,omitempty" yaml:"$defs,omitempty"`
 	SchemaDialectDiff                *ValueDiff             `json:"$schema,omitempty" yaml:"$schema,omitempty"`
 	CommentDiff                      *ValueDiff             `json:"$comment,omitempty" yaml:"$comment,omitempty"`
-	Base                             *openapi3.Schema       `json:"-" yaml:"-"`
-	Revision                         *openapi3.Schema       `json:"-" yaml:"-"`
+	// Derived pattern recognitions, not OpenAPI keywords. They reinterpret the
+	// type/oneOf/properties/required changes above for the checker so it can
+	// avoid field-level false positives on single<->oneOf and
+	// object<->oneOf-wrapping transitions. Additive: the raw shape change is
+	// still reported in the real fields; these only add the interpretation the
+	// checker reads.
+	ListOfTypesDiff   *ListOfTypesDiff   `json:"listOfTypes,omitempty" yaml:"listOfTypes,omitempty"`
+	OneOfWrappingDiff *OneOfWrappingDiff `json:"oneOfWrapping,omitempty" yaml:"oneOfWrapping,omitempty"`
+	Base              *openapi3.Schema   `json:"-" yaml:"-"`
+	Revision          *openapi3.Schema   `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
