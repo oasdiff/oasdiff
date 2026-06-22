@@ -36,7 +36,8 @@ type OneOfWrappingDiff struct {
 
 // Empty indicates whether a change was found in this element.
 func (diff *OneOfWrappingDiff) Empty() bool {
-	return diff == nil
+	return diff == nil ||
+		(diff.NumAlternatives == 0 && len(diff.MovedProperties) == 0 && len(diff.RequiredBecameOptional) == 0)
 }
 
 // getOneOfWrappingDiff detects the "oneOf wrapping" pattern (base is a concrete
