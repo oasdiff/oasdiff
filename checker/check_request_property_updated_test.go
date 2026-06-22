@@ -149,3 +149,36 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 		OperationId: "addProduct",
 	}, errs[0])
 }
+
+// BC: wrapping a concrete request body object into a oneOf of object
+// alternatives is a breaking restructuring (#702): under oneOf a previously
+// valid payload can match multiple overlapping alternatives and be rejected.
+// The moved properties must not be reported as removed, and the wrapping must
+// be reported once as request-body-wrapped-in-one-of (ERR), not as
+// request-property-became-optional. Reproduces oasdiff/oasdiff#702.
+func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_property_one_of_wrapped_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_one_of_wrapped_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
+
+	require.False(t, containsId(errs, checker.RequestPropertyRemovedId),
+		"properties moved into a oneOf wrapping must not be reported as removed (#702)")
+	require.False(t, containsId(errs, checker.RequestPropertyBecameOptionalId),
+		"oneOf wrapping must not be reported as became-optional (#702)")
+
+	// The wrapping must be reported exactly once per request body (not per
+	// property), as a breaking error.
+	wrapped := 0
+	for _, e := range errs {
+		if e.GetId() == checker.RequestBodyWrappedInOneOfId {
+			wrapped++
+			require.Equal(t, checker.ERR, e.GetLevel())
+		}
+	}
+	require.Equal(t, 1, wrapped, "the wrapping must be reported once as a breaking error (#702)")
+}

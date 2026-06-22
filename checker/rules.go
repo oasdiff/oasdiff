@@ -460,6 +460,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyWithDefaultId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(NewOptionalRequestPropertyId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyWrappedInOneOfId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaRequestBody, KindStructure, ActionChange),
 		// RequestPropertyWriteOnlyReadOnlyCheck
 		newBackwardCompatibilityRule(RequestOptionalPropertyBecameNonWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, ActionChange),
 		newBackwardCompatibilityRule(RequestOptionalPropertyBecameWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, ActionChange),

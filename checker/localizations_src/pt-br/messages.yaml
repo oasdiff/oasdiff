@@ -303,6 +303,7 @@ response-body-any-of-removed: "%s foi removido da lista `anyOf` do corpo da resp
 response-property-any-of-added: "%s foi adicionado à lista `anyOf` da propriedade de resposta %s para o status %s"
 response-property-any-of-removed: "%s foi removido da lista `anyOf` da propriedade de resposta %s para o status %s"
 request-body-one-of-added: "%s foi adicionado à lista `oneOf` do corpo da requisição"
+request-body-wrapped-in-one-of: "o corpo da requisição foi reestruturado em um `oneOf`, portanto uma carga que antes era válida pode não ser mais aceita"
 request-body-one-of-removed: "%s foi removido da lista `oneOf` do corpo da requisição"
 request-property-one-of-added: "%s foi adicionado à lista `oneOf` da propriedade de requisição %s"
 request-property-one-of-removed: "%s foi removido da lista `oneOf` da propriedade de requisição %s"
@@ -434,6 +435,7 @@ request-body-min-length-decreased-description: comprimento mínimo do corpo da r
 request-body-min-length-increased-description: comprimento mínimo do corpo da requisição aumentado
 request-body-min-set-description: valor mínimo do corpo da requisição definido
 request-body-one-of-added-description: subesquema adicionado ao oneOf no corpo da requisição
+request-body-wrapped-in-one-of-description: "corpo da requisição encapsulado em um `oneOf`"
 request-body-one-of-removed-description: subesquema removido do oneOf no corpo da requisição
 request-body-type-changed-description: tipo do corpo da requisição alterado
 request-body-type-generalized-description: tipo do corpo da requisição generalizado

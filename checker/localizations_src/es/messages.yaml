@@ -307,6 +307,7 @@ response-body-any-of-removed: "%s fue removido de la lista `anyOf` del cuerpo de
 response-property-any-of-added: "%s fue agregado a la lista `anyOf` de la propiedad de respuesta %s para el estado %s"
 response-property-any-of-removed: "%s fue removido de la lista `anyOf` de la propiedad de respuesta %s para el estado %s"
 request-body-one-of-added: "%s fue agregado a la lista `oneOf` del cuerpo de solicitud"
+request-body-wrapped-in-one-of: "el cuerpo de solicitud se reestructuró en un `oneOf`, por lo que una carga útil que antes era válida podría dejar de aceptarse"
 request-body-one-of-removed: "%s fue removido de la lista `oneOf` del cuerpo de solicitud"
 request-property-one-of-added: "%s fue agregado a la lista `oneOf` de la propiedad de solicitud %s"
 request-property-one-of-removed: "%s fue removido de la lista `oneOf` de la propiedad de solicitud %s"
@@ -438,6 +439,7 @@ request-body-min-length-decreased-description: longitud mínima del cuerpo de so
 request-body-min-length-increased-description: longitud mínima del cuerpo de solicitud aumentada
 request-body-min-set-description: valor mínimo del cuerpo de solicitud establecido
 request-body-one-of-added-description: subesquema agregado al oneOf en el cuerpo de solicitud
+request-body-wrapped-in-one-of-description: "cuerpo de solicitud envuelto en un `oneOf`"
 request-body-one-of-removed-description: subesquema removido del oneOf en el cuerpo de solicitud
 request-body-removed-description: cuerpo de solicitud removido
 request-body-type-changed-description: tipo del cuerpo de solicitud cambiado

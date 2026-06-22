@@ -12,26 +12,49 @@ const (
 	NewRequiredRequestPropertyId            = "new-required-request-property"
 	NewRequiredRequestPropertyWithDefaultId = "new-required-request-property-with-default"
 	NewOptionalRequestPropertyId            = "new-optional-request-property"
+	RequestBodyWrappedInOneOfId             = "request-body-wrapped-in-one-of"
 )
 
 func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		// Wrapping a concrete object request body into a oneOf (#702) is a
+		// breaking restructuring: under oneOf a previously valid payload can
+		// match multiple overlapping alternatives and be rejected. Emit one
+		// breaking finding per wrapped body (not per property).
+		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
+			result = append(result, info.newChange(
+				RequestBodyWrappedInOneOfId,
+				nil,
+				"",
+			).WithSources(nil, nil))
+		}
+
 		// CheckDeletedPropertiesDiff / CheckAddedPropertiesDiff handle the
 		// added/removed property sides — different from info.walkProperties,
 		// which delegates to CheckModifiedPropertiesDiff. Used directly here.
 		CheckDeletedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
-				if !propertyItem.ReadOnly {
-					baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
-					result = append(result, info.newChange(
-						RequestPropertyRemovedId,
-						[]any{propertyFullName(propertyPath, propertyName)},
-						"",
-					).WithSources(baseSource, nil))
+				if propertyItem.ReadOnly {
+					return
 				}
+
+				// A property that moved into a oneOf wrapping (#702) was not
+				// removed from the contract, so the raw "property removed" finding
+				// is a false positive. Suppress it; the breaking nature of the
+				// wrapping is reported once per body as request-body-wrapped-in-one-of.
+				if w := parent.OneOfWrappingDiff; w != nil && slices.Contains(w.MovedProperties, propertyName) {
+					return
+				}
+
+				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				result = append(result, info.newChange(
+					RequestPropertyRemovedId,
+					[]any{propertyFullName(propertyPath, propertyName)},
+					"",
+				).WithSources(baseSource, nil))
 			})
 
 		CheckAddedPropertiesDiff(
