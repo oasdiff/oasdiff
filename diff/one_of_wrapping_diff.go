@@ -59,9 +59,6 @@ func getOneOfWrappingDiff(base, revision *openapi3.Schema) *OneOfWrappingDiff {
 
 	alts := make([]*openapi3.Schema, 0, len(revision.OneOf))
 	for _, ref := range revision.OneOf {
-		if ref == nil || ref.Value == nil {
-			return nil // an unresolved alternative; don't guess
-		}
 		alts = append(alts, ref.Value)
 	}
 
