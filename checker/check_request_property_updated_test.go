@@ -171,9 +171,8 @@ func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 	require.False(t, containsId(errs, checker.RequestPropertyBecameOptionalId),
 		"oneOf wrapping must not be reported as became-optional (#702)")
 
-	require.True(t, containsId(errs, checker.RequestBodyWrappedInOneOfId),
-		"oneOf wrapping must be reported as a breaking change (#702)")
-
+	// The wrapping must be reported exactly once per request body (not per
+	// property), as a breaking error.
 	wrapped := 0
 	for _, e := range errs {
 		if e.GetId() == checker.RequestBodyWrappedInOneOfId {
@@ -181,5 +180,5 @@ func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 			require.Equal(t, checker.ERR, e.GetLevel())
 		}
 	}
-	require.Equal(t, 1, wrapped, "the wrapping must be reported once per request body, not per property")
+	require.Equal(t, 1, wrapped, "the wrapping must be reported once as a breaking error (#702)")
 }
