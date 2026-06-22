@@ -154,7 +154,7 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 // alternatives is a breaking restructuring (#702): under oneOf a previously
 // valid payload can match multiple overlapping alternatives and be rejected.
 // The moved properties must not be reported as removed, and the wrapping must
-// be reported once as request-body-wrapped-in-one-of (WARN), not as
+// be reported once as request-body-wrapped-in-one-of (ERR), not as
 // request-property-became-optional. Reproduces oasdiff/oasdiff#702.
 func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_wrapped_base.yaml")
@@ -178,7 +178,7 @@ func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 	for _, e := range errs {
 		if e.GetId() == checker.RequestBodyWrappedInOneOfId {
 			wrapped++
-			require.Equal(t, checker.WARN, e.GetLevel())
+			require.Equal(t, checker.ERR, e.GetLevel())
 		}
 	}
 	require.Equal(t, 1, wrapped, "the wrapping must be reported once per request body, not per property")
