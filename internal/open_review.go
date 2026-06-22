@@ -38,6 +38,16 @@ func oasdiffSiteURL() string {
 	return "https://www.oasdiff.com"
 }
 
+// oasdiffAPIBaseURL is the backend API base, used only by the authenticated
+// review upload (the free path posts to oasdiffSiteURL). Override with
+// OASDIFF_API_URL; defaults to api.oasdiff.com.
+func oasdiffAPIBaseURL() string {
+	if u := os.Getenv("OASDIFF_API_URL"); u != "" {
+		return strings.TrimRight(u, "/")
+	}
+	return "https://api.oasdiff.com"
+}
+
 // encryptedReviewBlobVersion is the first byte of the uploaded blob. It lets
 // the browser decryptor reject a format it doesn't understand instead of
 // trying to decrypt garbage. Bump it only on an incompatible layout change.
@@ -121,6 +131,12 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	blob, key, err := encryptReviewPayload(plaintext)
 	if err != nil {
 		return fmt.Errorf("encrypt review: %w", err)
+	}
+
+	// A token switches --open to the authenticated upload; the bundle and key
+	// are the same as the free path.
+	if token := flags.getReviewToken(); token != "" {
+		return uploadAuthenticatedReview(token, flags.getReviewMeta(), blob, key, errs, stderr)
 	}
 
 	reviewID, expiresAt, err := postEncryptedReview(blob)
@@ -232,6 +248,120 @@ func postEncryptedReview(blob []byte) (string, time.Time, error) {
 	return parsed.ReviewID, time.Unix(parsed.ExpiresAt, 0).UTC(), nil
 }
 
+// parseReviewMeta splits each "key=value" entry on the first '=' into an opaque
+// map (the CLI assigns no meaning to any key). It rejects entries that would
+// silently lose or override caller intent rather than swallowing them; see
+// TestParseReviewMeta for the exact cases.
+func parseReviewMeta(entries []string) (map[string]string, error) {
+	meta := make(map[string]string, len(entries))
+	for _, e := range entries {
+		i := strings.IndexByte(e, '=')
+		if i <= 0 {
+			return nil, fmt.Errorf("invalid --review-meta entry %q: expected key=value", e)
+		}
+		key := e[:i]
+		if _, dup := meta[key]; dup {
+			return nil, fmt.Errorf("duplicate --review-meta key %q", key)
+		}
+		meta[key] = e[i+1:]
+	}
+	return meta, nil
+}
+
+// reviewChange is one manifest entry sent alongside the encrypted bundle: a
+// change's fingerprint (see formatters.ComputeFingerprint) and its level.
+type reviewChange struct {
+	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
+	Level       int    `json:"level" yaml:"level"`
+}
+
+// reviewManifest builds the {fingerprint, level} manifest. Fingerprints are
+// computed as the JSON formatter does, so they match the ones in the encrypted
+// changelog the page renders.
+func reviewManifest(errs checker.Changes) []reviewChange {
+	manifest := make([]reviewChange, 0, len(errs))
+	for _, change := range errs {
+		manifest = append(manifest, reviewChange{
+			Fingerprint: formatters.ComputeFingerprint(change.GetId(), change.GetOperation(), change.GetPath(), change.GetArgs()),
+			Level:       int(change.GetLevel()),
+		})
+	}
+	return manifest
+}
+
+// uploadAuthenticatedReview posts the encrypted bundle to the token endpoint and
+// prints the returned review URL (key in its #fragment) plus the status. Errors
+// are returned for the caller to demote to a warning, like the free path.
+func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []byte, errs checker.Changes, stderr io.Writer) error {
+	metadata, err := parseReviewMeta(metaEntries)
+	if err != nil {
+		return err
+	}
+
+	body, err := json.Marshal(struct {
+		Ciphertext []byte            `json:"ciphertext" yaml:"ciphertext"`
+		Metadata   map[string]string `json:"metadata" yaml:"metadata"`
+		Changes    []reviewChange    `json:"changes" yaml:"changes"`
+	}{
+		Ciphertext: blob,
+		Metadata:   metadata,
+		Changes:    reviewManifest(errs),
+	})
+	if err != nil {
+		return fmt.Errorf("marshal authenticated review: %w", err)
+	}
+
+	endpoint := fmt.Sprintf("%s/tenants/%s/encrypted-pr-review", oasdiffAPIBaseURL(), url.PathEscape(token))
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "oasdiff-cli")
+
+	client := &http.Client{Timeout: 5 * time.Minute}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("upload to %s: %w", endpoint, err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("upload failed (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+
+	var parsed struct {
+		ReviewToken string `json:"review_token" yaml:"review_token"`
+		ReviewURL   string `json:"review_url" yaml:"review_url"`
+		Gate        struct {
+			State            string `json:"state" yaml:"state"`
+			BreakingTotal    int    `json:"breaking_total" yaml:"breaking_total"`
+			BreakingApproved int    `json:"breaking_approved" yaml:"breaking_approved"`
+		} `json:"gate" yaml:"gate"`
+	}
+	if err := json.Unmarshal(respBody, &parsed); err != nil {
+		return fmt.Errorf("parse response: %w", err)
+	}
+	if parsed.ReviewURL == "" {
+		return fmt.Errorf("response missing review_url: %s", string(respBody))
+	}
+
+	// The key rides in the URL #fragment exactly as the free path encodes it:
+	// browsers never transmit the fragment, so the server stores ciphertext it
+	// cannot read.
+	reviewURL := parsed.ReviewURL + "#k=" + base64.RawURLEncoding.EncodeToString(key)
+
+	fmt.Fprintf(stderr, "\nOpening %s\n", reviewURL)
+	// The status is printed verbatim, on its own grep-friendly line. The CLI
+	// does not interpret or branch on it; the caller acts on it.
+	fmt.Fprintf(stderr, "oasdiff: review status: %s\n", parsed.Gate.State)
+	if err := openBrowser(reviewURL); err != nil {
+		fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
+	}
+	return nil
+}
+
 // readSpecSource returns the raw bytes of a spec source and a display
 // filename for the upload. --open supports file and git-ref sources (the
 // git-ref read, including blob-hash handling, lives in the load package);
@@ -262,7 +392,10 @@ func readSpecSource(source *load.Source) ([]byte, string, error) {
 // manually. Notable absence: a CI / headless detection. CI users wouldn't
 // run --open in the first place; if they do, they get a non-fatal error
 // and the printed URL.
-func openBrowser(targetURL string) error {
+//
+// A var so tests can stub it: the upload path's tests exercise the upload, not
+// an actual browser launch.
+var openBrowser = func(targetURL string) error {
 	if _, err := url.Parse(targetURL); err != nil {
 		return fmt.Errorf("invalid URL: %w", err)
 	}

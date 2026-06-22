@@ -56,6 +56,31 @@ func Test_OpenWithComposedRejected(t *testing.T) {
 	}
 }
 
+func Test_ReviewFlagsRequireOpen(t *testing.T) {
+	// --review-token / --review-meta only make sense with --open; using either
+	// without --open is rejected at argument validation before any diff runs.
+	for _, cmd := range []string{
+		"oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test1.yaml --review-token tok",
+		"oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test1.yaml --review-meta owner=acme",
+	} {
+		var stderr bytes.Buffer
+		require.Equal(t, 100, internal.Run(cmdToArgs(cmd), io.Discard, &stderr), cmd)
+		require.Contains(t, stderr.String(), "--review-token and --review-meta require --open", cmd)
+	}
+}
+
+func Test_ReviewFlagsAllowedWithOpen(t *testing.T) {
+	// With --open the review flags pass argument validation. Point the upload at a
+	// non-connectable API so no real network call happens; --open upload errors
+	// are additive (warned, non-fatal), so the exit code is the changelog result
+	// (0 for identical specs), never the 100 arg-validation code.
+	t.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
+	var stderr bytes.Buffer
+	code := internal.Run(cmdToArgs("oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test1.yaml --open --review-token tok"), io.Discard, &stderr)
+	require.NotEqual(t, 100, code, "review flags with --open must pass argument validation")
+	require.NotContains(t, stderr.String(), "require --open")
+}
+
 func Test_BasicDiff(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml --exclude-elements endpoints"), &stdout, io.Discard))

@@ -8,6 +8,7 @@ type Config struct {
 	MinSunsetStableDays uint
 	LogLevels           map[string]Level
 	Attributes          []string
+	StabilityLevel      StabilityLevel
 }
 
 const (
@@ -28,6 +29,7 @@ func NewConfig(checks BackwardCompatibilityChecks, opts ...Option) *Config {
 		LogLevels:           GetCheckLevels(),
 		MinSunsetBetaDays:   DefaultBetaDeprecationDays,
 		MinSunsetStableDays: DefaultStableDeprecationDays,
+		StabilityLevel:      DefaultStabilityLevel,
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -85,6 +87,16 @@ func WithChecks(checks BackwardCompatibilityChecks) Option {
 func WithAttributes(attributes []string) Option {
 	return func(c *Config) {
 		c.Attributes = attributes
+	}
+}
+
+// WithStabilityLevel sets the minimum stability level from a string.
+// If the level is empty, the config is unchanged.
+func WithStabilityLevel(level string) Option {
+	return func(c *Config) {
+		if level != "" {
+			c.StabilityLevel = ParseStabilityLevel(level)
+		}
 	}
 }
 
