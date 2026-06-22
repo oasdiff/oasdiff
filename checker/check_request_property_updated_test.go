@@ -150,12 +150,13 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	}, errs[0])
 }
 
-// BC: wrapping a request body object into a oneOf of object alternatives is not
-// a removal of its properties: they move into the alternatives. The spurious
-// request-property-removed findings must be suppressed, and a base-required
-// property that is no longer required in every alternative is reported as
-// became-optional. Reproduces oasdiff/oasdiff#702.
-func TestRequestPropertyOneOfWrappingNotRemoved(t *testing.T) {
+// BC: wrapping a concrete request body object into a oneOf of object
+// alternatives is a breaking restructuring (#702): under oneOf a previously
+// valid payload can match multiple overlapping alternatives and be rejected.
+// The moved properties must not be reported as removed, and the wrapping must
+// be reported once as request-body-wrapped-in-one-of (WARN), not as
+// request-property-became-optional. Reproduces oasdiff/oasdiff#702.
+func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_wrapped_base.yaml")
 	require.NoError(t, err)
 	s2, err := open("../data/checker/request_property_one_of_wrapped_revision.yaml")
@@ -167,13 +168,18 @@ func TestRequestPropertyOneOfWrappingNotRemoved(t *testing.T) {
 
 	require.False(t, containsId(errs, checker.RequestPropertyRemovedId),
 		"properties moved into a oneOf wrapping must not be reported as removed (#702)")
+	require.False(t, containsId(errs, checker.RequestPropertyBecameOptionalId),
+		"oneOf wrapping must not be reported as became-optional (#702)")
 
-	var becameOptional []string
+	require.True(t, containsId(errs, checker.RequestBodyWrappedInOneOfId),
+		"oneOf wrapping must be reported as a breaking change (#702)")
+
+	wrapped := 0
 	for _, e := range errs {
-		require.Equal(t, checker.RequestPropertyBecameOptionalId, e.GetId(),
-			"the only findings from wrapping should be became-optional")
-		require.Equal(t, checker.INFO, e.GetLevel())
-		becameOptional = append(becameOptional, e.GetArgs()[0].(string))
+		if e.GetId() == checker.RequestBodyWrappedInOneOfId {
+			wrapped++
+			require.Equal(t, checker.WARN, e.GetLevel())
+		}
 	}
-	require.ElementsMatch(t, []string{"foo", "bar"}, becameOptional)
+	require.Equal(t, 1, wrapped, "the wrapping must be reported once per request body, not per property")
 }

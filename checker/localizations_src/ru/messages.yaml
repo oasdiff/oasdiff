@@ -285,6 +285,7 @@ response-body-any-of-removed: удалён %s из списка `anyOf` тела
 response-property-any-of-added: добавлено %s в список `anyOf` свойства ответа %s для статуса ответа %s
 response-property-any-of-removed: удалён %s из списка `anyOf` свойства ответа %s для статуса ответа %s
 request-body-one-of-added: добавлено %s в список `oneOf` тела запроса
+request-body-wrapped-in-one-of: "the request body was restructured into a oneOf, so a payload that was previously valid may no longer be accepted"
 request-body-one-of-removed: удалён %s из списка `oneOf` тела запроса
 request-property-one-of-added: добавлено %s в список `oneOf` свойства запроса %s
 request-property-one-of-removed: удалён %s из списка `oneOf` свойства запроса %s
@@ -429,6 +430,7 @@ request-body-min-length-decreased-description: уменьшена минимал
 request-body-min-length-increased-description: увеличена минимальная длина тела запроса
 request-body-min-set-description: установлено минимальное значение тела запроса
 request-body-one-of-added-description: подсхема добавлена к oneOf в теле запроса
+request-body-wrapped-in-one-of-description: "request body wrapped in a oneOf"
 request-body-one-of-removed-description: подсхема удалена из oneOf в теле запроса
 request-body-removed-description: удалено тело запроса
 request-body-type-changed-description: изменен тип тела запроса
