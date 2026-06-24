@@ -69,7 +69,7 @@ func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 	}
 	req, resp := map[aka]bool{}, map[aka]bool{}
 	for _, r := range rules {
-		if !(reqAreas[r.Area] && respAreas[r.Area]) {
+		if !reqAreas[r.Area] || !respAreas[r.Area] {
 			continue
 		}
 		k := aka{r.Area, r.Kind, r.Action}
@@ -169,7 +169,7 @@ func TestRuleSymmetryReport(t *testing.T) {
 	}
 	req, resp := map[key][]string{}, map[key][]string{}
 	for _, r := range rules {
-		if !(reqAreas[r.Area] && respAreas[r.Area]) {
+		if !reqAreas[r.Area] || !respAreas[r.Area] {
 			continue
 		}
 		k := key{r.Area, r.Kind, r.Action}

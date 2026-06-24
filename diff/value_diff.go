@@ -118,7 +118,7 @@ func exclusiveBoundToValue(eb any) any {
 	v := reflect.ValueOf(eb)
 
 	// Handle pointer types
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		if v.IsNil() {
 			return nil
 		}

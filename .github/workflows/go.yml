@@ -28,9 +28,9 @@ jobs:
     steps:
 
     - name: Check out code
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
 
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@v6
       with:
         go-version: ${{ matrix.go }}
 
@@ -42,7 +42,7 @@ jobs:
     - run: echo ${{ steps.go-cache-paths.outputs.go-mod }}
 
     - name: Go Build Cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ steps.go-cache-paths.outputs.go-build }}
         key: ${{ runner.os }}-go-${{ matrix.go }}-build-v3-${{ hashFiles('**/go.sum', 'checker/localizations_src/**/*.yaml') }}
@@ -50,7 +50,7 @@ jobs:
           ${{ runner.os }}-go-${{ matrix.go }}-build-v3-
 
     - name: Go Mod Cache
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: ${{ steps.go-cache-paths.outputs.go-mod }}
         key: ${{ runner.os }}-go-${{ matrix.go }}-mod-v3-${{ hashFiles('**/go.sum') }}
@@ -96,7 +96,7 @@ jobs:
       run: |
         ! git grep -InE 'json:"' | grep -v _test.go | grep -v yaml:
 
-    - uses: codecov/codecov-action@v5
+    - uses: codecov/codecov-action@v7
       with:
         files: ./coverage.txt
         flags: unittests # optional
