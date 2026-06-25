@@ -25,7 +25,7 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 		result = append(result, SecurityChange{
 			Id:    APIGlobalSecurityAddedCheckId,
 			Level: INFO,
-			Args:  []any{addedSecurity},
+			Args:  []any{addedSecurity.String()},
 		})
 	}
 
@@ -33,12 +33,12 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 		result = append(result, SecurityChange{
 			Id:    APIGlobalSecurityRemovedCheckId,
 			Level: INFO,
-			Args:  []any{removedSecurity},
+			Args:  []any{removedSecurity.String()},
 		})
 	}
 
 	for _, updatedSecurity := range diffReport.SecurityDiff.Modified {
-		for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity {
+		for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity.Scopes {
 			for _, addedScope := range updatedSecuritySchemeScopes.Added {
 				result = append(result, SecurityChange{
 					Id:    APIGlobalSecurityScopeAddedId,
@@ -79,14 +79,14 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			}
 
 			for _, addedSecurity := range operationItem.SecurityDiff.Added {
-				if addedSecurity == "" {
+				if len(addedSecurity.Schemes) == 0 {
 					continue
 				}
 
 				result = append(result, NewApiChange(
 					APISecurityAddedCheckId,
 					config,
-					[]any{addedSecurity},
+					[]any{addedSecurity.String()},
 					"",
 					operationsSources,
 					operationItem.Revision,
@@ -96,14 +96,14 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			}
 
 			for _, deletedSecurity := range operationItem.SecurityDiff.Deleted {
-				if deletedSecurity == "" {
+				if len(deletedSecurity.Schemes) == 0 {
 					continue
 				}
 
 				result = append(result, NewApiChange(
 					APISecurityRemovedCheckId,
 					config,
-					[]any{deletedSecurity},
+					[]any{deletedSecurity.String()},
 					"",
 					operationsSources,
 					operationItem.Revision,
@@ -113,10 +113,10 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			}
 
 			for _, updatedSecurity := range operationItem.SecurityDiff.Modified {
-				if updatedSecurity.Empty() {
+				if updatedSecurity.Scopes.Empty() {
 					continue
 				}
-				for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity {
+				for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity.Scopes {
 					for _, addedScope := range updatedSecuritySchemeScopes.Added {
 						result = append(result, NewApiChange(
 							APISecurityScopeAddedId,

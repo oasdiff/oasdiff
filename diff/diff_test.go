@@ -626,18 +626,39 @@ func TestFilterOperationssByExtension(t *testing.T) {
 		d.GetSummary().Details[diff.EndpointsDetail])
 }
 
+// securityAlternativeStrings renders a list of alternatives to their String()
+// forms, for asserting which alternative was added/deleted.
+func securityAlternativeStrings(alts diff.SecurityAlternatives) []string {
+	out := make([]string, len(alts))
+	for i, a := range alts {
+		out[i] = a.String()
+	}
+	return out
+}
+
+// modifiedSecurityRequirementByScheme finds the modified alternative carrying a
+// given scheme, or nil.
+func modifiedSecurityRequirementByScheme(modified diff.ModifiedSecurityRequirements, scheme string) *diff.ModifiedSecurityRequirement {
+	for _, m := range modified {
+		if _, ok := m.Base.Schemes[scheme]; ok {
+			return m
+		}
+	}
+	return nil
+}
+
 func TestAddedSecurityRequirement(t *testing.T) {
-	require.Contains(t,
-		d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Added,
-		"bearerAuth")
+	added := d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Added
+	require.Contains(t, securityAlternativeStrings(added), "bearerAuth")
 }
 
 func TestSecurityRequirementScopesDeleted(t *testing.T) {
-	securityScopesDiff := d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Modified["OAuth"]
-	require.NotEmpty(t, securityScopesDiff)
+	modified := d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Modified
+	oauth := modifiedSecurityRequirementByScheme(modified, "OAuth")
+	require.NotNil(t, oauth)
 
 	require.Contains(t,
-		securityScopesDiff["OAuth"].Deleted,
+		oauth.Scopes["OAuth"].Deleted,
 		"write:pets")
 }
 
@@ -1108,7 +1129,9 @@ func TestDiff_SharedSchemeORAlternatives_ScopeAddedStillReported(t *testing.T) {
 	require.NoError(t, err)
 
 	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
-	require.Contains(t, securityDiff.Modified["petstore_auth"]["petstore_auth"].Added, "list:pets")
+	petstore := modifiedSecurityRequirementByScheme(securityDiff.Modified, "petstore_auth")
+	require.NotNil(t, petstore)
+	require.Contains(t, petstore.Scopes["petstore_auth"].Added, "list:pets")
 	require.Empty(t, securityDiff.Added)
 	require.Empty(t, securityDiff.Deleted)
 }
@@ -1126,7 +1149,11 @@ func TestDiff_SharedSchemeORAlternatives_AlternativeRemoved(t *testing.T) {
 	require.NoError(t, err)
 
 	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
-	require.Contains(t, securityDiff.Deleted, "petstore_auth")
+	// Identified by index + schemes/scopes, so it's unambiguous which of the
+	// three same-scheme alternatives was removed.
+	require.Len(t, securityDiff.Deleted, 1)
+	require.Equal(t, "petstore_auth: [admin:pets]", securityDiff.Deleted[0].String())
+	require.Equal(t, 2, securityDiff.Deleted[0].Index)
 	require.Empty(t, securityDiff.Modified)
 	require.Empty(t, securityDiff.Added)
 }
