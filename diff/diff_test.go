@@ -1081,3 +1081,66 @@ func TestGetPathsDiff_WithSinceDate(t *testing.T) {
 	require.Nil(t, d)
 	require.Nil(t, osm)
 }
+
+// Regression test: OR-alternatives that share a security scheme (e.g.
+// `- petstore_auth: [read:pets]` / `- petstore_auth: [write:pets]`) must not
+// produce a phantom diff when a spec is compared against itself.
+func TestDiff_SharedSchemeORAlternativesNoPhantomDiff(t *testing.T) {
+	loader := openapi3.NewLoader()
+	s, err := loader.LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	d, err := diff.Get(diff.NewConfig(), s, s)
+	require.NoError(t, err)
+	require.Nil(t, d)
+}
+
+// An in-place scope change to a single OR-alternative is reported as a scope modification.
+func TestDiff_SharedSchemeORAlternativesScopeModified(t *testing.T) {
+	// Separate loaders: a single loader caches by file path and returns the same
+	// *openapi3.T for both calls, so mutating s2 would also mutate s1.
+	s1, err := openapi3.NewLoader().LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	s2, err := openapi3.NewLoader().LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+
+	security := *s2.Paths.Find("/pets/{petId}").Get.Security
+	last := len(security) - 1
+	security[last]["petstore_auth"] = append(security[last]["petstore_auth"], "list:pets")
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
+	require.NotNil(t, securityDiff)
+	scopesDiff := securityDiff.Modified["petstore_auth"]
+	require.NotNil(t, scopesDiff["petstore_auth"])
+	require.Equal(t, []string{"list:pets"}, scopesDiff["petstore_auth"].Added)
+	require.Empty(t, scopesDiff["petstore_auth"].Deleted)
+}
+
+// When more than one same-scheme alternative changes, pairing is ambiguous, so the
+// changes are reported as deleted/added alternatives rather than silently dropped.
+func TestDiff_SharedSchemeAmbiguousModificationNotDropped(t *testing.T) {
+	s1, err := openapi3.NewLoader().LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	s1.Paths.Find("/pets/{petId}").Get.Security = &openapi3.SecurityRequirements{
+		{"petstore_auth": []string{"read:pets"}},
+		{"petstore_auth": []string{"write:pets"}},
+	}
+
+	s2, err := openapi3.NewLoader().LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	s2.Paths.Find("/pets/{petId}").Get.Security = &openapi3.SecurityRequirements{
+		{"petstore_auth": []string{"read:pets", "list:pets"}},
+		{"petstore_auth": []string{"write:pets", "delete:pets"}},
+	}
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
+	require.NotNil(t, securityDiff)
+	require.Len(t, securityDiff.Deleted, 2)
+	require.Len(t, securityDiff.Added, 2)
+	require.Empty(t, securityDiff.Modified)
+}

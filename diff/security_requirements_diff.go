@@ -52,42 +52,98 @@ func getSecurityRequirementsDiffInternal(securityRequirements1, securityRequirem
 
 	result := newSecurityRequirementsDiff()
 
-	if securityRequirements1 != nil {
-		for _, securityRequirement1 := range *securityRequirements1 {
-			if securityRequirement2 := findSecurityRequirement(securityRequirement1, securityRequirements2); securityRequirement2 != nil {
-				if securityScopesDiff := getSecurityScopesDiff(securityRequirement1, securityRequirement2); !securityScopesDiff.Empty() {
-					result.Modified[getSecurityRequirementID(securityRequirement1)] = securityScopesDiff
-				}
-			} else {
-				result.Deleted = append(result.Deleted, getSecurityRequirementID(securityRequirement1))
-			}
+	// Security requirements are an unordered set of OR-alternatives, and several
+	// alternatives may share a scheme (e.g. `- petstore_auth: [read:pets]` /
+	// `- petstore_auth: [write:pets]`), so they cannot be matched by scheme name alone.
+	reqs1 := derefSecurityRequirements(securityRequirements1)
+	reqs2 := derefSecurityRequirements(securityRequirements2)
+	matched1 := make([]bool, len(reqs1))
+	matched2 := make([]bool, len(reqs2))
+
+	// Match unchanged alternatives (same schemes and scopes) so they don't participate in scope diffing.
+	for i := range reqs1 {
+		if j := findSecurityRequirementIndex(reqs1[i], reqs2, matched2, true); j >= 0 {
+			matched1[i] = true
+			matched2[j] = true
 		}
 	}
 
-	if securityRequirements2 != nil {
-		for _, securityRequirement2 := range *securityRequirements2 {
-			if securityRequirements1 := findSecurityRequirement(securityRequirement2, securityRequirements1); securityRequirements1 == nil {
-				result.Added = append(result.Added, getSecurityRequirementID(securityRequirement2))
-			}
+	// Report a leftover as a scope modification only when its scheme set is unambiguous:
+	// exactly one unmatched alternative with that scheme set on each side. Otherwise any
+	// pairing is arbitrary, so the alternatives fall through to deleted/added below.
+	for i := range reqs1 {
+		if matched1[i] || !uniqueUnmatchedBySchemes(reqs1, matched1, getSecuritySchemes(reqs1[i])) {
+			continue
+		}
+		j := findSecurityRequirementIndex(reqs1[i], reqs2, matched2, false)
+		if j < 0 || !uniqueUnmatchedBySchemes(reqs2, matched2, getSecuritySchemes(reqs2[j])) {
+			continue
+		}
+		matched1[i] = true
+		matched2[j] = true
+		if securityScopesDiff := getSecurityScopesDiff(reqs1[i], reqs2[j]); !securityScopesDiff.Empty() {
+			result.Modified[getSecurityRequirementID(reqs1[i])] = securityScopesDiff
+		}
+	}
+
+	for i := range reqs1 {
+		if !matched1[i] {
+			result.Deleted = append(result.Deleted, getSecurityRequirementID(reqs1[i]))
+		}
+	}
+	for j := range reqs2 {
+		if !matched2[j] {
+			result.Added = append(result.Added, getSecurityRequirementID(reqs2[j]))
 		}
 	}
 
 	return result
 }
 
-func findSecurityRequirement(securityRequirement1 openapi3.SecurityRequirement, securityRequirements2 *openapi3.SecurityRequirements) openapi3.SecurityRequirement {
-	if securityRequirements2 == nil {
+func derefSecurityRequirements(securityRequirements *openapi3.SecurityRequirements) []openapi3.SecurityRequirement {
+	if securityRequirements == nil {
 		return nil
 	}
+	return *securityRequirements
+}
 
-	securitySchemes1 := getSecuritySchemes(securityRequirement1)
-	for _, securityRequirement2 := range *securityRequirements2 {
-		securitySchemes2 := getSecuritySchemes(securityRequirement2)
-		if securitySchemes1.Equals(securitySchemes2) {
-			return securityRequirement2
+// findSecurityRequirementIndex returns the index of the first unmatched
+// requirement in candidates that matches securityRequirement, or -1 if none.
+// When exact is true the scopes must match too; otherwise only the set of
+// scheme names must match.
+func findSecurityRequirementIndex(securityRequirement openapi3.SecurityRequirement, candidates []openapi3.SecurityRequirement, matched []bool, exact bool) int {
+	schemes := getSecuritySchemes(securityRequirement)
+	for j, candidate := range candidates {
+		if matched[j] {
+			continue
+		}
+		if !schemes.Equals(getSecuritySchemes(candidate)) {
+			continue
+		}
+		if exact && !getSecurityScopesDiff(securityRequirement, candidate).Empty() {
+			continue
+		}
+		return j
+	}
+	return -1
+}
+
+// uniqueUnmatchedBySchemes reports whether exactly one unmatched requirement in
+// reqs has the given set of scheme names.
+func uniqueUnmatchedBySchemes(reqs []openapi3.SecurityRequirement, matched []bool, schemes utils.StringSet) bool {
+	count := 0
+	for i := range reqs {
+		if matched[i] {
+			continue
+		}
+		if schemes.Equals(getSecuritySchemes(reqs[i])) {
+			count++
+			if count > 1 {
+				return false
+			}
 		}
 	}
-	return nil
+	return count == 1
 }
 
 func getSecuritySchemes(securityRequirement openapi3.SecurityRequirement) utils.StringSet {
@@ -99,7 +155,7 @@ func getSecuritySchemes(securityRequirement openapi3.SecurityRequirement) utils.
 }
 
 func getSecurityRequirementID(securityRequirement openapi3.SecurityRequirement) string {
-	return strings.Join(slices.Collect(maps.Keys(securityRequirement)), " AND ")
+	return strings.Join(slices.Sorted(maps.Keys(securityRequirement)), " AND ")
 }
 
 func (diff *SecurityRequirementsDiff) getSummary() *SummaryDetails {
