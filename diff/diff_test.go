@@ -1081,3 +1081,52 @@ func TestGetPathsDiff_WithSinceDate(t *testing.T) {
 	require.Nil(t, d)
 	require.Nil(t, osm)
 }
+
+// Regression for #1041: OR-alternatives that share a security scheme (the only
+// way to express "scope A OR scope B" for one OAuth2 scheme) were matched by
+// scheme name alone, inventing a phantom scope add/remove, even on a spec
+// compared against a copy of itself. A spec must diff clean against itself.
+func TestDiff_SharedSchemeORAlternatives_NoPhantomOnSelf(t *testing.T) {
+	loader := openapi3.NewLoader()
+	s, err := loader.LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	d, err := diff.Get(diff.NewConfig(), s, s)
+	require.NoError(t, err)
+	require.Nil(t, d)
+}
+
+// A scope added to one shared-scheme OR-alternative is still reported as a scope
+// modification: the unambiguous case must not regress while the phantom is fixed.
+func TestDiff_SharedSchemeORAlternatives_ScopeAddedStillReported(t *testing.T) {
+	loader := openapi3.NewLoader()
+	base, err := loader.LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	added, err := loader.LoadFromFile("../data/security-requirements/or_alternatives_scope_added.yaml")
+	require.NoError(t, err)
+
+	d, err := diff.Get(diff.NewConfig(), base, added)
+	require.NoError(t, err)
+
+	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
+	require.Contains(t, securityDiff.Modified["petstore_auth"]["petstore_auth"].Added, "list:pets")
+	require.Empty(t, securityDiff.Added)
+	require.Empty(t, securityDiff.Deleted)
+}
+
+// Removing a whole shared-scheme OR-alternative is reported as a deleted
+// alternative, with no phantom scope modification on the survivors.
+func TestDiff_SharedSchemeORAlternatives_AlternativeRemoved(t *testing.T) {
+	loader := openapi3.NewLoader()
+	three, err := loader.LoadFromFile("../data/security-requirements/or_alternatives.yaml")
+	require.NoError(t, err)
+	two, err := loader.LoadFromFile("../data/security-requirements/or_alternatives_two.yaml")
+	require.NoError(t, err)
+
+	d, err := diff.Get(diff.NewConfig(), three, two)
+	require.NoError(t, err)
+
+	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
+	require.Contains(t, securityDiff.Deleted, "petstore_auth")
+	require.Empty(t, securityDiff.Modified)
+	require.Empty(t, securityDiff.Added)
+}
