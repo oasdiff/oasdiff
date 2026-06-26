@@ -51,7 +51,7 @@ func (f YAMLFormatter) SupportedOutputs() []Output {
 
 func printYAML(output any) ([]byte, error) {
 	if reflect.ValueOf(output).IsNil() {
-		return nil, nil
+		return []byte(emptyDocFor(output)), nil
 	}
 
 	bytes, err := yaml.Marshal(output)

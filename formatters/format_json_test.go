@@ -51,16 +51,29 @@ func TestJsonFormatter_RenderChecks(t *testing.T) {
 	require.Equal(t, `[{"id":"change_id","level":"info","direction":"request","area":"schema","kind":"existence","action":"remove","description":"This is a breaking change.","mitigation":"Fix it."}]`, string(out))
 }
 
+// An empty (nil) diff renders as the empty JSON object, not empty bytes,
+// so the output is always valid JSON.
 func TestJsonFormatter_RenderDiff(t *testing.T) {
 	out, err := jsonFormatter.RenderDiff(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Empty(t, string(out))
+	require.Equal(t, "{}", string(out))
 }
 
+// A nil pointer-shaped value (here a nil spec) renders as the empty object,
+// not empty bytes, so the output is valid JSON. Note this is "{}" rather than
+// a marshaled zero value: a zeroed openapi3.T would marshal to
+// {"info":null,"openapi":"","paths":null}.
 func TestJsonFormatter_RenderFlatten(t *testing.T) {
 	out, err := jsonFormatter.RenderFlatten(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Empty(t, string(out))
+	require.Equal(t, "{}", string(out))
+}
+
+// A nil slice-shaped value renders as the empty array, not empty bytes.
+func TestJsonFormatter_RenderValidate_Nil(t *testing.T) {
+	out, err := jsonFormatter.RenderValidate(nil, formatters.NewRenderOpts())
+	require.NoError(t, err)
+	require.Equal(t, "[]", string(out))
 }
 
 func TestJsonFormatter_RenderSummary(t *testing.T) {
