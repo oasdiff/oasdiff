@@ -705,19 +705,21 @@ func (r *report) printSecurityRequirements(d *diff.SecurityRequirementsDiff) {
 		return
 	}
 
-	slices.Sort(d.Added)
+	// Added/Deleted/Modified are already in spec (index) order, which is
+	// deterministic, so no extra sort is needed.
 	for _, added := range d.Added {
-		r.print("New security requirements:", added)
+		r.print("New security requirements:", added.String())
 	}
 
-	slices.Sort(d.Deleted)
 	for _, deleted := range d.Deleted {
-		r.print("Deleted security requirements:", deleted)
+		r.print("Deleted security requirements:", deleted.String())
 	}
 
-	for _, securityRequirementID := range getKeys(d.Modified) {
-		r.print("Modified security requirements:", securityRequirementID)
-		r.indent().printSecurityScopes(d.Modified[securityRequirementID])
+	for _, modified := range d.Modified {
+		// Label by scheme name, not the full String(): the scope changes are
+		// listed beneath, so including the base scopes here would just be noise.
+		r.print("Modified security requirements:", modified.Base.SchemeNames())
+		r.indent().printSecurityScopes(modified.Scopes)
 	}
 }
 

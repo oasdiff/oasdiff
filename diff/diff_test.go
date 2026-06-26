@@ -626,18 +626,39 @@ func TestFilterOperationssByExtension(t *testing.T) {
 		d.GetSummary().Details[diff.EndpointsDetail])
 }
 
+// securityAlternativeStrings renders a list of alternatives to their String()
+// forms, for asserting which alternative was added/deleted.
+func securityAlternativeStrings(alts diff.SecurityAlternatives) []string {
+	out := make([]string, len(alts))
+	for i, a := range alts {
+		out[i] = a.String()
+	}
+	return out
+}
+
+// modifiedSecurityRequirementByScheme finds the modified alternative carrying a
+// given scheme, or nil.
+func modifiedSecurityRequirementByScheme(modified diff.ModifiedSecurityRequirements, scheme string) *diff.ModifiedSecurityRequirement {
+	for _, m := range modified {
+		if _, ok := m.Base.Schemes[scheme]; ok {
+			return m
+		}
+	}
+	return nil
+}
+
 func TestAddedSecurityRequirement(t *testing.T) {
-	require.Contains(t,
-		d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Added,
-		"bearerAuth")
+	added := d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Added
+	require.Contains(t, securityAlternativeStrings(added), "bearerAuth")
 }
 
 func TestSecurityRequirementScopesDeleted(t *testing.T) {
-	securityScopesDiff := d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Modified["OAuth"]
-	require.NotEmpty(t, securityScopesDiff)
+	modified := d(t, diff.NewConfig(), 3, 1).PathsDiff.Modified["/register"].OperationsDiff.Modified["POST"].SecurityDiff.Modified
+	oauth := modifiedSecurityRequirementByScheme(modified, "OAuth")
+	require.NotNil(t, oauth)
 
 	require.Contains(t,
-		securityScopesDiff["OAuth"].Deleted,
+		oauth.Scopes["OAuth"].Deleted,
 		"write:pets")
 }
 
@@ -1108,7 +1129,9 @@ func TestDiff_SharedSchemeORAlternatives_ScopeAddedStillReported(t *testing.T) {
 	require.NoError(t, err)
 
 	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
-	require.Contains(t, securityDiff.Modified["petstore_auth"]["petstore_auth"].Added, "list:pets")
+	petstore := modifiedSecurityRequirementByScheme(securityDiff.Modified, "petstore_auth")
+	require.NotNil(t, petstore)
+	require.Contains(t, petstore.Scopes["petstore_auth"].Added, "list:pets")
 	require.Empty(t, securityDiff.Added)
 	require.Empty(t, securityDiff.Deleted)
 }
@@ -1126,7 +1149,66 @@ func TestDiff_SharedSchemeORAlternatives_AlternativeRemoved(t *testing.T) {
 	require.NoError(t, err)
 
 	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
-	require.Contains(t, securityDiff.Deleted, "petstore_auth")
+	// Identified by index + schemes/scopes, so it's unambiguous which of the
+	// three same-scheme alternatives was removed.
+	require.Len(t, securityDiff.Deleted, 1)
+	require.Equal(t, "petstore_auth: [admin:pets]", securityDiff.Deleted[0].String())
+	require.Equal(t, 2, securityDiff.Deleted[0].Index)
 	require.Empty(t, securityDiff.Modified)
 	require.Empty(t, securityDiff.Added)
+}
+
+// TestSecurityAlternative_String covers each branch of SecurityAlternative.String():
+// the empty requirement ({}), a scheme with no scopes (bare name), a scheme with
+// scopes (sorted), and several schemes AND-ed (sorted by scheme name).
+func TestSecurityAlternative_String(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		schemes map[string][]string
+		want    string
+	}{
+		{"empty requirement", map[string][]string{}, "{}"},
+		{"nil schemes", nil, "{}"},
+		{"scheme without scopes", map[string][]string{"bearerAuth": {}}, "bearerAuth"},
+		{"scheme with scopes, sorted", map[string][]string{"petstore_auth": {"write:pets", "read:pets"}}, "petstore_auth: [read:pets, write:pets]"},
+		{"schemes AND-ed, sorted by name", map[string][]string{"oauth": {"read:pets"}, "apiKey": {}}, "apiKey AND oauth: [read:pets]"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, diff.SecurityAlternative{Schemes: tc.schemes}.String())
+		})
+	}
+}
+
+// TestSecurityAlternative_SchemeNames covers the scheme-name-only label used for
+// a scope modification (scopes omitted; they're reported separately).
+func TestSecurityAlternative_SchemeNames(t *testing.T) {
+	require.Equal(t, "petstore_auth",
+		diff.SecurityAlternative{Schemes: map[string][]string{"petstore_auth": {"read:pets"}}}.SchemeNames())
+	require.Equal(t, "apiKey AND oauth",
+		diff.SecurityAlternative{Schemes: map[string][]string{"oauth": {"read:pets"}, "apiKey": {}}}.SchemeNames())
+}
+
+// Two alternatives sharing a scheme, both changing scopes in place, are
+// ambiguous to pair, so they are reported as deleted + added (each carrying its
+// full scopes), never as two same-scheme "modified" entries. This is the
+// invariant the report relies on when it labels a modified requirement by scheme
+// name alone (modified is reserved for the unambiguous, one-per-scheme-set case).
+func TestDiff_SharedSchemeORAlternatives_AmbiguousScopeChangeIsAddDelete(t *testing.T) {
+	loader := openapi3.NewLoader()
+	base, err := loader.LoadFromFile("../data/security-requirements/or_alternatives_two.yaml")
+	require.NoError(t, err)
+	changed, err := loader.LoadFromFile("../data/security-requirements/or_alternatives_two_changed.yaml")
+	require.NoError(t, err)
+
+	d, err := diff.Get(diff.NewConfig(), base, changed)
+	require.NoError(t, err)
+
+	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
+	require.Empty(t, securityDiff.Modified, "ambiguous scope changes must not become same-scheme modified entries")
+	require.ElementsMatch(t,
+		[]string{"petstore_auth: [read:pets]", "petstore_auth: [write:pets]"},
+		securityAlternativeStrings(securityDiff.Deleted))
+	require.ElementsMatch(t,
+		[]string{"petstore_auth: [list:pets, read:pets]", "petstore_auth: [audit:pets, write:pets]"},
+		securityAlternativeStrings(securityDiff.Added))
 }

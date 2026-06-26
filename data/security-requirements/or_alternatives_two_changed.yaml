@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Security Requirement Example
+  version: 1.0.0
+paths:
+  /pets/{petId}:
+    get:
+      operationId: getPet
+      # both same-scheme alternatives change scopes in place -> ambiguous to pair
+      security:
+      - petstore_auth:
+        - read:pets
+        - list:pets
+      - petstore_auth:
+        - write:pets
+        - audit:pets
+      responses:
+        "200":
+          description: OK
+components:
+  securitySchemes:
+    petstore_auth:
+      type: oauth2
+      flows:
+        implicit:
+          authorizationUrl: http://example.org/api/oauth/dialog
+          scopes:
+            read:pets: read your pets
+            write:pets: modify pets in your account
+            admin:pets: administer pets
+            list:pets: list your pets
+            audit:pets: audit pets

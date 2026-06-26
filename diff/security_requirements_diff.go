@@ -1,6 +1,7 @@
 package diff
 
 import (
+	"fmt"
 	"maps"
 	"slices"
 	"strings"
@@ -9,11 +10,90 @@ import (
 	"github.com/oasdiff/oasdiff/utils"
 )
 
-// SecurityRequirementsDiff describes the changes between a pair of sets of security requirement objects: https://swagger.io/specification/#security-requirement-object
+// SecurityRequirementsDiff describes the changes between a pair of lists of security requirement objects: https://swagger.io/specification/#security-requirement-object
+//
+// Semantics, which drive the modeling below:
+//   - the list is an OR: a request is authorized if it satisfies any one item;
+//   - the schemes within one item are AND-ed: all of them must be satisfied;
+//   - the scopes within a scheme are AND-ed too.
+//
+// So an OR of scopes for a single scheme can only be written by repeating the
+// scheme across items (- petstore_auth: [read] / - petstore_auth: [write]), and
+// a single item may carry several schemes AND-ed together (both an oauth and an
+// apiKey key).
+//
+// An alternative therefore has no identity of its own to key on: its scheme
+// names aren't unique (the repeated-scheme case above) and there may be several
+// of them. The scheme name is only a reference into components.securitySchemes,
+// an author-chosen label; the scheme's actual meaning (type, flows) is diffed
+// separately in SecuritySchemesDiff. So alternatives cannot be keyed by a
+// string; like SubschemasDiff, they are identified by index and carried as
+// structured values.
 type SecurityRequirementsDiff struct {
-	Added    []string                     `json:"added,omitempty" yaml:"added,omitempty"`
-	Deleted  []string                     `json:"deleted,omitempty" yaml:"deleted,omitempty"`
+	Added    SecurityAlternatives         `json:"added,omitempty" yaml:"added,omitempty"`
+	Deleted  SecurityAlternatives         `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSecurityRequirements `json:"modified,omitempty" yaml:"modified,omitempty"`
+}
+
+// SecurityAlternative is one alternative (one security requirement object) in a
+// security list, identified by its index plus its schemes and their scopes.
+type SecurityAlternative struct {
+	Index   int                 `json:"index" yaml:"index"`     // zero-based index in the security list
+	Schemes map[string][]string `json:"schemes" yaml:"schemes"` // scheme name -> scopes
+}
+
+// SecurityAlternatives is a list of security alternatives.
+type SecurityAlternatives []SecurityAlternative
+
+// String renders an alternative by its schemes and scopes. The index is kept in
+// the structured data but left out of the human-readable form, since it is
+// positional rather than a meaningful identity. Schemes and scopes are sorted so
+// the output is deterministic. A scheme with no scopes (API key, bearer) shows
+// as its bare name; an empty requirement (`{}`, this alternative requires no
+// authentication) shows as "{}".
+func (a SecurityAlternative) String() string {
+	if len(a.Schemes) == 0 {
+		return "{}"
+	}
+	schemes := slices.Sorted(maps.Keys(a.Schemes))
+	parts := make([]string, len(schemes))
+	for i, scheme := range schemes {
+		scopes := slices.Clone(a.Schemes[scheme])
+		if len(scopes) == 0 {
+			parts[i] = scheme
+			continue
+		}
+		slices.Sort(scopes)
+		parts[i] = fmt.Sprintf("%s: [%s]", scheme, strings.Join(scopes, ", "))
+	}
+	return strings.Join(parts, " AND ")
+}
+
+// SchemeNames returns the alternative's scheme names, sorted and AND-joined
+// (e.g. "apiKey AND oauth"). It labels a scope modification, where the changed
+// scopes are reported separately, so it omits the scopes that String() carries.
+func (a SecurityAlternative) SchemeNames() string {
+	return strings.Join(slices.Sorted(maps.Keys(a.Schemes)), " AND ")
+}
+
+func newSecurityAlternative(index int, securityRequirement openapi3.SecurityRequirement) SecurityAlternative {
+	return SecurityAlternative{
+		Index:   index,
+		Schemes: maps.Clone(securityRequirement),
+	}
+}
+
+// ModifiedSecurityRequirements is a list of alternatives whose scopes changed.
+// Like ModifiedSubschemas, it is modeled as a slice rather than a map to avoid a
+// composite key.
+type ModifiedSecurityRequirements []*ModifiedSecurityRequirement
+
+// ModifiedSecurityRequirement is an alternative whose scopes changed, with its
+// identity in base and revision and the per-scheme scope diff.
+type ModifiedSecurityRequirement struct {
+	Base     SecurityAlternative `json:"base" yaml:"base"`
+	Revision SecurityAlternative `json:"revision" yaml:"revision"`
+	Scopes   SecurityScopesDiff  `json:"scopes" yaml:"scopes"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -27,13 +107,10 @@ func (diff *SecurityRequirementsDiff) Empty() bool {
 		len(diff.Modified) == 0
 }
 
-// ModifiedSecurityRequirements is map of security requirements to their respective diffs
-type ModifiedSecurityRequirements map[string]SecurityScopesDiff
-
 func newSecurityRequirementsDiff() *SecurityRequirementsDiff {
 	return &SecurityRequirementsDiff{
-		Added:    []string{},
-		Deleted:  []string{},
+		Added:    SecurityAlternatives{},
+		Deleted:  SecurityAlternatives{},
 		Modified: ModifiedSecurityRequirements{},
 	}
 }
@@ -87,20 +164,24 @@ func getSecurityRequirementsDiffInternal(securityRequirements1, securityRequirem
 			continue
 		}
 		matched1[i], matched2[j] = true, true
-		if securityScopesDiff := getSecurityScopesDiff(reqs1[i], reqs2[j]); !securityScopesDiff.Empty() {
-			result.Modified[getSecurityRequirementID(reqs1[i])] = securityScopesDiff
+		if scopesDiff := getSecurityScopesDiff(reqs1[i], reqs2[j]); !scopesDiff.Empty() {
+			result.Modified = append(result.Modified, &ModifiedSecurityRequirement{
+				Base:     newSecurityAlternative(i, reqs1[i]),
+				Revision: newSecurityAlternative(j, reqs2[j]),
+				Scopes:   scopesDiff,
+			})
 		}
 	}
 
 	// Pass 3: whatever is still unmatched was genuinely deleted or added.
 	for i := range reqs1 {
 		if !matched1[i] {
-			result.Deleted = append(result.Deleted, getSecurityRequirementID(reqs1[i]))
+			result.Deleted = append(result.Deleted, newSecurityAlternative(i, reqs1[i]))
 		}
 	}
 	for j := range reqs2 {
 		if !matched2[j] {
-			result.Added = append(result.Added, getSecurityRequirementID(reqs2[j]))
+			result.Added = append(result.Added, newSecurityAlternative(j, reqs2[j]))
 		}
 	}
 
@@ -162,10 +243,6 @@ func getSecuritySchemes(securityRequirement openapi3.SecurityRequirement) utils.
 		result.Add(name)
 	}
 	return result
-}
-
-func getSecurityRequirementID(securityRequirement openapi3.SecurityRequirement) string {
-	return strings.Join(slices.Collect(maps.Keys(securityRequirement)), " AND ")
 }
 
 func (diff *SecurityRequirementsDiff) getSummary() *SummaryDetails {
