@@ -48,9 +48,13 @@ type SecurityAlternatives []SecurityAlternative
 // String renders an alternative by its schemes and scopes. The index is kept in
 // the structured data but left out of the human-readable form, since it is
 // positional rather than a meaningful identity. Schemes and scopes are sorted so
-// the output is deterministic; a scheme with no scopes (API key, bearer) shows
-// as its bare name.
+// the output is deterministic. A scheme with no scopes (API key, bearer) shows
+// as its bare name; an empty requirement (`{}`, this alternative requires no
+// authentication) shows as "{}".
 func (a SecurityAlternative) String() string {
+	if len(a.Schemes) == 0 {
+		return "{}"
+	}
 	schemes := slices.Sorted(maps.Keys(a.Schemes))
 	parts := make([]string, len(schemes))
 	for i, scheme := range schemes {
