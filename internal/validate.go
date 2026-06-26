@@ -81,10 +81,9 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 		return false, getErrFailedToLoadSpec("original", flags.getBase(), err)
 	}
 
+	// Render zero findings through the formatter too: the empty representation
+	// is format-specific, so it's the formatter's call, not an early return's.
 	findings := validate.Validate(spec.Spec, flags.getBase().String())
-	if len(findings) == 0 {
-		return false, nil
-	}
 
 	if returnErr := outputFindings(flags, stdout, findings); returnErr != nil {
 		return false, returnErr

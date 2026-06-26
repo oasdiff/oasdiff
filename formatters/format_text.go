@@ -74,6 +74,13 @@ func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
+	// Mirror RenderChangelog's empty case ("No changes detected") rather than
+	// printing a "0 findings" summary, so the sibling commands read alike.
+	if len(findings) == 0 {
+		_, _ = fmt.Fprint(result, "No findings detected")
+		return result.Bytes(), nil
+	}
+
 	count := findings.GetLevelCount()
 	// Color the severity labels in the summary line, matching the changelog
 	// command's title (getChangelogTitle).

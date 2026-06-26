@@ -34,14 +34,15 @@ const unknownValidationID = "spec-validation-error"
 // file:line:column anchors. Pass an empty string when there is no
 // meaningful source name (e.g. specs loaded from memory).
 //
-// Returns nil when the spec is fully valid.
+// A valid spec yields a non-nil empty Findings (nil only for the nil-spec
+// guard), so the formatters' nil guard doesn't collapse `[]` to empty bytes.
 func Validate(spec *openapi3.T, source string) formatters.Findings {
 	if spec == nil {
 		return nil
 	}
 	verr := spec.Validate(context.Background(), openapi3.EnableMultiError())
 	if verr == nil {
-		return nil
+		return formatters.Findings{}
 	}
 	return mapKinErrors(source, verr)
 }

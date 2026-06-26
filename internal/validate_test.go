@@ -12,10 +12,33 @@ import (
 )
 
 // Happy path: a well-formed minimal spec produces no findings and exit 0.
+// The empty representation is format-specific and owned by the formatter,
+// not suppressed by the command, so each format still emits valid output.
+// The text empty case mirrors changelog's "No changes detected".
 func Test_ValidateCmd_NoFindings(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff validate ../data/validate/valid.yaml"), &stdout, io.Discard))
-	require.Empty(t, stdout.String())
+	require.Contains(t, stdout.String(), "No findings detected")
+}
+
+// A valid spec in JSON format yields a valid empty array, not empty output.
+func Test_ValidateCmd_NoFindings_JSON(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/valid.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.Empty(t, findings)
+}
+
+// A valid spec in YAML format yields a valid empty list, not empty output.
+func Test_ValidateCmd_NoFindings_YAML(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/valid.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Empty(t, findings)
 }
 
 // Empty info.version → kin returns *RequiredFieldError{Field:"info.version"}

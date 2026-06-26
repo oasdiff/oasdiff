@@ -57,6 +57,14 @@ func TestTEXTFormatter_RenderValidate_Color(t *testing.T) {
 	require.Contains(t, s, color.InGreen("GET"))            // endpoint green
 }
 
+// Empty findings render as "No findings detected", mirroring
+// RenderChangelog's empty case rather than a "0 findings" summary.
+func TestTEXTFormatter_RenderValidate_Empty(t *testing.T) {
+	out, err := formatters.TEXTFormatter{Localizer: MockLocalizer}.RenderValidate(formatters.Findings{}, formatters.NewRenderOpts())
+	require.NoError(t, err)
+	require.Equal(t, "No findings detected", string(out))
+}
+
 func TestYAMLFormatter_RenderValidate(t *testing.T) {
 	out, err := formatters.YAMLFormatter{Localizer: MockLocalizer}.RenderValidate(sampleFindings(), formatters.NewRenderOpts())
 	require.NoError(t, err)
