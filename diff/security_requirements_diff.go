@@ -12,10 +12,12 @@ import (
 
 // SecurityRequirementsDiff describes the changes between a pair of lists of security requirement objects: https://swagger.io/specification/#security-requirement-object
 //
-// A security list is an unordered set of OR-alternatives. Alternatives have no
-// name, and several may even share a scheme (the only way to express an OR of
-// scopes), so they cannot be keyed by a string. Like SubschemasDiff, they are
-// identified by index and carried as structured values.
+// A security list is an unordered set of OR-alternatives. An alternative is a
+// map of scheme->scopes with no identity of its own: its scheme names aren't a
+// unique key (several alternatives may share a scheme, the only way to express
+// an OR of scopes), and one alternative may AND several schemes at once. So they
+// cannot be keyed by a string; like SubschemasDiff, they are identified by index
+// and carried as structured values.
 type SecurityRequirementsDiff struct {
 	Added    SecurityAlternatives         `json:"added,omitempty" yaml:"added,omitempty"`
 	Deleted  SecurityAlternatives         `json:"deleted,omitempty" yaml:"deleted,omitempty"`
