@@ -29,3 +29,30 @@ func TestWalkPropertiesSkipsOneSidedSubSchemaDiff(t *testing.T) {
 		checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
 	})
 }
+
+// A media type that existed without a schema and gains one (SchemaDiff.Base nil)
+// — or loses its schema (SchemaDiff.Revision nil) — produces a one-sided schema
+// diff. The per-schema-change checks read SchemaDiff.Base/Revision, so the
+// media-type walkers must not hand them a one-sided diff. Regression for #1047,
+// which panicked with a nil pointer dereference when a response media type
+// gained a schema. Covers request + response, added + removed.
+func TestWalkModifiedSchemasSkipsOneSidedMediaTypeSchema(t *testing.T) {
+	base, err := open("../data/media-type-schema/base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/media-type-schema/revision.yaml")
+	require.NoError(t, err)
+
+	// Added: request + response media types gain a schema (Base nil).
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	require.NotPanics(t, func() {
+		checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+	})
+
+	// Removed: the same media types lose their schema (Revision nil).
+	d, osm, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), revision, base)
+	require.NoError(t, err)
+	require.NotPanics(t, func() {
+		checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+	})
+}
