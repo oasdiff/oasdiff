@@ -1187,3 +1187,28 @@ func TestSecurityAlternative_SchemeNames(t *testing.T) {
 	require.Equal(t, "apiKey AND oauth",
 		diff.SecurityAlternative{Schemes: map[string][]string{"oauth": {"read:pets"}, "apiKey": {}}}.SchemeNames())
 }
+
+// Two alternatives sharing a scheme, both changing scopes in place, are
+// ambiguous to pair, so they are reported as deleted + added (each carrying its
+// full scopes), never as two same-scheme "modified" entries. This is the
+// invariant the report relies on when it labels a modified requirement by scheme
+// name alone (modified is reserved for the unambiguous, one-per-scheme-set case).
+func TestDiff_SharedSchemeORAlternatives_AmbiguousScopeChangeIsAddDelete(t *testing.T) {
+	loader := openapi3.NewLoader()
+	base, err := loader.LoadFromFile("../data/security-requirements/or_alternatives_two.yaml")
+	require.NoError(t, err)
+	changed, err := loader.LoadFromFile("../data/security-requirements/or_alternatives_two_changed.yaml")
+	require.NoError(t, err)
+
+	d, err := diff.Get(diff.NewConfig(), base, changed)
+	require.NoError(t, err)
+
+	securityDiff := d.PathsDiff.Modified["/pets/{petId}"].OperationsDiff.Modified["GET"].SecurityDiff
+	require.Empty(t, securityDiff.Modified, "ambiguous scope changes must not become same-scheme modified entries")
+	require.ElementsMatch(t,
+		[]string{"petstore_auth: [read:pets]", "petstore_auth: [write:pets]"},
+		securityAlternativeStrings(securityDiff.Deleted))
+	require.ElementsMatch(t,
+		[]string{"petstore_auth: [list:pets, read:pets]", "petstore_auth: [audit:pets, write:pets]"},
+		securityAlternativeStrings(securityDiff.Added))
+}
