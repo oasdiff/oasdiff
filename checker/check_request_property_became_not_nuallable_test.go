@@ -285,3 +285,19 @@ func TestRequestBodyTypeAddedFromUntypedStaysNullable(t *testing.T) {
 	require.False(t, containsId(errs, checker.RequestBodyBecomeNullableId),
 		"adding a type to a previously untyped schema does not add nullability (untyped already accepts null)")
 }
+
+// CL: adding a schema to a response media type that previously had none must not
+// panic. The base schema diff is nil in this case, so the nullable check has no
+// base type to inspect. (#1047)
+func TestResponseMediaTypeSchemaAddedNoPanic(t *testing.T) {
+	s1, err := open("../data/checker/response_media_type_schema_added_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_media_type_schema_added_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameNullableCheck), d, osm, checker.INFO)
+	require.False(t, containsId(errs, checker.ResponseBodyBecameNullableId),
+		"adding a schema to a previously schema-less response body is not a became-nullable change")
+}

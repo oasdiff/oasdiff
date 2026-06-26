@@ -17,7 +17,7 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 		if info.schemaDiff.NullableDiff != nil && info.schemaDiff.NullableDiff.To == true {
 			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
-		} else if nullAddedToTypeArray(info.schemaDiff.TypeDiff, info.schemaDiff.Base.Type) {
+		} else if info.schemaDiff.Base != nil && nullAddedToTypeArray(info.schemaDiff.TypeDiff, info.schemaDiff.Base.Type) {
 			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
 			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
