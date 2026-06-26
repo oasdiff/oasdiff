@@ -1157,3 +1157,24 @@ func TestDiff_SharedSchemeORAlternatives_AlternativeRemoved(t *testing.T) {
 	require.Empty(t, securityDiff.Modified)
 	require.Empty(t, securityDiff.Added)
 }
+
+// TestSecurityAlternative_String covers each branch of SecurityAlternative.String():
+// the empty requirement ({}), a scheme with no scopes (bare name), a scheme with
+// scopes (sorted), and several schemes AND-ed (sorted by scheme name).
+func TestSecurityAlternative_String(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		schemes map[string][]string
+		want    string
+	}{
+		{"empty requirement", map[string][]string{}, "{}"},
+		{"nil schemes", nil, "{}"},
+		{"scheme without scopes", map[string][]string{"bearerAuth": {}}, "bearerAuth"},
+		{"scheme with scopes, sorted", map[string][]string{"petstore_auth": {"write:pets", "read:pets"}}, "petstore_auth: [read:pets, write:pets]"},
+		{"schemes AND-ed, sorted by name", map[string][]string{"oauth": {"read:pets"}, "apiKey": {}}, "apiKey AND oauth: [read:pets]"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, diff.SecurityAlternative{Schemes: tc.schemes}.String())
+		})
+	}
+}
