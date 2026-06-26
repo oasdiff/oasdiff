@@ -1178,3 +1178,12 @@ func TestSecurityAlternative_String(t *testing.T) {
 		})
 	}
 }
+
+// TestSecurityAlternative_SchemeNames covers the scheme-name-only label used for
+// a scope modification (scopes omitted; they're reported separately).
+func TestSecurityAlternative_SchemeNames(t *testing.T) {
+	require.Equal(t, "petstore_auth",
+		diff.SecurityAlternative{Schemes: map[string][]string{"petstore_auth": {"read:pets"}}}.SchemeNames())
+	require.Equal(t, "apiKey AND oauth",
+		diff.SecurityAlternative{Schemes: map[string][]string{"oauth": {"read:pets"}, "apiKey": {}}}.SchemeNames())
+}

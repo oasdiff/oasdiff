@@ -69,6 +69,13 @@ func (a SecurityAlternative) String() string {
 	return strings.Join(parts, " AND ")
 }
 
+// SchemeNames returns the alternative's scheme names, sorted and AND-joined
+// (e.g. "apiKey AND oauth"). It labels a scope modification, where the changed
+// scopes are reported separately, so it omits the scopes that String() carries.
+func (a SecurityAlternative) SchemeNames() string {
+	return strings.Join(slices.Sorted(maps.Keys(a.Schemes)), " AND ")
+}
+
 func newSecurityAlternative(index int, securityRequirement openapi3.SecurityRequirement) SecurityAlternative {
 	return SecurityAlternative{
 		Index:   index,

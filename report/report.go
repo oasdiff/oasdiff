@@ -716,7 +716,9 @@ func (r *report) printSecurityRequirements(d *diff.SecurityRequirementsDiff) {
 	}
 
 	for _, modified := range d.Modified {
-		r.print("Modified security requirements:", modified.Base.String())
+		// Label by scheme name, not the full String(): the scope changes are
+		// listed beneath, so including the base scopes here would just be noise.
+		r.print("Modified security requirements:", modified.Base.SchemeNames())
 		r.indent().printSecurityScopes(modified.Scopes)
 	}
 }
