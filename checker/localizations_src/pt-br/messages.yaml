@@ -998,3 +998,12 @@ response-property-deprecated-sunset-missing-description: propriedade de resposta
 response-property-deprecated-with-sunset-description: propriedade de resposta depreciada com data de expiração
 response-property-reactivated-description: propriedade de resposta reativada (depreciação definida como falsa)
 response-property-sunset-date-too-small-description: propriedade de resposta depreciada antes do número mínimo de dias exigidos
+# media type schema existence (#1050)
+request-body-media-type-schema-added: added a schema to the media type %s of the request body
+request-body-media-type-schema-removed: removed the schema from the media type %s of the request body
+response-body-media-type-schema-added: added a schema to the media type %s for the response with the status %s
+response-body-media-type-schema-removed: removed the schema from the media type %s for the response with the status %s
+request-body-media-type-schema-added-description: request body media-type schema added
+request-body-media-type-schema-removed-description: request body media-type schema removed
+response-body-media-type-schema-added-description: response media-type schema added
+response-body-media-type-schema-removed-description: response media-type schema removed
