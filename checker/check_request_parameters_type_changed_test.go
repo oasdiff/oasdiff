@@ -425,3 +425,22 @@ func TestRequestQueryParamMultiTypeToArrayStillBreaking(t *testing.T) {
 		"a multi-non-null base type to array is breaking; the null relaxation must not apply")
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
+
+// CL (soundness): a scalar -> form/explode array is only safe when the array
+// items accept every value the base scalar accepted. Adding an item constraint
+// (here a pattern that excludes digits) rejects previously-valid values like
+// "5", so it must be breaking, not a generalization (#1024 follow-up).
+func TestRequestQueryParamScalarToConstrainedArrayBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_param_scalar_to_constrained_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_scalar_to_constrained_array_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
+		"scalar->array whose items add a constraint rejects values valid under the base, so it is breaking")
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}

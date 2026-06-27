@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"reflect"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -54,7 +56,56 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 		return false
 	}
 	itemTypes := withoutNull(revSchema.Items.Value.Type.Slice())
-	return len(itemTypes) == 1 && itemTypes[0] == deletedSansNull[0]
+	if len(itemTypes) != 1 || itemTypes[0] != deletedSansNull[0] {
+		return false
+	}
+
+	// A matching item type is not enough: the item must not constrain values more
+	// than the base scalar did, or a value valid under the base could be rejected
+	// by the item (e.g. base `string` -> item `string` with a `pattern` rejects
+	// "5"). Otherwise the relaxation would declare a breaking change safe (#1024).
+	return itemNoStricterThanBaseScalar(paramDiff.SchemaDiff.Base, revSchema.Items.Value)
+}
+
+// itemNoStricterThanBaseScalar reports whether the array's item schema accepts
+// every value the base scalar accepted. The item may DROP the base scalar's
+// value constraints (that only widens the accepted set) but must not ADD or
+// CHANGE one, which could reject a value valid under the base (e.g. base
+// `string` -> item `string` with a `pattern` rejects "5"). So for each value
+// constraint the item is acceptable only when it is unset, or set identically to
+// the base; anything else is conservatively treated as not-provably-safe, so the
+// scalar-to-array widening is never declared safe when the items could narrow.
+func itemNoStricterThanBaseScalar(base, item *openapi3.Schema) bool {
+	if base == nil || item == nil {
+		return false
+	}
+	if item.Pattern != "" && item.Pattern != base.Pattern {
+		return false
+	}
+	if item.Format != "" && item.Format != base.Format {
+		return false
+	}
+	if item.MinLength != 0 && item.MinLength != base.MinLength {
+		return false
+	}
+	if len(item.Enum) != 0 && !reflect.DeepEqual(item.Enum, base.Enum) {
+		return false
+	}
+	if item.MaxLength != nil && !reflect.DeepEqual(item.MaxLength, base.MaxLength) {
+		return false
+	}
+	if item.Min != nil && !(reflect.DeepEqual(item.Min, base.Min) && item.ExclusiveMin == base.ExclusiveMin) {
+		return false
+	}
+	if item.Max != nil && !(reflect.DeepEqual(item.Max, base.Max) && item.ExclusiveMax == base.ExclusiveMax) {
+		return false
+	}
+	if item.MultipleOf != nil && !reflect.DeepEqual(item.MultipleOf, base.MultipleOf) {
+		return false
+	}
+	// A composed item (allOf/anyOf/oneOf/not) is not a plain scalar; cannot prove
+	// it accepts all base values, so treat it as not-provably-safe.
+	return len(item.AllOf) == 0 && len(item.AnyOf) == 0 && len(item.OneOf) == 0 && item.Not == nil
 }
 
 // withoutNull returns the type list with the JSON-Schema "null" type removed,
