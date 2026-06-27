@@ -95,6 +95,7 @@ request-parameter-type-changed: para el parámetro %s de solicitud %s, el tipo/f
 request-parameter-type-generalized: para el parámetro %s de solicitud %s, el tipo/formato fue generalizado de %s/%s a %s/%s
 request-parameter-property-type-changed: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue cambiado de %s/%s a %s/%s
 request-parameter-property-type-changed-warn-comment: "Esto es una advertencia ya que los objetos de parámetro pueden ser enviados de diferentes maneras, algunas de las cuales permiten cambiar este tipo, otras no."
+request-parameter-type-form-explode-array-comment: "Este parámetro usa la serialización form/explode, donde un valor único es un arreglo válido de un solo elemento, por lo que ampliarlo a un arreglo cuyos elementos siguen aceptando los valores anteriores no rompe a los clientes existentes."
 request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue generalizado de %s/%s a %s/%s
 request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue especializado de %s/%s a %s/%s
 new-request-path-parameter: agregado nuevo parámetro de ruta de solicitud %s
