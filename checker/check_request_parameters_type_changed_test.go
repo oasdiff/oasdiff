@@ -383,29 +383,20 @@ func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 // breaking change.
 func TestRequestQueryParamScalarToFormExplodeArray_31Nullable(t *testing.T) {
 	for _, tc := range []struct {
-		name      string
-		baseType  *openapi3.Types
-		revType   *openapi3.Types
-		itemTypes *openapi3.Types
+		name     string
+		base     string
+		revision string
 	}{
-		{"add null on the array side", &openapi3.Types{"string"}, &openapi3.Types{"array", "null"}, &openapi3.Types{"string"}},
-		{"nullable both sides", &openapi3.Types{"string", "null"}, &openapi3.Types{"array", "null"}, &openapi3.Types{"string", "null"}},
-		{"nullable items", &openapi3.Types{"string", "null"}, &openapi3.Types{"array", "null"}, &openapi3.Types{"string", "null"}},
+		// scalar string -> [array, null] (null added on the array side)
+		{"scalar to nullable array", "request_param_scalar_to_array_31_base.yaml", "request_param_scalar_to_array_31_revision.yaml"},
+		// [string, null] -> [array, null], nullable items (nullable on both sides)
+		{"nullable scalar to nullable array", "request_param_nullable_to_array_31_base.yaml", "request_param_nullable_to_array_31_revision.yaml"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+			s1, err := open("../data/checker/" + tc.base)
 			require.NoError(t, err)
-			s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+			s2, err := open("../data/checker/" + tc.revision)
 			require.NoError(t, err)
-
-			base := s1.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
-			base.Schema.Value.Type = tc.baseType
-			base.Schema.Value.Format = ""
-
-			rev := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
-			rev.Schema.Value.Type = tc.revType
-			rev.Schema.Value.Format = ""
-			rev.Schema.Value.Items = &openapi3.SchemaRef{Value: &openapi3.Schema{Type: tc.itemTypes}}
 
 			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 			require.NoError(t, err)
@@ -421,19 +412,10 @@ func TestRequestQueryParamScalarToFormExplodeArray_31Nullable(t *testing.T) {
 // CL (guard): the null-stripping relaxation must not over-apply. A multi-non-null
 // base type ([string, integer] -> array) is genuinely breaking and must stay so.
 func TestRequestQueryParamMultiTypeToArrayStillBreaking(t *testing.T) {
-	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
 	require.NoError(t, err)
-	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
+	s2, err := open("../data/checker/request_param_multitype_to_array_31_revision.yaml")
 	require.NoError(t, err)
-
-	base := s1.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
-	base.Schema.Value.Type = &openapi3.Types{"string", "integer"}
-	base.Schema.Value.Format = ""
-
-	rev := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
-	rev.Schema.Value.Type = &openapi3.Types{"array"}
-	rev.Schema.Value.Format = ""
-	rev.Schema.Value.Items = &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
