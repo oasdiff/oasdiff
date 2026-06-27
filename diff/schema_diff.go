@@ -87,6 +87,14 @@ func (diff *SchemaDiff) Empty() bool {
 	return diff == nil || *diff == SchemaDiff{Base: diff.Base, Revision: diff.Revision}
 }
 
+// GetSchemaDiff returns the diff between two schemas (an empty diff, for which
+// Empty() reports true, when they are identical). It exposes the schema
+// comparison so callers outside this package can ask "are these two schemas the
+// same" without reimplementing the field-by-field comparison.
+func GetSchemaDiff(config *Config, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
+	return getSchemaDiff(config, newState(), schema1, schema2)
+}
+
 func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 
 	if diff, ok := state.cache.get(state.direction, schema1, schema2); ok {
