@@ -25,7 +25,7 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"path", "groupId", []string{"string"}, "", []string{"integer"}, ""},
+		Args:        []any{"path", "groupId", "string", "integer"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -49,7 +49,7 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"query", "token", []string{"string"}, "uuid", []string{"integer"}, "uuid"},
+		Args:        []any{"query", "token", "string/uuid", "integer/uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -73,7 +73,7 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"header", "X-Request-ID", []string{"string"}, "uuid", []string{"integer"}, "uuid"},
+		Args:        []any{"header", "X-Request-ID", "string/uuid", "integer/uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -97,7 +97,7 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"path", "groupId", []string{"string"}, "", []string{"string"}, "uuid"},
+		Args:        []any{"path", "groupId", "string", "string/uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -121,7 +121,7 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"query", "token", []string{"string"}, "uuid", []string{"string"}, "uri"},
+		Args:        []any{"query", "token", "string/uuid", "string/uri"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -145,7 +145,7 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"header", "X-Request-ID", []string{"string"}, "uuid", []string{"string"}, "uri"},
+		Args:        []any{"header", "X-Request-ID", "string/uuid", "string/uri"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -170,7 +170,7 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", []string{"integer"}, "", []string{"integer", "string"}, ""},
+		Args:        []any{"path", "groupId", "integer", "integer, string"},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -195,7 +195,7 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", []string{"integer", "string"}, "", []string{"number", "string"}, ""},
+		Args:        []any{"path", "groupId", "integer, string", "number, string"},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -247,7 +247,7 @@ func TestBreaking_ReqQueryParamTypeNumberToString(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterPropertyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was changed from `number`/`` to `string`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was changed from `number` to `string`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 }
 
@@ -264,7 +264,7 @@ func TestBreaking_ReqQueryParamTypeStringToNumber(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterPropertyTypeSpecializedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was specialized from `string`/`` to `number`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was specialized from `string` to `number`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -281,7 +281,7 @@ func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterPropertyTypeGeneralizedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was generalized from `integer`/`` to `number`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was generalized from `integer` to `number`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
@@ -352,7 +352,7 @@ func TestRequestPathParamFormatRemoved(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", []string{"string"}, "uuid", []string{"string"}, ""},
+		Args:        []any{"path", "groupId", "string/uuid", "string"},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
