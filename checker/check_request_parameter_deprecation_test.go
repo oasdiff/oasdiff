@@ -26,8 +26,7 @@ func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterSunsetParseId, errs[0].GetId())
-	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `sunset date doesn't conform with RFC3339: invalid-date`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `sunset date doesn't conform with RFC3339: invalid-date`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: deprecating a parameter without a deprecation policy but without specifying sunset date is not breaking
@@ -60,8 +59,7 @@ func TestBreaking_ParameterDeprecationWithoutSunsetWithPolicy(t *testing.T) {
 	c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterDeprecatedSunsetMissingId, errs[0].GetId())
-	require.Equal(t, "`query` request parameter `id` was deprecated without sunset date", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "`query` request parameter `id` was deprecated without sunset date", requireChange(t, errs, checker.RequestParameterDeprecatedSunsetMissingId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: deprecating a parameter with a default deprecation policy but without specifying sunset date is not breaking
@@ -112,8 +110,7 @@ func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterSunsetDateTooSmallId, errs[0].GetId())
-	require.Equal(t, fmt.Sprintf("`query` request parameter `id` sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, fmt.Sprintf("`query` request parameter `id` sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), requireChange(t, errs, checker.RequestParameterSunsetDateTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: deprecating a parameter with a deprecation policy and sunset date after required deprecation period is not breaking
@@ -133,7 +130,7 @@ func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	// only a non-breaking change detected
-	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterDeprecatedId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "`query` request parameter `id` was deprecated")
 }
@@ -199,8 +196,7 @@ func TestParameterDeprecated_MessageIncludesSunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
-	require.Equal(t, "`query` request parameter `id` was deprecated (sunset: 9999-08-10)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "`query` request parameter `id` was deprecated (sunset: 9999-08-10)", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: message includes both sunset and stability when parameter deprecated with both
@@ -218,8 +214,7 @@ func TestParameterDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
-	require.Equal(t, "`query` request parameter `id` was deprecated (sunset: 9999-08-10, stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "`query` request parameter `id` was deprecated (sunset: 9999-08-10, stability: beta)", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: message has no details when parameter deprecated without sunset or stability
@@ -237,8 +232,7 @@ func TestParameterDeprecated_MessageWithoutDetails(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
-	require.Equal(t, "`query` request parameter `id` was deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "`query` request parameter `id` was deprecated", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // CL: message includes stability when parameter deprecated with stability but no sunset
@@ -256,6 +250,5 @@ func TestParameterDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.RequestParameterDeprecatedId, errs[0].GetId())
-	require.Equal(t, "`query` request parameter `id` was deprecated (stability: beta)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "`query` request parameter `id` was deprecated (stability: beta)", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

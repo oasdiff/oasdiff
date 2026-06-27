@@ -40,7 +40,7 @@ func TestRequestBodyDependentRequiredChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.RequestBodyDependentRequiredChangedId))
+	requireChange(t, errs, checker.RequestBodyDependentRequiredChangedId)
 }
 
 // CL: adding dependentRequired to request property
@@ -53,7 +53,7 @@ func TestRequestPropertyDependentRequiredAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredAddedId))
+	requireChange(t, errs, checker.RequestPropertyDependentRequiredAddedId)
 }
 
 // CL: removing dependentRequired from request property
@@ -66,7 +66,7 @@ func TestRequestPropertyDependentRequiredRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredRemovedId))
+	requireChange(t, errs, checker.RequestPropertyDependentRequiredRemovedId)
 }
 
 // CL: changing dependentRequired on request property
@@ -79,7 +79,7 @@ func TestRequestPropertyDependentRequiredChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.RequestPropertyDependentRequiredChangedId))
+	requireChange(t, errs, checker.RequestPropertyDependentRequiredChangedId)
 }
 
 // CL: removing dependentRequired from request body

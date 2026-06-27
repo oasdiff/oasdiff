@@ -25,8 +25,7 @@ func TestBreaking_ReqTypeStringToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the request's body `type` changed from `string` to `number`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` changed from `string` to `number`", requireChange(t, errs, checker.RequestBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing request's body schema type from number to string is breaking
@@ -45,8 +44,7 @@ func TestBreaking_ReqTypeNumberToString(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the request's body `type` changed from `number` to `string`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` changed from `number` to `string`", requireChange(t, errs, checker.RequestBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing request's body schema type from number to integer is breaking
@@ -65,8 +63,7 @@ func TestBreaking_ReqTypeNumberToInteger(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the request's body `type` changed from `number` to `integer`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` changed from `number` to `integer`", requireChange(t, errs, checker.RequestBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing request's body schema type from integer to number is not breaking
@@ -85,8 +82,7 @@ func TestBreaking_ReqTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeGeneralizedId, errs[0].GetId())
-	require.Equal(t, "the request's body `type` was generalized from `integer` to `number`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` was generalized from `integer` to `number`", requireChange(t, errs, checker.RequestBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: narrowing a request's body schema union type is breaking (server rejects previously-valid values)
@@ -105,7 +101,7 @@ func TestBreaking_ReqTypeUnionNarrowed(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyTypeChangedId)
 }
 
 // BC: removing request's body schema type is not breaking (server becomes more permissive)
@@ -124,8 +120,7 @@ func TestBreaking_ReqTypeStringDeleted(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeGeneralizedId, errs[0].GetId())
-	require.Equal(t, "the request's body `type` was generalized from `string` to `any`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` was generalized from `string` to `any`", requireChange(t, errs, checker.RequestBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: changing request's body schema type from number/none to integer/int32 is breaking
@@ -145,6 +140,5 @@ func TestBreaking_ReqTypeNumberToInt32(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "the request's body `type/format` changed from `number` to `integer/int32`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type/format` changed from `number` to `integer/int32`", requireChange(t, errs, checker.RequestBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

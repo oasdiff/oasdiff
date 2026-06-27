@@ -18,7 +18,7 @@ func TestResponseBodyContainsAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyContainsAddedId))
+	requireChange(t, errs, checker.ResponseBodyContainsAddedId)
 }
 
 // CL: removing contains constraint from response body
@@ -31,7 +31,7 @@ func TestResponseBodyContainsRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyContainsRemovedId))
+	requireChange(t, errs, checker.ResponseBodyContainsRemovedId)
 }
 
 // CL: increasing minContains on response body
@@ -44,7 +44,7 @@ func TestResponseBodyMinContainsIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyMinContainsIncreasedId))
+	requireChange(t, errs, checker.ResponseBodyMinContainsIncreasedId)
 }
 
 // CL: decreasing minContains on response body
@@ -57,7 +57,7 @@ func TestResponseBodyMinContainsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyMinContainsDecreasedId))
+	requireChange(t, errs, checker.ResponseBodyMinContainsDecreasedId)
 }
 
 // CL: increasing maxContains on response body
@@ -70,7 +70,7 @@ func TestResponseBodyMaxContainsIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyMaxContainsIncreasedId))
+	requireChange(t, errs, checker.ResponseBodyMaxContainsIncreasedId)
 }
 
 // CL: decreasing maxContains on response body
@@ -83,7 +83,7 @@ func TestResponseBodyMaxContainsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyMaxContainsDecreasedId))
+	requireChange(t, errs, checker.ResponseBodyMaxContainsDecreasedId)
 }
 
 // CL: adding contains constraint to response property
@@ -96,7 +96,7 @@ func TestResponsePropertyContainsAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyContainsAddedId))
+	requireChange(t, errs, checker.ResponsePropertyContainsAddedId)
 }
 
 // CL: removing contains constraint from response property
@@ -109,7 +109,7 @@ func TestResponsePropertyContainsRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyContainsRemovedId))
+	requireChange(t, errs, checker.ResponsePropertyContainsRemovedId)
 }
 
 // CL: increasing minContains on response property
@@ -122,7 +122,7 @@ func TestResponsePropertyMinContainsIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyMinContainsIncreasedId))
+	requireChange(t, errs, checker.ResponsePropertyMinContainsIncreasedId)
 }
 
 // CL: decreasing minContains on response property
@@ -135,7 +135,7 @@ func TestResponsePropertyMinContainsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyMinContainsDecreasedId))
+	requireChange(t, errs, checker.ResponsePropertyMinContainsDecreasedId)
 }
 
 // CL: increasing maxContains on response property
@@ -148,7 +148,7 @@ func TestResponsePropertyMaxContainsIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyMaxContainsIncreasedId))
+	requireChange(t, errs, checker.ResponsePropertyMaxContainsIncreasedId)
 }
 
 // CL: decreasing maxContains on response property
@@ -161,5 +161,5 @@ func TestResponsePropertyMaxContainsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyContainsUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyMaxContainsDecreasedId))
+	requireChange(t, errs, checker.ResponsePropertyMaxContainsDecreasedId)
 }

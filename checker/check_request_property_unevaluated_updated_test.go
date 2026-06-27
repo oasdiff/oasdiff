@@ -38,8 +38,8 @@ func TestRequestPropertyUnevaluatedAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedItemsAddedId))
-	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedPropertiesAddedId))
+	requireChange(t, errs, checker.RequestPropertyUnevaluatedItemsAddedId)
+	requireChange(t, errs, checker.RequestPropertyUnevaluatedPropertiesAddedId)
 }
 
 // CL: removing unevaluated constraints from request property
@@ -52,8 +52,8 @@ func TestRequestPropertyUnevaluatedRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedItemsRemovedId))
-	require.True(t, containsId(errs, checker.RequestPropertyUnevaluatedPropertiesRemovedId))
+	requireChange(t, errs, checker.RequestPropertyUnevaluatedItemsRemovedId)
+	requireChange(t, errs, checker.RequestPropertyUnevaluatedPropertiesRemovedId)
 }
 
 // CL: removing unevaluated constraints from request body

@@ -74,7 +74,7 @@ func TestRequiredRequestPropertyAdded_WithSources(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.NewRequiredRequestPropertyId, errs[0].GetId())
+	requireChange(t, errs, checker.NewRequiredRequestPropertyId)
 
 	// Added property: base source is nil (property doesn't exist in base), revision source points to the property
 	require.Empty(t, errs[0].GetBaseSource())
