@@ -39,6 +39,30 @@ func TestTypeFormatString(t *testing.T) {
 	}
 }
 
+// typeFormatValue renders the side of a change matching the dimension: the type
+// for "type", the format (or "none") for "format", the composite for both.
+func TestTypeFormatValue(t *testing.T) {
+	withFormat := &openapi3.Schema{Type: &openapi3.Types{"string"}, Format: "uuid"}
+	noFormat := &openapi3.Schema{Type: &openapi3.Types{"string"}}
+	arr := &openapi3.Schema{Type: &openapi3.Types{"array"}, Items: ptrSchema(&openapi3.Schema{Type: &openapi3.Types{"integer"}})}
+	for _, tc := range []struct {
+		name      string
+		schema    *openapi3.Schema
+		dimension string
+		want      string
+	}{
+		{"type drops format", withFormat, "type", "string"},
+		{"type of array", arr, "type", "array<integer>"},
+		{"format shows format", withFormat, "format", "uuid"},
+		{"format none when unset", noFormat, "format", "none"},
+		{"both composite", withFormat, "type/format", "string/uuid"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			require.Equal(t, tc.want, typeFormatValue(tc.schema, tc.dimension))
+		})
+	}
+}
+
 // getTypeFormatDimension names what changed: "type", "format", "type/format", or
 // "" when neither changed (unreachable via the caller, but it must not mislabel
 // it as a type change).

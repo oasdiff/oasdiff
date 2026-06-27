@@ -52,7 +52,7 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{"format", "object", "object/uuid"},
+		Args:        []any{"format", "none", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
@@ -204,7 +204,7 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
-		Args:        []any{"age", "format", "integer/int32", "integer/uuid"},
+		Args:        []any{"age", "format", "int32", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
@@ -230,7 +230,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeGeneralizedId,
 		Level:       checker.INFO,
-		Args:        []any{"age", "type", "integer/int32", "number/int32"},
+		Args:        []any{"age", "type", "integer", "number"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),

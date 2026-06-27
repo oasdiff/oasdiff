@@ -71,7 +71,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", "format", "string/hostname", "string/uuid", "200"},
+		Args:        []any{"data/name", "format", "hostname", "uuid", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
