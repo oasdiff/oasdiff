@@ -412,9 +412,14 @@ func TestRequestQueryParamScalarToFormExplodeArray_31Nullable(t *testing.T) {
 	}
 }
 
-// CL (guard): the null-stripping relaxation must not over-apply. A multi-non-null
-// base type ([string, integer] -> array) is genuinely breaking and must stay so.
-func TestRequestQueryParamMultiTypeToArrayStillBreaking(t *testing.T) {
+// CL: widening a weakly-typed (query) parameter from a union of scalar types to a
+// form/explode array is safe when the item type accepts every value the base did.
+// A query value is a string on the wire, so [string, integer] -> array<string> is
+// a generalization: the string branch already accepted every wire value, and a
+// single value is a valid one-element array. Mirrors the scalar-to-scalar case
+// [string, integer] -> string, which is also non-breaking. The change carries the
+// form/explode comment so the verdict is not surprising.
+func TestRequestQueryParamMultiTypeToFormExplodeArraySafe(t *testing.T) {
 	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
 	require.NoError(t, err)
 	s2, err := open("../data/checker/request_param_multitype_to_array_31_revision.yaml")
@@ -424,8 +429,28 @@ func TestRequestQueryParamMultiTypeToArrayStillBreaking(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId(),
+		"[string,integer]->array<string> is safe: the item type accepts every value the base did on the wire")
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Equal(t, "This parameter uses form/explode serialization, where a single value is a valid one-element array, so widening it to an array whose items still accept the previous values does not break existing clients.", errs[0].GetComment(checker.NewDefaultLocalizer()))
+}
+
+// CL (guard): the widening is only safe when the item type accepts every base
+// value. [string, integer] -> array<integer> drops the string branch, so a value
+// like ?token=abc that validated under the base (string) is rejected by the
+// integer item. It must stay breaking.
+func TestRequestQueryParamWideningToNarrowerItemTypeStillBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_multitype_to_array_integer_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
-		"a multi-non-null base type to array is breaking; the null relaxation must not apply")
+		"an item type that does not accept every base value (string -> integer) is breaking")
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -445,5 +470,25 @@ func TestRequestQueryParamScalarToConstrainedArrayBreaking(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
 		"scalar->array whose items add a constraint rejects values valid under the base, so it is breaking")
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}
+
+// CL (soundness): the two safety axes are independent. Here the type axis passes
+// via weak typing ([string,integer] is accepted as string on the wire), but the
+// item adds a pattern that rejects previously-valid values like "5", so the
+// constraint axis fails and the widening is breaking. Guards that the "anything
+// to string" type rule does not short-circuit the value-constraint check.
+func TestRequestQueryParamMultiTypeToConstrainedArrayBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_multitype_to_constrained_array_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
+		"type axis passes (weak typing) but the added pattern narrows values, so it is breaking")
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }

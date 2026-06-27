@@ -6,40 +6,38 @@ import (
 )
 
 const (
-	RequestParameterTypeChangedId                = "request-parameter-type-changed"
-	RequestParameterTypeGeneralizedId            = "request-parameter-type-generalized"
-	RequestParameterPropertyTypeChangedId        = "request-parameter-property-type-changed"
-	RequestParameterPropertyTypeGeneralizedId    = "request-parameter-property-type-generalized"
-	RequestParameterPropertyTypeSpecializedId    = "request-parameter-property-type-specialized"
-	RequestParameterPropertyTypeChangedCommentId = "request-parameter-property-type-changed-warn-comment"
+	RequestParameterTypeChangedId                 = "request-parameter-type-changed"
+	RequestParameterTypeGeneralizedId             = "request-parameter-type-generalized"
+	RequestParameterPropertyTypeChangedId         = "request-parameter-property-type-changed"
+	RequestParameterPropertyTypeGeneralizedId     = "request-parameter-property-type-generalized"
+	RequestParameterPropertyTypeSpecializedId     = "request-parameter-property-type-specialized"
+	RequestParameterPropertyTypeChangedCommentId  = "request-parameter-property-type-changed-warn-comment"
+	RequestParameterTypeFormExplodeArrayCommentId = "request-parameter-type-form-explode-array-comment"
 )
 
 // isParameterScalarToFormExplodeArray reports whether typeDiff describes a
-// scalar-to-array change on a parameter using form/explode serialization
-// (the default for query and cookie parameters), where the new array's
-// element type matches the old scalar type. Per the OpenAPI spec, a client
-// sending a single value (?color=red) is a valid one-element array under
-// these serialization rules, so the schema change is backwards-compatible.
+// non-array-to-array change on a parameter using form/explode serialization
+// (the default for query and cookie parameters), where the new array's item
+// accepts every value the old scalar did. Per the OpenAPI spec, a client
+// sending a single value (?color=red) is a valid one-element array under these
+// serialization rules, so such a widening is backwards-compatible.
 func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff *diff.StringsDiff) bool {
-	if paramDiff == nil || paramDiff.Revision == nil || paramDiff.SchemaDiff == nil {
+	if paramDiff == nil || paramDiff.Revision == nil || paramDiff.SchemaDiff == nil ||
+		paramDiff.SchemaDiff.Base == nil || paramDiff.SchemaDiff.Revision == nil {
 		return false
 	}
 	if typeDiff == nil {
 		return false
 	}
 
-	// Compare modulo "null". Under OpenAPI 3.1 the type can be a JSON-Schema
-	// array, so a nullable scalar is ["string","null"] and a nullable array is
-	// ["array","null"]. Preserving or adding nullability around a
-	// scalar-to-form/explode-array widening is still backwards-compatible, so
-	// strip "null" from both the type diff and the item types before applying
-	// the 3.0 single-type equality. Multi-non-null types and item-type
-	// mismatches still fail the len==1 / equality checks, so the relaxation
-	// never declares an unsafe change safe.
-	deletedSansNull := withoutNull(typeDiff.Deleted)
+	// The revision must be a (possibly nullable) array and the base a non-array
+	// scalar, or union of scalars. "null" is stripped so that preserving or adding
+	// nullability around the widening stays in scope (a nullable scalar is
+	// ["string","null"], a nullable array ["array","null"]). A base that is
+	// untyped or already an array is out of scope and stays on the breaking path.
 	addedSansNull := withoutNull(typeDiff.Added)
-	if len(addedSansNull) != 1 || addedSansNull[0] != "array" ||
-		len(deletedSansNull) != 1 || deletedSansNull[0] == "array" {
+	baseTypes := withoutNull(paramDiff.SchemaDiff.Base.Type.Slice())
+	if len(addedSansNull) != 1 || addedSansNull[0] != "array" || len(baseTypes) == 0 {
 		return false
 	}
 
@@ -50,33 +48,46 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 	}
 
 	revSchema := paramDiff.SchemaDiff.Revision
-	if revSchema == nil || revSchema.Items == nil || revSchema.Items.Value == nil {
+	if revSchema.Items == nil || revSchema.Items.Value == nil {
 		return false
 	}
-	// The widening is safe only when the item schema accepts every value the base
-	// scalar accepted. We prove that the narrow way: the item must be the base
-	// scalar with nothing changed but the array wrapping. Any other difference (a
-	// tighter or different value constraint, e.g. base `string` -> item `string`
-	// with a `pattern` that rejects "5") means the relaxation is not declared safe
-	// when the items could narrow (#1024).
-	return itemMatchesBaseScalar(paramDiff.SchemaDiff.Base, revSchema.Items.Value)
+	return itemAcceptsBaseScalarValues(paramDiff.SchemaDiff.Base, revSchema.Items.Value)
 }
 
-// itemMatchesBaseScalar reports whether the array's item schema has the same
-// validation contract as the base scalar (the array wrapping aside), so it
-// provably accepts exactly the values the base scalar accepted. It defers to the
-// diff engine's validation-equivalence check rather than reimplementing the
-// comparison, so it inherits that helper's complete, centrally-maintained
-// coverage of every validation keyword (including `const` and the OpenAPI 3.1
-// conditional keywords) and its wire-contract scoping: annotation-only
-// differences (description, example, ...) are correctly ignored, while any value
-// constraint that could narrow the accepted set is not.
-func itemMatchesBaseScalar(base, item *openapi3.Schema) bool {
+// itemAcceptsBaseScalarValues reports whether the array's item schema accepts
+// every value the base scalar accepted, so wrapping the scalar in the array is
+// safe. It splits the question along the two axes the rest of check_types.go
+// uses:
+//
+//   - Type: the item's type must contain the base scalar's type(s). Query and
+//     cookie parameters are weakly typed (every value is a string on the wire),
+//     so isTypeContained applies the "anything is accepted as a string" rule and
+//     the integer-within-number lattice. This is what makes, for example,
+//     ["string","integer"] -> array<string> safe, consistent with how the
+//     scalar-to-scalar ["string","integer"] -> string change is already treated.
+//   - Value constraints: the item must not add or tighten a non-type constraint,
+//     which could reject a value valid under the base (e.g. a `pattern` that
+//     rejects "5", #1024). With the type removed (compared above), the diff
+//     engine's validation-equivalence check covers every remaining keyword
+//     (including `const` and the 3.1 conditionals) centrally, ignoring
+//     annotation-only differences such as description.
+func itemAcceptsBaseScalarValues(base, item *openapi3.Schema) bool {
 	if base == nil || item == nil {
 		return false
 	}
+
+	if !isTypeContained(withoutNull(item.Type.Slice()), withoutNull(base.Type.Slice()), false) {
+		return false
+	}
+
+	// Compare the non-type contract. Zero the type (handled above) and the
+	// nullability (handled via "null" stripping / the nullable checkers) on copies
+	// so the equivalence check sees only the value constraints.
+	baseValue, itemValue := *base, *item
+	baseValue.Type, itemValue.Type = nil, nil
+	baseValue.Nullable, itemValue.Nullable = false, false
 	return diff.SchemaRefsValidationEquivalent(diff.NewConfig(),
-		&openapi3.SchemaRef{Value: base}, &openapi3.SchemaRef{Value: item})
+		&openapi3.SchemaRef{Value: &baseValue}, &openapi3.SchemaRef{Value: &itemValue})
 }
 
 // withoutNull returns the type list with the JSON-Schema "null" type removed,
@@ -130,22 +141,29 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						}
 
 						id := RequestParameterTypeGeneralizedId
+						comment := ""
 
 						// The parameter's own value is serialized as a string on the wire
 						// (query/path/header/cookie), so it is non-strongly-typed: a binary
 						// generalized/changed verdict with stronglyTyped=false. This differs
 						// on purpose from the property-level check below, which cannot tell
 						// how an object parameter is serialized and therefore forks three ways.
-						if typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type) &&
-							!isParameterScalarToFormExplodeArray(paramDiff, typeDiff) {
-							id = RequestParameterTypeChangedId
+						if typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type) {
+							if isParameterScalarToFormExplodeArray(paramDiff, typeDiff) {
+								// The type change would otherwise be breaking; explain why
+								// widening to a form/explode array is safe so the verdict is
+								// not surprising.
+								comment = RequestParameterTypeFormExplodeArrayCommentId
+							} else {
+								id = RequestParameterTypeChangedId
+							}
 						}
 
 						result = append(result, NewApiChange(
 							id,
 							config,
 							[]any{paramLocation, paramName, getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff)},
-							"",
+							comment,
 							operationsSources,
 							operationItem.Revision,
 							operation,

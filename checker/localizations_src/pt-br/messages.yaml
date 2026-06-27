@@ -90,6 +90,7 @@ request-parameter-type-changed: no parâmetro de requisição do tipo %s e nome 
 request-parameter-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato foi generalizado de %s/%s para %s/%s
 request-parameter-property-type-changed: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato da propriedade %s foi alterado de %s/%s para %s/%s
 request-parameter-property-type-changed-warn-comment: "Este é um aviso porque objetos de parâmetro podem ser passados de diferentes maneiras, algumas das quais permitem essa alteração de tipo e outras não."
+request-parameter-type-form-explode-array-comment: "Este parâmetro usa a serialização form/explode, onde um único valor é um array válido de um elemento, portanto ampliá-lo para um array cujos itens ainda aceitam os valores anteriores não quebra os clientes existentes."
 request-parameter-property-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato da propriedade %s foi generalizado de %s/%s para %s/%s
 request-parameter-property-type-specialized: no parâmetro de requisição do tipo %s e nome %s, o tipo/formato da propriedade %s foi especializado de %s/%s para %s/%s
 request-parameter-reactivated: "o parâmetro de requisição do tipo %s e nome %s foi reativado"

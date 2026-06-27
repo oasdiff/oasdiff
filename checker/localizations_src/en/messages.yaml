@@ -102,6 +102,7 @@ request-parameter-type-changed: for the %s request parameter %s, the type/format
 request-parameter-type-generalized: for the %s request parameter %s, the type/format was generalized from %s/%s to %s/%s
 request-parameter-property-type-changed: for the %s request parameter %s, the type/format of property %s was changed from %s/%s to %s/%s
 request-parameter-property-type-changed-warn-comment: This is a warning because parameter objects can be passed in different ways, some of which allow this type change while others do not.
+request-parameter-type-form-explode-array-comment: This parameter uses form/explode serialization, where a single value is a valid one-element array, so widening it to an array whose items still accept the previous values does not break existing clients.
 request-parameter-property-type-generalized: for the %s request parameter %s, the type/format of property %s was generalized from %s/%s to %s/%s
 request-parameter-property-type-specialized: for the %s request parameter %s, the type/format of property %s was specialized from %s/%s to %s/%s
 request-parameter-reactivated: "%s request parameter %s was reactivated"
