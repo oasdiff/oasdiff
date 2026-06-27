@@ -308,3 +308,13 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 
 	return &result, nil
 }
+
+// schemaValue returns a SchemaRef's resolved schema. By the time diff runs every
+// SchemaRef is resolved: oasdiff disallows external refs at load, so a spec
+// either has its refs resolved or fails to load, and the schema-diff entry point
+// (getSchemaDiff) surfaces a nil Value as an error. Downstream reads can
+// therefore assume Value is non-nil; this accessor names that invariant in one
+// place instead of scattering blind derefs and ad-hoc nil guards. See #1036.
+func schemaValue(ref *openapi3.SchemaRef) *openapi3.Schema {
+	return ref.Value
+}

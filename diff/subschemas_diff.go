@@ -300,8 +300,8 @@ func getSubschemasInlineDiff(config *Config, state *state, schemaRefs1, schemaRe
 func isSingleModifiedCase(schemaRefs1, schemaRefs2 openapi3.SchemaRefs, addedIdx, deletedIdx []int) bool {
 	return len(addedIdx) == 1 &&
 		len(deletedIdx) == 1 &&
-		schemaRefs1[deletedIdx[0]].Value.Title == "" &&
-		schemaRefs2[addedIdx[0]].Value.Title == ""
+		schemaValue(schemaRefs1[deletedIdx[0]]).Title == "" &&
+		schemaValue(schemaRefs2[addedIdx[0]]).Title == ""
 }
 
 func compareByTitle(config *Config, state *state, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, []int, ModifiedSubschemas, error) {
@@ -344,13 +344,13 @@ func matchByTitle(addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.
 	matchedTitles.Add("") // empty title is not allowed
 
 	for _, addedId := range addedIdx {
-		title := schemaRefs2[addedId].Value.Title
+		title := schemaValue(schemaRefs2[addedId]).Title
 		if matchedTitles.Contains(title) {
 			// title already matched, skip
 			continue
 		}
 		for _, deletedId := range deletedIdx {
-			if title == schemaRefs1[deletedId].Value.Title {
+			if title == schemaValue(schemaRefs1[deletedId]).Title {
 				addedMatched[addedId] = deletedId
 				deletedMatched[deletedId] = addedId
 				matchedTitles.Add(title)
