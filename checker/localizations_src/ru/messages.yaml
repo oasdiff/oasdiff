@@ -999,3 +999,12 @@ response-property-deprecated-sunset-missing-description: свойство отв
 response-property-deprecated-with-sunset-description: свойство ответа устарело с датой прекращения действия
 response-property-reactivated-description: свойство ответа реактивировано (устаревание установлено в false)
 response-property-sunset-date-too-small-description: свойство ответа устарело до минимального требуемого количества дней устаревания
+# media type schema existence (#1050)
+request-body-media-type-schema-added: схема добавлена к типу медиа %s тела запроса
+request-body-media-type-schema-removed: схема удалена из типа медиа %s тела запроса
+response-body-media-type-schema-added: схема добавлена к типу медиа %s ответа со статусом %s
+response-body-media-type-schema-removed: схема удалена из типа медиа %s ответа со статусом %s
+request-body-media-type-schema-added-description: схема типа медиа добавлена в тело запроса
+request-body-media-type-schema-removed-description: схема типа медиа удалена из тела запроса
+response-body-media-type-schema-added-description: схема типа медиа добавлена в ответ
+response-body-media-type-schema-removed-description: схема типа медиа удалена из ответа

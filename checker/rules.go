@@ -259,6 +259,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestBodyMediaTypeChangedCheck
 		newBackwardCompatibilityRule(RequestBodyMediaTypeAddedId, INFO, RequestBodyMediaTypeChangedCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyMediaTypeRemovedId, ERR, RequestBodyMediaTypeChangedCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
+		// MediaTypeSchemaExistenceCheck: a schema appearing/disappearing within an existing media type (#1050).
+		newBackwardCompatibilityRule(RequestBodyMediaTypeSchemaAddedId, ERR, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyMediaTypeSchemaRemovedId, INFO, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeSchemaAddedId, INFO, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeSchemaRemovedId, WARN, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		// RequestBodyRemovedCheck
 		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, AreaSchema, KindExistence, ActionRemove),
 		// RequestBodyRequiredUpdatedCheck
