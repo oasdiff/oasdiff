@@ -41,7 +41,7 @@ func TestResponsePropertyBecameRequired_WithSources(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameRequiredCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyBecameRequiredId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponsePropertyBecameRequiredId)
 
 	// Base has no 'required' list in YAML, so baseSource is nil
 	require.Empty(t, errs[0].GetBaseSource())

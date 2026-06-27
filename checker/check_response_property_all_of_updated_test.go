@@ -79,7 +79,7 @@ func TestResponsePropertyAllOfAdded_WithSources_Inline(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseBodyAllOfAddedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseBodyAllOfAddedId)
 
 	// Added inline subschema: source should point to specific subschema, not allOf keyword
 	require.NotEmpty(t, errs[0].GetRevisionSource())
@@ -140,7 +140,7 @@ func TestResponsePropertyAllOfAdded_AnnotationOnly_EmitsInfoWithDistinctId(t *te
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseBodyAllOfAddedAnnotationOnlyId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseBodyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	// Distinct from the original allOf-added INFO ID.
 	require.NotEqual(t, checker.ResponseBodyAllOfAddedId, errs[0].GetId())

@@ -231,7 +231,7 @@ func TestRequestQueryParamSingleToListOfTypesNotDuplicated(t *testing.T) {
 	})
 	errs := checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterListOfTypesWidenedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterListOfTypesWidenedId)
 }
 
 // BC: changing request's query param property type from number to string is breaking
@@ -246,8 +246,7 @@ func TestBreaking_ReqQueryParamTypeNumberToString(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPropertyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was changed from `number` to `string`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was changed from `number` to `string`", requireChange(t, errs, checker.RequestParameterPropertyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 }
 
@@ -263,8 +262,7 @@ func TestBreaking_ReqQueryParamTypeStringToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPropertyTypeSpecializedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was specialized from `string` to `number`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was specialized from `string` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeSpecializedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -280,8 +278,7 @@ func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPropertyTypeGeneralizedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was generalized from `integer` to `number`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was generalized from `integer` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
@@ -309,7 +306,7 @@ func TestRequestQueryParamScalarToFormExplodeArray(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterTypeGeneralizedId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
@@ -332,7 +329,7 @@ func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterTypeChangedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -375,7 +372,7 @@ func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyTypeChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponsePropertyTypeChangedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 

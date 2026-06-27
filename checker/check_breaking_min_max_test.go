@@ -25,7 +25,7 @@ func TestBreaking_RequestMaxLengthSmaller(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterMaxLengthDecreasedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterMaxLengthDecreasedId)
 }
 
 // BC: reducing max length in response is not breaking
@@ -70,7 +70,7 @@ func TestBreaking_MinLengthSmaller(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Equal(t, checker.ResponseBodyMinLengthDecreasedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseBodyMinLengthDecreasedId)
 }
 
 // BC: increasing max length in request is not breaking
@@ -122,7 +122,7 @@ func TestBreaking_MaxLengthFromNil(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterMaxLengthSetId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterMaxLengthSetId)
 }
 
 // BC: changing max length in response from nil to any value is not breaking
@@ -172,7 +172,7 @@ func TestBreaking_ResponseMaxLengthToNil(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseBodyMaxLengthUnsetId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseBodyMaxLengthUnsetId)
 }
 
 // BC: both max lengths in request are nil is not breaking
@@ -230,7 +230,7 @@ func TestBreaking_ResponseMinItemsSmaller(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseBodyMinItemsDecreasedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseBodyMinItemsDecreasedId)
 }
 
 // BC: increasing min items in request is breaking
