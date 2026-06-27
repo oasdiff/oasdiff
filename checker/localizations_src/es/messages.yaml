@@ -91,13 +91,13 @@ request-parameter-min-items-set: para el parámetro %s de solicitud %s, minItems
 request-parameter-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-min-set: para el parámetro %s de solicitud %s, mínimo fue establecido en %s
 request-parameter-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
-request-parameter-type-changed: para el parámetro %s de solicitud %s, el tipo/formato fue cambiado de %s/%s a %s/%s
-request-parameter-type-generalized: para el parámetro %s de solicitud %s, el tipo/formato fue generalizado de %s/%s a %s/%s
-request-parameter-property-type-changed: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue cambiado de %s/%s a %s/%s
+request-parameter-type-changed: para el parámetro %s de solicitud %s, el %s fue cambiado de %s a %s
+request-parameter-type-generalized: para el parámetro %s de solicitud %s, el %s fue generalizado de %s a %s
+request-parameter-property-type-changed: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue cambiado de %s a %s
 request-parameter-property-type-changed-warn-comment: "Esto es una advertencia ya que los objetos de parámetro pueden ser enviados de diferentes maneras, algunas de las cuales permiten cambiar este tipo, otras no."
 request-parameter-type-form-explode-array-comment: "Este parámetro usa la serialización form/explode, donde un valor único es un arreglo válido de un solo elemento, por lo que ampliarlo a un arreglo cuyos elementos siguen aceptando los valores anteriores no rompe a los clientes existentes."
-request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue generalizado de %s/%s a %s/%s
-request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el tipo/formato de la propiedad %s fue especializado de %s/%s a %s/%s
+request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue generalizado de %s a %s
+request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue especializado de %s a %s
 new-request-path-parameter: agregado nuevo parámetro de ruta de solicitud %s
 request-parameter-deprecated: parámetro de solicitud deprecado
 request-parameter-deprecated-sunset-missing: parámetro de solicitud deprecado sin fecha de expiración
@@ -162,10 +162,10 @@ request-body-min-set-comment: Esto es una advertencia porque a veces es necesari
 request-property-min-set: el valor mínimo de la propiedad de solicitud %s fue establecido en %s
 request-property-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-removed: removida la propiedad de solicitud %s
-request-body-type-changed: el tipo/formato del cuerpo de solicitud fue cambiado de %s/%s a %s/%s
-request-body-type-generalized: el tipo/formato del cuerpo de solicitud fue generalizado de %s/%s a %s/%s
-request-property-type-changed: el tipo/formato de la propiedad de solicitud %s fue cambiado de %s/%s a %s/%s
-request-property-type-generalized: el tipo/formato de la propiedad de solicitud %s fue generalizado de %s/%s a %s/%s
+request-body-type-changed: el %s del cuerpo de solicitud fue cambiado de %s a %s
+request-body-type-generalized: el %s del cuerpo de solicitud fue generalizado de %s a %s
+request-property-type-changed: el %s de la propiedad de solicitud %s fue cambiado de %s a %s
+request-property-type-generalized: el %s de la propiedad de solicitud %s fue generalizado de %s a %s
 request-property-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s de la propiedad de solicitud %s
 response-header-became-optional: el encabezado de respuesta %s se volvió opcional para el estado %s
 required-response-header-removed: removido el encabezado de respuesta requerido %s para el estado %s
@@ -198,8 +198,8 @@ response-body-min-items-unset: el número mínimo de elementos del cuerpo de res
 response-property-min-items-unset: el número mínimo de elementos de la propiedad de respuesta %s fue removido de %s para el estado %s
 response-body-min-length-decreased: la longitud mínima del cuerpo de respuesta fue disminuida de %s a %s
 response-property-min-length-decreased: la longitud mínima de la propiedad de respuesta %s fue disminuida de %s a %s para el estado %s
-response-body-type-changed: el tipo/formato del cuerpo de respuesta fue cambiado de %s/%s a %s/%s para el estado %s
-response-property-type-changed: el tipo/formato de la propiedad de respuesta %s fue cambiado de %s/%s a %s/%s para el estado %s
+response-body-type-changed: el %s del cuerpo de respuesta fue cambiado de %s a %s para el estado %s
+response-property-type-changed: el %s de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
 response-required-property-became-not-write-only: la propiedad requerida de respuesta %s dejó de ser de solo escritura para el estado %s
 response-required-property-became-not-write-only-comment: Esto es válido solo si la propiedad siempre fue retornada antes de que la especificación fuera cambiada.
 response-required-property-removed: removida la propiedad requerida %s de la respuesta con estado %s

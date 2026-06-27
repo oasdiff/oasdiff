@@ -23,7 +23,7 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponseBodyTypeChangedId,
-		Args:        []any{[]string{"string"}, "", []string{"object"}, "", "200"},
+		Args:        []any{"type", "string", "object", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -47,7 +47,7 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", []string{"string"}, "", []string{"integer"}, "", "200"},
+		Args:        []any{"data/name", "type", "string", "integer", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -71,7 +71,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", []string{"string"}, "hostname", []string{"string"}, "uuid", "200"},
+		Args:        []any{"data/name", "format", "hostname", "uuid", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -95,7 +95,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 	require.ElementsMatch(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", []string{"string"}, "", []string{"number"}, "", "200"},
+			Args:        []any{"anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", "type", "string", "number", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -104,7 +104,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"anyOf[subschema #3: Rabbit]/", []string{"string"}, "", []string{"number"}, "", "200"},
+			Args:        []any{"anyOf[subschema #3: Rabbit]/", "type", "string", "number", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -113,7 +113,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"anyOf[subschema #4 -> subschema #5]/", []string{"string"}, "", []string{"number"}, "", "200"},
+			Args:        []any{"anyOf[subschema #4 -> subschema #5]/", "type", "string", "number", "200"},
 			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
@@ -137,7 +137,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"data/name", []string{"string"}, "", []string{"integer", "string"}, "", "200"},
+		Args:        []any{"data/name", "type", "string", "integer, string", "200"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -159,7 +159,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"additionalProperties/property1", []string{"integer"}, "", []string{"string"}, "", "200"},
+		Args:        []any{"additionalProperties/property1", "type", "integer", "string", "200"},
 		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/value",
@@ -181,7 +181,7 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
-		Args:        []any{"composite-property/additionalProperties/property1", []string{"integer"}, "", []string{"string"}, "", "200"},
+		Args:        []any{"composite-property/additionalProperties/property1", "type", "integer", "string", "200"},
 		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/value",
