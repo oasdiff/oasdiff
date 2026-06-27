@@ -36,88 +36,6 @@ func runChecks(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	return false, outputChecks(stdout, flags, checker.GetAllRules())
 }
 
-func directionString(d checker.Direction) string {
-	switch d {
-	case checker.DirectionRequest:
-		return "request"
-	case checker.DirectionResponse:
-		return "response"
-	default:
-		return "none"
-	}
-}
-
-func areaString(a checker.Area) string {
-	switch a {
-	case checker.AreaSchema:
-		return "schema"
-	case checker.AreaParameters:
-		return "parameters"
-	case checker.AreaRequestBody:
-		return "requestBody"
-	case checker.AreaResponses:
-		return "responses"
-	case checker.AreaPaths:
-		return "paths"
-	case checker.AreaHeaders:
-		return "headers"
-	case checker.AreaSecurity:
-		return "security"
-	case checker.AreaTags:
-		return "tags"
-	case checker.AreaComponents:
-		return "components"
-	default:
-		return "none"
-	}
-}
-
-func kindString(k checker.Kind) string {
-	switch k {
-	case checker.KindExistence:
-		return "existence"
-	case checker.KindRequiredness:
-		return "requiredness"
-	case checker.KindMutability:
-		return "mutability"
-	case checker.KindType:
-		return "type"
-	case checker.KindConstraints:
-		return "constraints"
-	case checker.KindValues:
-		return "values"
-	case checker.KindStructure:
-		return "structure"
-	case checker.KindLifecycle:
-		return "lifecycle"
-	default:
-		return "none"
-	}
-}
-
-func actionString(a checker.Action) string {
-	switch a {
-	case checker.ActionAdd:
-		return "add"
-	case checker.ActionRemove:
-		return "remove"
-	case checker.ActionChange:
-		return "change"
-	case checker.ActionGeneralize:
-		return "generalize"
-	case checker.ActionSpecialize:
-		return "specialize"
-	case checker.ActionIncrease:
-		return "increase"
-	case checker.ActionDecrease:
-		return "decrease"
-	case checker.ActionSet:
-		return "set"
-	default:
-		return "none"
-	}
-}
-
 func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompatibilityRule) *ReturnError {
 
 	format := flags.getFormat()
@@ -163,10 +81,10 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 		checks = append(checks, formatters.Check{
 			Id:          rule.Id,
 			Level:       rule.Level.String(),
-			Direction:   directionString(rule.Direction),
-			Area:        areaString(rule.Area),
-			Kind:        kindString(rule.Kind),
-			Action:      actionString(rule.Action),
+			Direction:   rule.Direction.String(),
+			Area:        rule.Area.String(),
+			Kind:        rule.Kind.String(),
+			Action:      rule.Action.String(),
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,
 		})

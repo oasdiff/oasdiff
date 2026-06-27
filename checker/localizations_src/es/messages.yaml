@@ -20,6 +20,11 @@ request-property-pattern-generalized: "cambiado el patrón de la propiedad de so
 api-deprecated-sunset-parse: "fallo al parsear la fecha de expiración: %v"
 api-path-sunset-parse: "fallo al parsear la fecha de expiración: %v"
 api-stability-decreased: "nivel de estabilidad del endpoint disminuido de %s a %s"
+api-stability-increased: "nivel de estabilidad del endpoint aumentado de %s a %s"
+request-property-stability-decreased: "nivel de estabilidad de la propiedad de solicitud %s disminuido de %s a %s"
+request-property-stability-increased: "nivel de estabilidad de la propiedad de solicitud %s aumentado de %s a %s"
+response-property-stability-decreased: "nivel de estabilidad de la propiedad de respuesta %s disminuido de %s a %s"
+response-property-stability-increased: "nivel de estabilidad de la propiedad de respuesta %s aumentado de %s a %s"
 api-invalid-stability-level: "fallo al parsear el nivel de estabilidad: %v"
 api-deprecated-sunset-missing: "fecha de expiración faltante para la API deprecada"
 api-sunset-date-too-small: "fecha de expiración %s es demasiado pequeña, debe ser al menos %s días desde ahora"
@@ -246,6 +251,11 @@ api-global-security-scope-removed: el alcance de seguridad %s fue removido del e
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
 api-stability-decreased-description: el nivel de estabilidad del endpoint fue disminuido
+api-stability-increased-description: el nivel de estabilidad del endpoint fue aumentado
+request-property-stability-decreased-description: el nivel de estabilidad de la propiedad de solicitud fue disminuido
+request-property-stability-increased-description: el nivel de estabilidad de la propiedad de solicitud fue aumentado
+response-property-stability-decreased-description: el nivel de estabilidad de la propiedad de respuesta fue disminuido
+response-property-stability-increased-description: el nivel de estabilidad de la propiedad de respuesta fue aumentado
 api-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad del endpoint %s
 api-security-component-type-changed: el tipo del esquema de seguridad %s fue cambiado de %s a %s
 api-security-component-oauth-url-changed: la URL OAuth del esquema de seguridad %s fue cambiada de %s a %s
@@ -298,6 +308,7 @@ response-body-any-of-removed: "%s fue removido de la lista `anyOf` del cuerpo de
 response-property-any-of-added: "%s fue agregado a la lista `anyOf` de la propiedad de respuesta %s para el estado %s"
 response-property-any-of-removed: "%s fue removido de la lista `anyOf` de la propiedad de respuesta %s para el estado %s"
 request-body-one-of-added: "%s fue agregado a la lista `oneOf` del cuerpo de solicitud"
+request-body-wrapped-in-one-of: "el cuerpo de solicitud se reestructuró en un `oneOf`, por lo que una carga útil que antes era válida podría dejar de aceptarse"
 request-body-one-of-removed: "%s fue removido de la lista `oneOf` del cuerpo de solicitud"
 request-property-one-of-added: "%s fue agregado a la lista `oneOf` de la propiedad de solicitud %s"
 request-property-one-of-removed: "%s fue removido de la lista `oneOf` de la propiedad de solicitud %s"
@@ -429,6 +440,7 @@ request-body-min-length-decreased-description: longitud mínima del cuerpo de so
 request-body-min-length-increased-description: longitud mínima del cuerpo de solicitud aumentada
 request-body-min-set-description: valor mínimo del cuerpo de solicitud establecido
 request-body-one-of-added-description: subesquema agregado al oneOf en el cuerpo de solicitud
+request-body-wrapped-in-one-of-description: "cuerpo de solicitud envuelto en un `oneOf`"
 request-body-one-of-removed-description: subesquema removido del oneOf en el cuerpo de solicitud
 request-body-removed-description: cuerpo de solicitud removido
 request-body-type-changed-description: tipo del cuerpo de solicitud cambiado
@@ -986,3 +998,12 @@ response-property-deprecated-sunset-missing-description: propiedad de respuesta 
 response-property-deprecated-with-sunset-description: propiedad de respuesta deprecada con fecha de expiración
 response-property-reactivated-description: propiedad de respuesta reactivada (deprecación establecida como falsa)
 response-property-sunset-date-too-small-description: propiedad de respuesta deprecada antes del número mínimo de días requeridos
+# media type schema existence (#1050)
+request-body-media-type-schema-added: agregado un esquema al tipo de media %s del cuerpo de solicitud
+request-body-media-type-schema-removed: removido el esquema del tipo de media %s del cuerpo de solicitud
+response-body-media-type-schema-added: agregado un esquema al tipo de media %s de la respuesta con estado %s
+response-body-media-type-schema-removed: removido el esquema del tipo de media %s de la respuesta con estado %s
+request-body-media-type-schema-added-description: esquema del tipo de media del cuerpo de solicitud agregado
+request-body-media-type-schema-removed-description: esquema del tipo de media del cuerpo de solicitud removido
+response-body-media-type-schema-added-description: esquema del tipo de media de la respuesta agregado
+response-body-media-type-schema-removed-description: esquema del tipo de media de la respuesta removido

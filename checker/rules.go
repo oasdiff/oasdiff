@@ -59,6 +59,88 @@ const (
 	ActionNone
 )
 
+func (d Direction) String() string {
+	switch d {
+	case DirectionRequest:
+		return "request"
+	case DirectionResponse:
+		return "response"
+	default:
+		return "none"
+	}
+}
+
+func (a Area) String() string {
+	switch a {
+	case AreaSchema:
+		return "schema"
+	case AreaParameters:
+		return "parameters"
+	case AreaRequestBody:
+		return "requestBody"
+	case AreaResponses:
+		return "responses"
+	case AreaPaths:
+		return "paths"
+	case AreaHeaders:
+		return "headers"
+	case AreaSecurity:
+		return "security"
+	case AreaTags:
+		return "tags"
+	case AreaComponents:
+		return "components"
+	default:
+		return "none"
+	}
+}
+
+func (k Kind) String() string {
+	switch k {
+	case KindExistence:
+		return "existence"
+	case KindRequiredness:
+		return "requiredness"
+	case KindMutability:
+		return "mutability"
+	case KindType:
+		return "type"
+	case KindConstraints:
+		return "constraints"
+	case KindValues:
+		return "values"
+	case KindStructure:
+		return "structure"
+	case KindLifecycle:
+		return "lifecycle"
+	default:
+		return "none"
+	}
+}
+
+func (a Action) String() string {
+	switch a {
+	case ActionAdd:
+		return "add"
+	case ActionRemove:
+		return "remove"
+	case ActionChange:
+		return "change"
+	case ActionGeneralize:
+		return "generalize"
+	case ActionSpecialize:
+		return "specialize"
+	case ActionIncrease:
+		return "increase"
+	case ActionDecrease:
+		return "decrease"
+	case ActionSet:
+		return "set"
+	default:
+		return "none"
+	}
+}
+
 type BackwardCompatibilityRule struct {
 	Id          string
 	Level       Level
@@ -125,8 +207,13 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityAddedCheckId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionRemove),
-		// Stability Descreased Check is run as part of CheckBackwardCompatibility
+		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, AreaPaths, KindLifecycle, ActionIncrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityDecreasedId, ERR, nil, DirectionRequest, AreaSchema, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(RequestPropertyStabilityIncreasedId, INFO, nil, DirectionRequest, AreaSchema, KindLifecycle, ActionIncrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityDecreasedId, ERR, nil, DirectionResponse, AreaSchema, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(ResponsePropertyStabilityIncreasedId, INFO, nil, DirectionResponse, AreaSchema, KindLifecycle, ActionIncrease),
 		// APIDeprecationCheck
 		newBackwardCompatibilityRule(EndpointReactivatedId, INFO, APIDeprecationCheck, DirectionNone, AreaPaths, KindLifecycle, ActionChange),
 		newBackwardCompatibilityRule(APIDeprecatedSunsetParseId, ERR, APIDeprecationCheck, DirectionNone, AreaPaths, KindLifecycle, ActionChange),
@@ -172,6 +259,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestBodyMediaTypeChangedCheck
 		newBackwardCompatibilityRule(RequestBodyMediaTypeAddedId, INFO, RequestBodyMediaTypeChangedCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyMediaTypeRemovedId, ERR, RequestBodyMediaTypeChangedCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
+		// MediaTypeSchemaExistenceCheck: a schema appearing/disappearing within an existing media type (#1050).
+		newBackwardCompatibilityRule(RequestBodyMediaTypeSchemaAddedId, ERR, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyMediaTypeSchemaRemovedId, INFO, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeSchemaAddedId, INFO, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeSchemaRemovedId, WARN, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		// RequestBodyRemovedCheck
 		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, AreaSchema, KindExistence, ActionRemove),
 		// RequestBodyRequiredUpdatedCheck
@@ -373,6 +465,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyWithDefaultId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(NewOptionalRequestPropertyId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyWrappedInOneOfId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaRequestBody, KindStructure, ActionChange),
 		// RequestPropertyWriteOnlyReadOnlyCheck
 		newBackwardCompatibilityRule(RequestOptionalPropertyBecameNonWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, ActionChange),
 		newBackwardCompatibilityRule(RequestOptionalPropertyBecameWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, ActionChange),

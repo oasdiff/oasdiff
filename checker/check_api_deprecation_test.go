@@ -120,7 +120,7 @@ func TestBreaking_DeprecationForAlpha(t *testing.T) {
 func TestBreaking_DeprecationForDraft(t *testing.T) {
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
-	draft := toJson(t, checker.STABILITY_DRAFT)
+	draft := toJson(t, checker.StabilityDraft)
 	s1.Spec.Paths.Value("/api/test").Get.Extensions["x-stability-level"] = draft
 
 	s2, err := open(deprecationFile("deprecated-no-sunset-alpha-stability.yaml"))
@@ -282,11 +282,11 @@ func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIDeprecationCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.EndpointDeprecatedWithSunsetId, errs[0].GetId())
-	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
-	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "stability: beta")
+	deprecationChange := findChange(errs, checker.EndpointDeprecatedWithSunsetId)
+	require.NotNil(t, deprecationChange)
+	require.Contains(t, deprecationChange.GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
+	require.Contains(t, deprecationChange.GetUncolorizedText(checker.NewDefaultLocalizer()), "stability: beta")
 }
 
 // CL: message has no details when endpoint deprecated without sunset or stability

@@ -26,6 +26,9 @@ func getParseArgs() cobra.PositionalArgs {
 		if err := checkOpenWithComposed(cmd); err != nil {
 			return err
 		}
+		if err := checkReviewFlagsRequireOpen(cmd); err != nil {
+			return err
+		}
 		if err := checkColor(cmd); err != nil {
 			return err
 		}
@@ -120,7 +123,42 @@ func checkOpenWithComposed(cmd *cobra.Command) error {
 	return nil
 }
 
+func checkReviewFlagsRequireOpen(cmd *cobra.Command) error {
+
+	// Only breaking/changelog define these (via addOpenFlags); skip elsewhere.
+	if cmd.Flags().Lookup("review-token") == nil {
+		return nil
+	}
+
+	// --open is registered alongside the review flags; the Lookup is defensive
+	// in case it ever isn't.
+	open := false
+	if cmd.Flags().Lookup("open") != nil {
+		var err error
+		if open, err = cmd.Flags().GetBool("open"); err != nil {
+			return errors.New("failed to get open flag")
+		}
+	}
+	if open {
+		return nil
+	}
+
+	if cmd.Flags().Changed("review-token") || cmd.Flags().Changed("review-meta") {
+		return errors.New("--review-token and --review-meta require --open")
+	}
+
+	return nil
+}
+
 func checkStdinWithComposed(cmd *cobra.Command, args []string) error {
+
+	// Every command using getParseArgs registers composed (via addCommonDiffFlags),
+	// but guard with Lookup so this check degrades gracefully instead of erroring
+	// with "failed to get composed flag" if it's ever run on a command without it.
+	// Same pattern as checkOpenWithComposed.
+	if cmd.Flags().Lookup("composed") == nil {
+		return nil
+	}
 
 	composed, err := cmd.Flags().GetBool("composed")
 	if err != nil {

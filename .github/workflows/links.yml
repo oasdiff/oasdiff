@@ -1,17 +1,24 @@
 name: detect-broken-links
 on:
   push:
+    branches: [main]
+    paths: ['**.md', '**.html', '.github/workflows/links.yml', '.github/workflows/mlc_config.json']
   pull_request:
+    paths: ['**.md', '**.html', '.github/workflows/links.yml', '.github/workflows/mlc_config.json']
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check-links:
     name: check-links
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         config-file: '.github/workflows/mlc_config.json'

@@ -1,0 +1,34 @@
+openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /test:
+    post:
+      operationId: createTest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  x-stability-level: stable
+                status:
+                  type: string
+                  x-stability-level: stable
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stability-level: stable
+                  details:
+                    type: string
+                    x-stability-level: stable

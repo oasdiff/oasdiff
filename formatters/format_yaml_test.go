@@ -65,16 +65,27 @@ func TestYamlFormatter_RenderChecks(t *testing.T) {
 	require.Equal(t, "- id: change_id\n  level: info\n  direction: request\n  area: schema\n  kind: existence\n  action: remove\n  description: This is a breaking change.\n  mitigation: Fix it.\n", string(out))
 }
 
+// An empty (nil) diff renders as the empty YAML mapping, for parity with
+// the JSON formatter, rather than empty bytes.
 func TestYamlFormatter_RenderDiff(t *testing.T) {
 	out, err := yamlFormatter.RenderDiff(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Empty(t, string(out))
+	require.Equal(t, "{}", string(out))
 }
 
+// A nil pointer-shaped value renders as the empty mapping, for parity with
+// the JSON formatter, rather than empty bytes.
 func TestYamlFormatter_RenderFlatten(t *testing.T) {
 	out, err := yamlFormatter.RenderFlatten(nil, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Empty(t, string(out))
+	require.Equal(t, "{}", string(out))
+}
+
+// A nil slice-shaped value renders as the empty sequence, not empty bytes.
+func TestYamlFormatter_RenderValidate_Nil(t *testing.T) {
+	out, err := yamlFormatter.RenderValidate(nil, formatters.NewRenderOpts())
+	require.NoError(t, err)
+	require.Equal(t, "[]", string(out))
 }
 
 func TestYamlFormatter_RenderSummary(t *testing.T) {

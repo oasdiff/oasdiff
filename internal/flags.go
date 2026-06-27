@@ -92,6 +92,20 @@ func (flags *Flags) getOpen() bool {
 	return flags.v.GetBool("open")
 }
 
+// getReviewToken returns the opaque auth token supplied via --review-token. Its
+// presence (non-empty) is the only switch that makes --open do an authenticated
+// upload instead of the free anonymous one.
+func (flags *Flags) getReviewToken() string {
+	return flags.v.GetString("review-token")
+}
+
+// getReviewMeta returns the raw --review-meta entries (repeatable key=value
+// strings). The values are an opaque bag the CLI does not interpret; parsing
+// into a map happens in the authenticated upload path.
+func (flags *Flags) getReviewMeta() []string {
+	return fixViperStringSlice(flags.v.GetStringSlice("review-meta"))
+}
+
 func (flags *Flags) getIncludeChecks() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("include-checks"))
 }
@@ -170,4 +184,8 @@ func (flags *Flags) getTags() []string {
 
 func (flags *Flags) getTemplate() string {
 	return flags.v.GetString("template")
+}
+
+func (flags *Flags) getStabilityLevel() string {
+	return flags.v.GetString("stability-level")
 }

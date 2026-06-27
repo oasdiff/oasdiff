@@ -73,7 +73,25 @@ var (
 	deprecationFile      = dataFileFn("deprecation")
 	paramDeprecationFile = dataFileFn("param-deprecation")
 	requiredPropertyFile = dataFileFn("required-properties")
+	stabilityFile        = dataFileFn("stability")
 )
+
+// stabilityChanges diffs two stability fixtures and runs all backward-compatibility
+// checks at the given threshold.
+func stabilityChanges(t *testing.T, baseFile, revisionFile string, sl checker.StabilityLevel) checker.Changes {
+	t.Helper()
+	s1, err := open(stabilityFile(baseFile))
+	require.NoError(t, err)
+	s2, err := open(stabilityFile(revisionFile))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	config := allChecksConfig()
+	config.StabilityLevel = sl
+	return checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
+}
 
 func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
 	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, append([]checker.Option{checker.WithSingleCheck(c)}, opts...)...)
@@ -83,11 +101,16 @@ func allChecksConfig(opts ...checker.Option) *checker.Config {
 	return checker.NewConfig(checker.GetAllChecks(), opts...)
 }
 
-func containsId(errs checker.Changes, id string) bool {
-	for _, e := range errs {
-		if e.GetId() == id {
-			return true
+// findChange returns the first Change with the given id, or nil if none match.
+func findChange(changes checker.Changes, id string) checker.Change {
+	for _, c := range changes {
+		if c.GetId() == id {
+			return c
 		}
 	}
-	return false
+	return nil
+}
+
+func containsId(changes checker.Changes, id string) bool {
+	return findChange(changes, id) != nil
 }

@@ -27,7 +27,7 @@ func getChangelogCmd() *cobra.Command {
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), LevelInfo), "level", "", "output errors with this level or higher")
-	cmd.PersistentFlags().Bool("open", false, "after printing the changelog, encrypt the comparison and upload it to oasdiff.com, then open the side-by-side review in a browser")
+	addOpenFlags(&cmd, "changelog")
 
 	return &cmd
 }
@@ -58,15 +58,18 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 		return false, returnErr
 	}
 
+	bcConfig := checker.NewConfig(
+		checker.GetAllChecks(),
+		checker.WithOptionalChecks(flags.getIncludeChecks()),
+		checker.WithSeverityLevels(severityLevels),
+		checker.WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()),
+		checker.WithAttributes(flags.getAttributes()),
+		checker.WithStabilityLevel(flags.getStabilityLevel()),
+	)
+
 	errs, returnErr := filterIgnored(
 		checker.CheckBackwardCompatibilityUntilLevel(
-			checker.NewConfig(
-				checker.GetAllChecks(),
-				checker.WithOptionalChecks(flags.getIncludeChecks()),
-				checker.WithSeverityLevels(severityLevels),
-				checker.WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()),
-				checker.WithAttributes(flags.getAttributes()),
-			),
+			bcConfig,
 			diffResult.diffReport,
 			diffResult.operationsSources,
 			level),
