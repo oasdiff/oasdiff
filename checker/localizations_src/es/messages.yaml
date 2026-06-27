@@ -170,6 +170,7 @@ request-property-x-extensible-enum-value-removed: removido el valor x-extensible
 response-header-became-optional: el encabezado de respuesta %s se volvió opcional para el estado %s
 required-response-header-removed: removido el encabezado de respuesta requerido %s para el estado %s
 optional-response-header-removed: removido el encabezado de respuesta opcional %s para el estado %s
+response-header-added: agregado el encabezado de respuesta %s para el estado %s
 response-media-type-removed: removido el tipo de media %s de la respuesta con estado %s
 response-media-type-added: agregado el tipo de media %s a la respuesta con estado %s
 response-media-type-name-changed: el tipo de media %s fue cambiado a %s para el estado de respuesta %s
@@ -404,6 +405,7 @@ new-required-request-parameter-description: parámetro requerido de solicitud ag
 new-required-request-property-description: propiedad requerida agregada a la solicitud
 new-required-request-property-with-default-description: propiedad requerida con valor por defecto agregada a la solicitud
 optional-response-header-removed-description: encabezado de respuesta opcional removido
+response-header-added-description: encabezado de respuesta agregado
 api-invalid-stability-level-description: nivel de estabilidad inválido
 request-body-all-of-added-description: subesquema agregado al allOf en el cuerpo de solicitud
 request-body-all-of-removed-description: subesquema removido del allOf en el cuerpo de solicitud

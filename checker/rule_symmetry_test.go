@@ -38,9 +38,6 @@ var symmetryWaivers = map[string]string{
 	"generalize<->specialize request/schema/type missing-specialize":            "narrowing a request type is breaking and already reported by request-*-type-changed (ERR); the generalize rule exists only to carve out the safe widening as INFO.",
 	"generalize<->specialize request/schema/constraints missing-specialize":     "tightening a request pattern is reported by request-*-pattern-changed; the generalize rule carves out the safe loosening.",
 	"generalize<->specialize request/parameters/constraints missing-specialize": "same as request schema pattern: tightening is covered by request-parameter-pattern-changed; generalize carves out the safe loosening.",
-
-	// --- KNOWN GAP, tracked (not intentional) ---
-	"add<->remove response/headers/existence missing-add": "GAP tracked in #1033: adding a response header has no rule, only removal. Remove this waiver when response-header-added lands.",
 }
 
 // symmetryAbsences returns the canonical key for every coordinate that is

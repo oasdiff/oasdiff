@@ -176,6 +176,7 @@ request-property-x-extensible-enum-value-removed: removed the x-extensible-enum 
 response-header-became-optional: the response header %s became optional for the status %s
 required-response-header-removed: the mandatory response header %s removed for the status %s
 optional-response-header-removed: the optional response header %s removed for the status %s
+response-header-added: the response header %s was added for the status %s
 response-media-type-removed: removed the media type %s for the response with the status %s
 response-media-type-added: added the media type %s for the response with the status %s
 response-media-type-name-changed: media type %s was changed to %s for the response status %s
@@ -405,6 +406,7 @@ new-required-request-parameter-description: required request parameter added to 
 new-required-request-property-description: required property added to request
 new-required-request-property-with-default-description: required property with default value added to request
 optional-response-header-removed-description: optional response header deleted
+response-header-added-description: response header added
 api-invalid-stability-level-description: invalid stability level
 request-body-all-of-added-description: sub-schema added to allOf in request body
 request-body-all-of-removed-description: sub-schema deleted from allOf in request body
