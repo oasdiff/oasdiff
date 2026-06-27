@@ -59,7 +59,7 @@ func getOneOfWrappingDiff(base, revision *openapi3.Schema) *OneOfWrappingDiff {
 
 	alts := make([]*openapi3.Schema, 0, len(revision.OneOf))
 	for _, ref := range revision.OneOf {
-		alts = append(alts, ref.Value)
+		alts = append(alts, schemaValue(ref))
 	}
 
 	moved := make([]string, 0, len(base.Properties))

@@ -115,11 +115,7 @@ func checkSchemaList(schemas []*openapi3.SchemaRef, source string) *listOfTypesP
 
 	var types []string
 	for _, schemaRef := range schemas {
-		if schemaRef.Value == nil {
-			return nil // Can't analyze refs or nil schemas
-		}
-
-		schema := schemaRef.Value
+		schema := schemaValue(schemaRef)
 
 		// Must be simple type schema with exactly one type
 		if !isSimpleTypeSchema(schema) {

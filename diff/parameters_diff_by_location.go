@@ -246,7 +246,7 @@ func isSemanticEquivalent(param1, param2 *openapi3.Parameter) bool {
 // isExplodedObjectParam checks if a parameter is an exploded object parameter
 // (style=form, explode=true, object schema)
 func isExplodedObjectParam(param *openapi3.Parameter) bool {
-	if param == nil || param.Schema == nil || param.Schema.Value == nil {
+	if param == nil || param.Schema == nil {
 		return false
 	}
 
@@ -266,7 +266,7 @@ func isExplodedObjectParam(param *openapi3.Parameter) bool {
 	}
 
 	// Must have object schema with properties
-	schema := param.Schema.Value
+	schema := schemaValue(param.Schema)
 	isObjectWithProps := schema.Type != nil && len(*schema.Type) == 1 && (*schema.Type)[0] == "object" && len(schema.Properties) > 0
 
 	return explode && isFormStyle && isObjectWithProps
@@ -284,7 +284,7 @@ func isParamInExplodedObject(simpleParam, explodedParam *openapi3.Parameter) boo
 		return false
 	}
 
-	schema := explodedParam.Schema.Value
+	schema := schemaValue(explodedParam.Schema)
 	if schema == nil || schema.Properties == nil {
 		return false
 	}
@@ -305,7 +305,7 @@ func getPropertyDiff(config *Config, state *state, simpleParam *openapi3.Paramet
 
 	// Get the property schema from the exploded object
 	propertyName := simpleParam.Name
-	explodedSchema := explodedParam.Schema.Value
+	explodedSchema := schemaValue(explodedParam.Schema)
 	propertySchemaRef, exists := explodedSchema.Properties[propertyName]
 	if !exists {
 		return nil, fmt.Errorf("property %s not found in exploded parameter", propertyName)
