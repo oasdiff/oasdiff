@@ -162,7 +162,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						result = append(result, NewApiChange(
 							id,
 							config,
-							[]any{paramLocation, paramName, getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
+							[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 							comment,
 							operationsSources,
 							operationItem.Revision,
@@ -197,7 +197,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 								result = append(result, NewApiChange(
 									id,
 									config,
-									[]any{paramLocation, paramName, propertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
+									[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), propertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 									comment,
 									operationsSources,
 									operationItem.Revision,

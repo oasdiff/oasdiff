@@ -7,6 +7,28 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
+// getTypeFormatDimension names what changed in a type/format change, for the
+// message: "type" when only the type changed, "format" when only the format
+// changed, and "type/format" when both did. It is passed as a message argument
+// so a type-only change does not read "the type/format was changed" when no
+// format was involved.
+func getTypeFormatDimension(schemaDiff *diff.SchemaDiff) string {
+	typeChanged := !schemaDiff.TypeDiff.Empty()
+	formatChanged := !schemaDiff.FormatDiff.Empty()
+	switch {
+	case typeChanged && formatChanged:
+		return "type/format"
+	case typeChanged:
+		return "type"
+	case formatChanged:
+		return "format"
+	default:
+		// Neither changed; the caller only emits a change when one did, so this
+		// is unreachable in practice. Return empty rather than mislabel it "type".
+		return ""
+	}
+}
+
 func getBaseTypeFormat(schemaDiff *diff.SchemaDiff) string {
 	return typeFormatString(schemaDiff.Base)
 }
@@ -38,11 +60,16 @@ func typeFormatString(s *openapi3.Schema) string {
 	}
 
 	result := strings.Join(parts, ", ")
-	if s.Format == "" {
-		return result
+	if s.Format != "" {
+		if result == "" {
+			return s.Format
+		}
+		return result + "/" + s.Format
 	}
 	if result == "" {
-		return s.Format
+		// No type constraint: render "any" rather than an empty value, which
+		// reads as nothing (e.g. a removed type generalizes "string" to "any").
+		return "any"
 	}
-	return result + "/" + s.Format
+	return result
 }
