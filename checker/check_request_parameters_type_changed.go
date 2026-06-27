@@ -62,20 +62,21 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 	return itemMatchesBaseScalar(paramDiff.SchemaDiff.Base, revSchema.Items.Value)
 }
 
-// itemMatchesBaseScalar reports whether the array's item schema is identical to
-// the base scalar (the array wrapping aside), so it provably accepts exactly the
-// values the base scalar accepted. It asks the diff engine whether the two
-// schemas differ rather than reimplementing the comparison, so the check inherits
-// the diff's complete, centrally-maintained coverage of every validation keyword
-// (including `const` and the OpenAPI 3.1 conditional keywords): a keyword the
-// diff engine learns about is covered here with no list to keep in sync.
+// itemMatchesBaseScalar reports whether the array's item schema has the same
+// validation contract as the base scalar (the array wrapping aside), so it
+// provably accepts exactly the values the base scalar accepted. It defers to the
+// diff engine's validation-equivalence check rather than reimplementing the
+// comparison, so it inherits that helper's complete, centrally-maintained
+// coverage of every validation keyword (including `const` and the OpenAPI 3.1
+// conditional keywords) and its wire-contract scoping: annotation-only
+// differences (description, example, ...) are correctly ignored, while any value
+// constraint that could narrow the accepted set is not.
 func itemMatchesBaseScalar(base, item *openapi3.Schema) bool {
 	if base == nil || item == nil {
 		return false
 	}
-	schemaDiff, err := diff.GetSchemaDiff(diff.NewConfig(),
+	return diff.SchemaRefsValidationEquivalent(diff.NewConfig(),
 		&openapi3.SchemaRef{Value: base}, &openapi3.SchemaRef{Value: item})
-	return err == nil && schemaDiff.Empty()
 }
 
 // withoutNull returns the type list with the JSON-Schema "null" type removed,
