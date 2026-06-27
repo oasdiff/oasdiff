@@ -998,11 +998,11 @@ response-property-deprecated-with-sunset-description: propiedad de respuesta dep
 response-property-reactivated-description: propiedad de respuesta reactivada (deprecación establecida como falsa)
 response-property-sunset-date-too-small-description: propiedad de respuesta deprecada antes del número mínimo de días requeridos
 # media type schema existence (#1050)
-request-body-media-type-schema-added: added a schema to the media type %s of the request body
-request-body-media-type-schema-removed: removed the schema from the media type %s of the request body
-response-body-media-type-schema-added: added a schema to the media type %s for the response with the status %s
-response-body-media-type-schema-removed: removed the schema from the media type %s for the response with the status %s
-request-body-media-type-schema-added-description: request body media-type schema added
-request-body-media-type-schema-removed-description: request body media-type schema removed
-response-body-media-type-schema-added-description: response media-type schema added
-response-body-media-type-schema-removed-description: response media-type schema removed
+request-body-media-type-schema-added: agregado un esquema al tipo de media %s del cuerpo de solicitud
+request-body-media-type-schema-removed: removido el esquema del tipo de media %s del cuerpo de solicitud
+response-body-media-type-schema-added: agregado un esquema al tipo de media %s de la respuesta con estado %s
+response-body-media-type-schema-removed: removido el esquema del tipo de media %s de la respuesta con estado %s
+request-body-media-type-schema-added-description: esquema del tipo de media del cuerpo de solicitud agregado
+request-body-media-type-schema-removed-description: esquema del tipo de media del cuerpo de solicitud removido
+response-body-media-type-schema-added-description: esquema del tipo de media de la respuesta agregado
+response-body-media-type-schema-removed-description: esquema del tipo de media de la respuesta removido
