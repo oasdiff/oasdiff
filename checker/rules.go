@@ -495,6 +495,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// ResponseHeaderRemovedCheck
 		newBackwardCompatibilityRule(RequiredResponseHeaderRemovedId, ERR, ResponseHeaderRemovedCheck, DirectionResponse, AreaHeaders, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(OptionalResponseHeaderRemovedId, WARN, ResponseHeaderRemovedCheck, DirectionResponse, AreaHeaders, KindExistence, ActionRemove),
+		// ResponseHeaderAddedCheck
+		newBackwardCompatibilityRule(ResponseHeaderAddedId, INFO, ResponseHeaderAddedCheck, DirectionResponse, AreaHeaders, KindExistence, ActionAdd),
 		// ResponseMediaTypeUpdatedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeRemovedId, ERR, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseMediaTypeAddedId, INFO, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
