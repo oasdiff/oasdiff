@@ -7,6 +7,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build-and-test:
     env:
@@ -39,8 +43,6 @@ jobs:
       run: |
         echo "go-build=$(go env GOCACHE)" >> $GITHUB_OUTPUT
         echo "go-mod=$(go env GOMODCACHE)" >> $GITHUB_OUTPUT
-    - run: echo ${{ steps.go-cache-paths.outputs.go-build }}
-    - run: echo ${{ steps.go-cache-paths.outputs.go-mod }}
 
     - name: Go Build Cache
       uses: actions/cache@v6
