@@ -60,52 +60,68 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 		return false
 	}
 
-	// A matching item type is not enough: the item must not constrain values more
-	// than the base scalar did, or a value valid under the base could be rejected
-	// by the item (e.g. base `string` -> item `string` with a `pattern` rejects
-	// "5"). Otherwise the relaxation would declare a breaking change safe (#1024).
-	return itemNoStricterThanBaseScalar(paramDiff.SchemaDiff.Base, revSchema.Items.Value)
+	// A matching item type is not enough: the widening is safe only when the item
+	// schema accepts every value the base scalar accepted. We prove that the
+	// narrow way - by requiring the item to be the base scalar with nothing changed
+	// but the array wrapping. Any other difference (a tighter or different value
+	// constraint, e.g. base `string` -> item `string` with a `pattern` that rejects
+	// "5") fails the comparison, so the relaxation is never declared safe when the
+	// items could narrow (#1024).
+	return itemMatchesBaseScalar(paramDiff.SchemaDiff.Base, revSchema.Items.Value)
 }
 
-// itemNoStricterThanBaseScalar reports whether the array's item schema accepts
-// every value the base scalar accepted. The item may DROP the base scalar's
-// value constraints (that only widens the accepted set) but must not ADD or
-// CHANGE one, which could reject a value valid under the base (e.g. base
-// `string` -> item `string` with a `pattern` rejects "5"). So for each value
-// constraint the item is acceptable only when it is unset, or set identically to
-// the base; anything else is conservatively treated as not-provably-safe, so the
-// scalar-to-array widening is never declared safe when the items could narrow.
-func itemNoStricterThanBaseScalar(base, item *openapi3.Schema) bool {
+// itemMatchesBaseScalar reports whether the array's item schema is the base
+// scalar with nothing changed but the array wrapping, so it provably accepts
+// exactly the values the base scalar accepted. It compares the two schemas'
+// value-validation surface for equality: every validation keyword (including
+// `const` and the OpenAPI 3.1 conditional keywords) is compared by zeroing only
+// the type (handled separately above), nullability, and the non-validating
+// annotation/metadata fields, then requiring deep equality of the rest.
+//
+// The comparison is deliberately exhaustive rather than a hand-listed set of
+// constraints: a forgotten annotation field merely stays in the comparison and
+// makes the check stricter (a safe over-report), whereas a forgotten *constraint*
+// in an allow-list would silently declare a narrowing safe. So the residual risk
+// is pushed to the harmless direction.
+func itemMatchesBaseScalar(base, item *openapi3.Schema) bool {
 	if base == nil || item == nil {
 		return false
 	}
-	if item.Pattern != "" && item.Pattern != base.Pattern {
-		return false
-	}
-	if item.Format != "" && item.Format != base.Format {
-		return false
-	}
-	if item.MinLength != 0 && item.MinLength != base.MinLength {
-		return false
-	}
-	if len(item.Enum) != 0 && !reflect.DeepEqual(item.Enum, base.Enum) {
-		return false
-	}
-	if item.MaxLength != nil && !reflect.DeepEqual(item.MaxLength, base.MaxLength) {
-		return false
-	}
-	if item.Min != nil && !(reflect.DeepEqual(item.Min, base.Min) && item.ExclusiveMin == base.ExclusiveMin) {
-		return false
-	}
-	if item.Max != nil && !(reflect.DeepEqual(item.Max, base.Max) && item.ExclusiveMax == base.ExclusiveMax) {
-		return false
-	}
-	if item.MultipleOf != nil && !reflect.DeepEqual(item.MultipleOf, base.MultipleOf) {
-		return false
-	}
-	// A composed item (allOf/anyOf/oneOf/not) is not a plain scalar; cannot prove
-	// it accepts all base values, so treat it as not-provably-safe.
-	return len(item.AllOf) == 0 && len(item.AnyOf) == 0 && len(item.OneOf) == 0 && item.Not == nil
+	return reflect.DeepEqual(validationSurface(base), validationSurface(item))
+}
+
+// validationSurface returns a copy of s with the type, nullability, and all
+// non-validating annotation/metadata fields zeroed, leaving only the keywords
+// that constrain which values validate. The type is compared separately (scalar
+// vs array, modulo "null"); nullability is treated as not affecting safety, in
+// keeping with the null-stripping the caller already applies.
+func validationSurface(s *openapi3.Schema) *openapi3.Schema {
+	c := *s
+	c.Type = nil
+	c.Nullable = false
+
+	// Non-validating metadata (these never reject a value).
+	c.Origin = nil
+	c.Extensions = nil
+	c.Title = ""
+	c.Description = ""
+	c.Default = nil
+	c.Example = nil
+	c.Examples = nil
+	c.ExternalDocs = nil
+	c.Deprecated = false
+	c.ReadOnly = false
+	c.WriteOnly = false
+	c.XML = nil
+	c.Discriminator = nil
+	c.Comment = ""
+	c.SchemaDialect = ""
+	c.SchemaID = ""
+	c.Anchor = ""
+	c.DynamicRef = ""
+	c.DynamicAnchor = ""
+	c.Defs = nil
+	return &c
 }
 
 // withoutNull returns the type list with the JSON-Schema "null" type removed,

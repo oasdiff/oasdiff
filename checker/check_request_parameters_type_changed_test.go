@@ -295,11 +295,14 @@ func TestRequestQueryParamScalarToFormExplodeArray(t *testing.T) {
 	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
 
+	// Wrap the base scalar in a form/explode array whose item is the scalar
+	// unchanged (same type and constraints), which is the backwards-compatible
+	// widening: a single value on the wire is a valid one-element array.
 	queryParam := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
-	queryParam.Schema.Value.Type = &openapi3.Types{"array"}
-	queryParam.Schema.Value.Format = ""
-	queryParam.Schema.Value.Items = &openapi3.SchemaRef{
-		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Format: "uuid"},
+	item := *queryParam.Schema.Value
+	queryParam.Schema.Value = &openapi3.Schema{
+		Type:  &openapi3.Types{"array"},
+		Items: &openapi3.SchemaRef{Value: &item},
 	}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
