@@ -69,8 +69,7 @@ func TestRequiredRequestPropertyAdded_WithSources(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.NewRequiredRequestPropertyId)
+	requireSingleChange(t, errs, checker.NewRequiredRequestPropertyId)
 
 	// Added property: base source is nil (property doesn't exist in base), revision source points to the property
 	require.Empty(t, errs[0].GetBaseSource())
@@ -177,6 +176,6 @@ func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 	// The wrapping must be reported exactly once per request body (not per
 	// property), as a breaking error, and nothing else.
 	require.Len(t, errs, 1, "a oneOf wrapping must produce exactly one finding (#702)")
-	require.Equal(t, checker.RequestBodyWrappedInOneOfId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyWrappedInOneOfId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }

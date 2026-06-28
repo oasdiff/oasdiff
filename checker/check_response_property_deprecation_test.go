@@ -25,8 +25,7 @@ func TestResponsePropertyDeprecationCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDeprecationCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "response property `legacyField` deprecated")
 }
 
@@ -43,8 +42,8 @@ func TestResponsePropertyDeprecationCheck_AllOf(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDeprecationCheck), d, osm, checker.INFO)
 	// With multiple media types (json and xml), we get one report per media type with distinct details
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[1].GetId())
+	requireChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
+	requireChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
 	// Each message should include media type context
 	msg0 := errs[0].GetUncolorizedText(checker.NewDefaultLocalizer())
 	msg1 := errs[1].GetUncolorizedText(checker.NewDefaultLocalizer())
@@ -93,8 +92,7 @@ func TestResponsePropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 	require.NoError(t, err)
 	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(30, 100))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedSunsetMissingId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedSunsetMissingId)
 	require.Equal(t, "response property `legacyField` deprecated without sunset date", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -127,8 +125,7 @@ func TestResponsePropertyDeprecation_WithEarlySunset(t *testing.T) {
 	require.NoError(t, err)
 	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertySunsetDateTooSmallId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertySunsetDateTooSmallId)
 	require.Equal(t, fmt.Sprintf("response property `legacyField` sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -147,8 +144,7 @@ func TestResponsePropertyDeprecation_WithProperSunset(t *testing.T) {
 	require.NoError(t, err)
 	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "response property `legacyField` deprecated")
 }
@@ -187,8 +183,7 @@ func TestResponsePropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	require.NoError(t, err)
 	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedInvalidId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedInvalidId)
 }
 
 // CL: deprecating a response property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
@@ -221,8 +216,7 @@ func TestResponsePropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDeprecationCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedId)
 	require.Equal(t, "response property `legacyField` deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -242,8 +236,7 @@ func TestResponsePropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 
 	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyDeprecatedWithSunsetId, errs[0].GetId())
+	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
 	require.Equal(t, fmt.Sprintf("response property `legacyField` deprecated with sunset date `%s` (stability: stable)", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 

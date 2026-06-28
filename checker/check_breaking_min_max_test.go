@@ -24,8 +24,7 @@ func TestBreaking_RequestMaxLengthSmaller(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestParameterMaxLengthDecreasedId)
+	requireSingleChange(t, errs, checker.RequestParameterMaxLengthDecreasedId)
 }
 
 // BC: reducing max length in response is not breaking
@@ -121,8 +120,7 @@ func TestBreaking_MaxLengthFromNil(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestParameterMaxLengthSetId)
+	requireSingleChange(t, errs, checker.RequestParameterMaxLengthSetId)
 }
 
 // BC: changing max length in response from nil to any value is not breaking
@@ -171,8 +169,7 @@ func TestBreaking_ResponseMaxLengthToNil(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.ResponseBodyMaxLengthUnsetId)
+	requireSingleChange(t, errs, checker.ResponseBodyMaxLengthUnsetId)
 }
 
 // BC: both max lengths in request are nil is not breaking
@@ -229,8 +226,7 @@ func TestBreaking_ResponseMinItemsSmaller(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.ResponseBodyMinItemsDecreasedId)
+	requireSingleChange(t, errs, checker.ResponseBodyMinItemsDecreasedId)
 }
 
 // BC: increasing min items in request is breaking

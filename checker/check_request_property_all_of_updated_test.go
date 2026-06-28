@@ -77,8 +77,7 @@ func TestRequestPropertyAllOfAdded_WithSources_Inline(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestBodyAllOfAddedId)
+	requireSingleChange(t, errs, checker.RequestBodyAllOfAddedId)
 
 	// Added inline subschema: revision source should point to the specific subschema, not the allOf keyword
 	require.NotEmpty(t, errs[0].GetRevisionSource())
@@ -140,8 +139,7 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_EmitsInfo(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestBodyAllOfAddedAnnotationOnlyId)
+	requireSingleChange(t, errs, checker.RequestBodyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	// And critically: not the original ERR-level breaking-change ID.
 	require.NotEqual(t, checker.RequestBodyAllOfAddedId, errs[0].GetId())
@@ -160,8 +158,7 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_AtProperty_EmitsInfo(t *testin
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAllOfUpdatedCheck), d, osm, checker.INFO)
 
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestPropertyAllOfAddedAnnotationOnlyId)
+	requireSingleChange(t, errs, checker.RequestPropertyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.NotEqual(t, checker.RequestPropertyAllOfAddedId, errs[0].GetId())
 }

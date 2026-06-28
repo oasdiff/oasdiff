@@ -359,8 +359,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	require.NoError(t, err)
 	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.APIDeprecatedSunsetParseId)
+	requireSingleChange(t, errs, checker.APIDeprecatedSunsetParseId)
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "failed to unmarshal sunset json")
 }
 
