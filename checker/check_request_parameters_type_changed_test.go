@@ -245,7 +245,7 @@ func TestBreaking_ReqQueryParamTypeStringToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was specialized from `string` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeSpecializedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was narrowed from `string` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeSpecializedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -261,7 +261,7 @@ func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was generalized from `integer` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was widened from `integer` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 

@@ -92,12 +92,12 @@ request-parameter-min-items-set-comment: Este é um aviso porque às vezes é ne
 request-parameter-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi definido como %s
 request-parameter-min-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-parameter-type-changed: no parâmetro de requisição do tipo %s e nome %s, o %s foi alterado de %s para %s
-request-parameter-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o %s foi generalizado de %s para %s
+request-parameter-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o %s foi expandido de %s para %s
 request-parameter-property-type-changed: no parâmetro de requisição do tipo %s e nome %s, o %s da propriedade %s foi alterado de %s para %s
 request-parameter-property-type-changed-warn-comment: "Este é um aviso porque objetos de parâmetro podem ser passados de diferentes maneiras, algumas das quais permitem essa alteração de tipo e outras não."
 request-parameter-type-form-explode-array-comment: "Este parâmetro usa a serialização form/explode, onde um único valor é um array válido de um elemento, portanto ampliá-lo para um array cujos itens ainda aceitam os valores anteriores não quebra os clientes existentes."
-request-parameter-property-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o %s da propriedade %s foi generalizado de %s para %s
-request-parameter-property-type-specialized: no parâmetro de requisição do tipo %s e nome %s, o %s da propriedade %s foi especializado de %s para %s
+request-parameter-property-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o %s da propriedade %s foi expandido de %s para %s
+request-parameter-property-type-specialized: no parâmetro de requisição do tipo %s e nome %s, o %s da propriedade %s foi restringido de %s para %s
 request-parameter-reactivated: "o parâmetro de requisição do tipo %s e nome %s foi reativado"
 request-parameter-deprecated-sunset-missing: "o parâmetro de requisição do tipo %s e nome %s foi depreciado sem data de expiração"
 request-parameter-sunset-date-too-small: "a data de expiração %s do parâmetro de requisição do tipo %s e nome %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
@@ -163,9 +163,9 @@ request-property-min-set: o valor mínimo da propriedade de requisição %s foi 
 request-property-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
 request-property-removed: a propriedade de requisição %s foi removida
 request-body-type-changed: o %s do corpo da requisição foi alterado de %s para %s
-request-body-type-generalized: o %s do corpo da requisição foi generalizado de %s para %s
+request-body-type-generalized: o %s do corpo da requisição foi expandido de %s para %s
 request-property-type-changed: o %s da propriedade de requisição %s foi alterado de %s para %s
-request-property-type-generalized: o %s da propriedade de requisição %s foi generalizado de %s para %s
+request-property-type-generalized: o %s da propriedade de requisição %s foi expandido de %s para %s
 request-property-x-extensible-enum-value-removed: valor x-extensible-enum %s removido da propriedade de requisição %s
 response-header-became-optional: o cabeçalho de resposta %s tornou-se opcional para o status %s
 required-response-header-removed: o cabeçalho de resposta obrigatório %s foi removido para o status %s
@@ -1012,10 +1012,10 @@ request-body-media-type-schema-added-description: esquema do tipo de mídia adic
 request-body-media-type-schema-removed-description: esquema do tipo de mídia removido do corpo da requisição
 response-body-media-type-schema-added-description: esquema do tipo de mídia da resposta adicionado
 response-body-media-type-schema-removed-description: esquema do tipo de mídia da resposta removido
-response-body-type-generalized: o %s do corpo da resposta foi generalizado de %s para %s para o status %s
-response-body-type-specialized: o %s do corpo da resposta foi especializado de %s para %s para o status %s
-response-property-type-generalized: o %s da propriedade de resposta %s foi generalizado de %s para %s para o status %s
-response-property-type-specialized: o %s da propriedade de resposta %s foi especializado de %s para %s para o status %s
+response-body-type-generalized: o %s do corpo da resposta foi expandido de %s para %s para o status %s
+response-body-type-specialized: o %s do corpo da resposta foi restringido de %s para %s para o status %s
+response-property-type-generalized: o %s da propriedade de resposta %s foi expandido de %s para %s para o status %s
+response-property-type-specialized: o %s da propriedade de resposta %s foi restringido de %s para %s para o status %s
 response-body-type-generalized-description: tipo do corpo da resposta generalizado
 response-body-type-specialized-description: tipo do corpo da resposta especializado
 response-property-type-generalized-description: tipo da propriedade de resposta generalizado

@@ -82,7 +82,7 @@ func TestBreaking_ReqTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, "the request's body `type` was generalized from `integer` to `number`", requireChange(t, errs, checker.RequestBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` was widened from `integer` to `number`", requireChange(t, errs, checker.RequestBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // narrowing a request's body schema union type is breaking (server rejects previously-valid values)
@@ -119,7 +119,7 @@ func TestBreaking_ReqTypeStringDeleted(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, "the request's body `type` was generalized from `string` to `any`", requireChange(t, errs, checker.RequestBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the request's body `type` was widened from `string` to `any`", requireChange(t, errs, checker.RequestBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing request's body schema type from number/none to integer/int32 is breaking

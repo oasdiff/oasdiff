@@ -81,7 +81,7 @@ func TestBreaking_RespTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, "the response's body `type` was generalized from `integer` to `number` for status `200`", requireChange(t, errs, checker.ResponseBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the response's body `type` was widened from `integer` to `number` for status `200`", requireChange(t, errs, checker.ResponseBodyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing response's body schema type from number/none to integer/int32 is not breaking

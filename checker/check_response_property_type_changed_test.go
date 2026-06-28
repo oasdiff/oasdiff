@@ -216,7 +216,7 @@ func TestResponseBodyTypeSpecializedIsInfo(t *testing.T) {
 	require.Len(t, errs, 1)
 	c := requireChange(t, errs, checker.ResponseBodyTypeSpecializedId)
 	require.Equal(t, checker.INFO, c.GetLevel())
-	require.Equal(t, "the response's body `type` was specialized from `number` to `integer` for status `200`",
+	require.Equal(t, "the response's body `type` was narrowed from `number` to `integer` for status `200`",
 		c.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
