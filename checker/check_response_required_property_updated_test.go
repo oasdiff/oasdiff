@@ -19,8 +19,7 @@ func TestResponseRequiredPropertyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredPropertyAddedId,
 		Args:        []any{"data/new", "200"},
@@ -29,7 +28,7 @@ func TestResponseRequiredPropertyAdded(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing an existent property that was required in response body is detected
@@ -43,8 +42,7 @@ func TestResponseRequiredPropertyRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseRequiredPropertyRemovedId,
 		Args:        []any{"data/new", "200"},
 		Level:       checker.ERR,
@@ -52,7 +50,7 @@ func TestResponseRequiredPropertyRemoved(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding a required write-only property to response body is detected
@@ -67,8 +65,7 @@ func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredWriteOnlyPropertyAddedId,
 		Args:        []any{"data/new", "200"},
@@ -77,7 +74,7 @@ func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing a required write-only property that was required in response body is detected
@@ -92,8 +89,7 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseRequiredWriteOnlyPropertyRemovedId,
 		Args:        []any{"data/new", "200"},
 		Level:       checker.INFO,
@@ -101,7 +97,7 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: wrapping a concrete object response body into a oneOf (#702) is a

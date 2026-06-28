@@ -19,8 +19,7 @@ func TestRequestParameterMaxIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxIncreasedId,
 		Args:        []any{"query", "category", 5.0, 10.0},
 		Level:       checker.INFO,
@@ -28,7 +27,7 @@ func TestRequestParameterMaxIncreased(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_updated_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing maximum value of request parameter
@@ -41,8 +40,7 @@ func TestRequestParameterMaxDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxDecreasedId,
 		Args:        []any{"query", "category", 10.0, 5.0},
 		Level:       checker.ERR,
@@ -50,5 +48,5 @@ func TestRequestParameterMaxDecreased(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_updated_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

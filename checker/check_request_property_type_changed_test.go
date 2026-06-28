@@ -23,8 +23,7 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"type", "object", "array"},
@@ -32,7 +31,7 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing request body type
@@ -48,8 +47,7 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"format", "none", "uuid"},
@@ -57,7 +55,7 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing request property type
@@ -71,8 +69,7 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"age", "type/format", "integer/int32", "string/string"},
@@ -80,7 +77,7 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_revision.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: narrowing a request property union type is breaking
@@ -200,8 +197,7 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"age", "format", "int32", "uuid"},
@@ -209,7 +205,7 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: generalizing request property format
@@ -226,8 +222,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeGeneralizedId,
 		Level:       checker.INFO,
 		Args:        []any{"age", "type", "integer", "number"},
@@ -235,7 +230,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: no changes when paths diff is nil

@@ -49,8 +49,7 @@ func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseBodyDefaultValueChangedId,
 		Args:        []any{"text/plain", "Error", "new default value", "404"},
 		Level:       checker.INFO,
@@ -58,7 +57,7 @@ func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding response body default value or response body property default value

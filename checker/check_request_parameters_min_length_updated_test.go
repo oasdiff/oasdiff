@@ -20,8 +20,7 @@ func TestRequestParameterMinLengthIncreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinLengthIncreasedId,
 		Args:        []any{"query", "name", uint64(3), uint64(5)},
 		Level:       checker.ERR,
@@ -29,7 +28,7 @@ func TestRequestParameterMinLengthIncreasedCheck(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_min_length_increased_revision.yaml"),
 		OperationId: "createTest",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing minLength value of request parameter
@@ -43,8 +42,7 @@ func TestRequestParameterMinLengthDecreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinLengthDecreasedId,
 		Args:        []any{"query", "name", uint64(5), uint64(3)},
 		Level:       checker.INFO,
@@ -52,5 +50,5 @@ func TestRequestParameterMinLengthDecreasedCheck(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_min_length_increased_base.yaml"),
 		OperationId: "createTest",
-	}, errs[0])
+	}, errs)
 }

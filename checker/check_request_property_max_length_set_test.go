@@ -19,8 +19,7 @@ func TestRequestBodyMaxLengthSetCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthSetCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthSetId,
 		Args:        []any{uint64(15)},
 		Level:       checker.WARN,
@@ -29,7 +28,7 @@ func TestRequestBodyMaxLengthSetCheck(t *testing.T) {
 		OperationId: "addPet",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_set_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }
 
 // CL: setting maxLength of request propreties
@@ -42,8 +41,7 @@ func TestRequestPropertyMaxLengthSetCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthSetCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthSetId,
 		Args:        []any{"age", uint64(15)},
 		Level:       checker.WARN,
@@ -52,5 +50,5 @@ func TestRequestPropertyMaxLengthSetCheck(t *testing.T) {
 		OperationId: "addPet",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_max_length_set_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }

@@ -19,8 +19,7 @@ func TestRequestParameterMaxLengthSetCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxLengthSetCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterMaxLengthSetId,
 		Args:      []any{"query", "category", uint64(15)},
 		Level:     checker.WARN,
@@ -28,5 +27,5 @@ func TestRequestParameterMaxLengthSetCheck(t *testing.T) {
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_max_length_set_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }

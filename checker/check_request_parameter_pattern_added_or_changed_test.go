@@ -20,8 +20,7 @@ func TestRequestParameterPatternChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.WARN)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternChangedId,
 		Args:      []any{"query", "category", "^\\w+$", "^[\\w\\s]+$"},
 		Comment:   checker.PatternChangedCommentId,
@@ -29,7 +28,7 @@ func TestRequestParameterPatternChanged(t *testing.T) {
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "changed the pattern of the `query` request parameter `category` from `^\\w+$` to `^[\\w\\s]+$`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
@@ -45,15 +44,14 @@ func TestRequestParameterPatternGeneralized(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternGeneralizedId,
 		Args:      []any{"query", "category", "^\\w+$", ".*"},
 		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "changed the pattern of the `query` request parameter `category` from `^\\w+$` to a more general pattern `.*`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -67,8 +65,7 @@ func TestRequestParameterPatternAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternAddedId,
 		Args:      []any{"^\\w+$", "query", "category"},
 		Comment:   checker.PatternAddedCommentId,
@@ -76,7 +73,7 @@ func TestRequestParameterPatternAdded(t *testing.T) {
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
@@ -90,13 +87,12 @@ func TestRequestParameterPatternRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternRemovedId,
 		Args:      []any{"^\\w+$", "query", "category"},
 		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }

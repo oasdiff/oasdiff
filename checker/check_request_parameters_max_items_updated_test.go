@@ -20,8 +20,7 @@ func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsIncreasedId,
 		Args:        []any{"query", "category", uint64(10), uint64(20)},
 		Level:       checker.INFO,
@@ -29,7 +28,7 @@ func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_items_updated_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing maxItems of request parameters
@@ -42,8 +41,7 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Level:       checker.ERR,
@@ -51,7 +49,7 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_items_updated_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: decreasing maxItems of common request parameters without --flatten-params is not breaking
@@ -83,8 +81,7 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Level:       checker.ERR,
@@ -92,7 +89,7 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/common_request_parameter_max_items_updated_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: decreasing maxItems on array parameter schema itself (issue #760)
@@ -105,8 +102,7 @@ func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "ids", uint64(50), uint64(10)},
 		Level:       checker.ERR,
@@ -114,5 +110,5 @@ func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_array_max_items_revision.yaml"),
 		OperationId: "testOperation",
-	}, errs[0])
+	}, errs)
 }

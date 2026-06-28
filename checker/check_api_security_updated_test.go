@@ -97,15 +97,14 @@ func TestAPISecurityAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityAddedCheckId,
 		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
 		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_added_revision.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the endpoint scheme security `petstore_auth: [read:pets, write:pets]` was added to the API", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -119,15 +118,14 @@ func TestAPISecurityDeleted(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityRemovedCheckId,
 		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
 		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_added_base.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the endpoint scheme security `petstore_auth: [read:pets, write:pets]` was removed from the API", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -141,15 +139,14 @@ func TestAPISecurityScopeRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityScopeRemovedId,
 		Args:      []any{"read:pets", "petstore_auth"},
 		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_updated_revision.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the security scope `read:pets` was removed from the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -163,14 +160,13 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityScopeAddedId,
 		Args:      []any{"read:pets", "petstore_auth"},
 		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_updated_base.yaml"),
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the security scope `read:pets` was added to the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

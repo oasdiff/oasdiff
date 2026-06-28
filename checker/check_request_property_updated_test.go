@@ -19,8 +19,7 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyId,
 		Args:        []any{"description"},
 		Level:       checker.ERR,
@@ -28,7 +27,7 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding two new request properties, one required, one optional
@@ -94,8 +93,7 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewOptionalRequestPropertyId,
 		Args:        []any{"description"},
 		Level:       checker.INFO,
@@ -103,7 +101,7 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing a required request property
@@ -116,8 +114,7 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyRemovedId,
 		Args:        []any{"description"},
 		Level:       checker.WARN,
@@ -125,7 +122,7 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding a new required request property with a default value
@@ -138,8 +135,7 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyWithDefaultId,
 		Args:        []any{"description"},
 		Level:       checker.INFO,
@@ -147,7 +143,7 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_with_default.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: wrapping a concrete request body object into a oneOf of object

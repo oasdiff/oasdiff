@@ -20,8 +20,7 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseBodyTypeChangedId,
 		Args:        []any{"type", "string", "object", "200"},
 		Level:       checker.ERR,
@@ -29,7 +28,7 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_schema_type_changed_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing a response property schema type from string to integer
@@ -44,8 +43,7 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"data/name", "type", "string", "integer", "200"},
 		Level:       checker.ERR,
@@ -53,7 +51,7 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_schema_type_changed_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing a response property schema format
@@ -68,8 +66,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"data/name", "format", "hostname", "uuid", "200"},
 		Level:       checker.ERR,
@@ -77,7 +74,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_schema_format_changed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing properties of subschemas under allOf
@@ -134,8 +131,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"data/name", "type", "string", "integer, string", "200"},
 		Level:       checker.ERR,
@@ -143,7 +139,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_schema_type_changed_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: changing an additionalResponse property schema type from integer to string is breaking
@@ -156,8 +152,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"additionalProperties/property1", "type", "integer", "string", "200"},
 		Level:       checker.ERR,
@@ -165,7 +160,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 		Path:        "/value",
 		Source:      load.NewSource("../data/additional-properties/revision.yaml"),
 		OperationId: "get_value",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: changing an embedded additionalResponse property schema type from integer to string is breaking
@@ -178,8 +173,7 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"composite-property/additionalProperties/property1", "type", "integer", "string", "200"},
 		Level:       checker.ERR,
@@ -187,7 +181,7 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 		Path:        "/value",
 		Source:      load.NewSource("../data/additional-properties/embedded-revision.yaml"),
 		OperationId: "get_value",
-	}, errs[0])
+	}, errs)
 }
 
 // setResponseBodyType sets the 200 response body schema type on the /test GET.

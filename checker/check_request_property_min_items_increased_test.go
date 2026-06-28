@@ -20,8 +20,7 @@ func TestRequestBodyMinItemsIncreased(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinItemsIncreasedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinItemsIncreasedId,
 		Level:       checker.ERR,
 		Args:        []any{uint64(20)},
@@ -29,7 +28,7 @@ func TestRequestBodyMinItemsIncreased(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_items_increased_revision.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: descreasing request body min items is not breaking

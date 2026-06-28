@@ -21,8 +21,7 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 
 		Id:          "response-required-property-became-write-only",
 		Args:        []any{"data/name", "200"},
@@ -31,7 +30,7 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing required response property to not write-only
@@ -46,8 +45,7 @@ func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredPropertyBecameNonWriteOnlyId,
 		Args:        []any{"data/writeOnlyName", "200"},
@@ -57,7 +55,7 @@ func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "This is valid only if the property was always returned before the specification changed.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 	require.Equal(t, "the response required property `data/writeOnlyName` became not write-only for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -74,8 +72,7 @@ func TestResponseRequiredPropertyBecameReadOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredPropertyBecameReadOnlyId,
 		Args:        []any{"data/id", "200"},
@@ -84,7 +81,7 @@ func TestResponseRequiredPropertyBecameReadOnly(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing required response property to not read-only
@@ -100,8 +97,7 @@ func TestResponseRequiredPropertyBecameNonReadOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredPropertyBecameNonReadOnlyId,
 		Args:        []any{"data/id", "200"},
@@ -110,5 +106,5 @@ func TestResponseRequiredPropertyBecameNonReadOnly(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

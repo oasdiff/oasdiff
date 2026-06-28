@@ -21,8 +21,7 @@ func TestTagAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APITagUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APITagAddedId,
 		Args:        []any{"newTag"},
 		Level:       checker.INFO,
@@ -30,7 +29,7 @@ func TestTagAdded(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/tag_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "api tag `newTag` added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -47,8 +46,7 @@ func TestTagRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APITagUpdatedCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APITagRemovedId,
 		Args:        []any{"Test"},
 		Level:       checker.INFO,
@@ -56,7 +54,7 @@ func TestTagRemoved(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "api tag `Test` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 }

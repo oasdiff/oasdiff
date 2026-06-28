@@ -21,8 +21,7 @@ func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinLengthDecreasedId,
 		Args:        []any{"name", uint64(3), uint64(2)},
 		Level:       checker.INFO,
@@ -30,7 +29,7 @@ func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: increasing minLength of request property
@@ -45,8 +44,7 @@ func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinLengthIncreasedId,
 		Args:        []any{"name", uint64(3), uint64(5)},
 		Level:       checker.ERR,
@@ -54,7 +52,7 @@ func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: increasing minLength of request body
@@ -69,8 +67,7 @@ func TestRequestBodyMinLengthIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinLengthIncreasedId,
 		Args:        []any{uint64(10), uint64(100)},
 		Level:       checker.ERR,
@@ -78,7 +75,7 @@ func TestRequestBodyMinLengthIncreased(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing minLength of request body
@@ -93,8 +90,7 @@ func TestRequestBodyMinLengthDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinLengthDecreasedId,
 		Args:        []any{uint64(10), uint64(1)},
 		Level:       checker.INFO,
@@ -102,5 +98,5 @@ func TestRequestBodyMinLengthDecreased(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }

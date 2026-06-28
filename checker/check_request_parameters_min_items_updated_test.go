@@ -19,8 +19,7 @@ func TestRequestParameterMinItemsIncreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinItemsUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinItemsIncreasedId,
 		Args:        []any{"query", "category", uint64(2), uint64(3)},
 		Level:       checker.ERR,
@@ -28,7 +27,7 @@ func TestRequestParameterMinItemsIncreased(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_min_items_increased_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing minItems value of request parameter
@@ -41,8 +40,7 @@ func TestRequestParameterMinItemsDecreased(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinItemsUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(3), uint64(2)},
 		Level:       checker.INFO,
@@ -50,5 +48,5 @@ func TestRequestParameterMinItemsDecreased(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_min_items_increased_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

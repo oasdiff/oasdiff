@@ -21,8 +21,7 @@ func TestResponsePropertyPatternChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternChangedId,
 		Args:        []any{"data/created", "^[a-z]+$", "^(?:([a-z]+-)*([a-z]+)?)$", "200"},
 		Level:       checker.INFO,
@@ -30,7 +29,7 @@ func TestResponsePropertyPatternChanged(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the `data/created` response's property pattern was changed from `^[a-z]+$` to `^(?:([a-z]+-)*([a-z]+)?)$` for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -46,8 +45,7 @@ func TestResponsePropertyPatternAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternAddedId,
 		Args:        []any{"data/created", "^[a-z]+$", "200"},
 		Level:       checker.INFO,
@@ -55,7 +53,7 @@ func TestResponsePropertyPatternAdded(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the `data/created` response's property pattern `^[a-z]+$` was added for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -71,8 +69,7 @@ func TestResponsePropertyPatternRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternRemovedId,
 		Args:        []any{"data/created", "^[a-z]+$", "200"},
 		Level:       checker.INFO,
@@ -80,6 +77,6 @@ func TestResponsePropertyPatternRemoved(t *testing.T) {
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the `data/created` response's property pattern `^[a-z]+$` was removed for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

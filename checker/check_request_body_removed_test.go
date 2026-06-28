@@ -19,13 +19,12 @@ func TestRequestBodyRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestBodyRemovedCheck), d, osm)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyRemovedId,
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/test",
 		Source:      load.NewSource("../data/checker/request_body_removed_revision.yaml"),
 		OperationId: "testOp",
-	}, errs[0])
+	}, errs)
 }

@@ -144,6 +144,15 @@ func requireApiChange(t *testing.T, expected checker.ApiChange, actual checker.C
 	require.Equal(t, expected, normalizeApiChange(ac))
 }
 
+// requireSingleApiChange asserts that changes contains exactly one change and
+// that it equals the expected ApiChange (by test identity). It folds the common
+// require.Len(t, errs, 1) + requireApiChange(..., errs[0]) pair into one call.
+func requireSingleApiChange(t *testing.T, expected checker.ApiChange, changes checker.Changes) {
+	t.Helper()
+	require.Len(t, changes, 1)
+	requireApiChange(t, expected, changes[0])
+}
+
 // requireApiChanges is requireApiChange for an unordered set of changes.
 func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checker.Changes) {
 	t.Helper()

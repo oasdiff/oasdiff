@@ -19,8 +19,7 @@ func TestRequestBodyConstChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyConstChangedId,
 		Args:        []any{"text/plain", "FixedValue", "NewFixedValue"},
 		Level:       checker.ERR,
@@ -28,7 +27,7 @@ func TestRequestBodyConstChanged(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_const_changed_revision.yaml"),
 		OperationId: "createProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing request property const value
@@ -43,8 +42,7 @@ func TestRequestPropertyConstChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyConstChangedId,
 		Args:        []any{"status", "active", "inactive"},
 		Level:       checker.ERR,
@@ -52,7 +50,7 @@ func TestRequestPropertyConstChanged(t *testing.T) {
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_const_changed_base.yaml"),
 		OperationId: "createProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding request body const value or request property const value

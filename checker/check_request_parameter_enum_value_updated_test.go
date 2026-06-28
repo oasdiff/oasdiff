@@ -20,8 +20,7 @@ func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterEnumValueRemovedId,
 		Args:        []any{"available", "query", "status"},
 		Level:       checker.ERR,
@@ -29,7 +28,7 @@ func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_enum_value_updated_revision.yaml"),
 		OperationId: "getTest",
-	}, errs[0])
+	}, errs)
 }
 
 // Regression: object-valued enum entries must not produce a false breaking change due to __origin__ metadata.
@@ -55,8 +54,7 @@ func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterEnumValueAddedId,
 		Args:        []any{"available", "query", "status"},
 		Level:       checker.INFO,
@@ -64,7 +62,7 @@ func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_enum_value_updated_base.yaml"),
 		OperationId: "getTest",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing an enum value from a deepObject request parameter property
@@ -78,8 +76,7 @@ func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterPropertyEnumValueRemovedId,
 		Args:        []any{"value-b", "origin", "query", "filter"},
 		Level:       checker.ERR,
@@ -87,7 +84,7 @@ func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_property_enum_value_updated_revision.yaml"),
 		OperationId: "getTest",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding an enum value to a deepObject request parameter property
@@ -102,8 +99,7 @@ func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireApiChange(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterPropertyEnumValueAddedId,
 		Args:        []any{"value-b", "origin", "query", "filter"},
 		Level:       checker.INFO,
@@ -111,7 +107,7 @@ func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_property_enum_value_updated_base.yaml"),
 		OperationId: "getTest",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: verifying the localized message for parameter property enum value removed
