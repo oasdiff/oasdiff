@@ -10,6 +10,20 @@ import (
 	"github.com/oasdiff/oasdiff/load"
 )
 
+// ChangeLocation identifies where in the API a change occurred, as typed
+// fields rather than positional Args. It lets post-checker passes match
+// co-located findings (e.g. a oneOf wrapping and its mechanical artifacts on
+// the same body) without parsing localized message arguments.
+//
+// PROTOTYPE (#702 follow-up / supersedes-post-pass): populated only for changes
+// emitted through the media-type walker; nil otherwise.
+type ChangeLocation struct {
+	Direction      string `json:"direction,omitempty" yaml:"direction,omitempty"`           // "request" | "response"
+	MediaType      string `json:"mediaType,omitempty" yaml:"mediaType,omitempty"`           // e.g. "application/json"
+	ResponseStatus string `json:"responseStatus,omitempty" yaml:"responseStatus,omitempty"` // empty for request bodies
+	PropertyPath   string `json:"propertyPath,omitempty" yaml:"propertyPath,omitempty"`     // empty for body-level changes
+}
+
 // ApiChange represnts a change in the Paths Section of an OpenAPI spec
 type ApiChange struct {
 	CommonChange
@@ -23,6 +37,7 @@ type ApiChange struct {
 	OperationId string
 	Path        string
 	Source      *load.Source
+	Location    *ChangeLocation `json:"location,omitempty" yaml:"location,omitempty"`
 
 	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
@@ -60,6 +75,12 @@ func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
 // WithDetails returns a copy of the ApiChange with Details set
 func (c ApiChange) WithDetails(details string) ApiChange {
 	c.Details = details
+	return c
+}
+
+// WithLocation returns a copy of the ApiChange with Location set (prototype).
+func (c ApiChange) WithLocation(loc ChangeLocation) ApiChange {
+	c.Location = &loc
 	return c
 }
 

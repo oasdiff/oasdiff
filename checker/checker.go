@@ -35,6 +35,10 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		result = append(result, errs...)
 	}
 
+	// PROTOTYPE (#702 follow-up): declarative post-checker suppression of
+	// findings made redundant by a co-located headline finding.
+	result = suppressSuperseded(result)
+
 	filteredResult := make(Changes, 0)
 	for _, change := range result {
 		if config.getLogLevel(change.GetId()) >= level {

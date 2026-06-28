@@ -18,6 +18,7 @@ import (
 type mediaTypeInfo struct {
 	path             string
 	method           string
+	direction        string // "request" | "response" (prototype: feeds ChangeLocation)
 	responseStatus   string
 	operationItem    *diff.MethodDiff
 	mediaType        string
@@ -51,7 +52,12 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.operationItem.Revision,
 		info.method,
 		info.path,
-	).WithDetails(info.mediaTypeDetails)
+	).WithDetails(info.mediaTypeDetails).
+		WithLocation(ChangeLocation{
+			Direction:      info.direction,
+			MediaType:      info.mediaType,
+			ResponseStatus: info.responseStatus,
+		})
 }
 
 // walkProperties walks every modified property under info.schemaDiff and
@@ -106,6 +112,17 @@ type propertyInfo struct {
 	parent       *diff.SchemaDiff
 }
 
+// newChange shadows the promoted mediaTypeInfo.newChange so property-level
+// findings additionally carry their PropertyPath in ChangeLocation (prototype).
+func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
+	return p.mediaTypeInfo.newChange(id, args, comment).WithLocation(ChangeLocation{
+		Direction:      p.direction,
+		MediaType:      p.mediaType,
+		ResponseStatus: p.responseStatus,
+		PropertyPath:   propertyFullName(p.propertyPath, p.propertyName),
+	})
+}
+
 // modifiedSchemaPresentBothSides reports whether a media type's schema changed
 // with a schema present on BOTH sides. A schema added (Base nil) or removed
 // (Revision nil) on an existing media type is not a modification of an existing
@@ -148,6 +165,7 @@ func walkModifiedRequestBodySchemas(
 				processor(mediaTypeInfo{
 					path:              path,
 					method:            method,
+					direction:         "request",
 					operationItem:     operationItem,
 					mediaType:         mediaType,
 					mediaTypeDetails:  formatMediaTypeDetails(mediaType, len(modifiedMediaTypes)),
@@ -194,6 +212,7 @@ func walkModifiedResponseSchemas(
 					processor(mediaTypeInfo{
 						path:              path,
 						method:            method,
+						direction:         "response",
 						responseStatus:    responseStatus,
 						operationItem:     operationItem,
 						mediaType:         mediaType,
