@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /example:
+    get:
+      operationId: getExample
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["foo", "bar"]
+                properties:
+                  foo: { type: string }
+                  bar: { type: string }
+                  baz: { type: string }

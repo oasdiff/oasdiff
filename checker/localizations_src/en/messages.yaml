@@ -309,6 +309,7 @@ response-property-any-of-added: added %s to the %s response property `anyOf` lis
 response-property-any-of-removed: removed %s from the %s response property `anyOf` list for the response status %s
 request-body-one-of-added: added %s to the request body `oneOf` list
 request-body-wrapped-in-one-of: "the request body was restructured into a oneOf, so a payload that was previously valid may no longer be accepted"
+response-body-wrapped-in-one-of: "the response body was restructured into a oneOf, so a field that was previously guaranteed may no longer be present"
 request-body-one-of-removed: removed %s from the request body `oneOf` list
 request-body-removed: removed the request body
 request-body-removed-description: request body removed
@@ -447,6 +448,7 @@ request-body-min-length-increased-description: request body min length increased
 request-body-min-set-description: request body min set
 request-body-one-of-added-description: sub-schema added to oneOf in request body
 request-body-wrapped-in-one-of-description: "request body wrapped in a oneOf"
+response-body-wrapped-in-one-of-description: "response body wrapped in a oneOf"
 request-body-one-of-removed-description: sub-schema deleted from oneOf in request body
 request-body-type-changed-description: request body type changed
 request-body-type-generalized-description: request body type generalized

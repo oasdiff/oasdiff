@@ -29,6 +29,15 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					// covered by response-required-property-removed
 					return
 				}
+
+				// A property that moved into a oneOf wrapping (#702) was not
+				// removed from the contract, so the raw "property removed"
+				// finding is a false positive. Suppress it; the breaking nature
+				// of the wrapping is reported once per body as
+				// response-body-wrapped-in-one-of.
+				if w := parent.OneOfWrappingDiff; w != nil && slices.Contains(w.MovedProperties, propertyName) {
+					return
+				}
 				id := ResponseOptionalPropertyRemovedId
 				if propertyItem.WriteOnly {
 					id = ResponseOptionalWriteOnlyPropertyRemovedId

@@ -293,6 +293,7 @@ response-property-any-of-added: добавлено %s в список `anyOf` с
 response-property-any-of-removed: удалён %s из списка `anyOf` свойства ответа %s для статуса ответа %s
 request-body-one-of-added: добавлено %s в список `oneOf` тела запроса
 request-body-wrapped-in-one-of: "тело запроса было реструктурировано в `oneOf`, поэтому ранее допустимая полезная нагрузка может больше не приниматься"
+response-body-wrapped-in-one-of: "тело ответа было реструктурировано в `oneOf`, поэтому ранее гарантированное поле может больше не присутствовать"
 request-body-one-of-removed: удалён %s из списка `oneOf` тела запроса
 request-property-one-of-added: добавлено %s в список `oneOf` свойства запроса %s
 request-property-one-of-removed: удалён %s из списка `oneOf` свойства запроса %s
@@ -444,6 +445,7 @@ request-body-min-length-increased-description: увеличена минимал
 request-body-min-set-description: установлено минимальное значение тела запроса
 request-body-one-of-added-description: подсхема добавлена к oneOf в теле запроса
 request-body-wrapped-in-one-of-description: "тело запроса обёрнуто в `oneOf`"
+response-body-wrapped-in-one-of-description: "тело ответа обёрнуто в `oneOf`"
 request-body-one-of-removed-description: подсхема удалена из oneOf в теле запроса
 request-body-removed-description: удалено тело запроса
 request-body-type-changed-description: изменен тип тела запроса
