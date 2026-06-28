@@ -66,7 +66,6 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDefaultValueChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyDefaultValueAddedId,
 		Args:        []any{"text/plain", "Default"},
@@ -101,7 +100,6 @@ func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDefaultValueChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyDefaultValueRemovedId,
 		Args:        []any{"text/plain", "Default"},

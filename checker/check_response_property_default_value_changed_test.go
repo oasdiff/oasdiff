@@ -18,7 +18,6 @@ func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponsePropertyDefaultValueChangedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "2020-02-01T00:00:00Z", "200"},
@@ -73,7 +72,6 @@ func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyDefaultValueAddedId,
 		Args:        []any{"text/plain", "Error", "404"},
@@ -106,7 +104,6 @@ func TestResponsePropertyDefaultValueRemovedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyDefaultValueRemovedId,
 		Args:        []any{"text/plain", "Error", "404"},

@@ -88,7 +88,6 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
 
-	require.Len(t, errs, 3)
 	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,

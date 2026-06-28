@@ -66,7 +66,6 @@ func TestRequestBodyConstAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyConstAddedId,
 		Args:        []any{"text/plain", "FixedValue"},
@@ -101,7 +100,6 @@ func TestRequestBodyConstRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyConstRemovedId,
 		Args:        []any{"text/plain", "FixedValue"},

@@ -131,25 +131,26 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 2)
-	requireApiChange(t, checker.ApiChange{
-		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"colors", "type", "array<integer>", "object"},
-		Operation:   "POST",
-		Path:        "/dogs",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
-		OperationId: "addDog",
-	}, errs[0])
-	requireApiChange(t, checker.ApiChange{
-		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"type", "array<object>", "object"},
-		Operation:   "POST",
-		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
-		OperationId: "addPet",
-	}, errs[1])
+	requireApiChanges(t, []checker.ApiChange{
+		{
+			Id:          checker.RequestPropertyTypeChangedId,
+			Level:       checker.ERR,
+			Args:        []any{"colors", "type", "array<integer>", "object"},
+			Operation:   "POST",
+			Path:        "/dogs",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
+			OperationId: "addDog",
+		},
+		{
+			Id:          checker.RequestBodyTypeChangedId,
+			Level:       checker.ERR,
+			Args:        []any{"type", "array<object>", "object"},
+			Operation:   "POST",
+			Path:        "/pets",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
+			OperationId: "addPet",
+		},
+	}, errs)
 }
 
 // CL: changing request body and property types from object to array
@@ -163,25 +164,26 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 2)
-	requireApiChange(t, checker.ApiChange{
-		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"colors", "type", "object", "array<integer>"},
-		Operation:   "POST",
-		Path:        "/dogs",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
-		OperationId: "addDog",
-	}, errs[0])
-	requireApiChange(t, checker.ApiChange{
-		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"type", "object", "array<object>"},
-		Operation:   "POST",
-		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
-		OperationId: "addPet",
-	}, errs[1])
+	requireApiChanges(t, []checker.ApiChange{
+		{
+			Id:          checker.RequestPropertyTypeChangedId,
+			Level:       checker.ERR,
+			Args:        []any{"colors", "type", "object", "array<integer>"},
+			Operation:   "POST",
+			Path:        "/dogs",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
+			OperationId: "addDog",
+		},
+		{
+			Id:          checker.RequestBodyTypeChangedId,
+			Level:       checker.ERR,
+			Args:        []any{"type", "object", "array<object>"},
+			Operation:   "POST",
+			Path:        "/pets",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
+			OperationId: "addPet",
+		},
+	}, errs)
 }
 
 // CL: changing request property format

@@ -18,7 +18,6 @@ func TestResponsePropertyConstChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponsePropertyConstChangedId,
 		Args:        []any{"status", "ok", "success", "200"},
@@ -51,7 +50,6 @@ func TestResponsePropertyConstAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyConstAddedId,
 		Args:        []any{"text/plain", "NotFound", "404"},
@@ -84,7 +82,6 @@ func TestResponsePropertyConstRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyConstChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 2)
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyConstRemovedId,
 		Args:        []any{"text/plain", "NotFound", "404"},
