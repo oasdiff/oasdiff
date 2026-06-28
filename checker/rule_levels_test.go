@@ -1,3 +1,8 @@
+//go:build !windows
+
+// The id->level contract is OS-independent; this golden test runs on the unix
+// builders and is skipped on Windows, where git checks the golden file out with
+// CRLF line endings (the project segregates OS-specific tests by build tag).
 package checker_test
 
 import (
