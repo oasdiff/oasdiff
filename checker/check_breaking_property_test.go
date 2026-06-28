@@ -392,7 +392,6 @@ func TestBreaking_ReqBodyDeleteRequiredProperty2(t *testing.T) {
 	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyRemovedId,
 		Args:      []any{"roleAssignments/items/role"},
-		Level:     checker.WARN,
 		Operation: "POST",
 		Path:      "/api/roleMappings",
 		Source:    load.NewSource("../data/required-properties/request-property-items-2.yaml"),

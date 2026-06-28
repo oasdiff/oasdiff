@@ -24,7 +24,6 @@ func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinLengthDecreasedId,
 		Args:        []any{"name", uint64(3), uint64(2)},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
@@ -47,7 +46,6 @@ func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinLengthIncreasedId,
 		Args:        []any{"name", uint64(3), uint64(5)},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
@@ -70,7 +68,6 @@ func TestRequestBodyMinLengthIncreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinLengthIncreasedId,
 		Args:        []any{uint64(10), uint64(100)},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
@@ -93,7 +90,6 @@ func TestRequestBodyMinLengthDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinLengthDecreasedId,
 		Args:        []any{uint64(10), uint64(1)},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),

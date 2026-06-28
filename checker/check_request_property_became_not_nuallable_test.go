@@ -22,7 +22,6 @@ func TestRequestPropertyBecameNotNullable(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNotNullableId,
 		Args:        []any{"name"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_base.yaml"),
@@ -43,7 +42,6 @@ func TestRequestPropertyBecameNullable(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNullableId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_revision.yaml"),
@@ -67,7 +65,6 @@ func TestRequestBodyBecameNullable(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyBecomeNullableId,
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_base.yaml"),
@@ -88,7 +85,6 @@ func TestRequestPropertyBecameNullable31(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNullableId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_31_revision.yaml"),
@@ -109,7 +105,6 @@ func TestRequestPropertyBecameNotNullable31(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNotNullableId,
 		Args:        []any{"name"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_31_base.yaml"),
@@ -145,7 +140,6 @@ func TestRequestBodyBecameNotNullable(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.ERR)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyBecomeNotNullableId,
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_base.yaml"),
@@ -166,7 +160,6 @@ func TestResponsePropertyBecameNullable31(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyBecameNullableId,
 		Args:        []any{"status", "200"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_nullable_31_revision.yaml"),

@@ -22,7 +22,6 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyId,
 		Args:        []any{"description"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
@@ -44,7 +43,6 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 		{
 			Id:          checker.NewRequiredRequestPropertyId,
 			Args:        []any{"description"},
-			Level:       checker.ERR,
 			Operation:   "POST",
 			Path:        "/products",
 			Source:      load.NewSource("../data/checker/request_property_added_revision2.yaml"),
@@ -53,7 +51,6 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 		{
 			Id:          checker.NewOptionalRequestPropertyId,
 			Args:        []any{"info"},
-			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/products",
 			Source:      load.NewSource("../data/checker/request_property_added_revision2.yaml"),
@@ -96,7 +93,6 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewOptionalRequestPropertyId,
 		Args:        []any{"description"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
@@ -117,7 +113,6 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyRemovedId,
 		Args:        []any{"description"},
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_base.yaml"),
@@ -138,7 +133,6 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyWithDefaultId,
 		Args:        []any{"description"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_with_default.yaml"),

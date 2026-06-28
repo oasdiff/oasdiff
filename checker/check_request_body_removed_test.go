@@ -21,7 +21,6 @@ func TestRequestBodyRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestBodyRemovedCheck), d, osm)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyRemovedId,
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/test",
 		Source:      load.NewSource("../data/checker/request_body_removed_revision.yaml"),

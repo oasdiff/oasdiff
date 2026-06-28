@@ -22,7 +22,6 @@ func TestRequestParameterMinItemsIncreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinItemsIncreasedId,
 		Args:        []any{"query", "category", uint64(2), uint64(3)},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_min_items_increased_revision.yaml"),
@@ -43,7 +42,6 @@ func TestRequestParameterMinItemsDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(3), uint64(2)},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_min_items_increased_base.yaml"),

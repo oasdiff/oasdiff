@@ -24,7 +24,6 @@ func TestRequestParameterPatternChanged(t *testing.T) {
 		Id:        checker.RequestParameterPatternChangedId,
 		Args:      []any{"query", "category", "^\\w+$", "^[\\w\\s]+$"},
 		Comment:   checker.PatternChangedCommentId,
-		Level:     checker.WARN,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
@@ -47,7 +46,6 @@ func TestRequestParameterPatternGeneralized(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternGeneralizedId,
 		Args:      []any{"query", "category", "^\\w+$", ".*"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
@@ -69,7 +67,6 @@ func TestRequestParameterPatternAdded(t *testing.T) {
 		Id:        checker.RequestParameterPatternAddedId,
 		Args:      []any{"^\\w+$", "query", "category"},
 		Comment:   checker.PatternAddedCommentId,
-		Level:     checker.ERR,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_base.yaml"),
@@ -90,7 +87,6 @@ func TestRequestParameterPatternRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternRemovedId,
 		Args:      []any{"^\\w+$", "query", "category"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_parameter_pattern_added_or_changed_revision.yaml"),

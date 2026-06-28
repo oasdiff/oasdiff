@@ -25,7 +25,6 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"path", "groupId", "type", "string", "integer"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -48,7 +47,6 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"query", "token", "type", "string", "integer"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -71,7 +69,6 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"header", "X-Request-ID", "type", "string", "integer"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -94,7 +91,6 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"path", "groupId", "format", "none", "uuid"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -117,7 +113,6 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"query", "token", "format", "uuid", "uri"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -140,7 +135,6 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"header", "X-Request-ID", "format", "uuid", "uri"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -164,7 +158,6 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
 		Args:        []any{"path", "groupId", "type", "integer", "integer, string"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -188,7 +181,6 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
 		Args:        []any{"path", "groupId", "type", "integer, string", "number, string"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
@@ -341,7 +333,6 @@ func TestRequestPathParamFormatRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
 		Args:        []any{"path", "groupId", "format", "uuid", "none"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),

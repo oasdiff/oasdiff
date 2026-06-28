@@ -23,7 +23,6 @@ func TestRequestPropertyMarkedRequired(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameRequiredId,
 		Args:        []any{"name"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),
@@ -45,7 +44,6 @@ func TestRequestPropertyMarkedOptional(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameOptionalId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),
@@ -68,7 +66,6 @@ func TestRequestPropertyWithDefaultMarkedRequired(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameRequiredWithDefaultId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),

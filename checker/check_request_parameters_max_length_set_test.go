@@ -22,7 +22,6 @@ func TestRequestParameterMaxLengthSetCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterMaxLengthSetId,
 		Args:      []any{"query", "category", uint64(15)},
-		Level:     checker.WARN,
 		Comment:   checker.RequestParameterMaxLengthSetId + "-comment",
 		Operation: "POST",
 		Path:      "/test",

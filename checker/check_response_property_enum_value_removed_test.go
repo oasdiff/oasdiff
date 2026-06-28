@@ -24,7 +24,6 @@ func TestResponsePropertyEnumValueRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueRemovedId,
 		Args:        []any{"TYPE2", "data/typeEnum", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
@@ -47,7 +46,6 @@ func TestResponseWriteOnlyPropertyEnumValueRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueRemovedId,
 		Args:        []any{"TYPE2", "data/writeOnlyEnum", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),

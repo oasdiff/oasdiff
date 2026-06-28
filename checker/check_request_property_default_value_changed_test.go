@@ -22,7 +22,6 @@ func TestRequestBodyDefaultValueChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyDefaultValueChangedId,
 		Args:        []any{"text/plain", "Default", "NewDefault"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_revision.yaml"),
@@ -45,7 +44,6 @@ func TestRequestPropertyDefaultValueChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyDefaultValueChangedId,
 		Args:        []any{"price", 10.0, 20.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_default_value_changed_base.yaml"),
@@ -69,7 +67,6 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyDefaultValueAddedId,
 		Args:        []any{"text/plain", "Default"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
@@ -78,7 +75,6 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 	}, {
 		Id:          checker.RequestPropertyDefaultValueAddedId,
 		Args:        []any{"price", 10.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
@@ -103,7 +99,6 @@ func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyDefaultValueRemovedId,
 		Args:        []any{"text/plain", "Default"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),
@@ -112,7 +107,6 @@ func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 	}, {
 		Id:          checker.RequestPropertyDefaultValueRemovedId,
 		Args:        []any{"price", 10.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_body_default_value_changed_base.yaml"),

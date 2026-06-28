@@ -25,7 +25,6 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 		Id:          checker.ResponsePropertyEnumValueAddedId,
 		Args:        []any{"Test", "data/typeEnum", "200"},
 		Comment:     checker.ResponsePropertyEnumValueAddedId + "-comment",
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
@@ -49,7 +48,6 @@ func TestResponseWriteOnlyPropertyEnumValueAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseWriteOnlyPropertyEnumValueAddedId,
 		Args:        []any{"Test", "data/writeOnlyEnum", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),

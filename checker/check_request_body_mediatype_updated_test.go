@@ -22,7 +22,6 @@ func TestRequestBodyMediaTypeAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMediaTypeAddedId,
 		Args:        []any{"application/json"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_body_media_type_updated_revision.yaml"),
@@ -43,7 +42,6 @@ func TestRequestBodyMediaTypeRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMediaTypeRemovedId,
 		Args:        []any{"application/json"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_body_media_type_updated_base.yaml"),

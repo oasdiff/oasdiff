@@ -22,7 +22,6 @@ func TestAddNewMediaType(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseMediaTypeAddedId,
 		Args:        []any{"application/xml", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/add_new_media_type_revision.yaml"),
@@ -43,7 +42,6 @@ func TestDeleteNewMediaType(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseMediaTypeRemovedId,
 		Args:        []any{"application/xml", "200"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/add_new_media_type_base.yaml"),

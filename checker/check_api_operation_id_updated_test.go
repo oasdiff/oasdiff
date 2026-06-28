@@ -24,7 +24,6 @@ func TestOperationIdRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APIOperationIdRemovedId,
 		Args:        []any{"createOneGroup", ""},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/operation_id_removed_base.yaml"),
@@ -47,7 +46,6 @@ func TestOperationIdUpdated(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APIOperationIdRemovedId,
 		Args:        []any{"createOneGroup", "newOperationId"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/operation_id_removed_base.yaml"),
@@ -95,7 +93,6 @@ func TestOperationIdAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APIOperationIdAddId,
 		Args:        []any{"NewOperationId"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/operation_id_added_base.yaml"),

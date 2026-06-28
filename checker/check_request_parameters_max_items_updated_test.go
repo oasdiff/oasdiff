@@ -23,7 +23,6 @@ func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsIncreasedId,
 		Args:        []any{"query", "category", uint64(10), uint64(20)},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_items_updated_revision.yaml"),
@@ -44,7 +43,6 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_items_updated_base.yaml"),
@@ -84,7 +82,6 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/common_request_parameter_max_items_updated_base.yaml"),
@@ -105,7 +102,6 @@ func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "ids", uint64(50), uint64(10)},
-		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_array_max_items_revision.yaml"),

@@ -22,7 +22,6 @@ func TestRequestBodyMinItemsIncreased(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinItemsIncreasedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinItemsIncreasedId,
-		Level:       checker.ERR,
 		Args:        []any{uint64(20)},
 		Operation:   "POST",
 		Path:        "/products",

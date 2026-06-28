@@ -100,7 +100,6 @@ func TestAPISecurityAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityAddedCheckId,
 		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_added_revision.yaml"),
@@ -121,7 +120,6 @@ func TestAPISecurityDeleted(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityRemovedCheckId,
 		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_added_base.yaml"),
@@ -142,7 +140,6 @@ func TestAPISecurityScopeRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityScopeRemovedId,
 		Args:      []any{"read:pets", "petstore_auth"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_updated_revision.yaml"),
@@ -163,7 +160,6 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityScopeAddedId,
 		Args:      []any{"read:pets", "petstore_auth"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_updated_base.yaml"),

@@ -22,7 +22,6 @@ func TestRequestBodyMaxLengthSetCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthSetId,
 		Args:        []any{uint64(15)},
-		Level:       checker.WARN,
 		Comment:     checker.RequestBodyMaxLengthSetId + "-comment",
 		Operation:   "POST",
 		OperationId: "addPet",
@@ -44,7 +43,6 @@ func TestRequestPropertyMaxLengthSetCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthSetId,
 		Args:        []any{"age", uint64(15)},
-		Level:       checker.WARN,
 		Comment:     checker.RequestPropertyMaxLengthSetId + "-comment",
 		Operation:   "POST",
 		OperationId: "addPet",

@@ -25,7 +25,6 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 
 		Id:          "response-required-property-became-write-only",
 		Args:        []any{"data/name", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
@@ -50,7 +49,6 @@ func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 		Id:          checker.ResponseRequiredPropertyBecameNonWriteOnlyId,
 		Args:        []any{"data/writeOnlyName", "200"},
 		Comment:     checker.ResponseRequiredPropertyBecameNonWriteOnlyId + "-comment",
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
@@ -76,7 +74,6 @@ func TestResponseRequiredPropertyBecameReadOnly(t *testing.T) {
 
 		Id:          checker.ResponseRequiredPropertyBecameReadOnlyId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
@@ -101,7 +98,6 @@ func TestResponseRequiredPropertyBecameNonReadOnly(t *testing.T) {
 
 		Id:          checker.ResponseRequiredPropertyBecameNonReadOnlyId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),

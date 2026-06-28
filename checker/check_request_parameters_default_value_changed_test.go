@@ -22,7 +22,6 @@ func TestRequestParameterDefaultValueChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueChangedId,
 		Args:        []any{"query", "category", "default_category", "updated_category"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_revision.yaml"),
@@ -43,7 +42,6 @@ func TestRequestParameterDefaultValueChangedAndRenamedParameter(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueChangedId,
 		Args:        []any{"path", "group_id", "2", "1"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups/{group_id}",
 		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_revision_renamed.yaml"),
@@ -66,7 +64,6 @@ func TestRequestParameterDefaultValueAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueAddedId,
 		Args:        []any{"query", "category", "default_category"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_base.yaml"),
@@ -89,7 +86,6 @@ func TestRequestParameterDefaultValueRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueRemovedId,
 		Args:        []any{"query", "category", "default_category"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_base.yaml"),

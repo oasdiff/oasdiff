@@ -21,7 +21,6 @@ func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponsePropertyDefaultValueChangedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "2020-02-01T00:00:00Z", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_revision.yaml"),
@@ -29,7 +28,6 @@ func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 	}, {
 		Id:          checker.ResponsePropertyDefaultValueChangedId,
 		Args:        []any{"enabled", false, true, "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_revision.yaml"),
@@ -51,7 +49,6 @@ func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseBodyDefaultValueChangedId,
 		Args:        []any{"text/plain", "Error", "new default value", "404"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
@@ -75,7 +72,6 @@ func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyDefaultValueAddedId,
 		Args:        []any{"text/plain", "Error", "404"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
@@ -83,7 +79,6 @@ func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 	}, {
 		Id:          checker.ResponsePropertyDefaultValueAddedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
@@ -107,7 +102,6 @@ func TestResponsePropertyDefaultValueRemovedCheck(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyDefaultValueRemovedId,
 		Args:        []any{"text/plain", "Error", "404"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
@@ -115,7 +109,6 @@ func TestResponsePropertyDefaultValueRemovedCheck(t *testing.T) {
 	}, {
 		Id:          checker.ResponsePropertyDefaultValueRemovedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),

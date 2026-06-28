@@ -24,7 +24,6 @@ func TestBreaking_HeaderParamBecameRequired(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterBecomeRequiredId,
 		Args:      []any{"header", "network-policies"},
-		Level:     checker.ERR,
 		Operation: "GET",
 		Path:      "/api/{domain}/{project}/install-command",
 		Source:    load.NewSource("../data/openapi-test1.yaml"),
@@ -65,7 +64,6 @@ func TestBreaking_HeaderParamBecameOptional(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterBecomeOptionalId,
 		Args:      []any{"header", "network-policies"},
-		Level:     checker.INFO,
 		Operation: "GET",
 		Path:      "/api/{domain}/{project}/install-command",
 		Source:    load.NewSource("../data/openapi-test1.yaml"),

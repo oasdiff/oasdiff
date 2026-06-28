@@ -26,7 +26,6 @@ func TestResponsePropertyAnyOfAdded(t *testing.T) {
 		{
 			Id:          checker.ResponseBodyAnyOfAddedId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_any_of_added_revision.yaml"),
@@ -35,7 +34,6 @@ func TestResponsePropertyAnyOfAdded(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyAnyOfAddedId,
 			Args:        []any{"#/components/schemas/Breed3", "anyOf[#/components/schemas/Dog]/breed", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_any_of_added_revision.yaml"),
@@ -83,7 +81,6 @@ func TestResponsePropertyAnyOfRemoved(t *testing.T) {
 		{
 			Id:          checker.ResponseBodyAnyOfRemovedId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_any_of_removed_revision.yaml"),
@@ -92,7 +89,6 @@ func TestResponsePropertyAnyOfRemoved(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyAnyOfRemovedId,
 			Args:        []any{"#/components/schemas/Breed3", "anyOf[#/components/schemas/Dog]/breed", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_any_of_removed_revision.yaml"),

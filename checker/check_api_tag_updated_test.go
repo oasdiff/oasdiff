@@ -24,7 +24,6 @@ func TestTagAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APITagAddedId,
 		Args:        []any{"newTag"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/tag_added_base.yaml"),
@@ -49,7 +48,6 @@ func TestTagRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APITagRemovedId,
 		Args:        []any{"Test"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
@@ -79,7 +77,6 @@ func TestTagUpdated(t *testing.T) {
 			requireApiChange(t, checker.ApiChange{
 				Id:          checker.APITagRemovedId,
 				Args:        []any{"Test"},
-				Level:       checker.INFO,
 				Operation:   "POST",
 				Path:        "/api/v1.0/groups",
 				Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
@@ -91,7 +88,6 @@ func TestTagUpdated(t *testing.T) {
 			requireApiChange(t, checker.ApiChange{
 				Id:          checker.APITagAddedId,
 				Args:        []any{"newTag"},
-				Level:       checker.INFO,
 				Operation:   "POST",
 				Path:        "/api/v1.0/groups",
 				Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),

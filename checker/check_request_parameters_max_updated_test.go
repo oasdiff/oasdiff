@@ -22,7 +22,6 @@ func TestRequestParameterMaxIncreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxIncreasedId,
 		Args:        []any{"query", "category", 5.0, 10.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_updated_revision.yaml"),
@@ -43,7 +42,6 @@ func TestRequestParameterMaxDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxDecreasedId,
 		Args:        []any{"query", "category", 10.0, 5.0},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_max_updated_base.yaml"),

@@ -24,7 +24,6 @@ func TestRequestPropertyPatternChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternChangedId,
 		Args:      []any{"name", "^\\w+$", "^[\\w\\s]+$"},
-		Level:     checker.WARN,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
@@ -48,7 +47,6 @@ func TestRequestPropertyPatternGeneralized(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternGeneralizedId,
 		Args:      []any{"name", "^\\w+$", ".*"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
@@ -68,7 +66,6 @@ func TestRequestPropertyPatternAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternAddedId,
 		Args:      []any{"^\\w+$", "name"},
-		Level:     checker.ERR,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_base.yaml"),
@@ -90,7 +87,6 @@ func TestRequestPropertyPatternRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternRemovedId,
 		Args:      []any{"^\\w+$", "name"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),

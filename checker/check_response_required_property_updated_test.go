@@ -23,7 +23,6 @@ func TestResponseRequiredPropertyAdded(t *testing.T) {
 
 		Id:          checker.ResponseRequiredPropertyAddedId,
 		Args:        []any{"data/new", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_revision.yaml"),
@@ -45,7 +44,6 @@ func TestResponseRequiredPropertyRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseRequiredPropertyRemovedId,
 		Args:        []any{"data/new", "200"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_base.yaml"),
@@ -69,7 +67,6 @@ func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 
 		Id:          checker.ResponseRequiredWriteOnlyPropertyAddedId,
 		Args:        []any{"data/new", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_revision.yaml"),
@@ -92,7 +89,6 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseRequiredWriteOnlyPropertyRemovedId,
 		Args:        []any{"data/new", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_added_base.yaml"),

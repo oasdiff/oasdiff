@@ -23,7 +23,6 @@ func TestRequestBodyBecameRequired(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestBodyRequiredUpdatedCheck), d, osm)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyBecameRequiredId,
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_body_became_required_base.yaml"),
@@ -45,7 +44,6 @@ func TestRequestBodyBecameOptional(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestBodyRequiredUpdatedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyBecameOptionalId,
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_body_became_optional_base.yaml"),

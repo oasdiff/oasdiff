@@ -22,7 +22,6 @@ func TestResponseOptionalPropertyUpdatedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalPropertyRemovedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_revision.yaml"),
@@ -44,7 +43,6 @@ func TestResponseOptionalPropertyAddedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalPropertyAddedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_base.yaml"),
@@ -66,7 +64,6 @@ func TestResponseOptionalWriteOnlyPropertyRemovedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalWriteOnlyPropertyRemovedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_revision.yaml"),
@@ -89,7 +86,6 @@ func TestResponseOptionalWriteOnlyPropertyAddedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalWriteOnlyPropertyAddedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_base.yaml"),

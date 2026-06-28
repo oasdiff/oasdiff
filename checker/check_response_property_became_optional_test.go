@@ -22,7 +22,6 @@ func TestResponsePropertyBecameOptionalCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyBecameOptionalId,
 		Args:        []any{"data/name", "200"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_became_optional_revision.yaml"),
@@ -84,7 +83,6 @@ func TestResponseWriteOnlyPropertyBecameOptionalCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseWriteOnlyPropertyBecameOptionalId,
 		Args:        []any{"data/name", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_became_optional_revision.yaml"),

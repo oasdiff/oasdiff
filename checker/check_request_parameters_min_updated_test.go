@@ -22,7 +22,6 @@ func TestRequestParameterMinIncreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinIncreasedId,
 		Args:        []any{"path", "groupId", 1.0, 10.0},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_min_increased_revision.yaml"),
@@ -43,7 +42,6 @@ func TestRequestParameterMinDecreased(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinDecreasedId,
 		Args:        []any{"path", "groupId", 10.0, 1.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_min_increased_base.yaml"),

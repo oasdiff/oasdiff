@@ -25,7 +25,6 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"type", "object", "array"},
 		Operation:   "POST",
 		Path:        "/pets",
@@ -49,7 +48,6 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"format", "none", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
@@ -71,7 +69,6 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"age", "type/format", "integer/int32", "string/string"},
 		Operation:   "POST",
 		Path:        "/pets",
@@ -134,7 +131,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.RequestPropertyTypeChangedId,
-			Level:       checker.ERR,
 			Args:        []any{"colors", "type", "array<integer>", "object"},
 			Operation:   "POST",
 			Path:        "/dogs",
@@ -143,7 +139,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestBodyTypeChangedId,
-			Level:       checker.ERR,
 			Args:        []any{"type", "array<object>", "object"},
 			Operation:   "POST",
 			Path:        "/pets",
@@ -167,7 +162,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.RequestPropertyTypeChangedId,
-			Level:       checker.ERR,
 			Args:        []any{"colors", "type", "object", "array<integer>"},
 			Operation:   "POST",
 			Path:        "/dogs",
@@ -176,7 +170,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestBodyTypeChangedId,
-			Level:       checker.ERR,
 			Args:        []any{"type", "object", "array<object>"},
 			Operation:   "POST",
 			Path:        "/pets",
@@ -201,7 +194,6 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"age", "format", "int32", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
@@ -226,7 +218,6 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeGeneralizedId,
-		Level:       checker.INFO,
 		Args:        []any{"age", "type", "integer", "number"},
 		Operation:   "POST",
 		Path:        "/pets",

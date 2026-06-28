@@ -28,7 +28,6 @@ func TestRequestBodyMaxLengthDecreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthIncreasedId,
 		Args:        []any{maxLength, newMaxLength},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
@@ -55,7 +54,6 @@ func TestRequestBodyMaxLengthIncreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthDecreasedId,
 		Args:        []any{newMaxLength},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
@@ -81,7 +79,6 @@ func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthDecreasedId,
 		Args:        []any{"description", newMaxLength},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
@@ -110,7 +107,6 @@ func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyMaxLengthDecreasedId,
 		Args:        []any{"description", newMaxLength},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
@@ -137,7 +133,6 @@ func TestRequestPropertyMaxLengthIncreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthIncreasedId,
 		Args:        []any{"description", maxLength, newMaxLength},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),

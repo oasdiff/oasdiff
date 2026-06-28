@@ -22,7 +22,6 @@ func TestRequestParameterBecameEnum(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterBecameEnumId,
 		Args:        []any{"path", "groupId"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_parameter_became_enum_revision.yaml"),

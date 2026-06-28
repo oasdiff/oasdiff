@@ -27,7 +27,6 @@ func TestRequestOptionalPropertyBecameWriteOnly(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Level:       checker.INFO,
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
@@ -49,7 +48,6 @@ func TestRequestOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameNonWriteOnlyCheckId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
@@ -73,7 +71,6 @@ func TestRequestOptionalPropertyBecameReadOnly(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameReadOnlyCheckId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
@@ -97,7 +94,6 @@ func TestRequestOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameNonReadOnlyCheckId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
@@ -123,7 +119,6 @@ func TestRequestRequiredPropertyBecameWriteOnly(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Level:       checker.INFO,
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
@@ -145,7 +140,6 @@ func TestRequestRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameNonWriteOnlyCheckId,
 		Args:        []any{"id"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
@@ -169,7 +163,6 @@ func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameReadOnlyCheckId,
 		Args:        []any{"id"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
@@ -193,7 +186,6 @@ func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameNonReadOnlyCheckId,
 		Args:        []any{"id"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),

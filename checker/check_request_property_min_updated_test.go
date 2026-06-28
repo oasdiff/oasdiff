@@ -23,7 +23,6 @@ func TestRequestPropertyMinIncreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinIncreasedId,
 		Args:        []any{"age", 15.0},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_min_increased_revision.yaml"),
@@ -47,7 +46,6 @@ func TestRequestReadOnlyPropertyMinIncreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyMinIncreasedId,
 		Args:        []any{"age", 15.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_min_increased_revision.yaml"),
@@ -69,7 +67,6 @@ func TestRequestPropertyMinDecreasedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinDecreasedId,
 		Args:        []any{"age", 15.0, 10.0},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_min_increased_base.yaml"),

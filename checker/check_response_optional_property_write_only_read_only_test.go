@@ -25,7 +25,6 @@ func TestResponseOptionalPropertyBecameWriteOnly(t *testing.T) {
 
 		Id:          checker.ResponseOptionalPropertyBecameWriteOnlyId,
 		Args:        []any{"data/name", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
@@ -49,7 +48,6 @@ func TestResponseOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 
 		Id:          checker.ResponseOptionalPropertyBecameNonWriteOnlyId,
 		Args:        []any{"data/writeOnlyName", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
@@ -73,7 +71,6 @@ func TestResponseOptionalPropertyBecameReadOnly(t *testing.T) {
 
 		Id:          checker.ResponseOptionalPropertyBecameReadOnlyId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
@@ -98,7 +95,6 @@ func TestResponseOptionalPropertyBecameNonReadOnly(t *testing.T) {
 
 		Id:          checker.ResponseOptionalPropertyBecameNonReadOnlyId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),

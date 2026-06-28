@@ -24,7 +24,6 @@ func TestResponsePropertyPatternChanged(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternChangedId,
 		Args:        []any{"data/created", "^[a-z]+$", "^(?:([a-z]+-)*([a-z]+)?)$", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_revision.yaml"),
@@ -48,7 +47,6 @@ func TestResponsePropertyPatternAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternAddedId,
 		Args:        []any{"data/created", "^[a-z]+$", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_base.yaml"),
@@ -72,7 +70,6 @@ func TestResponsePropertyPatternRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternRemovedId,
 		Args:        []any{"data/created", "^[a-z]+$", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_pattern_added_or_changed_base.yaml"),

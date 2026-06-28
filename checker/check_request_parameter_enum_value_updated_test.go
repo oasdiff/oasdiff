@@ -23,7 +23,6 @@ func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterEnumValueRemovedId,
 		Args:        []any{"available", "query", "status"},
-		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_enum_value_updated_revision.yaml"),
@@ -57,7 +56,6 @@ func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterEnumValueAddedId,
 		Args:        []any{"available", "query", "status"},
-		Level:       checker.INFO,
 		Operation:   "GET",
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_enum_value_updated_base.yaml"),
@@ -79,7 +77,6 @@ func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterPropertyEnumValueRemovedId,
 		Args:        []any{"value-b", "origin", "query", "filter"},
-		Level:       checker.ERR,
 		Operation:   "GET",
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_property_enum_value_updated_revision.yaml"),
@@ -102,7 +99,6 @@ func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterPropertyEnumValueAddedId,
 		Args:        []any{"value-b", "origin", "query", "filter"},
-		Level:       checker.INFO,
 		Operation:   "GET",
 		Path:        "/test",
 		Source:      load.NewSource("../data/checker/request_parameter_property_enum_value_updated_base.yaml"),

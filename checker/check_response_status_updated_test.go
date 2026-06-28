@@ -25,7 +25,6 @@ func TestResponseSuccessStatusAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseSuccessStatusAddedId,
 		Args:        []any{"201"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
@@ -49,7 +48,6 @@ func TestResponseNonSuccessStatusAdded(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseNonSuccessStatusAddedId,
 		Args:        []any{"400"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
@@ -73,7 +71,6 @@ func TestResponseNonSuccessStatusRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseNonSuccessStatusRemovedId,
 		Args:        []any{"409"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
@@ -97,7 +94,6 @@ func TestResponseSuccessStatusRemoved(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseSuccessStatusRemovedId,
 		Args:        []any{"200"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
