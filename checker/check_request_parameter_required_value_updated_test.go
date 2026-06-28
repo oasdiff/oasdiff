@@ -22,7 +22,7 @@ func TestBreaking_HeaderParamBecameRequired(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterRequiredValueUpdatedCheck), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterBecomeRequiredId,
 		Args:      []any{"header", "network-policies"},
 		Level:     checker.ERR,
@@ -64,7 +64,7 @@ func TestBreaking_HeaderParamBecameOptional(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterRequiredValueUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterBecomeOptionalId,
 		Args:      []any{"header", "network-policies"},
 		Level:     checker.INFO,

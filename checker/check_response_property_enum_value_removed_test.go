@@ -22,7 +22,7 @@ func TestResponsePropertyEnumValueRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseParameterEnumValueRemovedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueRemovedId,
 		Args:        []any{"TYPE2", "data/typeEnum", "200"},
 		Level:       checker.INFO,
@@ -46,7 +46,7 @@ func TestResponseWriteOnlyPropertyEnumValueRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseParameterEnumValueRemovedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueRemovedId,
 		Args:        []any{"TYPE2", "data/writeOnlyEnum", "200"},
 		Level:       checker.INFO,

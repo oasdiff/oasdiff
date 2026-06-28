@@ -20,7 +20,7 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyId,
 		Args:        []any{"description"},
 		Level:       checker.ERR,
@@ -41,7 +41,7 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.NewRequiredRequestPropertyId,
 			Args:        []any{"description"},
@@ -95,7 +95,7 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.NewOptionalRequestPropertyId,
 		Args:        []any{"description"},
 		Level:       checker.INFO,
@@ -117,7 +117,7 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyRemovedId,
 		Args:        []any{"description"},
 		Level:       checker.WARN,
@@ -139,7 +139,7 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyWithDefaultId,
 		Args:        []any{"description"},
 		Level:       checker.INFO,

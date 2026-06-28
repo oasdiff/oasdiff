@@ -23,7 +23,7 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"path", "groupId", "type", "string", "integer"},
 		Level:       checker.ERR,
@@ -47,7 +47,7 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"query", "token", "type", "string", "integer"},
 		Level:       checker.ERR,
@@ -71,7 +71,7 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"header", "X-Request-ID", "type", "string", "integer"},
 		Level:       checker.ERR,
@@ -95,7 +95,7 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"path", "groupId", "format", "none", "uuid"},
 		Level:       checker.ERR,
@@ -119,7 +119,7 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"query", "token", "format", "uuid", "uri"},
 		Level:       checker.ERR,
@@ -143,7 +143,7 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
 		Args:        []any{"header", "X-Request-ID", "format", "uuid", "uri"},
 		Level:       checker.ERR,
@@ -168,7 +168,7 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
 		Args:        []any{"path", "groupId", "type", "integer", "integer, string"},
 		Level:       checker.INFO,
@@ -193,7 +193,7 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
 		Args:        []any{"path", "groupId", "type", "integer, string", "number, string"},
 		Level:       checker.INFO,
@@ -347,7 +347,7 @@ func TestRequestPathParamFormatRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
 		Args:        []any{"path", "groupId", "format", "uuid", "none"},
 		Level:       checker.INFO,

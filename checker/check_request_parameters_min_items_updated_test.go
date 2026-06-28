@@ -20,7 +20,7 @@ func TestRequestParameterMinItemsIncreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinItemsUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinItemsIncreasedId,
 		Args:        []any{"query", "category", uint64(2), uint64(3)},
 		Level:       checker.ERR,
@@ -42,7 +42,7 @@ func TestRequestParameterMinItemsDecreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinItemsUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(3), uint64(2)},
 		Level:       checker.INFO,

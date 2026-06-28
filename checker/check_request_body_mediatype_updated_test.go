@@ -20,7 +20,7 @@ func TestRequestBodyMediaTypeAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestBodyMediaTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMediaTypeAddedId,
 		Args:        []any{"application/json"},
 		Level:       checker.INFO,
@@ -42,7 +42,7 @@ func TestRequestBodyMediaTypeRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestBodyMediaTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMediaTypeRemovedId,
 		Args:        []any{"application/json"},
 		Level:       checker.ERR,

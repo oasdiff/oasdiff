@@ -22,7 +22,7 @@ func TestResponseOptionalPropertyBecameWriteOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseOptionalPropertyBecameWriteOnlyId,
 		Args:        []any{"data/name", "200"},
@@ -47,7 +47,7 @@ func TestResponseOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseOptionalPropertyBecameNonWriteOnlyId,
 		Args:        []any{"data/writeOnlyName", "200"},
@@ -72,7 +72,7 @@ func TestResponseOptionalPropertyBecameReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseOptionalPropertyBecameReadOnlyId,
 		Args:        []any{"data/id", "200"},
@@ -98,7 +98,7 @@ func TestResponseOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseOptionalPropertyBecameNonReadOnlyId,
 		Args:        []any{"data/id", "200"},

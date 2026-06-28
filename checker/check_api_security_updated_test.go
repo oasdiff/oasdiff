@@ -98,7 +98,7 @@ func TestAPISecurityAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityAddedCheckId,
 		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
 		Level:     checker.INFO,
@@ -120,7 +120,7 @@ func TestAPISecurityDeleted(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityRemovedCheckId,
 		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
 		Level:     checker.INFO,
@@ -142,7 +142,7 @@ func TestAPISecurityScopeRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityScopeRemovedId,
 		Args:      []any{"read:pets", "petstore_auth"},
 		Level:     checker.INFO,
@@ -164,7 +164,7 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityScopeAddedId,
 		Args:      []any{"read:pets", "petstore_auth"},
 		Level:     checker.INFO,

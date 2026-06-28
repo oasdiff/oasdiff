@@ -22,7 +22,7 @@ func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinLengthDecreasedId,
 		Args:        []any{"name", uint64(3), uint64(2)},
 		Level:       checker.INFO,
@@ -46,7 +46,7 @@ func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinLengthIncreasedId,
 		Args:        []any{"name", uint64(3), uint64(5)},
 		Level:       checker.ERR,
@@ -70,7 +70,7 @@ func TestRequestBodyMinLengthIncreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinLengthIncreasedId,
 		Args:        []any{uint64(10), uint64(100)},
 		Level:       checker.ERR,
@@ -94,7 +94,7 @@ func TestRequestBodyMinLengthDecreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinLengthDecreasedId,
 		Args:        []any{uint64(10), uint64(1)},
 		Level:       checker.INFO,

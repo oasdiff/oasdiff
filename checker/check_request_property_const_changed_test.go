@@ -20,7 +20,7 @@ func TestRequestBodyConstChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyConstChangedId,
 		Args:        []any{"text/plain", "FixedValue", "NewFixedValue"},
 		Level:       checker.ERR,
@@ -44,7 +44,7 @@ func TestRequestPropertyConstChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyConstChangedId,
 		Args:        []any{"status", "active", "inactive"},
 		Level:       checker.ERR,
@@ -69,7 +69,7 @@ func TestRequestBodyConstAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyConstAddedId,
 		Args:        []any{"text/plain", "FixedValue"},
 		Level:       checker.ERR,
@@ -104,7 +104,7 @@ func TestRequestBodyConstRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyConstRemovedId,
 		Args:        []any{"text/plain", "FixedValue"},
 		Level:       checker.INFO,

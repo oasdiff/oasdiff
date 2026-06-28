@@ -20,7 +20,7 @@ func TestRequestBodyRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestBodyRemovedCheck), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyRemovedId,
 		Level:       checker.ERR,
 		Operation:   "POST",

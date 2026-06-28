@@ -22,7 +22,7 @@ func TestRequestPropertyPatternChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternChangedId,
 		Args:      []any{"name", "^\\w+$", "^[\\w\\s]+$"},
 		Level:     checker.WARN,
@@ -47,7 +47,7 @@ func TestRequestPropertyPatternGeneralized(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternGeneralizedId,
 		Args:      []any{"name", "^\\w+$", ".*"},
 		Level:     checker.INFO,
@@ -68,7 +68,7 @@ func TestRequestPropertyPatternAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternAddedId,
 		Args:      []any{"^\\w+$", "name"},
 		Level:     checker.ERR,
@@ -91,7 +91,7 @@ func TestRequestPropertyPatternRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternRemovedId,
 		Args:      []any{"^\\w+$", "name"},
 		Level:     checker.INFO,

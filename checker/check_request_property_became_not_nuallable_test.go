@@ -20,7 +20,7 @@ func TestRequestPropertyBecameNotNullable(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNotNullableId,
 		Args:        []any{"name"},
 		Level:       checker.ERR,
@@ -42,7 +42,7 @@ func TestRequestPropertyBecameNullable(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNullableId,
 		Args:        []any{"name"},
 		Level:       checker.INFO,
@@ -68,7 +68,7 @@ func TestRequestBodyBecameNullable(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyBecomeNullableId,
 		Level:       checker.INFO,
 		Operation:   "POST",
@@ -89,7 +89,7 @@ func TestRequestPropertyBecameNullable31(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNullableId,
 		Args:        []any{"name"},
 		Level:       checker.INFO,
@@ -111,7 +111,7 @@ func TestRequestPropertyBecameNotNullable31(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNotNullableId,
 		Args:        []any{"name"},
 		Level:       checker.ERR,
@@ -149,7 +149,7 @@ func TestRequestBodyBecameNotNullable(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyBecomeNotNullableId,
 		Level:       checker.ERR,
 		Operation:   "POST",
@@ -170,7 +170,7 @@ func TestResponsePropertyBecameNullable31(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameNullableCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyBecameNullableId,
 		Args:        []any{"status", "200"},
 		Level:       checker.ERR,

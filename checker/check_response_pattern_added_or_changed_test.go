@@ -22,7 +22,7 @@ func TestResponsePropertyPatternChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternChangedId,
 		Args:        []any{"data/created", "^[a-z]+$", "^(?:([a-z]+-)*([a-z]+)?)$", "200"},
 		Level:       checker.INFO,
@@ -47,7 +47,7 @@ func TestResponsePropertyPatternAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternAddedId,
 		Args:        []any{"data/created", "^[a-z]+$", "200"},
 		Level:       checker.INFO,
@@ -72,7 +72,7 @@ func TestResponsePropertyPatternRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyPatternRemovedId,
 		Args:        []any{"data/created", "^[a-z]+$", "200"},
 		Level:       checker.INFO,

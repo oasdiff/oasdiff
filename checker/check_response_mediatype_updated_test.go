@@ -20,7 +20,7 @@ func TestAddNewMediaType(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseMediaTypeUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseMediaTypeAddedId,
 		Args:        []any{"application/xml", "200"},
 		Level:       checker.INFO,
@@ -42,7 +42,7 @@ func TestDeleteNewMediaType(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseMediaTypeUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseMediaTypeRemovedId,
 		Args:        []any{"application/xml", "200"},
 		Level:       checker.ERR,

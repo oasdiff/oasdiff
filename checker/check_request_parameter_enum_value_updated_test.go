@@ -21,7 +21,7 @@ func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterEnumValueRemovedId,
 		Args:        []any{"available", "query", "status"},
 		Level:       checker.ERR,
@@ -56,7 +56,7 @@ func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterEnumValueAddedId,
 		Args:        []any{"available", "query", "status"},
 		Level:       checker.INFO,
@@ -79,7 +79,7 @@ func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterPropertyEnumValueRemovedId,
 		Args:        []any{"value-b", "origin", "query", "filter"},
 		Level:       checker.ERR,
@@ -103,7 +103,7 @@ func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterEnumValueUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterPropertyEnumValueAddedId,
 		Args:        []any{"value-b", "origin", "query", "filter"},
 		Level:       checker.INFO,

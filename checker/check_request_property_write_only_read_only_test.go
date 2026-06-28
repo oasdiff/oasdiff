@@ -23,7 +23,7 @@ func TestRequestOptionalPropertyBecameWriteOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameWriteOnlyCheckId,
 		Args:        []any{"name"},
 		Operation:   "POST",
@@ -48,7 +48,7 @@ func TestRequestOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameNonWriteOnlyCheckId,
 		Args:        []any{"name"},
 		Level:       checker.INFO,
@@ -73,7 +73,7 @@ func TestRequestOptionalPropertyBecameReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameReadOnlyCheckId,
 		Args:        []any{"name"},
 		Level:       checker.INFO,
@@ -98,7 +98,7 @@ func TestRequestOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameNonReadOnlyCheckId,
 		Args:        []any{"name"},
 		Level:       checker.INFO,
@@ -123,7 +123,7 @@ func TestRequestRequiredPropertyBecameWriteOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameWriteOnlyCheckId,
 		Args:        []any{"id"},
 		Operation:   "POST",
@@ -148,7 +148,7 @@ func TestRequestRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameNonWriteOnlyCheckId,
 		Args:        []any{"id"},
 		Level:       checker.INFO,
@@ -173,7 +173,7 @@ func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameReadOnlyCheckId,
 		Args:        []any{"id"},
 		Level:       checker.INFO,
@@ -198,7 +198,7 @@ func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameNonReadOnlyCheckId,
 		Args:        []any{"id"},
 		Level:       checker.INFO,

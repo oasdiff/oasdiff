@@ -24,7 +24,7 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"type", "object", "array"},
@@ -49,7 +49,7 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"format", "none", "uuid"},
@@ -72,7 +72,7 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"age", "type/format", "integer/int32", "string/string"},
@@ -135,7 +135,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"colors", "type", "array<integer>", "object"},
@@ -144,7 +144,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
 		OperationId: "addDog",
 	}, errs[0])
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"type", "array<object>", "object"},
@@ -167,7 +167,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"colors", "type", "object", "array<integer>"},
@@ -176,7 +176,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
 		OperationId: "addDog",
 	}, errs[0])
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"type", "object", "array<object>"},
@@ -201,7 +201,7 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
 		Level:       checker.ERR,
 		Args:        []any{"age", "format", "int32", "uuid"},
@@ -227,7 +227,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeGeneralizedId,
 		Level:       checker.INFO,
 		Args:        []any{"age", "type", "integer", "number"},

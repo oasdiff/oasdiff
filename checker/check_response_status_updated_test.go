@@ -23,7 +23,7 @@ func TestResponseSuccessStatusAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseSuccessStatusUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseSuccessStatusAddedId,
 		Args:        []any{"201"},
 		Level:       checker.INFO,
@@ -48,7 +48,7 @@ func TestResponseNonSuccessStatusAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseNonSuccessStatusUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseNonSuccessStatusAddedId,
 		Args:        []any{"400"},
 		Level:       checker.INFO,
@@ -73,7 +73,7 @@ func TestResponseNonSuccessStatusRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseNonSuccessStatusUpdatedCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseNonSuccessStatusRemovedId,
 		Args:        []any{"409"},
 		Level:       checker.INFO,
@@ -98,7 +98,7 @@ func TestResponseSuccessStatusRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseSuccessStatusUpdatedCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseSuccessStatusRemovedId,
 		Args:        []any{"200"},
 		Level:       checker.ERR,

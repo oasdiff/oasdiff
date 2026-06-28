@@ -130,3 +130,38 @@ func requireNoChange(t *testing.T, changes checker.Changes, id string) {
 	t.Helper()
 	require.Nil(t, findChange(changes, id), "unexpected change with id %q", id)
 }
+
+// requireApiChange asserts that actual equals the expected ApiChange, comparing
+// only the fields that make up a change's test identity. Fields that are
+// presentation/location/derived metadata are excluded in normalizeApiChange, so
+// adding such a field to ApiChange does not force an edit to every test that
+// builds an expected ApiChange. Prefer this over require.Equal on a raw
+// ApiChange literal.
+func requireApiChange(t *testing.T, expected checker.ApiChange, actual checker.Change) {
+	t.Helper()
+	ac, ok := actual.(checker.ApiChange)
+	require.True(t, ok, "expected a checker.ApiChange, got %T", actual)
+	require.Equal(t, expected, normalizeApiChange(ac))
+}
+
+// requireApiChanges is requireApiChange for an unordered set of changes.
+func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checker.Changes) {
+	t.Helper()
+	got := make([]checker.ApiChange, 0, len(actual))
+	for _, c := range actual {
+		ac, ok := c.(checker.ApiChange)
+		require.True(t, ok, "expected a checker.ApiChange, got %T", c)
+		got = append(got, normalizeApiChange(ac))
+	}
+	require.ElementsMatch(t, expected, got)
+}
+
+// normalizeApiChange zeroes the ApiChange fields that are not part of a change's
+// test identity, so whole-struct equality in tests ignores them. When you add a
+// field to ApiChange that tests should not have to spell out (presentation,
+// location, or other derived metadata), reset it here in one place rather than
+// updating every expected literal.
+func normalizeApiChange(c checker.ApiChange) checker.ApiChange {
+	// e.g. c.Location = nil  // reset alongside a future Location field
+	return c
+}

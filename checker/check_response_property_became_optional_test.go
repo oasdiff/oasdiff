@@ -20,7 +20,7 @@ func TestResponsePropertyBecameOptionalCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameOptionalCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyBecameOptionalId,
 		Args:        []any{"data/name", "200"},
 		Level:       checker.ERR,
@@ -83,7 +83,7 @@ func TestResponseWriteOnlyPropertyBecameOptionalCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameOptionalCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseWriteOnlyPropertyBecameOptionalId,
 		Args:        []any{"data/name", "200"},
 		Level:       checker.INFO,

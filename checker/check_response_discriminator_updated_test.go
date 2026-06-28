@@ -22,7 +22,7 @@ func TestResponseDiscriminatorUpdatedCheckAdded(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyDiscriminatorAddedId,
 			Args:        []any{"200"},
@@ -56,7 +56,7 @@ func TestResponseDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyDiscriminatorRemovedId,
 			Args:        []any{"200"},
@@ -90,7 +90,7 @@ func TestResponseDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyDiscriminatorPropertyNameChangedId,
 			Args:        []any{"petType", "petType2", "200"},
@@ -124,7 +124,7 @@ func TestResponseDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 
 	require.Len(t, errs, 5)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyDiscriminatorMappingAddedId,
 			Args:        []any{[]string{"cats"}, "200"},

@@ -22,7 +22,7 @@ func TestResponsePropertyAllOfAdded(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyAllOfAddedId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
@@ -101,7 +101,7 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyAllOfRemovedId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},

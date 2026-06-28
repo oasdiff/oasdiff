@@ -21,7 +21,7 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseBodyTypeChangedId,
 		Args:        []any{"type", "string", "object", "200"},
 		Level:       checker.ERR,
@@ -45,7 +45,7 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"data/name", "type", "string", "integer", "200"},
 		Level:       checker.ERR,
@@ -69,7 +69,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"data/name", "format", "hostname", "uuid", "200"},
 		Level:       checker.ERR,
@@ -92,7 +92,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
 
 	require.Len(t, errs, 3)
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
 			Args:        []any{"anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", "type", "string", "number", "200"},
@@ -135,7 +135,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"data/name", "type", "string", "integer, string", "200"},
 		Level:       checker.ERR,
@@ -157,7 +157,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"additionalProperties/property1", "type", "integer", "string", "200"},
 		Level:       checker.ERR,
@@ -179,7 +179,7 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyTypeChangedId,
 		Args:        []any{"composite-property/additionalProperties/property1", "type", "integer", "string", "200"},
 		Level:       checker.ERR,

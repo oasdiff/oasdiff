@@ -21,7 +21,7 @@ func TestRequestParameterPatternChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.WARN)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternChangedId,
 		Args:      []any{"query", "category", "^\\w+$", "^[\\w\\s]+$"},
 		Comment:   checker.PatternChangedCommentId,
@@ -46,7 +46,7 @@ func TestRequestParameterPatternGeneralized(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternGeneralizedId,
 		Args:      []any{"query", "category", "^\\w+$", ".*"},
 		Level:     checker.INFO,
@@ -68,7 +68,7 @@ func TestRequestParameterPatternAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternAddedId,
 		Args:      []any{"^\\w+$", "query", "category"},
 		Comment:   checker.PatternAddedCommentId,
@@ -91,7 +91,7 @@ func TestRequestParameterPatternRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterPatternAddedOrChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterPatternRemovedId,
 		Args:      []any{"^\\w+$", "query", "category"},
 		Level:     checker.INFO,

@@ -20,7 +20,7 @@ func TestResponseRequiredPropertyAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredPropertyAddedId,
 		Args:        []any{"data/new", "200"},
@@ -44,7 +44,7 @@ func TestResponseRequiredPropertyRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseRequiredPropertyRemovedId,
 		Args:        []any{"data/new", "200"},
 		Level:       checker.ERR,
@@ -68,7 +68,7 @@ func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 
 		Id:          checker.ResponseRequiredWriteOnlyPropertyAddedId,
 		Args:        []any{"data/new", "200"},
@@ -93,7 +93,7 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseRequiredPropertyUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseRequiredWriteOnlyPropertyRemovedId,
 		Args:        []any{"data/new", "200"},
 		Level:       checker.INFO,

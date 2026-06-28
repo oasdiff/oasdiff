@@ -24,7 +24,7 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 7)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.NewRequiredRequestDefaultParameterToExistingPathId,
 			Args:        []any{"query", "version"},

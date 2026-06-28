@@ -20,7 +20,7 @@ func TestRequestParameterDefaultValueChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueChangedId,
 		Args:        []any{"query", "category", "default_category", "updated_category"},
 		Level:       checker.ERR,
@@ -42,7 +42,7 @@ func TestRequestParameterDefaultValueChangedAndRenamedParameter(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueChangedId,
 		Args:        []any{"path", "group_id", "2", "1"},
 		Level:       checker.ERR,
@@ -66,7 +66,7 @@ func TestRequestParameterDefaultValueAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueAddedId,
 		Args:        []any{"query", "category", "default_category"},
 		Level:       checker.ERR,
@@ -90,7 +90,7 @@ func TestRequestParameterDefaultValueRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueRemovedId,
 		Args:        []any{"query", "category", "default_category"},
 		Level:       checker.ERR,

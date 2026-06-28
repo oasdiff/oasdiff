@@ -21,7 +21,7 @@ func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsIncreasedId,
 		Args:        []any{"query", "category", uint64(10), uint64(20)},
 		Level:       checker.INFO,
@@ -43,7 +43,7 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Level:       checker.ERR,
@@ -84,7 +84,7 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Level:       checker.ERR,
@@ -106,7 +106,7 @@ func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMaxItemsDecreasedId,
 		Args:        []any{"query", "ids", uint64(50), uint64(10)},
 		Level:       checker.ERR,

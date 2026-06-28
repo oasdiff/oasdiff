@@ -20,7 +20,7 @@ func TestRequestParameterMaxLengthIncreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterMaxLengthIncreasedId,
 		Args:      []any{"query", "category", uint64(10), uint64(15)},
 		Level:     checker.INFO,
@@ -41,7 +41,7 @@ func TestRequestParameterMaxLengthDecreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterMaxLengthDecreasedId,
 		Args:      []any{"query", "category", uint64(15), uint64(10)},
 		Level:     checker.ERR,

@@ -20,7 +20,7 @@ func TestRequestBodyMaxLengthSetCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthSetCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthSetId,
 		Args:        []any{uint64(15)},
 		Level:       checker.WARN,
@@ -43,7 +43,7 @@ func TestRequestPropertyMaxLengthSetCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthSetCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthSetId,
 		Args:        []any{"age", uint64(15)},
 		Level:       checker.WARN,

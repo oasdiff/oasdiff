@@ -20,7 +20,7 @@ func TestRequestParameterMaxLengthSetCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxLengthSetCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestParameterMaxLengthSetId,
 		Args:      []any{"query", "category", uint64(15)},
 		Level:     checker.WARN,

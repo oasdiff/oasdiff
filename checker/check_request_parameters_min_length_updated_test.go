@@ -21,7 +21,7 @@ func TestRequestParameterMinLengthIncreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinLengthIncreasedId,
 		Args:        []any{"query", "name", uint64(3), uint64(5)},
 		Level:       checker.ERR,
@@ -44,7 +44,7 @@ func TestRequestParameterMinLengthDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMinLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterMinLengthDecreasedId,
 		Args:        []any{"query", "name", uint64(5), uint64(3)},
 		Level:       checker.INFO,

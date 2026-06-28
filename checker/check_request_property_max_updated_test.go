@@ -24,7 +24,7 @@ func TestRequestPropertyMaxDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxDecreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxDecreasedId,
 		Level:       checker.ERR,
 		Args:        []any{"name", 10.0},
@@ -51,7 +51,7 @@ func TestRequestReadOnlyPropertyMaxDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxDecreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyMaxDecreasedId,
 		Level:       checker.INFO,
 		Args:        []any{"name", 10.0},
@@ -77,7 +77,7 @@ func TestRequestPropertyMaxIncreasingCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxDecreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxIncreasedId,
 		Level:       checker.INFO,
 		Args:        []any{"name", 15.0, 20.0},
@@ -105,7 +105,7 @@ func TestRequestBodyMaxIncreasingCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxDecreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxIncreasedId,
 		Level:       checker.INFO,
 		Args:        []any{20.0, 25.0},
@@ -133,7 +133,7 @@ func TestRequestBodyMaxDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxDecreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxDecreasedId,
 		Level:       checker.ERR,
 		Args:        []any{20.0},

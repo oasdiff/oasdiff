@@ -20,7 +20,7 @@ func TestRequestBodyDefaultValueChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyDefaultValueChangedId,
 		Args:        []any{"text/plain", "Default", "NewDefault"},
 		Level:       checker.INFO,
@@ -44,7 +44,7 @@ func TestRequestPropertyDefaultValueChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyDefaultValueChangedId,
 		Args:        []any{"price", 10.0, 20.0},
 		Level:       checker.INFO,
@@ -69,7 +69,7 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyDefaultValueAddedId,
 		Args:        []any{"text/plain", "Default"},
 		Level:       checker.INFO,
@@ -104,7 +104,7 @@ func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.RequestBodyDefaultValueRemovedId,
 		Args:        []any{"text/plain", "Default"},
 		Level:       checker.INFO,

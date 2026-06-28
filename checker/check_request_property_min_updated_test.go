@@ -21,7 +21,7 @@ func TestRequestPropertyMinIncreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinIncreasedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinIncreasedId,
 		Args:        []any{"age", 15.0},
 		Level:       checker.ERR,
@@ -46,7 +46,7 @@ func TestRequestReadOnlyPropertyMinIncreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinIncreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyMinIncreasedId,
 		Args:        []any{"age", 15.0},
 		Level:       checker.INFO,
@@ -69,7 +69,7 @@ func TestRequestPropertyMinDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinIncreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMinDecreasedId,
 		Args:        []any{"age", 15.0, 10.0},
 		Level:       checker.INFO,

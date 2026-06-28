@@ -20,7 +20,7 @@ func TestRequestParameterBecameEnum(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterBecameEnumCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterBecameEnumId,
 		Args:        []any{"path", "groupId"},
 		Level:       checker.ERR,

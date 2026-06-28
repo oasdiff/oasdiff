@@ -22,7 +22,7 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyEnumValueAddedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueAddedId,
 		Args:        []any{"Test", "data/typeEnum", "200"},
 		Comment:     checker.ResponsePropertyEnumValueAddedId + "-comment",
@@ -48,7 +48,7 @@ func TestResponseWriteOnlyPropertyEnumValueAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyEnumValueAddedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseWriteOnlyPropertyEnumValueAddedId,
 		Args:        []any{"Test", "data/writeOnlyEnum", "200"},
 		Level:       checker.INFO,

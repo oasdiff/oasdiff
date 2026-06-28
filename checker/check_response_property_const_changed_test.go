@@ -19,7 +19,7 @@ func TestResponsePropertyConstChanged(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponsePropertyConstChangedId,
 		Args:        []any{"status", "ok", "success", "200"},
 		Level:       checker.ERR,
@@ -52,7 +52,7 @@ func TestResponsePropertyConstAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyConstAddedId,
 		Args:        []any{"text/plain", "NotFound", "404"},
 		Level:       checker.INFO,
@@ -85,7 +85,7 @@ func TestResponsePropertyConstRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyConstChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyConstRemovedId,
 		Args:        []any{"text/plain", "NotFound", "404"},
 		Level:       checker.ERR,

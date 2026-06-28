@@ -19,7 +19,7 @@ func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponsePropertyDefaultValueChangedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "2020-02-01T00:00:00Z", "200"},
 		Level:       checker.INFO,
@@ -50,7 +50,7 @@ func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseBodyDefaultValueChangedId,
 		Args:        []any{"text/plain", "Error", "new default value", "404"},
 		Level:       checker.INFO,
@@ -75,7 +75,7 @@ func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyDefaultValueAddedId,
 		Args:        []any{"text/plain", "Error", "404"},
 		Level:       checker.INFO,
@@ -108,7 +108,7 @@ func TestResponsePropertyDefaultValueRemovedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDefaultValueChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ApiChange{{
+	requireApiChanges(t, []checker.ApiChange{{
 		Id:          checker.ResponseBodyDefaultValueRemovedId,
 		Args:        []any{"text/plain", "Error", "404"},
 		Level:       checker.INFO,

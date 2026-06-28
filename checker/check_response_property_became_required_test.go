@@ -19,7 +19,7 @@ func TestResponsePropertyBecameRequiredlCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameRequiredCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyBecameRequiredId,
 		Args:        []any{"data/name", "200"},
 		Level:       checker.INFO,
@@ -63,7 +63,7 @@ func TestResponseWriteOnlyPropertyBecameRequiredCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameRequiredCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseWriteOnlyPropertyBecameRequiredId,
 		Args:        []any{"data/name", "200"},
 		Level:       checker.INFO,

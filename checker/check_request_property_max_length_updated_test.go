@@ -26,7 +26,7 @@ func TestRequestBodyMaxLengthDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthIncreasedId,
 		Args:        []any{maxLength, newMaxLength},
 		Level:       checker.INFO,
@@ -54,7 +54,7 @@ func TestRequestBodyMaxLengthIncreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthDecreasedId,
 		Args:        []any{newMaxLength},
 		Level:       checker.ERR,
@@ -81,7 +81,7 @@ func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthDecreasedId,
 		Args:        []any{"description", newMaxLength},
 		Level:       checker.ERR,
@@ -111,7 +111,7 @@ func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyMaxLengthDecreasedId,
 		Args:        []any{"description", newMaxLength},
 		Level:       checker.INFO,
@@ -139,7 +139,7 @@ func TestRequestPropertyMaxLengthIncreasedCheck(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthIncreasedId,
 		Args:        []any{"description", maxLength, newMaxLength},
 		Level:       checker.INFO,

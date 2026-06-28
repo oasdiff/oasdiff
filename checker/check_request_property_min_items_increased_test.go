@@ -21,7 +21,7 @@ func TestRequestBodyMinItemsIncreased(t *testing.T) {
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMinItemsIncreasedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMinItemsIncreasedId,
 		Level:       checker.ERR,
 		Args:        []any{uint64(20)},
