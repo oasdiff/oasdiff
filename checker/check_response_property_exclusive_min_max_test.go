@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: response body/property exclusiveMaximum increased
+// response body/property exclusiveMaximum increased
 func TestResponsePropertyExclusiveMaxIncreased(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_base.yaml")
 	require.NoError(t, err)

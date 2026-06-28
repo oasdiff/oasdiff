@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding 'anyOf' schema to the response body or response body property
+// adding 'anyOf' schema to the response body or response body property
 func TestResponsePropertyAnyOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_any_of_added_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestResponsePropertyAnyOfAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding 'anyOf' subschema ($ref) with source tracking
+// adding 'anyOf' subschema ($ref) with source tracking
 func TestResponsePropertyAnyOfAdded_WithSources(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/response_property_any_of_added_base.yaml", loader)
@@ -64,7 +64,7 @@ func TestResponsePropertyAnyOfAdded_WithSources(t *testing.T) {
 	}
 }
 
-// CL: removing 'anyOf' schema from the response body or response body property
+// removing 'anyOf' schema from the response body or response body property
 func TestResponsePropertyAnyOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_any_of_removed_base.yaml")
 	require.NoError(t, err)

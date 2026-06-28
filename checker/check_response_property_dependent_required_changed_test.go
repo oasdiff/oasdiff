@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding dependentRequired to response body
+// adding dependentRequired to response body
 func TestResponseBodyDependentRequiredAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_base.yaml")
 	require.NoError(t, err)
@@ -21,7 +21,7 @@ func TestResponseBodyDependentRequiredAdded(t *testing.T) {
 	requireChange(t, errs, checker.ResponseBodyDependentRequiredAddedId)
 }
 
-// CL: removing dependentRequired from response body
+// removing dependentRequired from response body
 func TestResponseBodyDependentRequiredRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_revision.yaml")
 	require.NoError(t, err)
@@ -34,7 +34,7 @@ func TestResponseBodyDependentRequiredRemoved(t *testing.T) {
 	requireChange(t, errs, checker.ResponseBodyDependentRequiredRemovedId)
 }
 
-// CL: changing dependentRequired on response body
+// changing dependentRequired on response body
 func TestResponseBodyDependentRequiredChanged(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_revision.yaml")
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestResponseBodyDependentRequiredChanged(t *testing.T) {
 	requireChange(t, errs, checker.ResponseBodyDependentRequiredChangedId)
 }
 
-// CL: changing dependentRequired on response property
+// changing dependentRequired on response property
 func TestResponsePropertyDependentRequiredChanged(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_changed_base.yaml")
 	require.NoError(t, err)
@@ -60,7 +60,7 @@ func TestResponsePropertyDependentRequiredChanged(t *testing.T) {
 	requireChange(t, errs, checker.ResponsePropertyDependentRequiredChangedId)
 }
 
-// CL: adding dependentRequired to response property
+// adding dependentRequired to response property
 func TestResponsePropertyDependentRequiredAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_base.yaml")
 	require.NoError(t, err)
@@ -73,7 +73,7 @@ func TestResponsePropertyDependentRequiredAdded(t *testing.T) {
 	requireChange(t, errs, checker.ResponsePropertyDependentRequiredAddedId)
 }
 
-// CL: removing dependentRequired from response property
+// removing dependentRequired from response property
 func TestResponsePropertyDependentRequiredRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_revision.yaml")
 	require.NoError(t, err)

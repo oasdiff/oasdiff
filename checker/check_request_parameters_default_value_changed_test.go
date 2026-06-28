@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request parameter default value
+// changing request parameter default value
 func TestRequestParameterDefaultValueChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestParameterDefaultValueChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request parameter default value, while the param is also renamed
+// changing request parameter default value, while the param is also renamed
 func TestRequestParameterDefaultValueChangedAndRenamedParameter(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_default_value_changed_base_renamed.yaml")
 	require.NoError(t, err)
@@ -49,7 +49,7 @@ func TestRequestParameterDefaultValueChangedAndRenamedParameter(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding request parameter default value
+// adding request parameter default value
 func TestRequestParameterDefaultValueAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestRequestParameterDefaultValueAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing request parameter default value
+// removing request parameter default value
 func TestRequestParameterDefaultValueRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_default_value_changed_base.yaml")
 	require.NoError(t, err)

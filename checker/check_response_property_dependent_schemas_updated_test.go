@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding dependent schema to response body
+// adding dependent schema to response body
 func TestResponseBodyDependentSchemaAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestResponseBodyDependentSchemaAdded(t *testing.T) {
 	require.True(t, found, "expected response-body-dependent-schema-added")
 }
 
-// CL: removing dependent schema from response body
+// removing dependent schema from response body
 func TestResponseBodyDependentSchemaRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_revision.yaml")
 	require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestResponseBodyDependentSchemaRemoved(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyDependentSchemaRemovedId), "expected response-body-dependent-schema-removed")
 }
 
-// CL: adding dependent schema to response property
+// adding dependent schema to response property
 func TestResponsePropertyDependentSchemaAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_prop_base.yaml")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestResponsePropertyDependentSchemaAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponsePropertyDependentSchemaAddedId), "expected response-property-dependent-schema-added")
 }
 
-// CL: removing dependent schema from response property
+// removing dependent schema from response property
 func TestResponsePropertyDependentSchemaRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_prop_revision.yaml")
 	require.NoError(t, err)

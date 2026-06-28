@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: increasing minimum value of request property
+// increasing minimum value of request property
 func TestRequestPropertyMinIncreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_increased_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestPropertyMinIncreasedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: increasing minimum value of request read-only property
+// increasing minimum value of request read-only property
 func TestRequestReadOnlyPropertyMinIncreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_increased_base.yaml")
 	require.NoError(t, err)
@@ -53,7 +53,7 @@ func TestRequestReadOnlyPropertyMinIncreasedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing minimum value of request property
+// decreasing minimum value of request property
 func TestRequestPropertyMinDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_increased_revision.yaml")
 	require.NoError(t, err)

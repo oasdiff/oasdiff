@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: removing an existing operation id
+// removing an existing operation id
 func TestOperationIdRemoved(t *testing.T) {
 	s1, err := open("../data/checker/operation_id_removed_base.yaml")
 	require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestOperationIdRemoved(t *testing.T) {
 	}, errs)
 }
 
-// CL: updating an existing operation id
+// updating an existing operation id
 func TestOperationIdUpdated(t *testing.T) {
 	s1, err := open("../data/checker/operation_id_removed_base.yaml")
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestOperationIdUpdated(t *testing.T) {
 	require.Equal(t, "api operation id `createOneGroup` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing an existing operation id with source tracking
+// removing an existing operation id with source tracking
 func TestOperationIdRemoved_WithSources(t *testing.T) {
 	s1, err := open("../data/checker/operation_id_removed_base.yaml", newLoaderWithOriginTracking())
 	require.NoError(t, err)
@@ -77,7 +77,7 @@ func TestOperationIdRemoved_WithSources(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// CL: adding a new operation id
+// adding a new operation id
 func TestOperationIdAdded(t *testing.T) {
 	s1, err := open("../data/checker/operation_id_added_base.yaml")
 	require.NoError(t, err)

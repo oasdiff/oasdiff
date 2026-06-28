@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: reducing max length in request is breaking
+// reducing max length in request is breaking
 func TestBreaking_RequestMaxLengthSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -27,7 +27,7 @@ func TestBreaking_RequestMaxLengthSmaller(t *testing.T) {
 	requireSingleChange(t, errs, checker.RequestParameterMaxLengthDecreasedId)
 }
 
-// BC: reducing max length in response is not breaking
+// reducing max length in response is not breaking
 func TestBreaking_ResponseMaxLengthSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -44,7 +44,7 @@ func TestBreaking_ResponseMaxLengthSmaller(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: reducing min length in request is not breaking
+// reducing min length in request is not breaking
 func TestBreaking_RequestMinLengthSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -58,7 +58,7 @@ func TestBreaking_RequestMinLengthSmaller(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: reducing min length in response is breaking
+// reducing min length in response is breaking
 func TestBreaking_MinLengthSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -72,7 +72,7 @@ func TestBreaking_MinLengthSmaller(t *testing.T) {
 	requireChange(t, errs, checker.ResponseBodyMinLengthDecreasedId)
 }
 
-// BC: increasing max length in request is not breaking
+// increasing max length in request is not breaking
 func TestBreaking_RequestMaxLengthGreater(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -89,7 +89,7 @@ func TestBreaking_RequestMaxLengthGreater(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: increasing max length in response is breaking
+// increasing max length in response is breaking
 func TestBreaking_ResponseMaxLengthGreater(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -106,7 +106,7 @@ func TestBreaking_ResponseMaxLengthGreater(t *testing.T) {
 	require.NotEmpty(t, errs)
 }
 
-// BC: changing max length in request from nil to any value is breaking
+// changing max length in request from nil to any value is breaking
 func TestBreaking_MaxLengthFromNil(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -123,7 +123,7 @@ func TestBreaking_MaxLengthFromNil(t *testing.T) {
 	requireSingleChange(t, errs, checker.RequestParameterMaxLengthSetId)
 }
 
-// BC: changing max length in response from nil to any value is not breaking
+// changing max length in response from nil to any value is not breaking
 func TestBreaking_ResponseMaxLengthFromNil(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -139,7 +139,7 @@ func TestBreaking_ResponseMaxLengthFromNil(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing max length in request from any value to nil is not breaking
+// changing max length in request from any value to nil is not breaking
 func TestBreaking_RequestMaxLengthToNil(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -155,7 +155,7 @@ func TestBreaking_RequestMaxLengthToNil(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing max length in response from any value to nil is breaking
+// changing max length in response from any value to nil is breaking
 func TestBreaking_ResponseMaxLengthToNil(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -172,7 +172,7 @@ func TestBreaking_ResponseMaxLengthToNil(t *testing.T) {
 	requireSingleChange(t, errs, checker.ResponseBodyMaxLengthUnsetId)
 }
 
-// BC: both max lengths in request are nil is not breaking
+// both max lengths in request are nil is not breaking
 func TestBreaking_MaxLengthBothNil(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -186,7 +186,7 @@ func TestBreaking_MaxLengthBothNil(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: both max lengths in response are nil is not breaking
+// both max lengths in response are nil is not breaking
 func TestBreaking_ResponseMaxLengthBothNil(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -200,7 +200,7 @@ func TestBreaking_ResponseMaxLengthBothNil(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: reducing min items in request is not breaking
+// reducing min items in request is not breaking
 func TestBreaking_RequestMinItemsSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -214,7 +214,7 @@ func TestBreaking_RequestMinItemsSmaller(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: reducing min items in response is breaking
+// reducing min items in response is breaking
 func TestBreaking_ResponseMinItemsSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -229,7 +229,7 @@ func TestBreaking_ResponseMinItemsSmaller(t *testing.T) {
 	requireSingleChange(t, errs, checker.ResponseBodyMinItemsDecreasedId)
 }
 
-// BC: increasing min items in request is breaking
+// increasing min items in request is breaking
 func TestBreaking_RequeatMinItemsGreater(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -243,7 +243,7 @@ func TestBreaking_RequeatMinItemsGreater(t *testing.T) {
 	require.NotEmpty(t, errs)
 }
 
-// BC: increasing min items in response is not breaking
+// increasing min items in response is not breaking
 func TestBreaking_ResponseMinItemsGreater(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -257,7 +257,7 @@ func TestBreaking_ResponseMinItemsGreater(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: reducing max in request is breaking
+// reducing max in request is breaking
 func TestBreaking_MaxSmaller(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -274,7 +274,7 @@ func TestBreaking_MaxSmaller(t *testing.T) {
 	require.NotEmpty(t, errs)
 }
 
-// BC: reducing max in response is not breaking
+// reducing max in response is not breaking
 func TestBreaking_MaxSmallerInResponse(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)

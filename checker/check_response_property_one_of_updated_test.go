@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: adding 'oneOf' schema to the response body or response body property is breaking
+// adding 'oneOf' schema to the response body or response body property is breaking
 func TestResponsePropertyOneOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_one_of_added_base.yaml")
 	require.NoError(t, err)
@@ -49,7 +49,7 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding 'oneOf' subschema ($ref) with source tracking
+// adding 'oneOf' subschema ($ref) with source tracking
 func TestResponsePropertyOneOfAdded_WithSources(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/response_property_one_of_added_base.yaml", loader)
@@ -72,7 +72,7 @@ func TestResponsePropertyOneOfAdded_WithSources(t *testing.T) {
 	}
 }
 
-// CL: removing 'oneOf' schema from the response body or response body property
+// removing 'oneOf' schema from the response body or response body property
 func TestResponsePropertyOneOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_one_of_removed_base.yaml")
 	require.NoError(t, err)

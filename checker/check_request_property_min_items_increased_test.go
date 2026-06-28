@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: inclreasing request body min items is breaking
+// inclreasing request body min items is breaking
 func TestRequestBodyMinItemsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_items_increased_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyMinItemsIncreased(t *testing.T) {
 	}, errs)
 }
 
-// BC: descreasing request body min items is not breaking
+// descreasing request body min items is not breaking
 func TestRequestBodyMinItemsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_items_increased_revision.yaml")
 	require.NoError(t, err)

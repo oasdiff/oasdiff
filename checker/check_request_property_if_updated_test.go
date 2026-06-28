@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding if/then/else to request body
+// adding if/then/else to request body
 func TestRequestBodyIfAdded(t *testing.T) {
 	s1, err := open("../data/checker/if_added_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestBodyIfAdded(t *testing.T) {
 	require.True(t, ids[checker.RequestBodyElseAddedId], "expected request-body-else-added")
 }
 
-// CL: removing if/then/else from request body
+// removing if/then/else from request body
 func TestRequestBodyIfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/if_added_revision.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestRequestBodyIfRemoved(t *testing.T) {
 	require.True(t, ids[checker.RequestBodyElseRemovedId], "expected request-body-else-removed")
 }
 
-// CL: adding if/then/else to request property
+// adding if/then/else to request property
 func TestRequestPropertyIfAdded(t *testing.T) {
 	s1, err := open("../data/checker/if_added_prop_base.yaml")
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestRequestPropertyIfAdded(t *testing.T) {
 	require.True(t, ids[checker.RequestPropertyElseAddedId], "expected request-property-else-added")
 }
 
-// CL: removing if/then/else from request property
+// removing if/then/else from request property
 func TestRequestPropertyIfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/if_added_prop_revision.yaml")
 	require.NoError(t, err)

@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: detecting deprecated response properties with sunset date
+// detecting deprecated response properties with sunset date
 func TestResponsePropertyDeprecationCheck(t *testing.T) {
 	s1, err := open(deprecationFile("response_property_deprecation_base.yaml"))
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestResponsePropertyDeprecationCheck(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "response property `legacyField` deprecated")
 }
 
-// CL: detecting deprecated response properties in allOf schemas with multiple media types
+// detecting deprecated response properties in allOf schemas with multiple media types
 func TestResponsePropertyDeprecationCheck_AllOf(t *testing.T) {
 	s1, err := open(deprecationFile("response_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
@@ -53,7 +53,7 @@ func TestResponsePropertyDeprecationCheck_AllOf(t *testing.T) {
 	require.NotEqual(t, msg0, msg1)
 }
 
-// CL: each media type gets its own report with distinct details (issue #594)
+// each media type gets its own report with distinct details (issue #594)
 func TestResponsePropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
 	s1, err := open(deprecationFile("response_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestResponsePropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
 	require.True(t, mediaTypes["application/xml"], "should have application/xml media type")
 }
 
-// BC: deprecating a response property with a deprecation policy but without specifying sunset date is breaking
+// deprecating a response property with a deprecation policy but without specifying sunset date is breaking
 func TestResponsePropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestResponsePropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 	require.Equal(t, "response property `legacyField` deprecated without sunset date", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating a response property without a deprecation policy and without specifying sunset date is not breaking for alpha level
+// deprecating a response property without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestResponsePropertyDeprecation_ForAlpha(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_alpha.yaml"))
 	require.NoError(t, err)
@@ -110,7 +110,7 @@ func TestResponsePropertyDeprecation_ForAlpha(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating a response property with a deprecation policy and sunset date before required deprecation period is breaking
+// deprecating a response property with a deprecation policy and sunset date before required deprecation period is breaking
 func TestResponsePropertyDeprecation_WithEarlySunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestResponsePropertyDeprecation_WithEarlySunset(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("response property `legacyField` sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating a response property with a deprecation policy and sunset date after required deprecation period is not breaking
+// deprecating a response property with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestResponsePropertyDeprecation_WithProperSunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -149,7 +149,7 @@ func TestResponsePropertyDeprecation_WithProperSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "response property `legacyField` deprecated")
 }
 
-// CL: response properties that were re-activated
+// response properties that were re-activated
 func TestResponsePropertyDeprecation_DetectsReactivated(t *testing.T) {
 	s1, err := open(deprecationFile("property_deprecated.yaml"))
 	require.NoError(t, err)
@@ -171,7 +171,7 @@ func TestResponsePropertyDeprecation_DetectsReactivated(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "response property `legacyField` reactivated")
 }
 
-// BC: deprecating a response property with an invalid sunset date format is breaking
+// deprecating a response property with an invalid sunset date format is breaking
 func TestResponsePropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -186,7 +186,7 @@ func TestResponsePropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedInvalidId)
 }
 
-// CL: deprecating a response property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
+// deprecating a response property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
 func TestResponsePropertyDeprecation_WithInvalidStability(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -204,7 +204,7 @@ func TestResponsePropertyDeprecation_WithInvalidStability(t *testing.T) {
 	require.Empty(t, changes)
 }
 
-// CL: message has no details when response property deprecated without sunset or stability
+// message has no details when response property deprecated without sunset or stability
 func TestResponsePropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(deprecationFile("property_base.yaml"))
 	require.NoError(t, err)
@@ -220,7 +220,7 @@ func TestResponsePropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, "response property `legacyField` deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: message includes sunset date when response property deprecated with valid sunset
+// message includes sunset date when response property deprecated with valid sunset
 func TestResponsePropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -240,7 +240,7 @@ func TestResponsePropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("response property `legacyField` deprecated with sunset date `%s` (stability: stable)", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: source location points to the deprecated field, not the operation or response level
+// source location points to the deprecated field, not the operation or response level
 func TestResponsePropertyDeprecationCheck_SourceLocation(t *testing.T) {
 	loader := openapi3.NewLoader()
 	loader.IncludeOrigin = true

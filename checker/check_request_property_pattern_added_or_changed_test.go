@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request property pattern
+// changing request property pattern
 func TestRequestPropertyPatternChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_property_pattern_added_or_changed_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestRequestPropertyPatternChanged(t *testing.T) {
 	require.Equal(t, "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
-// CL: generalizing request property pattern
+// generalizing request property pattern
 func TestRequestPropertyPatternGeneralized(t *testing.T) {
 	s1, err := open("../data/checker/request_property_pattern_added_or_changed_base.yaml")
 	require.NoError(t, err)
@@ -53,7 +53,7 @@ func TestRequestPropertyPatternGeneralized(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding request property pattern
+// adding request property pattern
 func TestRequestPropertyPatternAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_pattern_added_or_changed_revision.yaml")
 	require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestRequestPropertyPatternAdded(t *testing.T) {
 	require.Equal(t, "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing request property pattern
+// removing request property pattern
 func TestRequestPropertyPatternRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_pattern_added_or_changed_base.yaml")
 	require.NoError(t, err)

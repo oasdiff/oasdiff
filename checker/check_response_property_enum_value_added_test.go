@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding an enum value to a response property
+// adding an enum value to a response property
 func TestResponsePropertyEnumValueAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_enum_added_base.yaml")
 	require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 	require.Equal(t, "Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
-// CL: adding an enum value to a response write-only property
+// adding an enum value to a response write-only property
 func TestResponseWriteOnlyPropertyEnumValueAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_enum_added_base.yaml")
 	require.NoError(t, err)

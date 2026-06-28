@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: removing request property enum values
+// removing request property enum values
 func TestRequestPropertyEnumValueRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_enum_value_updated_base.yaml")
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestRequestPropertyEnumValueRemovedCheck(t *testing.T) {
 	require.Equal(t, "removed the enum value `bird` of the request property `category`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing request read-only property enum values
+// removing request read-only property enum values
 func TestRequestReadOnlyPropertyEnumValueRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_enum_value_updated_base.yaml")
 	require.NoError(t, err)
@@ -62,7 +62,7 @@ func TestRequestReadOnlyPropertyEnumValueRemovedCheck(t *testing.T) {
 	require.Equal(t, "removed the enum value `bird` of the request read-only property `category`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: adding request property enum values
+// adding request property enum values
 func TestRequestPropertyEnumValueAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_enum_value_updated_base.yaml")
 	require.NoError(t, err)

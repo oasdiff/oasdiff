@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding dependent schema to request body
+// adding dependent schema to request body
 func TestRequestBodyDependentSchemaAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyDependentSchemaAdded(t *testing.T) {
 	require.True(t, found, "expected request-body-dependent-schema-added")
 }
 
-// CL: removing dependent schema from request body
+// removing dependent schema from request body
 func TestRequestBodyDependentSchemaRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_revision.yaml")
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ func TestRequestBodyDependentSchemaRemoved(t *testing.T) {
 	require.True(t, found, "expected request-body-dependent-schema-removed")
 }
 
-// CL: adding dependent schema to request property
+// adding dependent schema to request property
 func TestRequestPropertyDependentSchemaAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_prop_base.yaml")
 	require.NoError(t, err)
@@ -66,7 +66,7 @@ func TestRequestPropertyDependentSchemaAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyDependentSchemaAddedId), "expected request-property-dependent-schema-added")
 }
 
-// CL: removing dependent schema from request property
+// removing dependent schema from request property
 func TestRequestPropertyDependentSchemaRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_schemas_prop_revision.yaml")
 	require.NoError(t, err)

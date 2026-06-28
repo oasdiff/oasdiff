@@ -24,7 +24,7 @@ func verifyNonBreakingChangeIsChangelogEntry(t *testing.T, d *diff.Diff, osm *di
 	require.Equal(t, changeId, errs[0].GetId())
 }
 
-// BC: no change is not breaking
+// no change is not breaking
 func TestBreaking_Same(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -35,7 +35,7 @@ func TestBreaking_Same(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: adding an optional request body is not breaking
+// adding an optional request body is not breaking
 func TestBreaking_AddingOptionalRequestBody(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -50,7 +50,7 @@ func TestBreaking_AddingOptionalRequestBody(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// CL: changing an existing request body from required to optional
+// changing an existing request body from required to optional
 func TestBreaking_RequestBodyRequiredDisabled(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -68,7 +68,7 @@ func TestBreaking_RequestBodyRequiredDisabled(t *testing.T) {
 	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.RequestBodyBecameOptionalId)
 }
 
-// BC: deleting a tag is not breaking
+// deleting a tag is not breaking
 func TestBreaking_DeletedTag(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 5)
 	require.Len(t, r, 5)
@@ -79,7 +79,7 @@ func TestBreaking_DeletedTag(t *testing.T) {
 	require.Equal(t, checker.RequestParameterRemovedId, r[4].GetId())
 }
 
-// BC: adding an enum value is not breaking
+// adding an enum value is not breaking
 func TestBreaking_AddedEnum(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 3)
 	require.Len(t, r, 6)
@@ -91,7 +91,7 @@ func TestBreaking_AddedEnum(t *testing.T) {
 	require.Equal(t, checker.RequestParameterRemovedId, r[5].GetId())
 }
 
-// BC: changing extensions is not breaking
+// changing extensions is not breaking
 func TestBreaking_ModifiedExtension(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 3)
 	require.Len(t, r, 6)
@@ -103,7 +103,7 @@ func TestBreaking_ModifiedExtension(t *testing.T) {
 	require.Equal(t, checker.RequestParameterRemovedId, r[5].GetId())
 }
 
-// BC: changing comments is not breaking
+// changing comments is not breaking
 func TestBreaking_Comments(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 3)
 	require.Len(t, r, 6)
@@ -115,7 +115,7 @@ func TestBreaking_Comments(t *testing.T) {
 	require.Equal(t, checker.RequestParameterRemovedId, r[5].GetId())
 }
 
-// BC: new optional header param is not breaking
+// new optional header param is not breaking
 func TestBreaking_NewOptionalHeaderParam(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -129,7 +129,7 @@ func TestBreaking_NewOptionalHeaderParam(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// CL: changing an existing header param to optional
+// changing an existing header param to optional
 func TestBreaking_HeaderParamRequiredDisabled(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -149,7 +149,7 @@ func deleteResponseHeader(response *openapi3.Response, name string) {
 	delete(response.Headers, name)
 }
 
-// BC: new required response header param is not breaking
+// new required response header param is not breaking
 func TestBreaking_NewRequiredResponseHeader(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -163,7 +163,7 @@ func TestBreaking_NewRequiredResponseHeader(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing an operation's operationId is not breaking
+// changing an operation's operationId is not breaking
 func TestBreaking_OperationID(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -176,7 +176,7 @@ func TestBreaking_OperationID(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing a link's operationId is not breaking
+// changing a link's operationId is not breaking
 func TestBreaking_LinkOperationID(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -190,7 +190,7 @@ func TestBreaking_LinkOperationID(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: adding a media-type to response is not breaking
+// adding a media-type to response is not breaking
 func TestBreaking_ResponseAddMediaType(t *testing.T) {
 	s1, err := open("../data/response-media-type-revision.yaml")
 	require.NoError(t, err)
@@ -204,7 +204,7 @@ func TestBreaking_ResponseAddMediaType(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// CL: deprecating an operation with sunset greater than min
+// deprecating an operation with sunset greater than min
 func TestBreaking_DeprecatedOperation(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -219,7 +219,7 @@ func TestBreaking_DeprecatedOperation(t *testing.T) {
 	require.Equal(t, errs[0].GetLevel(), checker.INFO)
 }
 
-// BC: deprecating a parameter is not breaking
+// deprecating a parameter is not breaking
 func TestBreaking_DeprecatedParameter(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -232,7 +232,7 @@ func TestBreaking_DeprecatedParameter(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating a header is not breaking
+// deprecating a header is not breaking
 func TestBreaking_DeprecatedHeader(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -245,7 +245,7 @@ func TestBreaking_DeprecatedHeader(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating a schema is not breaking
+// deprecating a schema is not breaking
 func TestBreaking_DeprecatedSchema(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -258,7 +258,7 @@ func TestBreaking_DeprecatedSchema(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing servers is not breaking
+// changing servers is not breaking
 func TestBreaking_Servers(t *testing.T) {
 	s1, err := open("../data/servers/baseswagger.json")
 	require.NoError(t, err)
@@ -272,7 +272,7 @@ func TestBreaking_Servers(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: adding a tag is not breaking
+// adding a tag is not breaking
 func TestBreaking_TagAdded(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -283,7 +283,7 @@ func TestBreaking_TagAdded(t *testing.T) {
 	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.APITagAddedId)
 }
 
-// BC: adding an operation ID is not breaking
+// adding an operation ID is not breaking
 func TestBreaking_OperationIdAdded(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -295,7 +295,7 @@ func TestBreaking_OperationIdAdded(t *testing.T) {
 	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.APIOperationIdAddId)
 }
 
-// BC: adding a required property to response is not breaking
+// adding a required property to response is not breaking
 func TestBreaking_RequiredResponsePropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_added_base.yaml")
 	require.NoError(t, err)

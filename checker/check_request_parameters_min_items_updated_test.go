@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: increasing minItems value of request parameter
+// increasing minItems value of request parameter
 func TestRequestParameterMinItemsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_min_items_increased_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestParameterMinItemsIncreased(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing minItems value of request parameter
+// decreasing minItems value of request parameter
 func TestRequestParameterMinItemsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_min_items_increased_revision.yaml")
 	require.NoError(t, err)

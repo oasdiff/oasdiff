@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing response property pattern
+// changing response property pattern
 func TestResponsePropertyPatternChanged(t *testing.T) {
 	s1, err := open("../data/checker/response_pattern_added_or_changed_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestResponsePropertyPatternChanged(t *testing.T) {
 	require.Equal(t, "the `data/created` response's property pattern was changed from `^[a-z]+$` to `^(?:([a-z]+-)*([a-z]+)?)$` for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: adding response property pattern
+// adding response property pattern
 func TestResponsePropertyPatternAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_pattern_added_or_changed_base.yaml")
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestResponsePropertyPatternAdded(t *testing.T) {
 	require.Equal(t, "the `data/created` response's property pattern `^[a-z]+$` was added for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing response property pattern
+// removing response property pattern
 func TestResponsePropertyPatternRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_pattern_added_or_changed_base.yaml")
 	require.NoError(t, err)

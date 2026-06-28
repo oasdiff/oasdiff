@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding pattern property to request body
+// adding pattern property to request body
 func TestRequestBodyPatternPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyPatternPropertyAdded(t *testing.T) {
 	require.True(t, found, "expected request-body-pattern-property-added")
 }
 
-// CL: removing pattern property from request body
+// removing pattern property from request body
 func TestRequestBodyPatternPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_revision.yaml")
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ func TestRequestBodyPatternPropertyRemoved(t *testing.T) {
 	require.True(t, found, "expected request-body-pattern-property-removed")
 }
 
-// CL: adding pattern property to request property
+// adding pattern property to request property
 func TestRequestPropertyPatternPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_prop_base.yaml")
 	require.NoError(t, err)
@@ -66,7 +66,7 @@ func TestRequestPropertyPatternPropertyAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyPatternPropertyAddedId), "expected request-property-pattern-property-added")
 }
 
-// CL: removing pattern property from request property
+// removing pattern property from request property
 func TestRequestPropertyPatternPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_prop_revision.yaml")
 	require.NoError(t, err)

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding pattern property to response body
+// adding pattern property to response body
 func TestResponseBodyPatternPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestResponseBodyPatternPropertyAdded(t *testing.T) {
 	require.True(t, found, "expected response-body-pattern-property-added")
 }
 
-// CL: removing pattern property from response body
+// removing pattern property from response body
 func TestResponseBodyPatternPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_revision.yaml")
 	require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestResponseBodyPatternPropertyRemoved(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyPatternPropertyRemovedId), "expected response-body-pattern-property-removed")
 }
 
-// CL: adding pattern property to response property
+// adding pattern property to response property
 func TestResponsePropertyPatternPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_prop_base.yaml")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestResponsePropertyPatternPropertyAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponsePropertyPatternPropertyAddedId), "expected response-property-pattern-property-added")
 }
 
-// CL: removing pattern property from response property
+// removing pattern property from response property
 func TestResponsePropertyPatternPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/pattern_properties_prop_revision.yaml")
 	require.NoError(t, err)

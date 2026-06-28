@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: new header, query and cookie request params
+// new header, query and cookie request params
 func TestNewRequestNonPathParameter_DetectsNewPathsAndNewOperations(t *testing.T) {
 	s1, err := open("../data/request_params/base.yaml")
 	require.NoError(t, err)

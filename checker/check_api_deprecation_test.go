@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: deprecating an operation with a deprecation policy and an invalid sunset date is breaking
+// deprecating an operation with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 
 	s1, err := open(deprecationFile("base.yaml"))
@@ -30,7 +30,7 @@ func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: invalid`", requireChange(t, errs, checker.APIDeprecatedSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating an operation with a deprecation policy and an invalid stability level is breaking
+// deprecating an operation with a deprecation policy and an invalid stability level is breaking
 func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 
 	s1, err := open(deprecationFile("base.yaml"))
@@ -49,7 +49,7 @@ func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 	require.Equal(t, "../data/deprecation/deprecated-with-invalid-stability.yaml", errs[0].GetSource())
 }
 
-// BC: deprecating an operation without a deprecation policy but without specifying sunset date is not breaking
+// deprecating an operation without a deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_DeprecationWithoutSunsetNoPolicy(t *testing.T) {
 
 	s1, err := open(deprecationFile("base.yaml"))
@@ -65,7 +65,7 @@ func TestBreaking_DeprecationWithoutSunsetNoPolicy(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating an operation with a deprecation policy but without specifying sunset date is breaking
+// deprecating an operation with a deprecation policy but without specifying sunset date is breaking
 func TestBreaking_DeprecationWithoutSunsetWithPolicy(t *testing.T) {
 
 	s1, err := open(deprecationFile("base.yaml"))
@@ -82,7 +82,7 @@ func TestBreaking_DeprecationWithoutSunsetWithPolicy(t *testing.T) {
 	require.Equal(t, "sunset date is missing for deprecated API", requireChange(t, errs, checker.APIDeprecatedSunsetMissingId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating an operation with a default deprecation policy but without specifying sunset date is not breaking
+// deprecating an operation with a default deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_DeprecationWithoutSunset(t *testing.T) {
 
 	s1, err := open(deprecationFile("base.yaml"))
@@ -98,7 +98,7 @@ func TestBreaking_DeprecationWithoutSunset(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for alpha level
+// deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_DeprecationForAlpha(t *testing.T) {
 
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
@@ -113,7 +113,7 @@ func TestBreaking_DeprecationForAlpha(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for draft level
+// deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for draft level
 func TestBreaking_DeprecationForDraft(t *testing.T) {
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
@@ -137,7 +137,7 @@ func toJson(t *testing.T, value string) json.RawMessage {
 	return data
 }
 
-// BC: deprecating an operation with a deprecation policy and sunset date before required deprecation period is breaking
+// deprecating an operation with a deprecation policy and sunset date before required deprecation period is breaking
 func TestBreaking_DeprecationWithEarlySunset(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -156,7 +156,7 @@ func TestBreaking_DeprecationWithEarlySunset(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), requireChange(t, errs, checker.APISunsetDateTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating an operation with a deprecation policy and sunset date after required deprecation period is not breaking
+// deprecating an operation with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 
 	s1, err := open(deprecationFile("base.yaml"))
@@ -178,7 +178,7 @@ func TestBreaking_DeprecationWithProperSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
 }
 
-// CL: path operations that became deprecated
+// path operations that became deprecated
 func TestApiDeprecated_DetectsDeprecatedOperations(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -201,7 +201,7 @@ func TestApiDeprecated_DetectsDeprecatedOperations(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
 }
 
-// CL: path operations that were re-activated
+// path operations that were re-activated
 func TestApiDeprecated_DetectsReactivatedOperations(t *testing.T) {
 	s1, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
@@ -246,7 +246,7 @@ func TestBreaking_InvaidStability(t *testing.T) {
 	require.Equal(t, "../data/deprecation/invalid-stability.yaml", errs[0].GetSource())
 }
 
-// CL: message includes sunset details when endpoint deprecated with sunset date
+// message includes sunset details when endpoint deprecated with sunset date
 func TestApiDeprecated_MessageIncludesSunset(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -265,7 +265,7 @@ func TestApiDeprecated_MessageIncludesSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "endpoint deprecated")
 }
 
-// CL: message includes both sunset and stability when endpoint deprecated with both
+// message includes both sunset and stability when endpoint deprecated with both
 func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -285,7 +285,7 @@ func TestApiDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	require.Contains(t, deprecationChange.GetUncolorizedText(checker.NewDefaultLocalizer()), "stability: beta")
 }
 
-// CL: message has no details when endpoint deprecated without sunset or stability
+// message has no details when endpoint deprecated without sunset or stability
 func TestApiDeprecated_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -303,7 +303,7 @@ func TestApiDeprecated_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, "endpoint deprecated", requireChange(t, errs, checker.EndpointDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: message includes stability when endpoint deprecated with stability but no sunset
+// message includes stability when endpoint deprecated with stability but no sunset
 func TestApiDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 	s1, err := open(deprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
@@ -321,7 +321,7 @@ func TestApiDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 	require.Equal(t, "endpoint deprecated (stability: beta)", requireChange(t, errs, checker.EndpointDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: deprecating an operation with a sunset date in RFC3339 format is properly parsed
+// deprecating an operation with a sunset date in RFC3339 format is properly parsed
 func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -344,7 +344,7 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
-// BC: deprecating an operation with invalid JSON sunset date is breaking
+// deprecating an operation with invalid JSON sunset date is breaking
 func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -363,7 +363,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "failed to unmarshal sunset json")
 }
 
-// CL: endpoint deprecation message includes sunset date
+// endpoint deprecation message includes sunset date
 func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)

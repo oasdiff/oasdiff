@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: deleting a parameter without deprecation is breaking
+// deleting a parameter without deprecation is breaking
 func TestBreaking_DeletedParameter(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -24,7 +24,7 @@ func TestBreaking_DeletedParameter(t *testing.T) {
 	require.Equal(t, "This is a warning because some clients may return an error when receiving an unexpected parameter. It is recommended to deprecate the parameter first.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
-// BC: deleting a parameter after sunset date is not breaking
+// deleting a parameter after sunset date is not breaking
 func TestBreaking_ParameterDeprecationPast(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-past.yaml"))
@@ -39,7 +39,7 @@ func TestBreaking_ParameterDeprecationPast(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deleting a parameter before sunset date is breaking
+// deleting a parameter before sunset date is breaking
 func TestBreaking_ParameterDeprecationFuture(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
@@ -56,7 +56,7 @@ func TestBreaking_ParameterDeprecationFuture(t *testing.T) {
 	require.Equal(t, "deleted the `query` request parameter `id` before the sunset date `9999-08-10`", requireChange(t, errs, checker.ParameterRemovedBeforeSunsetId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deleting a deprecated parameter without sunset date is not breaking
+// deleting a deprecated parameter without sunset date is not breaking
 func TestBreaking_ParameterDeprecationNoSunset(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-no-sunset.yaml"))
@@ -71,7 +71,7 @@ func TestBreaking_ParameterDeprecationNoSunset(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing a parameter without a deprecation policy and without specifying sunset date is not breaking for alpha level
+// removing a parameter without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_RemovedParameterForAlpha(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
@@ -85,7 +85,7 @@ func TestBreaking_RemovedParameterForAlpha(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing a deprecated parameter with an invalid date is breaking
+// removing a deprecated parameter with an invalid date is breaking
 func TestBreaking_RemoveParameterWithInvalidSunset(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-invalid.yaml"))

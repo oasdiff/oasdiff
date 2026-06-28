@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding 'allOf' subschema to the request body or request body property
+// adding 'allOf' subschema to the request body or request body property
 func TestRequestPropertyAllOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_all_of_added_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestRequestPropertyAllOfAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding 'allOf' subschema ($ref) with source tracking verifies source points to component definition
+// adding 'allOf' subschema ($ref) with source tracking verifies source points to component definition
 func TestRequestPropertyAllOfAdded_WithSources_Ref(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/request_property_all_of_added_base.yaml", loader)
@@ -65,7 +65,7 @@ func TestRequestPropertyAllOfAdded_WithSources_Ref(t *testing.T) {
 	}
 }
 
-// CL: adding inline 'allOf' subschema with source tracking verifies source points to inline subschema
+// adding inline 'allOf' subschema with source tracking verifies source points to inline subschema
 func TestRequestPropertyAllOfAdded_WithSources_Inline(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/request_property_all_of_inline_added_base.yaml", loader)
@@ -86,7 +86,7 @@ func TestRequestPropertyAllOfAdded_WithSources_Inline(t *testing.T) {
 	require.Greater(t, errs[0].GetRevisionSource().Line, 14)
 }
 
-// CL: removing 'allOf' subschema from the request body or request body property
+// removing 'allOf' subschema from the request body or request body property
 func TestRequestPropertyAllOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_all_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -118,7 +118,7 @@ func TestRequestPropertyAllOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding an allOf subschema whose body is annotation-only (title,
+// adding an allOf subschema whose body is annotation-only (title,
 // description, examples, default, externalDocs, $comment) is a wire-
 // contract no-op. We don't emit it at the original ERR severity (that
 // would be a false positive on the breaking-change view), but we do
@@ -145,7 +145,7 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_EmitsInfo(t *testing.T) {
 	require.NotEqual(t, checker.RequestBodyAllOfAddedId, errs[0].GetId())
 }
 
-// CL: same as above but the annotation-only allOf lives on a nested
+// same as above but the annotation-only allOf lives on a nested
 // property's schema, not on the body. Covers the info.walkProperties
 // code path; the body-level test only exercises the outer walker.
 func TestRequestPropertyAllOfAdded_AnnotationOnly_AtProperty_EmitsInfo(t *testing.T) {

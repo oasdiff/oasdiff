@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request property to not nullable
+// changing request property to not nullable
 func TestRequestPropertyBecameNotNullable(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_revision.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestPropertyBecameNotNullable(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property to nullable
+// changing request property to nullable
 func TestRequestPropertyBecameNullable(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_base.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestRequestPropertyBecameNullable(t *testing.T) {
 
 }
 
-// CL: changing request body to nullable
+// changing request body to nullable
 func TestRequestBodyBecameNullable(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_base.yaml")
 	require.NoError(t, err)
@@ -72,7 +72,7 @@ func TestRequestBodyBecameNullable(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property to nullable via type array (OpenAPI 3.1)
+// changing request property to nullable via type array (OpenAPI 3.1)
 func TestRequestPropertyBecameNullable31(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -92,7 +92,7 @@ func TestRequestPropertyBecameNullable31(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property to not nullable via type array (OpenAPI 3.1)
+// changing request property to not nullable via type array (OpenAPI 3.1)
 func TestRequestPropertyBecameNotNullable31(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_31_revision.yaml")
 	require.NoError(t, err)
@@ -112,7 +112,7 @@ func TestRequestPropertyBecameNotNullable31(t *testing.T) {
 	}, errs)
 }
 
-// CL: type checker does NOT fire for null-only type changes (OpenAPI 3.1)
+// type checker does NOT fire for null-only type changes (OpenAPI 3.1)
 func TestTypeCheckerSuppressedForNullOnly31(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -125,7 +125,7 @@ func TestTypeCheckerSuppressedForNullOnly31(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// CL: changing request body to not nullable
+// changing request body to not nullable
 func TestRequestBodyBecameNotNullable(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_base.yaml")
 	require.NoError(t, err)
@@ -147,7 +147,7 @@ func TestRequestBodyBecameNotNullable(t *testing.T) {
 	}, errs)
 }
 
-// CL: response property became nullable via type array (OpenAPI 3.1)
+// response property became nullable via type array (OpenAPI 3.1)
 func TestResponsePropertyBecameNullable31(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -167,7 +167,7 @@ func TestResponsePropertyBecameNullable31(t *testing.T) {
 	}, errs)
 }
 
-// CL: request body became nullable via type array (OpenAPI 3.1)
+// request body became nullable via type array (OpenAPI 3.1)
 func TestRequestBodyBecameNullable31(t *testing.T) {
 	s1, err := open("../data/checker/request_body_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -181,7 +181,7 @@ func TestRequestBodyBecameNullable31(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestBodyBecomeNullableId), "expected request-body-became-nullable")
 }
 
-// CL: request body became not-nullable via type array (OpenAPI 3.1)
+// request body became not-nullable via type array (OpenAPI 3.1)
 func TestRequestBodyBecameNotNullable31(t *testing.T) {
 	s1, err := open("../data/checker/request_body_nullable_31_revision.yaml")
 	require.NoError(t, err)
@@ -195,7 +195,7 @@ func TestRequestBodyBecameNotNullable31(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestBodyBecomeNotNullableId), "expected request-body-became-not-nullable")
 }
 
-// CL: response body became nullable via type array (OpenAPI 3.1)
+// response body became nullable via type array (OpenAPI 3.1)
 func TestResponseBodyBecameNullable31(t *testing.T) {
 	s1, err := open("../data/checker/request_body_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -209,7 +209,7 @@ func TestResponseBodyBecameNullable31(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyBecameNullableId), "expected response-body-became-nullable")
 }
 
-// CL: response property became nullable via type array (OpenAPI 3.1) — property level check in response
+// response property became nullable via type array (OpenAPI 3.1) — property level check in response
 func TestResponsePropertyBecameNullable31Property(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -223,7 +223,7 @@ func TestResponsePropertyBecameNullable31Property(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponsePropertyBecameNullableId), "expected response-property-became-nullable")
 }
 
-// CL: response type checker does NOT fire for null-only type changes (OpenAPI 3.1)
+// response type checker does NOT fire for null-only type changes (OpenAPI 3.1)
 func TestResponseTypeCheckerSuppressedForNullOnly31(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_nullable_31_base.yaml")
 	require.NoError(t, err)
@@ -236,7 +236,7 @@ func TestResponseTypeCheckerSuppressedForNullOnly31(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// CL: removing the type keyword entirely (3.1) must NOT report became-not-nullable.
+// removing the type keyword entirely (3.1) must NOT report became-not-nullable.
 // An untyped schema accepts any value, including null, so the body is still
 // nullable; only narrowing to a non-null type set removes null. (#1004)
 func TestRequestBodyTypeRemovedEntirelyStaysNullable(t *testing.T) {
@@ -254,7 +254,7 @@ func TestRequestBodyTypeRemovedEntirelyStaysNullable(t *testing.T) {
 		"removing the type entirely leaves the schema nullable (untyped accepts null); must not report became-not-nullable")
 }
 
-// CL: adding an explicit type (including null) to a previously untyped body must
+// adding an explicit type (including null) to a previously untyped body must
 // NOT report became-nullable. An untyped schema already accepts null, so adding
 // [object, null] does not introduce nullability. Mirror of the type-removed case. (#1004)
 func TestRequestBodyTypeAddedFromUntypedStaysNullable(t *testing.T) {

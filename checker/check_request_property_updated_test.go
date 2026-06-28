@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding a new required request property
+// adding a new required request property
 func TestRequiredRequestPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_added_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding two new request properties, one required, one optional
+// adding two new request properties, one required, one optional
 func TestRequiredRequestPropertiesAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_added_base.yaml")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding a new required request property with source tracking
+// adding a new required request property with source tracking
 func TestRequiredRequestPropertyAdded_WithSources(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/request_property_added_base.yaml", loader)
@@ -78,7 +78,7 @@ func TestRequiredRequestPropertyAdded_WithSources(t *testing.T) {
 	require.NotZero(t, errs[0].GetRevisionSource().Line)
 }
 
-// CL: adding a new optional request property
+// adding a new optional request property
 func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_added_base.yaml")
 	require.NoError(t, err)
@@ -99,7 +99,7 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing a required request property
+// removing a required request property
 func TestRequiredRequestPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_added_revision.yaml")
 	require.NoError(t, err)
@@ -119,7 +119,7 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding a new required request property with a default value
+// adding a new required request property with a default value
 func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	s1, err := open("../data/checker/request_property_added_base.yaml")
 	require.NoError(t, err)
@@ -139,7 +139,7 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	}, errs)
 }
 
-// BC: wrapping a concrete request body object into a oneOf of object
+// wrapping a concrete request body object into a oneOf of object
 // alternatives is a breaking restructuring (#702): under oneOf a previously
 // valid payload can match multiple overlapping alternatives and be rejected.
 // The moved properties must not be reported as removed, and the wrapping must

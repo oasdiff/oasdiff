@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: decreasing min in response body
+// decreasing min in response body
 func TestResponseBodyMinDecreased(t *testing.T) {
 	s1, err := open("../data/checker/response_min_decreased_base.yaml")
 	require.NoError(t, err)
@@ -22,7 +22,7 @@ func TestResponseBodyMinDecreased(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyMinDecreasedId), "expected response-body-min-decreased")
 }
 
-// CL: decreasing min in response property
+// decreasing min in response property
 func TestResponsePropertyMinDecreased(t *testing.T) {
 	s1, err := open("../data/checker/response_min_decreased_base.yaml")
 	require.NoError(t, err)
@@ -36,7 +36,7 @@ func TestResponsePropertyMinDecreased(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponsePropertyMinDecreasedId), "expected response-property-min-decreased")
 }
 
-// CL: decreasing exclusiveMinimum in response body
+// decreasing exclusiveMinimum in response body
 func TestResponseBodyExclusiveMinDecreased(t *testing.T) {
 	s1, err := open("../data/checker/response_min_decreased_base.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestResponseBodyExclusiveMinDecreased(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyExclusiveMinDecreasedId), "expected response-body-exclusive-min-decreased")
 }
 
-// CL: decreasing exclusiveMinimum in response property
+// decreasing exclusiveMinimum in response property
 func TestResponsePropertyExclusiveMinDecreased(t *testing.T) {
 	s1, err := open("../data/checker/response_min_decreased_base.yaml")
 	require.NoError(t, err)

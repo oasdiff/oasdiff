@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request path parameter type
+// changing request path parameter type
 func TestRequestPathParamTypeChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request query parameter type
+// changing request query parameter type
 func TestRequestQueryParamTypeChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -54,7 +54,7 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request header parameter type
+// changing request header parameter type
 func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -76,7 +76,7 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request path parameter format
+// changing request path parameter format
 func TestRequestPathParamFormatChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -98,7 +98,7 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request query parameter format
+// changing request query parameter format
 func TestRequestQueryParamFormatChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -120,7 +120,7 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request header parameter format
+// changing request header parameter format
 func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -142,7 +142,7 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request path parameter type by adding "string"
+// changing request path parameter type by adding "string"
 func TestRequestPathParamTypeAddString(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -165,7 +165,7 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request path parameter type by replacing "integer" with "number"
+// changing request path parameter type by replacing "integer" with "number"
 func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -188,7 +188,7 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	}, errs)
 }
 
-// CL: a query parameter changing from a single type to a oneOf list of types is
+// a query parameter changing from a single type to a oneOf list of types is
 // reported once, by the list-of-types checker. RequestParameterTypeChangedCheck
 // suppresses its own report for the same change so it is not duplicated when both
 // checks run together.
@@ -217,7 +217,7 @@ func TestRequestQueryParamSingleToListOfTypesNotDuplicated(t *testing.T) {
 	requireSingleChange(t, errs, checker.RequestParameterListOfTypesWidenedId)
 }
 
-// BC: changing request's query param property type from number to string is breaking
+// changing request's query param property type from number to string is breaking
 func TestBreaking_ReqQueryParamTypeNumberToString(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_type_changed_base_num.yaml")
 	require.NoError(t, err)
@@ -233,7 +233,7 @@ func TestBreaking_ReqQueryParamTypeNumberToString(t *testing.T) {
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 }
 
-// BC: specializing request's query param property type from string to number is breaking
+// specializing request's query param property type from string to number is breaking
 func TestBreaking_ReqQueryParamTypeStringToNumber(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_type_changed_revision.yaml")
 	require.NoError(t, err)
@@ -249,7 +249,7 @@ func TestBreaking_ReqQueryParamTypeStringToNumber(t *testing.T) {
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
-// CL: generalizing request's query param property type from integer to number
+// generalizing request's query param property type from integer to number
 func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_type_changed_base_int.yaml")
 	require.NoError(t, err)
@@ -265,7 +265,7 @@ func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
-// CL: widening a query parameter from a scalar to a form/explode array of the
+// widening a query parameter from a scalar to a form/explode array of the
 // same type is backwards-compatible (one-element array on the wire), so it
 // should be reported as a generalization rather than a breaking change.
 // Reproduces issue #689.
@@ -292,7 +292,7 @@ func TestRequestQueryParamScalarToFormExplodeArray(t *testing.T) {
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
-// CL: widening a path parameter from scalar to array stays breaking, since
+// widening a path parameter from scalar to array stays breaking, since
 // path parameters use simple style (not form), so a single value on the wire
 // no longer matches the new array schema.
 func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
@@ -314,7 +314,7 @@ func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
-// CL: removing the format constraint of a request path parameter is a generalization, not breaking
+// removing the format constraint of a request path parameter is a generalization, not breaking
 func TestRequestPathParamFormatRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -337,7 +337,7 @@ func TestRequestPathParamFormatRemoved(t *testing.T) {
 	}, errs)
 }
 
-// BC: removing the format constraint of a response property is breaking,
+// removing the format constraint of a response property is breaking,
 // since clients may depend on the declared format for parsing.
 func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_schema_format_changed_base.yaml")
@@ -354,7 +354,7 @@ func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
-// CL: under OpenAPI 3.1, widening a nullable scalar query parameter to a
+// under OpenAPI 3.1, widening a nullable scalar query parameter to a
 // nullable form/explode array of the same scalar is still backwards-compatible
 // (#918). "null" is stripped from both sides before the scalar-to-array check,
 // so preserving or adding nullability does not turn a safe widening into a
@@ -387,7 +387,7 @@ func TestRequestQueryParamScalarToFormExplodeArray_31Nullable(t *testing.T) {
 	}
 }
 
-// CL: widening a weakly-typed (query) parameter from a union of scalar types to a
+// widening a weakly-typed (query) parameter from a union of scalar types to a
 // form/explode array is safe when the item type accepts every value the base did.
 // A query value is a string on the wire, so [string, integer] -> array<string> is
 // a generalization: the string branch already accepted every wire value, and a
@@ -410,7 +410,7 @@ func TestRequestQueryParamMultiTypeToFormExplodeArraySafe(t *testing.T) {
 	require.Equal(t, "This parameter uses form/explode serialization, where a single value is a valid one-element array, so widening it to an array whose items still accept the previous values does not break existing clients.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
-// CL (guard): the widening is only safe when the item type accepts every base
+// (guard): the widening is only safe when the item type accepts every base
 // value. [string, integer] -> array<integer> drops the string branch, so a value
 // like ?token=abc that validated under the base (string) is rejected by the
 // integer item. It must stay breaking.
@@ -429,7 +429,7 @@ func TestRequestQueryParamWideningToNarrowerItemTypeStillBreaking(t *testing.T) 
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
-// CL (soundness): a scalar -> form/explode array is only safe when the array
+// (soundness): a scalar -> form/explode array is only safe when the array
 // items accept every value the base scalar accepted. Adding an item constraint
 // (here a pattern that excludes digits) rejects previously-valid values like
 // "5", so it must be breaking, not a generalization (#1024 follow-up).
@@ -448,7 +448,7 @@ func TestRequestQueryParamScalarToConstrainedArrayBreaking(t *testing.T) {
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
-// CL (soundness): the two safety axes are independent. Here the type axis passes
+// (soundness): the two safety axes are independent. Here the type axis passes
 // via weak typing ([string,integer] is accepted as string on the wire), but the
 // item adds a pattern that rejects previously-valid values like "5", so the
 // constraint axis fails and the widening is breaking. Guards that the "anything

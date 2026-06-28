@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request's body to required is breaking
+// changing request's body to required is breaking
 func TestRequestBodyBecameRequired(t *testing.T) {
 	s1, err := open("../data/checker/request_body_became_required_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyBecameRequired(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request's body to optional
+// changing request's body to optional
 func TestRequestBodyBecameOptional(t *testing.T) {
 	s1, err := open("../data/checker/request_body_became_optional_base.yaml")
 	require.NoError(t, err)

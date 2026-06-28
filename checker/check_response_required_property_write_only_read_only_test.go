@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing required response property to write-only
+// changing required response property to write-only
 func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required response property to not write-only
+// changing required response property to not write-only
 func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	require.Equal(t, "the response required property `data/writeOnlyName` became not write-only for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: changing required response property to read-only
+// changing required response property to read-only
 func TestResponseRequiredPropertyBecameReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -81,7 +81,7 @@ func TestResponseRequiredPropertyBecameReadOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required response property to not read-only
+// changing required response property to not read-only
 func TestResponseRequiredPropertyBecameNonReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: new header, query and cookie required request default param is breaking
+// new header, query and cookie required request default param is breaking
 func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *testing.T) {
 	s1, err := open("../data/request_params/base.yaml")
 	require.NoError(t, err)

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: deleting sunset header for a deprecated endpoint is breaking
+// deleting sunset header for a deprecated endpoint is breaking
 func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-with-sunset.yaml"))
@@ -25,7 +25,7 @@ func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 	require.Equal(t, "api sunset date deleted, but deprecated=true kept", requireChange(t, errs, checker.APISunsetDeletedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing sunset to an earlier date for a deprecated endpoint with a deprecation policy is breaking
+// changing sunset to an earlier date for a deprecated endpoint with a deprecation policy is breaking
 func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-future.yaml"))
@@ -42,7 +42,7 @@ func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 	require.Equal(t, "api sunset date changed to an earlier date, from `9999-08-10` to `2022-08-10`, new sunset date must be not earlier than `9999-08-10` and at least `180` days from now", requireChange(t, errs, checker.APISunsetDateChangedTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing sunset to an invalid date for a deprecated endpoint is breaking
+// changing sunset to an invalid date for a deprecated endpoint is breaking
 func TestBreaking_SunsetModifiedToInvalidForDeprecatedEndpoint(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-future.yaml"))
@@ -59,7 +59,7 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedEndpoint(t *testing.T) {
 	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: invalid-date`", requireChange(t, errs, checker.APIPathSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing sunset from an invalid date for a deprecated endpoint is breaking
+// changing sunset from an invalid date for a deprecated endpoint is breaking
 func TestBreaking_SunsetModifiedFromInvalidForDeprecatedEndpoint(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-invalid.yaml"))
@@ -77,7 +77,7 @@ func TestBreaking_SunsetModifiedFromInvalidForDeprecatedEndpoint(t *testing.T) {
 	require.Equal(t, "../data/deprecation/deprecated-invalid.yaml", errs[0].GetSource())
 }
 
-// BC: deleting other extension (not sunset) header for a deprecated endpoint is not breaking
+// deleting other extension (not sunset) header for a deprecated endpoint is not breaking
 func TestBreaking_NonSunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-with-other-extension.yaml"))
@@ -92,7 +92,7 @@ func TestBreaking_NonSunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: no change to headers for a deprecated endpoint is not breaking
+// no change to headers for a deprecated endpoint is not breaking
 func TestBreaking_NoChangeToSunsetDeprecatedEndpoint(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-future.yaml"))

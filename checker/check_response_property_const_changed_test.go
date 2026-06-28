@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing response body const value and response property const value
+// changing response body const value and response property const value
 func TestResponsePropertyConstChanged(t *testing.T) {
 	s1, err := open("../data/checker/response_property_const_changed_base.yaml")
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestResponsePropertyConstChanged(t *testing.T) {
 	}}, errs)
 }
 
-// CL: adding response body const value or response property const value
+// adding response body const value or response property const value
 func TestResponsePropertyConstAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_const_changed_base.yaml")
 	require.NoError(t, err)
@@ -65,7 +65,7 @@ func TestResponsePropertyConstAdded(t *testing.T) {
 	}}, errs)
 }
 
-// CL: removing response body const value or response property const value
+// removing response body const value or response property const value
 func TestResponsePropertyConstRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_const_changed_base.yaml")
 	require.NoError(t, err)

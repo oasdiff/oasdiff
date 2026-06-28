@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: increasing maxItems of request parameters
+// increasing maxItems of request parameters
 func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_max_items_updated_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing maxItems of request parameters
+// decreasing maxItems of request parameters
 func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_max_items_updated_revision.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 	}, errs)
 }
 
-// BC: decreasing maxItems of common request parameters without --flatten-params is not breaking
+// decreasing maxItems of common request parameters without --flatten-params is not breaking
 func TestBreaking_RequestParameterMaxItemsWithoutFlatten(t *testing.T) {
 
 	s1, err := open("../data/checker/common_request_parameter_max_items_updated_revision.yaml")
@@ -65,7 +65,7 @@ func TestBreaking_RequestParameterMaxItemsWithoutFlatten(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: decreasing maxItems of common request parameters with --flatten-params is breaking
+// decreasing maxItems of common request parameters with --flatten-params is breaking
 func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 	loader := openapi3.NewLoader()
 
@@ -89,7 +89,7 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 	}, errs)
 }
 
-// BC: decreasing maxItems on array parameter schema itself (issue #760)
+// decreasing maxItems on array parameter schema itself (issue #760)
 func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_array_max_items_base.yaml")
 	require.NoError(t, err)

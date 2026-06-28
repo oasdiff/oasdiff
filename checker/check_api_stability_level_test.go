@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: decreasing stability level is breaking
+// decreasing stability level is breaking
 func TestBreaking_StabilityLevelDecreased(t *testing.T) {
 
 	s1, err := open(deprecationFile("base-beta-stability.yaml"))
@@ -34,7 +34,7 @@ func TestBreaking_StabilityLevelDecreased(t *testing.T) {
 	require.Equal(t, "endpoint stability level decreased from `beta` to `alpha`", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: increasing stability level is not breaking
+// increasing stability level is not breaking
 func TestBreaking_StabilityLevelIncreased(t *testing.T) {
 
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
@@ -49,7 +49,7 @@ func TestBreaking_StabilityLevelIncreased(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: specifying an invalid stability level in revision is breaking
+// specifying an invalid stability level in revision is breaking
 func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -65,7 +65,7 @@ func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
 	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
 }
 
-// BC: specifying an invalid stability level in base is breaking
+// specifying an invalid stability level in base is breaking
 func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
 	s1, err := open(deprecationFile("base-invalid-stability.yaml"))
 	require.NoError(t, err)
@@ -81,7 +81,7 @@ func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
 	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
 }
 
-// BC: specifying a non-text, not-json stability level in base is breaking
+// specifying a non-text, not-json stability level in base is breaking
 func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)

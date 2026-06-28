@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing response body property default value
+// changing response body property default value
 func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 	}}, errs)
 }
 
-// CL: changing response body default value
+// changing response body default value
 func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding response body default value or response body property default value
+// adding response body default value or response body property default value
 func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -86,7 +86,7 @@ func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 	}}, errs)
 }
 
-// CL: removing response body default value or response body property default value
+// removing response body default value or response body property default value
 func TestResponsePropertyDefaultValueRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_default_value_changed_base.yaml")
 	require.NoError(t, err)

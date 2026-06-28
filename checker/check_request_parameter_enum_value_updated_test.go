@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: removing an enum value from request parameter
+// removing an enum value from request parameter
 func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_enum_value_updated_base.yaml")
 	require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestRequestParameterObjectEnumNoFalseBreakingChange(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// CL: adding an enum value to request parameter
+// adding an enum value to request parameter
 func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_enum_value_updated_revision.yaml")
 	require.NoError(t, err)
@@ -63,7 +63,7 @@ func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing an enum value from a deepObject request parameter property
+// removing an enum value from a deepObject request parameter property
 func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_enum_value_updated_base.yaml")
 	require.NoError(t, err)
@@ -84,7 +84,7 @@ func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding an enum value to a deepObject request parameter property
+// adding an enum value to a deepObject request parameter property
 // Swap base/revision to exercise the added-value path
 func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_enum_value_updated_revision.yaml")
@@ -106,7 +106,7 @@ func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: verifying the localized message for parameter property enum value removed
+// verifying the localized message for parameter property enum value removed
 func TestRequestParameterPropertyEnumValueRemovedMessage(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_property_enum_value_updated_base.yaml")
 	require.NoError(t, err)

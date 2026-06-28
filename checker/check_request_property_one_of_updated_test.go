@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding 'oneOf' schema to the request body or request body property
+// adding 'oneOf' schema to the request body or request body property
 func TestRequestPropertyOneOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_added_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestRequestPropertyOneOfAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding 'oneOf' subschema ($ref) with source tracking
+// adding 'oneOf' subschema ($ref) with source tracking
 func TestRequestPropertyOneOfAdded_WithSources(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/request_property_one_of_added_base.yaml", loader)
@@ -64,7 +64,7 @@ func TestRequestPropertyOneOfAdded_WithSources(t *testing.T) {
 	}
 }
 
-// CL: removing 'oneOf' schema from the request body or request body property
+// removing 'oneOf' schema from the request body or request body property
 func TestRequestPropertyOneOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestRequestPropertyOneOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: no changes when paths diff is nil
+// no changes when paths diff is nil
 func TestRequestPropertyOneOfNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{}
@@ -106,7 +106,7 @@ func TestRequestPropertyOneOfNoPathsDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when operations diff is nil
+// no changes when operations diff is nil
 func TestRequestPropertyOneOfNoOperationsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -122,7 +122,7 @@ func TestRequestPropertyOneOfNoOperationsDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when request body diff is nil
+// no changes when request body diff is nil
 func TestRequestPropertyOneOfNoRequestBodyDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -144,7 +144,7 @@ func TestRequestPropertyOneOfNoRequestBodyDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when schema diff is nil
+// no changes when schema diff is nil
 func TestRequestPropertyOneOfNoSchemaDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding contains constraint to request body
+// adding contains constraint to request body
 func TestRequestBodyContainsAdded(t *testing.T) {
 	s1, err := open("../data/checker/contains_added_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyContainsAdded(t *testing.T) {
 	require.True(t, found, "expected request-body-contains-added")
 }
 
-// CL: removing contains constraint from request body
+// removing contains constraint from request body
 func TestRequestBodyContainsRemoved(t *testing.T) {
 	s1, err := open("../data/checker/contains_added_revision.yaml")
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ func TestRequestBodyContainsRemoved(t *testing.T) {
 	require.True(t, found, "expected request-body-contains-removed")
 }
 
-// CL: increasing minContains on request body
+// increasing minContains on request body
 func TestRequestBodyMinContainsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_min_max_base.yaml")
 	require.NoError(t, err)
@@ -65,7 +65,7 @@ func TestRequestBodyMinContainsIncreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestBodyMinContainsIncreasedId)
 }
 
-// CL: decreasing minContains on request body
+// decreasing minContains on request body
 func TestRequestBodyMinContainsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_min_max_revision.yaml")
 	require.NoError(t, err)
@@ -78,7 +78,7 @@ func TestRequestBodyMinContainsDecreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestBodyMinContainsDecreasedId)
 }
 
-// CL: increasing maxContains on request body
+// increasing maxContains on request body
 func TestRequestBodyMaxContainsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_min_max_base.yaml")
 	require.NoError(t, err)
@@ -91,7 +91,7 @@ func TestRequestBodyMaxContainsIncreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestBodyMaxContainsIncreasedId)
 }
 
-// CL: decreasing maxContains on request body
+// decreasing maxContains on request body
 func TestRequestBodyMaxContainsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_min_max_revision.yaml")
 	require.NoError(t, err)
@@ -104,7 +104,7 @@ func TestRequestBodyMaxContainsDecreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestBodyMaxContainsDecreasedId)
 }
 
-// CL: adding contains constraint to request property
+// adding contains constraint to request property
 func TestRequestPropertyContainsAdded(t *testing.T) {
 	s1, err := open("../data/checker/contains_property_base.yaml")
 	require.NoError(t, err)
@@ -117,7 +117,7 @@ func TestRequestPropertyContainsAdded(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyContainsAddedId)
 }
 
-// CL: removing contains constraint from request property
+// removing contains constraint from request property
 func TestRequestPropertyContainsRemoved(t *testing.T) {
 	s1, err := open("../data/checker/contains_property_revision.yaml")
 	require.NoError(t, err)
@@ -130,7 +130,7 @@ func TestRequestPropertyContainsRemoved(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyContainsRemovedId)
 }
 
-// CL: increasing minContains on request property
+// increasing minContains on request property
 func TestRequestPropertyMinContainsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_property_min_max_base.yaml")
 	require.NoError(t, err)
@@ -143,7 +143,7 @@ func TestRequestPropertyMinContainsIncreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyMinContainsIncreasedId)
 }
 
-// CL: decreasing minContains on request property
+// decreasing minContains on request property
 func TestRequestPropertyMinContainsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_property_min_max_revision.yaml")
 	require.NoError(t, err)
@@ -156,7 +156,7 @@ func TestRequestPropertyMinContainsDecreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyMinContainsDecreasedId)
 }
 
-// CL: increasing maxContains on request property
+// increasing maxContains on request property
 func TestRequestPropertyMaxContainsIncreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_property_min_max_base.yaml")
 	require.NoError(t, err)
@@ -169,7 +169,7 @@ func TestRequestPropertyMaxContainsIncreased(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyMaxContainsIncreasedId)
 }
 
-// CL: decreasing maxContains on request property
+// decreasing maxContains on request property
 func TestRequestPropertyMaxContainsDecreased(t *testing.T) {
 	s1, err := open("../data/checker/contains_property_min_max_revision.yaml")
 	require.NoError(t, err)

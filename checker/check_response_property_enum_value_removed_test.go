@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: removing an enum value from a response property
+// removing an enum value from a response property
 func TestResponsePropertyEnumValueRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_enum_added_base.yaml")
 	require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestResponsePropertyEnumValueRemoved(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing an enum value from a response write-only property
+// removing an enum value from a response write-only property
 func TestResponseWriteOnlyPropertyEnumValueRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_enum_added_base.yaml")
 	require.NoError(t, err)

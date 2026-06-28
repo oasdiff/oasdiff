@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request body default value
+// changing request body default value
 func TestRequestBodyDefaultValueChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_body_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestBodyDefaultValueChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property default value
+// changing request property default value
 func TestRequestPropertyDefaultValueChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_property_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestRequestPropertyDefaultValueChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding request body default value or request property default value
+// adding request body default value or request property default value
 func TestRequestBodyDefaultValueAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_body_default_value_changed_base.yaml")
 	require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestRequestBodyDefaultValueAdded(t *testing.T) {
 	}}, errs)
 }
 
-// CL: removing request body default value or request property default value
+// removing request body default value or request property default value
 func TestRequestBodyDefaultValueRemoving(t *testing.T) {
 	s1, err := open("../data/checker/request_body_default_value_changed_base.yaml")
 	require.NoError(t, err)

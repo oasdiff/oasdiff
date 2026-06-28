@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: deleting a path without deprecation is breaking
+// deleting a path without deprecation is breaking
 func TestBreaking_DeletedPath(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	errs := d(t, diff.NewConfig(), 1, 701, loader)
@@ -19,7 +19,7 @@ func TestBreaking_DeletedPath(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: deleting an operation without deprecation is breaking
+// deleting an operation without deprecation is breaking
 func TestBreaking_DeletedOp(t *testing.T) {
 	s1 := l(t, 1, newLoaderWithOriginTracking())
 	s2 := l(t, 1, newLoaderWithOriginTracking())
@@ -36,7 +36,7 @@ func TestBreaking_DeletedOp(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: deleting an operation after sunset date is not breaking
+// deleting an operation after sunset date is not breaking
 func TestBreaking_DeprecationPast(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-past.yaml"))
@@ -51,7 +51,7 @@ func TestBreaking_DeprecationPast(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deleting an operation before sunset date is breaking
+// deleting an operation before sunset date is breaking
 func TestBreaking_RemoveBeforeSunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
@@ -71,7 +71,7 @@ func TestBreaking_RemoveBeforeSunset(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: deleting a deprecated operation without sunset date is not breaking
+// deleting a deprecated operation without sunset date is not breaking
 func TestBreaking_DeprecationNoSunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
@@ -91,7 +91,7 @@ func TestBreaking_DeprecationNoSunset(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: removing the path without a deprecation policy and without specifying sunset date is not breaking for alpha level
+// removing the path without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_RemovedPathForAlpha(t *testing.T) {
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
@@ -110,7 +110,7 @@ func TestBreaking_RemovedPathForAlpha(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing the path without a deprecation policy and without specifying sunset date is not breaking for draft level
+// removing the path without a deprecation policy and without specifying sunset date is not breaking for draft level
 func TestBreaking_RemovedPathForDraft(t *testing.T) {
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"))
 	require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestBreaking_RemovedPathForDraft(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level
+// removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level
 func TestBreaking_RemovedPathForAlphaBreaking(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open(deprecationFile("base-alpha-stability.yaml"), loader)
@@ -147,7 +147,7 @@ func TestBreaking_RemovedPathForAlphaBreaking(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level
+// removing the path without a deprecation policy and without specifying sunset date is breaking for endpoints with non draft/alpha stability level
 func TestBreaking_RemovedPathForDraftBreaking(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open(deprecationFile("base-draft-stability.yaml"), loader)
@@ -165,7 +165,7 @@ func TestBreaking_RemovedPathForDraftBreaking(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: deleting a path after sunset date of all contained operations is not breaking
+// deleting a path after sunset date of all contained operations is not breaking
 func TestBreaking_DeprecationPathPast(t *testing.T) {
 
 	s1, err := open(deprecationFile("deprecated-path-past.yaml"))
@@ -180,7 +180,7 @@ func TestBreaking_DeprecationPathPast(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deleting a path with some operations having sunset date in the future is breaking
+// deleting a path with some operations having sunset date in the future is breaking
 func TestBreaking_DeprecationPathMixed(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
@@ -200,7 +200,7 @@ func TestBreaking_DeprecationPathMixed(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: deleting a path with deprecated operations without sunset date is not breaking
+// deleting a path with deprecated operations without sunset date is not breaking
 func TestBreaking_PathDeprecationNoSunset(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
@@ -226,7 +226,7 @@ func TestBreaking_PathDeprecationNoSunset(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// BC: removing a deprecated enpoint with an invalid date is breaking
+// removing a deprecated enpoint with an invalid date is breaking
 func TestBreaking_RemoveEndpointWithInvalidSunset(t *testing.T) {
 	s1, err := open(deprecationFile("deprecated-invalid.yaml"), newLoaderWithOriginTracking())
 	require.NoError(t, err)

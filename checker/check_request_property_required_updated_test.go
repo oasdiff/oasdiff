@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request property required value to true
+// changing request property required value to true
 func TestRequestPropertyMarkedRequired(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_required_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestPropertyMarkedRequired(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property required value to false
+// changing request property required value to false
 func TestRequestPropertyMarkedOptional(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_required_base.yaml")
 	require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestRequestPropertyMarkedOptional(t *testing.T) {
 	}, errs)
 }
 
-// CL: making request property required, while also giving it a default value
+// making request property required, while also giving it a default value
 func TestRequestPropertyWithDefaultMarkedRequired(t *testing.T) {
 	s1, err := open("../data/checker/request_property_became_required_base.yaml")
 	require.NoError(t, err)

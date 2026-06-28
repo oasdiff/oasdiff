@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: setting maxLength of request body
+// setting maxLength of request body
 func TestRequestBodyMaxLengthSetCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_body_max_length_set_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyMaxLengthSetCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: setting maxLength of request propreties
+// setting maxLength of request propreties
 func TestRequestPropertyMaxLengthSetCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_max_length_set_base.yaml")
 	require.NoError(t, err)

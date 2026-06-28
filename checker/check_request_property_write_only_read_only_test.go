@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing optional request property to write-only
+// changing optional request property to write-only
 func TestRequestOptionalPropertyBecameWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestRequestOptionalPropertyBecameWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional request property to not write-only
+// changing optional request property to not write-only
 func TestRequestOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestRequestOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional request property to read-only
+// changing optional request property to read-only
 func TestRequestOptionalPropertyBecameReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -78,7 +78,7 @@ func TestRequestOptionalPropertyBecameReadOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional request property to not read-only
+// changing optional request property to not read-only
 func TestRequestOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -101,7 +101,7 @@ func TestRequestOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required request property to write-only
+// changing required request property to write-only
 func TestRequestRequiredPropertyBecameWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -124,7 +124,7 @@ func TestRequestRequiredPropertyBecameWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required request property to not write-only
+// changing required request property to not write-only
 func TestRequestRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -147,7 +147,7 @@ func TestRequestRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required request property to read-only
+// changing required request property to read-only
 func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -170,7 +170,7 @@ func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required request property to not read-only
+// changing required request property to not read-only
 func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
