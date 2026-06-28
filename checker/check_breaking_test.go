@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: adding a required request body is breaking
+// adding a required request body is breaking
 func TestBreaking_AddingRequiredRequestBody(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -28,7 +28,7 @@ func TestBreaking_AddingRequiredRequestBody(t *testing.T) {
 	require.Equal(t, "added required request body", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing an existing request body from optional to required is breaking
+// changing an existing request body from optional to required is breaking
 func TestBreaking_RequestBodyRequiredEnabled(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -50,7 +50,7 @@ func TestBreaking_RequestBodyRequiredEnabled(t *testing.T) {
 	require.Equal(t, "request body became required", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deleting an enum value is breaking
+// deleting an enum value is breaking
 func TestBreaking_DeletedEnum(t *testing.T) {
 	errs := d(t, diff.NewConfig(), 702, 1)
 	require.NotEmpty(t, errs)
@@ -59,7 +59,7 @@ func TestBreaking_DeletedEnum(t *testing.T) {
 	require.Equal(t, "removed the enum value `removed-value` from the `path` request parameter `domain`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: added an enum value to response breaking
+// added an enum value to response breaking
 func TestBreaking_AddedResponseEnum(t *testing.T) {
 	errs := d(t, diff.NewConfig(), 703, 704)
 	require.NotEmpty(t, errs)
@@ -85,7 +85,7 @@ func deleteParam(op *openapi3.Operation, in string, name string) {
 	op.Parameters = result
 }
 
-// BC: renaming a path parameter is not breaking
+// renaming a path parameter is not breaking
 func TestBreaking_PathParamRename(t *testing.T) {
 	loader := openapi3.NewLoader()
 
@@ -105,7 +105,7 @@ func TestBreaking_PathParamRename(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: new required path param is breaking
+// new required path param is breaking
 func TestBreaking_NewPathParam(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -122,7 +122,7 @@ func TestBreaking_NewPathParam(t *testing.T) {
 	require.Equal(t, "added the new path request parameter `project`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: new required header param is breaking
+// new required header param is breaking
 func TestBreaking_NewRequiredHeaderParam(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -139,7 +139,7 @@ func TestBreaking_NewRequiredHeaderParam(t *testing.T) {
 	require.Equal(t, "added the new required `header` request parameter `network-policies`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing an existing header param from optional to required is breaking
+// changing an existing header param from optional to required is breaking
 func TestBreaking_HeaderParamRequiredEnabled(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -163,7 +163,7 @@ func TestBreaking_HeaderParamRequiredEnabled(t *testing.T) {
 	require.Equal(t, "the `header` request parameter `network-policies` became required", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing an existing response header from required to optional is breaking
+// changing an existing response header from required to optional is breaking
 func TestBreaking_ResponseHeaderParamRequiredDisabled(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -180,7 +180,7 @@ func TestBreaking_ResponseHeaderParamRequiredDisabled(t *testing.T) {
 	require.Equal(t, "the response header `X-RateLimit-Limit` became optional for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing an existing required response header is breaking as error
+// removing an existing required response header is breaking as error
 func TestBreaking_ResponseHeaderRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -200,7 +200,7 @@ func TestBreaking_ResponseHeaderRemoved(t *testing.T) {
 	require.Equal(t, "the mandatory response header `X-RateLimit-Limit` removed for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing an existing response with successful status is breaking
+// removing an existing response with successful status is breaking
 func TestBreaking_ResponseSuccessStatusUpdated(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -219,7 +219,7 @@ func TestBreaking_ResponseSuccessStatusUpdated(t *testing.T) {
 	require.Equal(t, "removed the success response with the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing an existing response with non-successful status is breaking (optional)
+// removing an existing response with non-successful status is breaking (optional)
 func TestBreaking_ResponseNonSuccessStatusUpdated(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -238,7 +238,7 @@ func TestBreaking_ResponseNonSuccessStatusUpdated(t *testing.T) {
 	require.Equal(t, "removed the non-success response with the status `400`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing/updating an operation id is breaking (optional)
+// removing/updating an operation id is breaking (optional)
 func TestBreaking_OperationIdRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -259,7 +259,7 @@ func TestBreaking_OperationIdRemoved(t *testing.T) {
 	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.APIOperationIdRemovedId)
 }
 
-// BC: removing/updating an enum in request body is breaking (optional)
+// removing/updating an enum in request body is breaking (optional)
 func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	s1, err := open("../data/enums/request-body-enum.yaml")
 	require.NoError(t, err)
@@ -282,7 +282,7 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	require.Equal(t, "request body enum value removed `VALUE_1`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing/updating a property enum in response is breaking (optional)
+// removing/updating a property enum in response is breaking (optional)
 func TestBreaking_ResponsePropertyEnumRemoved(t *testing.T) {
 	s1 := l(t, 704)
 	s2 := l(t, 703)
@@ -300,7 +300,7 @@ func TestBreaking_ResponsePropertyEnumRemoved(t *testing.T) {
 	require.Equal(t, "removed the `QWE` enum value from the `respenum` response property for the response status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing/updating a tag is breaking (optional)
+// removing/updating a tag is breaking (optional)
 func TestBreaking_TagRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -319,7 +319,7 @@ func TestBreaking_TagRemoved(t *testing.T) {
 	require.Equal(t, "api tag `security` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing/updating a media type enum in response (optional)
+// removing/updating a media type enum in response (optional)
 func TestBreaking_ResponseMediaTypeEnumRemoved(t *testing.T) {
 	s1, err := open("../data/enums/response-enum.yaml")
 	require.NoError(t, err)
@@ -339,7 +339,7 @@ func TestBreaking_ResponseMediaTypeEnumRemoved(t *testing.T) {
 	require.Equal(t, "response schema `application/json` enum value removed `VALUE_3`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing an existing response with unparseable status is not breaking
+// removing an existing response with unparseable status is not breaking
 func TestBreaking_ResponseUnparseableStatusRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -355,7 +355,7 @@ func TestBreaking_ResponseUnparseableStatusRemoved(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing an existing response with error status is not breaking
+// removing an existing response with error status is not breaking
 func TestBreaking_ResponseErrorStatusRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -371,7 +371,7 @@ func TestBreaking_ResponseErrorStatusRemoved(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing an existing optional response header is breaking as warn
+// removing an existing optional response header is breaking as warn
 func TestBreaking_OptionalResponseHeaderRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -391,7 +391,7 @@ func TestBreaking_OptionalResponseHeaderRemoved(t *testing.T) {
 	require.Equal(t, "the optional response header `X-RateLimit-Limit` removed for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deleting a media-type from response is breaking
+// deleting a media-type from response is breaking
 func TestBreaking_ResponseDeleteMediaType(t *testing.T) {
 	s1, err := open("../data/response-media-type-base.yaml")
 	require.NoError(t, err)
@@ -408,7 +408,7 @@ func TestBreaking_ResponseDeleteMediaType(t *testing.T) {
 	require.Equal(t, "removed the media type `application/json` for the response with the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deleting a pattern from a schema is not breaking
+// deleting a pattern from a schema is not breaking
 func TestBreaking_DeletePatten(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -422,7 +422,7 @@ func TestBreaking_DeletePatten(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: adding a pattern to a schema is breaking
+// adding a pattern to a schema is breaking
 func TestBreaking_AddPattern(t *testing.T) {
 	s1, err := open("../data/pattern-revision.yaml")
 	require.NoError(t, err)
@@ -439,7 +439,7 @@ func TestBreaking_AddPattern(t *testing.T) {
 	require.Equal(t, "added the pattern `^[a-z]+$` to the request property `created`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: adding a pattern to a schema is breaking for recursive properties
+// adding a pattern to a schema is breaking for recursive properties
 func TestBreaking_AddPatternRecursive(t *testing.T) {
 	s1, err := open("../data/pattern-revision-recursive.yaml")
 	require.NoError(t, err)
@@ -456,7 +456,7 @@ func TestBreaking_AddPatternRecursive(t *testing.T) {
 	require.Equal(t, "added the pattern `^[a-z]+$` to the request property `data/created`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: modifying a pattern in a schema is breaking
+// modifying a pattern in a schema is breaking
 func TestBreaking_ModifyPattern(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -474,7 +474,7 @@ func TestBreaking_ModifyPattern(t *testing.T) {
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 }
 
-// BC: modifying a pattern to .* in a schema is not breaking
+// modifying a pattern to .* in a schema is not breaking
 func TestBreaking_GeneralizedPattern(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -488,7 +488,7 @@ func TestBreaking_GeneralizedPattern(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: modifying a pattern in request parameter is breaking
+// modifying a pattern in request parameter is breaking
 func TestBreaking_ModifyParameterPattern(t *testing.T) {
 	s1, err := open("../data/pattern-parameter-base.yaml")
 	require.NoError(t, err)
@@ -505,7 +505,7 @@ func TestBreaking_ModifyParameterPattern(t *testing.T) {
 	require.Equal(t, "changed the pattern of the `path` request parameter `groupId` from `[0-9a-f]+` to `[0-9]+`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: modifying a pattern to ".*" in a schema is not breaking
+// modifying a pattern to ".*" in a schema is not breaking
 func TestBreaking_ModifyPatternToAnyString(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -519,7 +519,7 @@ func TestBreaking_ModifyPatternToAnyString(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: modifying the default value of an optional request parameter is breaking
+// modifying the default value of an optional request parameter is breaking
 func TestBreaking_ModifyRequiredOptionalParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -537,7 +537,7 @@ func TestBreaking_ModifyRequiredOptionalParamDefaultValue(t *testing.T) {
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value was changed from `X` to `Y`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: setting the default value of an optional request parameter is breaking
+// setting the default value of an optional request parameter is breaking
 func TestBreaking_SettingOptionalParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -555,7 +555,7 @@ func TestBreaking_SettingOptionalParamDefaultValue(t *testing.T) {
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value `Y` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing the default value of an optional request parameter is breaking
+// removing the default value of an optional request parameter is breaking
 func TestBreaking_RemovingOptionalParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -573,7 +573,7 @@ func TestBreaking_RemovingOptionalParamDefaultValue(t *testing.T) {
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value `Y` was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: modifying the default value of a required request parameter is not breaking
+// modifying the default value of a required request parameter is not breaking
 func TestBreaking_ModifyRequiredRequiredParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -592,7 +592,7 @@ func TestBreaking_ModifyRequiredRequiredParamDefaultValue(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: removing an schema object from components is breaking (optional)
+// removing an schema object from components is breaking (optional)
 func TestBreaking_SchemaRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -617,7 +617,7 @@ func TestBreaking_SchemaRemoved(t *testing.T) {
 	require.Equal(t, "removed the schema `rules`", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing a media type from request body is breaking
+// removing a media type from request body is breaking
 func TestBreaking_RequestBodyMediaTypeRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_body_media_type_updated_revision.yaml")
 	require.NoError(t, err)
@@ -633,7 +633,7 @@ func TestBreaking_RequestBodyMediaTypeRemoved(t *testing.T) {
 	require.Equal(t, "removed the media type `application/json` from the request body", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing 'anyOf' schema from the request body or request body property is breaking
+// removing 'anyOf' schema from the request body or request body property is breaking
 func TestBreaking_RequestPropertyAnyOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_any_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -655,7 +655,7 @@ func TestBreaking_RequestPropertyAnyOfRemoved(t *testing.T) {
 	require.Equal(t, "removed `#/components/schemas/Breed3` from the `anyOf[#/components/schemas/Dog]/breed` request property `anyOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing 'oneOf' schema from the request body or request body property is breaking
+// removing 'oneOf' schema from the request body or request body property is breaking
 func TestBreaking_RequestPropertyOneOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -676,7 +676,7 @@ func TestBreaking_RequestPropertyOneOfRemoved(t *testing.T) {
 	require.Equal(t, "removed `#/components/schemas/Breed3` from the `oneOf[#/components/schemas/Dog]/breed` request property `oneOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: adding 'allOf' subschema to the request body or request body property is breaking
+// adding 'allOf' subschema to the request body or request body property is breaking
 func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_all_of_added_base.yaml")
 	require.NoError(t, err)
@@ -698,7 +698,7 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: removing 'allOf' subschema from the request body or request body property is breaking with warn
+// removing 'allOf' subschema from the request body or request body property is breaking with warn
 func TestBreaking_RequestPropertyAllOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_all_of_removed_base.yaml")
 	require.NoError(t, err)

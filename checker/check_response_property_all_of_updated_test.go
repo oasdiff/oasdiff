@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding 'allOf' subschema to the response body or response body property
+// adding 'allOf' subschema to the response body or response body property
 func TestResponsePropertyAllOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_all_of_added_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestResponsePropertyAllOfAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding 'allOf' subschema ($ref) with source tracking
+// adding 'allOf' subschema ($ref) with source tracking
 func TestResponsePropertyAllOfAdded_WithSources_Ref(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/response_property_all_of_added_base.yaml", loader)
@@ -64,7 +64,7 @@ func TestResponsePropertyAllOfAdded_WithSources_Ref(t *testing.T) {
 	}
 }
 
-// CL: adding inline 'allOf' subschema to the response body with source tracking
+// adding inline 'allOf' subschema to the response body with source tracking
 func TestResponsePropertyAllOfAdded_WithSources_Inline(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/response_property_all_of_inline_added_base.yaml", loader)
@@ -86,7 +86,7 @@ func TestResponsePropertyAllOfAdded_WithSources_Inline(t *testing.T) {
 	require.Greater(t, errs[0].GetRevisionSource().Line, 17)
 }
 
-// CL: removing 'allOf' subschema from the response body or response body property
+// removing 'allOf' subschema from the response body or response body property
 func TestResponsePropertyAllOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_all_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -118,7 +118,7 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding an allOf subschema to a response body whose body is
+// adding an allOf subschema to a response body whose body is
 // annotation-only is emitted as a distinct INFO change instead of the
 // original allOf-added INFO. The response-side severity is unchanged
 // (INFO either way), but the new ID makes the wire-contract-neutral

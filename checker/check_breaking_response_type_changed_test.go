@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: changing response's body schema type from string to number is breaking
+// changing response's body schema type from string to number is breaking
 func TestBreaking_RespTypeStringToNumber(t *testing.T) {
 	file := "../data/type-change/simple-response.yaml"
 
@@ -28,7 +28,7 @@ func TestBreaking_RespTypeStringToNumber(t *testing.T) {
 	require.Equal(t, "the response's body `type` changed from `string` to `number` for status `200`", requireChange(t, errs, checker.ResponseBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing response's body schema type from number to string is breaking
+// changing response's body schema type from number to string is breaking
 func TestBreaking_RespTypeNumberToString(t *testing.T) {
 	file := "../data/type-change/simple-response.yaml"
 
@@ -47,7 +47,7 @@ func TestBreaking_RespTypeNumberToString(t *testing.T) {
 	require.Equal(t, "the response's body `type` changed from `number` to `string` for status `200`", requireChange(t, errs, checker.ResponseBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing response's body schema type from number to integer is not breaking
+// changing response's body schema type from number to integer is not breaking
 func TestBreaking_RespTypeNumberToInteger(t *testing.T) {
 	file := "../data/type-change/simple-response.yaml"
 
@@ -65,7 +65,7 @@ func TestBreaking_RespTypeNumberToInteger(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing response's body schema type from integer to number is breaking
+// changing response's body schema type from integer to number is breaking
 func TestBreaking_RespTypeIntegerToNumber(t *testing.T) {
 	file := "../data/type-change/simple-response.yaml"
 
@@ -84,7 +84,7 @@ func TestBreaking_RespTypeIntegerToNumber(t *testing.T) {
 	require.Equal(t, "the response's body `type` changed from `integer` to `number` for status `200`", requireChange(t, errs, checker.ResponseBodyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing response's body schema type from number/none to integer/int32 is not breaking
+// changing response's body schema type from number/none to integer/int32 is not breaking
 func TestBreaking_RespTypeNumberToInt32(t *testing.T) {
 	file := "../data/type-change/simple-response.yaml"
 
@@ -103,7 +103,7 @@ func TestBreaking_RespTypeNumberToInt32(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: changing response's embedded property schema type from string/none to integer/int32 is breaking
+// changing response's embedded property schema type from string/none to integer/int32 is breaking
 func TestBreaking_RespTypeChanged(t *testing.T) {
 	s1, err := open("../data/type-change/base-response.yaml")
 	require.NoError(t, err)

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: deleting sunset header for a deprecated parameter is breaking
+// deleting sunset header for a deprecated parameter is breaking
 func TestBreaking_SunsetDeletedForDeprecatedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-with-sunset.yaml"))
@@ -25,7 +25,7 @@ func TestBreaking_SunsetDeletedForDeprecatedParameter(t *testing.T) {
 	require.Equal(t, "`query` request parameter `id` sunset date deleted, but deprecated=true kept", requireChange(t, errs, checker.RequestParameterSunsetDeletedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deleting sunset header for a deprecated parameter is breaking even if the parameter is renamed
+// deleting sunset header for a deprecated parameter is breaking even if the parameter is renamed
 func TestBreaking_SunsetDeletedForDeprecatedAndRenamedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-with-sunset-path.yaml"))
@@ -42,7 +42,7 @@ func TestBreaking_SunsetDeletedForDeprecatedAndRenamedParameter(t *testing.T) {
 	require.Equal(t, "`path` request parameter `id` sunset date deleted, but deprecated=true kept", requireChange(t, errs, checker.RequestParameterSunsetDeletedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing sunset to an earlier date for a deprecated parameter with a deprecation policy is breaking
+// changing sunset to an earlier date for a deprecated parameter with a deprecation policy is breaking
 func TestBreaking_SunsetModifiedForDeprecatedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
@@ -59,7 +59,7 @@ func TestBreaking_SunsetModifiedForDeprecatedParameter(t *testing.T) {
 	require.Equal(t, "`query` request parameter `id` sunset date changed to an earlier date, from `9999-08-10` to `2022-08-10`, new sunset date must be not earlier than `9999-08-10` and at least `180` days from now", requireChange(t, errs, checker.RequestParameterSunsetDateChangedTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: changing sunset to an invalid date for a deprecated parameter is breaking
+// changing sunset to an invalid date for a deprecated parameter is breaking
 func TestBreaking_SunsetModifiedToInvalidForDeprecatedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
@@ -77,7 +77,7 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedParameter(t *testing.T) {
 	require.Equal(t, "../data/param-deprecation/deprecated-invalid.yaml", errs[0].GetSource())
 }
 
-// BC: changing sunset from an invalid date for a deprecated parameter is breaking
+// changing sunset from an invalid date for a deprecated parameter is breaking
 func TestBreaking_SunsetModifiedFromInvalidForDeprecatedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-invalid.yaml"))
@@ -95,7 +95,7 @@ func TestBreaking_SunsetModifiedFromInvalidForDeprecatedParameter(t *testing.T) 
 	require.Equal(t, "../data/param-deprecation/deprecated-invalid.yaml", errs[0].GetSource())
 }
 
-// BC: deleting other extension (not sunset) header for a deprecated parameter is not breaking
+// deleting other extension (not sunset) header for a deprecated parameter is not breaking
 func TestBreaking_NonSunsetDeletedForDeprecatedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-with-other-extension.yaml"))
@@ -110,7 +110,7 @@ func TestBreaking_NonSunsetDeletedForDeprecatedParameter(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: no change to headers for a deprecated parameter is not breaking
+// no change to headers for a deprecated parameter is not breaking
 func TestBreaking_NoChangeToSunsetDeprecatedParameter(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))

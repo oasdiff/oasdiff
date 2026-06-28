@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding prefixItems to response body
+// adding prefixItems to response body
 func TestResponseBodyPrefixItemsAdded(t *testing.T) {
 	s1, err := open("../data/checker/prefix_items_added_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestResponseBodyPrefixItemsAdded(t *testing.T) {
 	require.True(t, found, "expected response-body-prefix-items-added")
 }
 
-// CL: removing prefixItems from response body
+// removing prefixItems from response body
 func TestResponseBodyPrefixItemsRemoved(t *testing.T) {
 	s1, err := open("../data/checker/prefix_items_added_revision.yaml")
 	require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestResponseBodyPrefixItemsRemoved(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponseBodyPrefixItemsRemovedId), "expected response-body-prefix-items-removed")
 }
 
-// CL: adding prefixItems to response property
+// adding prefixItems to response property
 func TestResponsePropertyPrefixItemsAdded(t *testing.T) {
 	s1, err := open("../data/checker/prefix_items_prop_base.yaml")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestResponsePropertyPrefixItemsAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.ResponsePropertyPrefixItemsAddedId), "expected response-property-prefix-items-added")
 }
 
-// CL: removing prefixItems from response property
+// removing prefixItems from response property
 func TestResponsePropertyPrefixItemsRemoved(t *testing.T) {
 	s1, err := open("../data/checker/prefix_items_prop_revision.yaml")
 	require.NoError(t, err)

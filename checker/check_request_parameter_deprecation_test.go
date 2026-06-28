@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: deprecating a parameter with a deprecation policy and an invalid sunset date is breaking
+// deprecating a parameter with a deprecation policy and an invalid sunset date is breaking
 func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("base.yaml"))
@@ -29,7 +29,7 @@ func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `sunset date doesn't conform with RFC3339: invalid-date`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating a parameter without a deprecation policy but without specifying sunset date is not breaking
+// deprecating a parameter without a deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_ParameterDeprecationWithoutSunsetNoPolicy(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("base.yaml"))
@@ -45,7 +45,7 @@ func TestBreaking_ParameterDeprecationWithoutSunsetNoPolicy(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating a parameter with a deprecation policy but without specifying sunset date is breaking
+// deprecating a parameter with a deprecation policy but without specifying sunset date is breaking
 func TestBreaking_ParameterDeprecationWithoutSunsetWithPolicy(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("base.yaml"))
@@ -62,7 +62,7 @@ func TestBreaking_ParameterDeprecationWithoutSunsetWithPolicy(t *testing.T) {
 	require.Equal(t, "`query` request parameter `id` was deprecated without sunset date", requireChange(t, errs, checker.RequestParameterDeprecatedSunsetMissingId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating a parameter with a default deprecation policy but without specifying sunset date is not breaking
+// deprecating a parameter with a default deprecation policy but without specifying sunset date is not breaking
 func TestBreaking_ParameterDeprecationWithoutSunset(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("base.yaml"))
@@ -78,7 +78,7 @@ func TestBreaking_ParameterDeprecationWithoutSunset(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for alpha level
+// deprecating an operation without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestBreaking_ParameterDeprecationForAlpha(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("base-alpha-stability.yaml"))
@@ -93,7 +93,7 @@ func TestBreaking_ParameterDeprecationForAlpha(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating a parameter with a deprecation policy and sunset date before required deprecation period is breaking
+// deprecating a parameter with a deprecation policy and sunset date before required deprecation period is breaking
 func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -113,7 +113,7 @@ func TestBreaking_ParameterDeprecationWithEarlySunset(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("`query` request parameter `id` sunset date `%s` is too small, must be at least `10` days from now", sunsetDate), requireChange(t, errs, checker.RequestParameterSunsetDateTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating a parameter with a deprecation policy and sunset date after required deprecation period is not breaking
+// deprecating a parameter with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 
 	s1, err := open(paramDeprecationFile("base.yaml"))
@@ -135,7 +135,7 @@ func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "`query` request parameter `id` was deprecated")
 }
 
-// CL: parameters that became deprecated
+// parameters that became deprecated
 func TestParameterDeprecated_DetectsDeprecated(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -158,7 +158,7 @@ func TestParameterDeprecated_DetectsDeprecated(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "`query` request parameter `id` was deprecated")
 }
 
-// CL: parameters that were re-activated
+// parameters that were re-activated
 func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
 	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
@@ -181,7 +181,7 @@ func TestParameterDeprecated_DetectsReactivated(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "`query` request parameter `id` was reactivated")
 }
 
-// CL: message includes sunset details when parameter deprecated with sunset date
+// message includes sunset details when parameter deprecated with sunset date
 func TestParameterDeprecated_MessageIncludesSunset(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -199,7 +199,7 @@ func TestParameterDeprecated_MessageIncludesSunset(t *testing.T) {
 	require.Equal(t, "`query` request parameter `id` was deprecated (sunset: 9999-08-10)", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: message includes both sunset and stability when parameter deprecated with both
+// message includes both sunset and stability when parameter deprecated with both
 func TestParameterDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)
@@ -217,7 +217,7 @@ func TestParameterDeprecated_MessageIncludesSunsetAndStability(t *testing.T) {
 	require.Equal(t, "`query` request parameter `id` was deprecated (sunset: 9999-08-10, stability: beta)", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: message has no details when parameter deprecated without sunset or stability
+// message has no details when parameter deprecated without sunset or stability
 func TestParameterDeprecated_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -235,7 +235,7 @@ func TestParameterDeprecated_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, "`query` request parameter `id` was deprecated", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: message includes stability when parameter deprecated with stability but no sunset
+// message includes stability when parameter deprecated with stability but no sunset
 func TestParameterDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 	s1, err := open(paramDeprecationFile("base-beta-stability.yaml"))
 	require.NoError(t, err)

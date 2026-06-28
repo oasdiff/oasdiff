@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request body type
+// changing request body type
 func TestRequestBodyTypeChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request body type
+// changing request body type
 func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property type
+// changing request property type
 func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -77,7 +77,7 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: narrowing a request property union type is breaking
+// narrowing a request property union type is breaking
 func TestRequestPropertyTypeUnionNarrowedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -97,7 +97,7 @@ func TestRequestPropertyTypeUnionNarrowedCheck(t *testing.T) {
 	require.Equal(t, checker.RequestPropertyTypeChangedId, errs[0].GetId())
 }
 
-// CL: removing a request property type constraint is not breaking
+// removing a request property type constraint is not breaking
 func TestRequestPropertyTypeDeletedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -117,7 +117,7 @@ func TestRequestPropertyTypeDeletedCheck(t *testing.T) {
 	require.Equal(t, checker.RequestPropertyTypeGeneralizedId, errs[0].GetId())
 }
 
-// CL: changing request body and property types from array to object
+// changing request body and property types from array to object
 func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base_array_to_object.yaml")
 	require.NoError(t, err)
@@ -148,7 +148,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request body and property types from object to array
+// changing request body and property types from object to array
 func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_revision_array_to_object.yaml")
 	require.NoError(t, err)
@@ -179,7 +179,7 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property format
+// changing request property format
 func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -202,7 +202,7 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: generalizing request property format
+// generalizing request property format
 func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -226,7 +226,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	}, errs)
 }
 
-// CL: no changes when paths diff is nil
+// no changes when paths diff is nil
 func TestRequestPropertyTypeChangedNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{}
@@ -236,7 +236,7 @@ func TestRequestPropertyTypeChangedNoPathsDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when operations diff is nil
+// no changes when operations diff is nil
 func TestRequestPropertyTypeChangedNoOperationsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -252,7 +252,7 @@ func TestRequestPropertyTypeChangedNoOperationsDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when request body diff is nil
+// no changes when request body diff is nil
 func TestRequestPropertyTypeChangedNoRequestBodyDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -274,7 +274,7 @@ func TestRequestPropertyTypeChangedNoRequestBodyDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when schema diff is nil
+// no changes when schema diff is nil
 func TestRequestPropertyTypeChangedNoSchemaDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -304,7 +304,7 @@ func TestRequestPropertyTypeChangedNoSchemaDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when property is read-only
+// no changes when property is read-only
 func TestRequestPropertyTypeChangedReadOnlyProperty(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -328,7 +328,7 @@ func setRequestBodyType(t *testing.T, s *load.SpecInfo, types *openapi3.Types) {
 	s.Spec.Paths.Value("/test").Post.RequestBody.Value.Content["application/json"].Schema.Value.Type = types
 }
 
-// BC: widening a request type set ([string] -> [string, integer]) is not
+// widening a request type set ([string] -> [string, integer]) is not
 // breaking; the server accepts every type it did before plus more. Mirror of the
 // response narrowing case.
 func TestRequestBodyTypeWideningMultiTypeNotBreaking(t *testing.T) {
@@ -346,7 +346,7 @@ func TestRequestBodyTypeWideningMultiTypeNotBreaking(t *testing.T) {
 		"widening a request type set is non-breaking; must not report request-body-type-changed")
 }
 
-// BC: removing the type entirely from a request ([string] -> no type) is not
+// removing the type entirely from a request ([string] -> no type) is not
 // breaking; the server now accepts any value (a generalization).
 func TestRequestBodyTypeRemovedNotBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
@@ -363,7 +363,7 @@ func TestRequestBodyTypeRemovedNotBreaking(t *testing.T) {
 		"removing the type from a request accepts any value; non-breaking")
 }
 
-// BC: narrowing a request type set ([string, integer] -> [string]) is breaking
+// narrowing a request type set ([string, integer] -> [string]) is breaking
 // under a strongly-typed media type; a client sending integer is now rejected.
 func TestRequestBodyTypeNarrowingStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
@@ -380,7 +380,7 @@ func TestRequestBodyTypeNarrowingStillBreaking(t *testing.T) {
 		"narrowing a request type set is breaking")
 }
 
-// BC: adding a type constraint to a previously untyped request (no type ->
+// adding a type constraint to a previously untyped request (no type ->
 // [string]) is breaking; it restricts the accepted values.
 func TestRequestBodyTypeAddedFromUntypedStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-request.yaml")
@@ -397,7 +397,7 @@ func TestRequestBodyTypeAddedFromUntypedStillBreaking(t *testing.T) {
 		"constraining a previously untyped request is breaking")
 }
 
-// BC: a request type widening that co-occurs with a breaking format change is
+// a request type widening that co-occurs with a breaking format change is
 // breaking; the safe type axis must not mask the format axis. [integer] ->
 // [integer, string] widens the type (not breaking on its own), but int64 ->
 // int32 narrows the format (a client sending an int64 value is now rejected),

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: increasing maximum value of request parameter
+// increasing maximum value of request parameter
 func TestRequestParameterMaxIncreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_max_updated_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestParameterMaxIncreased(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing maximum value of request parameter
+// decreasing maximum value of request parameter
 func TestRequestParameterMaxDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_parameter_max_updated_revision.yaml")
 	require.NoError(t, err)

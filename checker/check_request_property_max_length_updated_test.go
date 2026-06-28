@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: increasing max length of request body
+// increasing max length of request body
 func TestRequestBodyMaxLengthDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_body_max_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -35,7 +35,7 @@ func TestRequestBodyMaxLengthDecreasedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing max length of request body
+// decreasing max length of request body
 func TestRequestBodyMaxLengthIncreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_body_max_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -61,7 +61,7 @@ func TestRequestBodyMaxLengthIncreasedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing max length of request property
+// decreasing max length of request property
 func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_body_max_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -87,7 +87,7 @@ func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	require.Equal(t, "the `description` request property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: decreasing max length of request read-only property
+// decreasing max length of request read-only property
 func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_body_max_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -115,7 +115,7 @@ func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	require.Equal(t, "the `description` request read-only property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: increasing max length of request property
+// increasing max length of request property
 func TestRequestPropertyMaxLengthIncreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_body_max_length_decreased_base.yaml")
 	require.NoError(t, err)

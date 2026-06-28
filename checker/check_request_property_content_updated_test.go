@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding contentSchema and changing contentMediaType/contentEncoding in request property
+// adding contentSchema and changing contentMediaType/contentEncoding in request property
 func TestRequestPropertyContentUpdated(t *testing.T) {
 	s1, err := open("../data/checker/content_schema_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestPropertyContentUpdated(t *testing.T) {
 	require.True(t, ids[checker.RequestPropertyContentEncodingChangedId], "expected request-property-content-encoding-changed")
 }
 
-// CL: adding contentSchema to request body
+// adding contentSchema to request body
 func TestRequestBodyContentSchemaAdded(t *testing.T) {
 	s1, err := open("../data/checker/content_schema_body_base.yaml")
 	require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestRequestBodyContentSchemaAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestBodyContentSchemaAddedId), "expected request-body-content-schema-added")
 }
 
-// CL: removing contentSchema from request body
+// removing contentSchema from request body
 func TestRequestBodyContentSchemaRemoved(t *testing.T) {
 	s1, err := open("../data/checker/content_schema_body_revision.yaml")
 	require.NoError(t, err)
@@ -57,7 +57,7 @@ func TestRequestBodyContentSchemaRemoved(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestBodyContentSchemaRemovedId), "expected request-body-content-schema-removed")
 }
 
-// CL: adding/changing content fields on request property
+// adding/changing content fields on request property
 func TestRequestPropertyContentUpdatedProp(t *testing.T) {
 	s1, err := open("../data/checker/content_schema_prop_base.yaml")
 	require.NoError(t, err)

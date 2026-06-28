@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding a new global security to the API
+// adding a new global security to the API
 func TestAPIGlobalSecurityyAdded(t *testing.T) {
 	s1, err := open("../data/checker/api_security_global_added_base.yaml")
 	require.NoError(t, err)
@@ -28,7 +28,7 @@ func TestAPIGlobalSecurityyAdded(t *testing.T) {
 	require.Equal(t, "the security scheme `petstore_auth: [read:pets, write:pets]` was added to the API", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing a global security from the API
+// removing a global security from the API
 func TestAPIGlobalSecurityyDeleted(t *testing.T) {
 	s1, err := open("../data/checker/api_security_global_added_revision.yaml")
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestAPIGlobalSecurityyDeleted(t *testing.T) {
 	require.Equal(t, "the security scheme `petstore_auth: [read:pets, write:pets]` was removed from the API", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing a security scope from an API global security
+// removing a security scope from an API global security
 func TestAPIGlobalSecurityScopeRemoved(t *testing.T) {
 	s1, err := open("../data/checker/api_security_global_added_revision.yaml")
 	require.NoError(t, err)
@@ -67,7 +67,7 @@ func TestAPIGlobalSecurityScopeRemoved(t *testing.T) {
 	require.Equal(t, "the security scope `read:pets` was removed from the global security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: adding a security scope from an API global security
+// adding a security scope from an API global security
 func TestAPIGlobalSecurityScopeAdded(t *testing.T) {
 	s1, err := open("../data/checker/api_security_global_added_revision.yaml")
 	require.NoError(t, err)
@@ -87,7 +87,7 @@ func TestAPIGlobalSecurityScopeAdded(t *testing.T) {
 	require.Equal(t, "the security scope `read:pets` was added to the global security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: adding a new security to the API endpoint
+// adding a new security to the API endpoint
 func TestAPISecurityAdded(t *testing.T) {
 	s1, err := open("../data/checker/api_security_added_base.yaml")
 	require.NoError(t, err)
@@ -107,7 +107,7 @@ func TestAPISecurityAdded(t *testing.T) {
 	require.Equal(t, "the endpoint scheme security `petstore_auth: [read:pets, write:pets]` was added to the API", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing a new security to the API endpoint
+// removing a new security to the API endpoint
 func TestAPISecurityDeleted(t *testing.T) {
 	s1, err := open("../data/checker/api_security_added_revision.yaml")
 	require.NoError(t, err)
@@ -127,7 +127,7 @@ func TestAPISecurityDeleted(t *testing.T) {
 	require.Equal(t, "the endpoint scheme security `petstore_auth: [read:pets, write:pets]` was removed from the API", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: removing a security scope from an API endpoint security
+// removing a security scope from an API endpoint security
 func TestAPISecurityScopeRemoved(t *testing.T) {
 	s1, err := open("../data/checker/api_security_updated_base.yaml")
 	require.NoError(t, err)
@@ -147,7 +147,7 @@ func TestAPISecurityScopeRemoved(t *testing.T) {
 	require.Equal(t, "the security scope `read:pets` was removed from the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: adding a security scope to an API endpoint security
+// adding a security scope to an API endpoint security
 func TestAPISecurityScopeAdded(t *testing.T) {
 	s1, err := open("../data/checker/api_security_updated_revision.yaml")
 	require.NoError(t, err)

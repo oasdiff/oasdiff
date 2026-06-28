@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding discriminator to the response body or response property
+// adding discriminator to the response body or response property
 func TestResponseDiscriminatorUpdatedCheckAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_property_discriminator_added_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestResponseDiscriminatorUpdatedCheckAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: removing discriminator from the response body or response property
+// removing discriminator from the response body or response property
 func TestResponseDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_property_discriminator_added_revision.yaml")
 	require.NoError(t, err)
@@ -73,7 +73,7 @@ func TestResponseDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: changing discriminator propertyName in the response body or response property
+// changing discriminator propertyName in the response body or response property
 func TestResponseDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 	s1, err := open("../data/checker/response_property_discriminator_added_revision.yaml")
 	require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestResponseDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 		}}, errs)
 }
 
-// CL: changing discriminator mapping in the response body or response property
+// changing discriminator mapping in the response body or response property
 func TestResponseDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 	s1, err := open("../data/checker/response_property_discriminator_added_revision.yaml")
 	require.NoError(t, err)

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: changing an existing header param from optional to required is breaking
+// changing an existing header param from optional to required is breaking
 func TestBreaking_HeaderParamBecameRequired(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -30,7 +30,7 @@ func TestBreaking_HeaderParamBecameRequired(t *testing.T) {
 	}, errs)
 }
 
-// BC: changing an existing header param from optional to required with source tracking
+// changing an existing header param from optional to required with source tracking
 func TestBreaking_HeaderParamBecameRequired_WithSources(t *testing.T) {
 	s1 := l(t, 1, newLoaderWithOriginTracking())
 	s2 := l(t, 1, newLoaderWithOriginTracking())
@@ -50,7 +50,7 @@ func TestBreaking_HeaderParamBecameRequired_WithSources(t *testing.T) {
 	require.Empty(t, errs[0].GetRevisionSource())
 }
 
-// CL: changing an existing header param from required to optional
+// changing an existing header param from required to optional
 func TestBreaking_HeaderParamBecameOptional(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)

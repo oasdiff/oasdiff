@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing a response schema type
+// changing a response schema type
 func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_schema_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing a response property schema type from string to integer
+// changing a response property schema type from string to integer
 func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_schema_type_changed_revision.yaml")
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing a response property schema format
+// changing a response property schema format
 func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_schema_format_changed_base.yaml")
 	require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing properties of subschemas under allOf
+// changing properties of subschemas under allOf
 func TestResponsePropertyAnyOfModified(t *testing.T) {
 	s1, err := open("../data/checker/response_property_any_of_complex_base.yaml")
 	require.NoError(t, err)
@@ -112,7 +112,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		}}, errs)
 }
 
-// CL: changing a response property schema type from a single value to to multiple types
+// changing a response property schema type from a single value to to multiple types
 func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_schema_type_changed_revision.yaml")
 	require.NoError(t, err)
@@ -134,7 +134,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	}, errs)
 }
 
-// BC: changing an additionalResponse property schema type from integer to string is breaking
+// changing an additionalResponse property schema type from integer to string is breaking
 func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	s1, err := open("../data/additional-properties/base.yaml")
 	require.NoError(t, err)
@@ -154,7 +154,7 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	}, errs)
 }
 
-// BC: changing an embedded additionalResponse property schema type from integer to string is breaking
+// changing an embedded additionalResponse property schema type from integer to string is breaking
 func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 	s1, err := open("../data/additional-properties/embedded-base.yaml")
 	require.NoError(t, err)
@@ -180,7 +180,7 @@ func setResponseBodyType(t *testing.T, s *load.SpecInfo, types *openapi3.Types) 
 	s.Spec.Paths.Value("/test").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value.Type = types
 }
 
-// BC: narrowing a response type set ([string, integer] -> [string]) is not
+// narrowing a response type set ([string, integer] -> [string]) is not
 // breaking; the server returns fewer kinds of values, all of which the client
 // already handled. (#1003 / #989 Gap 2)
 func TestResponseBodyTypeNarrowingMultiTypeNotBreaking(t *testing.T) {
@@ -198,7 +198,7 @@ func TestResponseBodyTypeNarrowingMultiTypeNotBreaking(t *testing.T) {
 		"narrowing a response type set is non-breaking; must not report response-body-type-changed")
 }
 
-// BC: narrowing a previously untyped response to a concrete type (no type ->
+// narrowing a previously untyped response to a concrete type (no type ->
 // [string]) is not breaking; the server returns fewer kinds of values.
 func TestResponseBodyTypeAddedFromUntypedNotBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
@@ -215,7 +215,7 @@ func TestResponseBodyTypeAddedFromUntypedNotBreaking(t *testing.T) {
 		"narrowing an untyped response to a concrete type is non-breaking")
 }
 
-// BC: widening a response type set ([string] -> [string, integer]) is breaking;
+// widening a response type set ([string] -> [string, integer]) is breaking;
 // the server may now return a type the client did not handle.
 func TestResponseBodyTypeWideningStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
@@ -232,7 +232,7 @@ func TestResponseBodyTypeWideningStillBreaking(t *testing.T) {
 		"widening a response type set is breaking")
 }
 
-// BC: removing the type entirely from a response ([string] -> no type) is
+// removing the type entirely from a response ([string] -> no type) is
 // breaking; the server may now return any value.
 func TestResponseBodyTypeRemovedStillBreaking(t *testing.T) {
 	s1, err := open("../data/type-change/simple-response.yaml")
@@ -249,7 +249,7 @@ func TestResponseBodyTypeRemovedStillBreaking(t *testing.T) {
 		"removing the type from a response is breaking")
 }
 
-// BC: a response type narrowing that co-occurs with a breaking format change is
+// a response type narrowing that co-occurs with a breaking format change is
 // breaking; the safe type axis must not mask the format axis. [string, integer]
 // -> [integer] narrows the type (not breaking on its own), but int32 -> int64
 // widens the format (the server may now return values outside the range a client

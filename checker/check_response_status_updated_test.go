@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding a success response status
+// adding a success response status
 func TestResponseSuccessStatusAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_status_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestResponseSuccessStatusAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding a non-success response status
+// adding a non-success response status
 func TestResponseNonSuccessStatusAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_status_base.yaml")
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestResponseNonSuccessStatusAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing a non-success response status
+// removing a non-success response status
 func TestResponseNonSuccessStatusRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_status_base.yaml")
 	require.NoError(t, err)
@@ -78,7 +78,7 @@ func TestResponseNonSuccessStatusRemoved(t *testing.T) {
 	}, errs)
 }
 
-// BC: removing a success status is breaking
+// removing a success status is breaking
 func TestResponseSuccessStatusRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_status_base.yaml")
 	require.NoError(t, err)

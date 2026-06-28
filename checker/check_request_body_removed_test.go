@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: removing request body is breaking
+// removing request body is breaking
 func TestRequestBodyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_body_removed_base.yaml")
 	require.NoError(t, err)

@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding dependentRequired to request body
+// adding dependentRequired to request body
 func TestRequestBodyDependentRequiredAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyDependentRequiredAdded(t *testing.T) {
 	require.True(t, found, "expected request-body-dependent-required-added")
 }
 
-// CL: changing dependentRequired on request body
+// changing dependentRequired on request body
 func TestRequestBodyDependentRequiredChanged(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_revision.yaml")
 	require.NoError(t, err)
@@ -43,7 +43,7 @@ func TestRequestBodyDependentRequiredChanged(t *testing.T) {
 	requireChange(t, errs, checker.RequestBodyDependentRequiredChangedId)
 }
 
-// CL: adding dependentRequired to request property
+// adding dependentRequired to request property
 func TestRequestPropertyDependentRequiredAdded(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_base.yaml")
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestRequestPropertyDependentRequiredAdded(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyDependentRequiredAddedId)
 }
 
-// CL: removing dependentRequired from request property
+// removing dependentRequired from request property
 func TestRequestPropertyDependentRequiredRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_revision.yaml")
 	require.NoError(t, err)
@@ -69,7 +69,7 @@ func TestRequestPropertyDependentRequiredRemoved(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyDependentRequiredRemovedId)
 }
 
-// CL: changing dependentRequired on request property
+// changing dependentRequired on request property
 func TestRequestPropertyDependentRequiredChanged(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_property_changed_base.yaml")
 	require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestRequestPropertyDependentRequiredChanged(t *testing.T) {
 	requireChange(t, errs, checker.RequestPropertyDependentRequiredChangedId)
 }
 
-// CL: removing dependentRequired from request body
+// removing dependentRequired from request body
 func TestRequestBodyDependentRequiredRemoved(t *testing.T) {
 	s1, err := open("../data/checker/dependent_required_revision.yaml")
 	require.NoError(t, err)

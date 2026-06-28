@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: new paths or path operations
+// new paths or path operations
 func TestApiAdded_DetectsNewPathsAndNewOperations(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/new_endpoints/base.yaml", loader)
@@ -43,7 +43,7 @@ func TestApiAdded_DetectsNewPathsAndNewOperations(t *testing.T) {
 	require.Equal(t, checker.NewSource("../data/new_endpoints/revision.yaml", 27, 5), e1.GetRevisionSource())
 }
 
-// CL: new paths or path operations
+// new paths or path operations
 func TestApiAdded_DetectsModifiedPathsWithPathParam(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/new_endpoints/base_with_path_param.yaml", loader)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: decreasing minLength of request property
+// decreasing minLength of request property
 func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -31,7 +31,7 @@ func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 	}, errs)
 }
 
-// CL: increasing minLength of request property
+// increasing minLength of request property
 func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -53,7 +53,7 @@ func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 	}, errs)
 }
 
-// CL: increasing minLength of request body
+// increasing minLength of request body
 func TestRequestBodyMinLengthIncreased(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_length_decreased_base.yaml")
 	require.NoError(t, err)
@@ -75,7 +75,7 @@ func TestRequestBodyMinLengthIncreased(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing minLength of request body
+// decreasing minLength of request body
 func TestRequestBodyMinLengthDecreased(t *testing.T) {
 	s1, err := open("../data/checker/request_property_min_length_decreased_base.yaml")
 	require.NoError(t, err)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing optional response property to write-only
+// changing optional response property to write-only
 func TestResponseOptionalPropertyBecameWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestResponseOptionalPropertyBecameWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional response property to not write-only
+// changing optional response property to not write-only
 func TestResponseOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -55,7 +55,7 @@ func TestResponseOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional response property to read-only
+// changing optional response property to read-only
 func TestResponseOptionalPropertyBecameReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -78,7 +78,7 @@ func TestResponseOptionalPropertyBecameReadOnly(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional response property to not read-only
+// changing optional response property to not read-only
 func TestResponseOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)

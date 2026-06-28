@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding propertyNames to request body
+// adding propertyNames to request body
 func TestRequestBodyPropertyNamesAdded(t *testing.T) {
 	s1, err := open("../data/checker/property_names_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestBodyPropertyNamesAdded(t *testing.T) {
 	require.True(t, found, "expected request-body-property-names-added")
 }
 
-// CL: removing propertyNames from request body
+// removing propertyNames from request body
 func TestRequestBodyPropertyNamesRemoved(t *testing.T) {
 	s1, err := open("../data/checker/property_names_revision.yaml")
 	require.NoError(t, err)
@@ -52,7 +52,7 @@ func TestRequestBodyPropertyNamesRemoved(t *testing.T) {
 	require.True(t, found, "expected request-body-property-names-removed")
 }
 
-// CL: adding propertyNames to request property
+// adding propertyNames to request property
 func TestRequestPropertyPropertyNamesAdded(t *testing.T) {
 	s1, err := open("../data/checker/property_names_prop_base.yaml")
 	require.NoError(t, err)
@@ -66,7 +66,7 @@ func TestRequestPropertyPropertyNamesAdded(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyPropertyNamesAddedId), "expected request-property-property-names-added")
 }
 
-// CL: removing propertyNames from request property
+// removing propertyNames from request property
 func TestRequestPropertyPropertyNamesRemoved(t *testing.T) {
 	s1, err := open("../data/checker/property_names_prop_revision.yaml")
 	require.NoError(t, err)

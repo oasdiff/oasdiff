@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing required response property to optional
+// changing required response property to optional
 func TestResponsePropertyBecameOptionalCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_became_optional_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestResponsePropertyBecameOptionalCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing required response property to optional — schema defined in an external $ref file.
+// changing required response property to optional — schema defined in an external $ref file.
 // Verifies that source tracking (base source) points to the correct line in the $ref'd file.
 // This exercises the yaml3 root-mapping origin fix: previously, schemas loaded from $ref'd files
 // had Origin==nil because document() in yaml3 never injected __origin__ for the root mapping.
@@ -68,7 +68,7 @@ func TestResponsePropertyBecameOptionalCheck_ExternalRef(t *testing.T) {
 	require.Equal(t, 3, base.Line, "base source line must point to '- id' in pet.yaml")
 }
 
-// CL: changing write-only required response property to optional
+// changing write-only required response property to optional
 func TestResponseWriteOnlyPropertyBecameOptionalCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_became_optional_base.yaml")
 	require.NoError(t, err)

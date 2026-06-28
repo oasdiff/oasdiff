@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: Deleting a value from an x-extensible-enum property is breaking
+// Deleting a value from an x-extensible-enum property is breaking
 func TestRequestPropertyXExtensibleEnumValueRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_extensible_enum_base.yaml")
 	require.NoError(t, err)

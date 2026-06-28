@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: removing an optional write-only property from a response
+// removing an optional write-only property from a response
 func TestResponseOptionalPropertyUpdatedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_removed_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestResponseOptionalPropertyUpdatedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding an optional write-only property to a response
+// adding an optional write-only property to a response
 func TestResponseOptionalPropertyAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_removed_revision.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestResponseOptionalPropertyAddedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing an optional write-only property from a response
+// removing an optional write-only property from a response
 func TestResponseOptionalWriteOnlyPropertyRemovedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_removed_base.yaml")
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestResponseOptionalWriteOnlyPropertyRemovedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding an optional write-only property to a response
+// adding an optional write-only property to a response
 func TestResponseOptionalWriteOnlyPropertyAddedCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_optional_property_removed_revision.yaml")
 	require.NoError(t, err)

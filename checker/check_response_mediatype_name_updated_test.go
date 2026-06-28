@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// BC: changing parameters of a media type is not breaking
+// changing parameters of a media type is not breaking
 func TestChangeMediaTypeParameters(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)
@@ -23,7 +23,7 @@ func TestChangeMediaTypeParameters(t *testing.T) {
 	require.Equal(t, "media type `application/json` was changed to `application/problem+json;q=1` for the response status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: modifying a media type name in response to make it more specific is not breaking
+// modifying a media type name in response to make it more specific is not breaking
 func TestSpecializeMediaTypeName(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)
@@ -38,7 +38,7 @@ func TestSpecializeMediaTypeName(t *testing.T) {
 	require.Equal(t, "media type `application/json` was changed to a more specific media type `application/problem+json` for the response status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: modifying a media type name in response to make it more general is breaking
+// modifying a media type name in response to make it more general is breaking
 func TestGeneralizeMediaTypeName(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_name_modified.yaml")
 	require.NoError(t, err)

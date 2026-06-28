@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing request body const value
+// changing request body const value
 func TestRequestBodyConstChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_body_const_changed_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestRequestBodyConstChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing request property const value
+// changing request property const value
 func TestRequestPropertyConstChanged(t *testing.T) {
 	s1, err := open("../data/checker/request_body_const_changed_base.yaml")
 	require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestRequestPropertyConstChanged(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding request body const value or request property const value
+// adding request body const value or request property const value
 func TestRequestBodyConstAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_body_const_changed_base.yaml")
 	require.NoError(t, err)
@@ -83,7 +83,7 @@ func TestRequestBodyConstAdded(t *testing.T) {
 	}}, errs)
 }
 
-// CL: removing request body const value or request property const value
+// removing request body const value or request property const value
 func TestRequestBodyConstRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_body_const_changed_base.yaml")
 	require.NoError(t, err)

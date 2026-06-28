@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: request body/property exclusiveMinimum increased, exclusiveMaximum decreased
+// request body/property exclusiveMinimum increased, exclusiveMaximum decreased
 func TestRequestPropertyExclusiveMinIncreased(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_base.yaml")
 	require.NoError(t, err)
@@ -28,7 +28,7 @@ func TestRequestPropertyExclusiveMinIncreased(t *testing.T) {
 	require.True(t, ids[checker.RequestPropertyExclusiveMinIncreasedId], "expected request-property-exclusive-min-increased")
 }
 
-// CL: request body/property exclusiveMaximum decreased
+// request body/property exclusiveMaximum decreased
 func TestRequestPropertyExclusiveMaxDecreased(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_base.yaml")
 	require.NoError(t, err)
@@ -48,7 +48,7 @@ func TestRequestPropertyExclusiveMaxDecreased(t *testing.T) {
 	require.True(t, ids[checker.RequestPropertyExclusiveMaxDecreasedId], "expected request-property-exclusive-max-decreased")
 }
 
-// CL: request body/property exclusiveMinimum decreased (swap base/revision)
+// request body/property exclusiveMinimum decreased (swap base/revision)
 func TestRequestPropertyExclusiveMinDecreased(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_revision.yaml")
 	require.NoError(t, err)
@@ -64,7 +64,7 @@ func TestRequestPropertyExclusiveMinDecreased(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyExclusiveMinDecreasedId), "expected request-property-exclusive-min-decreased")
 }
 
-// CL: request body/property exclusiveMaximum increased (swap base/revision)
+// request body/property exclusiveMaximum increased (swap base/revision)
 func TestRequestPropertyExclusiveMaxIncreased(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_revision.yaml")
 	require.NoError(t, err)
@@ -80,7 +80,7 @@ func TestRequestPropertyExclusiveMaxIncreased(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestPropertyExclusiveMaxIncreasedId), "expected request-property-exclusive-max-increased")
 }
 
-// CL: request body/property exclusiveMinimum set
+// request body/property exclusiveMinimum set
 func TestRequestPropertyExclusiveMinSet(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_set_base.yaml")
 	require.NoError(t, err)
@@ -100,7 +100,7 @@ func TestRequestPropertyExclusiveMinSet(t *testing.T) {
 	require.True(t, ids[checker.RequestPropertyExclusiveMinSetId], "expected request-property-exclusive-min-set")
 }
 
-// CL: request body/property exclusiveMaximum set
+// request body/property exclusiveMaximum set
 func TestRequestPropertyExclusiveMaxSet(t *testing.T) {
 	s1, err := open("../data/checker/exclusive_min_max_set_base.yaml")
 	require.NoError(t, err)

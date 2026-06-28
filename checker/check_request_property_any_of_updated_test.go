@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding 'anyOf' schema to the request body or request body property
+// adding 'anyOf' schema to the request body or request body property
 func TestRequestPropertyAnyOfAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_any_of_added_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestRequestPropertyAnyOfAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: adding 'anyOf' subschema ($ref) with source tracking
+// adding 'anyOf' subschema ($ref) with source tracking
 func TestRequestPropertyAnyOfAdded_WithSources(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/request_property_any_of_added_base.yaml", loader)
@@ -64,7 +64,7 @@ func TestRequestPropertyAnyOfAdded_WithSources(t *testing.T) {
 	}
 }
 
-// CL: removing 'anyOf' schema from the request body or request body property
+// removing 'anyOf' schema from the request body or request body property
 func TestRequestPropertyAnyOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_any_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestRequestPropertyAnyOfRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// BC: refactoring an anyOf branch from inline enum to an equivalent $ref is not breaking
+// refactoring an anyOf branch from inline enum to an equivalent $ref is not breaking
 func TestRequestPropertyAnyOfInlineEnumRefactorToRef(t *testing.T) {
 	s1, err := open("../data/checker/request_property_any_of_ref_inline_enum_base.yaml")
 	require.NoError(t, err)
@@ -115,7 +115,7 @@ func TestRequestPropertyAnyOfInlineEnumRefactorToRef(t *testing.T) {
 	require.Empty(t, anyOfChanges)
 }
 
-// CL: body-level anyOf added/removed changes carry media-type details so
+// body-level anyOf added/removed changes carry media-type details so
 // reports can tell which media type each change belongs to when a request
 // body has more than one. Without WithDetails the entries are identical
 // and visitors can't tell apart "added Rabbit on application/json" from
@@ -151,7 +151,7 @@ func TestRequestBodyAnyOfMultiMediaTypeDetails(t *testing.T) {
 	}, removedDetails)
 }
 
-// CL: no changes when paths diff is nil
+// no changes when paths diff is nil
 func TestRequestPropertyAnyOfNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{}
@@ -161,7 +161,7 @@ func TestRequestPropertyAnyOfNoPathsDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when operations diff is nil
+// no changes when operations diff is nil
 func TestRequestPropertyAnyOfNoOperationsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -177,7 +177,7 @@ func TestRequestPropertyAnyOfNoOperationsDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when request body diff is nil
+// no changes when request body diff is nil
 func TestRequestPropertyAnyOfNoRequestBodyDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{
@@ -199,7 +199,7 @@ func TestRequestPropertyAnyOfNoRequestBodyDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// CL: no changes when schema diff is nil
+// no changes when schema diff is nil
 func TestRequestPropertyAnyOfNoSchemaDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{

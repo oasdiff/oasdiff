@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding a required property to response body is detected
+// adding a required property to response body is detected
 func TestResponseRequiredPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_added_base.yaml")
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestResponseRequiredPropertyAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing an existent property that was required in response body is detected
+// removing an existent property that was required in response body is detected
 func TestResponseRequiredPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_added_revision.yaml")
 	require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestResponseRequiredPropertyRemoved(t *testing.T) {
 	}, errs)
 }
 
-// CL: adding a required write-only property to response body is detected
+// adding a required write-only property to response body is detected
 func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_added_base.yaml")
 	require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 	}, errs)
 }
 
-// CL: removing a required write-only property that was required in response body is detected
+// removing a required write-only property that was required in response body is detected
 func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_added_revision.yaml")
 	require.NoError(t, err)
@@ -96,7 +96,7 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 	}, errs)
 }
 
-// CL: wrapping a concrete object response body into a oneOf (#702) is a
+// wrapping a concrete object response body into a oneOf (#702) is a
 // breaking restructuring: a field that was previously guaranteed in the
 // response may now be absent depending on which alternative matches. The moved
 // properties must not be reported as removed, and the wrapping must be reported

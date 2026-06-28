@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: removing unevaluated constraints from response body
+// removing unevaluated constraints from response body
 func TestResponseBodyUnevaluatedRemoved(t *testing.T) {
 	s1, err := open("../data/checker/unevaluated_revision.yaml")
 	require.NoError(t, err)
@@ -22,7 +22,7 @@ func TestResponseBodyUnevaluatedRemoved(t *testing.T) {
 	requireChange(t, errs, checker.ResponseBodyUnevaluatedPropertiesRemovedId)
 }
 
-// CL: adding unevaluated constraints to response property
+// adding unevaluated constraints to response property
 func TestResponsePropertyUnevaluatedAdded(t *testing.T) {
 	s1, err := open("../data/checker/unevaluated_property_base.yaml")
 	require.NoError(t, err)
@@ -36,7 +36,7 @@ func TestResponsePropertyUnevaluatedAdded(t *testing.T) {
 	requireChange(t, errs, checker.ResponsePropertyUnevaluatedPropertiesAddedId)
 }
 
-// CL: removing unevaluated constraints from response property
+// removing unevaluated constraints from response property
 func TestResponsePropertyUnevaluatedRemoved(t *testing.T) {
 	s1, err := open("../data/checker/unevaluated_property_revision.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestResponsePropertyUnevaluatedRemoved(t *testing.T) {
 	requireChange(t, errs, checker.ResponsePropertyUnevaluatedPropertiesRemovedId)
 }
 
-// CL: adding unevaluated constraints to response body
+// adding unevaluated constraints to response body
 func TestResponseBodyUnevaluatedAdded(t *testing.T) {
 	s1, err := open("../data/checker/unevaluated_base.yaml")
 	require.NoError(t, err)

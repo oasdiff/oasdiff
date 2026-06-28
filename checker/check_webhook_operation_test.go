@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: modified webhook operations are covered by existing operation-level checkers
+// modified webhook operations are covered by existing operation-level checkers
 func TestWebhookOperationChangesDetected(t *testing.T) {
 	s1, err := open("../data/checker/webhook_operation_base.yaml")
 	require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestWebhookOperationChangesDetected(t *testing.T) {
 		"expected at least one of: request-body-became-required or new-optional-request-property")
 }
 
-// CL: no changes in webhooks should produce no webhook-related changes
+// no changes in webhooks should produce no webhook-related changes
 func TestWebhookOperationNoChanges(t *testing.T) {
 	s1, err := open("../data/checker/webhook_operation_base.yaml")
 	require.NoError(t, err)

@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: detecting deprecated request properties with sunset date
+// detecting deprecated request properties with sunset date
 func TestRequestPropertyDeprecationCheck(t *testing.T) {
 	s1, err := open(deprecationFile("request_property_deprecation_base.yaml"))
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestRequestPropertyDeprecationCheck(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "request property `oldField` deprecated")
 }
 
-// CL: detecting deprecated request properties in allOf schemas with multiple media types
+// detecting deprecated request properties in allOf schemas with multiple media types
 func TestRequestPropertyDeprecationCheck_AllOf(t *testing.T) {
 	s1, err := open(deprecationFile("request_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
@@ -54,7 +54,7 @@ func TestRequestPropertyDeprecationCheck_AllOf(t *testing.T) {
 	require.NotEqual(t, msg0, msg1)
 }
 
-// CL: each media type gets its own report with distinct details (issue #594)
+// each media type gets its own report with distinct details (issue #594)
 func TestRequestPropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
 	s1, err := open(deprecationFile("request_property_deprecation_allof_base.yaml"))
 	require.NoError(t, err)
@@ -81,7 +81,7 @@ func TestRequestPropertyDeprecationCheck_MediaTypeContext(t *testing.T) {
 	require.True(t, mediaTypes["application/xml"], "should have application/xml media type")
 }
 
-// BC: deprecating a property with a deprecation policy but without specifying sunset date is breaking
+// deprecating a property with a deprecation policy but without specifying sunset date is breaking
 func TestRequestPropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -98,7 +98,7 @@ func TestRequestPropertyDeprecation_WithoutSunsetWithPolicy(t *testing.T) {
 	require.Equal(t, "request property `oldField` deprecated without sunset date", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// BC: deprecating a property without a deprecation policy and without specifying sunset date is not breaking for alpha level
+// deprecating a property without a deprecation policy and without specifying sunset date is not breaking for alpha level
 func TestRequestPropertyDeprecation_ForAlpha(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_alpha.yaml"))
 	require.NoError(t, err)
@@ -112,7 +112,7 @@ func TestRequestPropertyDeprecation_ForAlpha(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// BC: deprecating a property with a deprecation policy and sunset date before required deprecation period is breaking
+// deprecating a property with a deprecation policy and sunset date before required deprecation period is breaking
 func TestRequestPropertyDeprecation_WithEarlySunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -133,7 +133,7 @@ func TestRequestPropertyDeprecation_WithEarlySunset(t *testing.T) {
 
 }
 
-// BC: deprecating a property with a deprecation policy and sunset date after required deprecation period is not breaking
+// deprecating a property with a deprecation policy and sunset date after required deprecation period is not breaking
 func TestRequestPropertyDeprecation_WithProperSunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -154,7 +154,7 @@ func TestRequestPropertyDeprecation_WithProperSunset(t *testing.T) {
 	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "request property `oldField` deprecated")
 }
 
-// CL: properties that were re-activated
+// properties that were re-activated
 func TestRequestPropertyDeprecation_DetectsReactivated(t *testing.T) {
 	s1, err := open(deprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
@@ -176,7 +176,7 @@ func TestRequestPropertyDeprecation_DetectsReactivated(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "request property `oldField` reactivated")
 }
 
-// BC: deprecating a property with an invalid sunset date format is breaking
+// deprecating a property with an invalid sunset date format is breaking
 func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -192,7 +192,7 @@ func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	require.Equal(t, checker.RequestPropertyDeprecatedInvalidId, errs[0].GetId())
 }
 
-// CL: deprecating a request property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
+// deprecating a request property with invalid stability level is skipped (handled in CheckBackwardCompatibility)
 func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -210,7 +210,7 @@ func TestRequestPropertyDeprecation_WithInvalidStability(t *testing.T) {
 	require.Empty(t, changes)
 }
 
-// CL: message has no details when request property deprecated without sunset or stability
+// message has no details when request property deprecated without sunset or stability
 func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	s1, err := open(deprecationFile("property_base.yaml"))
 	require.NoError(t, err)
@@ -227,7 +227,7 @@ func TestRequestPropertyDeprecation_MessageWithoutDetails(t *testing.T) {
 	require.Equal(t, "request property `oldField` deprecated", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: message includes sunset date when request property deprecated with valid sunset
+// message includes sunset date when request property deprecated with valid sunset
 func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))
 	require.NoError(t, err)
@@ -248,7 +248,7 @@ func TestRequestPropertyDeprecation_MessageWithSunsetDate(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("request property `oldField` deprecated with sunset date `%s` (stability: stable)", sunsetDate), errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// CL: source location points to the deprecated field, not the operation level
+// source location points to the deprecated field, not the operation level
 func TestRequestPropertyDeprecationCheck_SourceLocation(t *testing.T) {
 	loader := openapi3.NewLoader()
 	loader.IncludeOrigin = true

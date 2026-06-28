@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: decreasing request property maximum value
+// decreasing request property maximum value
 func TestRequestPropertyMaxDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_max_decreased_base.yaml")
 	require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestRequestPropertyMaxDecreasedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing request read-only property maximum value
+// decreasing request read-only property maximum value
 func TestRequestReadOnlyPropertyMaxDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_max_decreased_base.yaml")
 	require.NoError(t, err)
@@ -58,7 +58,7 @@ func TestRequestReadOnlyPropertyMaxDecreasedCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: increasing request property maximum value
+// increasing request property maximum value
 func TestRequestPropertyMaxIncreasingCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_max_decreased_base.yaml")
 	require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestRequestPropertyMaxIncreasingCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: increasing request body maximum value
+// increasing request body maximum value
 func TestRequestBodyMaxIncreasingCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_max_decreased_base.yaml")
 	require.NoError(t, err)
@@ -108,7 +108,7 @@ func TestRequestBodyMaxIncreasingCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: decreasing request body maximum value
+// decreasing request body maximum value
 func TestRequestBodyMaxDecreasedCheck(t *testing.T) {
 	s1, err := open("../data/checker/request_property_max_decreased_base.yaml")
 	require.NoError(t, err)

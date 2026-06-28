@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: changing optional response property to required
+// changing optional response property to required
 func TestResponsePropertyBecameRequiredlCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_became_optional_revision.yaml")
 	require.NoError(t, err)
@@ -28,7 +28,7 @@ func TestResponsePropertyBecameRequiredlCheck(t *testing.T) {
 	}, errs)
 }
 
-// CL: changing optional response property to required with source tracking
+// changing optional response property to required with source tracking
 func TestResponsePropertyBecameRequired_WithSources(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 	s1, err := open("../data/checker/response_property_became_optional_revision.yaml", loader)
@@ -48,7 +48,7 @@ func TestResponsePropertyBecameRequired_WithSources(t *testing.T) {
 	require.Equal(t, "../data/checker/response_property_became_optional_base.yaml", errs[0].GetRevisionSource().File)
 }
 
-// CL: changing optional response write-only property to required
+// changing optional response write-only property to required
 func TestResponseWriteOnlyPropertyBecameRequiredCheck(t *testing.T) {
 	s1, err := open("../data/checker/response_property_became_optional_revision.yaml")
 	require.NoError(t, err)

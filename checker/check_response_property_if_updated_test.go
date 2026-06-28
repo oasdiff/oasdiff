@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding if/then/else to response body
+// adding if/then/else to response body
 func TestResponseBodyIfAdded(t *testing.T) {
 	s1, err := open("../data/checker/if_added_base.yaml")
 	require.NoError(t, err)
@@ -29,7 +29,7 @@ func TestResponseBodyIfAdded(t *testing.T) {
 	require.True(t, ids[checker.ResponseBodyElseAddedId], "expected response-body-else-added")
 }
 
-// CL: removing if/then/else from response body
+// removing if/then/else from response body
 func TestResponseBodyIfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/if_added_revision.yaml")
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestResponseBodyIfRemoved(t *testing.T) {
 	require.True(t, ids[checker.ResponseBodyElseRemovedId], "expected response-body-else-removed")
 }
 
-// CL: adding if/then/else to response property
+// adding if/then/else to response property
 func TestResponsePropertyIfAdded(t *testing.T) {
 	s1, err := open("../data/checker/if_added_prop_base.yaml")
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestResponsePropertyIfAdded(t *testing.T) {
 	require.True(t, ids[checker.ResponsePropertyElseAddedId], "expected response-property-else-added")
 }
 
-// CL: removing if/then/else from response property
+// removing if/then/else from response property
 func TestResponsePropertyIfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/if_added_prop_revision.yaml")
 	require.NoError(t, err)

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding discriminator to the request body or request body property
+// adding discriminator to the request body or request body property
 func TestRequestDiscriminatorUpdatedCheckAdded(t *testing.T) {
 	s1, err := open("../data/checker/request_property_discriminator_added_base.yaml")
 	require.NoError(t, err)
@@ -40,7 +40,7 @@ func TestRequestDiscriminatorUpdatedCheckAdded(t *testing.T) {
 		}}, errs)
 }
 
-// CL: removing discriminator from the request body or request body property
+// removing discriminator from the request body or request body property
 func TestRequestDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_discriminator_added_revision.yaml")
 	require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestRequestDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 		}}, errs)
 }
 
-// CL: changing discriminator propertyName in the request body or request body property
+// changing discriminator propertyName in the request body or request body property
 func TestRequestDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 	s1, err := open("../data/checker/request_property_discriminator_added_revision.yaml")
 	require.NoError(t, err)
@@ -103,7 +103,7 @@ func TestRequestDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 		}}, errs)
 }
 
-// CL: changing discriminator mapping in the request body or request body property
+// changing discriminator mapping in the request body or request body property
 func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 	s1, err := open("../data/checker/request_property_discriminator_added_revision.yaml")
 	require.NoError(t, err)

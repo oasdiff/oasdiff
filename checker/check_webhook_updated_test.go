@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// CL: adding and removing webhooks
+// adding and removing webhooks
 func TestWebhookAddedAndRemoved(t *testing.T) {
 	s1, err := open("../data/checker/webhook_base.yaml")
 	require.NoError(t, err)
@@ -32,7 +32,7 @@ func TestWebhookAddedAndRemoved(t *testing.T) {
 	}}, errs)
 }
 
-// CL: no webhook changes
+// no webhook changes
 func TestWebhookNoChanges(t *testing.T) {
 	s1, err := open("../data/checker/webhook_base.yaml")
 	require.NoError(t, err)
