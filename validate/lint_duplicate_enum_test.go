@@ -61,8 +61,9 @@ func TestLintDuplicateEnums(t *testing.T) {
 		byDups[f.Section] = nil
 	}
 	// One finding from the component schema, one from the inline parameter.
-	require.Contains(t, byDups, "components/schemas/Color")
-	require.Contains(t, byDups, "GET /x")
+	// WalkSchemas reports each schema's exact RFC 6901 JSON Pointer as the section.
+	require.Contains(t, byDups, "/components/schemas/Color")
+	require.Contains(t, byDups, "/paths/~1x/get/parameters/0/schema")
 }
 
 // A duplicated value is reported once even when it repeats more than twice;
