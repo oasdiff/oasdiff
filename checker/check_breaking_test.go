@@ -24,7 +24,7 @@ func TestBreaking_AddingRequiredRequestBody(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.AddedRequiredRequestBodyId, errs[0].GetId())
+	requireChange(t, errs, checker.AddedRequiredRequestBodyId)
 	require.Equal(t, "added required request body", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -46,7 +46,7 @@ func TestBreaking_RequestBodyRequiredEnabled(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestBodyBecameRequiredId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyBecameRequiredId)
 	require.Equal(t, "request body became required", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -55,7 +55,7 @@ func TestBreaking_DeletedEnum(t *testing.T) {
 	errs := d(t, diff.NewConfig(), 702, 1)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterEnumValueRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterEnumValueRemovedId)
 	require.Equal(t, "removed the enum value `removed-value` from the `path` request parameter `domain`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -64,9 +64,9 @@ func TestBreaking_AddedResponseEnum(t *testing.T) {
 	errs := d(t, diff.NewConfig(), 703, 704)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.ResponsePropertyEnumValueAddedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponsePropertyEnumValueAddedId)
 	require.Equal(t, "added the new `QWE` enum value to the `respenum` response property for the response status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, checker.ResponsePropertyEnumValueAddedId, errs[1].GetId())
+	requireChange(t, errs, checker.ResponsePropertyEnumValueAddedId)
 	require.Equal(t, "added the new `TER2` enum value to the `respenum2/respenum3` response property for the response status `default`", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -118,7 +118,7 @@ func TestBreaking_NewPathParam(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.NewRequestPathParameterId, errs[0].GetId())
+	requireChange(t, errs, checker.NewRequestPathParameterId)
 	require.Equal(t, "added the new path request parameter `project`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -135,7 +135,7 @@ func TestBreaking_NewRequiredHeaderParam(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.NewRequiredRequestParameterId, errs[0].GetId())
+	requireChange(t, errs, checker.NewRequiredRequestParameterId)
 	require.Equal(t, "added the new required `header` request parameter `network-policies`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -176,7 +176,7 @@ func TestBreaking_ResponseHeaderParamRequiredDisabled(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseHeaderBecameOptionalId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseHeaderBecameOptionalId)
 	require.Equal(t, "the response header `X-RateLimit-Limit` became optional for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -196,7 +196,7 @@ func TestBreaking_ResponseHeaderRemoved(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequiredResponseHeaderRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequiredResponseHeaderRemovedId)
 	require.Equal(t, "the mandatory response header `X-RateLimit-Limit` removed for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -215,7 +215,7 @@ func TestBreaking_ResponseSuccessStatusUpdated(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseSuccessStatusRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseSuccessStatusRemovedId)
 	require.Equal(t, "removed the success response with the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -234,7 +234,7 @@ func TestBreaking_ResponseNonSuccessStatusUpdated(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseNonSuccessStatusRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseNonSuccessStatusRemovedId)
 	require.Equal(t, "removed the non-success response with the status `400`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -254,7 +254,7 @@ func TestBreaking_OperationIdRemoved(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.APIOperationIdRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.APIOperationIdRemovedId)
 	require.Equal(t, "api operation id `GetSecurityScores` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.APIOperationIdRemovedId)
 }
@@ -278,7 +278,7 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	}
 
 	require.Len(t, errs, 3)
-	require.Equal(t, checker.RequestBodyEnumValueRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyEnumValueRemovedId)
 	require.Equal(t, "request body enum value removed `VALUE_1`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -296,7 +296,7 @@ func TestBreaking_ResponsePropertyEnumRemoved(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.ResponsePropertyEnumValueRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponsePropertyEnumValueRemovedId)
 	require.Equal(t, "removed the `QWE` enum value from the `respenum` response property for the response status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -315,7 +315,7 @@ func TestBreaking_TagRemoved(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.APITagRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.APITagRemovedId)
 	require.Equal(t, "api tag `security` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -335,7 +335,7 @@ func TestBreaking_ResponseMediaTypeEnumRemoved(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseMediaTypeEnumValueRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseMediaTypeEnumValueRemovedId)
 	require.Equal(t, "response schema `application/json` enum value removed `VALUE_3`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -387,7 +387,7 @@ func TestBreaking_OptionalResponseHeaderRemoved(t *testing.T) {
 	}
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.OptionalResponseHeaderRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.OptionalResponseHeaderRemovedId)
 	require.Equal(t, "the optional response header `X-RateLimit-Limit` removed for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -404,7 +404,7 @@ func TestBreaking_ResponseDeleteMediaType(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponseMediaTypeRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseMediaTypeRemovedId)
 	require.Equal(t, "removed the media type `application/json` for the response with the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -469,7 +469,7 @@ func TestBreaking_ModifyPattern(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestPropertyPatternChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestPropertyPatternChangedId)
 	require.Equal(t, "changed the pattern of the request property `created` from `^[a-z]+$` to `.+`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 }
@@ -501,7 +501,7 @@ func TestBreaking_ModifyParameterPattern(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPatternChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterPatternChangedId)
 	require.Equal(t, "changed the pattern of the `path` request parameter `groupId` from `[0-9a-f]+` to `[0-9]+`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -533,7 +533,7 @@ func TestBreaking_ModifyRequiredOptionalParamDefaultValue(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterDefaultValueChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterDefaultValueChangedId)
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value was changed from `X` to `Y`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -551,7 +551,7 @@ func TestBreaking_SettingOptionalParamDefaultValue(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterDefaultValueAddedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterDefaultValueAddedId)
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value `Y` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -611,9 +611,9 @@ func TestBreaking_SchemaRemoved(t *testing.T) {
 		require.Equal(t, checker.ERR, err.GetLevel())
 	}
 	require.NotEmpty(t, errs)
-	require.Equal(t, checker.APISchemasRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.APISchemasRemovedId)
 	require.Equal(t, "removed the schema `network-policies`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, checker.APISchemasRemovedId, errs[1].GetId())
+	requireChange(t, errs, checker.APISchemasRemovedId)
 	require.Equal(t, "removed the schema `rules`", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -646,11 +646,11 @@ func TestBreaking_RequestPropertyAnyOfRemoved(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.Equal(t, checker.RequestBodyAnyOfRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyAnyOfRemovedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Rabbit` from the request body `anyOf` list", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
-	require.Equal(t, checker.RequestPropertyAnyOfRemovedId, errs[1].GetId())
+	requireChange(t, errs, checker.RequestPropertyAnyOfRemovedId)
 	require.Equal(t, checker.ERR, errs[1].GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Breed3` from the `anyOf[#/components/schemas/Dog]/breed` request property `anyOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -667,11 +667,11 @@ func TestBreaking_RequestPropertyOneOfRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 
 	require.Len(t, errs, 2)
-	require.Equal(t, checker.RequestBodyOneOfRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyOneOfRemovedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Rabbit` from the request body `oneOf` list", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
-	require.Equal(t, checker.RequestPropertyOneOfRemovedId, errs[1].GetId())
+	requireChange(t, errs, checker.RequestPropertyOneOfRemovedId)
 	require.Equal(t, checker.ERR, errs[1].GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Breed3` from the `oneOf[#/components/schemas/Dog]/breed` request property `oneOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -689,11 +689,11 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.Equal(t, checker.RequestBodyAllOfAddedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyAllOfAddedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 	require.Equal(t, "added `#/components/schemas/Rabbit` to the request body `allOf` list", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
-	require.Equal(t, checker.RequestPropertyAllOfAddedId, errs[1].GetId())
+	requireChange(t, errs, checker.RequestPropertyAllOfAddedId)
 	require.Equal(t, checker.ERR, errs[1].GetLevel())
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -711,11 +711,11 @@ func TestBreaking_RequestPropertyAllOfRemoved(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	require.Equal(t, checker.RequestBodyAllOfRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestBodyAllOfRemovedId)
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Rabbit` from the request body `allOf` list", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
-	require.Equal(t, checker.RequestPropertyAllOfRemovedId, errs[1].GetId())
+	requireChange(t, errs, checker.RequestPropertyAllOfRemovedId)
 	require.Equal(t, checker.WARN, errs[1].GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Breed3` from the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

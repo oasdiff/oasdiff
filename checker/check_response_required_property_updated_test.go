@@ -131,6 +131,6 @@ func TestResponsePropertyOneOfWrappingIsBreaking(t *testing.T) {
 	// The wrapping must be reported exactly once per response body (not per
 	// property), as a breaking error, and nothing else.
 	require.Len(t, errs, 1, "a oneOf wrapping must produce exactly one finding (#702)")
-	require.Equal(t, checker.ResponseBodyWrappedInOneOfId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponseBodyWrappedInOneOfId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
