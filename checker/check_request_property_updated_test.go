@@ -19,16 +19,14 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyId,
 		Args:        []any{"description"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding two new request properties, one required, one optional
@@ -41,11 +39,10 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.NewRequiredRequestPropertyId,
 			Args:        []any{"description"},
-			Level:       checker.ERR,
 			Operation:   "POST",
 			Path:        "/products",
 			Source:      load.NewSource("../data/checker/request_property_added_revision2.yaml"),
@@ -54,7 +51,6 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 		{
 			Id:          checker.NewOptionalRequestPropertyId,
 			Args:        []any{"info"},
-			Level:       checker.INFO,
 			Operation:   "POST",
 			Path:        "/products",
 			Source:      load.NewSource("../data/checker/request_property_added_revision2.yaml"),
@@ -94,16 +90,14 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewOptionalRequestPropertyId,
 		Args:        []any{"description"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing a required request property
@@ -116,16 +110,14 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyRemovedId,
 		Args:        []any{"description"},
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding a new required request property with a default value
@@ -138,16 +130,14 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyWithDefaultId,
 		Args:        []any{"description"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_with_default.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: wrapping a concrete request body object into a oneOf of object

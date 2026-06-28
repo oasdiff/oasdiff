@@ -24,11 +24,10 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 7)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.NewRequiredRequestDefaultParameterToExistingPathId,
 			Args:        []any{"query", "version"},
-			Level:       3,
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test1",
@@ -37,7 +36,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 		{
 			Id:        checker.NewRequiredRequestDefaultParameterToExistingPathId,
 			Args:      []any{"query", "version"},
-			Level:     3,
 			Operation: "POST",
 			Path:      "/api/test1",
 			Source:    load.NewSource("../data/request_params/required-request-params.yaml"),
@@ -45,7 +43,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 		{
 			Id:          checker.NewRequiredRequestDefaultParameterToExistingPathId,
 			Args:        []any{"query", "id"},
-			Level:       3,
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test2",
@@ -54,7 +51,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 		{
 			Id:          checker.NewRequiredRequestDefaultParameterToExistingPathId,
 			Args:        []any{"header", "If-None-Match"},
-			Level:       3,
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test3",
@@ -63,7 +59,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 		{
 			Id:          checker.NewOptionalRequestDefaultParameterToExistingPathId,
 			Args:        []any{"query", "optionalQueryParam"},
-			Level:       1,
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test1",
@@ -72,7 +67,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 		{
 			Id:        checker.NewOptionalRequestDefaultParameterToExistingPathId,
 			Args:      []any{"query", "optionalQueryParam"},
-			Level:     1,
 			Operation: "POST",
 			Path:      "/api/test1",
 			Source:    load.NewSource("../data/request_params/required-request-params.yaml"),
@@ -80,7 +74,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 		{
 			Id:          checker.NewOptionalRequestDefaultParameterToExistingPathId,
 			Args:        []any{"header", "optionalHeaderParam"},
-			Level:       1,
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test2",

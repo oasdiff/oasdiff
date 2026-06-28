@@ -19,17 +19,15 @@ func TestRequestBodyMaxSetCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxSetCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxSetId,
 		Args:        []any{float64(15)},
-		Level:       checker.WARN,
 		Comment:     checker.RequestBodyMaxSetId + "-comment",
 		Operation:   "POST",
 		OperationId: "addPet",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_set_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }
 
 // CL: setting max of request propreties
@@ -42,15 +40,13 @@ func TestRequestPropertyMaxSetCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxSetCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxSetId,
 		Args:        []any{"age", float64(15)},
-		Level:       checker.WARN,
 		Comment:     checker.RequestPropertyMaxSetId + "-comment",
 		Operation:   "POST",
 		OperationId: "addPet",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_max_set_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }

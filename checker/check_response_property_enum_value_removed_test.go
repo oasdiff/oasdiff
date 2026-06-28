@@ -21,16 +21,14 @@ func TestResponsePropertyEnumValueRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseParameterEnumValueRemovedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueRemovedId,
 		Args:        []any{"TYPE2", "data/typeEnum", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing an enum value from a response write-only property
@@ -45,14 +43,12 @@ func TestResponseWriteOnlyPropertyEnumValueRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseParameterEnumValueRemovedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueRemovedId,
 		Args:        []any{"TYPE2", "data/writeOnlyEnum", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

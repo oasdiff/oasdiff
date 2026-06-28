@@ -19,16 +19,14 @@ func TestResponseOptionalPropertyUpdatedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalPropertyRemovedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding an optional write-only property to a response
@@ -42,16 +40,14 @@ func TestResponseOptionalPropertyAddedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck), d, osm, checker.INFO)
 
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalPropertyAddedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing an optional write-only property from a response
@@ -65,16 +61,14 @@ func TestResponseOptionalWriteOnlyPropertyRemovedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalWriteOnlyPropertyRemovedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_revision.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding an optional write-only property to a response
@@ -89,14 +83,12 @@ func TestResponseOptionalWriteOnlyPropertyAddedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck), d, osm, checker.INFO)
 
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseOptionalWriteOnlyPropertyAddedId,
 		Args:        []any{"data/id", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_optional_property_removed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

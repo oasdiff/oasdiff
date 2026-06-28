@@ -23,16 +23,14 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"type", "object", "array"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing request body type
@@ -48,16 +46,14 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"format", "none", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing request property type
@@ -71,16 +67,14 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"age", "type/format", "integer/int32", "string/string"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_revision.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: narrowing a request property union type is breaking
@@ -134,25 +128,24 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 2)
-	require.Equal(t, checker.ApiChange{
-		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"colors", "type", "array<integer>", "object"},
-		Operation:   "POST",
-		Path:        "/dogs",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
-		OperationId: "addDog",
-	}, errs[0])
-	require.Equal(t, checker.ApiChange{
-		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"type", "array<object>", "object"},
-		Operation:   "POST",
-		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
-		OperationId: "addPet",
-	}, errs[1])
+	requireApiChanges(t, []checker.ApiChange{
+		{
+			Id:          checker.RequestPropertyTypeChangedId,
+			Args:        []any{"colors", "type", "array<integer>", "object"},
+			Operation:   "POST",
+			Path:        "/dogs",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
+			OperationId: "addDog",
+		},
+		{
+			Id:          checker.RequestBodyTypeChangedId,
+			Args:        []any{"type", "array<object>", "object"},
+			Operation:   "POST",
+			Path:        "/pets",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
+			OperationId: "addPet",
+		},
+	}, errs)
 }
 
 // CL: changing request body and property types from object to array
@@ -166,25 +159,24 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 2)
-	require.Equal(t, checker.ApiChange{
-		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"colors", "type", "object", "array<integer>"},
-		Operation:   "POST",
-		Path:        "/dogs",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
-		OperationId: "addDog",
-	}, errs[0])
-	require.Equal(t, checker.ApiChange{
-		Id:          checker.RequestBodyTypeChangedId,
-		Level:       checker.ERR,
-		Args:        []any{"type", "object", "array<object>"},
-		Operation:   "POST",
-		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
-		OperationId: "addPet",
-	}, errs[1])
+	requireApiChanges(t, []checker.ApiChange{
+		{
+			Id:          checker.RequestPropertyTypeChangedId,
+			Args:        []any{"colors", "type", "object", "array<integer>"},
+			Operation:   "POST",
+			Path:        "/dogs",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
+			OperationId: "addDog",
+		},
+		{
+			Id:          checker.RequestBodyTypeChangedId,
+			Args:        []any{"type", "object", "array<object>"},
+			Operation:   "POST",
+			Path:        "/pets",
+			Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
+			OperationId: "addPet",
+		},
+	}, errs)
 }
 
 // CL: changing request property format
@@ -200,16 +192,14 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeChangedId,
-		Level:       checker.ERR,
 		Args:        []any{"age", "format", "int32", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: generalizing request property format
@@ -226,16 +216,14 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyTypeGeneralizedId,
-		Level:       checker.INFO,
 		Args:        []any{"age", "type", "integer", "number"},
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: no changes when paths diff is nil

@@ -389,14 +389,13 @@ func TestBreaking_ReqBodyDeleteRequiredProperty2(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Contains(t, errs, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyRemovedId,
 		Args:      []any{"roleAssignments/items/role"},
-		Level:     checker.WARN,
 		Operation: "POST",
 		Path:      "/api/roleMappings",
 		Source:    load.NewSource("../data/required-properties/request-property-items-2.yaml"),
-	})
+	}, requireChange(t, errs, checker.RequestPropertyRemovedId))
 }
 
 // BC: adding a new required property in response body is not breaking

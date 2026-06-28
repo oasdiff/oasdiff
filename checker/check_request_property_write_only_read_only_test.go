@@ -22,16 +22,14 @@ func TestRequestOptionalPropertyBecameWriteOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameWriteOnlyCheckId,
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Level:       checker.INFO,
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing optional request property to not write-only
@@ -47,16 +45,14 @@ func TestRequestOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameNonWriteOnlyCheckId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing optional request property to read-only
@@ -72,16 +68,14 @@ func TestRequestOptionalPropertyBecameReadOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameReadOnlyCheckId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing optional request property to not read-only
@@ -97,16 +91,14 @@ func TestRequestOptionalPropertyBecameNonReadOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestOptionalPropertyBecameNonReadOnlyCheckId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing required request property to write-only
@@ -122,16 +114,14 @@ func TestRequestRequiredPropertyBecameWriteOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameWriteOnlyCheckId,
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Level:       checker.INFO,
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing required request property to not write-only
@@ -147,16 +137,14 @@ func TestRequestRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameNonWriteOnlyCheckId,
 		Args:        []any{"id"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing required request property to read-only
@@ -172,16 +160,14 @@ func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameReadOnlyCheckId,
 		Args:        []any{"id"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing required request property to not read-only
@@ -197,14 +183,12 @@ func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyWriteOnlyReadOnlyCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestRequiredPropertyBecameNonReadOnlyCheckId,
 		Args:        []any{"id"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

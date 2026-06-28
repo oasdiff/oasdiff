@@ -21,16 +21,14 @@ func TestOperationIdRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIOperationIdUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APIOperationIdRemovedId,
 		Args:        []any{"createOneGroup", ""},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/operation_id_removed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: updating an existing operation id
@@ -45,16 +43,14 @@ func TestOperationIdUpdated(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIOperationIdUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APIOperationIdRemovedId,
 		Args:        []any{"createOneGroup", "newOperationId"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/operation_id_removed_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 
 	require.Equal(t, "api operation id `createOneGroup` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -94,16 +90,14 @@ func TestOperationIdAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIOperationIdUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.APIOperationIdAddId,
 		Args:        []any{"NewOperationId"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/operation_id_added_base.yaml"),
 		OperationId: "NewOperationId",
-	}, errs[0])
+	}, errs)
 
 	require.Equal(t, "api operation id `NewOperationId` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

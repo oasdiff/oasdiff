@@ -25,16 +25,14 @@ func TestRequestBodyMaxLengthDecreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthIncreasedId,
 		Args:        []any{maxLength, newMaxLength},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing max length of request body
@@ -53,16 +51,14 @@ func TestRequestBodyMaxLengthIncreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxLengthDecreasedId,
 		Args:        []any{newMaxLength},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: decreasing max length of request property
@@ -80,16 +76,14 @@ func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthDecreasedId,
 		Args:        []any{"description", newMaxLength},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the `description` request property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -110,16 +104,14 @@ func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyMaxLengthDecreasedId,
 		Args:        []any{"description", newMaxLength},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "the `description` request read-only property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -138,14 +130,12 @@ func TestRequestPropertyMaxLengthIncreasedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyMaxLengthUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxLengthIncreasedId,
 		Args:        []any{"description", maxLength, newMaxLength},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
-	}, errs[0])
+	}, errs)
 }

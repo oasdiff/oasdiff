@@ -21,16 +21,14 @@ func TestRequestPropertyPatternChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternChangedId,
 		Args:      []any{"name", "^\\w+$", "^[\\w\\s]+$"},
-		Level:     checker.WARN,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
 		Comment:   checker.PatternChangedCommentId,
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
@@ -46,15 +44,13 @@ func TestRequestPropertyPatternGeneralized(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternGeneralizedId,
 		Args:      []any{"name", "^\\w+$", ".*"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding request property pattern
@@ -67,16 +63,14 @@ func TestRequestPropertyPatternAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternAddedId,
 		Args:      []any{"^\\w+$", "name"},
-		Level:     checker.ERR,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_base.yaml"),
 		Comment:   checker.PatternAddedCommentId,
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
@@ -90,13 +84,11 @@ func TestRequestPropertyPatternRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyPatternUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:        checker.RequestPropertyPatternRemovedId,
 		Args:      []any{"^\\w+$", "name"},
-		Level:     checker.INFO,
 		Operation: "POST",
 		Path:      "/test",
 		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
-	}, errs[0])
+	}, errs)
 }

@@ -22,11 +22,10 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 
 	require.Len(t, errs, 3)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyOneOfAddedId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
-			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_one_of_added_revision.yaml"),
@@ -35,7 +34,6 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyOneOfAddedId,
 			Args:        []any{"#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed", "200"},
-			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_one_of_added_revision.yaml"),
@@ -44,7 +42,6 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyOneOfAddedId,
 			Args:        []any{"subschema #2: Dark brown types", "oneOf[#/components/schemas/Fox]/breed", "200"},
-			Level:       checker.ERR,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_one_of_added_revision.yaml"),
@@ -88,11 +85,10 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 
 	require.Len(t, errs, 3)
 
-	require.ElementsMatch(t, []checker.ApiChange{
+	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyOneOfRemovedId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),
@@ -101,7 +97,6 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyOneOfRemovedId,
 			Args:        []any{"#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),
@@ -110,7 +105,6 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyOneOfRemovedId,
 			Args:        []any{"subschema #2: Dark brown types", "oneOf[#/components/schemas/Fox]/breed", "200"},
-			Level:       checker.INFO,
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),

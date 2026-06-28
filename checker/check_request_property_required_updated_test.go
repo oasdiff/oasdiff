@@ -20,16 +20,14 @@ func TestRequestPropertyMarkedRequired(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyRequiredUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameRequiredId,
 		Args:        []any{"name"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: changing request property required value to false
@@ -43,16 +41,14 @@ func TestRequestPropertyMarkedOptional(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyRequiredUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameOptionalId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: making request property required, while also giving it a default value
@@ -67,14 +63,12 @@ func TestRequestPropertyWithDefaultMarkedRequired(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyRequiredUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameRequiredWithDefaultId,
 		Args:        []any{"name"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),
 		OperationId: "addProduct",
-	}, errs[0])
+	}, errs)
 }

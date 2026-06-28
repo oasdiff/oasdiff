@@ -22,16 +22,14 @@ func TestResponseSuccessStatusAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseSuccessStatusUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseSuccessStatusAddedId,
 		Args:        []any{"201"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: adding a non-success response status
@@ -47,16 +45,14 @@ func TestResponseNonSuccessStatusAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseNonSuccessStatusUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseNonSuccessStatusAddedId,
 		Args:        []any{"400"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // CL: removing a non-success response status
@@ -72,16 +68,14 @@ func TestResponseNonSuccessStatusRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseNonSuccessStatusUpdatedCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseNonSuccessStatusRemovedId,
 		Args:        []any{"409"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
 
 // BC: removing a success status is breaking
@@ -97,14 +91,12 @@ func TestResponseSuccessStatusRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseSuccessStatusUpdatedCheck), d, osm, checker.INFO)
 	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseSuccessStatusRemovedId,
 		Args:        []any{"200"},
-		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }

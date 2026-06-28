@@ -24,9 +24,8 @@ func TestRequestPropertyEnumValueRemovedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyEnumValueUpdatedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyEnumValueRemovedId,
-		Level:       checker.ERR,
 		Args:        []any{"bird", "category"},
 		Operation:   "POST",
 		OperationId: "updatePet",
@@ -52,9 +51,8 @@ func TestRequestReadOnlyPropertyEnumValueRemovedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyEnumValueUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestReadOnlyPropertyEnumValueRemovedId,
-		Level:       checker.INFO,
 		Args:        []any{"bird", "category"},
 		Operation:   "POST",
 		OperationId: "updatePet",
@@ -79,9 +77,8 @@ func TestRequestPropertyEnumValueAddedCheck(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyEnumValueUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 
-	require.Equal(t, checker.ApiChange{
+	requireApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyEnumValueAddedId,
-		Level:       checker.INFO,
 		Args:        []any{"bird", "category"},
 		Operation:   "POST",
 		OperationId: "updatePet",

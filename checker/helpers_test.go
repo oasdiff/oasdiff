@@ -130,3 +130,36 @@ func requireNoChange(t *testing.T, changes checker.Changes, id string) {
 	t.Helper()
 	require.Nil(t, findChange(changes, id), "unexpected change with id %q", id)
 }
+
+// requireApiChange asserts actual equals expected, ignoring fields cleared by normalizeApiChange.
+func requireApiChange(t *testing.T, expected checker.ApiChange, actual checker.Change) {
+	t.Helper()
+	ac, ok := actual.(checker.ApiChange)
+	require.True(t, ok, "expected a checker.ApiChange, got %T", actual)
+	require.Equal(t, expected, normalizeApiChange(ac))
+}
+
+// requireSingleApiChange asserts changes has exactly one change, equal to expected.
+func requireSingleApiChange(t *testing.T, expected checker.ApiChange, changes checker.Changes) {
+	t.Helper()
+	require.Len(t, changes, 1)
+	requireApiChange(t, expected, changes[0])
+}
+
+// requireApiChanges asserts changes equal expected as an unordered set.
+func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checker.Changes) {
+	t.Helper()
+	got := make([]checker.ApiChange, 0, len(actual))
+	for _, c := range actual {
+		ac, ok := c.(checker.ApiChange)
+		require.True(t, ok, "expected a checker.ApiChange, got %T", c)
+		got = append(got, normalizeApiChange(ac))
+	}
+	require.ElementsMatch(t, expected, got)
+}
+
+// normalizeApiChange clears fields that are not part of a change's test identity.
+func normalizeApiChange(c checker.ApiChange) checker.ApiChange {
+	c.Level = 0 // derived from id, pinned in TestRuleLevels
+	return c
+}

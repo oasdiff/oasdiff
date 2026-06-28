@@ -21,17 +21,15 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyEnumValueAddedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponsePropertyEnumValueAddedId,
 		Args:        []any{"Test", "data/typeEnum", "200"},
 		Comment:     checker.ResponsePropertyEnumValueAddedId + "-comment",
-		Level:       checker.WARN,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 	require.Equal(t, "Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.", errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
@@ -47,14 +45,12 @@ func TestResponseWriteOnlyPropertyEnumValueAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyEnumValueAddedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.ApiChange{
+	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.ResponseWriteOnlyPropertyEnumValueAddedId,
 		Args:        []any{"Test", "data/writeOnlyEnum", "200"},
-		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
-	}, errs[0])
+	}, errs)
 }
