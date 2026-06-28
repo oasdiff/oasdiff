@@ -22,6 +22,13 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 			return
 		}
 
+		// A oneOf wrapping (#702) is reported once per body as
+		// response-body-wrapped-in-one-of; don't also report its added
+		// alternatives as a raw one-of-added.
+		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
+			return
+		}
+
 		if info.schemaDiff.OneOfDiff != nil {
 			if added := info.schemaDiff.OneOfDiff.Added; len(added) > 0 {
 				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "oneOf", -1, added[0].Index)

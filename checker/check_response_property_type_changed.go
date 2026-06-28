@@ -21,6 +21,14 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 			return
 		}
 
+		// A oneOf wrapping (#702) reads as a top-level type change to "any"
+		// (the oneOf wrapper has no type of its own); it's reported once per
+		// body as response-body-wrapped-in-one-of, so don't also report a body
+		// type change.
+		if !schemaDiff.OneOfWrappingDiff.Empty() {
+			return
+		}
+
 		typeDiff := schemaDiff.TypeDiff
 		formatDiff := schemaDiff.FormatDiff
 

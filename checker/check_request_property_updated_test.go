@@ -156,6 +156,11 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 // The moved properties must not be reported as removed, and the wrapping must
 // be reported once as request-body-wrapped-in-one-of (ERR), not as
 // request-property-became-optional. Reproduces oasdiff/oasdiff#702.
+//
+// Runs the full check set so it also asserts the mechanical artifacts
+// (one-of-added, type-generalized) are suppressed. The fixture moves both
+// required (foo, bar) and optional (baz) properties into the wrapping, so the
+// moved-property suppression is exercised for both.
 func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 	s1, err := open("../data/checker/request_property_one_of_wrapped_base.yaml")
 	require.NoError(t, err)
@@ -164,21 +169,24 @@ func TestRequestPropertyOneOfWrappingIsBreaking(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUpdatedCheck), d, osm, checker.INFO)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 
 	require.False(t, containsId(errs, checker.RequestPropertyRemovedId),
 		"properties moved into a oneOf wrapping must not be reported as removed (#702)")
 	require.False(t, containsId(errs, checker.RequestPropertyBecameOptionalId),
 		"oneOf wrapping must not be reported as became-optional (#702)")
 
+	// The mechanical artifacts of the wrapping (the added oneOf alternatives,
+	// the top-level type going to "any") are redundant with the single wrapped
+	// finding and must be suppressed too.
+	require.False(t, containsId(errs, checker.RequestBodyOneOfAddedId),
+		"the wrapping's added alternatives must not also be reported as one-of-added (#702)")
+	require.False(t, containsId(errs, checker.RequestBodyTypeGeneralizedId),
+		"the wrapping's top-level type change to 'any' must not also be reported (#702)")
+
 	// The wrapping must be reported exactly once per request body (not per
-	// property), as a breaking error.
-	wrapped := 0
-	for _, e := range errs {
-		if e.GetId() == checker.RequestBodyWrappedInOneOfId {
-			wrapped++
-			require.Equal(t, checker.ERR, e.GetLevel())
-		}
-	}
-	require.Equal(t, 1, wrapped, "the wrapping must be reported once as a breaking error (#702)")
+	// property), as a breaking error, and nothing else.
+	require.Len(t, errs, 1, "a oneOf wrapping must produce exactly one finding (#702)")
+	require.Equal(t, checker.RequestBodyWrappedInOneOfId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
