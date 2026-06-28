@@ -18,7 +18,7 @@ func TestResponseBodyDependentRequiredAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyDependentRequiredAddedId))
+	requireChange(t, errs, checker.ResponseBodyDependentRequiredAddedId)
 }
 
 // CL: removing dependentRequired from response body
@@ -31,7 +31,7 @@ func TestResponseBodyDependentRequiredRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyDependentRequiredRemovedId))
+	requireChange(t, errs, checker.ResponseBodyDependentRequiredRemovedId)
 }
 
 // CL: changing dependentRequired on response body
@@ -44,7 +44,7 @@ func TestResponseBodyDependentRequiredChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyDependentRequiredChangedId))
+	requireChange(t, errs, checker.ResponseBodyDependentRequiredChangedId)
 }
 
 // CL: changing dependentRequired on response property
@@ -57,7 +57,7 @@ func TestResponsePropertyDependentRequiredChanged(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyDependentRequiredChangedId))
+	requireChange(t, errs, checker.ResponsePropertyDependentRequiredChangedId)
 }
 
 // CL: adding dependentRequired to response property
@@ -70,7 +70,7 @@ func TestResponsePropertyDependentRequiredAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyDependentRequiredAddedId))
+	requireChange(t, errs, checker.ResponsePropertyDependentRequiredAddedId)
 }
 
 // CL: removing dependentRequired from response property
@@ -83,5 +83,5 @@ func TestResponsePropertyDependentRequiredRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyDependentRequiredChangedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyDependentRequiredRemovedId))
+	requireChange(t, errs, checker.ResponsePropertyDependentRequiredRemovedId)
 }

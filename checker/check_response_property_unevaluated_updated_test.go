@@ -18,8 +18,8 @@ func TestResponseBodyUnevaluatedRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponseBodyUnevaluatedItemsRemovedId))
-	require.True(t, containsId(errs, checker.ResponseBodyUnevaluatedPropertiesRemovedId))
+	requireChange(t, errs, checker.ResponseBodyUnevaluatedItemsRemovedId)
+	requireChange(t, errs, checker.ResponseBodyUnevaluatedPropertiesRemovedId)
 }
 
 // CL: adding unevaluated constraints to response property
@@ -32,8 +32,8 @@ func TestResponsePropertyUnevaluatedAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedItemsAddedId))
-	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedPropertiesAddedId))
+	requireChange(t, errs, checker.ResponsePropertyUnevaluatedItemsAddedId)
+	requireChange(t, errs, checker.ResponsePropertyUnevaluatedPropertiesAddedId)
 }
 
 // CL: removing unevaluated constraints from response property
@@ -46,8 +46,8 @@ func TestResponsePropertyUnevaluatedRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyUnevaluatedUpdatedCheck), d, osm, checker.INFO)
-	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedItemsRemovedId))
-	require.True(t, containsId(errs, checker.ResponsePropertyUnevaluatedPropertiesRemovedId))
+	requireChange(t, errs, checker.ResponsePropertyUnevaluatedItemsRemovedId)
+	requireChange(t, errs, checker.ResponsePropertyUnevaluatedPropertiesRemovedId)
 }
 
 // CL: adding unevaluated constraints to response body

@@ -51,7 +51,7 @@ func (f JSONFormatter) SupportedOutputs() []Output {
 
 func printJSON(output any) ([]byte, error) {
 	if reflect.ValueOf(output).IsNil() {
-		return nil, nil
+		return []byte(emptyDocFor(output)), nil
 	}
 
 	bytes, err := json.Marshal(output)
@@ -60,6 +60,26 @@ func printJSON(output any) ([]byte, error) {
 	}
 
 	return bytes, nil
+}
+
+// emptyDocFor returns the valid empty document to emit for a nil value of
+// output's type: "[]" for slice/array kinds (after dereferencing pointers),
+// "{}" otherwise (structs, maps, pointers to them). A nil value would marshal
+// to null, and the previous behavior — empty bytes — is not valid JSON at all.
+// Emitting the empty container keeps the output valid and shape-stable for
+// every command, and, unlike marshaling a zero value, stays "{}" for structs
+// whose fields aren't omitempty (a zeroed openapi3.T marshals to
+// {"info":null,"openapi":"","paths":null}, not {}). Shared with printYAML,
+// where "[]"/"{}" are valid flow-style documents too.
+func emptyDocFor(output any) string {
+	t := reflect.TypeOf(output)
+	if t != nil && t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+	if t != nil && (t.Kind() == reflect.Slice || t.Kind() == reflect.Array) {
+		return "[]"
+	}
+	return "{}"
 }
 
 // adaptStructure wraps the changes list in an object when the caller asks

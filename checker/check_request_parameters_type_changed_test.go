@@ -25,7 +25,7 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"path", "groupId", []string{"string"}, "", []string{"integer"}, ""},
+		Args:        []any{"path", "groupId", "type", "string", "integer"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -49,7 +49,7 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"query", "token", []string{"string"}, "uuid", []string{"integer"}, "uuid"},
+		Args:        []any{"query", "token", "type", "string", "integer"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -73,7 +73,7 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"header", "X-Request-ID", []string{"string"}, "uuid", []string{"integer"}, "uuid"},
+		Args:        []any{"header", "X-Request-ID", "type", "string", "integer"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -97,7 +97,7 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"path", "groupId", []string{"string"}, "", []string{"string"}, "uuid"},
+		Args:        []any{"path", "groupId", "format", "none", "uuid"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -121,7 +121,7 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"query", "token", []string{"string"}, "uuid", []string{"string"}, "uri"},
+		Args:        []any{"query", "token", "format", "uuid", "uri"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -145,7 +145,7 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeChangedId,
-		Args:        []any{"header", "X-Request-ID", []string{"string"}, "uuid", []string{"string"}, "uri"},
+		Args:        []any{"header", "X-Request-ID", "format", "uuid", "uri"},
 		Level:       checker.ERR,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -170,7 +170,7 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", []string{"integer"}, "", []string{"integer", "string"}, ""},
+		Args:        []any{"path", "groupId", "type", "integer", "integer, string"},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -195,7 +195,7 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", []string{"integer", "string"}, "", []string{"number", "string"}, ""},
+		Args:        []any{"path", "groupId", "type", "integer, string", "number, string"},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -231,7 +231,7 @@ func TestRequestQueryParamSingleToListOfTypesNotDuplicated(t *testing.T) {
 	})
 	errs := checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterListOfTypesWidenedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterListOfTypesWidenedId)
 }
 
 // BC: changing request's query param property type from number to string is breaking
@@ -246,8 +246,7 @@ func TestBreaking_ReqQueryParamTypeNumberToString(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPropertyTypeChangedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was changed from `number`/`` to `string`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was changed from `number` to `string`", requireChange(t, errs, checker.RequestParameterPropertyTypeChangedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 }
 
@@ -263,8 +262,7 @@ func TestBreaking_ReqQueryParamTypeStringToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPropertyTypeSpecializedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was specialized from `string`/`` to `number`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was specialized from `string` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeSpecializedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -280,8 +278,7 @@ func TestBreaking_ReqQueryParamTypeIntegerToNumber(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterPropertyTypeGeneralizedId, errs[0].GetId())
-	require.Equal(t, "for the `query` request parameter `filters`, the type/format of property `groupId` was generalized from `integer`/`` to `number`/``", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "for the `query` request parameter `filters`, the `type` of property `groupId` was generalized from `integer` to `number`", requireChange(t, errs, checker.RequestParameterPropertyTypeGeneralizedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
@@ -295,18 +292,21 @@ func TestRequestQueryParamScalarToFormExplodeArray(t *testing.T) {
 	s2, err := open("../data/checker/request_parameter_type_changed_base.yaml")
 	require.NoError(t, err)
 
+	// Wrap the base scalar in a form/explode array whose item is the scalar
+	// unchanged (same type and constraints), which is the backwards-compatible
+	// widening: a single value on the wire is a valid one-element array.
 	queryParam := s2.Spec.Paths.Value("/api/v1.0/groups").Post.Parameters[1].Value
-	queryParam.Schema.Value.Type = &openapi3.Types{"array"}
-	queryParam.Schema.Value.Format = ""
-	queryParam.Schema.Value.Items = &openapi3.SchemaRef{
-		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Format: "uuid"},
+	item := *queryParam.Schema.Value
+	queryParam.Schema.Value = &openapi3.Schema{
+		Type:  &openapi3.Types{"array"},
+		Items: &openapi3.SchemaRef{Value: &item},
 	}
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterTypeGeneralizedId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
@@ -329,7 +329,7 @@ func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.RequestParameterTypeChangedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -349,7 +349,7 @@ func TestRequestPathParamFormatRemoved(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ApiChange{
 		Id:          checker.RequestParameterTypeGeneralizedId,
-		Args:        []any{"path", "groupId", []string{"string"}, "uuid", []string{"string"}, ""},
+		Args:        []any{"path", "groupId", "format", "uuid", "none"},
 		Level:       checker.INFO,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -372,6 +372,120 @@ func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ResponsePropertyTypeChangedId, errs[0].GetId())
+	requireChange(t, errs, checker.ResponsePropertyTypeChangedId)
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}
+
+// CL: under OpenAPI 3.1, widening a nullable scalar query parameter to a
+// nullable form/explode array of the same scalar is still backwards-compatible
+// (#918). "null" is stripped from both sides before the scalar-to-array check,
+// so preserving or adding nullability does not turn a safe widening into a
+// breaking change.
+func TestRequestQueryParamScalarToFormExplodeArray_31Nullable(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		base     string
+		revision string
+	}{
+		// scalar string -> [array, null] (null added on the array side)
+		{"scalar to nullable array", "request_param_scalar_to_array_31_base.yaml", "request_param_scalar_to_array_31_revision.yaml"},
+		// [string, null] -> [array, null], nullable items (nullable on both sides)
+		{"nullable scalar to nullable array", "request_param_nullable_to_array_31_base.yaml", "request_param_nullable_to_array_31_revision.yaml"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s1, err := open("../data/checker/" + tc.base)
+			require.NoError(t, err)
+			s2, err := open("../data/checker/" + tc.revision)
+			require.NoError(t, err)
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+			errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+			require.Len(t, errs, 1)
+			require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId(),
+				"nullable scalar->form/explode array widening must be a generalization, not breaking")
+			require.Equal(t, checker.INFO, errs[0].GetLevel())
+		})
+	}
+}
+
+// CL: widening a weakly-typed (query) parameter from a union of scalar types to a
+// form/explode array is safe when the item type accepts every value the base did.
+// A query value is a string on the wire, so [string, integer] -> array<string> is
+// a generalization: the string branch already accepted every wire value, and a
+// single value is a valid one-element array. Mirrors the scalar-to-scalar case
+// [string, integer] -> string, which is also non-breaking. The change carries the
+// form/explode comment so the verdict is not surprising.
+func TestRequestQueryParamMultiTypeToFormExplodeArraySafe(t *testing.T) {
+	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_multitype_to_array_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeGeneralizedId, errs[0].GetId(),
+		"[string,integer]->array<string> is safe: the item type accepts every value the base did on the wire")
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Equal(t, "This parameter uses form/explode serialization, where a single value is a valid one-element array, so widening it to an array whose items still accept the previous values does not break existing clients.", errs[0].GetComment(checker.NewDefaultLocalizer()))
+}
+
+// CL (guard): the widening is only safe when the item type accepts every base
+// value. [string, integer] -> array<integer> drops the string branch, so a value
+// like ?token=abc that validated under the base (string) is rejected by the
+// integer item. It must stay breaking.
+func TestRequestQueryParamWideningToNarrowerItemTypeStillBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_multitype_to_array_integer_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
+		"an item type that does not accept every base value (string -> integer) is breaking")
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}
+
+// CL (soundness): a scalar -> form/explode array is only safe when the array
+// items accept every value the base scalar accepted. Adding an item constraint
+// (here a pattern that excludes digits) rejects previously-valid values like
+// "5", so it must be breaking, not a generalization (#1024 follow-up).
+func TestRequestQueryParamScalarToConstrainedArrayBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_param_scalar_to_constrained_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_scalar_to_constrained_array_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
+		"scalar->array whose items add a constraint rejects values valid under the base, so it is breaking")
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}
+
+// CL (soundness): the two safety axes are independent. Here the type axis passes
+// via weak typing ([string,integer] is accepted as string on the wire), but the
+// item adds a pattern that rejects previously-valid values like "5", so the
+// constraint axis fails and the widening is breaking. Guards that the "anything
+// to string" type rule does not short-circuit the value-constraint check.
+func TestRequestQueryParamMultiTypeToConstrainedArrayBreaking(t *testing.T) {
+	s1, err := open("../data/checker/request_param_multitype_to_array_31_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_param_multitype_to_constrained_array_31_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.RequestParameterTypeChangedId, errs[0].GetId(),
+		"type axis passes (weak typing) but the added pattern narrows values, so it is breaking")
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }

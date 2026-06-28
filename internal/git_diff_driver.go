@@ -65,11 +65,11 @@ func runGitDiffDriver(cmd *cobra.Command, args []string) error {
 	newHex := args[5]
 
 	if oldFile == nullFile {
-		fmt.Fprintf(cmd.OutOrStdout(), "Added %s\n", path)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Added %s\n", path)
 		return nil
 	}
 	if newFile == nullFile {
-		fmt.Fprintf(cmd.OutOrStdout(), "Removed %s\n", path)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "Removed %s\n", path)
 		return nil
 	}
 	if oldHex == newHex {
@@ -83,7 +83,7 @@ func runGitDiffDriver(cmd *cobra.Command, args []string) error {
 		// External diff drivers must exit 0 to keep `git log --ext-diff` alive.
 		// Surface the configuration error inline in the diff output instead of
 		// aborting git's whole pipeline.
-		fmt.Fprintf(cmd.OutOrStdout(), "oasdiff: configuration error: %s\n", returnErr)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "oasdiff: configuration error: %s\n", returnErr)
 		return nil
 	}
 	flags.setBase(load.NewSource(shortHex(oldHex) + ":" + path))
@@ -94,7 +94,7 @@ func runGitDiffDriver(cmd *cobra.Command, args []string) error {
 	if _, returnErr := runChangelog(flags, cmd.OutOrStdout()); returnErr != nil {
 		// Same exit-code-zero discipline as above. Print the error in-line so
 		// the user sees it as part of git's diff output.
-		fmt.Fprintf(cmd.OutOrStdout(), "oasdiff: %s\n", returnErr)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "oasdiff: %s\n", returnErr)
 	}
 
 	return nil

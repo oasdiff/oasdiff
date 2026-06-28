@@ -37,7 +37,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
 				id,
-				[]any{getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff)},
+				[]any{getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 				"",
 			).WithSources(baseSource, revisionSource))
 		}
@@ -70,7 +70,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), getBaseType(propSchemaDiff), getBaseFormat(propSchemaDiff), getRevisionType(propSchemaDiff), getRevisionFormat(propSchemaDiff)},
+					[]any{propertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff)},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}

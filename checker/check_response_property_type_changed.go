@@ -33,7 +33,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
 				ResponseBodyTypeChangedId,
-				[]any{getBaseType(schemaDiff), getBaseFormat(schemaDiff), getRevisionType(schemaDiff), getRevisionFormat(schemaDiff), info.responseStatus},
+				[]any{getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), info.responseStatus},
 				"",
 			).WithSources(baseSource, revisionSource))
 		}
@@ -58,7 +58,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					ResponsePropertyTypeChangedId,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), getBaseType(propSchemaDiff), getBaseFormat(propSchemaDiff), getRevisionType(propSchemaDiff), getRevisionFormat(propSchemaDiff), info.responseStatus},
+					[]any{propertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff), info.responseStatus},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}

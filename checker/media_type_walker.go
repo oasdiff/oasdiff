@@ -106,10 +106,20 @@ type propertyInfo struct {
 	parent       *diff.SchemaDiff
 }
 
+// modifiedSchemaPresentBothSides reports whether a media type's schema changed
+// with a schema present on BOTH sides. A schema added (Base nil) or removed
+// (Revision nil) on an existing media type is not a modification of an existing
+// schema, and the per-schema-change checks built on these walkers dereference
+// Base/Revision unconditionally, so walking those cases nil-panics (#1047).
+func modifiedSchemaPresentBothSides(d *diff.MediaTypeDiff) bool {
+	return d.SchemaDiff != nil && d.SchemaDiff.Base != nil && d.SchemaDiff.Revision != nil
+}
+
 // walkModifiedRequestBodySchemas invokes processor once for each modified
 // request-body media type across the diff, with the per-media-type schema
-// diff and the plumbing needed to emit ApiChange values. Skips media
-// types whose SchemaDiff is nil.
+// diff and the plumbing needed to emit ApiChange values. Skips media types
+// whose schema is absent on either side (added or removed; see
+// modifiedSchemaPresentBothSides).
 func walkModifiedRequestBodySchemas(
 	diffReport *diff.Diff,
 	operationsSources *diff.OperationsSourcesMap,
@@ -132,7 +142,7 @@ func walkModifiedRequestBodySchemas(
 			}
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if mediaTypeDiff.SchemaDiff == nil {
+				if !modifiedSchemaPresentBothSides(mediaTypeDiff) {
 					continue
 				}
 				processor(mediaTypeInfo{
@@ -153,7 +163,7 @@ func walkModifiedRequestBodySchemas(
 // walkModifiedResponseSchemas mirrors walkModifiedRequestBodySchemas for
 // response bodies. The processor receives an info with responseStatus set
 // to the response status code (e.g. "200"). Skips media types whose
-// SchemaDiff is nil.
+// schema is absent on either side (see modifiedSchemaPresentBothSides).
 func walkModifiedResponseSchemas(
 	diffReport *diff.Diff,
 	operationsSources *diff.OperationsSourcesMap,
@@ -178,7 +188,7 @@ func walkModifiedResponseSchemas(
 				}
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					if mediaTypeDiff.SchemaDiff == nil {
+					if !modifiedSchemaPresentBothSides(mediaTypeDiff) {
 						continue
 					}
 					processor(mediaTypeInfo{

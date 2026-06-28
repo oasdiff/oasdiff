@@ -236,10 +236,4 @@ func getRevisionType(schemaDiff *diff.SchemaDiff) []string {
 	return schemaDiff.Revision.Type.Slice()
 }
 
-func getBaseFormat(schemaDiff *diff.SchemaDiff) string {
-	return schemaDiff.Base.Format
-}
-
-func getRevisionFormat(schemaDiff *diff.SchemaDiff) string {
-	return schemaDiff.Revision.Format
-}
+// type/format rendering for human-readable messages lives in type_format.go.

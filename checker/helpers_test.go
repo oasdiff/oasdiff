@@ -114,3 +114,19 @@ func findChange(changes checker.Changes, id string) checker.Change {
 func containsId(changes checker.Changes, id string) bool {
 	return findChange(changes, id) != nil
 }
+
+// requireChange asserts that changes contains a change with the given id and
+// returns it, so callers can chain assertions on the change (its text, level,
+// sources, ...) without depending on its position in the slice.
+func requireChange(t *testing.T, changes checker.Changes, id string) checker.Change {
+	t.Helper()
+	change := findChange(changes, id)
+	require.NotNil(t, change, "expected a change with id %q", id)
+	return change
+}
+
+// requireNoChange asserts that changes contains no change with the given id.
+func requireNoChange(t *testing.T, changes checker.Changes, id string) {
+	t.Helper()
+	require.Nil(t, findChange(changes, id), "unexpected change with id %q", id)
+}

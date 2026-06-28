@@ -154,9 +154,9 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		base64.RawURLEncoding.EncodeToString(key),
 	)
 
-	fmt.Fprintf(stderr, "\nOpening %s (expires %s)\n", reviewURL, expiresAt.Format("2006-01-02 15:04 MST"))
+	_, _ = fmt.Fprintf(stderr, "\nOpening %s (expires %s)\n", reviewURL, expiresAt.Format("2006-01-02 15:04 MST"))
 	if err := openBrowser(reviewURL); err != nil {
-		fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
+		_, _ = fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
 	}
 	return nil
 }
@@ -228,7 +228,7 @@ func postEncryptedReview(blob []byte) (string, time.Time, error) {
 	if err != nil {
 		return "", time.Time{}, fmt.Errorf("upload to %s: %w", endpoint, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -324,7 +324,7 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 	if err != nil {
 		return fmt.Errorf("upload to %s: %w", endpoint, err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -352,12 +352,12 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 	// cannot read.
 	reviewURL := parsed.ReviewURL + "#k=" + base64.RawURLEncoding.EncodeToString(key)
 
-	fmt.Fprintf(stderr, "\nOpening %s\n", reviewURL)
+	_, _ = fmt.Fprintf(stderr, "\nOpening %s\n", reviewURL)
 	// The status is printed verbatim, on its own grep-friendly line. The CLI
 	// does not interpret or branch on it; the caller acts on it.
-	fmt.Fprintf(stderr, "oasdiff: review status: %s\n", parsed.Gate.State)
+	_, _ = fmt.Fprintf(stderr, "oasdiff: review status: %s\n", parsed.Gate.State)
 	if err := openBrowser(reviewURL); err != nil {
-		fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
+		_, _ = fmt.Fprintf(stderr, "Could not open browser automatically: %v\nOpen this URL manually: %s\n", err, reviewURL)
 	}
 	return nil
 }

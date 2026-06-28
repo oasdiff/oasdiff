@@ -95,6 +95,24 @@ func Test_DiffJson(t *testing.T) {
 	require.Nil(t, json.Unmarshal(stdout.Bytes(), &bc))
 }
 
+// Identical specs produce an empty diff. json/yaml must still emit a valid
+// empty document (`{}`), not empty bytes — an empty string is not valid JSON.
+func Test_DiffEmptyJson(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test1.yaml -f json"), &stdout, io.Discard))
+	require.Equal(t, "{}", strings.TrimSpace(stdout.String()))
+	var bc any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &bc))
+}
+
+func Test_DiffEmptyYaml(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test1.yaml -f yaml"), &stdout, io.Discard))
+	require.Equal(t, "{}", strings.TrimSpace(stdout.String()))
+	var bc any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &bc))
+}
+
 func Test_DiffHtml(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml -f html"), &stdout, io.Discard))

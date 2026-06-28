@@ -61,8 +61,7 @@ func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.APIInvalidStabilityLevelId, errs[0].GetId())
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
 }
 
@@ -78,8 +77,7 @@ func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.APIInvalidStabilityLevelId, errs[0].GetId())
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
 }
 
@@ -95,8 +93,7 @@ func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.APIInvalidStabilityLevelId, errs[0].GetId())
-	require.Equal(t, "failed to parse stability level: `x-stability-level isn't a string nor valid json`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse stability level: `x-stability-level isn't a string nor valid json`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability-2.yaml", errs[0].GetSource())
 }
 
@@ -107,13 +104,13 @@ func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
 // At Draft, an endpoint stability decrease (stable→draft) is reported.
 func TestEndpointStability_StableToDraft_Decreased(t *testing.T) {
 	errs := stabilityChanges(t, "base-endpoint-stable.yaml", "revision-endpoint-draft.yaml", checker.StabilityLevelDraft)
-	require.True(t, containsId(errs, checker.APIStabilityDecreasedId))
+	requireChange(t, errs, checker.APIStabilityDecreasedId)
 }
 
 // At Draft, an endpoint stability increase (draft→stable) is reported.
 func TestEndpointStability_DraftToStable_Increased(t *testing.T) {
 	errs := stabilityChanges(t, "revision-endpoint-draft.yaml", "base-endpoint-stable.yaml", checker.StabilityLevelDraft)
-	require.True(t, containsId(errs, checker.APIStabilityIncreasedId))
+	requireChange(t, errs, checker.APIStabilityIncreasedId)
 }
 
 // At Beta (default), a stable→draft decrease IS reported: the base (stable) is
@@ -121,11 +118,11 @@ func TestEndpointStability_DraftToStable_Increased(t *testing.T) {
 // level instead would drop this and regress the existing api-stability-decreased ERR.
 func TestEndpointStability_BetaLevel_StableToDraftDetected(t *testing.T) {
 	errs := stabilityChanges(t, "base-endpoint-stable.yaml", "revision-endpoint-draft.yaml", checker.StabilityLevelBeta)
-	require.True(t, containsId(errs, checker.APIStabilityDecreasedId))
+	requireChange(t, errs, checker.APIStabilityDecreasedId)
 }
 
 // At Stable, draft→stable is not reported because base (draft) is below the threshold.
 func TestEndpointStability_StableLevel_DraftToStableNotDetected(t *testing.T) {
 	errs := stabilityChanges(t, "revision-endpoint-draft.yaml", "base-endpoint-stable.yaml", checker.StabilityLevelStable)
-	require.False(t, containsId(errs, checker.APIStabilityIncreasedId))
+	requireNoChange(t, errs, checker.APIStabilityIncreasedId)
 }

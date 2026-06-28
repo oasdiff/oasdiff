@@ -62,7 +62,7 @@ func getSubschemas(indexes []int, schemaRefs openapi3.SchemaRefs) Subschemas {
 	for _, index := range indexes {
 		result = append(result, Subschema{
 			Index: index,
-			Title: schemaRefs[index].Value.Title,
+			Title: schemaValue(schemaRefs[index]).Title,
 		})
 	}
 	return result
@@ -88,12 +88,12 @@ func (modifiedSchemas ModifiedSubschemas) addSchemaDiff(config *Config, state *s
 			Base: Subschema{
 				Index:     index1,
 				Component: getComponentName(schemaRef1),
-				Title:     schemaRef1.Value.Title,
+				Title:     schemaValue(schemaRef1).Title,
 			},
 			Revision: Subschema{
 				Index:     index2,
 				Component: getComponentName(schemaRef2),
-				Title:     schemaRef2.Value.Title,
+				Title:     schemaValue(schemaRef2).Title,
 			},
 			Diff: diff,
 		})

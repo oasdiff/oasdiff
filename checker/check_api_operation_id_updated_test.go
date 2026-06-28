@@ -72,7 +72,7 @@ func TestOperationIdRemoved_WithSources(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIOperationIdUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.APIOperationIdRemovedId, errs[0].GetId())
+	requireChange(t, errs, checker.APIOperationIdRemovedId)
 
 	// Verify source tracking: base has operationId, revision does not
 	require.NotEmpty(t, errs[0].GetBaseSource())
