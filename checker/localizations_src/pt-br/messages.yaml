@@ -1012,3 +1012,11 @@ request-body-media-type-schema-added-description: esquema do tipo de mídia adic
 request-body-media-type-schema-removed-description: esquema do tipo de mídia removido do corpo da requisição
 response-body-media-type-schema-added-description: esquema do tipo de mídia da resposta adicionado
 response-body-media-type-schema-removed-description: esquema do tipo de mídia da resposta removido
+response-body-type-generalized: o %s do corpo da resposta foi generalizado de %s para %s para o status %s
+response-body-type-specialized: o %s do corpo da resposta foi especializado de %s para %s para o status %s
+response-property-type-generalized: o %s da propriedade de resposta %s foi generalizado de %s para %s para o status %s
+response-property-type-specialized: o %s da propriedade de resposta %s foi especializado de %s para %s para o status %s
+response-body-type-generalized-description: tipo do corpo da resposta generalizado
+response-body-type-specialized-description: tipo do corpo da resposta especializado
+response-property-type-generalized-description: tipo da propriedade de resposta generalizado
+response-property-type-specialized-description: tipo da propriedade de resposta especializado

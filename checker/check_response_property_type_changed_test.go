@@ -125,7 +125,7 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
 	requireSingleApiChange(t, checker.ApiChange{
-		Id:          checker.ResponsePropertyTypeChangedId,
+		Id:          checker.ResponsePropertyTypeGeneralizedId,
 		Args:        []any{"data/name", "type", "string", "integer, string", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
@@ -196,6 +196,28 @@ func TestResponseBodyTypeNarrowingMultiTypeNotBreaking(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
 	require.False(t, containsId(errs, checker.ResponseBodyTypeChangedId),
 		"narrowing a response type set is non-breaking; must not report response-body-type-changed")
+	require.True(t, containsId(errs, checker.ResponseBodyTypeSpecializedId),
+		"narrowing a response type set is surfaced as a non-breaking specialization (#989 Gap 2)")
+}
+
+// CL: narrowing a response type (number -> integer) is reported as a non-breaking
+// specialization (info), not suppressed and not breaking. (#989 Gap 2)
+func TestResponseBodyTypeSpecializedIsInfo(t *testing.T) {
+	s1, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/type-change/simple-response.yaml")
+	require.NoError(t, err)
+	setResponseBodyType(t, s1, &openapi3.Types{"number"})
+	setResponseBodyType(t, s2, &openapi3.Types{"integer"})
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	c := requireChange(t, errs, checker.ResponseBodyTypeSpecializedId)
+	require.Equal(t, checker.INFO, c.GetLevel())
+	require.Equal(t, "the response's body `type` was specialized from `number` to `integer` for status `200`",
+		c.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // BC: narrowing a previously untyped response to a concrete type (no type ->
@@ -228,7 +250,7 @@ func TestResponseBodyTypeWideningStillBreaking(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.True(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+	require.True(t, containsId(errs, checker.ResponseBodyTypeGeneralizedId),
 		"widening a response type set is breaking")
 }
 
