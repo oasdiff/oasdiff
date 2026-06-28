@@ -17,3 +17,4 @@ paths:
                 properties:
                   foo: { type: string }
                   bar: { type: string }
+                  baz: { type: string }

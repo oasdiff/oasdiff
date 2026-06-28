@@ -18,8 +18,10 @@ paths:
                     properties:
                       foo: { type: string }
                       bar: { type: string }
+                      baz: { type: string }
                   - type: object
                     required: ["bar"]
                     properties:
                       foo: { type: string }
                       bar: { type: string }
+                      baz: { type: string }

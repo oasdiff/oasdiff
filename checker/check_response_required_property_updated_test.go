@@ -109,6 +109,10 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 // response may now be absent depending on which alternative matches. The moved
 // properties must not be reported as removed, and the wrapping must be reported
 // once as response-body-wrapped-in-one-of (ERR).
+//
+// The fixture moves both required (foo, bar) and optional (baz) properties into
+// the wrapping, so this exercises the moved-property suppression in both
+// ResponseRequiredPropertyUpdatedCheck and ResponseOptionalPropertyUpdatedCheck.
 func TestResponsePropertyOneOfWrappingIsBreaking(t *testing.T) {
 	s1, err := open("../data/checker/response_property_one_of_wrapped_base.yaml")
 	require.NoError(t, err)
