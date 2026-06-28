@@ -171,7 +171,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						).WithSources(baseSource, revisionSource))
 					}
 
-					CheckModifiedPropertiesDiff(
+					checkModifiedPropertiesDiff(
 						schemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 

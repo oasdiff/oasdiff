@@ -45,7 +45,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 						func(enumVal any) []any { return []any{enumVal, paramLocation, paramName} },
 					)...)
 
-					CheckModifiedPropertiesDiff(
+					checkModifiedPropertiesDiff(
 						paramItem.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							result = append(result, checkParameterEnumDiff(

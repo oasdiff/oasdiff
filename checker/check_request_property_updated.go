@@ -31,10 +31,10 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 			).WithSources(nil, nil))
 		}
 
-		// CheckDeletedPropertiesDiff / CheckAddedPropertiesDiff handle the
+		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the
 		// added/removed property sides — different from info.walkProperties,
-		// which delegates to CheckModifiedPropertiesDiff. Used directly here.
-		CheckDeletedPropertiesDiff(
+		// which delegates to checkModifiedPropertiesDiff. Used directly here.
+		checkDeletedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 				if propertyItem.ReadOnly {
@@ -57,7 +57,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 				).WithSources(baseSource, nil))
 			})
 
-		CheckAddedPropertiesDiff(
+		checkAddedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 				if propertyItem.ReadOnly {

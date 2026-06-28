@@ -33,11 +33,11 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			).WithSources(nil, nil))
 		}
 
-		// CheckDeletedPropertiesDiff / CheckAddedPropertiesDiff walk
+		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff walk
 		// properties that were dropped or introduced entirely, not just
 		// modified ones — different from info.walkProperties, which
-		// delegates to CheckModifiedPropertiesDiff. Used directly here.
-		CheckDeletedPropertiesDiff(
+		// delegates to checkModifiedPropertiesDiff. Used directly here.
+		checkDeletedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 				id := ResponseRequiredPropertyRemovedId
@@ -65,7 +65,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					"",
 				).WithSources(baseSource, nil))
 			})
-		CheckAddedPropertiesDiff(
+		checkAddedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 				id := ResponseRequiredPropertyAddedId
