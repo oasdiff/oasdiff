@@ -48,7 +48,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 						).WithSources(baseSource, revisionSource))
 					}
 
-					CheckModifiedPropertiesDiff(
+					checkModifiedPropertiesDiff(
 						paramDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 

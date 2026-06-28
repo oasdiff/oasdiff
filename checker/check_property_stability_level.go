@@ -31,7 +31,7 @@ func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 			op := operationItem.Revision
 			for _, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
-				CheckModifiedPropertiesDiff(
+				checkModifiedPropertiesDiff(
 					mediaTypeDiff.SchemaDiff,
 					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 						checkPropertyStabilityChange(propertyDiff, propertyPath, propertyName,
@@ -67,7 +67,7 @@ func ResponsePropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSour
 					continue
 				}
 				for _, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
-					CheckModifiedPropertiesDiff(
+					checkModifiedPropertiesDiff(
 						mediaTypeDiff.SchemaDiff,
 						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 							checkPropertyStabilityChange(propertyDiff, propertyPath, propertyName,

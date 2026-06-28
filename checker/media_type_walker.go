@@ -56,7 +56,7 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 
 // walkProperties walks every modified property under info.schemaDiff and
 // invokes processor with a propertyInfo for each. Delegates to
-// CheckModifiedPropertiesDiff, so the recursion covers AllOf / AnyOf /
+// checkModifiedPropertiesDiff, so the recursion covers AllOf / AnyOf /
 // OneOf / Items / PatternProperties / DependentSchemas and the OpenAPI 3.1
 // sub-schema fields exactly as that primitive does.
 //
@@ -66,7 +66,7 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 // WithSources(propBaseSource, propRevisionSource) with the property-
 // specific sources.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
-	CheckModifiedPropertiesDiff(info.schemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff) {
+	checkModifiedPropertiesDiff(info.schemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff) {
 		// The traversal also descends into single-valued sub-schemas (items,
 		// not, if/then/else, contentSchema, ...). When such a sub-schema exists
 		// on only one side (e.g. `items` removed in the revision), its diff has
@@ -96,7 +96,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 // media-type).
 //
 // propertyPath, propertyName, and propertyDiff are the same triple
-// CheckModifiedPropertiesDiff passes to its processor; parent is the
+// checkModifiedPropertiesDiff passes to its processor; parent is the
 // containing schema diff.
 type propertyInfo struct {
 	mediaTypeInfo

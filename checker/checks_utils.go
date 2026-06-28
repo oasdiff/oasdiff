@@ -65,7 +65,7 @@ func interfaceToString(arg any) string {
 	return fmt.Sprintf("%v", arg)
 }
 
-func CheckModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff)) {
+func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff)) {
 	if schemaDiff == nil {
 		return
 	}
@@ -174,7 +174,7 @@ func processModifiedPropertiesDiff(propertyPath string, propertyName string, sch
 	}
 }
 
-func CheckAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
+func checkAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
 	if schemaDiff == nil {
 		return
 	}
@@ -281,7 +281,7 @@ func processAddedPropertiesDiff(propertyPath string, propertyName string, schema
 	}
 }
 
-func CheckDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
+func checkDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
 	if schemaDiff == nil {
 		return
 	}

@@ -18,11 +18,11 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// CheckDeletedPropertiesDiff / CheckAddedPropertiesDiff handle the
+		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the
 		// added/removed property sides; info.walkProperties only delegates
-		// to CheckModifiedPropertiesDiff so the primitives are called
+		// to checkModifiedPropertiesDiff so the primitives are called
 		// directly inside the walker callback.
-		CheckDeletedPropertiesDiff(
+		checkDeletedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 				if slices.Contains(parent.Base.Required, propertyName) {
@@ -50,7 +50,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				).WithSources(baseSource, nil))
 			})
 
-		CheckAddedPropertiesDiff(
+		checkAddedPropertiesDiff(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
 				if slices.Contains(parent.Revision.Required, propertyName) {
