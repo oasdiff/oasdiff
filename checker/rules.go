@@ -590,7 +590,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyOneOfRemovedId, INFO, ResponsePropertyOneOfUpdated, DirectionResponse, AreaSchema, KindStructure, ActionRemove),
 		// ResponsePropertyTypeChangedCheck
 		newBackwardCompatibilityRule(ResponseBodyTypeChangedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionChange),
+		newBackwardCompatibilityRule(ResponseBodyTypeGeneralizedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionGeneralize),
+		newBackwardCompatibilityRule(ResponseBodyTypeSpecializedId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionSpecialize),
 		newBackwardCompatibilityRule(ResponsePropertyTypeChangedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyTypeGeneralizedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionGeneralize),
+		newBackwardCompatibilityRule(ResponsePropertyTypeSpecializedId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionSpecialize),
 		// ResponseRequiredPropertyUpdatedCheck
 		newBackwardCompatibilityRule(ResponseRequiredPropertyRemovedId, ERR, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseRequiredWriteOnlyPropertyRemovedId, INFO, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, ActionRemove),

@@ -55,6 +55,16 @@ func isResponseTypeNarrowing(typeDiff *diff.StringsDiff, schemaDiff *diff.Schema
 	return typeDiff != nil && isTypeSetSubset(getRevisionType(schemaDiff), getBaseType(schemaDiff))
 }
 
+// isResponseTypeWidening reports whether a response type change widens the
+// returned type set: the base set is contained in the revision set, so the server
+// may now return types it could not before. This is the breaking direction for a
+// response and gets the dedicated generalize verdict, separating it from a
+// genuinely incompatible change. Same predicate as isRequestTypeWidening, named
+// per direction for the response call site.
+func isResponseTypeWidening(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	return typeDiff != nil && isTypeSetSubset(getBaseType(schemaDiff), getRevisionType(schemaDiff))
+}
+
 // isTypeSetSubset reports whether sub is non-empty and every type in it is
 // covered by some type in super (using the integer-within-number lattice).
 //

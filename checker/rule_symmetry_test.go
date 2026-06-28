@@ -27,7 +27,7 @@ import (
 // Removing a real check, or adding one that fills a gap, must update this map.
 var symmetryWaivers = map[string]string{
 	// --- request <-> response (bidirectional areas only) ---
-	"request<->response schema/type/generalize missing-response":        "response type generalization is the breaking direction (a wider returned type can break clients); it is reported by response-property-type-changed (ERR). The safe response direction is specialization. Granularity asymmetry tracked in #1034.",
+	"request<->response schema/type/specialize missing-request":         "narrowing a response type is the safe direction and gets a dedicated specialize rule (INFO, #989); on the request side narrowing is breaking and folded into request-*-type-changed (ERR) by contravariance, so there is no request specialize rule.",
 	"request<->response schema/constraints/generalize missing-response": "response pattern generalization is breaking and reported by response-property-pattern-changed; the safe response direction is specialization. Tracked in #1034.",
 	"request<->response schema/constraints/set missing-response":        "setting a constraint on a response narrows the server's output, which is non-breaking for clients, so it is request-only by contravariance (request reports the constraint as newly enforced).",
 

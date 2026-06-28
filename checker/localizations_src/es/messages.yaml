@@ -1011,3 +1011,11 @@ request-body-media-type-schema-added-description: esquema del tipo de media del 
 request-body-media-type-schema-removed-description: esquema del tipo de media del cuerpo de solicitud removido
 response-body-media-type-schema-added-description: esquema del tipo de media de la respuesta agregado
 response-body-media-type-schema-removed-description: esquema del tipo de media de la respuesta removido
+response-body-type-generalized: el %s del cuerpo de respuesta fue generalizado de %s a %s para el estado %s
+response-body-type-specialized: el %s del cuerpo de respuesta fue especializado de %s a %s para el estado %s
+response-property-type-generalized: el %s de la propiedad de respuesta %s fue generalizado de %s a %s para el estado %s
+response-property-type-specialized: el %s de la propiedad de respuesta %s fue especializado de %s a %s para el estado %s
+response-body-type-generalized-description: tipo del cuerpo de respuesta generalizado
+response-body-type-specialized-description: tipo del cuerpo de respuesta especializado
+response-property-type-generalized-description: tipo de la propiedad de respuesta generalizado
+response-property-type-specialized-description: tipo de la propiedad de respuesta especializado
