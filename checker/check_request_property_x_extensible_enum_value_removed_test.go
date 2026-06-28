@@ -19,6 +19,5 @@ func TestRequestPropertyXExtensibleEnumValueRemovedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestPropertyXExtensibleEnumValueRemovedCheck), d, osm)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestPropertyXExtensibleEnumValueRemovedId)
+	requireSingleChange(t, errs, checker.RequestPropertyXExtensibleEnumValueRemovedId)
 }

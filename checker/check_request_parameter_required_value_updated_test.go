@@ -41,8 +41,7 @@ func TestBreaking_HeaderParamBecameRequired_WithSources(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterRequiredValueUpdatedCheck), d, osm)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestParameterBecomeRequiredId)
+	requireSingleChange(t, errs, checker.RequestParameterBecomeRequiredId)
 
 	// The 'required' field is not explicitly in the YAML (set in-memory),
 	// so both sources are nil when origin tracking is enabled

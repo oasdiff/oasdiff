@@ -93,8 +93,7 @@ func TestRequestPropertyTypeUnionNarrowedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestPropertyTypeChangedId)
+	requireSingleChange(t, errs, checker.RequestPropertyTypeChangedId)
 }
 
 // CL: removing a request property type constraint is not breaking
@@ -113,8 +112,7 @@ func TestRequestPropertyTypeDeletedCheck(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestPropertyTypeGeneralizedId)
+	requireSingleChange(t, errs, checker.RequestPropertyTypeGeneralizedId)
 }
 
 // CL: changing request body and property types from array to object

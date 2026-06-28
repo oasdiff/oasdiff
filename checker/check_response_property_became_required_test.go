@@ -38,8 +38,7 @@ func TestResponsePropertyBecameRequired_WithSources(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyBecameRequiredCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.ResponsePropertyBecameRequiredId)
+	requireSingleChange(t, errs, checker.ResponsePropertyBecameRequiredId)
 
 	// Base has no 'required' list in YAML, so baseSource is nil
 	require.Empty(t, errs[0].GetBaseSource())

@@ -214,8 +214,7 @@ func TestRequestQueryParamSingleToListOfTypesNotDuplicated(t *testing.T) {
 		checker.RequestParameterListOfTypesChangedCheck,
 	})
 	errs := checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestParameterListOfTypesWidenedId)
+	requireSingleChange(t, errs, checker.RequestParameterListOfTypesWidenedId)
 }
 
 // BC: changing request's query param property type from number to string is breaking
@@ -289,8 +288,7 @@ func TestRequestQueryParamScalarToFormExplodeArray(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestParameterTypeGeneralizedId)
+	requireSingleChange(t, errs, checker.RequestParameterTypeGeneralizedId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 }
 
@@ -312,8 +310,7 @@ func TestRequestPathParamScalarToArrayStillBreaking(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterTypeChangedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestParameterTypeChangedId)
+	requireSingleChange(t, errs, checker.RequestParameterTypeChangedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
@@ -353,8 +350,7 @@ func TestResponsePropertyFormatRemovedCheck(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyTypeChangedCheck), d, osm, checker.ERR)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.ResponsePropertyTypeChangedId)
+	requireSingleChange(t, errs, checker.ResponsePropertyTypeChangedId)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 

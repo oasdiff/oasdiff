@@ -100,8 +100,7 @@ func TestBreaking_ReqTypeUnionNarrowed(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Len(t, errs, 1)
-	requireChange(t, errs, checker.RequestBodyTypeChangedId)
+	requireSingleChange(t, errs, checker.RequestBodyTypeChangedId)
 }
 
 // BC: removing request's body schema type is not breaking (server becomes more permissive)

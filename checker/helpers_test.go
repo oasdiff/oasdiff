@@ -125,6 +125,14 @@ func requireChange(t *testing.T, changes checker.Changes, id string) checker.Cha
 	return change
 }
 
+// requireSingleChange asserts changes has exactly one change, with the given id,
+// and returns it. Folds require.Len(t, errs, 1) + requireChange(...) into one.
+func requireSingleChange(t *testing.T, changes checker.Changes, id string) checker.Change {
+	t.Helper()
+	require.Len(t, changes, 1)
+	return requireChange(t, changes, id)
+}
+
 // requireNoChange asserts that changes contains no change with the given id.
 func requireNoChange(t *testing.T, changes checker.Changes, id string) {
 	t.Helper()
