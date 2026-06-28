@@ -128,14 +128,17 @@ func TestResponsePropertyOneOfWrappingIsBreaking(t *testing.T) {
 	require.False(t, containsId(errs, checker.ResponseOptionalPropertyRemovedId),
 		"properties moved into a oneOf wrapping must not be reported as removed (#702)")
 
+	// The mechanical artifacts of the wrapping (the added oneOf alternatives,
+	// the top-level type going to "any") are redundant with the single wrapped
+	// finding and must be suppressed too.
+	require.False(t, containsId(errs, checker.ResponseBodyOneOfAddedId),
+		"the wrapping's added alternatives must not also be reported as one-of-added (#702)")
+	require.False(t, containsId(errs, checker.ResponseBodyTypeChangedId),
+		"the wrapping's top-level type change to 'any' must not also be reported (#702)")
+
 	// The wrapping must be reported exactly once per response body (not per
-	// property), as a breaking error.
-	wrapped := 0
-	for _, e := range errs {
-		if e.GetId() == checker.ResponseBodyWrappedInOneOfId {
-			wrapped++
-			require.Equal(t, checker.ERR, e.GetLevel())
-		}
-	}
-	require.Equal(t, 1, wrapped, "the wrapping must be reported once as a breaking error (#702)")
+	// property), as a breaking error, and nothing else.
+	require.Len(t, errs, 1, "a oneOf wrapping must produce exactly one finding (#702)")
+	require.Equal(t, checker.ResponseBodyWrappedInOneOfId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
