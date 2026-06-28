@@ -104,12 +104,12 @@ request-parameter-min-items-set-comment: This is a warning because the restricti
 request-parameter-min-set: for the %s request parameter %s, the min was set to %s
 request-parameter-min-set-comment: This is a warning because the restriction is sometimes legitimately required, for security reasons or to correct an error in the specification. Before making such a change, confirm that clients can handle the new restriction.
 request-parameter-type-changed: for the %s request parameter %s, the %s was changed from %s to %s
-request-parameter-type-generalized: for the %s request parameter %s, the %s was generalized from %s to %s
+request-parameter-type-generalized: for the %s request parameter %s, the %s was widened from %s to %s
 request-parameter-property-type-changed: for the %s request parameter %s, the %s of property %s was changed from %s to %s
 request-parameter-property-type-changed-warn-comment: This is a warning because parameter objects can be passed in different ways, some of which allow this type change while others do not.
 request-parameter-type-form-explode-array-comment: This parameter uses form/explode serialization, where a single value is a valid one-element array, so widening it to an array whose items still accept the previous values does not break existing clients.
-request-parameter-property-type-generalized: for the %s request parameter %s, the %s of property %s was generalized from %s to %s
-request-parameter-property-type-specialized: for the %s request parameter %s, the %s of property %s was specialized from %s to %s
+request-parameter-property-type-generalized: for the %s request parameter %s, the %s of property %s was widened from %s to %s
+request-parameter-property-type-specialized: for the %s request parameter %s, the %s of property %s was narrowed from %s to %s
 request-parameter-reactivated: "%s request parameter %s was reactivated"
 request-parameter-deprecated-sunset-missing: "%s request parameter %s was deprecated without sunset date"
 request-parameter-sunset-date-too-small: "%s request parameter %s sunset date %s is too small, must be at least %s days from now"
@@ -169,9 +169,9 @@ request-property-min-set: the %s request property's min was set to %s
 request-property-min-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
 request-property-removed: removed the request property %s
 request-body-type-changed: the request's body %s changed from %s to %s
-request-body-type-generalized: the request's body %s was generalized from %s to %s
+request-body-type-generalized: the request's body %s was widened from %s to %s
 request-property-type-changed: the %s request property %s changed from %s to %s
-request-property-type-generalized: the %s request property %s was generalized from %s to %s
+request-property-type-generalized: the %s request property %s was widened from %s to %s
 request-property-x-extensible-enum-value-removed: removed the x-extensible-enum value %s of the request property %s
 response-header-became-optional: the response header %s became optional for the status %s
 required-response-header-removed: the mandatory response header %s removed for the status %s
@@ -1022,10 +1022,10 @@ request-body-media-type-schema-added-description: request body media-type schema
 request-body-media-type-schema-removed-description: request body media-type schema removed
 response-body-media-type-schema-added-description: response media-type schema added
 response-body-media-type-schema-removed-description: response media-type schema removed
-response-body-type-generalized: the response's body %s was generalized from %s to %s for status %s
-response-body-type-specialized: the response's body %s was specialized from %s to %s for status %s
-response-property-type-generalized: the %s response's property %s was generalized from %s to %s for status %s
-response-property-type-specialized: the %s response's property %s was specialized from %s to %s for status %s
+response-body-type-generalized: the response's body %s was widened from %s to %s for status %s
+response-body-type-specialized: the response's body %s was narrowed from %s to %s for status %s
+response-property-type-generalized: the %s response's property %s was widened from %s to %s for status %s
+response-property-type-specialized: the %s response's property %s was narrowed from %s to %s for status %s
 response-body-type-generalized-description: response body type generalized
 response-body-type-specialized-description: response body type specialized
 response-property-type-generalized-description: response property type generalized

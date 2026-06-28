@@ -92,12 +92,12 @@ request-parameter-min-items-set-comment: Esto es una advertencia porque a veces 
 request-parameter-min-set: para el parámetro %s de solicitud %s, mínimo fue establecido en %s
 request-parameter-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-parameter-type-changed: para el parámetro %s de solicitud %s, el %s fue cambiado de %s a %s
-request-parameter-type-generalized: para el parámetro %s de solicitud %s, el %s fue generalizado de %s a %s
+request-parameter-type-generalized: para el parámetro %s de solicitud %s, el %s fue ampliado de %s a %s
 request-parameter-property-type-changed: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue cambiado de %s a %s
 request-parameter-property-type-changed-warn-comment: "Esto es una advertencia ya que los objetos de parámetro pueden ser enviados de diferentes maneras, algunas de las cuales permiten cambiar este tipo, otras no."
 request-parameter-type-form-explode-array-comment: "Este parámetro usa la serialización form/explode, donde un valor único es un arreglo válido de un solo elemento, por lo que ampliarlo a un arreglo cuyos elementos siguen aceptando los valores anteriores no rompe a los clientes existentes."
-request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue generalizado de %s a %s
-request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue especializado de %s a %s
+request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue ampliado de %s a %s
+request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue reducido de %s a %s
 new-request-path-parameter: agregado nuevo parámetro de ruta de solicitud %s
 request-parameter-deprecated: parámetro de solicitud deprecado
 request-parameter-deprecated-sunset-missing: parámetro de solicitud deprecado sin fecha de expiración
@@ -163,9 +163,9 @@ request-property-min-set: el valor mínimo de la propiedad de solicitud %s fue e
 request-property-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
 request-property-removed: removida la propiedad de solicitud %s
 request-body-type-changed: el %s del cuerpo de solicitud fue cambiado de %s a %s
-request-body-type-generalized: el %s del cuerpo de solicitud fue generalizado de %s a %s
+request-body-type-generalized: el %s del cuerpo de solicitud fue ampliado de %s a %s
 request-property-type-changed: el %s de la propiedad de solicitud %s fue cambiado de %s a %s
-request-property-type-generalized: el %s de la propiedad de solicitud %s fue generalizado de %s a %s
+request-property-type-generalized: el %s de la propiedad de solicitud %s fue ampliado de %s a %s
 request-property-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s de la propiedad de solicitud %s
 response-header-became-optional: el encabezado de respuesta %s se volvió opcional para el estado %s
 required-response-header-removed: removido el encabezado de respuesta requerido %s para el estado %s
@@ -1011,10 +1011,10 @@ request-body-media-type-schema-added-description: esquema del tipo de media del 
 request-body-media-type-schema-removed-description: esquema del tipo de media del cuerpo de solicitud removido
 response-body-media-type-schema-added-description: esquema del tipo de media de la respuesta agregado
 response-body-media-type-schema-removed-description: esquema del tipo de media de la respuesta removido
-response-body-type-generalized: el %s del cuerpo de respuesta fue generalizado de %s a %s para el estado %s
-response-body-type-specialized: el %s del cuerpo de respuesta fue especializado de %s a %s para el estado %s
-response-property-type-generalized: el %s de la propiedad de respuesta %s fue generalizado de %s a %s para el estado %s
-response-property-type-specialized: el %s de la propiedad de respuesta %s fue especializado de %s a %s para el estado %s
+response-body-type-generalized: el %s del cuerpo de respuesta fue ampliado de %s a %s para el estado %s
+response-body-type-specialized: el %s del cuerpo de respuesta fue reducido de %s a %s para el estado %s
+response-property-type-generalized: el %s de la propiedad de respuesta %s fue ampliado de %s a %s para el estado %s
+response-property-type-specialized: el %s de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
 response-body-type-generalized-description: tipo del cuerpo de respuesta generalizado
 response-body-type-specialized-description: tipo del cuerpo de respuesta especializado
 response-property-type-generalized-description: tipo de la propiedad de respuesta generalizado
