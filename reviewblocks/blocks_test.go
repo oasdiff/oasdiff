@@ -5,6 +5,8 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -166,5 +168,88 @@ func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
 	require.NotContains(t, b.BaseText, "/users:") // not the path block
 }
 
+// allOfRequiredBase / allOfRequiredRevision differ by one line: the revision
+// requires `role` at the usage site via allOf, not inside the User component.
+const allOfRequiredBase = `openapi: 3.0.0
+info: { title: t, version: "1.0" }
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+      responses:
+        "200": { description: ok }
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name: { type: string }
+        role: { type: string }
+`
+
+const allOfRequiredRevision = `openapi: 3.0.0
+info: { title: t, version: "1.0" }
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/User'
+                - required: [role]
+      responses:
+        "200": { description: ok }
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name: { type: string }
+        role: { type: string }
+`
+
+// End-to-end through the real diff + checker pipeline with --flatten-allof.
+// Flattening gives the clear message (request-property-became-required) but
+// leaves the change with no source line, since the merged schema is a new
+// construct. The change must still card onto the operation it names (the
+// fallback), and the slice must be the real operation block whose origin
+// survives the flatten. This is the path the review page runs.
+func TestExtract_FlattenedAllOfFallsBackToOperation(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+
+	s1, err := load.NewSpecInfoFromData(loader, []byte(allOfRequiredBase), "base.yaml", load.WithFlattenAllOf())
+	require.NoError(t, err)
+	s2, err := load.NewSpecInfoFromData(loader, []byte(allOfRequiredRevision), "revision.yaml", load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibility(checker.NewConfig(checker.GetAllChecks()), d, sources)
+
+	// flatten produces the readable, semantic change, with no source line
+	require.Len(t, changes, 1)
+	require.Equal(t, "request-property-became-required", changes[0].GetId())
+	base, rev := changeSources(changes[0])
+	require.Nil(t, base)
+	require.Nil(t, rev)
+
+	blocks := Extract(changes, s1.Spec, s2.Spec, allOfRequiredBase, allOfRequiredRevision)
+	require.Len(t, blocks, 1)
+	b := blocks[0]
+
+	require.Equal(t, "POST /users", b.Key) // fell back to the operation it names
+	require.Contains(t, b.RevText, "required: [role]")
+	require.Contains(t, b.RevText, "$ref: '#/components/schemas/User'")
+	require.NotContains(t, b.RevText, "openapi:") // a real slice, not the whole doc
+}
+
 // TODO(endpoint-review): top-level (info/servers/tags/security) slice tests once
-// those blocks are wired, and a real-pipeline test with sources populated.
+// those blocks are wired.
