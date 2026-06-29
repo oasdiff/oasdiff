@@ -31,6 +31,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/formatters"
 )
 
 // otherChangesKey collects changes with no resolvable block; they render as a
@@ -42,13 +43,15 @@ const otherChangesKey = "__other__"
 // means that side has no sliceable source (e.g. an added or removed block, or a
 // location that did not resolve to a block).
 type Block struct {
-	Key           string   `json:"key"`             // stable identity, e.g. "POST /users" or "components/schemas/User"
-	Title         string   `json:"title"`           // human header
-	ChangeIDs     []string `json:"change_ids"`      // changes contained in this block
-	BaseText      string   `json:"base_text"`       // source slice on the base side ("" if absent)
-	BaseLineStart int      `json:"base_line_start"` // 1-based first line of BaseText in the base spec
-	RevText       string   `json:"rev_text"`        // source slice on the revision side ("" if absent)
-	RevLineStart  int      `json:"rev_line_start"`  // 1-based first line of RevText in the revision spec
+	Key          string   `json:"key"`          // stable identity, e.g. "POST /users" or "components/schemas/User"
+	Title        string   `json:"title"`        // human header
+	ChangeIDs    []string `json:"change_ids"`   // rule ids of the changes in this block (for display/debug)
+	Fingerprints []string `json:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the
+	// stable key the review page joins each change to its card on
+	BaseText      string `json:"base_text"`       // source slice on the base side ("" if absent)
+	BaseLineStart int    `json:"base_line_start"` // 1-based first line of BaseText in the base spec
+	RevText       string `json:"rev_text"`        // source slice on the revision side ("" if absent)
+	RevLineStart  int    `json:"rev_line_start"`  // 1-based first line of RevText in the revision spec
 }
 
 // Extract groups changes by their enclosing structural block and slices each
@@ -70,6 +73,7 @@ func Extract(changes checker.Changes, base, revision *openapi3.T, baseText, revT
 			order = append(order, key)
 		}
 		b.ChangeIDs = append(b.ChangeIDs, c.GetId())
+		b.Fingerprints = append(b.Fingerprints, formatters.ComputeFingerprint(c.GetId(), c.GetOperation(), c.GetPath(), c.GetArgs()))
 	}
 
 	out := make([]Block, 0, len(order))
