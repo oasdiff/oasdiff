@@ -478,6 +478,36 @@ func sourceFromOrigin(origin *openapi3.Origin) *Source {
 	}
 }
 
+// securitySource returns the location of an operation's "security" field,
+// falling back to the operation's own location. Returns nil when the operation
+// has no origin data.
+func securitySource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation) *Source {
+	if op == nil || op.Origin == nil {
+		return nil
+	}
+	if s := NewSourceFromField(operationsSources, op, op.Origin, "security"); s != nil {
+		return s
+	}
+	return NewSourceFromOrigin(operationsSources, op, op.Origin)
+}
+
+// sourceFromField creates a Source from a named field of an origin (e.g. the
+// document-root "security" field). Used for top-level changes where no
+// operation context is available. Returns nil when the field has no origin data.
+func sourceFromField(origin *openapi3.Origin, field string) *Source {
+	if origin == nil {
+		return nil
+	}
+	if location, ok := origin.Fields[field]; ok {
+		return &Source{
+			File:   displayFilePath(location.File),
+			Line:   location.Line,
+			Column: location.Column,
+		}
+	}
+	return nil
+}
+
 func NewEmptySource() *Source {
 	return nil
 }

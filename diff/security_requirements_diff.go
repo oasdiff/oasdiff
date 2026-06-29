@@ -33,6 +33,13 @@ type SecurityRequirementsDiff struct {
 	Added    SecurityAlternatives         `json:"added,omitempty" yaml:"added,omitempty"`
 	Deleted  SecurityAlternatives         `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSecurityRequirements `json:"modified,omitempty" yaml:"modified,omitempty"`
+
+	// Origins of the documents whose root "security" field changed, used to
+	// report the source location of global security changes. Set only on the
+	// root-level diff (see diff.go), not the per-operation one, and kept out of
+	// the diff output.
+	BaseOrigin     *openapi3.Origin `json:"-" yaml:"-"`
+	RevisionOrigin *openapi3.Origin `json:"-" yaml:"-"`
 }
 
 // SecurityAlternative is one alternative (one security requirement object) in a

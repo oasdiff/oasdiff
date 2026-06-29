@@ -290,6 +290,13 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 	}
 
 	result.SecurityDiff = getSecurityRequirementsDiff(&s1.Security, &s2.Security)
+	if result.SecurityDiff != nil {
+		// Carry the document-root origins so the checker can report the source
+		// location of global security changes (the per-operation security diff in
+		// method_diff.go leaves these nil and is sourced from its operation).
+		result.SecurityDiff.BaseOrigin = s1.Origin
+		result.SecurityDiff.RevisionOrigin = s2.Origin
+	}
 	result.ServersDiff = getServersDiff(config, &s1.Servers, &s2.Servers)
 	result.TagsDiff = getTagsDiff(config, s1.Tags, s2.Tags)
 	result.ExternalDocsDiff, err = getExternalDocsDiff(config, s1.ExternalDocs, s2.ExternalDocs)

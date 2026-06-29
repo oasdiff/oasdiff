@@ -166,3 +166,41 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 	}, errs)
 	require.Equal(t, "the security scope `read:pets` was added to the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
+
+// removing a global security, with source tracking: the change points at the
+// document-root "security" field of the base spec.
+func TestAPIGlobalSecurityDeleted_WithSources(t *testing.T) {
+	s1, err := open("../data/checker/api_security_global_added_revision.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+	s2, err := open("../data/checker/api_security_global_added_base.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
+	requireSingleChange(t, errs, checker.APIGlobalSecurityRemovedCheckId)
+
+	require.NotEmpty(t, errs[0].GetBaseSource())
+	require.Equal(t, "../data/checker/api_security_global_added_revision.yaml", errs[0].GetBaseSource().File)
+	require.Equal(t, 5, errs[0].GetBaseSource().Line)
+	require.Empty(t, errs[0].GetRevisionSource())
+}
+
+// removing an endpoint security, with source tracking: the change points at the
+// operation's "security" field of the base spec.
+func TestAPISecurityDeleted_WithSources(t *testing.T) {
+	s1, err := open("../data/checker/api_security_added_revision.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+	s2, err := open("../data/checker/api_security_added_base.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
+	requireSingleChange(t, errs, checker.APISecurityRemovedCheckId)
+
+	require.NotEmpty(t, errs[0].GetBaseSource())
+	require.Equal(t, "../data/checker/api_security_added_revision.yaml", errs[0].GetBaseSource().File)
+	require.Equal(t, 23, errs[0].GetBaseSource().Line)
+	require.Empty(t, errs[0].GetRevisionSource())
+}
