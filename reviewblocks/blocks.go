@@ -42,13 +42,13 @@ const otherChangesKey = "__other__"
 // means that side has no sliceable source (e.g. an added or removed block, or a
 // location that did not resolve to a block).
 type Block struct {
-	Key           string   // stable identity, e.g. "POST /users" or "components/schemas/User"
-	Title         string   // human header
-	ChangeIDs     []string // changes contained in this block
-	BaseText      string
-	BaseLineStart int // 1-based first line of BaseText in the base spec
-	RevText       string
-	RevLineStart  int // 1-based first line of RevText in the revision spec
+	Key           string   `json:"key"`             // stable identity, e.g. "POST /users" or "components/schemas/User"
+	Title         string   `json:"title"`           // human header
+	ChangeIDs     []string `json:"change_ids"`      // changes contained in this block
+	BaseText      string   `json:"base_text"`       // source slice on the base side ("" if absent)
+	BaseLineStart int      `json:"base_line_start"` // 1-based first line of BaseText in the base spec
+	RevText       string   `json:"rev_text"`        // source slice on the revision side ("" if absent)
+	RevLineStart  int      `json:"rev_line_start"`  // 1-based first line of RevText in the revision spec
 }
 
 // Extract groups changes by their enclosing structural block and slices each
