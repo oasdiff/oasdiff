@@ -11,11 +11,12 @@
 // IncludeOrigin = true.
 //
 // WIP / draft. Wired so far: change grouping, the Origin-end slice, and the
-// component-schema case. Still to do (see the design): operation / path-item /
-// top-level node resolution (operations don't carry Origin directly, so the
-// path-item key origin is the handle), overlap dedup, and the "Other changes"
-// fallback rendering. Then this feeds the encrypted review bundle so the
-// browser renders cards from decrypted blocks (the server never sees the spec).
+// endpoint (operation + path-level) and component-schema cases (PathItem,
+// Operation and Schema all carry Origin). Still to do (see the design): other
+// named components, top-level blocks (info/servers/tags/security), overlap
+// dedup, and the "Other changes" fallback rendering. Then this feeds the
+// encrypted review bundle so the browser renders cards from decrypted blocks
+// (the server never sees the spec).
 package reviewblocks
 
 import (
@@ -91,24 +92,77 @@ func structuralKey(c checker.Change) (key, title string) {
 }
 
 // sliceFor resolves a structural key to its node in spec, reads the origin
-// end-range, and slices the source text. WIP: only the component-schema case is
-// wired (schemas carry Origin); operation / path-item / top-level cases return
-// empty until their node resolution lands.
+// end-range, and slices the source text. Both PathItem and Operation carry an
+// Origin, so an endpoint change slices the operation block (falling back to the
+// whole path block when the operation has no recorded origin); a path-level
+// change slices the whole path block; a named component schema slices the
+// schema block. Returns empty for keys not yet mapped or nodes with no origin.
 func sliceFor(spec *openapi3.T, text, key string) (string, int) {
-	if spec == nil || spec.Components == nil {
+	if spec == nil {
 		return "", 0
 	}
-	if name, ok := strings.CutPrefix(key, "components/schemas/"); ok {
+
+	// Endpoint: key "<METHOD> <path>" -> the operation block.
+	if method, path, ok := splitOperationKey(key); ok {
+		pi := pathItemFor(spec, path)
+		if pi == nil {
+			return "", 0
+		}
+		if op := pi.GetOperation(strings.ToUpper(method)); op != nil {
+			if start, end, ok := originEndRange(op.Origin); ok {
+				return sliceLines(text, start, end), start
+			}
+		}
+		// Operation origin missing: fall back to the whole path block.
+		if start, end, ok := originEndRange(pi.Origin); ok {
+			return sliceLines(text, start, end), start
+		}
+		return "", 0
+	}
+
+	// Path level: key "<path>" -> the whole path block (all methods).
+	if strings.HasPrefix(key, "/") {
+		if pi := pathItemFor(spec, key); pi != nil {
+			if start, end, ok := originEndRange(pi.Origin); ok {
+				return sliceLines(text, start, end), start
+			}
+		}
+		return "", 0
+	}
+
+	// Named component schema.
+	if name, ok := strings.CutPrefix(key, "components/schemas/"); ok && spec.Components != nil {
 		if ref := spec.Components.Schemas[name]; ref != nil && ref.Value != nil {
 			if start, end, ok := originEndRange(ref.Value.Origin); ok {
 				return sliceLines(text, start, end), start
 			}
 		}
 	}
-	// TODO(endpoint-review): operation (path-item key origin), path-level,
-	// other named components, top-level (info/servers/tags/security), and the
-	// "Other changes" fallback. Dedup overlapping ranges.
+	// TODO(endpoint-review): other named components, top-level blocks
+	// (info/servers/tags/security), and the "Other changes" fallback. Dedup
+	// overlapping ranges.
 	return "", 0
+}
+
+// splitOperationKey splits an "<METHOD> <path>" key. ok is false for keys that
+// are not operation keys (no space or a non-path second token).
+func splitOperationKey(key string) (method, path string, ok bool) {
+	i := strings.IndexByte(key, ' ')
+	if i <= 0 {
+		return "", "", false
+	}
+	method, path = key[:i], key[i+1:]
+	if !strings.HasPrefix(path, "/") {
+		return "", "", false
+	}
+	return method, path, true
+}
+
+func pathItemFor(spec *openapi3.T, path string) *openapi3.PathItem {
+	if spec.Paths == nil {
+		return nil
+	}
+	return spec.Paths.Value(path)
 }
 
 // originEndRange returns the 1-based [start, end] line span a key origin heads,
