@@ -41,16 +41,19 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 		}
 		for operation, operationItem := range pathDiff.OperationsDiff.Modified {
 			if _, err := getStabilityLevel(pathDiff.Base.GetOperation(operation).Extensions); err != nil {
-				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Base, operationsSources, operation, path, err))
+				baseSource := stabilityFieldSource(operationsSources, operationItem.Base, operationItem.Base.Origin)
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Base, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 			if _, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions); err != nil {
-				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Revision, operationsSources, operation, path, err))
+				revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Revision, operationsSources, operation, path, err).WithSources(nil, revisionSource))
 			}
 		}
 		for _, operation := range pathDiff.OperationsDiff.Deleted {
 			operationItem := pathDiff.Base.GetOperation(operation)
 			if _, err := getStabilityLevel(operationItem.Extensions); err != nil {
-				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
+				baseSource := stabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 		}
 	}
@@ -60,7 +63,8 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 		pathVal := diffReport.PathsDiff.Base.Value(path)
 		for operation, operationItem := range pathVal.Operations() {
 			if _, err := getStabilityLevel(pathVal.GetOperation(operation).Extensions); err != nil {
-				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err))
+				baseSource := stabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
+				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 		}
 	}
@@ -111,6 +115,9 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 				changeId = APIStabilityDecreasedId
 			}
 
+			baseSource := stabilityFieldSource(operationsSources, pathDiff.Base.GetOperation(operation), pathDiff.Base.GetOperation(operation).Origin)
+			revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
+
 			result = append(result, NewApiChange(
 				changeId,
 				config,
@@ -120,7 +127,7 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 				operationItem.Revision,
 				operation,
 				path,
-			))
+			).WithSources(baseSource, revisionSource))
 		}
 	}
 
@@ -198,7 +205,7 @@ func normalizedStability(label string) string {
 	return label
 }
 
-func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method string, path string, err error) Change {
+func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method string, path string, err error) ApiChange {
 	return NewApiChange(
 		APIInvalidStabilityLevelId,
 		config,

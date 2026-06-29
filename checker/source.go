@@ -508,6 +508,21 @@ func sourceFromField(origin *openapi3.Origin, field string) *Source {
 	return nil
 }
 
+// stabilityFieldSource returns the location of the x-stability-level field on
+// the element whose origin is given (an operation or a property schema),
+// falling back to the element's own location. op supplies the file for the
+// fallback when the field location carries none. Returns nil without origin
+// data.
+func stabilityFieldSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, origin *openapi3.Origin) *Source {
+	if origin == nil {
+		return nil
+	}
+	if s := NewSourceFromField(operationsSources, op, origin, diff.XStabilityLevelExtension); s != nil {
+		return s
+	}
+	return NewSourceFromOrigin(operationsSources, op, origin)
+}
+
 func NewEmptySource() *Source {
 	return nil
 }

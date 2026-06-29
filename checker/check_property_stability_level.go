@@ -102,14 +102,16 @@ func checkPropertyStabilityChange(
 	if propertyDiff.Base != nil {
 		baseStability, err = getStabilityLevel(propertyDiff.Base.Extensions)
 		if err != nil {
-			*result = append(*result, getAPIInvalidStabilityLevel(config, op, operationsSources, operation, path, err))
+			baseSource := stabilityFieldSource(operationsSources, op, propertyDiff.Base.Origin)
+			*result = append(*result, getAPIInvalidStabilityLevel(config, op, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			return
 		}
 	}
 	if propertyDiff.Revision != nil {
 		revisionStability, err = getStabilityLevel(propertyDiff.Revision.Extensions)
 		if err != nil {
-			*result = append(*result, getAPIInvalidStabilityLevel(config, op, operationsSources, operation, path, err))
+			revisionSource := stabilityFieldSource(operationsSources, op, propertyDiff.Revision.Origin)
+			*result = append(*result, getAPIInvalidStabilityLevel(config, op, operationsSources, operation, path, err).WithSources(nil, revisionSource))
 			return
 		}
 	}
@@ -137,6 +139,18 @@ func checkPropertyStabilityChange(
 
 	propName := propertyFullName(propertyPath, propertyName)
 
+	// Base/Revision can be nil here (a sub-schema present on only one side);
+	// stabilityFieldSource tolerates a nil origin.
+	var baseOrigin, revisionOrigin *openapi3.Origin
+	if propertyDiff.Base != nil {
+		baseOrigin = propertyDiff.Base.Origin
+	}
+	if propertyDiff.Revision != nil {
+		revisionOrigin = propertyDiff.Revision.Origin
+	}
+	baseSource := stabilityFieldSource(operationsSources, op, baseOrigin)
+	revisionSource := stabilityFieldSource(operationsSources, op, revisionOrigin)
+
 	*result = append(*result, NewApiChange(
 		changeId,
 		config,
@@ -146,5 +160,5 @@ func checkPropertyStabilityChange(
 		op,
 		operation,
 		path,
-	))
+	).WithSources(baseSource, revisionSource))
 }
