@@ -96,7 +96,9 @@ func TestSliceLines(t *testing.T) {
 	}
 }
 
-func TestStructuralKey(t *testing.T) {
+// fallbackKey is used when a change has no resolvable source line: key by
+// operation+path, else path, else (via Area) a top-level bucket, else "Other".
+func TestFallbackKey(t *testing.T) {
 	for _, tc := range []struct {
 		name           string
 		op, path       string
@@ -104,16 +106,65 @@ func TestStructuralKey(t *testing.T) {
 	}{
 		{"operation", "POST", "/users", "POST /users", "POST /users"},
 		{"path level", "", "/users", "/users", "/users"},
-		{"component", "", "components/schemas/User", "components/schemas/User", "components/schemas/User"},
-		{"fallback", "", "", otherChangesKey, "Other changes"},
+		{"no path no area", "", "", otherChangesKey, "Other changes"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			key, title := structuralKey(checker.ApiChange{Operation: tc.op, Path: tc.path})
+			key, title := fallbackKey(checker.ApiChange{Operation: tc.op, Path: tc.path})
 			require.Equal(t, tc.wantKey, key)
 			require.Equal(t, tc.wantT, title)
 		})
 	}
 }
 
-// TODO(endpoint-review): add component-schema and top-level (info/servers)
-// end-to-end slice tests once those mapping cases are wired.
+const refdComponentSpec = `openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/User' }
+      responses: { "201": { description: created } }
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        role: { type: string }
+`
+
+// The hard case: a change to a property inside a $ref'd component. oasdiff
+// reports it under the referencing operation (POST /users), but its source line
+// is inside components/schemas/User. The block must follow the source line and
+// card it as the component (whose block holds the real change), not the
+// operation (whose source only shows the $ref).
+func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
+	doc := loadWithOrigin(t, refdComponentSpec)
+	userSpan, ok := buildIndex(doc).byKey["components/schemas/User"]
+	require.True(t, ok)
+
+	// change reported under the endpoint, but sourced inside User (the role line)
+	c := checker.ApiChange{
+		Id:        "request-property-type-changed",
+		Operation: "POST",
+		Path:      "/users",
+		CommonChange: checker.CommonChange{
+			BaseSource:     &checker.Source{Line: userSpan.end},
+			RevisionSource: &checker.Source{Line: userSpan.end},
+		},
+	}
+
+	blocks := Extract(checker.Changes{c}, doc, doc, refdComponentSpec, refdComponentSpec)
+	require.Len(t, blocks, 1)
+	b := blocks[0]
+
+	require.Equal(t, "components/schemas/User", b.Key) // the component, not "POST /users"
+	require.Contains(t, b.BaseText, "User:")
+	require.Contains(t, b.BaseText, "role:")
+	require.NotContains(t, b.BaseText, "$ref")    // not the operation block
+	require.NotContains(t, b.BaseText, "/users:") // not the path block
+}
+
+// TODO(endpoint-review): top-level (info/servers/tags/security) slice tests once
+// those blocks are wired, and a real-pipeline test with sources populated.

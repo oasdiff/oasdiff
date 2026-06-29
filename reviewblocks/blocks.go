@@ -5,36 +5,42 @@
 // the full-spec side-by-side commits ~1M DOM nodes for a 250k-line spec; cards
 // drop that by ~99%.
 //
-// Slicing relies on kin-openapi origin end-positions
-// (openapi3.Origin.Key.EndLine/EndColumn, added upstream) so a block's full
-// extent is known, not just its start. The specs must be loaded with
-// IncludeOrigin = true.
+// Which block a change belongs to is decided by the change's source line, not
+// its (operation, path): a change inside a $ref'd component is reported under
+// the referencing operation, but its source line is in the component, so
+// keying by the line (matched against block origin spans) follows the $ref and
+// cards it as the component (and dedupes the same component change reported
+// across several endpoints into one card). The (operation, path) and the rule
+// Area are the fallback when no source line resolves.
 //
-// WIP / draft. Wired so far: change grouping, the Origin-end slice, and the
-// endpoint (operation + path-level) and component-schema cases (PathItem,
-// Operation and Schema all carry Origin). Still to do (see the design): other
-// named components, top-level blocks (info/servers/tags/security), overlap
-// dedup, and the "Other changes" fallback rendering. Then this feeds the
+// Slicing relies on kin-openapi origin end-positions
+// (openapi3.Origin.Key.EndLine/EndColumn) so a block's full extent is known,
+// not just its start. The specs must be loaded with IncludeOrigin = true.
+//
+// WIP / draft. Wired: change grouping by source-line containment, the
+// Origin-end slice, and the operation / path / named-component-schema blocks.
+// Still to do (see the design): other named components, top-level blocks
+// (info/servers/tags/security), overlap dedup, and feeding the blocks into the
 // encrypted review bundle so the browser renders cards from decrypted blocks
 // (the server never sees the spec).
 package reviewblocks
 
 import (
+	"math"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 )
 
-// otherChangesKey collects changes whose structural location we don't (yet) map
-// to a sliceable block; they render as a single "Other changes" card with no
-// side-by-side.
+// otherChangesKey collects changes with no resolvable block; they render as a
+// single "Other changes" card with no side-by-side.
 const otherChangesKey = "__other__"
 
 // Block is one review card: the source-text slice of a structural block on each
 // side, plus the ids of the changes that fall inside it. Empty BaseText/RevText
 // means that side has no sliceable source (e.g. an added or removed block, or a
-// location not yet resolved).
+// location that did not resolve to a block).
 type Block struct {
 	Key           string   // stable identity, e.g. "POST /users" or "components/schemas/User"
 	Title         string   // human header
@@ -50,10 +56,13 @@ type Block struct {
 // appearance in changes. The specs must be loaded with IncludeOrigin so
 // end-positions are available; baseText/revText are the raw spec sources.
 func Extract(changes checker.Changes, base, revision *openapi3.T, baseText, revText string) []Block {
+	baseIdx := buildIndex(base)
+	revIdx := buildIndex(revision)
+
 	byKey := map[string]*Block{}
 	var order []string
 	for _, c := range changes {
-		key, title := structuralKey(c)
+		key, title := blockKey(c, baseIdx, revIdx)
 		b := byKey[key]
 		if b == nil {
 			b = &Block{Key: key, Title: title}
@@ -66,103 +75,141 @@ func Extract(changes checker.Changes, base, revision *openapi3.T, baseText, revT
 	out := make([]Block, 0, len(order))
 	for _, key := range order {
 		b := byKey[key]
-		b.BaseText, b.BaseLineStart = sliceFor(base, baseText, key)
-		b.RevText, b.RevLineStart = sliceFor(revision, revText, key)
+		if s, ok := baseIdx.byKey[key]; ok {
+			b.BaseText, b.BaseLineStart = sliceLines(baseText, s.start, s.end), s.start
+		}
+		if s, ok := revIdx.byKey[key]; ok {
+			b.RevText, b.RevLineStart = sliceLines(revText, s.start, s.end), s.start
+		}
 		out = append(out, *b)
 	}
 	return out
 }
 
-// structuralKey maps a change to the key of its smallest enclosing structural
-// block. WIP: keys operations as "<METHOD> <path>", path-level and named
-// components by their path string, and everything else into the "Other
-// changes" fallback. The exact shape of a component change's path is a design
-// open question (sample real changelogs before locking the mapping).
-func structuralKey(c checker.Change) (key, title string) {
-	op, path := c.GetOperation(), c.GetPath()
-	switch {
+// blockKey decides which structural block a change belongs to. Primary signal:
+// the change's source line matched against the smallest enclosing block, on the
+// revision side (current state) first, then the base side (deletions). This
+// follows $refs. Fallback when no source line resolves: the (operation, path)
+// key, then the rule Area (top-level changes), then "Other changes".
+func blockKey(c checker.Change, baseIdx, revIdx docIndex) (key, title string) {
+	baseSrc, revSrc := changeSources(c)
+	if revSrc != nil && revSrc.Line > 0 {
+		if s, ok := revIdx.smallestContaining(revSrc.Line); ok {
+			return s.key, s.title
+		}
+	}
+	if baseSrc != nil && baseSrc.Line > 0 {
+		if s, ok := baseIdx.smallestContaining(baseSrc.Line); ok {
+			return s.key, s.title
+		}
+	}
+	return fallbackKey(c)
+}
+
+func fallbackKey(c checker.Change) (key, title string) {
+	switch op, path := c.GetOperation(), c.GetPath(); {
 	case op != "" && path != "":
 		k := op + " " + path
 		return k, k
 	case path != "":
 		return path, path
-	default:
-		return otherChangesKey, "Other changes"
 	}
+	// No operation/path: bucket top-level changes by their Area name (security,
+	// tags, ...). Schema changes with no path fall through to "Other" rather
+	// than being mis-bucketed.
+	if area, ok := areaByID[c.GetId()]; ok && area != checker.AreaSchema {
+		a := area.String()
+		return a, a
+	}
+	return otherChangesKey, "Other changes"
 }
 
-// sliceFor resolves a structural key to its node in spec, reads the origin
-// end-range, and slices the source text. Both PathItem and Operation carry an
-// Origin, so an endpoint change slices the operation block (falling back to the
-// whole path block when the operation has no recorded origin); a path-level
-// change slices the whole path block; a named component schema slices the
-// schema block. Returns empty for keys not yet mapped or nodes with no origin.
-func sliceFor(spec *openapi3.T, text, key string) (string, int) {
-	if spec == nil {
-		return "", 0
+// changeSources returns the change's base and revision source locations, which
+// oasdiff resolves to the changed element (following $refs). Nil when absent or
+// when the change is not the concrete ApiChange.
+func changeSources(c checker.Change) (base, rev *checker.Source) {
+	if ac, ok := c.(checker.ApiChange); ok {
+		return ac.BaseSource, ac.RevisionSource
 	}
-
-	// Endpoint: key "<METHOD> <path>" -> the operation block.
-	if method, path, ok := splitOperationKey(key); ok {
-		pi := pathItemFor(spec, path)
-		if pi == nil {
-			return "", 0
-		}
-		if op := pi.GetOperation(strings.ToUpper(method)); op != nil {
-			if start, end, ok := originEndRange(op.Origin); ok {
-				return sliceLines(text, start, end), start
-			}
-		}
-		// Operation origin missing: fall back to the whole path block.
-		if start, end, ok := originEndRange(pi.Origin); ok {
-			return sliceLines(text, start, end), start
-		}
-		return "", 0
-	}
-
-	// Path level: key "<path>" -> the whole path block (all methods).
-	if strings.HasPrefix(key, "/") {
-		if pi := pathItemFor(spec, key); pi != nil {
-			if start, end, ok := originEndRange(pi.Origin); ok {
-				return sliceLines(text, start, end), start
-			}
-		}
-		return "", 0
-	}
-
-	// Named component schema.
-	if name, ok := strings.CutPrefix(key, "components/schemas/"); ok && spec.Components != nil {
-		if ref := spec.Components.Schemas[name]; ref != nil && ref.Value != nil {
-			if start, end, ok := originEndRange(ref.Value.Origin); ok {
-				return sliceLines(text, start, end), start
-			}
-		}
-	}
-	// TODO(endpoint-review): other named components, top-level blocks
-	// (info/servers/tags/security), and the "Other changes" fallback. Dedup
-	// overlapping ranges.
-	return "", 0
+	return nil, nil
 }
 
-// splitOperationKey splits an "<METHOD> <path>" key. ok is false for keys that
-// are not operation keys (no space or a non-path second token).
-func splitOperationKey(key string) (method, path string, ok bool) {
-	i := strings.IndexByte(key, ' ')
-	if i <= 0 {
-		return "", "", false
+// areaByID maps each rule id to its Area, so a change's Area can be looked up
+// from its id for the fallback bucketing.
+var areaByID = func() map[string]checker.Area {
+	rules := checker.GetAllRules()
+	m := make(map[string]checker.Area, len(rules))
+	for _, r := range rules {
+		m[r.Id] = r.Area
 	}
-	method, path = key[:i], key[i+1:]
-	if !strings.HasPrefix(path, "/") {
-		return "", "", false
-	}
-	return method, path, true
+	return m
+}()
+
+// span is one enumerated structural block in a single document: its key/title
+// and 1-based inclusive line span.
+type span struct {
+	key, title string
+	start, end int
 }
 
-func pathItemFor(spec *openapi3.T, path string) *openapi3.PathItem {
-	if spec.Paths == nil {
-		return nil
+// docIndex indexes a document's enumerated structural blocks for two lookups:
+// the smallest block containing a line, and the span for a key.
+type docIndex struct {
+	spans []span
+	byKey map[string]span
+}
+
+// buildIndex enumerates the sliceable structural blocks of doc: every path
+// item, every operation, and every named component schema (all carry Origin).
+func buildIndex(doc *openapi3.T) docIndex {
+	idx := docIndex{byKey: map[string]span{}}
+	add := func(key, title string, o *openapi3.Origin) {
+		if start, end, ok := originEndRange(o); ok {
+			s := span{key: key, title: title, start: start, end: end}
+			idx.spans = append(idx.spans, s)
+			idx.byKey[key] = s
+		}
 	}
-	return spec.Paths.Value(path)
+	if doc == nil {
+		return idx
+	}
+	if doc.Paths != nil {
+		for path, pi := range doc.Paths.Map() {
+			if pi == nil {
+				continue
+			}
+			add(path, path, pi.Origin)
+			for method, op := range pi.Operations() {
+				k := method + " " + path
+				add(k, k, op.Origin)
+			}
+		}
+	}
+	if doc.Components != nil {
+		for name, ref := range doc.Components.Schemas {
+			if ref != nil && ref.Value != nil {
+				k := "components/schemas/" + name
+				add(k, k, ref.Value.Origin)
+			}
+		}
+	}
+	return idx
+}
+
+// smallestContaining returns the span containing line whose extent is smallest
+// (the most specific enclosing block), and whether one was found.
+func (idx docIndex) smallestContaining(line int) (span, bool) {
+	best := span{}
+	bestSize := math.MaxInt
+	found := false
+	for _, s := range idx.spans {
+		if line >= s.start && line <= s.end {
+			if size := s.end - s.start; size < bestSize {
+				best, bestSize, found = s, size, true
+			}
+		}
+	}
+	return best, found
 }
 
 // originEndRange returns the 1-based [start, end] line span a key origin heads,
