@@ -17,7 +17,12 @@ const (
 
 const ComponentSecuritySchemes = "securitySchemes"
 
-func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string) Changes {
+// checkOAuthUpdates reports oauth flow changes for a modified security scheme.
+// baseSource/revisionSource locate the scheme in each spec: added scopes are
+// reported against the revision, removed scopes against the base, and in-place
+// changes (urls, scope value) against both, matching the source convention used
+// elsewhere.
+func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string, baseSource, revisionSource *Source) Changes {
 	result := make(Changes, 0)
 
 	if updatedSecurity.OAuthFlowsDiff == nil {
@@ -34,7 +39,7 @@ func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurity
 			Level:     INFO,
 			Args:      []any{updatedSecurityName, urlDiff.From, urlDiff.To},
 			Component: ComponentSecuritySchemes,
-		})
+		}.WithSources(baseSource, revisionSource))
 	}
 
 	if tokenDiff := updatedSecurity.OAuthFlowsDiff.ImplicitDiff.TokenURLDiff; tokenDiff != nil {
@@ -43,7 +48,7 @@ func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurity
 			Level:     INFO,
 			Args:      []any{updatedSecurityName, tokenDiff.From, tokenDiff.To},
 			Component: ComponentSecuritySchemes,
-		})
+		}.WithSources(baseSource, revisionSource))
 	}
 
 	if scopesDiff := updatedSecurity.OAuthFlowsDiff.ImplicitDiff.ScopesDiff; scopesDiff != nil {
@@ -53,7 +58,7 @@ func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurity
 				Level:     INFO,
 				Args:      []any{updatedSecurityName, addedScope},
 				Component: ComponentSecuritySchemes,
-			})
+			}.WithSources(nil, revisionSource))
 		}
 
 		for _, removedScope := range scopesDiff.Deleted {
@@ -62,7 +67,7 @@ func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurity
 				Level:     INFO,
 				Args:      []any{updatedSecurityName, removedScope},
 				Component: ComponentSecuritySchemes,
-			})
+			}.WithSources(baseSource, nil))
 		}
 
 		for name, modifiedScope := range scopesDiff.Modified {
@@ -71,7 +76,7 @@ func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurity
 				Level:     INFO,
 				Args:      []any{updatedSecurityName, name, modifiedScope.From, modifiedScope.To},
 				Component: ComponentSecuritySchemes,
-			})
+			}.WithSources(baseSource, revisionSource))
 		}
 
 	}
@@ -117,7 +122,15 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	}
 
 	for updatedSecurityName, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Modified {
-		result = append(result, checkOAuthUpdates(updatedSecurity, updatedSecurityName)...)
+		var baseSource, revisionSource *Source
+		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurityName]; ref != nil && ref.Value != nil {
+			baseSource = sourceFromOrigin(ref.Value.Origin)
+		}
+		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Revision[updatedSecurityName]; ref != nil && ref.Value != nil {
+			revisionSource = sourceFromOrigin(ref.Value.Origin)
+		}
+
+		result = append(result, checkOAuthUpdates(updatedSecurity, updatedSecurityName, baseSource, revisionSource)...)
 
 		if updatedSecurity.TypeDiff != nil {
 			result = append(result, ComponentChange{
@@ -125,7 +138,7 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 				Level:     INFO,
 				Args:      []any{updatedSecurityName, updatedSecurity.TypeDiff.From, updatedSecurity.TypeDiff.To},
 				Component: ComponentSecuritySchemes,
-			})
+			}.WithSources(baseSource, revisionSource))
 		}
 	}
 

@@ -136,6 +136,27 @@ func TestComponentSecurityOauthScopeAdded(t *testing.T) {
 	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `admin:pets` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
+// adding an oauth scope, with source tracking: the change points at the
+// revision scheme's location.
+func TestComponentSecurityOauthScopeAdded_WithSources(t *testing.T) {
+	s1, err := open("../data/checker/component_security_updated_base.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+	s2, err := open("../data/checker/component_security_updated_base.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	s2.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows.Implicit.Scopes["admin:pets"] = "grants access to admin operations"
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
+	requireSingleChange(t, errs, checker.APIComponentSecurityOauthScopeAddedId)
+
+	require.NotEmpty(t, errs[0].GetRevisionSource())
+	require.Equal(t, "../data/checker/component_security_updated_base.yaml", errs[0].GetRevisionSource().File)
+	require.Equal(t, 29, errs[0].GetRevisionSource().Line)
+	require.Empty(t, errs[0].GetBaseSource())
+}
+
 // removing a new oauth security scope
 func TestComponentSecurityOauthScopeRemoved(t *testing.T) {
 	s1, err := open("../data/checker/component_security_updated_base.yaml")
