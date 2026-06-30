@@ -3,9 +3,6 @@ package internal
 import (
 	"bytes"
 	"context"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -23,7 +20,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
-	"github.com/oasdiff/oasdiff/reviewblocks"
+	"github.com/oasdiff/oasdiff/review"
 )
 
 // oasdiffSiteURL is the base URL of the web product. Defaults to the canonical
@@ -47,41 +44,6 @@ func oasdiffAPIBaseURL() string {
 		return strings.TrimRight(u, "/")
 	}
 	return "https://api.oasdiff.com"
-}
-
-// encryptedReviewBlobVersion is the first byte of the uploaded blob. It lets
-// the browser decryptor reject a format it doesn't understand instead of
-// trying to decrypt garbage. Bump it only on an incompatible layout change.
-const encryptedReviewBlobVersion = 1
-
-// reviewPayload is the cleartext bundle the CLI encrypts and uploads. The
-// server (oasdiff.com by default, or whatever OASDIFF_URL points at) never
-// sees it in cleartext: the CLI AES-256-GCM-encrypts the JSON below with a
-// fresh random key, uploads only the ciphertext, and puts the key in the
-// review URL's #fragment (which browsers never send to a server). The browser
-// decrypts and renders.
-//
-// BaseSpec / RevisionSpec hold each spec's bytes verbatim as a string. A YAML
-// spec stays YAML text and a JSON spec stays JSON text -- this JSON object is
-// only the envelope that bundles the several fields into one blob; it does not
-// reformat or reparse the spec content.
-//
-// Changes is the JSON changelog the CLI already computed, embedded raw. The
-// server can't recompute it (it can't read the specs), so the CLI ships it.
-// It is byte-identical to what the service's /public/changelog returns for the
-// plaintext path, so the review page renders it the same way.
-type reviewPayload struct {
-	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
-	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
-	BaseFilename     string          `json:"base_filename" yaml:"base_filename"`
-	RevisionFilename string          `json:"revision_filename" yaml:"revision_filename"`
-	Changes          json.RawMessage `json:"changes" yaml:"changes"`
-	Mode             string          `json:"mode" yaml:"mode"`
-	// Blocks is the per-change structural slices the review page renders as
-	// cards instead of the full spec. Computed here from the resolved docs and
-	// the raw spec text; empty when extraction finds nothing sliceable, in
-	// which case the page falls back to the full side-by-side.
-	Blocks []reviewblocks.Block `json:"blocks,omitempty" yaml:"blocks,omitempty"`
 }
 
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
@@ -126,12 +88,12 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	// render one card per change instead of the full spec. The specs are
 	// already loaded with origins (the changelog path sets IncludeOrigin), so
 	// the slices are available here; on the raw text we just read above.
-	var blocks []reviewblocks.Block
+	var blocks []review.Block
 	if specInfoPair != nil && specInfoPair.Base != nil && specInfoPair.Revision != nil {
-		blocks = reviewblocks.Extract(errs, specInfoPair.Base.Spec, specInfoPair.Revision.Spec, string(baseBytes), string(revBytes))
+		blocks = review.Extract(errs, specInfoPair.Base.Spec, specInfoPair.Revision.Spec, string(baseBytes), string(revBytes))
 	}
 
-	plaintext, err := json.Marshal(reviewPayload{
+	blob, key, err := review.Payload{
 		BaseSpec:         string(baseBytes),
 		RevisionSpec:     string(revBytes),
 		BaseFilename:     baseName,
@@ -139,12 +101,7 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		Changes:          changesJSON,
 		Mode:             mode,
 		Blocks:           blocks,
-	})
-	if err != nil {
-		return fmt.Errorf("marshal review payload: %w", err)
-	}
-
-	blob, key, err := encryptReviewPayload(plaintext)
+	}.Encrypt()
 	if err != nil {
 		return fmt.Errorf("encrypt review: %w", err)
 	}
@@ -195,36 +152,6 @@ func renderChangelogJSON(flags *Flags, errs checker.Changes, specInfoPair *load.
 		errs,
 		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
 	)
-}
-
-// encryptReviewPayload encrypts plaintext with a freshly generated 256-bit key
-// using AES-256-GCM. It returns the upload blob and the key. The blob layout
-// is: version(1) || nonce(12) || ciphertext+tag. The key is returned to the
-// caller (it goes in the URL fragment) and is never uploaded.
-func encryptReviewPayload(plaintext []byte) (blob, key []byte, err error) {
-	key = make([]byte, 32) // AES-256
-	if _, err := rand.Read(key); err != nil {
-		return nil, nil, fmt.Errorf("generate key: %w", err)
-	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, nil, err
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, nil, err
-	}
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := rand.Read(nonce); err != nil {
-		return nil, nil, fmt.Errorf("generate nonce: %w", err)
-	}
-	ciphertext := gcm.Seal(nil, nonce, plaintext, nil)
-
-	blob = make([]byte, 0, 1+len(nonce)+len(ciphertext))
-	blob = append(blob, encryptedReviewBlobVersion)
-	blob = append(blob, nonce...)
-	blob = append(blob, ciphertext...)
-	return blob, key, nil
 }
 
 // postEncryptedReview uploads the opaque ciphertext blob to the configured
@@ -286,27 +213,6 @@ func parseReviewMeta(entries []string) (map[string]string, error) {
 	return meta, nil
 }
 
-// reviewChange is one manifest entry sent alongside the encrypted bundle: a
-// change's fingerprint (see checker.ComputeFingerprint) and its level.
-type reviewChange struct {
-	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
-	Level       int    `json:"level" yaml:"level"`
-}
-
-// reviewManifest builds the {fingerprint, level} manifest. Fingerprints are
-// computed as the JSON formatter does, so they match the ones in the encrypted
-// changelog the page renders.
-func reviewManifest(errs checker.Changes) []reviewChange {
-	manifest := make([]reviewChange, 0, len(errs))
-	for _, change := range errs {
-		manifest = append(manifest, reviewChange{
-			Fingerprint: checker.Fingerprint(change),
-			Level:       int(change.GetLevel()),
-		})
-	}
-	return manifest
-}
-
 // uploadAuthenticatedReview posts the encrypted bundle to the token endpoint and
 // prints the returned review URL (key in its #fragment) plus the status. Errors
 // are returned for the caller to demote to a warning, like the free path.
@@ -319,11 +225,11 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 	body, err := json.Marshal(struct {
 		Ciphertext []byte            `json:"ciphertext" yaml:"ciphertext"`
 		Metadata   map[string]string `json:"metadata" yaml:"metadata"`
-		Changes    []reviewChange    `json:"changes" yaml:"changes"`
+		Changes    []review.Change   `json:"changes" yaml:"changes"`
 	}{
 		Ciphertext: blob,
 		Metadata:   metadata,
-		Changes:    reviewManifest(errs),
+		Changes:    review.Manifest(errs),
 	})
 	if err != nil {
 		return fmt.Errorf("marshal authenticated review: %w", err)
