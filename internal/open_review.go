@@ -85,12 +85,14 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	}
 
 	// Slice the structural block each change lives in, so the review page can
-	// render one card per change instead of the full spec. The specs are
-	// already loaded with origins (the changelog path sets IncludeOrigin), so
-	// the slices are available here; on the raw text we just read above.
+	// render one card per change instead of the full spec. The specs are loaded
+	// with origins and with source capture on the --open path (see
+	// load.NewSpecInfoWithCapture), so Sources holds every contributing file's
+	// text keyed by origin path -- a $ref'd-from-another-file block slices from
+	// the right file.
 	var blocks []review.Block
 	if specInfoPair != nil && specInfoPair.Base != nil && specInfoPair.Revision != nil {
-		blocks = review.Extract(errs, specInfoPair.Base.Spec, specInfoPair.Revision.Spec, string(baseBytes), string(revBytes))
+		blocks = review.Extract(errs, specInfoPair.Base.Spec, specInfoPair.Revision.Spec, specInfoPair.Base.Sources, specInfoPair.Revision.Sources)
 	}
 
 	blob, key, err := review.Payload{
