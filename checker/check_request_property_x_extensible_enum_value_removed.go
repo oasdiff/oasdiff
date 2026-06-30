@@ -53,13 +53,13 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 			if p.propertyDiff.Revision.ReadOnly {
 				return
 			}
-			propBaseSource, propRevisionSource := SchemaSources(operationsSources, info.operationItem, p.propertyDiff)
 			for _, enumVal := range deletedVals {
+				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, diff.XExtensibleEnumExtension, enumVal)
 				result = append(result, p.newChange(
 					RequestPropertyXExtensibleEnumValueRemovedId,
 					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName)},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSources(baseSource, revisionSource))
 			}
 		})
 	})

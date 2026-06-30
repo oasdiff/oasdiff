@@ -31,7 +31,6 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 					if paramItem.SchemaDiff == nil {
 						continue
 					}
-					baseSource, revisionSource := ParameterSources(operationsSources, operationItem, paramItem)
 					if paramItem.SchemaDiff.ExtensionsDiff == nil {
 						continue
 					}
@@ -68,6 +67,7 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 					}
 
 					for _, enumVal := range deletedVals {
+						baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, paramItem.SchemaDiff, diff.XExtensibleEnumExtension, enumVal)
 						result = append(result, opInfo.NewApiChange(
 							RequestParameterXExtensibleEnumValueRemovedId,
 							[]any{enumVal, paramLocation, paramName},
