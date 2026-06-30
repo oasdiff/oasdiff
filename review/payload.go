@@ -9,7 +9,7 @@ import (
 
 // Payload is the cleartext review bundle. It is AES-256-GCM-encrypted with a
 // fresh key (see Encrypt) and only the ciphertext is uploaded, so the server
-// stores a blob it cannot read; a decryptor on the rendering side reconstructs
+// receives a blob it cannot read; a decryptor on the rendering side reconstructs
 // it. This package is the single source of truth for the bundle's wire shape --
 // that decryptor mirrors these json tags.
 //

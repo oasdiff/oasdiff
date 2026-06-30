@@ -9,7 +9,7 @@ decryptor on the rendering side mirrors the same layout.
 The bundle is zero-knowledge by construction: Encrypt seals the Payload with a
 fresh AES-256-GCM key and returns the ciphertext and the key separately. The
 caller uploads only the ciphertext and keeps the key out of band, so the server
-stores a blob it cannot read. This package makes no assumption about where the
+receives a blob it cannot read. This package makes no assumption about where the
 bundle is uploaded or rendered; that is the caller's concern.
 
 # Blocks: render only what changed
