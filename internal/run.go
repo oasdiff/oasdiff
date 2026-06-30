@@ -35,6 +35,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 		getUpgradeCmd(),
 		getChecksCmd(),
 		getValidateCmd(),
+		getSchemaCmd(),
 		getGitDiffDriverCmd(),
 	)
 
