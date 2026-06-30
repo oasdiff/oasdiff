@@ -34,6 +34,32 @@ func TestBreaking_StabilityLevelDecreased(t *testing.T) {
 	require.Equal(t, "endpoint stability level decreased from `beta` to `alpha`", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
+// the stability change points at the x-stability-level field in each spec
+func TestBreaking_StabilityLevelDecreased_WithSources(t *testing.T) {
+
+	s1, err := open(deprecationFile("base-beta-stability.yaml"), newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("base-alpha-stability.yaml"), newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	config := allChecksConfig()
+	config.StabilityLevel = checker.StabilityLevelAlpha
+	errs := checker.CheckBackwardCompatibility(config, d, osm)
+	require.Len(t, errs, 1)
+
+	require.Equal(t, checker.APIStabilityDecreasedId, errs[0].GetId())
+	require.NotEmpty(t, errs[0].GetBaseSource())
+	require.Equal(t, "../data/deprecation/base-beta-stability.yaml", errs[0].GetBaseSource().File)
+	require.Equal(t, 12, errs[0].GetBaseSource().Line)
+	require.NotEmpty(t, errs[0].GetRevisionSource())
+	require.Equal(t, "../data/deprecation/base-alpha-stability.yaml", errs[0].GetRevisionSource().File)
+	require.Equal(t, 12, errs[0].GetRevisionSource().Line)
+}
+
 // increasing stability level is not breaking
 func TestBreaking_StabilityLevelIncreased(t *testing.T) {
 
