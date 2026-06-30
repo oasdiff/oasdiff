@@ -1,4 +1,4 @@
-package reviewblocks
+package review
 
 import (
 	"testing"
