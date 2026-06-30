@@ -73,6 +73,13 @@ For example:
 oasdiff breaking -f yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
 ```
 
+### JSON Schema
+The `json`/`yaml` output of `breaking` and `changelog` follows a stable schema. Print it with:
+```
+oasdiff schema
+```
+The schema is generated from oasdiff's output type, so it stays in lockstep with the output. Pin it to an oasdiff version to validate or type results in non-Go CI tooling.
+
 ## Color
 When outputting changes to a Unix terminal, oasdiff automatically adds colors with ANSI color escape sequences.  
 If output is piped into another process or redirected to a file, oasdiff disables color.  
