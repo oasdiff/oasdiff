@@ -19,7 +19,7 @@ func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			minLengthDiff.From != nil && minLengthDiff.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
 			id := RequestBodyMinLengthDecreasedId
-			if IsIncreasedValue(minLengthDiff) {
+			if isIncreasedValue(minLengthDiff) {
 				id = RequestBodyMinLengthIncreasedId
 			}
 			result = append(result, info.newChange(
@@ -38,7 +38,7 @@ func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minLength")
 			id := RequestPropertyMinLengthIncreasedId
-			if IsDecreasedValue(minLengthDiff) {
+			if isDecreasedValue(minLengthDiff) {
 				id = RequestPropertyMinLengthDecreasedId
 			}
 			result = append(result, p.newChange(

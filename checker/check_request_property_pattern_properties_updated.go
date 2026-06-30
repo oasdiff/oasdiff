@@ -18,12 +18,12 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 		if info.schemaDiff.PatternPropertiesDiff != nil {
 			patPropsDiff := info.schemaDiff.PatternPropertiesDiff
 			for _, pattern := range patPropsDiff.Added {
-				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
+				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
 				result = append(result, info.newChange(RequestBodyPatternPropertyAddedId, []any{pattern}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, pattern := range patPropsDiff.Deleted {
-				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
+				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
 				result = append(result, info.newChange(RequestBodyPatternPropertyRemovedId, []any{pattern}, "").
 					WithSources(baseSource, nil))
 			}
@@ -36,12 +36,12 @@ func RequestPropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operati
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			patPropsDiff := p.propertyDiff.PatternPropertiesDiff
 			for _, pattern := range patPropsDiff.Added {
-				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
+				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
 				result = append(result, p.newChange(RequestPropertyPatternPropertyAddedId, []any{pattern, propName}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, pattern := range patPropsDiff.Deleted {
-				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
+				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
 				result = append(result, p.newChange(RequestPropertyPatternPropertyRemovedId, []any{pattern, propName}, "").
 					WithSources(baseSource, nil))
 			}

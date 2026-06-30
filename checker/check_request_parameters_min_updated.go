@@ -43,7 +43,7 @@ func RequestParameterMinUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 							continue
 						}
 						id := entry.increasedId
-						if !IsIncreasedValue(entry.diff) {
+						if !isIncreasedValue(entry.diff) {
 							id = entry.decreasedId
 						}
 						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)

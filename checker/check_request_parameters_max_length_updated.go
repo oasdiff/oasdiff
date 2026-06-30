@@ -38,7 +38,7 @@ func RequestParameterMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 					}
 
 					id := RequestParameterMaxLengthDecreasedId
-					if !IsDecreasedValue(maxLengthDiff) {
+					if !isDecreasedValue(maxLengthDiff) {
 						id = RequestParameterMaxLengthIncreasedId
 					}
 

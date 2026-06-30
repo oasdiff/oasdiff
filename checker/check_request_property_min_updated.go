@@ -24,7 +24,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
 			minDiff.From != nil && minDiff.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
-			if IsIncreasedValue(minDiff) {
+			if isIncreasedValue(minDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMinIncreasedId,
 					[]any{minDiff.To},
@@ -41,7 +41,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
 			exMinDiff.From != nil && exMinDiff.To != nil {
 			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
-			if IsIncreasedValue(exMinDiff) {
+			if isIncreasedValue(exMinDiff) {
 				result = append(result, info.newChange(
 					RequestBodyExclusiveMinIncreasedId,
 					[]any{exMinDiff.To},
@@ -62,7 +62,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
 				minDiff.From != nil && minDiff.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
-				if IsIncreasedValue(minDiff) {
+				if isIncreasedValue(minDiff) {
 					id := RequestPropertyMinIncreasedId
 					if p.propertyDiff.Revision.ReadOnly {
 						id = RequestReadOnlyPropertyMinIncreasedId
@@ -84,7 +84,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
 				exMinDiff.From != nil && exMinDiff.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
-				if IsIncreasedValue(exMinDiff) {
+				if isIncreasedValue(exMinDiff) {
 					id := RequestPropertyExclusiveMinIncreasedId
 					if p.propertyDiff.Revision.ReadOnly {
 						id = RequestReadOnlyPropertyExclusiveMinIncreasedId

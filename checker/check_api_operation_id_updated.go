@@ -25,7 +25,7 @@ func APIOperationIdUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.O
 				continue
 			}
 
-			baseSource, revisionSource := OperationFieldSources(operationsSources, operationItem, "operationId")
+			baseSource, revisionSource := operationFieldSources(operationsSources, operationItem, "operationId")
 
 			op := pathItem.Base.GetOperation(operation)
 			id := APIOperationIdRemovedId

@@ -39,7 +39,7 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 					}
 
 					id := RequestParameterMinLengthIncreasedId
-					if IsDecreasedValue(minLengthDiff) {
+					if isDecreasedValue(minLengthDiff) {
 						id = RequestParameterMinLengthDecreasedId
 					}
 

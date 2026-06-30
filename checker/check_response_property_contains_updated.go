@@ -37,11 +37,11 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 		if d := info.schemaDiff.MinContainsDiff; d != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
-			if IsIncreasedValue(d) {
+			if isIncreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMinContainsIncreasedId, []any{d.From, d.To, info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
 			}
-			if IsDecreasedValue(d) {
+			if isDecreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMinContainsDecreasedId, []any{d.From, d.To, info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
 			}
@@ -49,11 +49,11 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 		if d := info.schemaDiff.MaxContainsDiff; d != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxContains")
-			if IsIncreasedValue(d) {
+			if isIncreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMaxContainsIncreasedId, []any{d.From, d.To, info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
 			}
-			if IsDecreasedValue(d) {
+			if isDecreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMaxContainsDecreasedId, []any{d.From, d.To, info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
 			}
@@ -76,11 +76,11 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 			if d := p.propertyDiff.MinContainsDiff; d != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
-				if IsIncreasedValue(d) {
+				if isIncreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMinContainsIncreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
 						WithSources(propBaseSource, propRevisionSource))
 				}
-				if IsDecreasedValue(d) {
+				if isDecreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMinContainsDecreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
 						WithSources(propBaseSource, propRevisionSource))
 				}
@@ -88,11 +88,11 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 			if d := p.propertyDiff.MaxContainsDiff; d != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxContains")
-				if IsIncreasedValue(d) {
+				if isIncreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMaxContainsIncreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
 						WithSources(propBaseSource, propRevisionSource))
 				}
-				if IsDecreasedValue(d) {
+				if isDecreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMaxContainsDecreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
 						WithSources(propBaseSource, propRevisionSource))
 				}

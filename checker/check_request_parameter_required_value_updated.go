@@ -32,7 +32,7 @@ func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operations
 					if requiredDiff == nil {
 						continue
 					}
-					baseSource, revisionSource := ParameterFieldSources(operationsSources, operationItem, paramItem, "required")
+					baseSource, revisionSource := parameterFieldSources(operationsSources, operationItem, paramItem, "required")
 
 					id := RequestParameterBecomeRequiredId
 

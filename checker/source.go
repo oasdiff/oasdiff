@@ -113,9 +113,9 @@ func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, ope
 	return nil
 }
 
-// OperationFieldSources returns source locations from a specific field within operation Origins.
+// operationFieldSources returns source locations from a specific field within operation Origins.
 // Falls back to operation-level sources when the field is not found in origin data.
-func OperationFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {
+func operationFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {
 	hasOrigin := (operationItem.Base != nil && operationItem.Base.Origin != nil) ||
 		(operationItem.Revision != nil && operationItem.Revision.Origin != nil)
 	if !hasOrigin {
@@ -132,9 +132,9 @@ func OperationFieldSources(operationsSources *diff.OperationsSourcesMap, operati
 	return baseSource, revisionSource
 }
 
-// ParameterFieldSources returns source locations from a specific field within parameter Origins.
+// parameterFieldSources returns source locations from a specific field within parameter Origins.
 // Falls back to parameter-level sources when the field is not found in origin data.
-func ParameterFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, paramDiff *diff.ParameterDiff, field string) (*Source, *Source) {
+func parameterFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, paramDiff *diff.ParameterDiff, field string) (*Source, *Source) {
 	if paramDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -267,10 +267,10 @@ func SchemaAddedItemSources(operationsSources *diff.OperationsSourcesMap, operat
 	return nil, revisionSource
 }
 
-// SchemaMapItemSource returns the source location for a named schema within a Schemas map
+// schemaMapItemSource returns the source location for a named schema within a Schemas map
 // (e.g., a specific key in dependentSchemas, patternProperties, or properties).
 // It uses the schema's own Origin rather than the parent field's origin.
-func SchemaMapItemSource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, schemas openapi3.Schemas, name string) *Source {
+func schemaMapItemSource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, schemas openapi3.Schemas, name string) *Source {
 	if schemas == nil {
 		return nil
 	}

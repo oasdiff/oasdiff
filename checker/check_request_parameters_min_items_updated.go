@@ -39,7 +39,7 @@ func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					}
 
 					id := RequestParameterMinItemsIncreasedId
-					if !IsIncreasedValue(minItemsDiff) {
+					if !isIncreasedValue(minItemsDiff) {
 						id = RequestParameterMinItemsDecreasedId
 					}
 
