@@ -402,11 +402,11 @@ func IsIncreased(from any, to any) bool {
 	return false
 }
 
-func IsIncreasedValue(diff *diff.ValueDiff) bool {
+func isIncreasedValue(diff *diff.ValueDiff) bool {
 	return IsIncreased(diff.From, diff.To)
 }
 
-func IsDecreasedValue(diff *diff.ValueDiff) bool {
+func isDecreasedValue(diff *diff.ValueDiff) bool {
 	return IsDecreased(diff.From, diff.To)
 }
 

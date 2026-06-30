@@ -24,7 +24,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 		if maxDiff := info.schemaDiff.MaxDiff; maxDiff != nil &&
 			maxDiff.From != nil && maxDiff.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
-			if IsDecreasedValue(maxDiff) {
+			if isDecreasedValue(maxDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMaxDecreasedId,
 					[]any{maxDiff.To},
@@ -41,7 +41,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 		if exMaxDiff := info.schemaDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
 			exMaxDiff.From != nil && exMaxDiff.To != nil {
 			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
-			if IsDecreasedValue(exMaxDiff) {
+			if isDecreasedValue(exMaxDiff) {
 				result = append(result, info.newChange(
 					RequestBodyExclusiveMaxDecreasedId,
 					[]any{exMaxDiff.To},
@@ -62,7 +62,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 			if maxDiff := p.propertyDiff.MaxDiff; maxDiff != nil &&
 				maxDiff.From != nil && maxDiff.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
-				if IsDecreasedValue(maxDiff) {
+				if isDecreasedValue(maxDiff) {
 					id := RequestPropertyMaxDecreasedId
 					if p.propertyDiff.Revision.ReadOnly {
 						id = RequestReadOnlyPropertyMaxDecreasedId
@@ -84,7 +84,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 			if exMaxDiff := p.propertyDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
 				exMaxDiff.From != nil && exMaxDiff.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
-				if IsDecreasedValue(exMaxDiff) {
+				if isDecreasedValue(exMaxDiff) {
 					id := RequestPropertyExclusiveMaxDecreasedId
 					if p.propertyDiff.Revision.ReadOnly {
 						id = RequestReadOnlyPropertyExclusiveMaxDecreasedId

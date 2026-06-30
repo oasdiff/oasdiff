@@ -18,12 +18,12 @@ func ResponsePropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operati
 		if info.schemaDiff.DependentSchemasDiff != nil {
 			depSchemasDiff := info.schemaDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
-				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
 				result = append(result, info.newChange(ResponseBodyDependentSchemaAddedId, []any{name, info.responseStatus}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, name := range depSchemasDiff.Deleted {
-				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
 				result = append(result, info.newChange(ResponseBodyDependentSchemaRemovedId, []any{name, info.responseStatus}, "").
 					WithSources(baseSource, nil))
 			}
@@ -36,12 +36,12 @@ func ResponsePropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operati
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			depSchemasDiff := p.propertyDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
-				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
 				result = append(result, p.newChange(ResponsePropertyDependentSchemaAddedId, []any{name, propName, info.responseStatus}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, name := range depSchemasDiff.Deleted {
-				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
 				result = append(result, p.newChange(ResponsePropertyDependentSchemaRemovedId, []any{name, propName, info.responseStatus}, "").
 					WithSources(baseSource, nil))
 			}

@@ -27,7 +27,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 				continue
 			}
 
-			baseSource, revisionSource := OperationFieldSources(operationsSources, operationItem, "tags")
+			baseSource, revisionSource := operationFieldSources(operationsSources, operationItem, "tags")
 
 			for _, tag := range operationItem.TagsDiff.Deleted {
 				result = append(result, NewApiChange(

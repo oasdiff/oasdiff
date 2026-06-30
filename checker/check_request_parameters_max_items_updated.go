@@ -46,7 +46,7 @@ func RequestParameterMaxItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					}
 
 					id := RequestParameterMaxItemsDecreasedId
-					if IsIncreasedValue(maxItemsDiff) {
+					if isIncreasedValue(maxItemsDiff) {
 						id = RequestParameterMaxItemsIncreasedId
 					}
 

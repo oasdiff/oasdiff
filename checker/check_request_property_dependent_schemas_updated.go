@@ -18,12 +18,12 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 		if info.schemaDiff.DependentSchemasDiff != nil {
 			depSchemasDiff := info.schemaDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
-				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
 				result = append(result, info.newChange(RequestBodyDependentSchemaAddedId, []any{name}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, name := range depSchemasDiff.Deleted {
-				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
 				result = append(result, info.newChange(RequestBodyDependentSchemaRemovedId, []any{name}, "").
 					WithSources(baseSource, nil))
 			}
@@ -36,12 +36,12 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			depSchemasDiff := p.propertyDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
-				revisionSource := SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
 				result = append(result, p.newChange(RequestPropertyDependentSchemaAddedId, []any{name, propName}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, name := range depSchemasDiff.Deleted {
-				baseSource := SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
 				result = append(result, p.newChange(RequestPropertyDependentSchemaRemovedId, []any{name, propName}, "").
 					WithSources(baseSource, nil))
 			}

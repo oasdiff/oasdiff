@@ -16,7 +16,7 @@ func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSo
 		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
 			maxLengthDiff.From != nil &&
 			maxLengthDiff.To != nil &&
-			IsIncreasedValue(maxLengthDiff) {
+			isIncreasedValue(maxLengthDiff) {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
 			result = append(result, info.newChange(
 				ResponseBodyMaxLengthIncreasedId,
@@ -34,7 +34,7 @@ func ResponsePropertyMaxLengthIncreasedCheck(diffReport *diff.Diff, operationsSo
 				maxLengthDiff.From == nil {
 				return
 			}
-			if !IsIncreasedValue(maxLengthDiff) {
+			if !isIncreasedValue(maxLengthDiff) {
 				return
 			}
 

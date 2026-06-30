@@ -16,7 +16,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
-			minDiff.From != nil && minDiff.To != nil && IsDecreasedValue(minDiff) {
+			minDiff.From != nil && minDiff.To != nil && isDecreasedValue(minDiff) {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			result = append(result, info.newChange(
 				ResponseBodyMinDecreasedId,
@@ -25,7 +25,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 			).WithSources(baseSource, revisionSource))
 		}
 		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
-			exMinDiff.From != nil && exMinDiff.To != nil && IsDecreasedValue(exMinDiff) {
+			exMinDiff.From != nil && exMinDiff.To != nil && isDecreasedValue(exMinDiff) {
 			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			result = append(result, info.newChange(
 				ResponseBodyExclusiveMinDecreasedId,
@@ -41,7 +41,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
 			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
-				minDiff.To != nil && minDiff.From != nil && IsDecreasedValue(minDiff) {
+				minDiff.To != nil && minDiff.From != nil && isDecreasedValue(minDiff) {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
 				result = append(result, p.newChange(
 					ResponsePropertyMinDecreasedId,
@@ -51,7 +51,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 			}
 
 			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
-				exMinDiff.To != nil && exMinDiff.From != nil && IsDecreasedValue(exMinDiff) {
+				exMinDiff.To != nil && exMinDiff.From != nil && isDecreasedValue(exMinDiff) {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				result = append(result, p.newChange(
 					ResponsePropertyExclusiveMinDecreasedId,
