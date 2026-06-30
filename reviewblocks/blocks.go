@@ -1,28 +1,3 @@
-// Package reviewblocks extracts, per reported change, the smallest enclosing
-// OpenAPI structural block (operation / path / named component / top-level) and
-// its source-text slice, so the review page can render one self-contained card
-// per change instead of the full spec. This is the large-spec rendering fix:
-// the full-spec side-by-side commits ~1M DOM nodes for a 250k-line spec; cards
-// drop that by ~99%.
-//
-// Which block a change belongs to is decided by the change's source line, not
-// its (operation, path): a change inside a $ref'd component is reported under
-// the referencing operation, but its source line is in the component, so
-// keying by the line (matched against block origin spans) follows the $ref and
-// cards it as the component (and dedupes the same component change reported
-// across several endpoints into one card). The (operation, path) and the rule
-// Area are the fallback when no source line resolves.
-//
-// Slicing relies on kin-openapi origin end-positions
-// (openapi3.Origin.Key.EndLine/EndColumn) so a block's full extent is known,
-// not just its start. The specs must be loaded with IncludeOrigin = true.
-//
-// WIP / draft. Wired: change grouping by source-line containment, the
-// Origin-end slice, and the operation / path / named-component-schema blocks.
-// Still to do (see the design): other named components, top-level blocks
-// (info/servers/tags/security), overlap dedup, and feeding the blocks into the
-// encrypted review bundle so the browser renders cards from decrypted blocks
-// (the server never sees the spec).
 package reviewblocks
 
 import (
