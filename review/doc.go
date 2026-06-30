@@ -47,11 +47,20 @@ just its start. The specs must be loaded with IncludeOrigin = true.
 # Status and limitations
 
 Indexed block types are operations, path items, named component schemas, and the
-top-level sections (info/servers/tags/security). Known gaps: multi-file specs (a
-$ref'd block defined in another file) are not sliced yet; and because blocks are
-keyed off the changelog, a block whose only change has no changelog entry (e.g.
-a description-only edit) is not shown, that schema-shape completeness is a later
-phase. Within a shown block the slice is the raw text diff, so unflagged changed
-lines are still visible.
+top-level sections (info/servers/tags/security). Known gaps:
+
+  - Multi-file specs. kin resolves an external $ref's value into the document
+    but drops its origin (only nodes physically in the loaded file get one), so
+    a change in a $ref'd-from-another-file block is sourced at the referencing
+    operation, not the external file. It cards to that operation and shows the
+    $ref line, not the resolved content; the changelog message still names the
+    change. The fix is upstream (carry origins across file resolution), then a
+    file-aware index here.
+  - Because blocks are keyed off the changelog, a block whose only change has no
+    changelog entry (e.g. a description-only edit) is not shown; that
+    schema-shape completeness is a later phase.
+
+Within a shown block the slice is the raw text diff, so unflagged changed lines
+are still visible.
 */
 package review
