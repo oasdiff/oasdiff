@@ -1,6 +1,9 @@
 package review
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -9,6 +12,10 @@ import (
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
+
+// oneFile builds the file->text map Extract takes for a single-file (or
+// in-memory, file "") spec.
+func oneFile(file, text string) map[string]string { return map[string]string{file: text} }
 
 const endpointSpec = `openapi: 3.0.0
 info:
@@ -46,7 +53,7 @@ func TestExtract_OperationBlock(t *testing.T) {
 	doc := loadWithOrigin(t, endpointSpec)
 	changes := checker.Changes{checker.ApiChange{Id: "c1", Operation: "POST", Path: "/users"}}
 
-	blocks := Extract(changes, doc, doc, endpointSpec, endpointSpec)
+	blocks := Extract(changes, doc, doc, oneFile("", endpointSpec), oneFile("", endpointSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -66,7 +73,7 @@ func TestExtract_PathBlock(t *testing.T) {
 	doc := loadWithOrigin(t, endpointSpec)
 	changes := checker.Changes{checker.ApiChange{Id: "c1", Path: "/users"}}
 
-	blocks := Extract(changes, doc, doc, endpointSpec, endpointSpec)
+	blocks := Extract(changes, doc, doc, oneFile("", endpointSpec), oneFile("", endpointSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -157,7 +164,7 @@ func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
 		},
 	}
 
-	blocks := Extract(checker.Changes{c}, doc, doc, refdComponentSpec, refdComponentSpec)
+	blocks := Extract(checker.Changes{c}, doc, doc, oneFile("", refdComponentSpec), oneFile("", refdComponentSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -241,7 +248,7 @@ func TestExtract_FlattenedAllOfFallsBackToOperation(t *testing.T) {
 	require.Nil(t, base)
 	require.Nil(t, rev)
 
-	blocks := Extract(changes, s1.Spec, s2.Spec, allOfRequiredBase, allOfRequiredRevision)
+	blocks := Extract(changes, s1.Spec, s2.Spec, oneFile("base.yaml", allOfRequiredBase), oneFile("revision.yaml", allOfRequiredRevision))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -299,11 +306,77 @@ func TestExtract_SecurityChangeCardsToSection(t *testing.T) {
 		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{Line: sec.start}},
 	}
 
-	blocks := Extract(checker.Changes{c}, doc, doc, topLevelSpec, topLevelSpec)
+	blocks := Extract(checker.Changes{c}, doc, doc, oneFile("", topLevelSpec), oneFile("", topLevelSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 	require.Equal(t, "security", b.Key, "a security change cards to the security section, not Other")
 	require.Contains(t, b.RevText, "security:")
 	require.Contains(t, b.RevText, "apiKey")
 	require.NotContains(t, b.RevText, "/x:") // not the paths block
+}
+
+const crossFileSubDoc = `openapi: 3.0.0
+info: { title: lib, version: "1" }
+paths: {}
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        role: { type: string }
+`
+
+const crossFileRoot = `openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: './other.yaml#/components/schemas/User' }
+      responses: { "201": { description: created } }
+`
+
+// A change inside a schema $ref'd from another file cards to a block keyed by
+// the ref and slices from that external file, not the referencing operation in
+// the root file. The texts come from the captured Sources, keyed by origin file.
+func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
+	dir := t.TempDir()
+	root := filepath.Join(dir, "openapi.yaml")
+	other := filepath.Join(dir, "other.yaml")
+	require.NoError(t, os.WriteFile(root, []byte(crossFileRoot), 0644))
+	require.NoError(t, os.WriteFile(other, []byte(crossFileSubDoc), 0644))
+
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	loader.IsExternalRefsAllowed = true
+	si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(root))
+	require.NoError(t, err)
+
+	// the cross-file User block is indexed, in other.yaml
+	idx := buildIndex(si.Spec)
+	var userKey string
+	var userSpan span
+	for k, s := range idx.byKey {
+		if strings.Contains(k, "other.yaml") {
+			userKey, userSpan = k, s
+		}
+	}
+	require.NotEmpty(t, userKey, "the cross-file User schema must be indexed")
+	require.Equal(t, other, userSpan.file, "indexed in the external file")
+
+	// a change sourced inside the external file (as the changelog reports it)
+	c := checker.ApiChange{
+		Id:           "request-property-type-changed",
+		Operation:    "POST",
+		Path:         "/users",
+		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: other, Line: userSpan.end}},
+	}
+	blocks := Extract(checker.Changes{c}, si.Spec, si.Spec, si.Sources, si.Sources)
+	require.Len(t, blocks, 1)
+	require.Equal(t, userKey, blocks[0].Key, "cards to the external block, not the operation")
+	require.Contains(t, blocks[0].RevText, "User:")
+	require.Contains(t, blocks[0].RevText, "role:")
+	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from other.yaml, not the root spec")
 }

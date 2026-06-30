@@ -101,7 +101,16 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	s1, err := load.NewSpecInfo(loader, flags.getBase(), flattenAllOf, flattenParams, lowerHeaderNames)
+	// --open builds an encrypted side-by-side review whose cards are sliced from
+	// the source text. Capture every contributing file's text (the root and each
+	// $ref'd file) so a multi-file spec slices from the right file; ordinary
+	// runs load without the recorder and pay nothing.
+	newSpecInfo := load.NewSpecInfo
+	if flags.getOpen() {
+		newSpecInfo = load.NewSpecInfoWithCapture
+	}
+
+	s1, err := newSpecInfo(loader, flags.getBase(), flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpec("base", flags.getBase(), err)
 	}
@@ -114,7 +123,7 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 		specInfo := *s1
 		s2 = &specInfo
 	} else {
-		s2, err = load.NewSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
+		s2, err = newSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
 		if err != nil {
 			return nil, getErrFailedToLoadSpec("revision", flags.getRevision(), err)
 		}

@@ -31,10 +31,13 @@ type Block struct {
 }
 
 // Extract groups changes by their enclosing structural block and slices each
-// block's text from the base and revision specs. Order follows first
-// appearance in changes. The specs must be loaded with IncludeOrigin so
-// end-positions are available; baseText/revText are the raw spec sources.
-func Extract(changes checker.Changes, base, revision *openapi3.T, baseText, revText string) []Block {
+// block's text from the base and revision specs. Order follows first appearance
+// in changes. The specs must be loaded with IncludeOrigin so end-positions are
+// available. baseTexts/revTexts map each contributing file's path (as reported
+// on element origins) to its raw source; for a single-file spec that's one
+// entry. A block is sliced from the file it lives in, so a $ref'd-from-another-
+// file block is sliced from that file (see load.NewSpecInfoWithCapture).
+func Extract(changes checker.Changes, base, revision *openapi3.T, baseTexts, revTexts map[string]string) []Block {
 	baseIdx := buildIndex(base)
 	revIdx := buildIndex(revision)
 
@@ -56,10 +59,10 @@ func Extract(changes checker.Changes, base, revision *openapi3.T, baseText, revT
 	for _, key := range order {
 		b := byKey[key]
 		if s, ok := baseIdx.byKey[key]; ok {
-			b.BaseText, b.BaseLineStart = sliceLines(baseText, s.start, s.end), s.start
+			b.BaseText, b.BaseLineStart = sliceLines(baseTexts[s.file], s.start, s.end), s.start
 		}
 		if s, ok := revIdx.byKey[key]; ok {
-			b.RevText, b.RevLineStart = sliceLines(revText, s.start, s.end), s.start
+			b.RevText, b.RevLineStart = sliceLines(revTexts[s.file], s.start, s.end), s.start
 		}
 		out = append(out, *b)
 	}
@@ -74,12 +77,12 @@ func Extract(changes checker.Changes, base, revision *openapi3.T, baseText, revT
 func blockKey(c checker.Change, baseIdx, revIdx docIndex) (key, title string) {
 	baseSrc, revSrc := changeSources(c)
 	if revSrc != nil && revSrc.Line > 0 {
-		if s, ok := revIdx.smallestContaining(revSrc.Line); ok {
+		if s, ok := revIdx.smallestContaining(revSrc.File, revSrc.Line); ok {
 			return s.key, s.title
 		}
 	}
 	if baseSrc != nil && baseSrc.Line > 0 {
-		if s, ok := baseIdx.smallestContaining(baseSrc.Line); ok {
+		if s, ok := baseIdx.smallestContaining(baseSrc.File, baseSrc.Line); ok {
 			return s.key, s.title
 		}
 	}
@@ -125,10 +128,12 @@ var areaByID = func() map[string]checker.Area {
 	return m
 }()
 
-// span is one enumerated structural block in a single document: its key/title
-// and 1-based inclusive line span.
+// span is one enumerated structural block: its key/title, the file it lives in
+// (the element's origin File; "" for an in-memory spec), and its 1-based
+// inclusive line range within that file.
 type span struct {
 	key, title string
+	file       string
 	start, end int
 }
 
@@ -145,7 +150,7 @@ func buildIndex(doc *openapi3.T) docIndex {
 	idx := docIndex{byKey: map[string]span{}}
 	add := func(key, title string, o *openapi3.Origin) {
 		if start, end, ok := originEndRange(o); ok {
-			s := span{key: key, title: title, start: start, end: end}
+			s := span{key: key, title: title, file: o.Key.File, start: start, end: end}
 			idx.spans = append(idx.spans, s)
 			idx.byKey[key] = s
 		}
@@ -174,7 +179,36 @@ func buildIndex(doc *openapi3.T) docIndex {
 		}
 	}
 	addTopLevelSections(&idx, doc)
+	indexExternalSchemas(&idx, doc)
 	return idx
+}
+
+// indexExternalSchemas indexes schemas $ref'd from another file. They live at
+// the usage site (not in this doc's Components) and carry the external file's
+// origin, so a change inside one is keyed to that block and sliced from that
+// file. Keyed by the ref (stable across base/revision and deduped across the N
+// operations that share it).
+func indexExternalSchemas(idx *docIndex, doc *openapi3.T) {
+	_ = doc.WalkSchemas(func(_ string, sr *openapi3.SchemaRef) error {
+		if sr == nil || sr.Value == nil {
+			return nil
+		}
+		// A non-empty part before "#" means the ref points at another file
+		// (internal "#/..." refs have none and are already indexed).
+		if before, _, _ := strings.Cut(sr.Ref, "#"); before == "" {
+			return nil
+		}
+		if start, end, ok := originEndRange(sr.Value.Origin); ok {
+			key := strings.TrimPrefix(sr.Ref, "./")
+			if _, exists := idx.byKey[key]; exists {
+				return nil
+			}
+			s := span{key: key, title: key, file: sr.Value.Origin.Key.File, start: start, end: end}
+			idx.spans = append(idx.spans, s)
+			idx.byKey[key] = s
+		}
+		return nil
+	})
 }
 
 // addTopLevelSections indexes the document-level sections (info / servers /
@@ -205,21 +239,23 @@ func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 	}
 	for _, name := range []string{"info", "servers", "tags", "security"} {
 		if loc, ok := doc.Origin.Fields[name]; ok && loc.Line > 0 {
-			s := span{key: name, title: name, start: loc.Line, end: sectionEnd(loc.Line)}
+			s := span{key: name, title: name, file: loc.File, start: loc.Line, end: sectionEnd(loc.Line)}
 			idx.spans = append(idx.spans, s)
 			idx.byKey[name] = s
 		}
 	}
 }
 
-// smallestContaining returns the span containing line whose extent is smallest
-// (the most specific enclosing block), and whether one was found.
-func (idx docIndex) smallestContaining(line int) (span, bool) {
+// smallestContaining returns the span in file containing line whose extent is
+// smallest (the most specific enclosing block), and whether one was found.
+// Matching on file is what keeps multi-file specs correct: line numbers are not
+// unique across files.
+func (idx docIndex) smallestContaining(file string, line int) (span, bool) {
 	best := span{}
 	bestSize := math.MaxInt
 	found := false
 	for _, s := range idx.spans {
-		if line >= s.start && line <= s.end {
+		if s.file == file && line >= s.start && line <= s.end {
 			if size := s.end - s.start; size < bestSize {
 				best, bestSize, found = s, size, true
 			}
