@@ -50,11 +50,14 @@ Indexed block types are operations, path items, named component schemas, the
 top-level sections (info/servers/tags/security), and schemas $ref'd from another
 file (sliced from that file via the per-file texts Extract takes). Known gaps:
 
-  - Bare-fragment multi-file. A $ref into a valid OpenAPI sub-document is sliced
-    correctly. But a $ref into a bare fragment file -- YAML that isn't a valid
-    OpenAPI doc -- loses its origin in kin's generic-map resolution path (it
-    JSON-round-trips the value), so its change sources at the referencing
-    operation and can't be sliced from the fragment; that needs an upstream fix.
+  - Schemas reached through a non-OpenAPI key. Whole-file refs (./User.yaml) and
+    refs into a components-structured file (./defs.yaml#/components/schemas/User,
+    even without openapi:/info:) slice correctly. But a ref to a schema under an
+    arbitrary top-level key (./schemas.yaml#/User, a Swagger-2-era "definitions
+    bag" shape) is resolved generically by kin, which JSON-round-trips the value
+    and drops its origin, so its change sources at the referencing operation and
+    isn't sliced from that file. Uncommon in idiomatic OpenAPI 3; needs an
+    upstream kin fix.
   - Because blocks are keyed off the changelog, a block whose only change has no
     changelog entry (e.g. a description-only edit) is not shown; that
     schema-shape completeness is a later phase.
