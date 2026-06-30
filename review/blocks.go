@@ -9,8 +9,8 @@ import (
 	"github.com/oasdiff/oasdiff/formatters"
 )
 
-// otherChangesKey collects changes with no resolvable block; they render as a
-// single "Other changes" card with no side-by-side.
+// otherChangesKey collects changes with no resolvable block; they group under a
+// single "Other changes" key with no source slice.
 const otherChangesKey = "__other__"
 
 // Block is one review card: the source-text slice of a structural block on each

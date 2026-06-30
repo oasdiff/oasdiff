@@ -14,10 +14,10 @@ bundle is uploaded or rendered; that is the caller's concern.
 
 # Blocks: render only what changed
 
-A side-by-side review that renders both specs in full is unusable for a large
-spec (tens to hundreds of thousands of lines commit ~1M DOM nodes). Extract
-slices the spec into just the structural blocks that changed, so the UI renders
-one self-contained card per change while keeping each change in context:
+Rendering both specs in full is unusable for a large spec (a web UI commits ~1M
+DOM nodes for 250k lines). Extract slices the spec into just the structural
+blocks that changed, so a UI can render only what changed while keeping each
+change in context:
 
 	blocks := review.Extract(changes, baseSpec, revisionSpec, baseText, revText)
 
