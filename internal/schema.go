@@ -17,8 +17,8 @@ func getSchemaCmd() *cobra.Command {
 	cmd := cobra.Command{
 		Use:   "schema [flags]",
 		Short: "Display the JSON Schema of the JSON output",
-		Long: `Print the JSON Schema describing the "--format json" output of the breaking and changelog commands.
-The schema is generated from the Go output type, so it stays in lockstep with the output and can be used by non-Go tooling to validate or type oasdiff results in CI.`,
+		Long: `Print a JSON Schema for the "--format json" output of the breaking and changelog commands.
+The "--format yaml" output has the same structure.`,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions, // see https://github.com/spf13/cobra/issues/1969
 		RunE:              getRun(runSchema),

@@ -74,11 +74,10 @@ oasdiff breaking -f yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/
 ```
 
 ### JSON Schema
-The `json`/`yaml` output of `breaking` and `changelog` follows a stable schema. Print it with:
+`oasdiff schema` prints a [JSON Schema](https://json-schema.org/) for the `json` output of `breaking` and `changelog` (the `yaml` output has the same structure):
 ```
 oasdiff schema
 ```
-The schema is generated from oasdiff's output type, so it stays in lockstep with the output. Pin it to an oasdiff version to validate or type results in non-Go CI tooling.
 
 ## Color
 When outputting changes to a Unix terminal, oasdiff automatically adds colors with ANSI color escape sequences.  
