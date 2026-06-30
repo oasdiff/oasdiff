@@ -12,8 +12,11 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// from is a convenience function that opens an OpenAPI spec from a URL or a local path based on the format of the path parameter
-func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
+// from is a convenience function that opens an OpenAPI spec from a URL or a
+// local path based on the format of the path parameter. When capture is
+// non-nil, every file the loader reads (the root and each $ref'd file) is
+// recorded into it; see sourceCapture.
+func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*openapi3.T, error) {
 
 	switch source.Type {
 	case SourceTypeStdin:
@@ -21,8 +24,16 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 	case SourceTypeURL:
 		return loader.LoadFromURI(source.Uri)
 	case SourceTypeGitRevision:
-		return loadFromGitRevision(loader, source.Path, source.Fetch)
+		return loadFromGitRevision(loader, source.Path, source.Fetch, capture)
 	default:
+		if capture != nil {
+			// A loader copy so the recorder doesn't leak onto the caller's
+			// loader; the copy shares the visitedDocuments cache (like the git
+			// path), which is fine.
+			lc := *loader
+			lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture)
+			return lc.LoadFromFile(source.Path)
+		}
 		return loader.LoadFromFile(source.Path)
 	}
 }
@@ -38,7 +49,7 @@ func from(loader *openapi3.Loader, source *Source) (*openapi3.T, error) {
 // Blob-hash refs (e.g. "abc1234:openapi.yaml" where abc1234 is a git blob object hash)
 // are supported via readGitRefContent. The path portion is preserved on the ref string
 // passed downstream for source labels and relative $ref resolution.
-func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool) (*openapi3.T, error) {
+func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool, capture *sourceCapture) (*openapi3.T, error) {
 	out, err := readGitRefContent(gitRef, fetch)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load spec from git revision %q: %w", gitRef, err)
@@ -99,6 +110,10 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool) (*o
 	// loader's visitedDocuments map (e.g. "origin/main:openapi.yaml" vs "HEAD:openapi.yaml").
 	// Using only the file portion would cause both refs to share the key "openapi.yaml" and
 	// the loader would return the cached base spec for the revision.
+	if capture != nil {
+		loaderCopy.ReadFromURIFunc = recordingReader(loaderCopy.ReadFromURIFunc, capture)
+	}
+
 	u := &url.URL{Path: filepath.ToSlash(gitRef)}
 	t, err := loaderCopy.LoadFromDataWithPath(out, u)
 	if err != nil && blockedRef != "" {
