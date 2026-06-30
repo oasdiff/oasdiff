@@ -49,13 +49,14 @@ just its start. The specs must be loaded with IncludeOrigin = true.
 Indexed block types are operations, path items, named component schemas, and the
 top-level sections (info/servers/tags/security). Known gaps:
 
-  - Multi-file specs. kin resolves an external $ref's value into the document
-    but drops its origin (only nodes physically in the loaded file get one), so
-    a change in a $ref'd-from-another-file block is sourced at the referencing
-    operation, not the external file. It cards to that operation and shows the
-    $ref line, not the resolved content; the changelog message still names the
-    change. The fix is upstream (carry origins across file resolution), then a
-    file-aware index here.
+  - Multi-file specs. A $ref into a valid OpenAPI sub-document keeps its origin
+    (the external file + line), so the coordinates are available; this index is
+    single-file, so it doesn't slice them yet. Supporting it needs a file-aware
+    index (line numbers collide across files), indexing the externally-$ref'd
+    schema by its own origin file, and per-file source texts. (A bare fragment
+    file -- YAML that isn't a valid OpenAPI doc -- additionally loses its origin
+    in kin's generic-map resolution path, which JSON-round-trips the value; that
+    one needs an upstream fix.)
   - Because blocks are keyed off the changelog, a block whose only change has no
     changelog entry (e.g. a description-only edit) is not shown; that
     schema-shape completeness is a later phase.
