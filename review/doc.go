@@ -46,17 +46,15 @@ just its start. The specs must be loaded with IncludeOrigin = true.
 
 # Status and limitations
 
-Indexed block types are operations, path items, named component schemas, and the
-top-level sections (info/servers/tags/security). Known gaps:
+Indexed block types are operations, path items, named component schemas, the
+top-level sections (info/servers/tags/security), and schemas $ref'd from another
+file (sliced from that file via the per-file texts Extract takes). Known gaps:
 
-  - Multi-file specs. A $ref into a valid OpenAPI sub-document keeps its origin
-    (the external file + line), so the coordinates are available; this index is
-    single-file, so it doesn't slice them yet. Supporting it needs a file-aware
-    index (line numbers collide across files), indexing the externally-$ref'd
-    schema by its own origin file, and per-file source texts. (A bare fragment
-    file -- YAML that isn't a valid OpenAPI doc -- additionally loses its origin
-    in kin's generic-map resolution path, which JSON-round-trips the value; that
-    one needs an upstream fix.)
+  - Bare-fragment multi-file. A $ref into a valid OpenAPI sub-document is sliced
+    correctly. But a $ref into a bare fragment file -- YAML that isn't a valid
+    OpenAPI doc -- loses its origin in kin's generic-map resolution path (it
+    JSON-round-trips the value), so its change sources at the referencing
+    operation and can't be sliced from the fragment; that needs an upstream fix.
   - Because blocks are keyed off the changelog, a block whose only change has no
     changelog entry (e.g. a description-only edit) is not shown; that
     schema-shape completeness is a later phase.
