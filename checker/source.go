@@ -28,6 +28,17 @@ func NewSource(file string, line int, column int) *Source {
 		Column: column,
 	}
 }
+
+// WithEnd sets the end position (the origin's end span) and returns the
+// receiver, so a multi-line source can be built fluently:
+// NewSource(file, line, col).WithEnd(endLine, endCol). Leave it unset for a
+// single-line or point source.
+func (s *Source) WithEnd(endLine, endColumn int) *Source {
+	s.EndLine = endLine
+	s.EndColumn = endColumn
+	return s
+}
+
 func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin) *Source {
 	if origin == nil || origin.Key == nil {
 		return &Source{File: (*operationsSources)[operation]}
