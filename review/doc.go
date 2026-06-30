@@ -34,8 +34,9 @@ source line is in the component, so keying by line follows the $ref and cards it
 as the component, and dedupes the same component change reported across several
 operations into one card. When no source line resolves (e.g. a change detected
 after --flatten-allof, whose merged schema has no single location), it falls
-back to the operation it names, then the rule Area, then an "other changes"
-bucket.
+back to the operation it names, then, for a top-level change with no
+operation, the rule's Area (the OpenAPI object the rule concerns, e.g.
+"security" or "tags"; see checker.Area), then an "other changes" bucket.
 
 # Slicing
 
