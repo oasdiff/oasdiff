@@ -23,6 +23,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
+	"github.com/oasdiff/oasdiff/reviewblocks"
 )
 
 // oasdiffSiteURL is the base URL of the web product. Defaults to the canonical
@@ -76,6 +77,11 @@ type reviewPayload struct {
 	RevisionFilename string          `json:"revision_filename" yaml:"revision_filename"`
 	Changes          json.RawMessage `json:"changes" yaml:"changes"`
 	Mode             string          `json:"mode" yaml:"mode"`
+	// Blocks is the per-change structural slices the review page renders as
+	// cards instead of the full spec. Computed here from the resolved docs and
+	// the raw spec text; empty when extraction finds nothing sliceable, in
+	// which case the page falls back to the full side-by-side.
+	Blocks []reviewblocks.Block `json:"blocks,omitempty" yaml:"blocks,omitempty"`
 }
 
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
@@ -116,6 +122,15 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		mode = "breaking"
 	}
 
+	// Slice the structural block each change lives in, so the review page can
+	// render one card per change instead of the full spec. The specs are
+	// already loaded with origins (the changelog path sets IncludeOrigin), so
+	// the slices are available here; on the raw text we just read above.
+	var blocks []reviewblocks.Block
+	if specInfoPair != nil && specInfoPair.Base != nil && specInfoPair.Revision != nil {
+		blocks = reviewblocks.Extract(errs, specInfoPair.Base.Spec, specInfoPair.Revision.Spec, string(baseBytes), string(revBytes))
+	}
+
 	plaintext, err := json.Marshal(reviewPayload{
 		BaseSpec:         string(baseBytes),
 		RevisionSpec:     string(revBytes),
@@ -123,6 +138,7 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		RevisionFilename: revName,
 		Changes:          changesJSON,
 		Mode:             mode,
+		Blocks:           blocks,
 	})
 	if err != nil {
 		return fmt.Errorf("marshal review payload: %w", err)

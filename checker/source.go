@@ -14,9 +14,11 @@ func displayFilePath(file string) string {
 
 // Source represents the location of a change in an OpenAPI spec file
 type Source struct {
-	File   string `json:"file,omitempty" yaml:"file,omitempty"`     // File path (relative or absolute)
-	Line   int    `json:"line,omitempty" yaml:"line,omitempty"`     // Line number (1-based)
-	Column int    `json:"column,omitempty" yaml:"column,omitempty"` // Column number (1-based)
+	File      string `json:"file,omitempty" yaml:"file,omitempty"`         // File path (relative or absolute)
+	Line      int    `json:"line,omitempty" yaml:"line,omitempty"`         // Line number (1-based)
+	Column    int    `json:"column,omitempty" yaml:"column,omitempty"`     // Column number (1-based)
+	EndLine   int    `json:"endLine,omitempty" yaml:"endLine,omitempty"`     // End line (1-based, inclusive); 0 if unknown/single
+	EndColumn int    `json:"endColumn,omitempty" yaml:"endColumn,omitempty"` // End column (1-based); 0 if unknown
 }
 
 func NewSource(file string, line int, column int) *Source {
@@ -37,9 +39,11 @@ func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation
 	}
 
 	return &Source{
-		File:   file,
-		Line:   origin.Key.Line,
-		Column: origin.Key.Column,
+		File:      file,
+		Line:      origin.Key.Line,
+		Column:    origin.Key.Column,
+		EndLine:   origin.Key.EndLine,
+		EndColumn: origin.Key.EndColumn,
 	}
 }
 
@@ -54,9 +58,11 @@ func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation 
 			file = (*operationsSources)[operation]
 		}
 		return &Source{
-			File:   file,
-			Line:   location.Line,
-			Column: location.Column,
+			File:      file,
+			Line:      location.Line,
+			Column:    location.Column,
+			EndLine:   location.EndLine,
+			EndColumn: location.EndColumn,
 		}
 	}
 
@@ -103,9 +109,11 @@ func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, ope
 				file = (*operationsSources)[operation]
 			}
 			return &Source{
-				File:   file,
-				Line:   item.Line,
-				Column: item.Column,
+				File:      file,
+				Line:      item.Line,
+				Column:    item.Column,
+				EndLine:   item.EndLine,
+				EndColumn: item.EndColumn,
 			}
 		}
 	}
@@ -342,9 +350,11 @@ func subschemaSource(operationsSources *diff.OperationsSourcesMap, operation *op
 	}
 
 	return &Source{
-		File:   file,
-		Line:   origin.Key.Line,
-		Column: origin.Key.Column,
+		File:      file,
+		Line:      origin.Key.Line,
+		Column:    origin.Key.Column,
+		EndLine:   origin.Key.EndLine,
+		EndColumn: origin.Key.EndColumn,
 	}
 }
 
@@ -472,9 +482,11 @@ func sourceFromOrigin(origin *openapi3.Origin) *Source {
 		return nil
 	}
 	return &Source{
-		File:   displayFilePath(origin.Key.File),
-		Line:   origin.Key.Line,
-		Column: origin.Key.Column,
+		File:      displayFilePath(origin.Key.File),
+		Line:      origin.Key.Line,
+		Column:    origin.Key.Column,
+		EndLine:   origin.Key.EndLine,
+		EndColumn: origin.Key.EndColumn,
 	}
 }
 
