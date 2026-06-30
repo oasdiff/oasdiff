@@ -46,12 +46,12 @@ just its start. The specs must be loaded with IncludeOrigin = true.
 
 # Status and limitations
 
-Indexed block types are operations, path items, and named component schemas.
-Known gaps: top-level sections (info/servers/tags/security) are not indexed yet;
-multi-file specs (a $ref'd block defined in another file) are not sliced yet;
-and because blocks are keyed off the changelog, a block whose only change has no
-changelog entry (e.g. a description-only edit) is not shown, that schema-shape
-completeness is a later phase. Within a shown block the slice is the raw text
-diff, so unflagged changed lines are still visible.
+Indexed block types are operations, path items, named component schemas, and the
+top-level sections (info/servers/tags/security). Known gaps: multi-file specs (a
+$ref'd block defined in another file) are not sliced yet; and because blocks are
+keyed off the changelog, a block whose only change has no changelog entry (e.g.
+a description-only edit) is not shown, that schema-shape completeness is a later
+phase. Within a shown block the slice is the raw text diff, so unflagged changed
+lines are still visible.
 */
 package review

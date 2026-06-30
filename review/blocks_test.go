@@ -251,5 +251,59 @@ func TestExtract_FlattenedAllOfFallsBackToOperation(t *testing.T) {
 	require.NotContains(t, b.RevText, "openapi:") // a real slice, not the whole doc
 }
 
-// TODO(endpoint-review): top-level (info/servers/tags/security) slice tests once
-// those blocks are wired.
+const topLevelSpec = `openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+servers:
+  - url: https://a.example.com
+tags:
+  - name: t1
+security:
+  - apiKey: []
+paths:
+  /x:
+    get:
+      responses:
+        "200": { description: ok }
+components:
+  securitySchemes:
+    apiKey: { type: apiKey, name: k, in: header }
+`
+
+// The four top-level sections are indexed, each spanning from its key line to
+// just before the next top-level key.
+func TestBuildIndex_TopLevelSections(t *testing.T) {
+	idx := buildIndex(loadWithOrigin(t, topLevelSpec))
+	for _, name := range []string{"info", "servers", "tags", "security"} {
+		s, ok := idx.byKey[name]
+		require.True(t, ok, "section %q must be indexed", name)
+		require.Positive(t, s.start)
+		require.GreaterOrEqual(t, s.end, s.start)
+	}
+	// Sections don't overlap and stay above the paths block.
+	require.Less(t, idx.byKey["info"].end, idx.byKey["servers"].start)
+	require.Less(t, idx.byKey["security"].start, idx.byKey["GET /x"].start)
+}
+
+// A security change (a SecurityChange, not an ApiChange) sourced in the security
+// section cards to that section with its slice. This exercises both the section
+// index and the interface-based source lookup that resolves non-ApiChange types.
+func TestExtract_SecurityChangeCardsToSection(t *testing.T) {
+	doc := loadWithOrigin(t, topLevelSpec)
+	sec, ok := buildIndex(doc).byKey["security"]
+	require.True(t, ok)
+
+	c := checker.SecurityChange{
+		Id:           "api-security-removed",
+		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{Line: sec.start}},
+	}
+
+	blocks := Extract(checker.Changes{c}, doc, doc, topLevelSpec, topLevelSpec)
+	require.Len(t, blocks, 1)
+	b := blocks[0]
+	require.Equal(t, "security", b.Key, "a security change cards to the security section, not Other")
+	require.Contains(t, b.RevText, "security:")
+	require.Contains(t, b.RevText, "apiKey")
+	require.NotContains(t, b.RevText, "/x:") // not the paths block
+}
