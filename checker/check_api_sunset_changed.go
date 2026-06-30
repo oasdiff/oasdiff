@@ -130,14 +130,9 @@ func getDeprecationDays(config *Config, stability string) uint {
 }
 
 func getAPIDeprecatedSunsetMissing(opInfo opInfo) ApiChange {
-	return NewApiChange(
+	return opInfo.NewApiChange(
 		APIDeprecatedSunsetMissingId,
-		opInfo.config,
 		nil,
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	)
 }

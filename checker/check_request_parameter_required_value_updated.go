@@ -25,6 +25,7 @@ func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operations
 			if operationItem.ParametersDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
 					requiredDiff := paramItem.RequiredDiff
@@ -39,15 +40,10 @@ func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operations
 						id = RequestParameterBecomeOptionalId
 					}
 
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						id,
-						config,
 						[]any{paramLocation, paramName},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource))
 				}
 			}

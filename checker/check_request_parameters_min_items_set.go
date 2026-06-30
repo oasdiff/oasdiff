@@ -21,6 +21,7 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -36,15 +37,10 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 						continue
 					}
 
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						RequestParameterMinItemsSetId,
-						config,
 						[]any{paramLocation, paramName, minItemsDiff.To},
 						commentId(RequestParameterMinItemsSetId),
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(nil, revisionSource))
 				}
 			}

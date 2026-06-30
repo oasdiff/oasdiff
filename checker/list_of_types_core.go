@@ -44,15 +44,10 @@ func checkPropertyListOfTypesChange(opInfo opInfo, propertyPath string, property
 	}
 
 	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, propertyDiff, "type")
-	result = append(result, NewApiChange(
+	result = append(result, opInfo.NewApiChange(
 		messageId,
-		opInfo.config,
 		args,
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
@@ -95,15 +90,10 @@ func checkBodyListOfTypesChange(opInfo opInfo, schemaDiff *diff.SchemaDiff, medi
 	}
 
 	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "type")
-	result = append(result, NewApiChange(
+	result = append(result, opInfo.NewApiChange(
 		messageId,
-		opInfo.config,
 		args,
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
@@ -133,15 +123,10 @@ func checkParameterListOfTypesChange(opInfo opInfo, paramDiff *diff.ParameterDif
 	}
 
 	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, paramDiff.SchemaDiff, "type")
-	result = append(result, NewApiChange(
+	result = append(result, opInfo.NewApiChange(
 		messageId,
-		opInfo.config,
 		args,
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
@@ -172,15 +157,10 @@ func checkParameterPropertyListOfTypesChange(opInfo opInfo, propertyPath string,
 	}
 
 	baseSource, revisionSource := SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, propertyDiff, "type")
-	result = append(result, NewApiChange(
+	result = append(result, opInfo.NewApiChange(
 		messageId,
-		opInfo.config,
 		args,
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	).WithSources(baseSource, revisionSource))
 
 	return result
