@@ -22,9 +22,9 @@ import (
 // server can't recompute it (it can't read the specs), so it ships in the
 // bundle and the renderer consumes it directly.
 //
-// Blocks is the per-change structural slices the UI renders as cards instead of
-// the full spec (see Extract). Empty when extraction finds nothing sliceable,
-// in which case the renderer falls back to the full side-by-side.
+// Blocks is the per-change structural slices the UI renders instead of the full
+// spec (see Extract). Empty when extraction finds nothing sliceable, in which
+// case the renderer falls back to the full spec.
 type Payload struct {
 	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
 	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
