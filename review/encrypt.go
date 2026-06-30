@@ -17,7 +17,7 @@ const BlobVersion = 1
 // 256-bit key using AES-256-GCM. It returns the upload blob and the key. The
 // blob layout is: version(1) || nonce(12) || ciphertext+tag. The key is
 // returned to the caller, which keeps it out of band (never uploaded), so the
-// server stores ciphertext it cannot read. A decryptor on the rendering side
+// server receives ciphertext it cannot read. A decryptor on the rendering side
 // reverses this exact layout.
 func (p Payload) Encrypt() (blob, key []byte, err error) {
 	plaintext, err := json.Marshal(p)
