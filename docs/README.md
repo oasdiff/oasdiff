@@ -72,6 +72,7 @@ The top-level subcommands.
 - [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade) — canonicalize an OpenAPI 3.0 spec to the latest 3.x
 - [`validate`](VALIDATE.md) — check a single spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)
 - [`checks`](CHECKS.md) — list the rules oasdiff uses to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
+- [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
 - [`git-diff-driver`](GIT-DIFF-DRIVER.md) — run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
 
 ### Inputs
