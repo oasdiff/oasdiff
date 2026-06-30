@@ -22,6 +22,7 @@ func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *d
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Added {
 				if paramLocation == "path" {
 					// it is processed in the separate check NewRequestPathParameterCheck
@@ -36,15 +37,10 @@ func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *d
 								id = NewOptionalRequestParameterId
 							}
 							revisionSource := parameterSource(operationsSources, operationItem.Revision, param.Value)
-							result = append(result, NewApiChange(
+							result = append(result, opInfo.NewApiChange(
 								id,
-								config,
 								[]any{paramLocation, paramName},
 								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
 							).WithSources(nil, revisionSource))
 							break
 						}

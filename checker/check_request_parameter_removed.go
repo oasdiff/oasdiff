@@ -54,29 +54,19 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) (ApiChange, bool) {
 
 	if !param.Deprecated {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			RequestParameterRemovedId,
-			opInfo.config,
 			[]any{param.In, param.Name},
 			commentId(RequestParameterRemovedId),
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		), true
 	}
 
 	sunset, ok := getSunset(param.Extensions)
 	if !ok {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			RequestParameterRemovedWithDeprecationId,
-			opInfo.config,
 			[]any{param.In, param.Name},
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		), true
 	}
 
@@ -86,29 +76,19 @@ func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) (ApiChange,
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			ParameterRemovedBeforeSunsetId,
-			opInfo.config,
 			[]any{param.In, param.Name, date},
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		), true
 	}
 	return ApiChange{}, false
 }
 
 func getRequestParameterSunsetParse(opInfo opInfo, param *openapi3.Parameter, err error) ApiChange {
-	return NewApiChange(
+	return opInfo.NewApiChange(
 		RequestParameterSunsetParseId,
-		opInfo.config,
 		[]any{param.In, param.Name, err},
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	)
 }

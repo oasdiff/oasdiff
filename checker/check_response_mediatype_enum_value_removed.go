@@ -26,6 +26,7 @@ func ResponseMediaTypeEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 			if operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for _, responseItems := range operationItem.ResponsesDiff.Modified {
 				if responseItems.ContentDiff == nil {
 					continue
@@ -46,15 +47,10 @@ func ResponseMediaTypeEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 
 					for _, enumVal := range enumDiff.Deleted {
 						baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, mediaTypeItem.SchemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							ResponseMediaTypeEnumValueRemovedId,
-							config,
 							[]any{mediaType, enumVal},
 							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource))
 					}
 				}

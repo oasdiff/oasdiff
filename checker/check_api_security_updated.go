@@ -87,20 +87,17 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			baseSource := securitySource(operationsSources, operationItem.Base)
 			revisionSource := securitySource(operationsSources, operationItem.Revision)
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			for _, addedSecurity := range operationItem.SecurityDiff.Added {
 				if len(addedSecurity.Schemes) == 0 {
 					continue
 				}
 
-				result = append(result, NewApiChange(
+				result = append(result, opInfo.NewApiChange(
 					APISecurityAddedCheckId,
-					config,
 					[]any{addedSecurity.String()},
 					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
 				).WithSources(nil, revisionSource))
 			}
 
@@ -109,15 +106,10 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 					continue
 				}
 
-				result = append(result, NewApiChange(
+				result = append(result, opInfo.NewApiChange(
 					APISecurityRemovedCheckId,
-					config,
 					[]any{deletedSecurity.String()},
 					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
 				).WithSources(baseSource, nil))
 			}
 
@@ -127,27 +119,17 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 				}
 				for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity.Scopes {
 					for _, addedScope := range updatedSecuritySchemeScopes.Added {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							APISecurityScopeAddedId,
-							config,
 							[]any{addedScope, securitySchemeName},
 							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(nil, revisionSource))
 					}
 					for _, deletedScope := range updatedSecuritySchemeScopes.Deleted {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							APISecurityScopeRemovedId,
-							config,
 							[]any{deletedScope, securitySchemeName},
 							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(baseSource, nil))
 					}
 				}

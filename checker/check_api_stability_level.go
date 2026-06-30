@@ -118,15 +118,11 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 			baseSource := stabilityFieldSource(operationsSources, pathDiff.Base.GetOperation(operation), pathDiff.Base.GetOperation(operation).Origin)
 			revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
 
-			result = append(result, NewApiChange(
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+			result = append(result, opInfo.NewApiChange(
 				changeId,
-				config,
 				[]any{baseLabel, revisionLabel},
 				"",
-				operationsSources,
-				operationItem.Revision,
-				operation,
-				path,
 			).WithSources(baseSource, revisionSource))
 		}
 	}

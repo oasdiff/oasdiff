@@ -69,6 +69,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 			if operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for _, responseStatus := range operationItem.ResponsesDiff.Deleted {
 				status, err := strconv.Atoi(responseStatus)
 				if err != nil {
@@ -78,15 +79,10 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 				if filter(status) {
 					baseSource := responseSource(operationsSources, operationItem.Base, responseStatus)
 					var revisionSource *Source
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						id,
-						config,
 						[]any{responseStatus},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource))
 				}
 			}
@@ -101,15 +97,10 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 				if filter(status) {
 					var baseSource *Source
 					revisionSource := responseSource(operationsSources, operationItem.Revision, responseStatus)
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						addedId,
-						config,
 						[]any{responseStatus},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource))
 				}
 			}

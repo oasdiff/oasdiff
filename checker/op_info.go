@@ -25,6 +25,14 @@ type opInfo struct {
 	methodDiff *diff.MethodDiff
 }
 
+// NewApiChange builds an ApiChange from the operation context carried by o,
+// so a caller supplies only what varies per change (id, args, comment) instead
+// of repeating config/operationsSources/operation/method/path at every call.
+// The caller still chains WithSources / WithDetails as needed.
+func (o opInfo) NewApiChange(id string, args []any, comment string) ApiChange {
+	return NewApiChange(id, o.config, args, comment, o.operationsSources, o.operation, o.method, o.path)
+}
+
 func newOpInfo(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method, path string) opInfo {
 	return opInfo{
 		config:            config,

@@ -22,6 +22,7 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -39,15 +40,10 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 							continue
 						}
 						_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							entry.id,
-							config,
 							[]any{paramLocation, paramName, entry.diff.To},
 							commentId(entry.id),
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(nil, revisionSource))
 					}
 				}

@@ -117,6 +117,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -159,15 +160,10 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 							}
 						}
 
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							id,
-							config,
 							[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 							comment,
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource))
 					}
 
@@ -194,15 +190,10 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 								id, comment := checkRequestParameterPropertyTypeChanged(typeDiff, formatDiff, schemaDiff)
 
-								result = append(result, NewApiChange(
+								result = append(result, opInfo.NewApiChange(
 									id,
-									config,
 									[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), propertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 									comment,
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
 								).WithSources(propBaseSource, propRevisionSource))
 							}
 						})

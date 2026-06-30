@@ -24,6 +24,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -46,15 +47,10 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 							id = entry.increasedId
 						}
 						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							id,
-							config,
 							[]any{paramLocation, paramName, entry.diff.From, entry.diff.To},
 							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource))
 					}
 				}
