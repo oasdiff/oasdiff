@@ -2,6 +2,7 @@ package review
 
 import (
 	"math"
+	"sort"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -107,10 +108,10 @@ func fallbackKey(c checker.Change) (key, title string) {
 // oasdiff resolves to the changed element (following $refs). Nil when absent or
 // when the change is not the concrete ApiChange.
 func changeSources(c checker.Change) (base, rev *checker.Source) {
-	if ac, ok := c.(checker.ApiChange); ok {
-		return ac.BaseSource, ac.RevisionSource
-	}
-	return nil, nil
+	// The interface carries the sources for every change type (ApiChange,
+	// ComponentChange, SecurityChange all embed CommonChange), so a security or
+	// component change resolves to its block, not just operation changes.
+	return c.GetBaseSource(), c.GetRevisionSource()
 }
 
 // areaByID maps each rule id to its Area, so a change's Area can be looked up
@@ -172,7 +173,43 @@ func buildIndex(doc *openapi3.T) docIndex {
 			}
 		}
 	}
+	addTopLevelSections(&idx, doc)
 	return idx
+}
+
+// addTopLevelSections indexes the document-level sections (info / servers /
+// tags / security). Each spans from its key line to just before the next
+// top-level key, derived from the document origin's field locations. This is
+// key-line based on purpose: it works uniformly even for `security`, whose
+// items are bare maps (SecurityRequirement) with no origin of their own, where
+// per-element spans (as used for operations and component schemas) aren't
+// available.
+func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
+	if doc.Origin == nil {
+		return
+	}
+	keyLines := make([]int, 0, len(doc.Origin.Fields))
+	for _, loc := range doc.Origin.Fields {
+		if loc.Line > 0 {
+			keyLines = append(keyLines, loc.Line)
+		}
+	}
+	sort.Ints(keyLines)
+	sectionEnd := func(start int) int {
+		for _, l := range keyLines {
+			if l > start {
+				return l - 1 // up to just before the next top-level key
+			}
+		}
+		return math.MaxInt // last section: to EOF (sliceLines clamps)
+	}
+	for _, name := range []string{"info", "servers", "tags", "security"} {
+		if loc, ok := doc.Origin.Fields[name]; ok && loc.Line > 0 {
+			s := span{key: name, title: name, start: loc.Line, end: sectionEnd(loc.Line)}
+			idx.spans = append(idx.spans, s)
+			idx.byKey[name] = s
+		}
+	}
 }
 
 // smallestContaining returns the span containing line whose extent is smallest
