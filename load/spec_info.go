@@ -14,6 +14,11 @@ type SpecInfo struct {
 	Url     string
 	Spec    *openapi3.T
 	Version string
+	// Sources holds the raw text of every file that contributed to Spec (the
+	// root and each $ref'd file), keyed by the path the loader resolved, when
+	// the spec was loaded via NewSpecInfoWithCapture. Nil otherwise. Used to
+	// slice multi-file specs by origin file.
+	Sources map[string]string
 }
 
 func (specInfo *SpecInfo) GetVersion() string {
@@ -41,12 +46,34 @@ func getVersion(spec *openapi3.T) string {
 
 // NewSpecInfo creates a SpecInfo from a local file path, a URL, a git revision, or stdin
 func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
-	specInfo, err := loadSpecInfo(loader, source)
+	specInfo, err := loadSpecInfo(loader, source, nil)
 	if err != nil {
 		return nil, err
 	}
 	specInfos := []*SpecInfo{specInfo}
 
+	for _, option := range options {
+		if specInfos, err = option(loader, specInfos); err != nil {
+			return nil, err
+		}
+	}
+	return specInfos[0], nil
+}
+
+// NewSpecInfoWithCapture is NewSpecInfo that also records the raw text of every
+// file the loader reads (the root spec and each $ref'd file) into the returned
+// SpecInfo's Sources map, keyed by resolved path. Use it only when those texts
+// are needed (the review bundle, to slice multi-file specs); NewSpecInfo loads
+// without the recorder and leaves Sources nil.
+func NewSpecInfoWithCapture(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
+	capture := newSourceCapture()
+	specInfo, err := loadSpecInfo(loader, source, capture)
+	if err != nil {
+		return nil, err
+	}
+	specInfo.Sources = capture.asStrings()
+
+	specInfos := []*SpecInfo{specInfo}
 	for _, option := range options {
 		if specInfos, err = option(loader, specInfos); err != nil {
 			return nil, err
@@ -93,8 +120,8 @@ func NewSpecInfoFromData(loader *openapi3.Loader, data []byte, name string, opti
 	return specInfos[0], nil
 }
 
-func loadSpecInfo(loader *openapi3.Loader, source *Source) (*SpecInfo, error) {
-	s, err := from(loader, source)
+func loadSpecInfo(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*SpecInfo, error) {
+	s, err := from(loader, source, capture)
 	if err != nil {
 		return nil, err
 	}
