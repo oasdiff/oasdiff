@@ -2,6 +2,7 @@ package review
 
 import (
 	"math"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -9,6 +10,19 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 )
+
+// fileBase is the display filename for a block's source file: the basename,
+// with any git "<rev>:" prefix stripped. Empty for an in-memory spec (no file).
+func fileBase(f string) string {
+	if f == "" {
+		return ""
+	}
+	b := filepath.Base(f)
+	if i := strings.LastIndex(b, ":"); i >= 0 {
+		b = b[i+1:] // strip a git "<rev>:" prefix that survived Base (no "/" in the ref)
+	}
+	return b
+}
 
 // otherChangesKey collects changes with no resolvable block; they group under a
 // single "Other changes" key with no source slice.
@@ -24,10 +38,12 @@ type Block struct {
 	ChangeIDs    []string `json:"change_ids"`   // rule ids of the changes in this block (for display/debug)
 	Fingerprints []string `json:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the
 	// stable key the review page joins each change to its card on
-	BaseText      string `json:"base_text"`       // source slice on the base side ("" if absent)
-	BaseLineStart int    `json:"base_line_start"` // 1-based first line of BaseText in the base spec
-	RevText       string `json:"rev_text"`        // source slice on the revision side ("" if absent)
-	RevLineStart  int    `json:"rev_line_start"`  // 1-based first line of RevText in the revision spec
+	BaseFile      string `json:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
+	BaseText      string `json:"base_text"`           // source slice on the base side ("" if absent)
+	BaseLineStart int    `json:"base_line_start"`     // 1-based first line of BaseText in the base spec
+	RevFile       string `json:"rev_file,omitempty"`  // basename of the revision slice's source file
+	RevText       string `json:"rev_text"`            // source slice on the revision side ("" if absent)
+	RevLineStart  int    `json:"rev_line_start"`      // 1-based first line of RevText in the revision spec
 }
 
 // Extract groups changes by their enclosing structural block and slices each
@@ -59,9 +75,11 @@ func Extract(changes checker.Changes, base, revision *openapi3.T, baseTexts, rev
 	for _, key := range order {
 		b := byKey[key]
 		if s, ok := baseIdx.byKey[key]; ok {
+			b.BaseFile = fileBase(s.file)
 			b.BaseText, b.BaseLineStart = sliceLines(baseTexts[s.file], s.start, s.end), s.start
 		}
 		if s, ok := revIdx.byKey[key]; ok {
+			b.RevFile = fileBase(s.file)
 			b.RevText, b.RevLineStart = sliceLines(revTexts[s.file], s.start, s.end), s.start
 		}
 		out = append(out, *b)
