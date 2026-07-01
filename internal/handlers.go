@@ -23,9 +23,6 @@ func getParseArgs() cobra.PositionalArgs {
 		if err := checkStdinWithComposed(cmd, args); err != nil {
 			return err
 		}
-		if err := checkOpenWithComposed(cmd); err != nil {
-			return err
-		}
 		if err := checkReviewFlagsRequireOpen(cmd); err != nil {
 			return err
 		}
@@ -91,38 +88,6 @@ func checkColor(cmd *cobra.Command) error {
 	return errors.New(`--color flag is only relevant with 'text' or 'singleline' formats`)
 }
 
-func checkOpenWithComposed(cmd *cobra.Command) error {
-
-	// --open exists only on breaking and changelog; diff and summary share
-	// getParseArgs but don't define it.
-	if cmd.Flags().Lookup("open") == nil {
-		return nil
-	}
-
-	open, err := cmd.Flags().GetBool("open")
-	if err != nil {
-		return errors.New("failed to get open flag")
-	}
-
-	if !open {
-		return nil
-	}
-
-	composed, err := cmd.Flags().GetBool("composed")
-	if err != nil {
-		return errors.New("failed to get composed flag")
-	}
-
-	if composed {
-		// --open builds a side-by-side review of exactly two specs; composed
-		// mode (-c) diffs a glob of many files, which the review can't
-		// represent.
-		return errors.New("--open cannot be used with composed mode (-c): the side-by-side review compares exactly two specs")
-	}
-
-	return nil
-}
-
 func checkReviewFlagsRequireOpen(cmd *cobra.Command) error {
 
 	// Only breaking/changelog define these (via addOpenFlags); skip elsewhere.
@@ -155,7 +120,6 @@ func checkStdinWithComposed(cmd *cobra.Command, args []string) error {
 	// Every command using getParseArgs registers composed (via addCommonDiffFlags),
 	// but guard with Lookup so this check degrades gracefully instead of erroring
 	// with "failed to get composed flag" if it's ever run on a command without it.
-	// Same pattern as checkOpenWithComposed.
 	if cmd.Flags().Lookup("composed") == nil {
 		return nil
 	}

@@ -85,6 +85,11 @@ type diffResult struct {
 	diffReport        *diff.Diff
 	operationsSources *diff.OperationsSourcesMap
 	specInfoPair      *load.SpecInfoPair
+	// The spec sets per side (one each for a normal diff, N for composed). The
+	// review bundle slices blocks from these; captured texts are in each
+	// SpecInfo.Sources on the --open path.
+	baseSpecs []*load.SpecInfo
+	revSpecs  []*load.SpecInfo
 }
 
 func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoPair) *diffResult {
@@ -132,7 +137,9 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 		return nil, getErrDiffFailed(err)
 	}
 
-	return newDiffResult(diffReport, operationsSources, load.NewSpecInfoPair(s1, s2)), nil
+	r := newDiffResult(diffReport, operationsSources, load.NewSpecInfoPair(s1, s2))
+	r.baseSpecs, r.revSpecs = []*load.SpecInfo{s1}, []*load.SpecInfo{s2}
+	return r, nil
 }
 
 func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
@@ -141,12 +148,19 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	s1, err := load.NewSpecInfoFromGlob(loader, flags.getBase().Path, flattenAllOf, flattenParams, lowerHeaderNames)
+	// --open slices the composed review from source text; capture every matched
+	// spec's files (see normalDiff).
+	newGlob := load.NewSpecInfoFromGlob
+	if flags.getOpen() {
+		newGlob = load.NewSpecInfoFromGlobWithCapture
+	}
+
+	s1, err := newGlob(loader, flags.getBase().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpecs("base", flags.getBase().Path, err)
 	}
 
-	s2, err := load.NewSpecInfoFromGlob(loader, flags.getRevision().Path, flattenAllOf, flattenParams, lowerHeaderNames)
+	s2, err := newGlob(loader, flags.getRevision().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpecs("revision", flags.getRevision().Path, err)
 	}
@@ -161,5 +175,7 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 		return nil, getErrDiffFailed(err)
 	}
 
-	return newDiffResult(diffReport, operationsSources, nil), nil
+	r := newDiffResult(diffReport, operationsSources, nil)
+	r.baseSpecs, r.revSpecs = s1, s2
+	return r, nil
 }

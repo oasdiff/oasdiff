@@ -62,20 +62,27 @@ func oasdiffAPIBaseURL() string {
 // There is no sign-in: the upload is zero-knowledge, so the server stores an
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
-func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
-	// Composed mode (-c) is rejected up front in argument validation
-	// (checkOpenWithComposed: --open compares exactly two specs), so it never
-	// reaches here.
-	baseBytes, baseName, err := readSpecSource(flags.getBase())
-	if err != nil {
-		return fmt.Errorf("read base spec: %w", err)
-	}
-	revBytes, revName, err := readSpecSource(flags.getRevision())
-	if err != nil {
-		return fmt.Errorf("read revision spec: %w", err)
+func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, baseSpecs, revSpecs []*load.SpecInfo, diffEmpty bool) error {
+	// A composed diff (-c) has no single spec; the cards carry it, so the
+	// full-spec fields stay empty and each side is labelled "composed". A normal
+	// diff reads the two files for the full side-by-side fallback.
+	var baseSpec, revSpec, baseName, revName string
+	if flags.getComposed() {
+		baseName, revName = "composed", "composed"
+	} else {
+		baseBytes, bn, err := readSpecSource(flags.getBase())
+		if err != nil {
+			return fmt.Errorf("read base spec: %w", err)
+		}
+		revBytes, rn, err := readSpecSource(flags.getRevision())
+		if err != nil {
+			return fmt.Errorf("read revision spec: %w", err)
+		}
+		baseSpec, baseName = string(baseBytes), bn
+		revSpec, revName = string(revBytes), rn
 	}
 
-	changesJSON, err := renderChangelogJSON(flags, errs, specInfoPair, isBreaking, diffEmpty)
+	changesJSON, err := renderChangelogJSON(flags, errs, specSetVersion(baseSpecs), specSetVersion(revSpecs), isBreaking, diffEmpty)
 	if err != nil {
 		return fmt.Errorf("render changelog: %w", err)
 	}
@@ -85,22 +92,17 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		mode = "breaking"
 	}
 
-	// Slice the structural block each change lives in, so the review page can
-	// render one card per change instead of the full spec. The specs are loaded
-	// with origins and with source capture on the --open path (see
-	// load.NewSpecInfoWithCapture), so Sources holds every contributing file's
-	// text keyed by origin path -- a $ref'd-from-another-file block slices from
-	// the right file.
-	var blocks []review.Block
-	if specInfoPair != nil && specInfoPair.Base != nil && specInfoPair.Revision != nil {
-		blocks = review.Extract(errs,
-			[]*openapi3.T{specInfoPair.Base.Spec}, []*openapi3.T{specInfoPair.Revision.Spec},
-			specInfoPair.Base.Sources, specInfoPair.Revision.Sources)
-	}
+	// Slice the block each change lives in, from the set of specs (one for a
+	// normal diff, N for composed). The texts come from each spec's captured
+	// Sources (populated on --open), so a $ref'd-from-another-file block slices
+	// from the right file.
+	baseDocs, baseTexts := specSetDocsAndSources(baseSpecs)
+	revDocs, revTexts := specSetDocsAndSources(revSpecs)
+	blocks := review.Extract(errs, baseDocs, revDocs, baseTexts, revTexts)
 
 	blob, key, err := review.Payload{
-		BaseSpec:         string(baseBytes),
-		RevisionSpec:     string(revBytes),
+		BaseSpec:         baseSpec,
+		RevisionSpec:     revSpec,
 		BaseFilename:     baseName,
 		RevisionFilename: revName,
 		Changes:          changesJSON,
@@ -144,7 +146,7 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 // (FormatJSON + WrapInObject) so the review page consumes identical bytes
 // whether the review came through the plaintext path or the encrypted one.
 // Color is forced off: the output is data, not a terminal render.
-func renderChangelogJSON(flags *Flags, errs checker.Changes, specInfoPair *load.SpecInfoPair, isBreaking, diffEmpty bool) ([]byte, error) {
+func renderChangelogJSON(flags *Flags, errs checker.Changes, baseVersion, revVersion string, isBreaking, diffEmpty bool) ([]byte, error) {
 	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{Language: flags.getLang()})
 	if err != nil {
 		return nil, err
@@ -152,9 +154,36 @@ func renderChangelogJSON(flags *Flags, errs checker.Changes, specInfoPair *load.
 	return formatter.RenderChangelog(
 		errs,
 		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
-		specInfoPair.GetBaseVersion(),
-		specInfoPair.GetRevisionVersion(),
+		baseVersion,
+		revVersion,
 	)
+}
+
+// specSetVersion is the version reported for a side's spec set: the first
+// spec's version (a normal diff has exactly one; a composed diff reports the
+// first matched spec). "n/a" when the set is empty (e.g. the review-only tests).
+func specSetVersion(specs []*load.SpecInfo) string {
+	if len(specs) > 0 && specs[0] != nil {
+		return specs[0].GetVersion()
+	}
+	return "n/a"
+}
+
+// specSetDocsAndSources collects the parsed docs and the union of captured file
+// texts across a side's spec set, for review.Extract to slice blocks from.
+func specSetDocsAndSources(specs []*load.SpecInfo) ([]*openapi3.T, map[string]string) {
+	docs := make([]*openapi3.T, 0, len(specs))
+	texts := map[string]string{}
+	for _, si := range specs {
+		if si == nil || si.Spec == nil {
+			continue
+		}
+		docs = append(docs, si.Spec)
+		for k, v := range si.Sources {
+			texts[k] = v
+		}
+	}
+	return docs, texts
 }
 
 // postEncryptedReview uploads the opaque ciphertext blob to the configured

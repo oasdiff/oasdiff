@@ -43,16 +43,19 @@ func Test_InvalidFlag(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --invalid"), io.Discard, io.Discard))
 }
 
-func Test_OpenWithComposedRejected(t *testing.T) {
-	// --open compares exactly two specs, so it can't be combined with composed
-	// mode (-c). Rejected at argument validation before any diff runs.
+func Test_OpenWithComposedAllowed(t *testing.T) {
+	// A composed diff (-c) can now be reviewed with --open: the cards carry the
+	// composed comparison, so composed no longer conflicts with --open. Point the
+	// upload at a non-connectable API so no real network call happens; --open
+	// upload errors are additive (non-fatal), so the exit code is the changelog
+	// result (0 for identical specs), never the 100 arg-validation code.
+	t.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
 	for _, cmd := range []string{
 		"oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test1.yaml --composed --open",
 		"oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test1.yaml -c --open",
 	} {
 		var stderr bytes.Buffer
-		require.Equal(t, 100, internal.Run(cmdToArgs(cmd), io.Discard, &stderr), cmd)
-		require.Contains(t, stderr.String(), "--open cannot be used with composed mode (-c)", cmd)
+		require.Equal(t, 0, internal.Run(cmdToArgs(cmd), io.Discard, &stderr), cmd)
 	}
 }
 

@@ -86,7 +86,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getOpen() {
-		if err := uploadAndOpen(flags, os.Stderr, isBreaking, errs, diffResult.specInfoPair, diffResult.diffReport.Empty()); err != nil {
+		if err := uploadAndOpen(flags, os.Stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty()); err != nil {
 			// --open is additive: an upload error, unsupported source, or
 			// composed mode must not change the exit code or pre-empt --fail-on.
 			// Warn to stderr (not stdout, so it never corrupts piped --format
