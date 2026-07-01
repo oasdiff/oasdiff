@@ -376,6 +376,7 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 	blocks := Extract(checker.Changes{c}, si.Spec, si.Spec, si.Sources, si.Sources)
 	require.Len(t, blocks, 1)
 	require.Equal(t, userKey, blocks[0].Key, "cards to the external block, not the operation")
+	require.Equal(t, "other.yaml", blocks[0].RevFile, "the block reports the file it was sliced from")
 	require.Contains(t, blocks[0].RevText, "User:")
 	require.Contains(t, blocks[0].RevText, "role:")
 	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from other.yaml, not the root spec")
