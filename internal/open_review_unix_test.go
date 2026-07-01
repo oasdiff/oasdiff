@@ -159,7 +159,7 @@ func TestUploadAndOpen_EncryptsSpecsAndEmitsFragmentURL(t *testing.T) {
 	var out bytes.Buffer
 	// nil specInfoPair is safe (version getters return "n/a"); empty changes
 	// is a valid changelog.
-	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true))
 
 	// The emitted URL must point at the encrypted review surface and carry
 	// the key only in the fragment.
@@ -206,7 +206,7 @@ func TestUploadAndOpen_BreakingSetsModeBreaking(t *testing.T) {
 	flags.setRevision(load.NewSource(revPath))
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, nil, true))
 
 	key, err := base64.RawURLEncoding.DecodeString(keyFragmentRe.FindStringSubmatch(out.String())[1])
 	require.NoError(t, err)
@@ -320,7 +320,7 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 	flags.v.Set("review-meta", []string{"owner=acme", "pr=42"})
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, nil, true))
 
 	require.Equal(t, http.MethodPost, gotMethod)
 	require.Equal(t, "/tenants/tok-123/encrypted-pr-review", gotPath, "the token is path-authenticated")
@@ -375,7 +375,7 @@ func TestUploadAndOpen_FreePathWhenNoToken(t *testing.T) {
 	flags := writeSpecPair(t)
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true))
 	require.True(t, freeHit, "the free endpoint must be used when --review-token is empty")
 	require.Contains(t, out.String(), "/review/e/free-1#k=")
 }
@@ -446,7 +446,7 @@ func TestUploadAndOpen_ReadBaseSpecError(t *testing.T) {
 	flags.setRevision(load.NewSource(filepath.Join(t.TempDir(), "also-missing.yaml")))
 
 	var out bytes.Buffer
-	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true)
+	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "read base spec")
 }
@@ -462,7 +462,7 @@ func TestUploadAndOpen_ReadRevisionSpecError(t *testing.T) {
 	flags.setRevision(load.NewSource(filepath.Join(t.TempDir(), "missing.yaml")))
 
 	var out bytes.Buffer
-	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true)
+	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "read revision spec")
 }

@@ -84,7 +84,19 @@ func NewSpecInfoWithCapture(loader *openapi3.Loader, source *Source, options ...
 
 // NewSpecInfoFromGlob creates SpecInfos from local files matching the specified glob parameter
 func NewSpecInfoFromGlob(loader *openapi3.Loader, glob string, options ...Option) ([]*SpecInfo, error) {
-	specInfos, err := fromGlob(loader, glob)
+	return newSpecInfoFromGlob(loader, glob, false, options...)
+}
+
+// NewSpecInfoFromGlobWithCapture is NewSpecInfoFromGlob that also records each
+// spec's contributing file texts into its SpecInfo.Sources (see
+// NewSpecInfoWithCapture). Used for a composed review, where every matched spec
+// (and its $ref'd files) must be sliceable.
+func NewSpecInfoFromGlobWithCapture(loader *openapi3.Loader, glob string, options ...Option) ([]*SpecInfo, error) {
+	return newSpecInfoFromGlob(loader, glob, true, options...)
+}
+
+func newSpecInfoFromGlob(loader *openapi3.Loader, glob string, capture bool, options ...Option) ([]*SpecInfo, error) {
+	specInfos, err := fromGlob(loader, glob, capture)
 	if err != nil {
 		return nil, err
 	}
@@ -128,18 +140,30 @@ func loadSpecInfo(loader *openapi3.Loader, source *Source, capture *sourceCaptur
 	return newSpecInfo(s, source.DisplayPath()), nil
 }
 
-func fromGlob(loader *openapi3.Loader, glob string) ([]*SpecInfo, error) {
+func fromGlob(loader *openapi3.Loader, glob string, capture bool) ([]*SpecInfo, error) {
 	files, err := filepathx.Glob(glob)
 	if err != nil {
 		return nil, err
 	}
 	result := make([]*SpecInfo, 0)
 	for _, file := range files {
-		spec, err := loader.LoadFromFile(file)
+		l := loader
+		var cap *sourceCapture
+		if capture {
+			cap = newSourceCapture()
+			lc := *loader
+			lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, cap)
+			l = &lc
+		}
+		spec, err := l.LoadFromFile(file)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load %q: %w", file, err)
 		}
-		result = append(result, &SpecInfo{Url: file, Spec: spec})
+		si := &SpecInfo{Url: file, Spec: spec}
+		if cap != nil {
+			si.Sources = cap.asStrings()
+		}
+		result = append(result, si)
 	}
 
 	if len(result) > 0 {
