@@ -53,9 +53,9 @@ type Block struct {
 // on element origins) to its raw source; for a single-file spec that's one
 // entry. A block is sliced from the file it lives in, so a $ref'd-from-another-
 // file block is sliced from that file (see load.NewSpecInfoWithCapture).
-func Extract(changes checker.Changes, base, revision *openapi3.T, baseTexts, revTexts map[string]string) []Block {
-	baseIdx := buildIndex(base)
-	revIdx := buildIndex(revision)
+func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts, revTexts map[string]string) []Block {
+	baseIdx := buildIndex(baseDocs...)
+	revIdx := buildIndex(revDocs...)
 
 	byKey := map[string]*Block{}
 	var order []string
@@ -162,9 +162,12 @@ type docIndex struct {
 	byKey map[string]span
 }
 
-// buildIndex enumerates the sliceable structural blocks of doc: every path
-// item, every operation, and every named component schema (all carry Origin).
-func buildIndex(doc *openapi3.T) docIndex {
+// buildIndex enumerates the sliceable structural blocks of one or more docs:
+// every path item, every operation, and every named component schema (all carry
+// Origin). Multiple docs support composed mode (a set of specs diffed as one
+// API); their blocks share one index, disambiguated by file (composed specs
+// have disjoint paths, so operation keys don't collide).
+func buildIndex(docs ...*openapi3.T) docIndex {
 	idx := docIndex{byKey: map[string]span{}}
 	add := func(key, title string, o *openapi3.Origin) {
 		if start, end, ok := originEndRange(o); ok {
@@ -173,9 +176,17 @@ func buildIndex(doc *openapi3.T) docIndex {
 			idx.byKey[key] = s
 		}
 	}
-	if doc == nil {
-		return idx
+	for _, doc := range docs {
+		if doc == nil {
+			continue
+		}
+		addDoc(&idx, doc, add)
 	}
+	return idx
+}
+
+// addDoc indexes one document's blocks into idx.
+func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *openapi3.Origin)) {
 	if doc.Paths != nil {
 		for path, pi := range doc.Paths.Map() {
 			if pi == nil {
@@ -196,9 +207,8 @@ func buildIndex(doc *openapi3.T) docIndex {
 			}
 		}
 	}
-	addTopLevelSections(&idx, doc)
-	indexExternalSchemas(&idx, doc)
-	return idx
+	addTopLevelSections(idx, doc)
+	indexExternalSchemas(idx, doc)
 }
 
 // indexExternalSchemas indexes schemas $ref'd from another file. They live at

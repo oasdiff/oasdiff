@@ -17,6 +17,9 @@ import (
 // in-memory, file "") spec.
 func oneFile(file, text string) map[string]string { return map[string]string{file: text} }
 
+// docs wraps specs for Extract (which takes a set of docs per side for composed).
+func docs(d ...*openapi3.T) []*openapi3.T { return d }
+
 const endpointSpec = `openapi: 3.0.0
 info:
   title: t
@@ -53,7 +56,7 @@ func TestExtract_OperationBlock(t *testing.T) {
 	doc := loadWithOrigin(t, endpointSpec)
 	changes := checker.Changes{checker.ApiChange{Id: "c1", Operation: "POST", Path: "/users"}}
 
-	blocks := Extract(changes, doc, doc, oneFile("", endpointSpec), oneFile("", endpointSpec))
+	blocks := Extract(changes, docs(doc), docs(doc), oneFile("", endpointSpec), oneFile("", endpointSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -73,7 +76,7 @@ func TestExtract_PathBlock(t *testing.T) {
 	doc := loadWithOrigin(t, endpointSpec)
 	changes := checker.Changes{checker.ApiChange{Id: "c1", Path: "/users"}}
 
-	blocks := Extract(changes, doc, doc, oneFile("", endpointSpec), oneFile("", endpointSpec))
+	blocks := Extract(changes, docs(doc), docs(doc), oneFile("", endpointSpec), oneFile("", endpointSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -164,7 +167,7 @@ func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
 		},
 	}
 
-	blocks := Extract(checker.Changes{c}, doc, doc, oneFile("", refdComponentSpec), oneFile("", refdComponentSpec))
+	blocks := Extract(checker.Changes{c}, docs(doc), docs(doc), oneFile("", refdComponentSpec), oneFile("", refdComponentSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -248,7 +251,7 @@ func TestExtract_FlattenedAllOfFallsBackToOperation(t *testing.T) {
 	require.Nil(t, base)
 	require.Nil(t, rev)
 
-	blocks := Extract(changes, s1.Spec, s2.Spec, oneFile("base.yaml", allOfRequiredBase), oneFile("revision.yaml", allOfRequiredRevision))
+	blocks := Extract(changes, docs(s1.Spec), docs(s2.Spec), oneFile("base.yaml", allOfRequiredBase), oneFile("revision.yaml", allOfRequiredRevision))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
@@ -306,7 +309,7 @@ func TestExtract_SecurityChangeCardsToSection(t *testing.T) {
 		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{Line: sec.start}},
 	}
 
-	blocks := Extract(checker.Changes{c}, doc, doc, oneFile("", topLevelSpec), oneFile("", topLevelSpec))
+	blocks := Extract(checker.Changes{c}, docs(doc), docs(doc), oneFile("", topLevelSpec), oneFile("", topLevelSpec))
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 	require.Equal(t, "security", b.Key, "a security change cards to the security section, not Other")
@@ -373,7 +376,7 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 		Path:         "/users",
 		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: other, Line: userSpan.end}},
 	}
-	blocks := Extract(checker.Changes{c}, si.Spec, si.Spec, si.Sources, si.Sources)
+	blocks := Extract(checker.Changes{c}, docs(si.Spec), docs(si.Spec), si.Sources, si.Sources)
 	require.Len(t, blocks, 1)
 	require.Equal(t, userKey, blocks[0].Key, "cards to the external block, not the operation")
 	require.Equal(t, "other.yaml", blocks[0].RevFile, "the block reports the file it was sliced from")

@@ -17,6 +17,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
@@ -92,7 +93,9 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	// the right file.
 	var blocks []review.Block
 	if specInfoPair != nil && specInfoPair.Base != nil && specInfoPair.Revision != nil {
-		blocks = review.Extract(errs, specInfoPair.Base.Spec, specInfoPair.Revision.Spec, specInfoPair.Base.Sources, specInfoPair.Revision.Sources)
+		blocks = review.Extract(errs,
+			[]*openapi3.T{specInfoPair.Base.Spec}, []*openapi3.T{specInfoPair.Revision.Spec},
+			specInfoPair.Base.Sources, specInfoPair.Revision.Sources)
 	}
 
 	blob, key, err := review.Payload{
