@@ -384,3 +384,45 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 	require.Contains(t, blocks[0].RevText, "role:")
 	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from other.yaml, not the root spec")
 }
+
+const securitySchemeSpec = `openapi: 3.0.0
+info: { title: t, version: "1.0" }
+paths: {}
+components:
+  securitySchemes:
+    AccessToken:
+      type: http
+      scheme: bearer
+    OAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/auth
+          tokenUrl: https://example.com/token
+          scopes:
+            read: read access
+`
+
+// A component security-scheme change (scheme removed / type changed) is sourced
+// inside components/securitySchemes, which must be indexed so the change slices
+// that scheme's block instead of falling back.
+func TestExtract_SecuritySchemeBlock(t *testing.T) {
+	doc := loadWithOrigin(t, securitySchemeSpec)
+	idx := buildIndex(doc)
+	oauth, ok := idx.byKey["components/securitySchemes/OAuth"]
+	require.True(t, ok, "security schemes must be indexed")
+
+	// change reported at the OAuth scheme's source line (as the checker sources it)
+	c := checker.ApiChange{
+		Id: "api-security-component-removed",
+		CommonChange: checker.CommonChange{
+			BaseSource: &checker.Source{Line: oauth.start},
+		},
+	}
+	blocks := Extract(checker.Changes{c}, docs(doc), docs(doc), oneFile("", securitySchemeSpec), oneFile("", securitySchemeSpec))
+	require.Len(t, blocks, 1)
+	require.Equal(t, "components/securitySchemes/OAuth", blocks[0].Key)
+	require.Contains(t, blocks[0].BaseText, "OAuth:")
+	require.Contains(t, blocks[0].BaseText, "oauth2")
+	require.NotContains(t, blocks[0].BaseText, "AccessToken:") // sibling scheme excluded
+}

@@ -206,6 +206,15 @@ func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *opena
 				add(k, k, ref.Value.Origin)
 			}
 		}
+		// Security schemes carry Origin too; index them so a component
+		// security change (scheme removed / type changed) slices its own block
+		// instead of falling back.
+		for name, ref := range doc.Components.SecuritySchemes {
+			if ref != nil && ref.Value != nil {
+				k := "components/securitySchemes/" + name
+				add(k, k, ref.Value.Origin)
+			}
+		}
 	}
 	addTopLevelSections(idx, doc)
 	indexExternalSchemas(idx, doc)
