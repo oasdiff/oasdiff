@@ -164,8 +164,10 @@ request-property-min-set-comment: Esto es una advertencia porque a veces es nece
 request-property-removed: removida la propiedad de solicitud %s
 request-body-type-changed: el %s del cuerpo de solicitud fue cambiado de %s a %s
 request-body-type-generalized: el %s del cuerpo de solicitud fue ampliado de %s a %s
+request-body-type-compatible: el %s del cuerpo de solicitud cambió de %s a %s (retrocompatible)
 request-property-type-changed: el %s de la propiedad de solicitud %s fue cambiado de %s a %s
 request-property-type-generalized: el %s de la propiedad de solicitud %s fue ampliado de %s a %s
+request-property-type-compatible: el %s de la propiedad de solicitud %s cambió de %s a %s (retrocompatible)
 request-property-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s de la propiedad de solicitud %s
 response-header-became-optional: el encabezado de respuesta %s se volvió opcional para el estado %s
 required-response-header-removed: removido el encabezado de respuesta requerido %s para el estado %s
@@ -449,6 +451,7 @@ request-body-one-of-removed-description: subesquema removido del oneOf en el cue
 request-body-removed-description: cuerpo de solicitud removido
 request-body-type-changed-description: tipo del cuerpo de solicitud cambiado
 request-body-type-generalized-description: tipo del cuerpo de solicitud generalizado
+request-body-type-compatible-description: tipo del cuerpo de solicitud cambiado pero retrocompatible
 request-header-property-became-enum-description: propiedad del encabezado de solicitud restringida a enum
 request-header-property-became-required-description: propiedad del encabezado de solicitud se volvió requerida
 request-optional-property-became-not-read-only-description: propiedad opcional de solicitud dejó de ser de solo lectura
@@ -539,6 +542,7 @@ request-property-pattern-removed-description: patrón de la propiedad de solicit
 request-property-removed-description: propiedad de solicitud removida
 request-property-type-changed-description: tipo de la propiedad de solicitud cambiado
 request-property-type-generalized-description: tipo de la propiedad de solicitud generalizado
+request-property-type-compatible-description: tipo de la propiedad de solicitud cambiado pero retrocompatible
 request-property-x-extensible-enum-value-removed-description: valor x-extensible-enum de la propiedad de solicitud removido
 request-required-property-became-not-read-only-description: propiedad requerida de solicitud dejó de ser de solo lectura
 request-required-property-became-not-write-only-description: propiedad requerida de solicitud dejó de ser de solo escritura
@@ -1013,9 +1017,14 @@ response-body-media-type-schema-added-description: esquema del tipo de media de 
 response-body-media-type-schema-removed-description: esquema del tipo de media de la respuesta removido
 response-body-type-generalized: el %s del cuerpo de respuesta fue ampliado de %s a %s para el estado %s
 response-body-type-specialized: el %s del cuerpo de respuesta fue reducido de %s a %s para el estado %s
+response-body-type-compatible: el %s del cuerpo de respuesta cambió de %s a %s para el estado %s (retrocompatible)
+type-change-loosely-typed-comment: "Este cambio es retrocompatible porque el tipo de medio no es fuertemente tipado (por ejemplo XML), donde cualquier valor puede representarse como texto, por lo que el tipo no se impone en la transmisión. Con un tipo de medio fuertemente tipado como JSON el mismo cambio sería incompatible."
 response-property-type-generalized: el %s de la propiedad de respuesta %s fue ampliado de %s a %s para el estado %s
 response-property-type-specialized: el %s de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
+response-property-type-compatible: el %s de la propiedad de respuesta %s cambió de %s a %s para el estado %s (retrocompatible)
 response-body-type-generalized-description: tipo del cuerpo de respuesta generalizado
 response-body-type-specialized-description: tipo del cuerpo de respuesta especializado
+response-body-type-compatible-description: tipo del cuerpo de respuesta cambiado pero retrocompatible
 response-property-type-generalized-description: tipo de la propiedad de respuesta generalizado
 response-property-type-specialized-description: tipo de la propiedad de respuesta especializado
+response-property-type-compatible-description: tipo de la propiedad de respuesta cambiado pero retrocompatible

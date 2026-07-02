@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"strings"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -197,16 +199,16 @@ func joinTypes(types []string) string {
 		return types[0]
 	}
 
-	result := ""
+	var result strings.Builder
 	for i, t := range types {
 		if i > 0 {
 			if i == len(types)-1 {
-				result += " and "
+				result.WriteString(" and ")
 			} else {
-				result += ", "
+				result.WriteString(", ")
 			}
 		}
-		result += t
+		result.WriteString(t)
 	}
-	return result
+	return result.String()
 }

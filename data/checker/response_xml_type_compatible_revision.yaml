@@ -1,0 +1,15 @@
+openapi: 3.0.1
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /api/v1.0/groups:
+    post:
+      operationId: createOneGroup
+      responses:
+        "200":
+          description: OK
+          content:
+            application/xml:
+              schema:
+                type: object

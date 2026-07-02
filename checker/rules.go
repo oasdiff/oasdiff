@@ -457,8 +457,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyBecameOptionalId, INFO, RequestPropertyRequiredUpdatedCheck, DirectionRequest, AreaSchema, KindRequiredness, ActionChange),
 		// RequestPropertyTypeChangedCheck
 		newBackwardCompatibilityRule(RequestBodyTypeGeneralizedId, INFO, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionGeneralize),
+		newBackwardCompatibilityRule(RequestBodyTypeCompatibleId, INFO, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionChange),
 		newBackwardCompatibilityRule(RequestBodyTypeChangedId, ERR, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyTypeGeneralizedId, INFO, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionGeneralize),
+		newBackwardCompatibilityRule(RequestPropertyTypeCompatibleId, INFO, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyTypeChangedId, ERR, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionChange),
 		// RequestPropertyUpdatedCheck
 		newBackwardCompatibilityRule(RequestPropertyRemovedId, WARN, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionRemove),
@@ -592,9 +594,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyTypeChangedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionChange),
 		newBackwardCompatibilityRule(ResponseBodyTypeGeneralizedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionGeneralize),
 		newBackwardCompatibilityRule(ResponseBodyTypeSpecializedId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionSpecialize),
+		newBackwardCompatibilityRule(ResponseBodyTypeCompatibleId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionChange),
 		newBackwardCompatibilityRule(ResponsePropertyTypeChangedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionChange),
 		newBackwardCompatibilityRule(ResponsePropertyTypeGeneralizedId, ERR, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionGeneralize),
 		newBackwardCompatibilityRule(ResponsePropertyTypeSpecializedId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionSpecialize),
+		newBackwardCompatibilityRule(ResponsePropertyTypeCompatibleId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, ActionChange),
 		// ResponseRequiredPropertyUpdatedCheck
 		newBackwardCompatibilityRule(ResponseRequiredPropertyRemovedId, ERR, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseRequiredWriteOnlyPropertyRemovedId, INFO, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, ActionRemove),

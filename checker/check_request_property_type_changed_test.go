@@ -418,3 +418,26 @@ func TestRequestBodyTypeWidenWithBreakingFormatStillBreaking(t *testing.T) {
 	require.True(t, containsId(errs, checker.RequestBodyTypeChangedId),
 		"a type widening must not mask a co-occurring breaking format change (int64 -> int32)")
 }
+
+// Contravariant mirror: for a request, object -> string is the loosely-typed
+// compatible case (string -> object stays breaking).
+func TestRequestBodyTypeLooselyTypedCompatible(t *testing.T) {
+	s1, err := open("../data/checker/request_xml_type_compatible_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_xml_type_compatible_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
+	requireSingleApiChange(t, checker.ApiChange{
+		Id:          checker.RequestBodyTypeCompatibleId,
+		Args:        []any{"type", "object", "string"},
+		Comment:     checker.TypeChangeLooselyTypedCommentId,
+		Operation:   "POST",
+		Path:        "/api/v1.0/groups",
+		Source:      load.NewSource("../data/checker/request_xml_type_compatible_revision.yaml"),
+		OperationId: "createOneGroup",
+	}, errs)
+	require.Equal(t, "the request's body `type` changed from `object` to `string` (backward compatible)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
