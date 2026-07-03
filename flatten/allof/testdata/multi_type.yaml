@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info:
+  title: base class introduced without contract change
+  version: 1.0.1
+components:
+  schemas:
+    BaseRequest:
+      type: object
+      required:
+        - fromDate
+      properties:
+        fromDate:
+          type: string
+    LimitHitsByDateRequest:
+      allOf:
+        - $ref: "#/components/schemas/BaseRequest"
+        - type: object
+          properties:
+            nullablePrimitive:
+              type: [ integer, "null" ]

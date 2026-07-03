@@ -30,7 +30,7 @@ type SchemaCollection struct {
 	OneOf                []openapi3.SchemaRefs
 	AnyOf                []openapi3.SchemaRefs
 	Title                []string
-	Type                 []string
+	Type                 []openapi3.Types
 	Format               []string
 	Description          []string
 	Enum                 [][]any
@@ -1064,36 +1064,58 @@ func findMaxValuePtr(values []*uint64) *uint64 {
 	return &out
 }
 
+// resolveType intersects the type sets of the subschemas: a value is valid
+// under allOf only if every subschema permits its type.
 func resolveType(schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
-	types := filterEmptyStrings(collection.Type)
-	if len(types) == 0 {
+	typeSets := filterEmptyTypeSets(collection.Type)
+	if len(typeSets) == 0 {
 		schema.Type = nil
 		return schema, nil
 	}
-	if areTypesNumeric(types) {
-		for _, t := range types {
-			if t == "integer" {
-				schema.Type = &openapi3.Types{"integer"}
-				return schema, nil
-			}
-		}
-		schema.Type = &openapi3.Types{"number"}
-		return schema, nil
+	types := typeSets[0]
+	for _, ts := range typeSets[1:] {
+		types = intersectTypes(types, ts)
 	}
-	if allStringsEqual(types) {
-		schema.Type = &openapi3.Types{types[0]}
-		return schema, nil
+	if len(types) == 0 {
+		return schema, errors.New(TypeErrorMessage)
 	}
-	return schema, errors.New(TypeErrorMessage)
+	schema.Type = &types
+	return schema, nil
 }
 
-func areTypesNumeric(types []string) bool {
-	for _, t := range types {
-		if t != "integer" && t != "number" {
-			return false
+// intersectTypes returns the types permitted by both sets, in a's order.
+// "integer" is a subset of "number", so their intersection is "integer".
+// Exact membership is checked before the numeric-subset rule so that a
+// redundant set listing both types does not narrow "number" to "integer".
+func intersectTypes(a, b openapi3.Types) openapi3.Types {
+	result := openapi3.Types{}
+	seen := map[string]struct{}{}
+	add := func(t string) {
+		if _, ok := seen[t]; !ok {
+			seen[t] = struct{}{}
+			result = append(result, t)
 		}
 	}
-	return true
+	for _, t := range a {
+		switch {
+		case b.Includes(t):
+			add(t)
+		case t == "number" && b.Includes("integer"),
+			t == "integer" && b.Includes("number"):
+			add("integer")
+		}
+	}
+	return result
+}
+
+func filterEmptyTypeSets(sets []openapi3.Types) []openapi3.Types {
+	var result []openapi3.Types
+	for _, ts := range sets {
+		if filtered := openapi3.Types(filterEmptyStrings(ts)); len(filtered) > 0 {
+			result = append(result, filtered)
+		}
+	}
+	return result
 }
 
 func resolveFormat(schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
@@ -1270,7 +1292,7 @@ func collect(schemas []*openapi3.SchemaRef) SchemaCollection {
 		collection.OneOf = append(collection.OneOf, s.Value.OneOf)
 		collection.Title = append(collection.Title, s.Value.Title)
 		if s.Value.Type != nil {
-			collection.Type = append(collection.Type, *s.Value.Type...)
+			collection.Type = append(collection.Type, *s.Value.Type)
 		}
 		collection.Format = append(collection.Format, s.Value.Format)
 		collection.Description = append(collection.Description, s.Value.Description)
