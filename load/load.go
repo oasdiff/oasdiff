@@ -112,6 +112,10 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool, cap
 	// the loader would return the cached base spec for the revision.
 	if capture != nil {
 		loaderCopy.ReadFromURIFunc = recordingReader(loaderCopy.ReadFromURIFunc, capture)
+		// The root document is loaded from bytes below (LoadFromDataWithPath),
+		// so ReadFromURIFunc never fires for it; record it directly, keyed the
+		// same way the recorder keys $ref'd files.
+		capture.record(filepath.FromSlash(filepath.ToSlash(gitRef)), out)
 	}
 
 	u := &url.URL{Path: filepath.ToSlash(gitRef)}

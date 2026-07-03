@@ -1,6 +1,7 @@
 package review
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +20,14 @@ func oneFile(file, text string) map[string]string { return map[string]string{fil
 
 // docs wraps specs for Extract (which takes a set of docs per side for composed).
 func docs(d ...*openapi3.T) []*openapi3.T { return d }
+
+// singleSpan returns the unique span for key, failing if absent or ambiguous.
+func singleSpan(t *testing.T, idx docIndex, key string) span {
+	t.Helper()
+	entries := idx.byKey[key]
+	require.Len(t, entries, 1, "expected exactly one span for %q", key)
+	return entries[0]
+}
 
 const endpointSpec = `openapi: 3.0.0
 info:
@@ -153,8 +162,7 @@ components:
 // operation (whose source only shows the $ref).
 func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
 	doc := loadWithOrigin(t, refdComponentSpec)
-	userSpan, ok := buildIndex(doc).byKey["components/schemas/User"]
-	require.True(t, ok)
+	userSpan := singleSpan(t, buildIndex(doc), "components/schemas/User")
 
 	// change reported under the endpoint, but sourced inside User (the role line)
 	c := checker.ApiChange{
@@ -286,14 +294,13 @@ components:
 func TestBuildIndex_TopLevelSections(t *testing.T) {
 	idx := buildIndex(loadWithOrigin(t, topLevelSpec))
 	for _, name := range []string{"info", "servers", "tags", "security"} {
-		s, ok := idx.byKey[name]
-		require.True(t, ok, "section %q must be indexed", name)
+		s := singleSpan(t, idx, name)
 		require.Positive(t, s.start)
 		require.GreaterOrEqual(t, s.end, s.start)
 	}
 	// Sections don't overlap and stay above the paths block.
-	require.Less(t, idx.byKey["info"].end, idx.byKey["servers"].start)
-	require.Less(t, idx.byKey["security"].start, idx.byKey["GET /x"].start)
+	require.Less(t, singleSpan(t, idx, "info").end, singleSpan(t, idx, "servers").start)
+	require.Less(t, singleSpan(t, idx, "security").start, singleSpan(t, idx, "GET /x").start)
 }
 
 // A security change (a SecurityChange, not an ApiChange) sourced in the security
@@ -301,8 +308,7 @@ func TestBuildIndex_TopLevelSections(t *testing.T) {
 // index and the interface-based source lookup that resolves non-ApiChange types.
 func TestExtract_SecurityChangeCardsToSection(t *testing.T) {
 	doc := loadWithOrigin(t, topLevelSpec)
-	sec, ok := buildIndex(doc).byKey["security"]
-	require.True(t, ok)
+	sec := singleSpan(t, buildIndex(doc), "security")
 
 	c := checker.SecurityChange{
 		Id:           "api-security-removed",
@@ -361,9 +367,9 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 	idx := buildIndex(si.Spec)
 	var userKey string
 	var userSpan span
-	for k, s := range idx.byKey {
+	for k, spans := range idx.byKey {
 		if strings.Contains(k, "other.yaml") {
-			userKey, userSpan = k, s
+			userKey, userSpan = k, spans[0]
 		}
 	}
 	require.NotEmpty(t, userKey, "the cross-file User schema must be indexed")
@@ -409,8 +415,7 @@ components:
 func TestExtract_SecuritySchemeBlock(t *testing.T) {
 	doc := loadWithOrigin(t, securitySchemeSpec)
 	idx := buildIndex(doc)
-	oauth, ok := idx.byKey["components/securitySchemes/OAuth"]
-	require.True(t, ok, "security schemes must be indexed")
+	oauth := singleSpan(t, idx, "components/securitySchemes/OAuth")
 
 	// change reported at the OAuth scheme's source line (as the checker sources it)
 	c := checker.ApiChange{
@@ -425,4 +430,120 @@ func TestExtract_SecuritySchemeBlock(t *testing.T) {
 	require.Contains(t, blocks[0].BaseText, "OAuth:")
 	require.Contains(t, blocks[0].BaseText, "oauth2")
 	require.NotContains(t, blocks[0].BaseText, "AccessToken:") // sibling scheme excluded
+}
+
+// loadWithOriginNamed loads an in-memory spec under a filename, so element
+// origins carry that file (as composed/multi-file loads do).
+func loadWithOriginNamed(t *testing.T, name, data string) *openapi3.T {
+	t.Helper()
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	doc, err := loader.LoadFromDataWithPath([]byte(data), &url.URL{Path: name})
+	require.NoError(t, err)
+	return doc
+}
+
+const dupUsersSpec = `openapi: 3.0.0
+info: { title: users, version: "1" }
+paths:
+  /users:
+    get:
+      responses:
+        "200": { description: ok }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: integer }
+`
+
+const dupPetsBase = `openapi: 3.0.0
+info: { title: pets, version: "1" }
+paths:
+  /pets:
+    get:
+      responses:
+        "200": { description: ok }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: string }
+`
+
+const dupPetsRev = `openapi: 3.0.0
+info: { title: pets, version: "1" }
+paths:
+  /pets:
+    get:
+      responses:
+        "200": { description: ok }
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        code: { type: boolean }
+`
+
+// Composed specs can define the same component name in several files. The
+// change must slice the file it actually lives in (not whichever file the key
+// map happened to keep), and the card key is qualified by filename so blocks
+// from different files stay separate.
+func TestExtract_ComposedDuplicateComponentName(t *testing.T) {
+	usersBase := loadWithOriginNamed(t, "users.yaml", dupUsersSpec)
+	usersRev := loadWithOriginNamed(t, "users.yaml", dupUsersSpec)
+	petsBase := loadWithOriginNamed(t, "pets.yaml", dupPetsBase)
+	petsRev := loadWithOriginNamed(t, "pets.yaml", dupPetsRev)
+
+	// The change is inside pets.yaml's Error schema on both sides.
+	baseSpan := buildIndex(petsBase).byKey["components/schemas/Error"][0]
+	revSpan := buildIndex(petsRev).byKey["components/schemas/Error"][0]
+	c := checker.ApiChange{
+		Id:        "response-property-type-changed",
+		Operation: "GET",
+		Path:      "/pets",
+		CommonChange: checker.CommonChange{
+			BaseSource:     &checker.Source{File: "pets.yaml", Line: baseSpan.end},
+			RevisionSource: &checker.Source{File: "pets.yaml", Line: revSpan.end},
+		},
+	}
+
+	blocks := Extract(checker.Changes{c},
+		docs(usersBase, petsBase), docs(usersRev, petsRev),
+		map[string]string{"users.yaml": dupUsersSpec, "pets.yaml": dupPetsBase},
+		map[string]string{"users.yaml": dupUsersSpec, "pets.yaml": dupPetsRev})
+	require.Len(t, blocks, 1)
+	b := blocks[0]
+
+	require.Equal(t, "pets.yaml: components/schemas/Error", b.Key, "the card key is qualified by file")
+	require.Equal(t, "pets.yaml", b.BaseFile)
+	require.Equal(t, "pets.yaml", b.RevFile)
+	require.Contains(t, b.BaseText, "string", "sliced from pets.yaml's Error, not users.yaml's")
+	require.Contains(t, b.RevText, "boolean")
+	require.NotContains(t, b.BaseText, "integer", "users.yaml's Error must not leak into the slice")
+	require.NotContains(t, b.RevText, "integer")
+}
+
+// A git-revision span file keeps its "<rev>:" prefix while checker sources are
+// display paths with the prefix stripped; matching must accept both forms.
+func TestSmallestContaining_GitRevisionPrefixedFile(t *testing.T) {
+	idx := docIndex{spans: []span{{key: "GET /users", title: "GET /users", file: "HEAD:api/openapi.yaml", start: 10, end: 20}}}
+
+	s, ok := idx.smallestContaining("api/openapi.yaml", 12)
+	require.True(t, ok, "a display-path source must match its rev-prefixed span")
+	require.Equal(t, "GET /users", s.key)
+
+	_, ok = idx.smallestContaining("other/openapi.yaml", 12)
+	require.False(t, ok, "a different file must not match")
+}
+
+// Origins under git loads carry a "./" prefix that capture keys don't.
+func TestTextFor_DotSlashOriginPrefix(t *testing.T) {
+	texts := map[string]string{"HEAD:api.yaml": "x"}
+	require.Equal(t, "x", textFor(texts, "./HEAD:api.yaml"))
+	require.Equal(t, "x", textFor(texts, "HEAD:api.yaml"))
+	require.Empty(t, textFor(texts, "other.yaml"))
 }

@@ -541,3 +541,64 @@ paths:
 	var extErr *load.ExternalRefError
 	require.ErrorAs(t, err, &extErr)
 }
+
+// TestLoadInfo_GitRevisionCapture verifies that NewSpecInfoWithCapture records
+// the git-loaded root document's text (the root is loaded from bytes, not
+// through ReadFromURIFunc, so it needs an explicit record) and each $ref'd
+// file's, keyed to match element origins so the review bundle can slice them.
+func TestLoadInfo_GitRevisionCapture(t *testing.T) {
+	dir := t.TempDir()
+
+	run := func(args ...string) {
+		t.Helper()
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
+	}
+
+	run("git", "init")
+	run("git", "config", "user.email", "test@test.com")
+	run("git", "config", "user.name", "Test")
+
+	require.NoError(t, os.MkdirAll(filepath.Join(dir, "schemas"), 0755))
+
+	topLevel := `openapi: "3.0.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/pet.yaml"
+`
+	petSchema := `type: object
+properties:
+  id:
+    type: integer
+`
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(topLevel), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "schemas", "pet.yaml"), []byte(petSchema), 0644))
+	run("git", "add", ".")
+	run("git", "commit", "-m", "add multi-file spec")
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(dir))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	specInfo, err := load.NewSpecInfoWithCapture(loader, load.NewSource("HEAD:openapi.yaml"))
+	require.NoError(t, err)
+
+	require.Equal(t, topLevel, specInfo.Sources["HEAD:openapi.yaml"], "the root document's text must be captured")
+	require.Equal(t, petSchema, specInfo.Sources["HEAD:schemas/pet.yaml"], "each $ref'd file's text must be captured")
+}

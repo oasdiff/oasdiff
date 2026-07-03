@@ -3,6 +3,7 @@ package load
 import (
 	"net/url"
 	"path/filepath"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -24,6 +25,11 @@ func (c *sourceCapture) record(key string, data []byte) {
 	if c == nil {
 		return
 	}
+	// Origins may carry a "./" prefix on the same path (net/url prepends it
+	// when a relative path's first segment contains a colon, as git
+	// "<rev>:<path>" refs do); store under the normalized form and consumers
+	// normalize their lookups the same way.
+	key = strings.TrimPrefix(key, "./")
 	if _, seen := c.files[key]; !seen {
 		c.files[key] = append([]byte(nil), data...)
 	}
