@@ -3107,3 +3107,152 @@ func TestMerge_Cycle_ItemsTwoDistinctNodes(t *testing.T) {
 	require.NotNil(t, merged.Items)
 	require.Same(t, merged, merged.Items.Value)
 }
+
+// A 3.1 multi-type array in a single allOf branch is a union within one
+// schema, not a conflict between schemas, and passes through unchanged
+// (https://github.com/oasdiff/oasdiff/issues/1078).
+func TestMerge_MultiType_SingleBranch(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							Properties: openapi3.Schemas{
+								"fromDate": &openapi3.SchemaRef{
+									Value: &openapi3.Schema{
+										Type: &openapi3.Types{"string"},
+									},
+								},
+							},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							Properties: openapi3.Schemas{
+								"nullablePrimitive": &openapi3.SchemaRef{
+									Value: &openapi3.Schema{
+										Type: &openapi3.Types{"integer", "null"},
+									},
+								},
+							},
+						},
+					},
+				},
+			}})
+	require.NoError(t, err)
+	require.Equal(t, &openapi3.Types{"integer", "null"}, merged.Properties["nullablePrimitive"].Value.Type)
+}
+
+// Identical multi-type arrays across allOf branches merge to the same array.
+func TestMerge_MultiType_IdenticalSets(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"string", "null"},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"string", "null"},
+						},
+					},
+				},
+			}})
+	require.NoError(t, err)
+	require.Equal(t, &openapi3.Types{"string", "null"}, merged.Type)
+}
+
+// The merged type array is the intersection of the branches' arrays: a value
+// is valid under allOf only if every branch permits its type.
+func TestMerge_MultiType_Intersection(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"integer", "null"},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"integer"},
+						},
+					},
+				},
+			}})
+	require.NoError(t, err)
+	require.Equal(t, &openapi3.Types{"integer"}, merged.Type)
+}
+
+// integer is a subset of number, so numeric members intersect to integer.
+func TestMerge_MultiType_NumericIntersection(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"number", "null"},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"integer", "null"},
+						},
+					},
+				},
+			}})
+	require.NoError(t, err)
+	require.Equal(t, &openapi3.Types{"integer", "null"}, merged.Type)
+}
+
+// Disjoint type arrays are a genuine conflict: no value can satisfy both.
+func TestMerge_MultiType_EmptyIntersection(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"string", "null"},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"integer"},
+						},
+					},
+				},
+			}})
+	require.EqualError(t, err, allof.TypeErrorMessage)
+}
+
+// A branch that redundantly lists both number and integer (integer is a
+// subset of number) must not narrow number in the other branch to integer.
+func TestMerge_MultiType_RedundantNumericSet(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"number"},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"number", "integer"},
+						},
+					},
+				},
+			}})
+	require.NoError(t, err)
+	require.Equal(t, &openapi3.Types{"number"}, merged.Type)
+}
