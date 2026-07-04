@@ -27,9 +27,9 @@ type Payload struct {
 	Blocks           []Block         `json:"blocks,omitempty" yaml:"blocks,omitempty"`
 }
 
-// Change is one manifest entry sent alongside the encrypted bundle on the
-// authenticated (Pro) path: a change's fingerprint (see
-// formatters.ComputeFingerprint) and its level.
+// Change is one manifest entry sent alongside the encrypted bundle in
+// cleartext: a change's fingerprint (see formatters.ComputeFingerprint) and
+// its level, so a server can track per-change state without reading the bundle.
 type Change struct {
 	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
 	Level       int    `json:"level" yaml:"level"`
