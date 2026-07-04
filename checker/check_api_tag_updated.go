@@ -21,13 +21,13 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 		}
 
 		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			op := pathItem.Base.GetOperation(operation)
-
 			if operationItem.TagsDiff == nil {
 				continue
 			}
 
-			baseSource, revisionSource := operationFieldSources(operationsSources, operationItem, "tags")
+			baseOp := pathItem.Base.GetOperation(operation)
+			revisionOp := pathItem.Revision.GetOperation(operation)
+			fieldBase, fieldRevision := operationFieldSources(operationsSources, operationItem, "tags")
 
 			for _, tag := range operationItem.TagsDiff.Deleted {
 				result = append(result, NewApiChange(
@@ -36,10 +36,10 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					[]any{tag},
 					"",
 					operationsSources,
-					op,
+					baseOp,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				).WithSources(sequenceItemSource(operationsSources, baseOp, "tags", tag, fieldBase), nil))
 			}
 
 			for _, tag := range operationItem.TagsDiff.Added {
@@ -49,10 +49,10 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					[]any{tag},
 					"",
 					operationsSources,
-					op,
+					baseOp,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				).WithSources(nil, sequenceItemSource(operationsSources, revisionOp, "tags", tag, fieldRevision)))
 			}
 		}
 	}

@@ -113,6 +113,17 @@ func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, ope
 	return nil
 }
 
+// sequenceItemSource is NewSourceFromSequenceItem with a fallback: the item's
+// location, or fallback when op or the item's origin is missing.
+func sequenceItemSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, field, value string, fallback *Source) *Source {
+	if op != nil {
+		if s := NewSourceFromSequenceItem(operationsSources, op, op.Origin, field, value); s != nil {
+			return s
+		}
+	}
+	return fallback
+}
+
 // operationFieldSources returns source locations from a specific field within operation Origins.
 // Falls back to operation-level sources when the field is not found in origin data.
 func operationFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {

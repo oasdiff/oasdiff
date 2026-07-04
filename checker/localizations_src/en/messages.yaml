@@ -170,8 +170,10 @@ request-property-min-set-comment: This is a warning because the restriction is s
 request-property-removed: removed the request property %s
 request-body-type-changed: the request's body %s changed from %s to %s
 request-body-type-generalized: the request's body %s was widened from %s to %s
+request-body-type-compatible: the request's body %s changed from %s to %s (backward compatible)
 request-property-type-changed: the %s request property %s changed from %s to %s
 request-property-type-generalized: the %s request property %s was widened from %s to %s
+request-property-type-compatible: the %s request property %s changed from %s to %s (backward compatible)
 request-property-x-extensible-enum-value-removed: removed the x-extensible-enum value %s of the request property %s
 response-header-became-optional: the response header %s became optional for the status %s
 required-response-header-removed: the mandatory response header %s removed for the status %s
@@ -452,6 +454,7 @@ response-body-wrapped-in-one-of-description: "response body wrapped in a oneOf"
 request-body-one-of-removed-description: sub-schema deleted from oneOf in request body
 request-body-type-changed-description: request body type changed
 request-body-type-generalized-description: request body type generalized
+request-body-type-compatible-description: request body type changed but backward compatible
 request-header-property-became-enum-description: request header property restricted to enum
 request-header-property-became-required-description: request header property became required
 request-optional-property-became-not-read-only-description: request optional property became not read-only
@@ -545,6 +548,7 @@ request-property-pattern-removed-description: request property pattern unset
 request-property-removed-description: request property removed
 request-property-type-changed-description: request property type changed
 request-property-type-generalized-description: request property type generalized
+request-property-type-compatible-description: request property type changed but backward compatible
 request-property-x-extensible-enum-value-removed-description: request property x-extensible-enum value removed
 request-required-property-became-not-read-only-description: request required property became not read-only
 request-required-property-became-not-write-only-description: request required property became not write-only
@@ -1024,9 +1028,14 @@ response-body-media-type-schema-added-description: response media-type schema ad
 response-body-media-type-schema-removed-description: response media-type schema removed
 response-body-type-generalized: the response's body %s was widened from %s to %s for status %s
 response-body-type-specialized: the response's body %s was narrowed from %s to %s for status %s
+response-body-type-compatible: the response's body %s changed from %s to %s for status %s (backward compatible)
+type-change-loosely-typed-comment: "This change is backward compatible because the media type is not strongly typed (for example XML), where any value can be represented as text, so the type is not enforced on the wire. Under a strongly typed media type such as JSON the same change would be breaking."
 response-property-type-generalized: the %s response's property %s was widened from %s to %s for status %s
 response-property-type-specialized: the %s response's property %s was narrowed from %s to %s for status %s
+response-property-type-compatible: the %s response's property %s changed from %s to %s for status %s (backward compatible)
 response-body-type-generalized-description: response body type generalized
 response-body-type-specialized-description: response body type specialized
+response-body-type-compatible-description: response body type changed but backward compatible
 response-property-type-generalized-description: response property type generalized
 response-property-type-specialized-description: response property type specialized
+response-property-type-compatible-description: response property type changed but backward compatible
