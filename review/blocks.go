@@ -28,16 +28,16 @@ func fileBase(f string) string {
 // single "Other changes" key with no source slice.
 const otherChangesKey = "__other__"
 
-// Block is one review card: the source-text slice of a structural block on each
-// side, plus the ids of the changes that fall inside it. Empty BaseText/RevText
-// means that side has no sliceable source (e.g. an added or removed block, or a
+// Block is one extracted structural block: its source-text slice on each side,
+// plus the ids of the changes that fall inside it. Empty BaseText/RevText means
+// that side has no sliceable source (e.g. an added or removed block, or a
 // location that did not resolve to a block).
 type Block struct {
 	Key          string   `json:"key"`          // stable identity, e.g. "POST /users" or "components/schemas/User"
 	Title        string   `json:"title"`        // human header
 	ChangeIDs    []string `json:"change_ids"`   // rule ids of the changes in this block (for display/debug)
 	Fingerprints []string `json:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the
-	// stable key the review page joins each change to its card on
+	// stable key a consumer joins each change to its block on
 	BaseFile      string `json:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
 	BaseText      string `json:"base_text"`           // source slice on the base side ("" if absent)
 	BaseLineStart int    `json:"base_line_start"`     // 1-based first line of BaseText in the base spec
@@ -98,7 +98,7 @@ func textFor(texts map[string]string, file string) string {
 	return texts[strings.TrimPrefix(file, "./")]
 }
 
-// resolution is a change's block assignment: its card key/title and the exact
+// resolution is a change's block assignment: its key/title and the exact
 // span to slice on each side (nil = no slice on that side).
 type resolution struct {
 	key, title string
@@ -137,7 +137,7 @@ func matchSpan(idx docIndex, src *checker.Source) *span {
 	return nil
 }
 
-// newResolution qualifies the card key with its filename when the same key
+// newResolution qualifies the block key with its filename when the same key
 // exists in more than one file (composed), keeping each file's block separate.
 func newResolution(key string, base, rev *span, baseIdx, revIdx docIndex) resolution {
 	display := key
