@@ -1,8 +1,7 @@
 
 [![CI](https://github.com/oasdiff/oasdiff/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/oasdiff/oasdiff/actions)
 [![codecov](https://codecov.io/gh/oasdiff/oasdiff/branch/main/graph/badge.svg?token=Y8BM6X77JY)](https://codecov.io/gh/oasdiff/oasdiff)
-[![Go Report Card](https://goreportcard.com/badge/github.com/oasdiff/oasdiff)](https://goreportcard.com/report/github.com/oasdiff/oasdiff)
-[![GoDoc](https://godoc.org/github.com/oasdiff/oasdiff?status.svg)](https://godoc.org/github.com/oasdiff/oasdiff)
+[![Go Reference](https://pkg.go.dev/badge/github.com/oasdiff/oasdiff.svg)](https://pkg.go.dev/github.com/oasdiff/oasdiff)
 [![Docker Image Version](https://img.shields.io/docker/v/tufin/oasdiff?sort=semver)](https://hub.docker.com/r/tufin/oasdiff/tags)
 
 ![oasdiff banner](https://github.com/yonatanmgr/oasdiff/assets/31913495/ac9b154e-72d1-4969-bc3b-f527bbe7751d)
