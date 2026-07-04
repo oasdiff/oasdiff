@@ -63,7 +63,7 @@ func oasdiffAPIBaseURL() string {
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
 func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, baseSpecs, revSpecs []*load.SpecInfo, diffEmpty bool) error {
-	// A composed diff has no single spec: the cards carry it, the full-spec
+	// A composed diff has no single spec: the blocks carry it, the full-spec
 	// fields stay empty, and each side is labelled "composed".
 	var baseSpec, revSpec, baseName, revName string
 	if flags.getComposed() {

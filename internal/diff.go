@@ -105,7 +105,7 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	// --open slices review cards from source text: capture every contributing
+	// --open slices review blocks from source text: capture every contributing
 	// file (root + $ref'd); ordinary runs load without the recorder.
 	newSpecInfo := load.NewSpecInfo
 	if flags.getOpen() {
