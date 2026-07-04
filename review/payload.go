@@ -8,15 +8,15 @@ import (
 )
 
 // Payload is the cleartext review bundle and the single source of truth for
-// its wire shape: a decryptor on the rendering side mirrors these json tags.
+// its wire shape: a decryptor on the receiving side mirrors these json tags.
 // Encrypt seals it with a fresh key and only the ciphertext is uploaded, so
 // the server receives a blob it cannot read.
 //
 // BaseSpec/RevisionSpec hold each spec's bytes verbatim (YAML stays YAML text);
 // this JSON object is only the envelope. Changes is the changelog the caller
 // already computed, embedded raw: the server can't recompute what it can't
-// read. Blocks is the per-change slices a UI renders instead of the full spec
-// (see Extract); when empty the renderer falls back to the full spec.
+// read. Blocks is the per-change structural slices (see Extract); consumers
+// that find it empty have only the full specs to work from.
 type Payload struct {
 	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
 	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
@@ -37,7 +37,7 @@ type Change struct {
 
 // Manifest builds the {fingerprint, level} manifest. Fingerprints are computed
 // as the JSON formatter does, so they match the ones in the encrypted changelog
-// the page renders and the fingerprints carried on each Block.
+// the bundle carries and the fingerprints on each Block.
 func Manifest(changes checker.Changes) []Change {
 	manifest := make([]Change, 0, len(changes))
 	for _, change := range changes {

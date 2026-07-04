@@ -238,7 +238,7 @@ components:
 // leaves the change with no source line, since the merged schema is a new
 // construct. The change must still card onto the operation it names (the
 // fallback), and the slice must be the real operation block whose origin
-// survives the flatten. This is the path the review page runs.
+// survives the flatten.
 func TestExtract_FlattenedAllOfFallsBackToOperation(t *testing.T) {
 	loader := openapi3.NewLoader()
 	loader.IncludeOrigin = true

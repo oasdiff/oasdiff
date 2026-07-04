@@ -4,20 +4,18 @@ changelog, and the per-change structural blocks of the specs.
 
 It is the single source of truth for the bundle's on-the-wire shape (Payload),
 its encryption (Encrypt), and the per-change fingerprint manifest (Manifest); a
-decryptor on the rendering side mirrors the same layout.
+decryptor on the receiving side mirrors the same layout.
 
 The bundle is zero-knowledge by construction: Encrypt seals the Payload with a
 fresh AES-256-GCM key and returns the ciphertext and the key separately. The
 caller uploads only the ciphertext and keeps the key out of band, so the server
 receives a blob it cannot read. This package makes no assumption about where the
-bundle is uploaded or rendered; that is the caller's concern.
+bundle is uploaded or consumed; that is the caller's concern.
 
-# Blocks: render only what changed
+# Blocks: each change with its source context
 
-Rendering both specs in full is unusable for a large spec (a web UI commits ~1M
-DOM nodes for 250k lines). Extract slices the spec into just the structural
-blocks that changed, so a UI can render only what changed while keeping each
-change in context:
+Extract slices the specs into just the structural blocks that contain changes,
+so each change carries its enclosing source text without the full specs:
 
 	blocks := review.Extract(changes, baseDocs, revDocs, baseTexts, revTexts)
 
@@ -62,10 +60,10 @@ same-named blocks by file. Known gaps:
     isn't sliced from that file. Uncommon in idiomatic OpenAPI 3; needs an
     upstream kin fix.
   - Because blocks are keyed off the changelog, a block whose only change has no
-    changelog entry (e.g. a description-only edit) is not shown; that
+    changelog entry (e.g. a description-only edit) is not extracted; that
     schema-shape completeness is a later phase.
 
-Within a shown block the slice is the raw text diff, so unflagged changed lines
-are still visible.
+A block's slice is raw source text, so changed lines within it that have no
+changelog entry are still present.
 */
 package review
