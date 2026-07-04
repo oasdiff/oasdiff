@@ -15,8 +15,8 @@ import (
 // BaseSpec/RevisionSpec hold each spec's bytes verbatim (YAML stays YAML text);
 // this JSON object is only the envelope. Changes is the changelog the caller
 // already computed, embedded raw: the server can't recompute what it can't
-// read. Blocks is the per-change structural slices (see Extract); consumers
-// that find it empty have only the full specs to work from.
+// read. Blocks is the per-change structural slices (see Extract); empty when
+// the changelog is empty, since every change resolves to some block.
 type Payload struct {
 	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
 	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
