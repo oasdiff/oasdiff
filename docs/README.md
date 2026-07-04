@@ -21,7 +21,7 @@ docker run --rm -t tufin/oasdiff changelog \
   https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test5.yaml
 ```
 
-That prints a human-readable changelog of every significant change between the two specs. Swap `changelog` for `breaking` to see only breaking changes, or `diff` for the full machine-readable diff.
+That prints a human-readable changelog of the changes that can affect API consumers, breaking and non-breaking. Swap `changelog` for `breaking` to see only the changes that break existing API clients, or `diff` for the full machine-readable diff of the API definition, including documentation-only edits.
 
 ## Installation
 
@@ -63,10 +63,10 @@ Grouped by what you're trying to do. New to oasdiff? Start with **Commands**.
 ### Commands
 The top-level subcommands.
 
-- [`diff`](DIFF.md) — full diff between two OpenAPI specs (output: html, json, markdown, markup, text, or yaml — default yaml)
+- [`diff`](DIFF.md) — full diff of the API definition, including documentation-only edits (output: html, json, markdown, markup, text, or yaml — default yaml)
 - [`summary`](DIFF.md) — high-level count of changes between two specs (built on the diff engine; same shared options)
-- [`breaking`](BREAKING-CHANGES.md) — only breaking changes
-- [`changelog`](BREAKING-CHANGES.md) — every significant change, breaking or not, in human-readable form
+- [`breaking`](BREAKING-CHANGES.md) — only the changes that break existing API clients
+- [`changelog`](BREAKING-CHANGES.md) — changes that can affect API consumers, breaking or not, in human-readable form
 - [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
 - [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade) — canonicalize an OpenAPI 3.0 spec to the latest 3.x
 - [`validate`](VALIDATE.md) — check a single spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)

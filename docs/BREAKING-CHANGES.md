@@ -1,7 +1,7 @@
 # Breaking Changes and Changelog
 As your API evolves, it undergoes changes. Some of these changes may be "breaking" while others are not.  
-The `oasdiff breaking` command displays the breaking changes between OpenAPI specifications.  
-The `oasdiff changelog` command displays all significant changes between OpenAPI specifications, including breaking and non-breaking changes.  
+The `oasdiff breaking` command displays the changes that break existing API clients.  
+The `oasdiff changelog` command displays the changes that can affect API consumers, both breaking and non-breaking. Documentation-only edits, such as descriptions and examples, are not included; use `oasdiff diff` to see every difference in the API definition.  
 These commands are typically used in the CI to report or prevent breaking changes.
 
 > **Note:** `breaking` and `changelog` run on the diff engine described in [DIFF.md](DIFF.md). The flags and concepts there — extension tracking, path matching, `allOf` flattening, the path-prefix family, header case, `--allow-external-refs`, `--fail-on-diff` — apply here too, in addition to the breaking-specific options below.
