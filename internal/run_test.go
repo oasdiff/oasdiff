@@ -21,6 +21,11 @@ func cmdToArgs(cmd string) []string {
 }
 
 func TestMain(m *testing.M) {
+	// No test may reach production by default: --open uploads go to these URLs
+	// when a test forgets to stub them (it happened). Tests with a stub server
+	// override per-test via t.Setenv.
+	os.Setenv("OASDIFF_URL", "http://127.0.0.1:0")
+	os.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
 	code := m.Run()
 	os.Exit(code)
 }
@@ -46,10 +51,11 @@ func Test_InvalidFlag(t *testing.T) {
 func Test_OpenWithComposedAllowed(t *testing.T) {
 	// A composed diff (-c) can now be reviewed with --open: the cards carry the
 	// composed comparison, so composed no longer conflicts with --open. Point the
-	// upload at a non-connectable API so no real network call happens; --open
-	// upload errors are additive (non-fatal), so the exit code is the changelog
-	// result (0 for identical specs), never the 100 arg-validation code.
-	t.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
+	// free upload (OASDIFF_URL, not the authenticated OASDIFF_API_URL) at a
+	// non-connectable address so no real network call happens; --open upload
+	// errors are additive (non-fatal), so the exit code is the changelog result
+	// (0 for identical specs), never the 100 arg-validation code.
+	t.Setenv("OASDIFF_URL", "http://127.0.0.1:0")
 	for _, cmd := range []string{
 		"oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test1.yaml --composed --open",
 		"oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test1.yaml -c --open",
