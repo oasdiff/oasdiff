@@ -12,7 +12,7 @@ import (
 )
 
 // fileBase is the display filename for a block's source file: the basename,
-// with any git "<rev>:" prefix stripped. Empty for an in-memory spec (no file).
+// with any git "<rev>:" prefix stripped.
 func fileBase(f string) string {
 	if f == "" {
 		return ""
@@ -47,12 +47,10 @@ type Block struct {
 }
 
 // Extract groups changes by their enclosing structural block and slices each
-// block's text from the base and revision specs. Order follows first appearance
-// in changes. The specs must be loaded with IncludeOrigin so end-positions are
-// available. baseTexts/revTexts map each contributing file's path (as reported
-// on element origins) to its raw source; for a single-file spec that's one
-// entry. A block is sliced from the file it lives in, so a $ref'd-from-another-
-// file block is sliced from that file (see load.NewSpecInfoWithCapture).
+// block's text, ordered by first appearance. The docs must be loaded with
+// IncludeOrigin (end positions). baseTexts/revTexts map each contributing
+// file's path, as reported on element origins, to its raw source (see
+// load.NewSpecInfoWithCapture), so a block slices from the file it lives in.
 func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts, revTexts map[string]string) []Block {
 	baseIdx := buildIndex(baseDocs...)
 	revIdx := buildIndex(revDocs...)
@@ -90,10 +88,9 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 	return out
 }
 
-// textFor returns the captured text for a span's origin file. Capture keys are
-// normalized without a leading "./" (see load's sourceCapture); origins may
-// carry one (net/url prepends it when a relative path's first segment contains
-// a colon, as git "<rev>:<path>" refs do).
+// textFor looks up a span's origin file in the captured texts. Capture keys
+// have no leading "./"; origins may carry one (net/url prepends it when a
+// relative path's first segment contains a colon, as git refs do).
 func textFor(texts map[string]string, file string) string {
 	if t, ok := texts[file]; ok {
 		return t
@@ -108,14 +105,11 @@ type resolution struct {
 	base, rev  *span
 }
 
-// resolve decides which block a change belongs to. Primary signal: the
-// change's source line matched against the smallest enclosing block, on the
-// revision side (current state) first, then the base side (deletions). This
-// follows $refs. The matched span is carried through to slicing, so a key that
-// exists in several files (composed specs) slices the file the change is
-// actually in; the other side resolves the same key within its own index.
-// Fallback when no source line resolves: the (operation, path) key, then the
-// rule Area (top-level changes), then "Other changes".
+// resolve decides which block a change belongs to: the smallest block
+// containing its source line (revision side first, then base), which follows
+// $refs. The matched span is carried through to slicing so a key existing in
+// several files (composed) slices the file the change is in. Fallback when no
+// source line resolves: (operation, path), then the rule Area, then "Other".
 func resolve(c checker.Change, baseIdx, revIdx docIndex) resolution {
 	baseSrc, revSrc := changeSources(c)
 	revSpan := matchSpan(revIdx, revSrc)
@@ -133,8 +127,6 @@ func resolve(c checker.Change, baseIdx, revIdx docIndex) resolution {
 	return resolution{key: key, title: title, base: baseIdx.spanFor(key, ""), rev: revIdx.spanFor(key, "")}
 }
 
-// matchSpan returns the smallest indexed block containing the source line, or
-// nil when the source is absent or no block contains it.
 func matchSpan(idx docIndex, src *checker.Source) *span {
 	if src == nil || src.Line <= 0 {
 		return nil
@@ -145,9 +137,8 @@ func matchSpan(idx docIndex, src *checker.Source) *span {
 	return nil
 }
 
-// newResolution qualifies the card key with its filename when the same logical
-// key exists in more than one file (composed specs can define the same
-// component name), so each file's block stays a separate, correctly-sliced card.
+// newResolution qualifies the card key with its filename when the same key
+// exists in more than one file (composed), keeping each file's block separate.
 func newResolution(key string, base, rev *span, baseIdx, revIdx docIndex) resolution {
 	display := key
 	if len(baseIdx.byKey[key]) > 1 || len(revIdx.byKey[key]) > 1 {
@@ -158,7 +149,6 @@ func newResolution(key string, base, rev *span, baseIdx, revIdx docIndex) resolu
 	return resolution{key: display, title: display, base: base, rev: rev}
 }
 
-// firstFileBase returns the first non-empty display filename among the spans.
 func firstFileBase(spans ...*span) string {
 	for _, s := range spans {
 		if s != nil {
@@ -188,13 +178,9 @@ func fallbackKey(c checker.Change) (key, title string) {
 	return otherChangesKey, "Other changes"
 }
 
-// changeSources returns the change's base and revision source locations, which
-// oasdiff resolves to the changed element (following $refs). Nil when absent or
-// when the change is not the concrete ApiChange.
+// changeSources reads via the Change interface so SecurityChange and
+// ComponentChange resolve to their blocks too, not only ApiChange.
 func changeSources(c checker.Change) (base, rev *checker.Source) {
-	// The interface carries the sources for every change type (ApiChange,
-	// ComponentChange, SecurityChange all embed CommonChange), so a security or
-	// component change resolves to its block, not just operation changes.
 	return c.GetBaseSource(), c.GetRevisionSource()
 }
 
@@ -227,12 +213,11 @@ type docIndex struct {
 	byKey map[string][]span
 }
 
-// buildIndex enumerates the sliceable structural blocks of one or more docs:
-// every path item, every operation, and every named component schema (all carry
-// Origin). Multiple docs support composed mode (a set of specs diffed as one
-// API); their blocks share one index. Composed paths are disjoint, but
-// component names and top-level sections repeat across specs, so byKey keeps
-// every span and resolution disambiguates by file.
+// buildIndex enumerates the sliceable structural blocks of one or more docs
+// (composed mode shares one index): path items, operations, and named
+// components, all of which carry Origin. Component names and top-level
+// sections repeat across composed specs, so byKey keeps every span and
+// resolution disambiguates by file.
 func buildIndex(docs ...*openapi3.T) docIndex {
 	idx := docIndex{byKey: map[string][]span{}}
 	add := func(key, title string, o *openapi3.Origin) {
@@ -301,18 +286,15 @@ func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *opena
 	indexExternalSchemas(idx, doc)
 }
 
-// indexExternalSchemas indexes schemas $ref'd from another file. They live at
+// indexExternalSchemas indexes schemas $ref'd from another file: they live at
 // the usage site (not in this doc's Components) and carry the external file's
-// origin, so a change inside one is keyed to that block and sliced from that
-// file. Keyed by the ref (stable across base/revision and deduped across the N
-// operations that share it).
+// origin. Keyed by the ref, stable across sides and deduped across operations.
 func indexExternalSchemas(idx *docIndex, doc *openapi3.T) {
 	_ = doc.WalkSchemas(func(_ string, sr *openapi3.SchemaRef) error {
 		if sr == nil || sr.Value == nil {
 			return nil
 		}
-		// A non-empty part before "#" means the ref points at another file
-		// (internal "#/..." refs have none and are already indexed).
+		// a non-empty part before "#" = another file; internal "#/..." refs are already indexed
 		if before, _, _ := strings.Cut(sr.Ref, "#"); before == "" {
 			return nil
 		}
@@ -329,13 +311,10 @@ func indexExternalSchemas(idx *docIndex, doc *openapi3.T) {
 	})
 }
 
-// addTopLevelSections indexes the document-level sections (info / servers /
-// tags / security). Each spans from its key line to just before the next
-// top-level key, derived from the document origin's field locations. This is
-// key-line based on purpose: it works uniformly even for `security`, whose
-// items are bare maps (SecurityRequirement) with no origin of their own, where
-// per-element spans (as used for operations and component schemas) aren't
-// available.
+// addTopLevelSections indexes info/servers/tags/security, each spanning from
+// its key line to just before the next top-level key. Key-line based on
+// purpose: security items are bare maps with no origin of their own, so
+// per-element spans aren't available.
 func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 	if doc.Origin == nil {
 		return
@@ -350,7 +329,7 @@ func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 	sectionEnd := func(start int) int {
 		for _, l := range keyLines {
 			if l > start {
-				return l - 1 // up to just before the next top-level key
+				return l - 1
 			}
 		}
 		return math.MaxInt // last section: to EOF (sliceLines clamps)
@@ -364,10 +343,9 @@ func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 	}
 }
 
-// smallestContaining returns the span in file containing line whose extent is
-// smallest (the most specific enclosing block), and whether one was found.
-// Matching on file is what keeps multi-file specs correct: line numbers are not
-// unique across files.
+// smallestContaining returns the most specific block in file containing line.
+// Matching on file keeps multi-file specs correct: line numbers are not unique
+// across files.
 func (idx docIndex) smallestContaining(file string, line int) (span, bool) {
 	best := span{}
 	bestSize := math.MaxInt
@@ -382,9 +360,8 @@ func (idx docIndex) smallestContaining(file string, line int) (span, bool) {
 	return best, found
 }
 
-// fileMatches reports whether a span's origin file refers to the change's
-// source file. Origin files keep a git "<rev>:" prefix; checker sources are
-// display paths with the prefix stripped, so accept both forms.
+// fileMatches accepts both forms of the same file: origin files keep a git
+// "<rev>:" prefix, checker sources are display paths with it stripped.
 func fileMatches(spanFile, srcFile string) bool {
 	return spanFile == srcFile || strings.HasSuffix(spanFile, ":"+srcFile)
 }
@@ -400,7 +377,7 @@ func originEndRange(o *openapi3.Origin) (start, end int, ok bool) {
 }
 
 // sliceLines returns lines [start, end] (1-based, inclusive) of text, clamped
-// to its bounds. Returns "" for an out-of-range or inverted span.
+// to its bounds; "" for an invalid span.
 func sliceLines(text string, start, end int) string {
 	if start < 1 || end < start {
 		return ""

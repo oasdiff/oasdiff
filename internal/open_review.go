@@ -63,9 +63,8 @@ func oasdiffAPIBaseURL() string {
 // opaque blob it cannot read and never needs to know who the visitor is. The
 // decryption key lives only in the URL fragment on the visitor's machine.
 func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, baseSpecs, revSpecs []*load.SpecInfo, diffEmpty bool) error {
-	// A composed diff (-c) has no single spec; the cards carry it, so the
-	// full-spec fields stay empty and each side is labelled "composed". A normal
-	// diff reads the two files for the full side-by-side fallback.
+	// A composed diff has no single spec: the cards carry it, the full-spec
+	// fields stay empty, and each side is labelled "composed".
 	var baseSpec, revSpec, baseName, revName string
 	if flags.getComposed() {
 		baseName, revName = "composed", "composed"
@@ -92,10 +91,9 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		mode = "breaking"
 	}
 
-	// Slice the block each change lives in, from the set of specs (one for a
-	// normal diff, N for composed). The texts come from each spec's captured
-	// Sources (populated on --open), so a $ref'd-from-another-file block slices
-	// from the right file.
+	// Slice each change's block from the spec set (one doc normally, N
+	// composed); texts come from the captured Sources, so a cross-file block
+	// slices from the right file.
 	baseDocs, baseTexts := specSetDocsAndSources(baseSpecs)
 	revDocs, revTexts := specSetDocsAndSources(revSpecs)
 	blocks := review.Extract(errs, baseDocs, revDocs, baseTexts, revTexts)
@@ -162,8 +160,7 @@ func renderChangelogJSON(flags *Flags, errs checker.Changes, baseVersion, revVer
 }
 
 // specSetVersion is the version reported for a side's spec set: the first
-// spec's version (a normal diff has exactly one; a composed diff reports the
-// first matched spec). "n/a" when the set is empty (e.g. the review-only tests).
+// spec's (a composed diff reports the first matched spec); "n/a" when empty.
 func specSetVersion(specs []*load.SpecInfo) string {
 	if len(specs) > 0 && specs[0] != nil {
 		return specs[0].GetVersion()

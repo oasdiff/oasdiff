@@ -488,10 +488,8 @@ components:
         code: { type: boolean }
 `
 
-// Composed specs can define the same component name in several files. The
-// change must slice the file it actually lives in (not whichever file the key
-// map happened to keep), and the card key is qualified by filename so blocks
-// from different files stay separate.
+// Composed specs can define the same component name in several files: the
+// change slices the file it lives in and the card key is qualified by filename.
 func TestExtract_ComposedDuplicateComponentName(t *testing.T) {
 	usersBase := loadWithOriginNamed(t, "users.yaml", dupUsersSpec)
 	usersRev := loadWithOriginNamed(t, "users.yaml", dupUsersSpec)

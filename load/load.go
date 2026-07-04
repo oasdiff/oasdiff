@@ -27,9 +27,8 @@ func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*ope
 		return loadFromGitRevision(loader, source.Path, source.Fetch, capture)
 	default:
 		if capture != nil {
-			// A loader copy so the recorder doesn't leak onto the caller's
-			// loader; the copy shares the visitedDocuments cache (like the git
-			// path), which is fine.
+			// a copy so the recorder doesn't leak onto the caller's loader;
+			// it shares the visitedDocuments cache, same as the git path
 			lc := *loader
 			lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture)
 			return lc.LoadFromFile(source.Path)
@@ -112,9 +111,8 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool, cap
 	// the loader would return the cached base spec for the revision.
 	if capture != nil {
 		loaderCopy.ReadFromURIFunc = recordingReader(loaderCopy.ReadFromURIFunc, capture)
-		// The root document is loaded from bytes below (LoadFromDataWithPath),
-		// so ReadFromURIFunc never fires for it; record it directly, keyed the
-		// same way the recorder keys $ref'd files.
+		// the root is loaded from bytes below, so ReadFromURIFunc never fires
+		// for it; record it directly, keyed as the recorder keys $ref'd files
 		capture.record(filepath.FromSlash(filepath.ToSlash(gitRef)), out)
 	}
 

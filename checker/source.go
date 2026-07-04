@@ -14,9 +14,9 @@ func displayFilePath(file string) string {
 
 // Source represents the location of a change in an OpenAPI spec file
 type Source struct {
-	File      string `json:"file,omitempty" yaml:"file,omitempty"`         // File path (relative or absolute)
-	Line      int    `json:"line,omitempty" yaml:"line,omitempty"`         // Line number (1-based)
-	Column    int    `json:"column,omitempty" yaml:"column,omitempty"`     // Column number (1-based)
+	File      string `json:"file,omitempty" yaml:"file,omitempty"`           // File path (relative or absolute)
+	Line      int    `json:"line,omitempty" yaml:"line,omitempty"`           // Line number (1-based)
+	Column    int    `json:"column,omitempty" yaml:"column,omitempty"`       // Column number (1-based)
 	EndLine   int    `json:"endLine,omitempty" yaml:"endLine,omitempty"`     // End line (1-based, inclusive); 0 if unknown/single
 	EndColumn int    `json:"endColumn,omitempty" yaml:"endColumn,omitempty"` // End column (1-based); 0 if unknown
 }
@@ -29,10 +29,8 @@ func NewSource(file string, line int, column int) *Source {
 	}
 }
 
-// WithEnd sets the end position (the origin's end span) and returns the
-// receiver, so a multi-line source can be built fluently:
-// NewSource(file, line, col).WithEnd(endLine, endCol). Leave it unset for a
-// single-line or point source.
+// WithEnd sets the origin's end span and returns the receiver, so end-bearing
+// sources keep the NewSource constructor. Unset for a point source.
 func (s *Source) WithEnd(endLine, endColumn int) *Source {
 	s.EndLine = endLine
 	s.EndColumn = endColumn

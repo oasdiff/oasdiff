@@ -14,10 +14,8 @@ type SpecInfo struct {
 	Url     string
 	Spec    *openapi3.T
 	Version string
-	// Sources holds the raw text of every file that contributed to Spec (the
-	// root and each $ref'd file), keyed by the path the loader resolved, when
-	// the spec was loaded via NewSpecInfoWithCapture. Nil otherwise. Used to
-	// slice multi-file specs by origin file.
+	// Sources holds the raw text of every file that contributed to Spec, keyed
+	// by resolved path, when loaded via NewSpecInfoWithCapture; nil otherwise.
 	Sources map[string]string
 }
 
@@ -60,11 +58,9 @@ func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*S
 	return specInfos[0], nil
 }
 
-// NewSpecInfoWithCapture is NewSpecInfo that also records the raw text of every
-// file the loader reads (the root spec and each $ref'd file) into the returned
-// SpecInfo's Sources map, keyed by resolved path. Use it only when those texts
-// are needed (the review bundle, to slice multi-file specs); NewSpecInfo loads
-// without the recorder and leaves Sources nil.
+// NewSpecInfoWithCapture is NewSpecInfo that also records the raw text of
+// every file the loader reads (root and $ref'd) into SpecInfo.Sources, for
+// slicing multi-file specs by origin file (the review bundle).
 func NewSpecInfoWithCapture(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
 	capture := newSourceCapture()
 	specInfo, err := loadSpecInfo(loader, source, capture)
@@ -88,9 +84,7 @@ func NewSpecInfoFromGlob(loader *openapi3.Loader, glob string, options ...Option
 }
 
 // NewSpecInfoFromGlobWithCapture is NewSpecInfoFromGlob that also records each
-// spec's contributing file texts into its SpecInfo.Sources (see
-// NewSpecInfoWithCapture). Used for a composed review, where every matched spec
-// (and its $ref'd files) must be sliceable.
+// spec's contributing file texts into its Sources (see NewSpecInfoWithCapture).
 func NewSpecInfoFromGlobWithCapture(loader *openapi3.Loader, glob string, options ...Option) ([]*SpecInfo, error) {
 	return newSpecInfoFromGlob(loader, glob, true, options...)
 }

@@ -85,9 +85,8 @@ type diffResult struct {
 	diffReport        *diff.Diff
 	operationsSources *diff.OperationsSourcesMap
 	specInfoPair      *load.SpecInfoPair
-	// The spec sets per side (one each for a normal diff, N for composed). The
-	// review bundle slices blocks from these; captured texts are in each
-	// SpecInfo.Sources on the --open path.
+	// The spec sets per side (one for a normal diff, N for composed); on the
+	// --open path each SpecInfo.Sources carries its captured file texts.
 	baseSpecs []*load.SpecInfo
 	revSpecs  []*load.SpecInfo
 }
@@ -106,10 +105,8 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	// --open builds an encrypted side-by-side review whose cards are sliced from
-	// the source text. Capture every contributing file's text (the root and each
-	// $ref'd file) so a multi-file spec slices from the right file; ordinary
-	// runs load without the recorder and pay nothing.
+	// --open slices review cards from source text: capture every contributing
+	// file (root + $ref'd); ordinary runs load without the recorder.
 	newSpecInfo := load.NewSpecInfo
 	if flags.getOpen() {
 		newSpecInfo = load.NewSpecInfoWithCapture

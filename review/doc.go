@@ -19,7 +19,7 @@ DOM nodes for 250k lines). Extract slices the spec into just the structural
 blocks that changed, so a UI can render only what changed while keeping each
 change in context:
 
-	blocks := review.Extract(changes, baseSpec, revisionSpec, baseText, revText)
+	blocks := review.Extract(changes, baseDocs, revDocs, baseTexts, revTexts)
 
 Each Block carries its key/title (e.g. "POST /users" or
 "components/schemas/User"), the ids and fingerprints of the changes inside it,
@@ -46,9 +46,11 @@ just its start. The specs must be loaded with IncludeOrigin = true.
 
 # Status and limitations
 
-Indexed block types are operations, path items, named component schemas, the
-top-level sections (info/servers/tags/security), and schemas $ref'd from another
-file (sliced from that file via the per-file texts Extract takes). Known gaps:
+Indexed block types are operations, path items, named component schemas and
+security schemes, the top-level sections (info/servers/tags/security), and
+schemas $ref'd from another file (sliced from that file via the per-file texts
+Extract takes). Composed mode indexes every spec in the set, disambiguating
+same-named blocks by file. Known gaps:
 
   - Schemas reached through a non-OpenAPI key. Whole-file refs (./User.yaml) and
     refs into a components-structured file (./defs.yaml#/components/schemas/User,

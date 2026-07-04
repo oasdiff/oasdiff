@@ -329,7 +329,7 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 	var body struct {
 		Ciphertext []byte            `json:"ciphertext"`
 		Metadata   map[string]string `json:"metadata"`
-		Changes    []review.Change    `json:"changes"`
+		Changes    []review.Change   `json:"changes"`
 	}
 	require.NoError(t, json.Unmarshal(gotBody, &body))
 	require.NotEmpty(t, body.Ciphertext, "the encrypted bundle must ride in ciphertext")
