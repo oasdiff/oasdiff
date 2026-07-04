@@ -27,11 +27,11 @@ and the block's source-text slice on each side with its starting line.
 
 A change is keyed to the smallest indexed block whose origin span contains its
 source line, not by its (operation, path). This matters for $refs: a change
-inside a $ref'd component is reported under the referencing operation, but its
-source line is in the component, so keying by line follows the $ref and keys it
-to the component. A component change is reported once per referencing endpoint;
-all those reports group onto that component's single block, each keeping its own
-operation and fingerprint, so no report is dropped. When no source line resolves (e.g. a change detected
+inside a $ref'd component carries the referencing operation, but its source
+line is in the component, so keying by line follows the $ref and keys it to
+the component. The changelog holds one such change per referencing endpoint;
+they all group onto that component's single block, each keeping its own
+operation and fingerprint, so none is dropped. When no source line resolves (e.g. a change detected
 after --flatten-allof, whose merged schema has no single location), it falls
 back to the operation it names, then, for a top-level change with no
 operation, the rule's Area (the OpenAPI object the rule concerns, e.g.
