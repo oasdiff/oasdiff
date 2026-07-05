@@ -24,8 +24,8 @@ func TestMain(m *testing.M) {
 	// No test may reach production by default: --open uploads go to these URLs
 	// when a test forgets to stub them (it happened). Tests with a stub server
 	// override per-test via t.Setenv.
-	os.Setenv("OASDIFF_URL", "http://127.0.0.1:0")
-	os.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
+	_ = os.Setenv("OASDIFF_URL", "http://127.0.0.1:0")
+	_ = os.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
 	code := m.Run()
 	os.Exit(code)
 }
