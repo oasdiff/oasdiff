@@ -48,20 +48,20 @@ func oasdiffAPIBaseURL() string {
 }
 
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
-// `breaking --open`): it bundles the two specs and the computed changelog,
-// encrypts the bundle with a fresh key, uploads only the ciphertext to the
-// configured server (oasdiff.com by default; see oasdiffSiteURL), prints the
-// resulting review URL (with the key in its #fragment) to stderr, and opens it
-// in the default browser. The terminal changelog/breaking output has already
-// been printed by the caller; --open is purely additive.
+// `breaking --open`): it bundles the changelog, the per-change blocks, and
+// (for a non-composed diff) the two specs, encrypts the bundle with a fresh
+// key, uploads only the ciphertext to the configured server (oasdiff.com by
+// default; see oasdiffSiteURL), prints the resulting review URL (with the key
+// in its #fragment) to stderr, and opens it in the default browser. The
+// terminal changelog/breaking output has already been printed by the caller;
+// --open is purely additive.
 //
 // The review URL and browser-fallback notice go to stderr, never stdout, so
 // they can't corrupt piped machine-readable output (e.g. changelog
 // --format json --open > out.json). stderr is passed in by the caller.
 //
-// There is no sign-in: the upload is zero-knowledge, so the server stores an
-// opaque blob it cannot read and never needs to know who the visitor is. The
-// decryption key lives only in the URL fragment on the visitor's machine.
+// The upload is anonymous and zero-knowledge: the server receives an opaque
+// blob it cannot read, and the decryption key exists only in the URL fragment.
 func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, baseSpecs, revSpecs []*load.SpecInfo, diffEmpty bool) error {
 	// A composed diff has no single spec: the full-spec and filename fields
 	// stay empty and Payload.Composed marks it (presentation is the consumer's).
