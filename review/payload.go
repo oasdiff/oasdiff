@@ -24,7 +24,11 @@ type Payload struct {
 	RevisionFilename string          `json:"revision_filename" yaml:"revision_filename"`
 	Changes          json.RawMessage `json:"changes" yaml:"changes"`
 	Mode             string          `json:"mode" yaml:"mode"`
-	Blocks           []Block         `json:"blocks,omitempty" yaml:"blocks,omitempty"`
+	// Composed marks a bundle built from a set of specs per side (composed
+	// mode): there is no single spec or filename, so BaseSpec/RevisionSpec and
+	// the filenames are empty and the blocks carry the comparison.
+	Composed bool    `json:"composed,omitempty" yaml:"composed,omitempty"`
+	Blocks   []Block `json:"blocks,omitempty" yaml:"blocks,omitempty"`
 }
 
 // Change is one manifest entry sent alongside the encrypted bundle in
