@@ -17,7 +17,9 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/oasdiff/oasdiff/review"
 	"github.com/stretchr/testify/require"
@@ -29,7 +31,7 @@ func TestReadSpecSource_FromFile(t *testing.T) {
 	body := []byte("openapi: 3.0.0\ninfo: {title: t, version: '1'}\npaths: {}\n")
 	require.NoError(t, os.WriteFile(path, body, 0644))
 
-	bytesOut, name, err := readSpecSource(load.NewSource(path))
+	bytesOut, name, err := readSpecSource(load.NewSource(path), nil)
 	require.NoError(t, err)
 	require.Equal(t, body, bytesOut)
 	require.Equal(t, "openapi.yaml", name, "the upload's display filename must be the basename, not the full local path")
@@ -57,14 +59,14 @@ func TestReadSpecSource_FromGitRef(t *testing.T) {
 	require.NoError(t, os.Chdir(dir))
 	defer os.Chdir(oldDir) //nolint:errcheck
 
-	bytesOut, name, err := readSpecSource(load.NewSource("HEAD:openapi.yaml"))
+	bytesOut, name, err := readSpecSource(load.NewSource("HEAD:openapi.yaml"), nil)
 	require.NoError(t, err)
 	require.Equal(t, body, bytesOut)
 	require.Equal(t, "openapi.yaml", name, "display filename must be derived from the path portion of the git ref, not the ref itself")
 }
 
 func TestReadSpecSource_StdinRejected(t *testing.T) {
-	_, _, err := readSpecSource(load.NewSource("-"))
+	_, _, err := readSpecSource(load.NewSource("-"), nil)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "stdin")
 }
@@ -465,4 +467,62 @@ func TestUploadAndOpen_ReadRevisionSpecError(t *testing.T) {
 	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "read revision spec")
+}
+
+// URL sources ride the capture: the bundle's specs are the exact bytes the
+// loader fetched (no second fetch), and blocks slice from them.
+func TestUploadAndOpen_URLSources(t *testing.T) {
+	stubBrowser(t)
+	const baseSpec = "openapi: 3.0.0\ninfo: {title: t, version: \"1\"}\npaths:\n  /users:\n    get:\n      responses:\n        \"200\": {description: ok}\n        \"404\": {description: gone}\n"
+	const revSpec = "openapi: 3.0.0\ninfo: {title: t, version: \"1\"}\npaths:\n  /users:\n    get:\n      responses:\n        \"200\": {description: ok}\n"
+	specs := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/base/openapi.yaml" {
+			_, _ = w.Write([]byte(baseSpec))
+			return
+		}
+		_, _ = w.Write([]byte(revSpec))
+	}))
+	defer specs.Close()
+
+	var uploadedBlob []byte
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		uploadedBlob, _ = io.ReadAll(r.Body)
+		_, _ = w.Write([]byte(`{"review_id":"r-url","expires_at":0}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_URL", stub.URL)
+
+	baseURL := specs.URL + "/base/openapi.yaml"
+	revURL := specs.URL + "/rev/openapi.yaml"
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	s1, err := load.NewSpecInfoWithCapture(loader, load.NewSource(baseURL))
+	require.NoError(t, err)
+	s2, err := load.NewSpecInfoWithCapture(loader, load.NewSource(revURL))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	flags := NewFlags()
+	flags.setBase(load.NewSource(baseURL))
+	flags.setRevision(load.NewSource(revURL))
+
+	var out bytes.Buffer
+	require.NoError(t, uploadAndOpen(flags, &out, false, errs, []*load.SpecInfo{s1}, []*load.SpecInfo{s2}, false))
+
+	m := keyFragmentRe.FindStringSubmatch(out.String())
+	require.Len(t, m, 2)
+	key, err := base64.RawURLEncoding.DecodeString(m[1])
+	require.NoError(t, err)
+
+	var payload review.Payload
+	require.NoError(t, json.Unmarshal(decryptBlob(t, uploadedBlob, key), &payload))
+	require.Equal(t, baseSpec, payload.BaseSpec, "the bundle carries the bytes the loader fetched")
+	require.Equal(t, revSpec, payload.RevisionSpec)
+	require.Equal(t, "openapi.yaml", payload.BaseFilename)
+	require.NotEmpty(t, payload.Blocks)
+	require.NotEmpty(t, payload.Blocks[0].BaseText, "blocks slice from the captured URL text")
 }

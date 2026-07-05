@@ -44,8 +44,9 @@ func (c *sourceCapture) asStrings() map[string]string {
 }
 
 // recordingReader wraps a ReadFromURIFunc (or kin's default when inner is nil)
-// to record every successfully read file into the capture. The key is the
-// location's filesystem path, matching origin.Key.File.
+// to record every successfully read file into the capture, keyed to match
+// origin.Key.File: the full URL for a remote location, the filesystem path
+// otherwise.
 func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture) openapi3.ReadFromURIFunc {
 	return func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		var (
@@ -58,7 +59,11 @@ func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture) ope
 			data, err = openapi3.DefaultReadFromURI(loader, location)
 		}
 		if err == nil {
-			capture.record(filepath.FromSlash(location.Path), data)
+			key := filepath.FromSlash(location.Path)
+			if location.IsAbs() {
+				key = location.String()
+			}
+			capture.record(key, data)
 		}
 		return data, err
 	}

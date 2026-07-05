@@ -67,11 +67,11 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	// stay empty and Payload.Composed marks it (presentation is the consumer's).
 	var baseSpec, revSpec, baseName, revName string
 	if !flags.getComposed() {
-		baseBytes, bn, err := readSpecSource(flags.getBase())
+		baseBytes, bn, err := readSpecSource(flags.getBase(), baseSpecs)
 		if err != nil {
 			return fmt.Errorf("read base spec: %w", err)
 		}
-		revBytes, rn, err := readSpecSource(flags.getRevision())
+		revBytes, rn, err := readSpecSource(flags.getRevision(), revSpecs)
 		if err != nil {
 			return fmt.Errorf("read revision spec: %w", err)
 		}
@@ -320,12 +320,26 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 // git-ref read, including blob-hash handling, lives in the load package);
 // stdin and URL sources are rejected here because the upload requires bytes
 // the CLI can attribute to a filename.
-func readSpecSource(source *load.Source) ([]byte, string, error) {
+func readSpecSource(source *load.Source, specs []*load.SpecInfo) ([]byte, string, error) {
 	if source == nil {
 		return nil, "", errors.New("spec source is required")
 	}
 	if source.IsStdin() {
-		return nil, "", errors.New("--open does not support stdin (use a file path or git ref)")
+		return nil, "", errors.New("--open does not support stdin (use a file path, URL, or git ref)")
+	}
+	// DisplayPath strips the "<ref>:" prefix for git sources; Base trims any
+	// directory so the upload's filename is just "openapi.yaml".
+	name := filepath.Base(source.DisplayPath())
+	if source.IsURL() {
+		// The loader already fetched the URL; take those exact bytes (captured
+		// in Sources) so the bundle cannot disagree with the diff if the remote
+		// content changed between reads.
+		if len(specs) > 0 && specs[0] != nil {
+			if text, ok := specs[0].Sources[source.Path]; ok {
+				return []byte(text), name, nil
+			}
+		}
+		return nil, "", fmt.Errorf("no captured content for %q", source.Path)
 	}
 	if !source.IsFile() && !source.IsGitRevision() {
 		return nil, "", fmt.Errorf("--open does not support source type for %q", source.Path)
@@ -334,9 +348,7 @@ func readSpecSource(source *load.Source) ([]byte, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	// DisplayPath strips the "<ref>:" prefix for git sources; Base trims any
-	// directory so the upload's filename is just "openapi.yaml".
-	return body, filepath.Base(source.DisplayPath()), nil
+	return body, name, nil
 }
 
 // openBrowser opens the URL in the default browser. xdg-open / open / start
