@@ -139,14 +139,16 @@ func matchSpan(idx docIndex, src *checker.Source) *span {
 
 // newResolution qualifies the block key with its filename when the same key
 // exists in more than one file (composed), keeping each file's block separate.
+// The qualifier is identity only: Title stays the plain name, and a consumer
+// shows each block's file from BaseFile/RevFile.
 func newResolution(key string, base, rev *span, baseIdx, revIdx docIndex) resolution {
-	display := key
+	id := key
 	if len(baseIdx.byKey[key]) > 1 || len(revIdx.byKey[key]) > 1 {
 		if f := firstFileBase(rev, base); f != "" {
-			display = f + ": " + key
+			id = f + ": " + key
 		}
 	}
-	return resolution{key: display, title: display, base: base, rev: rev}
+	return resolution{key: id, title: key, base: base, rev: rev}
 }
 
 func firstFileBase(spans ...*span) string {

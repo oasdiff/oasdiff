@@ -516,7 +516,8 @@ func TestExtract_ComposedDuplicateComponentName(t *testing.T) {
 	require.Len(t, blocks, 1)
 	b := blocks[0]
 
-	require.Equal(t, "pets.yaml: components/schemas/Error", b.Key, "the card key is qualified by file")
+	require.Equal(t, "pets.yaml: components/schemas/Error", b.Key, "the block key is qualified by file")
+	require.Equal(t, "components/schemas/Error", b.Title, "the title stays plain; consumers label the file from BaseFile/RevFile")
 	require.Equal(t, "pets.yaml", b.BaseFile)
 	require.Equal(t, "pets.yaml", b.RevFile)
 	require.Contains(t, b.BaseText, "string", "sliced from pets.yaml's Error, not users.yaml's")
