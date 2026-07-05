@@ -139,10 +139,10 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 }
 
 // renderChangelogJSON produces the JSON changelog bytes embedded in the
-// encrypted payload. It mirrors the service's /public/changelog rendering
-// (FormatJSON + WrapInObject) so the review page consumes identical bytes
-// whether the review came through the plaintext path or the encrypted one.
-// Color is forced off: the output is data, not a terminal render.
+// encrypted payload, mirroring the service's /public/changelog rendering
+// (FormatJSON + WrapInObject) so a consumer parses identical bytes on the
+// plaintext and encrypted paths. Color is forced off: the output is data,
+// not a terminal render.
 func renderChangelogJSON(flags *Flags, errs checker.Changes, baseVersion, revVersion string, isBreaking, diffEmpty bool) ([]byte, error) {
 	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{
 		Language:        flags.getLang(),
