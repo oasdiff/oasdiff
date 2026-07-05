@@ -14,8 +14,11 @@ import (
 
 // from is a convenience function that opens an OpenAPI spec from a URL or a
 // local path based on the format of the path parameter. When capture is
-// non-nil, every file the loader reads (the root and each $ref'd file) is
-// recorded into it; see sourceCapture.
+// non-nil, the file and git-revision branches record every file the loader
+// reads (the root and each $ref'd file) into it; the URL and stdin branches
+// ignore it, since their captured text has no consumer (the review bundle
+// accepts only file and git-revision sources). A branch that gains a consumer
+// must also gain the recorder, or its blocks will slice empty.
 func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*openapi3.T, error) {
 
 	switch source.Type {
