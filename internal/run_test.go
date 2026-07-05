@@ -557,7 +557,7 @@ func Test_BothSidesStdin(t *testing.T) {
 	require.NoError(t, os.WriteFile(path, []byte("openapi: 3.0.0\ninfo: {title: t, version: \"1.2.3\"}\npaths: {}\n"), 0644))
 	f, err := os.Open(path)
 	require.NoError(t, err)
-	defer f.Close()
+	defer f.Close() //nolint:errcheck
 	orig := os.Stdin
 	os.Stdin = f
 	t.Cleanup(func() { os.Stdin = orig })
