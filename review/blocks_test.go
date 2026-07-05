@@ -546,3 +546,81 @@ func TestTextFor_DotSlashOriginPrefix(t *testing.T) {
 	require.Equal(t, "x", textFor(texts, "HEAD:api.yaml"))
 	require.Empty(t, textFor(texts, "other.yaml"))
 }
+
+const namedComponentsSpec = `openapi: 3.0.0
+info: { title: t, version: "1.0" }
+paths:
+  /users:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        "404": { $ref: '#/components/responses/NotFound' }
+        "200":
+          description: ok
+          headers:
+            X-Rate: { $ref: '#/components/headers/RateLimit' }
+    post:
+      requestBody: { $ref: '#/components/requestBodies/UserBody' }
+      responses:
+        "201": { description: created }
+components:
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer }
+  responses:
+    NotFound:
+      description: not found
+      content:
+        application/json:
+          schema: { type: string }
+  requestBodies:
+    UserBody:
+      content:
+        application/json:
+          schema: { type: object }
+  headers:
+    RateLimit:
+      schema: { type: integer }
+`
+
+// Every named component type is indexed, so a change sourced inside one keys
+// to its own block instead of falling back to the operation.
+func TestBuildIndex_NamedComponentTypes(t *testing.T) {
+	idx := buildIndex(loadWithOrigin(t, namedComponentsSpec))
+	for _, key := range []string{
+		"components/parameters/Limit",
+		"components/responses/NotFound",
+		"components/requestBodies/UserBody",
+		"components/headers/RateLimit",
+	} {
+		s := singleSpan(t, idx, key)
+		require.Positive(t, s.start, key)
+		require.GreaterOrEqual(t, s.end, s.start, key)
+	}
+}
+
+// The common case end to end: a change inside a $ref'd component response
+// slices the response block, not the referencing operation.
+func TestExtract_ComponentResponseBlock(t *testing.T) {
+	doc := loadWithOrigin(t, namedComponentsSpec)
+	notFound := singleSpan(t, buildIndex(doc), "components/responses/NotFound")
+
+	c := checker.ApiChange{
+		Id:        "response-property-type-changed",
+		Operation: "GET",
+		Path:      "/users",
+		CommonChange: checker.CommonChange{
+			BaseSource:     &checker.Source{Line: notFound.end},
+			RevisionSource: &checker.Source{Line: notFound.end},
+		},
+	}
+	blocks := Extract(checker.Changes{c}, docs(doc), docs(doc), oneFile("", namedComponentsSpec), oneFile("", namedComponentsSpec))
+	require.Len(t, blocks, 1)
+	require.Equal(t, "components/responses/NotFound", blocks[0].Key)
+	require.Contains(t, blocks[0].BaseText, "NotFound:")
+	require.NotContains(t, blocks[0].BaseText, "/users:", "not the operation block")
+	require.NotContains(t, blocks[0].BaseText, "UserBody:", "sibling components excluded")
+}

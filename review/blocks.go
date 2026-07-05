@@ -270,19 +270,43 @@ func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *opena
 			}
 		}
 	}
-	if doc.Components != nil {
-		for name, ref := range doc.Components.Schemas {
-			if ref != nil && ref.Value != nil {
-				k := "components/schemas/" + name
-				add(k, k, ref.Value.Origin)
+	if c := doc.Components; c != nil {
+		addComponentMap(add, "schemas", c.Schemas, func(r *openapi3.SchemaRef) *openapi3.Origin {
+			if r == nil || r.Value == nil {
+				return nil
 			}
-		}
-		for name, ref := range doc.Components.SecuritySchemes {
-			if ref != nil && ref.Value != nil {
-				k := "components/securitySchemes/" + name
-				add(k, k, ref.Value.Origin)
+			return r.Value.Origin
+		})
+		addComponentMap(add, "securitySchemes", c.SecuritySchemes, func(r *openapi3.SecuritySchemeRef) *openapi3.Origin {
+			if r == nil || r.Value == nil {
+				return nil
 			}
-		}
+			return r.Value.Origin
+		})
+		addComponentMap(add, "responses", c.Responses, func(r *openapi3.ResponseRef) *openapi3.Origin {
+			if r == nil || r.Value == nil {
+				return nil
+			}
+			return r.Value.Origin
+		})
+		addComponentMap(add, "parameters", c.Parameters, func(r *openapi3.ParameterRef) *openapi3.Origin {
+			if r == nil || r.Value == nil {
+				return nil
+			}
+			return r.Value.Origin
+		})
+		addComponentMap(add, "requestBodies", c.RequestBodies, func(r *openapi3.RequestBodyRef) *openapi3.Origin {
+			if r == nil || r.Value == nil {
+				return nil
+			}
+			return r.Value.Origin
+		})
+		addComponentMap(add, "headers", c.Headers, func(r *openapi3.HeaderRef) *openapi3.Origin {
+			if r == nil || r.Value == nil {
+				return nil
+			}
+			return r.Value.Origin
+		})
 	}
 	addTopLevelSections(idx, doc)
 	indexExternalSchemas(idx, doc)
@@ -311,6 +335,17 @@ func indexExternalSchemas(idx *docIndex, doc *openapi3.T) {
 		}
 		return nil
 	})
+}
+
+// addComponentMap indexes one named-component section; origin returns a ref's
+// origin (nil to skip).
+func addComponentMap[R any](add func(key, title string, o *openapi3.Origin), section string, m map[string]R, origin func(R) *openapi3.Origin) {
+	for name, ref := range m {
+		if o := origin(ref); o != nil {
+			k := "components/" + section + "/" + name
+			add(k, k, o)
+		}
+	}
 }
 
 // addTopLevelSections indexes info/servers/tags/security, each spanning from
