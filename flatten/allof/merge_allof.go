@@ -6,6 +6,7 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -1164,12 +1165,7 @@ func areFormatsNumeric(values []string) bool {
 }
 
 func containsString(list []string, search string) bool {
-	for _, item := range list {
-		if item == search {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(list, search)
 }
 
 func filterEmptyStrings(input []string) []string {
@@ -1232,7 +1228,7 @@ func findIntersectionOfArrays(arrays [][]any) []any {
 func flattenArray(arrays [][]string) []string {
 	var result []string
 
-	for i := 0; i < len(arrays); i++ {
+	for i := range arrays {
 		for j := 0; j < len(arrays[i]); j++ {
 			result = append(result, arrays[i][j])
 		}

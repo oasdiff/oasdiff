@@ -2,6 +2,7 @@ package checker_test
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 
@@ -283,12 +284,7 @@ func TestListOfTypesIntegration_JoinTypesInMessages(t *testing.T) {
 }
 
 func containsString(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(slice, item)
 }
 
 // Test core function behavior with various scenarios
