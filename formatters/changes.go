@@ -40,7 +40,7 @@ func NewChanges(originalChanges checker.Changes, l checker.Localizer) Changes {
 			Attributes:     change.GetAttributes(),
 			BaseSource:     change.GetBaseSource(),
 			RevisionSource: change.GetRevisionSource(),
-			Fingerprint:    checker.ComputeFingerprint(id, operation, path, change.GetArgs()),
+			Fingerprint:    checker.Fingerprint(change),
 		}
 	}
 	return changes

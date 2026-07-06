@@ -23,6 +23,13 @@ func ComputeFingerprint(id, operation, path string, args []any) string {
 	return hex.EncodeToString(sum[:])[:12]
 }
 
+// Fingerprint is ComputeFingerprint for a Change, reading its id, operation,
+// path, and args. Findings are not Changes, so they call ComputeFingerprint
+// directly.
+func Fingerprint(c Change) string {
+	return ComputeFingerprint(c.GetId(), c.GetOperation(), c.GetPath(), c.GetArgs())
+}
+
 // serializeArgs joins the change args into a deterministic string. fmt's `%v`
 // verb sorts map keys (Go 1.12+) so nested maps remain stable; primitives and
 // slices are stable by definition.

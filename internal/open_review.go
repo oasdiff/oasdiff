@@ -284,7 +284,7 @@ func reviewManifest(errs checker.Changes) []reviewChange {
 	manifest := make([]reviewChange, 0, len(errs))
 	for _, change := range errs {
 		manifest = append(manifest, reviewChange{
-			Fingerprint: checker.ComputeFingerprint(change.GetId(), change.GetOperation(), change.GetPath(), change.GetArgs()),
+			Fingerprint: checker.Fingerprint(change),
 			Level:       int(change.GetLevel()),
 		})
 	}
