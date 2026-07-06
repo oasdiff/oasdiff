@@ -155,6 +155,9 @@ func renderChangelogJSON(flags *Flags, errs checker.Changes, isBreaking, diffEmp
 
 // specSetDocsAndSources collects the parsed docs and the union of captured file
 // texts across a side's spec set, for review.Extract to slice blocks from.
+// Sources is keyed by resolved file path, so the union is safe: a key repeats
+// only when two specs in a composed set share a $ref'd file, and the same path
+// is the same file with the same text, so the last-write overwrite is a no-op.
 func specSetDocsAndSources(specs []*load.SpecInfo) ([]*openapi3.T, map[string]string) {
 	docs := make([]*openapi3.T, 0, len(specs))
 	texts := map[string]string{}
