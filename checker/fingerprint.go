@@ -13,10 +13,8 @@ import (
 // records at view time. The changelog and validate commands share it so a
 // downstream tool can match findings produced by either.
 //
-// Inputs are the structured rule arguments rather than the rendered text:
-// rendered text varies with locale and copy edits to the message templates,
-// which would silently invalidate every stored fingerprint. The args carry the
-// same per-change disambiguation power without that fragility.
+// It hashes the structured rule args, not the rendered text, which changes with
+// locale and template edits and would silently invalidate stored fingerprints.
 func ComputeFingerprint(id, operation, path string, args []any) string {
 	h := fmt.Sprintf("%s:%s:%s:%s", id, operation, path, serializeArgs(args))
 	sum := sha256.Sum256([]byte(h))
