@@ -29,7 +29,7 @@ func (f JSONFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 	return printJSON(diff.GetSummary())
 }
 
-func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
+func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts))
 }
 

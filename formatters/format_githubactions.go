@@ -27,7 +27,7 @@ func newGitHubActionsFormatter(l checker.Localizer) GitHubActionsFormatter {
 	}
 }
 
-func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
+func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	var buf bytes.Buffer
 
 	// add error, warning and notice count to job output parameters

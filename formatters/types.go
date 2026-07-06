@@ -37,7 +37,9 @@ func GetSupportedFormats() []string {
 
 // FormatterOpts can be used to pass properties to the formatter (e.g. colors)
 type FormatterOpts struct {
-	Language string
+	Language        string
+	BaseVersion     string
+	RevisionVersion string
 }
 
 // RenderOpts can be used to pass properties to the renderer method

@@ -6,7 +6,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 type notImplementedFormatter struct{}
@@ -19,7 +18,7 @@ func (f notImplementedFormatter) RenderSummary(*diff.Diff, RenderOpts) ([]byte, 
 	return notImplemented()
 }
 
-func (f notImplementedFormatter) RenderChangelog(checker.Changes, RenderOpts, *load.SpecInfoPair) ([]byte, error) {
+func (f notImplementedFormatter) RenderChangelog(checker.Changes, RenderOpts) ([]byte, error) {
 	return notImplemented()
 }
 

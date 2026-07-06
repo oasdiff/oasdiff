@@ -29,7 +29,7 @@ func (f YAMLFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 	return printYAML(diff.GetSummary())
 }
 
-func (f YAMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
+func (f YAMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	return printYAML(adaptStructure(NewChanges(changes, f.Localizer), opts))
 }
 
