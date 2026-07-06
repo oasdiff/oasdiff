@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -162,9 +163,7 @@ func specSetDocsAndSources(specs []*load.SpecInfo) ([]*openapi3.T, map[string]st
 			continue
 		}
 		docs = append(docs, si.Spec)
-		for k, v := range si.Sources {
-			texts[k] = v
-		}
+		maps.Copy(texts, si.Sources)
 	}
 	return docs, texts
 }
