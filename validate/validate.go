@@ -85,10 +85,7 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 			Column: columnForKinError(err),
 		},
 	}
-	// Fingerprint last so it hashes over the populated fields. validate and
-	// changelog share ComputeFingerprint so a downstream tool can match
-	// findings across spec versions; the args carry the per-finding
-	// disambiguator (checker/fingerprint.go).
+	// Fingerprint last so it hashes over the populated fields.
 	f.Fingerprint = checker.ComputeFingerprint(f.Id, f.Operation, f.Path, argsForKinError(err))
 	return formatters.Findings{f}
 }
