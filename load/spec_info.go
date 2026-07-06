@@ -44,30 +44,32 @@ func getVersion(spec *openapi3.T) string {
 
 // NewSpecInfo creates a SpecInfo from a local file path, a URL, a git revision, or stdin
 func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
-	specInfo, err := loadSpecInfo(loader, source, nil)
-	if err != nil {
-		return nil, err
-	}
-	specInfos := []*SpecInfo{specInfo}
-
-	for _, option := range options {
-		if specInfos, err = option(loader, specInfos); err != nil {
-			return nil, err
-		}
-	}
-	return specInfos[0], nil
+	return newSpecInfoFromSource(loader, source, false, options...)
 }
 
 // NewSpecInfoWithCapture is NewSpecInfo that also records the raw text of
 // every file the loader reads (root and $ref'd) into SpecInfo.Sources, for
 // slicing multi-file specs by origin file (the review bundle).
 func NewSpecInfoWithCapture(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
-	capture := newSourceCapture()
-	specInfo, err := loadSpecInfo(loader, source, capture)
+	return newSpecInfoFromSource(loader, source, true, options...)
+}
+
+// newSpecInfoFromSource loads a single SpecInfo and applies the options. When
+// capture is true it also records the raw text of every file read into
+// SpecInfo.Sources. Capture is a constructor choice, not an Option, because the
+// recorder must be installed before the load, whereas options run after it.
+func newSpecInfoFromSource(loader *openapi3.Loader, source *Source, capture bool, options ...Option) (*SpecInfo, error) {
+	var recorder *sourceCapture
+	if capture {
+		recorder = newSourceCapture()
+	}
+	specInfo, err := loadSpecInfo(loader, source, recorder)
 	if err != nil {
 		return nil, err
 	}
-	specInfo.Sources = capture.asStrings()
+	if recorder != nil {
+		specInfo.Sources = recorder.asStrings()
+	}
 
 	specInfos := []*SpecInfo{specInfo}
 	for _, option := range options {
