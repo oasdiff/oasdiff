@@ -79,7 +79,7 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		revSpec, revName = string(revBytes), rn
 	}
 
-	changesJSON, err := renderChangelogJSON(flags, errs, specSetVersion(baseSpecs), specSetVersion(revSpecs), isBreaking, diffEmpty)
+	changesJSON, err := renderChangelogJSON(flags, errs, isBreaking, diffEmpty)
 	if err != nil {
 		return fmt.Errorf("render changelog: %w", err)
 	}
@@ -142,12 +142,8 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 // payload: the standard object-wrapped shape (WrapInObject), so a consumer
 // parses it like any other JSON changelog output. Color is forced off: the
 // output is data, not a terminal render.
-func renderChangelogJSON(flags *Flags, errs checker.Changes, baseVersion, revVersion string, isBreaking, diffEmpty bool) ([]byte, error) {
-	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{
-		Language:        flags.getLang(),
-		BaseVersion:     baseVersion,
-		RevisionVersion: revVersion,
-	})
+func renderChangelogJSON(flags *Flags, errs checker.Changes, isBreaking, diffEmpty bool) ([]byte, error) {
+	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{Language: flags.getLang()})
 	if err != nil {
 		return nil, err
 	}
@@ -155,15 +151,6 @@ func renderChangelogJSON(flags *Flags, errs checker.Changes, baseVersion, revVer
 		errs,
 		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
 	)
-}
-
-// specSetVersion is the version reported for a side's spec set: the first
-// spec's (a composed diff reports the first matched spec); "n/a" when empty.
-func specSetVersion(specs []*load.SpecInfo) string {
-	if len(specs) > 0 && specs[0] != nil {
-		return specs[0].GetVersion()
-	}
-	return "n/a"
 }
 
 // specSetDocsAndSources collects the parsed docs and the union of captured file
