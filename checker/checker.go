@@ -2,6 +2,7 @@ package checker
 
 //go:generate go-localize -input localizations_src -output localizations
 import (
+	"maps"
 	"slices"
 
 	"github.com/oasdiff/oasdiff/diff"
@@ -81,9 +82,7 @@ func clonePathsDiffForCheck(d *diff.Diff) *diff.Diff {
 				pdElem.OperationsDiff.Deleted = slices.Clone(v.OperationsDiff.Deleted)
 				if v.OperationsDiff.Modified != nil {
 					pdElem.OperationsDiff.Modified = make(diff.ModifiedOperations, len(v.OperationsDiff.Modified))
-					for ok, ov := range v.OperationsDiff.Modified {
-						pdElem.OperationsDiff.Modified[ok] = ov
-					}
+					maps.Copy(pdElem.OperationsDiff.Modified, v.OperationsDiff.Modified)
 				}
 			}
 			cloned.PathsDiff.Modified[k] = &pdElem

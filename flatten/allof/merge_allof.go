@@ -6,6 +6,7 @@ import (
 	"math"
 	"reflect"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -943,7 +944,7 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	propsToSchemasMap := map[string]openapi3.SchemaRefs{}
 	for _, schema := range collection.Properties {
 		for propKey, schemaRef := range schema {
-			if containsString(propsToMerge, propKey) {
+			if slices.Contains(propsToMerge, propKey) {
 				propsToSchemasMap[propKey] = append(propsToSchemasMap[propKey], schemaRef)
 			}
 		}
@@ -1163,15 +1164,6 @@ func areFormatsNumeric(values []string) bool {
 	return true
 }
 
-func containsString(list []string, search string) bool {
-	for _, item := range list {
-		if item == search {
-			return true
-		}
-	}
-	return false
-}
-
 func filterEmptyStrings(input []string) []string {
 	var result []string
 
@@ -1232,7 +1224,7 @@ func findIntersectionOfArrays(arrays [][]any) []any {
 func flattenArray(arrays [][]string) []string {
 	var result []string
 
-	for i := 0; i < len(arrays); i++ {
+	for i := range arrays {
 		for j := 0; j < len(arrays[i]); j++ {
 			result = append(result, arrays[i][j])
 		}
