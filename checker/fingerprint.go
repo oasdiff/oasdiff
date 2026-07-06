@@ -12,9 +12,6 @@ import (
 // (carry-forward of review state in oasdiff-service) and to look up review
 // records at view time. The changelog and validate commands share it so a
 // downstream tool can match findings produced by either.
-//
-// It hashes the structured rule args, not the rendered text, which changes with
-// locale and template edits and would silently invalidate stored fingerprints.
 func ComputeFingerprint(id, operation, path string, args []any) string {
 	h := fmt.Sprintf("%s:%s:%s:%s", id, operation, path, serializeArgs(args))
 	sum := sha256.Sum256([]byte(h))
