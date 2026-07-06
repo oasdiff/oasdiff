@@ -114,7 +114,7 @@ func TestListOfTypesIntegration_EdgeCases(t *testing.T) {
 	// Should have some list-of-types changes but not for complex schemas
 	var listOfTypesChanges []checker.ApiChange
 	for _, err := range errs {
-		if containsString([]string{
+		if slices.Contains([]string{
 			checker.ResponsePropertyListOfTypesWidenedId,
 			checker.ResponsePropertyListOfTypesNarrowedId,
 		}, err.GetId()) {
@@ -143,7 +143,7 @@ func TestListOfTypesIntegration_ParameterChanges(t *testing.T) {
 	// No changes expected for identical files
 	var paramChanges []checker.ApiChange
 	for _, err := range errs {
-		if containsString([]string{
+		if slices.Contains([]string{
 			checker.RequestParameterListOfTypesNarrowedId,
 			checker.RequestParameterListOfTypesWidenedId,
 		}, err.GetId()) {
@@ -283,10 +283,6 @@ func TestListOfTypesIntegration_JoinTypesInMessages(t *testing.T) {
 	}
 }
 
-func containsString(slice []string, item string) bool {
-	return slices.Contains(slice, item)
-}
-
 // Test core function behavior with various scenarios
 func TestListOfTypesCoreScenarios(t *testing.T) {
 	t.Run("empty_list_diff_no_changes", func(t *testing.T) {
@@ -305,7 +301,7 @@ func TestListOfTypesCoreScenarios(t *testing.T) {
 		// Should have no changes since specs are identical
 		listOfTypesChanges := 0
 		for _, err := range errs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.RequestPropertyListOfTypesNarrowedId,
 				checker.RequestPropertyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -338,7 +334,7 @@ func TestListOfTypesCoreScenarios(t *testing.T) {
 		hasResponseChanges := false
 
 		for _, err := range responseErrs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.ResponsePropertyListOfTypesNarrowedId,
 				checker.ResponsePropertyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -365,7 +361,7 @@ func TestListOfTypesCoreScenarios(t *testing.T) {
 
 		hasRequestChanges := false
 		for _, err := range requestErrs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.RequestPropertyListOfTypesNarrowedId,
 				checker.RequestPropertyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -478,7 +474,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		// Should find parameter changes (narrowing from multiple types to single)
 		foundParamChanges := false
 		for _, err := range errs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.RequestParameterListOfTypesNarrowedId,
 				checker.RequestParameterListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -509,7 +505,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		// Should find response body widening (adding integer type)
 		foundResponseBodyChanges := false
 		for _, err := range responseErrs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.ResponseBodyListOfTypesNarrowedId,
 				checker.ResponseBodyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -520,7 +516,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		// Also check if we can find property-level changes
 		foundResponsePropertyChanges := false
 		for _, err := range responseErrs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.ResponsePropertyListOfTypesNarrowedId,
 				checker.ResponsePropertyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -564,7 +560,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		// Count list-of-types specific changes (should be 0 for identical specs)
 		listOfTypesChanges := 0
 		for _, err := range append(append(requestPropertyErrs, responsePropertyErrs...), parameterErrs...) {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.RequestPropertyListOfTypesNarrowedId,
 				checker.RequestPropertyListOfTypesWidenedId,
 				checker.ResponsePropertyListOfTypesNarrowedId,
@@ -612,7 +608,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 				require.NotNil(t, err.GetArgs(), "Change args should not be nil")
 
 				// If it's a list-of-types change, verify args format
-				if containsString([]string{
+				if slices.Contains([]string{
 					checker.RequestPropertyListOfTypesNarrowedId,
 					checker.RequestPropertyListOfTypesWidenedId,
 					checker.ResponsePropertyListOfTypesNarrowedId,
@@ -763,7 +759,7 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		// Should find parameter property changes (narrowing - removing types from parameter property)
 		foundParamPropertyChanges := false
 		for _, err := range errs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.RequestParameterPropertyListOfTypesNarrowedId,
 				checker.RequestParameterPropertyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -859,7 +855,7 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 		foundResponseBodyChanges := false
 
 		for _, err := range requestErrs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.RequestBodyListOfTypesNarrowedId,
 				checker.RequestBodyListOfTypesWidenedId,
 			}, err.GetId()) {
@@ -869,7 +865,7 @@ func TestListOfTypesRemainingUncoveredLines(t *testing.T) {
 		}
 
 		for _, err := range responseErrs {
-			if containsString([]string{
+			if slices.Contains([]string{
 				checker.ResponseBodyListOfTypesNarrowedId,
 				checker.ResponseBodyListOfTypesWidenedId,
 			}, err.GetId()) {

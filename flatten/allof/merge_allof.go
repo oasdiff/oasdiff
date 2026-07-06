@@ -944,7 +944,7 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	propsToSchemasMap := map[string]openapi3.SchemaRefs{}
 	for _, schema := range collection.Properties {
 		for propKey, schemaRef := range schema {
-			if containsString(propsToMerge, propKey) {
+			if slices.Contains(propsToMerge, propKey) {
 				propsToSchemasMap[propKey] = append(propsToSchemasMap[propKey], schemaRef)
 			}
 		}
@@ -1162,10 +1162,6 @@ func areFormatsNumeric(values []string) bool {
 		}
 	}
 	return true
-}
-
-func containsString(list []string, search string) bool {
-	return slices.Contains(list, search)
 }
 
 func filterEmptyStrings(input []string) []string {
