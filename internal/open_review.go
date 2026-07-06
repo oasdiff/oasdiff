@@ -329,9 +329,8 @@ func readSpecSource(source *load.Source, specs []*load.SpecInfo) ([]byte, string
 		}
 		return nil, "", fmt.Errorf("no captured content for %q", source.Path)
 	}
-	if !source.IsFile() && !source.IsGitRevision() {
-		return nil, "", fmt.Errorf("--open does not support source type for %q", source.Path)
-	}
+	// Only file and git-revision sources remain (stdin and URL returned above);
+	// ReadRaw's default rejects anything else.
 	body, err := source.ReadRaw()
 	if err != nil {
 		return nil, "", err
