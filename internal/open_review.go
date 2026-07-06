@@ -140,8 +140,7 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 
 // renderChangelogJSON renders the changelog to JSON for the encrypted
 // payload: the standard object-wrapped shape (WrapInObject), so a consumer
-// parses it like any other JSON changelog output. Color is forced off: the
-// output is data, not a terminal render.
+// parses it like any other JSON changelog output.
 func renderChangelogJSON(flags *Flags, errs checker.Changes, isBreaking, diffEmpty bool) ([]byte, error) {
 	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{Language: flags.getLang()})
 	if err != nil {
@@ -149,7 +148,7 @@ func renderChangelogJSON(flags *Flags, errs checker.Changes, isBreaking, diffEmp
 	}
 	return formatter.RenderChangelog(
 		errs,
-		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
+		formatters.RenderOpts{WrapInObject: true, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
 	)
 }
 
