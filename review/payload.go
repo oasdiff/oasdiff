@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/formatters"
 )
 
 // Payload is the cleartext review bundle and the single source of truth for
@@ -32,21 +31,21 @@ type Payload struct {
 }
 
 // Change is one manifest entry sent alongside the encrypted bundle in
-// cleartext: a change's fingerprint (see formatters.ComputeFingerprint) and
+// cleartext: a change's fingerprint (see checker.Fingerprint) and
 // its level, so a server can track per-change state without reading the bundle.
 type Change struct {
 	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
 	Level       int    `json:"level" yaml:"level"`
 }
 
-// Manifest builds the {fingerprint, level} manifest. Fingerprints are computed
-// as the JSON formatter does, so they match the ones in the encrypted changelog
-// the bundle carries and the fingerprints on each Block.
+// Manifest builds the {fingerprint, level} manifest. Fingerprints use
+// checker.Fingerprint, so they match the ones in the encrypted changelog the
+// bundle carries and the fingerprints on each Block.
 func Manifest(changes checker.Changes) []Change {
 	manifest := make([]Change, 0, len(changes))
 	for _, change := range changes {
 		manifest = append(manifest, Change{
-			Fingerprint: formatters.ComputeFingerprint(change.GetId(), change.GetOperation(), change.GetPath(), change.GetArgs()),
+			Fingerprint: checker.Fingerprint(change),
 			Level:       int(change.GetLevel()),
 		})
 	}

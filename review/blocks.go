@@ -8,7 +8,6 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/formatters"
 )
 
 // fileBase is the display filename for a block's source file: the basename,
@@ -67,7 +66,7 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 			order = append(order, r.key)
 		}
 		b.ChangeIDs = append(b.ChangeIDs, c.GetId())
-		b.Fingerprints = append(b.Fingerprints, formatters.ComputeFingerprint(c.GetId(), c.GetOperation(), c.GetPath(), c.GetArgs()))
+		b.Fingerprints = append(b.Fingerprints, checker.Fingerprint(c))
 	}
 
 	out := make([]Block, 0, len(order))
