@@ -14,8 +14,7 @@ import (
 
 // These tests pin the contract the whole review-bundle depends on: a file the
 // loader captured must be findable by the File on an element's origin, for every
-// source type and on every platform. If they hold, "the capture key matches
-// origin.Key.File" is truth, not a comment. They exercise the same lookup
+// source type and on every platform. They exercise the same lookup
 // review.Extract uses (by origin File, with a "./" fallback), so a regression in
 // either the capture key or origin derivation fails here.
 
