@@ -33,17 +33,16 @@ const otherChangesKey = "__other__"
 // that side has no sliceable source (e.g. an added or removed block, or a
 // location that did not resolve to a block).
 type Block struct {
-	Key          string   `json:"key" yaml:"key"`                   // stable identity, e.g. "POST /users" or "components/schemas/User"
-	Title        string   `json:"title" yaml:"title"`               // human header
-	ChangeIDs    []string `json:"change_ids" yaml:"change_ids"`     // rule ids of the changes in this block (for display/debug)
-	Fingerprints []string `json:"fingerprints" yaml:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the
-	// stable key a consumer joins each change to its block on
-	BaseFile      string `json:"base_file,omitempty" yaml:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
-	BaseText      string `json:"base_text" yaml:"base_text"`                     // source slice on the base side ("" if absent)
-	BaseLineStart int    `json:"base_line_start" yaml:"base_line_start"`         // 1-based first line of BaseText in the base spec
-	RevFile       string `json:"rev_file,omitempty" yaml:"rev_file,omitempty"`   // basename of the revision slice's source file
-	RevText       string `json:"rev_text" yaml:"rev_text"`                       // source slice on the revision side ("" if absent)
-	RevLineStart  int    `json:"rev_line_start" yaml:"rev_line_start"`           // 1-based first line of RevText in the revision spec
+	Key           string   `json:"key" yaml:"key"`                                 // stable identity, e.g. "POST /users" or "components/schemas/User"
+	Title         string   `json:"title" yaml:"title"`                             // human header
+	ChangeIDs     []string `json:"change_ids" yaml:"change_ids"`                   // rule ids of the changes in this block (for display/debug)
+	Fingerprints  []string `json:"fingerprints" yaml:"fingerprints"`               // per-change fingerprints, aligned with ChangeIDs; the stable key a consumer joins each change to its block on
+	BaseFile      string   `json:"base_file,omitempty" yaml:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
+	BaseText      string   `json:"base_text" yaml:"base_text"`                     // source slice on the base side ("" if absent)
+	BaseLineStart int      `json:"base_line_start" yaml:"base_line_start"`         // 1-based first line of BaseText in the base spec
+	RevFile       string   `json:"rev_file,omitempty" yaml:"rev_file,omitempty"`   // basename of the revision slice's source file
+	RevText       string   `json:"rev_text" yaml:"rev_text"`                       // source slice on the revision side ("" if absent)
+	RevLineStart  int      `json:"rev_line_start" yaml:"rev_line_start"`           // 1-based first line of RevText in the revision spec
 }
 
 // Extract groups changes by their enclosing structural block and slices each
