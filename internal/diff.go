@@ -99,18 +99,25 @@ func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoP
 	}
 }
 
+// loaderForOpen returns the capturing loader variant when --open is set, and the
+// plain one otherwise. --open renders a side-by-side review whose blocks are
+// sliced from source text, so it needs every contributing file (root + $ref'd)
+// recorded; ordinary runs skip the recorder. normalDiff and composedDiff pass
+// their respective loader pairs.
+func loaderForOpen[F any](open bool, plain, capture F) F {
+	if open {
+		return capture
+	}
+	return plain
+}
+
 func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	// --open slices review blocks from source text: capture every contributing
-	// file (root + $ref'd); ordinary runs load without the recorder.
-	newSpecInfo := load.NewSpecInfo
-	if flags.getOpen() {
-		newSpecInfo = load.NewSpecInfoWithCapture
-	}
+	newSpecInfo := loaderForOpen(flags.getOpen(), load.NewSpecInfo, load.NewSpecInfoWithCapture)
 
 	s1, err := newSpecInfo(loader, flags.getBase(), flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
@@ -149,12 +156,7 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	// --open slices the composed review from source text; capture every matched
-	// spec's files (see normalDiff).
-	newGlob := load.NewSpecInfoFromGlob
-	if flags.getOpen() {
-		newGlob = load.NewSpecInfoFromGlobWithCapture
-	}
+	newGlob := loaderForOpen(flags.getOpen(), load.NewSpecInfoFromGlob, load.NewSpecInfoFromGlobWithCapture)
 
 	s1, err := newGlob(loader, flags.getBase().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
