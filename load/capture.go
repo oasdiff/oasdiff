@@ -8,11 +8,12 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// sourceCapture records the raw bytes of every file the loader reads, the root
-// spec and each $ref'd file, keyed by the path the loader resolved (which
-// matches the File reported on each element's origin). It is populated only on
-// the review-bundle path (NewSpecInfoWithCapture); ordinary loads install no
-// recorder and pay nothing.
+// sourceCapture holds the raw bytes of every file the loader reads, the root
+// spec and each $ref'd file, keyed so a file can be looked up by the File on any
+// element's origin: recordingReader derives the key with the same rule
+// kin-openapi uses for origin.Key.File (the full URL when absolute, otherwise the
+// resolved filesystem path). A recorder is installed only when a capture is
+// passed to the load; ordinary loads install none and pay nothing.
 type sourceCapture struct {
 	files map[string][]byte
 }
