@@ -12,8 +12,7 @@ import (
 // spec and each $ref'd file, keyed so a file can be looked up by the File on any
 // element's origin: recordingReader derives the key with the same rule
 // kin-openapi uses for origin.Key.File (the full URL when absolute, otherwise the
-// resolved filesystem path). A recorder is installed only when a capture is
-// passed to the load; ordinary loads install none and pay nothing.
+// resolved filesystem path).
 type sourceCapture struct {
 	files map[string][]byte
 }
@@ -47,7 +46,8 @@ func (c *sourceCapture) asStrings() map[string]string {
 // recordingReader wraps a ReadFromURIFunc (or kin's default when inner is nil)
 // to record every successfully read file into the capture, keyed to match
 // origin.Key.File: the full URL for a remote location, the filesystem path
-// otherwise.
+// otherwise. It is installed only when the load is given a capture; ordinary
+// loads install no recorder and pay nothing.
 func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture) openapi3.ReadFromURIFunc {
 	return func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
 		var (
