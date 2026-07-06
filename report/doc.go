@@ -12,7 +12,7 @@ formats, use the checker package with formatters instead:
 
 	changes := checker.CheckBackwardCompatibility(config, diffReport, operationsSources)
 	formatter, _ := formatters.Lookup("text", formatters.FormatterOpts{})
-	output, _ := formatter.RenderChangelog(changes, formatters.RenderOpts{}, baseVersion, revisionVersion)
+	output, _ := formatter.RenderChangelog(changes, formatters.RenderOpts{})
 
 # Usage
 

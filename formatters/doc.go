@@ -11,7 +11,7 @@ and breaking changes in multiple output formats suitable for different use cases
 Get a formatter and render output:
 
 	formatter, err := formatters.Lookup("json", formatters.FormatterOpts{Language: "en"})
-	output, err := formatter.RenderChangelog(changes, formatters.RenderOpts{}, baseVersion, revisionVersion)
+	output, err := formatter.RenderChangelog(changes, formatters.RenderOpts{})
 
 # Available Formats
 

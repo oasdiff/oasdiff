@@ -38,7 +38,7 @@ func TestMarkupFormatter_RenderChangelog_NoVersions(t *testing.T) {
 		},
 	}
 
-	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Contains(t, string(out), "# API Changelog")
 	require.NotContains(t, string(out), "vs.")
@@ -54,7 +54,8 @@ func TestMarkupFormatter_RenderChangelog_NoBaseVersion(t *testing.T) {
 		},
 	}
 
-	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "2.0.0")
+	f := formatters.MarkupFormatter{Localizer: markupFormatter.Localizer, RevisionVersion: "2.0.0"}
+	out, err := f.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Contains(t, string(out), "# API Changelog")
 	require.NotContains(t, string(out), "vs.")
@@ -70,7 +71,8 @@ func TestMarkupFormatter_RenderChangelog_WithVersions(t *testing.T) {
 		},
 	}
 
-	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "1.0.0", "2.0.0")
+	f := formatters.MarkupFormatter{Localizer: markupFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	out, err := f.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Contains(t, string(out), "# API Changelog 1.0.0 vs. 2.0.0")
 }
@@ -88,7 +90,7 @@ func TestMarkupFormatter_RenderChangelog_SecurityAndComponentChanges(t *testing.
 		},
 	}
 
-	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := markupFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 
 	result := string(out)
@@ -140,7 +142,8 @@ func TestMarkupFormatter_RenderChangelog_WithCustomTemplate(t *testing.T) {
 	opts := formatters.NewRenderOpts()
 	opts.TemplatePath = templatePath
 
-	out, err := markupFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	f := formatters.MarkupFormatter{Localizer: markupFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	out, err := f.RenderChangelog(testChanges, opts)
 	require.NoError(t, err)
 
 	result := string(out)
@@ -162,7 +165,8 @@ func TestMarkupFormatter_RenderChangelog_CustomTemplateNotFound(t *testing.T) {
 	opts := formatters.NewRenderOpts()
 	opts.TemplatePath = "/nonexistent/template.md"
 
-	_, err := markupFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	f := formatters.MarkupFormatter{Localizer: markupFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	_, err := f.RenderChangelog(testChanges, opts)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to load custom template")
 }
@@ -188,7 +192,8 @@ func TestMarkupFormatter_RenderChangelog_InvalidCustomTemplate(t *testing.T) {
 	opts := formatters.NewRenderOpts()
 	opts.TemplatePath = templatePath
 
-	_, err = markupFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	f := formatters.MarkupFormatter{Localizer: markupFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	_, err = f.RenderChangelog(testChanges, opts)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to load custom template")
 }

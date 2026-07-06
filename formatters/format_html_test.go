@@ -60,7 +60,8 @@ func TestHtmlFormatter_RenderChangelog_NoBaseVersion(t *testing.T) {
 		},
 	}
 
-	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "2.0.0")
+	f := formatters.HTMLFormatter{Localizer: htmlFormatter.Localizer, RevisionVersion: "2.0.0"}
+	out, err := f.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Contains(t, string(out), "<div class=\"title\">API Changelog </div>")
 }
@@ -75,7 +76,8 @@ func TestHtmlFormatter_RenderChangelog_WithBaseAndRevisionVersion(t *testing.T) 
 		},
 	}
 
-	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "1.0.0", "2.0.0")
+	f := formatters.HTMLFormatter{Localizer: htmlFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	out, err := f.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Contains(t, string(out), "<div class=\"title\">API Changelog 1.0.0 vs. 2.0.0</div>")
 }
@@ -93,7 +95,7 @@ func TestHtmlFormatter_RenderChangelog_SecurityAndComponentChanges(t *testing.T)
 		},
 	}
 
-	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := htmlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 
 	result := string(out)
@@ -152,7 +154,8 @@ func TestHtmlFormatter_RenderChangelog_WithCustomTemplate(t *testing.T) {
 	opts := formatters.NewRenderOpts()
 	opts.TemplatePath = templatePath
 
-	out, err := htmlFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	f := formatters.HTMLFormatter{Localizer: htmlFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	out, err := f.RenderChangelog(testChanges, opts)
 	require.NoError(t, err)
 
 	result := string(out)
@@ -174,7 +177,8 @@ func TestHtmlFormatter_RenderChangelog_CustomTemplateNotFound(t *testing.T) {
 	opts := formatters.NewRenderOpts()
 	opts.TemplatePath = "/nonexistent/template.html"
 
-	_, err := htmlFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	f := formatters.HTMLFormatter{Localizer: htmlFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	_, err := f.RenderChangelog(testChanges, opts)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to load custom template")
 }
@@ -200,7 +204,8 @@ func TestHtmlFormatter_RenderChangelog_InvalidCustomTemplate(t *testing.T) {
 	opts := formatters.NewRenderOpts()
 	opts.TemplatePath = templatePath
 
-	_, err = htmlFormatter.RenderChangelog(testChanges, opts, "1.0.0", "2.0.0")
+	f := formatters.HTMLFormatter{Localizer: htmlFormatter.Localizer, BaseVersion: "1.0.0", RevisionVersion: "2.0.0"}
+	_, err = f.RenderChangelog(testChanges, opts)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to load custom template")
 }

@@ -26,7 +26,7 @@ func (f TEXTFormatter) RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, err
 	return []byte(report.GetTextReportAsString(diff)), nil
 }
 
-func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
+func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
 	if len(changes) == 0 {

@@ -15,12 +15,16 @@ import (
 
 type MarkupFormatter struct {
 	notImplementedFormatter
-	Localizer checker.Localizer
+	Localizer       checker.Localizer
+	BaseVersion     string
+	RevisionVersion string
 }
 
-func newMarkupFormatter(l checker.Localizer) MarkupFormatter {
+func newMarkupFormatter(l checker.Localizer, baseVersion, revisionVersion string) MarkupFormatter {
 	return MarkupFormatter{
-		Localizer: l,
+		Localizer:       l,
+		BaseVersion:     baseVersion,
+		RevisionVersion: revisionVersion,
 	}
 }
 
@@ -31,7 +35,7 @@ func (f MarkupFormatter) RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, e
 //go:embed templates/changelog.md
 var changelogMarkdown string
 
-func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error) {
+func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	var tmpl *template.Template
 	var err error
 
@@ -44,7 +48,7 @@ func (f MarkupFormatter) RenderChangelog(changes checker.Changes, opts RenderOpt
 		tmpl = template.Must(template.New("changelog").Funcs(MarkupTemplateFuncs()).Parse(changelogMarkdown))
 	}
 
-	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion, opts.DiffEmpty, opts.IsBreaking)
+	return ExecuteTextTemplate(tmpl, GroupChanges(changes, f.Localizer), f.BaseVersion, f.RevisionVersion, opts.DiffEmpty, opts.IsBreaking)
 }
 
 func (f MarkupFormatter) loadCustomTemplate(templatePath string) (*template.Template, error) {
