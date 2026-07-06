@@ -1133,9 +1133,7 @@ func TestMerge_MaxContains_WithAbsentSibling(t *testing.T) {
 }
 
 // uint64Ptr is a small helper for *uint64 literal in tests.
-//
-//go:fix inline
-func uint64Ptr(v uint64) *uint64 { return new(v) }
+func uint64Ptr(v uint64) *uint64 { return &v }
 
 // merge multiple Not inside AllOf
 func TestMerge_Not(t *testing.T) {
