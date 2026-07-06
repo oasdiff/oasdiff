@@ -271,7 +271,7 @@ func parseReviewMeta(entries []string) (map[string]string, error) {
 }
 
 // reviewChange is one manifest entry sent alongside the encrypted bundle: a
-// change's fingerprint (see formatters.ComputeFingerprint) and its level.
+// change's fingerprint (see checker.ComputeFingerprint) and its level.
 type reviewChange struct {
 	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
 	Level       int    `json:"level" yaml:"level"`
@@ -284,7 +284,7 @@ func reviewManifest(errs checker.Changes) []reviewChange {
 	manifest := make([]reviewChange, 0, len(errs))
 	for _, change := range errs {
 		manifest = append(manifest, reviewChange{
-			Fingerprint: formatters.ComputeFingerprint(change.GetId(), change.GetOperation(), change.GetPath(), change.GetArgs()),
+			Fingerprint: checker.Fingerprint(change),
 			Level:       int(change.GetLevel()),
 		})
 	}
