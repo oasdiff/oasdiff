@@ -84,14 +84,15 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool, cap
 	// loader's visitedDocuments map (e.g. "origin/main:openapi.yaml" vs "HEAD:openapi.yaml").
 	// Using only the file portion would cause both refs to share the key "openapi.yaml" and
 	// the loader would return the cached base spec for the revision.
+	u := &url.URL{Path: filepath.ToSlash(gitRef)}
 	if capture != nil {
 		loaderCopy.ReadFromURIFunc = recordingReader(loaderCopy.ReadFromURIFunc, capture)
 		// the root is loaded from bytes below, so ReadFromURIFunc never fires
-		// for it; record it directly, keyed as the recorder keys $ref'd files
-		capture.record(filepath.FromSlash(filepath.ToSlash(gitRef)), out)
+		// for it; record it under the same key kin will use for its origin
+		// (u.String()), which is how recordingReader keys $ref'd files too.
+		capture.record(u.String(), out)
 	}
 
-	u := &url.URL{Path: filepath.ToSlash(gitRef)}
 	t, err := loaderCopy.LoadFromDataWithPath(out, u)
 	if err != nil && blockedRef != "" {
 		// Return the typed error even if kin-openapi wrapped ours in plain text,
