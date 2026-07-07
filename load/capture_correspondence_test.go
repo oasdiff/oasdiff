@@ -25,24 +25,31 @@ func sourceKeys(m map[string]string) []string {
 	return out
 }
 
-// refElementOriginFile returns the origin File of the $ref'd User schema that
-// captureRoot points at (defined in capture_test.go).
-func refElementOriginFile(t *testing.T, si *SpecInfo) string {
+// assertCapturedByOrigin is the single source of truth for the capture<->origin
+// contract: both files captureRoot pulls in -- the root itself and the one
+// $ref'd file -- must be captured under the exact key kin records as each
+// element's origin.Key.File, so review.Extract's slice lookup
+// (Sources[origin.File]) hits. Each is looked up directly (no normalization),
+// and nothing else may be captured.
+func assertCapturedByOrigin(t *testing.T, si *SpecInfo) {
 	t.Helper()
+
+	// root document: Info is defined in the root spec
+	require.NotNil(t, si.Spec.Info.Origin, "the root carries an origin")
+	rootFile := si.Spec.Info.Origin.Key.File
+	root, ok := si.Sources[rootFile]
+	require.Truef(t, ok, "root not captured by its origin File %q; captured keys: %v", rootFile, sourceKeys(si.Sources))
+	require.Equal(t, captureRoot, root, "root text captured verbatim")
+
+	// $ref'd document: the resolved User schema lives in the other file
 	user := si.Spec.Paths.Value("/x").Get.Responses.Value("200").Value.Content["application/json"].Schema
 	require.NotNil(t, user.Value.Origin, "the $ref'd element carries an origin")
-	return user.Value.Origin.Key.File
-}
+	refFile := user.Value.Origin.Key.File
+	sub, ok := si.Sources[refFile]
+	require.Truef(t, ok, "$ref'd file not captured by its origin File %q; captured keys: %v", refFile, sourceKeys(si.Sources))
+	require.Equal(t, captureSubDoc, sub, "$ref'd file text captured verbatim")
 
-func assertRefTextFindable(t *testing.T, si *SpecInfo) {
-	t.Helper()
-	originFile := refElementOriginFile(t, si)
-	// A captured file is found by its origin File with a direct lookup, the same
-	// as review.Extract: load keys sources by location.String(), exactly what kin
-	// records as origin.Key.File.
-	text, ok := si.Sources[originFile]
-	require.Truef(t, ok, "$ref'd file not findable by origin File %q; captured keys: %v", originFile, sourceKeys(si.Sources))
-	require.Equal(t, captureSubDoc, text, "found text is the $ref'd file's content")
+	require.Len(t, si.Sources, 2, "exactly the root and the one $ref'd file are captured")
 }
 
 func TestCaptureFoundByOriginFile_LocalFile(t *testing.T) {
@@ -52,7 +59,7 @@ func TestCaptureFoundByOriginFile_LocalFile(t *testing.T) {
 
 	si, err := NewSpecInfoWithCapture(captureLoader(), NewSource(filepath.Join(dir, "openapi.yaml")))
 	require.NoError(t, err)
-	assertRefTextFindable(t, si)
+	assertCapturedByOrigin(t, si)
 }
 
 func TestCaptureFoundByOriginFile_URL(t *testing.T) {
@@ -64,7 +71,7 @@ func TestCaptureFoundByOriginFile_URL(t *testing.T) {
 
 	si, err := NewSpecInfoWithCapture(captureLoader(), NewSource(srv.URL+"/openapi.yaml"))
 	require.NoError(t, err)
-	assertRefTextFindable(t, si)
+	assertCapturedByOrigin(t, si)
 }
 
 func TestCaptureFoundByOriginFile_GitRevision(t *testing.T) {
@@ -95,5 +102,5 @@ func TestCaptureFoundByOriginFile_GitRevision(t *testing.T) {
 
 	si, err := NewSpecInfoWithCapture(captureLoader(), NewSource("HEAD:openapi.yaml"))
 	require.NoError(t, err)
-	assertRefTextFindable(t, si)
+	assertCapturedByOrigin(t, si)
 }

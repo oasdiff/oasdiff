@@ -1,8 +1,6 @@
 package load
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -50,19 +48,4 @@ func TestNewSpecInfo_NoCapture(t *testing.T) {
 	si, err := NewSpecInfo(captureLoader(), NewSource(root))
 	require.NoError(t, err)
 	require.Nil(t, si.Sources, "plain load does not capture sources")
-}
-
-// A URL-loaded spec must be captured under its full URL, matching the origin
-// File kin records for remote documents.
-func TestNewSpecInfoWithCapture_URL(t *testing.T) {
-	const spec = "openapi: 3.0.0\ninfo: {title: t, version: \"1\"}\npaths: {}\n"
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte(spec))
-	}))
-	defer srv.Close()
-
-	u := srv.URL + "/openapi.yaml"
-	si, err := NewSpecInfoWithCapture(openapi3.NewLoader(), NewSource(u))
-	require.NoError(t, err)
-	require.Equal(t, spec, si.Sources[u], "captured under the full URL")
 }
