@@ -599,6 +599,8 @@ properties:
 	specInfo, err := load.NewSpecInfoWithCapture(loader, load.NewSource("HEAD:openapi.yaml"))
 	require.NoError(t, err)
 
-	require.Equal(t, topLevel, specInfo.Sources["HEAD:openapi.yaml"], "the root document's text must be captured")
-	require.Equal(t, petSchema, specInfo.Sources["HEAD:schemas/pet.yaml"], "each $ref'd file's text must be captured")
+	// Keys carry the "./" url.String() prepends to colon-first git paths -- the
+	// exact value kin records as origin.Key.File, so review.Extract finds them.
+	require.Equal(t, topLevel, specInfo.Sources["./HEAD:openapi.yaml"], "the root document's text must be captured")
+	require.Equal(t, petSchema, specInfo.Sources["./HEAD:schemas/pet.yaml"], "each $ref'd file's text must be captured")
 }

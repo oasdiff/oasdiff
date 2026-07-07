@@ -492,14 +492,6 @@ func TestSmallestContaining_GitRevisionPrefixedFile(t *testing.T) {
 	require.False(t, ok, "a different file must not match")
 }
 
-// Origins under git loads carry a "./" prefix that capture keys don't.
-func TestTextFor_DotSlashOriginPrefix(t *testing.T) {
-	texts := map[string]string{"HEAD:api.yaml": "x"}
-	require.Equal(t, "x", textFor(texts, "./HEAD:api.yaml"))
-	require.Equal(t, "x", textFor(texts, "HEAD:api.yaml"))
-	require.Empty(t, textFor(texts, "other.yaml"))
-}
-
 const namedComponentsSpec = `openapi: 3.0.0
 info: { title: t, version: "1.0" }
 paths:

@@ -2,16 +2,14 @@ package load
 
 import (
 	"net/url"
-	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
 // sourceCapture holds the raw bytes of every file the loader reads, the root
-// spec and each $ref'd file, keyed so a file can be looked up by the File on any
-// element's origin: recordingReader derives the key with the same rule
-// kin-openapi uses for origin.Key.File (the full URL when absolute, otherwise the
-// resolved filesystem path).
+// spec and each $ref'd file, keyed by location.String() -- the exact value
+// kin-openapi records as origin.Key.File -- so a file is found by the File on
+// any element's origin with a direct lookup, no normalization.
 type sourceCapture struct {
 	files map[string][]byte
 }
@@ -24,9 +22,6 @@ func (c *sourceCapture) record(key string, data []byte) {
 	if c == nil {
 		return
 	}
-	// Origins may carry a "./" prefix on the same path (net/url prepends it
-	// when a relative path's first segment contains a colon, as git refs do).
-	key = strings.TrimPrefix(key, "./")
 	if _, seen := c.files[key]; !seen {
 		c.files[key] = append([]byte(nil), data...)
 	}

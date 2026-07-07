@@ -69,31 +69,24 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 		b.Fingerprints = append(b.Fingerprints, checker.Fingerprint(c))
 	}
 
+	// Text is a direct lookup by origin file: capture keys are the origin.Key.File
+	// verbatim (load keys sources by location.String(), the value kin sets as the
+	// origin), so no normalization is needed.
 	out := make([]Block, 0, len(order))
 	for _, key := range order {
 		b := byKey[key]
 		r := spansByKey[key]
 		if r.base != nil {
 			b.BaseFile = fileBase(r.base.file)
-			b.BaseText, b.BaseLineStart = sliceLines(textFor(baseTexts, r.base.file), r.base.start, r.base.end), r.base.start
+			b.BaseText, b.BaseLineStart = sliceLines(baseTexts[r.base.file], r.base.start, r.base.end), r.base.start
 		}
 		if r.rev != nil {
 			b.RevFile = fileBase(r.rev.file)
-			b.RevText, b.RevLineStart = sliceLines(textFor(revTexts, r.rev.file), r.rev.start, r.rev.end), r.rev.start
+			b.RevText, b.RevLineStart = sliceLines(revTexts[r.rev.file], r.rev.start, r.rev.end), r.rev.start
 		}
 		out = append(out, *b)
 	}
 	return out
-}
-
-// textFor looks up a span's origin file in the captured texts. Capture keys
-// have no leading "./"; origins may carry one (net/url prepends it when a
-// relative path's first segment contains a colon, as git refs do).
-func textFor(texts map[string]string, file string) string {
-	if t, ok := texts[file]; ok {
-		return t
-	}
-	return texts[strings.TrimPrefix(file, "./")]
 }
 
 // resolution is a change's block assignment: its key/title and the exact

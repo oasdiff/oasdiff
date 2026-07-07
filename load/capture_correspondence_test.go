@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,16 +14,13 @@ import (
 // These tests pin the contract the whole review-bundle depends on: a file the
 // loader captured must be findable by the File on an element's origin, for every
 // source type and on every platform. They exercise the same lookup
-// review.Extract uses (by origin File, with a "./" fallback), so a regression in
-// either the capture key or origin derivation fails here.
+// review.Extract uses (a direct match on origin File), so a regression in either
+// the capture key or origin derivation fails here.
 
-// textForOrigin mirrors review.Extract's lookup: by the origin File, then with
-// the leading "./" trimmed (url.String() prepends it to colon-first git paths).
+// textForOrigin mirrors review.Extract's lookup: a direct match on the origin
+// File (capture keys are the origin.Key.File verbatim).
 func textForOrigin(sources map[string]string, originFile string) (string, bool) {
-	if s, ok := sources[originFile]; ok {
-		return s, true
-	}
-	s, ok := sources[strings.TrimPrefix(originFile, "./")]
+	s, ok := sources[originFile]
 	return s, ok
 }
 
