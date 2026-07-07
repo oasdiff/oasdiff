@@ -44,23 +44,6 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 		formatDiff := schemaDiff.FormatDiff
 
 		if !typeDiff.Empty() || !formatDiff.Empty() {
-			// Body-level suppression also skips the property walk for this
-			// media type.
-			if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
-				return
-			}
-			// A oneOf wrapping (#702) reads as a top-level type change to "any"
-			// (the oneOf wrapper has no type of its own); it's reported once per
-			// body as response-body-wrapped-in-one-of, so don't also report a body
-			// type change.
-			if !schemaDiff.OneOfWrappingDiff.Empty() {
-				return
-			}
-			// Suppress null-only type changes (handled by nullable checkers).
-			if isNullTypeChange(typeDiff) && formatDiff.Empty() {
-				return
-			}
-
 			id, comment := responseTypeChangeId(typeDiff, formatDiff, info.mediaType, schemaDiff,
 				ResponseBodyTypeSpecializedId, ResponseBodyTypeCompatibleId, ResponseBodyTypeGeneralizedId, ResponseBodyTypeChangedId)
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
@@ -73,13 +56,6 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 		info.walkProperties(func(p propertyInfo) {
 			if p.propertyDiff == nil || p.propertyDiff.Revision == nil {
-				return
-			}
-
-			if shouldSuppressPropertyTypeChangedForListOfTypes(p.propertyDiff) {
-				return
-			}
-			if isNullTypeChange(p.propertyDiff.TypeDiff) && p.propertyDiff.FormatDiff.Empty() {
 				return
 			}
 

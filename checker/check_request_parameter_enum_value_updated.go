@@ -84,7 +84,7 @@ func checkParameterEnumDiff(
 			removedId,
 			makeArgs(enumVal),
 			"",
-		).WithSources(baseSource, revisionSource))
+		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 	}
 
 	for _, enumVal := range enumDiff.Added {
@@ -93,7 +93,7 @@ func checkParameterEnumDiff(
 			addedId,
 			makeArgs(enumVal),
 			"",
-		).WithSources(baseSource, revisionSource))
+		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 	}
 
 	return result

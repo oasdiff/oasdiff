@@ -85,8 +85,9 @@ type SchemaDiff struct {
 	// object<->oneOf-wrapping transitions. Additive: the raw shape change is
 	// still reported in the real fields; these only add the interpretation the
 	// checker reads.
-	ListOfTypesDiff   *ListOfTypesDiff   `json:"listOfTypes,omitempty" yaml:"listOfTypes,omitempty"`
-	OneOfWrappingDiff *OneOfWrappingDiff `json:"oneOfWrapping,omitempty" yaml:"oneOfWrapping,omitempty"`
+	ListOfTypesDiff      *ListOfTypesDiff      `json:"listOfTypes,omitempty" yaml:"listOfTypes,omitempty"`
+	OneOfWrappingDiff    *OneOfWrappingDiff    `json:"oneOfWrapping,omitempty" yaml:"oneOfWrapping,omitempty"`
+	NullableWrappingDiff *NullableWrappingDiff `json:"nullableWrapping,omitempty" yaml:"nullableWrapping,omitempty"`
 
 	// Base and Revision point to the compared schema objects for reference in checkers
 	Base     *openapi3.Schema `json:"-" yaml:"-"`
@@ -188,6 +189,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	result.TypeDiff = getTypeDiff(value1.Type, value2.Type)
 	result.ListOfTypesDiff = getListOfTypesDiff(value1, value2)
 	result.OneOfWrappingDiff = getOneOfWrappingDiff(value1, value2)
+	result.NullableWrappingDiff = getNullableWrappingDiff(config, value1, value2)
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)

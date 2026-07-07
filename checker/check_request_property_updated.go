@@ -23,6 +23,9 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 		// breaking restructuring: under oneOf a previously valid payload can
 		// match multiple overlapping alternatives and be rejected. Emit one
 		// breaking finding per wrapped body (not per property).
+		// A nullable wrapping also matches this shape, but the claim filter
+		// drops this change there (KindStructure is claimed and became-nullable
+		// reports it), so no explicit precedence check is needed.
 		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
 			result = append(result, info.newChange(
 				RequestBodyWrappedInOneOfId,

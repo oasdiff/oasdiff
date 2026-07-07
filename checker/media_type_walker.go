@@ -51,7 +51,7 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.operationItem.Revision,
 		info.method,
 		info.path,
-	).WithDetails(info.mediaTypeDetails)
+	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails)
 }
 
 // walkProperties walks every modified property under info.schemaDiff and
@@ -104,6 +104,13 @@ type propertyInfo struct {
 	propertyName string
 	propertyDiff *diff.SchemaDiff
 	parent       *diff.SchemaDiff
+}
+
+// newChange shadows the promoted body-level helper so the claim decision is
+// made against the property's own schema diff (WithSchema recomputes claimed,
+// so the second call overrides the body-level decision).
+func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
+	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff)
 }
 
 // modifiedSchemaPresentBothSides reports whether a media type's schema changed
