@@ -104,3 +104,22 @@ func TestCaptureFoundByOriginFile_GitRevision(t *testing.T) {
 	require.NoError(t, err)
 	assertCapturedByOrigin(t, si)
 }
+
+// Composed mode (-c, glob) captures per spec: NewSpecInfoFromGlobWithCapture
+// returns one SpecInfo per matched root, each carrying its own root and $ref'd
+// file keyed by origin, so specSetDocsAndSources' union feeds review.Extract a
+// complete file->text map. A shared $ref'd file is captured by every spec that
+// uses it (the loader re-reads it on each top-level load), not just the first.
+func TestCaptureFoundByOriginFile_ComposedGlob(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "other.yaml"), []byte(captureSubDoc), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "api-1.yaml"), []byte(captureRoot), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "api-2.yaml"), []byte(captureRoot), 0644))
+
+	sis, err := NewSpecInfoFromGlobWithCapture(captureLoader(), filepath.Join(dir, "api-*.yaml"))
+	require.NoError(t, err)
+	require.Len(t, sis, 2, "the glob matches the two root specs, not the $ref'd other.yaml")
+	for _, si := range sis {
+		assertCapturedByOrigin(t, si)
+	}
+}
