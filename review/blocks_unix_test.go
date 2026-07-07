@@ -59,3 +59,56 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 	require.Contains(t, blocks[0].RevText, "role:")
 	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from other.yaml, not the root spec")
 }
+
+// An external $ref authored "other.yaml" on the base side and "./other.yaml" on
+// the revision side names the same target; kin preserves the authored "./" in
+// sr.Ref, so indexExternalSchemas strips it before keying. That makes both sides
+// key the block identically, so resolve() pairs them into one block rather than a
+// spurious delete + add. Remove the strip and this fails: base and rev key
+// differently and the base side no longer slices.
+func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "other.yaml"), []byte(crossFileSubDoc), 0644))
+	baseRoot := filepath.Join(dir, "base.yaml")
+	revRoot := filepath.Join(dir, "rev.yaml")
+	require.NoError(t, os.WriteFile(baseRoot, []byte(strings.Replace(crossFileRoot, "./other.yaml", "other.yaml", 1)), 0644))
+	require.NoError(t, os.WriteFile(revRoot, []byte(crossFileRoot), 0644)) // keeps "./other.yaml"
+
+	loadSpec := func(path string) *load.SpecInfo {
+		loader := openapi3.NewLoader()
+		loader.IncludeOrigin = true
+		loader.IsExternalRefsAllowed = true
+		si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(path))
+		require.NoError(t, err)
+		return si
+	}
+	baseSI, revSI := loadSpec(baseRoot), loadSpec(revRoot)
+
+	findExternal := func(d *openapi3.T) (string, span) {
+		for k, spans := range buildIndex(d).byKey {
+			if strings.Contains(k, "other.yaml") {
+				return k, spans[0]
+			}
+		}
+		return "", span{}
+	}
+	baseKey, baseSpan := findExternal(baseSI.Spec)
+	revKey, revSpan := findExternal(revSI.Spec)
+	require.NotEmpty(t, baseKey, "the external User schema must be indexed on the base side")
+	require.Equal(t, baseKey, revKey, "'other.yaml' and './other.yaml' must key the same block")
+
+	// one change, sourced inside other.yaml on each side (as the changelog reports)
+	c := checker.ApiChange{
+		Id:        "request-property-type-changed",
+		Operation: "POST",
+		Path:      "/users",
+		CommonChange: checker.CommonChange{
+			BaseSource:     &checker.Source{File: baseSpan.file, Line: baseSpan.end},
+			RevisionSource: &checker.Source{File: revSpan.file, Line: revSpan.end},
+		},
+	}
+	blocks := Extract(checker.Changes{c}, docs(baseSI.Spec), docs(revSI.Spec), baseSI.Sources, revSI.Sources)
+	require.Len(t, blocks, 1, "the two sides pair into one block")
+	require.NotEmpty(t, blocks[0].BaseText, "base side sliced (paired, not delete + add)")
+	require.NotEmpty(t, blocks[0].RevText, "revision side sliced")
+}

@@ -17,13 +17,6 @@ import (
 // review.Extract uses (a direct match on origin File), so a regression in either
 // the capture key or origin derivation fails here.
 
-// textForOrigin mirrors review.Extract's lookup: a direct match on the origin
-// File (capture keys are the origin.Key.File verbatim).
-func textForOrigin(sources map[string]string, originFile string) (string, bool) {
-	s, ok := sources[originFile]
-	return s, ok
-}
-
 func sourceKeys(m map[string]string) []string {
 	out := make([]string, 0, len(m))
 	for k := range m {
@@ -44,7 +37,10 @@ func refElementOriginFile(t *testing.T, si *SpecInfo) string {
 func assertRefTextFindable(t *testing.T, si *SpecInfo) {
 	t.Helper()
 	originFile := refElementOriginFile(t, si)
-	text, ok := textForOrigin(si.Sources, originFile)
+	// A captured file is found by its origin File with a direct lookup, the same
+	// as review.Extract: load keys sources by location.String(), exactly what kin
+	// records as origin.Key.File.
+	text, ok := si.Sources[originFile]
 	require.Truef(t, ok, "$ref'd file not findable by origin File %q; captured keys: %v", originFile, sourceKeys(si.Sources))
 	require.Equal(t, captureSubDoc, text, "found text is the $ref'd file's content")
 }
