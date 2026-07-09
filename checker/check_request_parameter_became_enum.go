@@ -40,7 +40,7 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 						RequestParameterBecameEnumId,
 						[]any{paramLocation, paramName},
 						"",
-					).WithSources(baseSource, revisionSource))
+					).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

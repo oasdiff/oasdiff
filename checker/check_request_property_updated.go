@@ -57,7 +57,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					RequestPropertyRemovedId,
 					[]any{propertyFullName(propertyPath, propertyName)},
 					"",
-				).WithSources(baseSource, nil))
+				).WithSchema(parent).WithSources(baseSource, nil))
 			})
 
 		checkAddedPropertiesDiff(
@@ -76,20 +76,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 							NewRequiredRequestPropertyId,
 							[]any{propName},
 							"",
-						).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							"",
-						).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
 						"",
-					).WithSources(nil, revisionSource))
+					).WithSchema(parent).WithSources(nil, revisionSource))
 				}
 			})
 	})

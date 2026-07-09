@@ -33,8 +33,12 @@ func TestClaimedByTransition(t *testing.T) {
 	require.True(t, claimedByTransition(nullable, RequestPropertyEnumValueRemovedId), "values")
 	require.True(t, claimedByTransition(nullable, RequestPropertyPatternRemovedId), "constraints")
 	require.True(t, claimedByTransition(nullable, RequestPropertyOneOfAddedId), "structure")
-	require.False(t, claimedByTransition(nullable, RequestPropertyRemovedId),
-		"existence changes are not reflections of the wrap and keep reporting")
+	require.True(t, claimedByTransition(nullable, RequestPropertyRemovedId),
+		"existence: an object's properties read as removed when it is wrapped")
+	require.True(t, claimedByTransition(nullable, RequestPropertyBecameRequiredId),
+		"requiredness: required entries move between the top level and the branch")
+	require.False(t, claimedByTransition(nullable, RequestPropertyDeprecatedId),
+		"lifecycle changes are not reflections of the wrap and keep reporting")
 
 	// A list-of-types transition claims the type and structure reflections but
 	// not values: an enum change there is a real change.

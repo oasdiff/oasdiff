@@ -36,6 +36,9 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 			// wrapped in oneOf: [{type: "null"}, <equivalent schema>]
 			result = append(result, info.newChange(RequestBodyBecomeNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
+		} else if isNullableUnwrapping(info.schemaDiff) {
+			result = append(result, info.newChange(RequestBodyBecomeNotNullableId, nil, "").
+				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
@@ -59,6 +62,9 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 					WithSources(propBaseSource, propRevisionSource))
 			} else if isNullableWrapping(p.propertyDiff) {
 				result = append(result, p.newChange(RequestPropertyBecomeNullableId, []any{propName}, "").
+					WithSources(propBaseSource, propRevisionSource))
+			} else if isNullableUnwrapping(p.propertyDiff) {
+				result = append(result, p.newChange(RequestPropertyBecomeNotNullableId, []any{propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
 		})

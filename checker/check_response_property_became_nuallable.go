@@ -5,8 +5,10 @@ import (
 )
 
 const (
-	ResponsePropertyBecameNullableId = "response-property-became-nullable"
-	ResponseBodyBecameNullableId     = "response-body-became-nullable"
+	ResponsePropertyBecameNullableId    = "response-property-became-nullable"
+	ResponseBodyBecameNullableId        = "response-body-became-nullable"
+	ResponsePropertyBecameNotNullableId = "response-property-became-not-nullable"
+	ResponseBodyBecameNotNullableId     = "response-body-became-not-nullable"
 )
 
 func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -24,6 +26,9 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 		} else if isNullableWrapping(info.schemaDiff) {
 			// wrapped in oneOf: [{type: "null"}, <equivalent schema>]
 			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
+				WithSources(baseSource, revisionSource))
+		} else if isNullableUnwrapping(info.schemaDiff) {
+			result = append(result, info.newChange(ResponseBodyBecameNotNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
 		}
 
@@ -46,6 +51,12 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 			if nullAddedToTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Base.Type) || isNullableWrapping(p.propertyDiff) {
 				result = append(result, p.newChange(
 					ResponsePropertyBecameNullableId,
+					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			} else if isNullableUnwrapping(p.propertyDiff) {
+				result = append(result, p.newChange(
+					ResponsePropertyBecameNotNullableId,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))

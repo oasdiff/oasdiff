@@ -188,6 +188,8 @@ response-optional-property-removed: removed the optional property %s from the re
 response-property-became-optional: the response property %s became optional for the status %s
 response-property-became-nullable: the response property %s became nullable for the status %s
 response-body-became-nullable: the response's body became nullable
+response-property-became-not-nullable: the response property %s became not nullable for the status %s
+response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
 response-property-enum-value-added-comment: Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
@@ -560,6 +562,8 @@ response-body-all-of-removed-description: sub-schema removed from allOf in respo
 response-body-any-of-added-description: sub-schema added to anyOf in response body
 response-body-any-of-removed-description: sub-schema removed from anyOf in response body
 response-body-became-nullable-description: response body became nullable
+response-property-became-not-nullable-description: response property became not nullable
+response-body-became-not-nullable-description: response body became not nullable
 response-body-default-value-added-description: response body default value set
 response-body-default-value-changed-description: response body default value changed
 response-body-default-value-removed-description: response body default value unset

@@ -188,6 +188,8 @@ response-property-sunset-date-too-small: "la fecha de expiración %s de la propi
 response-property-became-optional: la propiedad de respuesta %s se volvió opcional para el estado %s
 response-property-became-nullable: la propiedad de respuesta %s se volvió nulable para el estado %s
 response-body-became-nullable: el cuerpo de respuesta se volvió nulable
+response-property-became-not-nullable: la propiedad de respuesta %s se volvió no nulable para el estado %s
+response-body-became-not-nullable: el cuerpo de respuesta se volvió no nulable
 response-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de respuesta %s para el estado %s
 response-property-enum-value-added-comment: "Agregar nuevos valores enum a la respuesta puede ser inesperado para los clientes, usa x-extensible-enum en su lugar."
 response-property-enum-value-removed: removido el valor enum %s de la propiedad de respuesta %s para el estado %s
@@ -554,6 +556,8 @@ response-body-all-of-removed-description: subesquema removido del allOf en el cu
 response-body-any-of-added-description: subesquema agregado al anyOf en el cuerpo de respuesta
 response-body-any-of-removed-description: subesquema removido del anyOf en el cuerpo de respuesta
 response-body-became-nullable-description: cuerpo de respuesta se volvió nulable
+response-property-became-not-nullable-description: la propiedad de respuesta se volvió no nulable
+response-body-became-not-nullable-description: el cuerpo de respuesta se volvió no nulable
 response-body-default-value-added-description: valor por defecto del cuerpo de respuesta establecido
 response-body-default-value-changed-description: valor por defecto del cuerpo de respuesta cambiado
 response-body-default-value-removed-description: valor por defecto del cuerpo de respuesta removido
