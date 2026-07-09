@@ -163,12 +163,8 @@ func claimedByTransition(schemaDiff *diff.SchemaDiff, ruleId string) bool {
 		return false
 	}
 	for _, t := range transitions {
-		if t.claims[kind] && t.present(schemaDiff) {
-			if slices.Contains(t.reportedBy, ruleId) {
-				return false
-			} else {
-				return true
-			}
+		if t.claims[kind] && t.present(schemaDiff) && !slices.Contains(t.reportedBy, ruleId) {
+			return true
 		}
 	}
 	return false

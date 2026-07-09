@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -79,12 +81,7 @@ func schemaAcceptsNull(schema *openapi3.Schema) bool {
 	if schema.Nullable {
 		return true
 	}
-	for _, t := range schema.Type.Slice() {
-		if t == "null" {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(schema.Type.Slice(), "null")
 }
 
 // constrainsNothingBeyondOneOf reports whether the schema, with its oneOf
