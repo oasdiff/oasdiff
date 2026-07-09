@@ -15,19 +15,6 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// Body-level suppression also skips the property walk for this
-		// media type (pre-migration code used `continue` in the
-		// media-type for-loop). Preserved.
-		if shouldSuppressOneOfSchemaChangedForListOfTypes(info.schemaDiff) {
-			return
-		}
-
-		// A oneOf wrapping (#702) is reported once per body as
-		// response-body-wrapped-in-one-of; don't also report its added
-		// alternatives as a raw one-of-added.
-		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
-			return
-		}
 
 		if info.schemaDiff.OneOfDiff != nil {
 			if added := info.schemaDiff.OneOfDiff.Added; len(added) > 0 {
@@ -44,9 +31,6 @@ func ResponsePropertyOneOfUpdated(diffReport *diff.Diff, operationsSources *diff
 
 		info.walkProperties(func(p propertyInfo) {
 			if p.propertyDiff.OneOfDiff == nil {
-				return
-			}
-			if shouldSuppressPropertyOneOfSchemaChangedForListOfTypes(p.propertyDiff) {
 				return
 			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)

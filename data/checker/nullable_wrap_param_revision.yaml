@@ -1,0 +1,16 @@
+openapi: 3.1.0
+info: {title: t, version: "1.0.0"}
+paths:
+  /test:
+    get:
+      operationId: testOp
+      parameters:
+        - name: kind
+          in: query
+          schema:
+            oneOf:
+              - type: "null"
+              - type: string
+                enum: [user, serviceAccount]
+      responses:
+        "200": {description: OK}

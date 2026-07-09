@@ -21,6 +21,10 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
 			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
+		} else if isNullableWrapping(info.schemaDiff) {
+			// wrapped in oneOf: [{type: "null"}, <equivalent schema>]
+			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
+				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
@@ -37,8 +41,9 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 				).WithSources(propBaseSource, propRevisionSource))
 				return
 			}
-			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
-			if nullAddedToTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Base.Type) {
+			// OpenAPI 3.1: type changed from "string" to ["string", "null"], or
+			// wrapped in oneOf: [{type: "null"}, <equivalent schema>]
+			if nullAddedToTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Base.Type) || isNullableWrapping(p.propertyDiff) {
 				result = append(result, p.newChange(
 					ResponsePropertyBecameNullableId,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
