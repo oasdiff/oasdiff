@@ -131,16 +131,6 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 					if !typeDiff.Empty() || !formatDiff.Empty() {
 
-						// Suppress single<->oneOf/anyOf transitions (handled by the list-of-types checker)
-						if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
-							continue
-						}
-
-						// Suppress null-only type changes (handled by nullable checkers)
-						if isNullTypeChange(typeDiff) && formatDiff.Empty() {
-							continue
-						}
-
 						id := RequestParameterTypeGeneralizedId
 						comment := ""
 
@@ -164,7 +154,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 							id,
 							[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 							comment,
-						).WithSources(baseSource, revisionSource))
+						).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 					}
 
 					checkModifiedPropertiesDiff(
@@ -178,23 +168,13 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 							if !typeDiff.Empty() || !formatDiff.Empty() {
 
-								// Suppress single<->oneOf/anyOf transitions (handled by the list-of-types checker)
-								if shouldSuppressPropertyTypeChangedForListOfTypes(schemaDiff) {
-									return
-								}
-
-								// Suppress null-only type changes (handled by nullable checkers)
-								if isNullTypeChange(typeDiff) && formatDiff.Empty() {
-									return
-								}
-
 								id, comment := checkRequestParameterPropertyTypeChanged(typeDiff, formatDiff, schemaDiff)
 
 								result = append(result, opInfo.NewApiChange(
 									id,
 									[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), propertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 									comment,
-								).WithSources(propBaseSource, propRevisionSource))
+								).WithSchema(schemaDiff).WithSources(propBaseSource, propRevisionSource))
 							}
 						})
 				}

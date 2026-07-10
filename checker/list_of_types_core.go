@@ -50,7 +50,7 @@ func checkPropertyListOfTypesChange(opInfo opInfo, propertyPath string, property
 		messageId,
 		args,
 		"",
-	).WithSources(baseSource, revisionSource))
+	).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -96,7 +96,7 @@ func checkBodyListOfTypesChange(opInfo opInfo, schemaDiff *diff.SchemaDiff, medi
 		messageId,
 		args,
 		"",
-	).WithSources(baseSource, revisionSource))
+	).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -129,7 +129,7 @@ func checkParameterListOfTypesChange(opInfo opInfo, paramDiff *diff.ParameterDif
 		messageId,
 		args,
 		"",
-	).WithSources(baseSource, revisionSource))
+	).WithSchema(paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -163,31 +163,9 @@ func checkParameterPropertyListOfTypesChange(opInfo opInfo, propertyPath string,
 		messageId,
 		args,
 		"",
-	).WithSources(baseSource, revisionSource))
+	).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
 
 	return result
-}
-
-// Suppression functions that can be called by existing checkers
-
-// shouldSuppressTypeChangedForListOfTypes checks if a type change should be suppressed because it's handled by ListOfTypes checker
-func shouldSuppressTypeChangedForListOfTypes(schemaDiff *diff.SchemaDiff) bool {
-	return schemaDiff != nil && !schemaDiff.ListOfTypesDiff.Empty()
-}
-
-// shouldSuppressPropertyTypeChangedForListOfTypes checks if a property type change should be suppressed because it's handled by ListOfTypes checker
-func shouldSuppressPropertyTypeChangedForListOfTypes(propertyDiff *diff.SchemaDiff) bool {
-	return propertyDiff != nil && !propertyDiff.ListOfTypesDiff.Empty()
-}
-
-// shouldSuppressOneOfSchemaChangedForListOfTypes checks if oneOf schema changes should be suppressed because they're handled by ListOfTypes checker
-func shouldSuppressOneOfSchemaChangedForListOfTypes(schemaDiff *diff.SchemaDiff) bool {
-	return schemaDiff != nil && !schemaDiff.ListOfTypesDiff.Empty()
-}
-
-// shouldSuppressPropertyOneOfSchemaChangedForListOfTypes checks if property oneOf schema changes should be suppressed because they're handled by ListOfTypes checker
-func shouldSuppressPropertyOneOfSchemaChangedForListOfTypes(propertyDiff *diff.SchemaDiff) bool {
-	return propertyDiff != nil && !propertyDiff.ListOfTypesDiff.Empty()
 }
 
 // Helper function to join types for display in messages

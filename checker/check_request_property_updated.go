@@ -23,6 +23,9 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 		// breaking restructuring: under oneOf a previously valid payload can
 		// match multiple overlapping alternatives and be rejected. Emit one
 		// breaking finding per wrapped body (not per property).
+		// A nullable wrapping also matches this shape, but the claim filter
+		// drops this change there (KindStructure is claimed and became-nullable
+		// reports it), so no explicit precedence check is needed.
 		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
 			result = append(result, info.newChange(
 				RequestBodyWrappedInOneOfId,
@@ -54,7 +57,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					RequestPropertyRemovedId,
 					[]any{propertyFullName(propertyPath, propertyName)},
 					"",
-				).WithSources(baseSource, nil))
+				).WithSchema(parent).WithSources(baseSource, nil))
 			})
 
 		checkAddedPropertiesDiff(
@@ -73,20 +76,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 							NewRequiredRequestPropertyId,
 							[]any{propName},
 							"",
-						).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							"",
-						).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
 						"",
-					).WithSources(nil, revisionSource))
+					).WithSchema(parent).WithSources(nil, revisionSource))
 				}
 			})
 	})

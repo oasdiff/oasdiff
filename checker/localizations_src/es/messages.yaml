@@ -61,6 +61,10 @@ request-header-property-became-enum: la propiedad %s del encabezado de solicitud
 request-parameter-became-required: el parámetro %s de solicitud %s se volvió requerido
 request-parameter-became-optional: el parámetro %s de solicitud %s se volvió opcional
 request-parameter-became-enum: el parámetro %s de solicitud %s fue restringido a una lista de valores enum
+request-parameter-became-nullable: el parámetro de solicitud %s %s se volvió nulable
+request-parameter-became-not-nullable: el parámetro de solicitud %s %s se volvió no nulable
+request-parameter-property-became-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió nulable
+request-parameter-property-became-not-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió no nulable
 request-parameter-enum-value-removed: removido el valor enum %s del parámetro %s de solicitud %s
 request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro %s de solicitud %s
 request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
@@ -188,6 +192,8 @@ response-property-sunset-date-too-small: "la fecha de expiración %s de la propi
 response-property-became-optional: la propiedad de respuesta %s se volvió opcional para el estado %s
 response-property-became-nullable: la propiedad de respuesta %s se volvió nulable para el estado %s
 response-body-became-nullable: el cuerpo de respuesta se volvió nulable
+response-property-became-not-nullable: la propiedad de respuesta %s se volvió no nulable para el estado %s
+response-body-became-not-nullable: el cuerpo de respuesta se volvió no nulable
 response-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de respuesta %s para el estado %s
 response-property-enum-value-added-comment: "Agregar nuevos valores enum a la respuesta puede ser inesperado para los clientes, usa x-extensible-enum en su lugar."
 response-property-enum-value-removed: removido el valor enum %s de la propiedad de respuesta %s para el estado %s
@@ -459,6 +465,10 @@ request-optional-property-became-not-write-only-description: propiedad opcional 
 request-optional-property-became-read-only-description: propiedad opcional de solicitud se volvió de solo lectura
 request-optional-property-became-write-only-description: propiedad opcional de solicitud se volvió de solo escritura
 request-parameter-became-enum-description: parámetro de solicitud restringido a enum
+request-parameter-became-nullable-description: el parámetro de solicitud se volvió nulable
+request-parameter-became-not-nullable-description: el parámetro de solicitud se volvió no nulable
+request-parameter-property-became-nullable-description: la propiedad del parámetro de solicitud se volvió nulable
+request-parameter-property-became-not-nullable-description: la propiedad del parámetro de solicitud se volvió no nulable
 request-parameter-became-optional-description: parámetro de solicitud se volvió opcional
 request-parameter-became-required-description: parámetro de solicitud se volvió requerido
 request-parameter-default-value-added-description: valor por defecto del parámetro de solicitud establecido
@@ -554,6 +564,8 @@ response-body-all-of-removed-description: subesquema removido del allOf en el cu
 response-body-any-of-added-description: subesquema agregado al anyOf en el cuerpo de respuesta
 response-body-any-of-removed-description: subesquema removido del anyOf en el cuerpo de respuesta
 response-body-became-nullable-description: cuerpo de respuesta se volvió nulable
+response-property-became-not-nullable-description: la propiedad de respuesta se volvió no nulable
+response-body-became-not-nullable-description: el cuerpo de respuesta se volvió no nulable
 response-body-default-value-added-description: valor por defecto del cuerpo de respuesta establecido
 response-body-default-value-changed-description: valor por defecto del cuerpo de respuesta cambiado
 response-body-default-value-removed-description: valor por defecto del cuerpo de respuesta removido

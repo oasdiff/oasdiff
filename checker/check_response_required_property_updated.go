@@ -25,6 +25,9 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		// Emit one breaking finding per wrapped body (not per property). This
 		// is the single emission point for the response side, mirroring the
 		// request side which emits in RequestPropertyUpdatedCheck.
+		// A nullable wrapping also matches this shape, but the claim filter
+		// drops this change there (KindStructure is claimed and became-nullable
+		// reports it), so no explicit precedence check is needed.
 		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
 			result = append(result, info.newChange(
 				ResponseBodyWrappedInOneOfId,
@@ -63,7 +66,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSources(baseSource, nil))
+				).WithSchema(parent).WithSources(baseSource, nil))
 			})
 		checkAddedPropertiesDiff(
 			info.schemaDiff,
@@ -82,7 +85,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSources(nil, revisionSource))
+				).WithSchema(parent).WithSources(nil, revisionSource))
 			})
 	})
 

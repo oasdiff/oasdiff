@@ -5,42 +5,27 @@ import (
 )
 
 const (
-	ResponsePropertyBecameNullableId = "response-property-became-nullable"
-	ResponseBodyBecameNullableId     = "response-body-became-nullable"
+	ResponsePropertyBecameNullableId    = "response-property-became-nullable"
+	ResponseBodyBecameNullableId        = "response-body-became-nullable"
+	ResponsePropertyBecameNotNullableId = "response-property-became-not-nullable"
+	ResponseBodyBecameNotNullableId     = "response-body-became-not-nullable"
 )
 
 func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
-		if info.schemaDiff.NullableDiff != nil && info.schemaDiff.NullableDiff.To == true {
-			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
-				WithSources(baseSource, revisionSource))
-		} else if nullAddedToTypeArray(info.schemaDiff.TypeDiff, info.schemaDiff.Base.Type) {
-			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
-			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
+		if id := nullabilityChangeId(info.schemaDiff, ResponseBodyBecameNullableId, ResponseBodyBecameNotNullableId); id != "" {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
+			result = append(result, info.newChange(id, nil, "").
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
-			nullableDiff := p.propertyDiff.NullableDiff
-			if nullableDiff != nil {
-				if nullableDiff.To != true {
-					return
-				}
+			if id := nullabilityChangeId(p.propertyDiff, ResponsePropertyBecameNullableId, ResponsePropertyBecameNotNullableId); id != "" {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
 				result = append(result, p.newChange(
-					ResponsePropertyBecameNullableId,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
-					"",
-				).WithSources(propBaseSource, propRevisionSource))
-				return
-			}
-			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
-			if nullAddedToTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Base.Type) {
-				result = append(result, p.newChange(
-					ResponsePropertyBecameNullableId,
+					id,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))

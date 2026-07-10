@@ -288,6 +288,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestHeaderPropertyBecameRequiredId, ERR, RequestHeaderPropertyBecameRequiredCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
 		// RequestParameterBecameEnumCheck
 		newBackwardCompatibilityRule(RequestParameterBecameEnumId, ERR, RequestParameterBecameEnumCheck, DirectionRequest, AreaParameters, KindValues, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterBecameNullableId, INFO, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterPropertyBecameNullableId, INFO, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterPropertyBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
 		// RequestParameterDefaultValueChangedCheck
 		newBackwardCompatibilityRule(RequestParameterDefaultValueChangedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, ActionChange),
 		newBackwardCompatibilityRule(RequestParameterDefaultValueAddedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, ActionAdd),
@@ -537,6 +541,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// ResponsePropertyBecameNullableCheck
 		newBackwardCompatibilityRule(ResponsePropertyBecameNullableId, ERR, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, ActionChange),
 		newBackwardCompatibilityRule(ResponseBodyBecameNullableId, ERR, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(ResponsePropertyBecameNotNullableId, INFO, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(ResponseBodyBecameNotNullableId, INFO, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, ActionChange),
 		// ResponsePropertyBecameOptionalCheck
 		newBackwardCompatibilityRule(ResponsePropertyBecameOptionalId, ERR, ResponsePropertyBecameOptionalCheck, DirectionResponse, AreaSchema, KindRequiredness, ActionChange),
 		newBackwardCompatibilityRule(ResponseWriteOnlyPropertyBecameOptionalId, INFO, ResponsePropertyBecameOptionalCheck, DirectionResponse, AreaSchema, KindRequiredness, ActionChange),

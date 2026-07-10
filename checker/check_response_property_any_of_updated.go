@@ -15,13 +15,6 @@ func ResponsePropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// Body-level suppression also skips the property walk for this
-		// media type (pre-migration code used `continue` in the
-		// media-type for-loop). Preserved.
-		if shouldSuppressOneOfSchemaChangedForListOfTypes(info.schemaDiff) {
-			return
-		}
-
 		if info.schemaDiff.AnyOfDiff != nil {
 			if added := info.schemaDiff.AnyOfDiff.Added; len(added) > 0 {
 				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "anyOf", -1, added[0].Index)
@@ -37,9 +30,6 @@ func ResponsePropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 
 		info.walkProperties(func(p propertyInfo) {
 			if p.propertyDiff.AnyOfDiff == nil {
-				return
-			}
-			if shouldSuppressPropertyOneOfSchemaChangedForListOfTypes(p.propertyDiff) {
 				return
 			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)

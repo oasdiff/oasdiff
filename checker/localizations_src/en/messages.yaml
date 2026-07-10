@@ -73,6 +73,10 @@ request-header-property-became-enum: the %s request header's property %s was res
 request-parameter-became-required: the %s request parameter %s became required
 request-parameter-became-optional: the %s request parameter %s became optional
 request-parameter-became-enum: the %s request parameter %s was restricted to a list of enum values
+request-parameter-became-nullable: the %s request parameter %s became nullable
+request-parameter-became-not-nullable: the %s request parameter %s became not nullable
+request-parameter-property-became-nullable: the %s property of the %s request parameter %s became nullable
+request-parameter-property-became-not-nullable: the %s property of the %s request parameter %s became not nullable
 request-parameter-enum-value-removed: removed the enum value %s from the %s request parameter %s
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
 request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
@@ -188,6 +192,8 @@ response-optional-property-removed: removed the optional property %s from the re
 response-property-became-optional: the response property %s became optional for the status %s
 response-property-became-nullable: the response property %s became nullable for the status %s
 response-body-became-nullable: the response's body became nullable
+response-property-became-not-nullable: the response property %s became not nullable for the status %s
+response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
 response-property-enum-value-added-comment: Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
@@ -462,6 +468,10 @@ request-optional-property-became-not-write-only-description: request optional pr
 request-optional-property-became-read-only-description: request optional property became read-only
 request-optional-property-became-write-only-description: request optional property became write-only
 request-parameter-became-enum-description: request parameter restricted to enum
+request-parameter-became-nullable-description: request parameter became nullable
+request-parameter-became-not-nullable-description: request parameter became not nullable
+request-parameter-property-became-nullable-description: request parameter property became nullable
+request-parameter-property-became-not-nullable-description: request parameter property became not nullable
 request-parameter-became-optional-description: request parameter became optional
 request-parameter-became-required-description: request parameter became required
 request-parameter-default-value-added-description: request parameter default value set
@@ -560,6 +570,8 @@ response-body-all-of-removed-description: sub-schema removed from allOf in respo
 response-body-any-of-added-description: sub-schema added to anyOf in response body
 response-body-any-of-removed-description: sub-schema removed from anyOf in response body
 response-body-became-nullable-description: response body became nullable
+response-property-became-not-nullable-description: response property became not nullable
+response-body-became-not-nullable-description: response body became not nullable
 response-body-default-value-added-description: response body default value set
 response-body-default-value-changed-description: response body default value changed
 response-body-default-value-removed-description: response body default value unset

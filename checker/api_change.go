@@ -24,6 +24,11 @@ type ApiChange struct {
 	Path        string
 	Source      *load.Source
 
+	// claimed marks a change that a recognized schema transition explains
+	// (see transition_claims.go); claimed changes are dropped in favor of the
+	// transition's own finding. Set by WithSchema.
+	claimed bool
+
 	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
@@ -33,7 +38,6 @@ type ApiChange struct {
 }
 
 // NewApiChange creates a new ApiChange
-// TODO: use opInfo to simplify the function signature
 func NewApiChange(id string, config *Config, args []any, comment string, operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string) ApiChange {
 	return ApiChange{
 		Id:          id,
@@ -48,6 +52,15 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 			Attributes: getAttributes(config, operation),
 		},
 	}
+}
+
+// WithSchema returns a copy of the ApiChange with claimed set: the change is
+// claimed when a recognized transition at the given schema node (the node the
+// change was computed from) claims the change's rule (see
+// transition_claims.go). The node itself is not retained.
+func (a ApiChange) WithSchema(schemaDiff *diff.SchemaDiff) ApiChange {
+	a.claimed = claimedByTransition(schemaDiff, a.Id)
+	return a
 }
 
 // WithSources returns a copy of the ApiChange with BaseSource and RevisionSource populated

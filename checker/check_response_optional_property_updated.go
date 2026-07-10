@@ -47,7 +47,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSources(baseSource, nil))
+				).WithSchema(parent).WithSources(baseSource, nil))
 			})
 
 		checkAddedPropertiesDiff(
@@ -66,7 +66,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSources(nil, revisionSource))
+				).WithSchema(parent).WithSources(nil, revisionSource))
 			})
 	})
 
