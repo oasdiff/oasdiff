@@ -59,3 +59,4 @@ oasdiff recognizes the `oneOf` form only when it is a pure wrap: exactly two bra
 - **Wrapping an already-nullable schema** is not a nullability change. Under `oneOf`, a value must match exactly one branch; if the schema already allows `null`, a `null` value now matches two branches and is rejected.
 - **A wrap that also changes the schema**, for example removing an enum value while adding the wrapper, is reported by the underlying changes (the enum removal), not as a nullability change.
 - **Adding a null branch to a `oneOf` that already has several branches** is reported as a list-of-types change (for simple types) or a `oneOf` change (for objects), not as a nullability change.
+- **Response headers** are not yet checked for schema changes, including nullability ([#1094](https://github.com/oasdiff/oasdiff/issues/1094)). Request headers are parameters (`in: header`) and are covered by the parameter checks.
