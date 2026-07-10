@@ -84,6 +84,7 @@ Where specs come from.
 How oasdiff pairs up base and revision and what counts as a difference.
 
 - [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
+- [Nullability changes](NULLABILITY.md) — the three equivalent nullable forms and when changing them is breaking
 - [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
 - [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
 

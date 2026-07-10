@@ -65,6 +65,18 @@ const (
 	becameNotNullable
 )
 
+// nullabilityChangeId returns the rule id reporting the schema diff's
+// nullability transition, or "" when nullability did not change.
+func nullabilityChangeId(d *diff.SchemaDiff, nullableId, notNullableId string) string {
+	switch nullabilityChange(d) {
+	case becameNullable:
+		return nullableId
+	case becameNotNullable:
+		return notNullableId
+	}
+	return ""
+}
+
 // nullabilityChange recognizes a nullability transition in any of its three
 // equivalent forms: the nullable keyword (OpenAPI 3.0), a "null" entry in the
 // type array (OpenAPI 3.1), and the nullable oneOf wrapping

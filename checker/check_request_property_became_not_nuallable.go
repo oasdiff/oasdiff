@@ -15,25 +15,16 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
-		switch nullabilityChange(info.schemaDiff) {
-		case becameNullable:
-			result = append(result, info.newChange(RequestBodyBecomeNullableId, nil, "").
-				WithSources(baseSource, revisionSource))
-		case becameNotNullable:
-			result = append(result, info.newChange(RequestBodyBecomeNotNullableId, nil, "").
+		if id := nullabilityChangeId(info.schemaDiff, RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId); id != "" {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
+			result = append(result, info.newChange(id, nil, "").
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
-			switch nullabilityChange(p.propertyDiff) {
-			case becameNullable:
-				result = append(result, p.newChange(RequestPropertyBecomeNullableId, []any{propName}, "").
-					WithSources(propBaseSource, propRevisionSource))
-			case becameNotNullable:
-				result = append(result, p.newChange(RequestPropertyBecomeNotNullableId, []any{propName}, "").
+			if id := nullabilityChangeId(p.propertyDiff, RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId); id != "" {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
+				result = append(result, p.newChange(id, []any{propertyFullName(p.propertyPath, p.propertyName)}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
 		})
