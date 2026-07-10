@@ -55,3 +55,41 @@ func onlyNull(types []string) bool {
 	}
 	return true
 }
+
+// nullability classifies a schema diff's nullability transition.
+type nullability int
+
+const (
+	nullabilityUnchanged nullability = iota
+	becameNullable
+	becameNotNullable
+)
+
+// nullabilityChange recognizes a nullability transition in any of its three
+// equivalent forms: the nullable keyword (OpenAPI 3.0), a "null" entry in the
+// type array (OpenAPI 3.1), and the nullable oneOf wrapping
+// (oneOf: [{type: "null"}, <equivalent schema>]).
+func nullabilityChange(d *diff.SchemaDiff) nullability {
+	if d.NullableDiff != nil {
+		if d.NullableDiff.From == true {
+			return becameNotNullable
+		}
+		if d.NullableDiff.To == true {
+			return becameNullable
+		}
+		return nullabilityUnchanged
+	}
+	if nullRemovedFromTypeArray(d.TypeDiff, d.Revision.Type) {
+		return becameNotNullable
+	}
+	if nullAddedToTypeArray(d.TypeDiff, d.Base.Type) {
+		return becameNullable
+	}
+	if isNullableWrapping(d) {
+		return becameNullable
+	}
+	if isNullableUnwrapping(d) {
+		return becameNotNullable
+	}
+	return nullabilityUnchanged
+}

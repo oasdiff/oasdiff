@@ -16,45 +16,25 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
-		if info.schemaDiff.NullableDiff != nil && info.schemaDiff.NullableDiff.To == true {
+		switch nullabilityChange(info.schemaDiff) {
+		case becameNullable:
 			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
-		} else if nullAddedToTypeArray(info.schemaDiff.TypeDiff, info.schemaDiff.Base.Type) {
-			// OpenAPI 3.1: type changed from "string" to ["string", "null"]
-			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
-				WithSources(baseSource, revisionSource))
-		} else if isNullableWrapping(info.schemaDiff) {
-			// wrapped in oneOf: [{type: "null"}, <equivalent schema>]
-			result = append(result, info.newChange(ResponseBodyBecameNullableId, nil, "").
-				WithSources(baseSource, revisionSource))
-		} else if isNullableUnwrapping(info.schemaDiff) {
+		case becameNotNullable:
 			result = append(result, info.newChange(ResponseBodyBecameNotNullableId, nil, "").
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
-			nullableDiff := p.propertyDiff.NullableDiff
-			if nullableDiff != nil {
-				if nullableDiff.To != true {
-					return
-				}
+			switch nullabilityChange(p.propertyDiff) {
+			case becameNullable:
 				result = append(result, p.newChange(
 					ResponsePropertyBecameNullableId,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
-				return
-			}
-			// OpenAPI 3.1: type changed from "string" to ["string", "null"], or
-			// wrapped in oneOf: [{type: "null"}, <equivalent schema>]
-			if nullAddedToTypeArray(p.propertyDiff.TypeDiff, p.propertyDiff.Base.Type) || isNullableWrapping(p.propertyDiff) {
-				result = append(result, p.newChange(
-					ResponsePropertyBecameNullableId,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
-					"",
-				).WithSources(propBaseSource, propRevisionSource))
-			} else if isNullableUnwrapping(p.propertyDiff) {
+			case becameNotNullable:
 				result = append(result, p.newChange(
 					ResponsePropertyBecameNotNullableId,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
