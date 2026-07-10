@@ -51,7 +51,7 @@ error   [request-property-became-not-nullable]
                 the request property `optionalEnum` became not nullable
 ```
 
-Parameters don't have dedicated nullability checks; a parameter that gains or loses the `null` type is reported by the list-of-types checks: `request-parameter-list-of-types-widened` (info) when `null` is added and `request-parameter-list-of-types-narrowed` (error) when it is removed.
+Parameters follow the request column: `request-parameter-became-nullable` (info) and `request-parameter-became-not-nullable` (error), with `request-parameter-property-*` variants for properties of object parameters.
 
 ## Limitations
 oasdiff recognizes the `oneOf` form only when it is a pure wrap: exactly two branches, one of them just `{type: "null"}`, and the other equivalent to the original schema. When the edit is more than a nullability change, oasdiff falls back to reporting the underlying changes, erring on the side of reporting too much rather than missing a breaking change:

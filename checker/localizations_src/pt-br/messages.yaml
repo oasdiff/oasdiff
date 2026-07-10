@@ -61,6 +61,10 @@ request-header-property-became-enum: a propriedade %s do cabeçalho de requisiç
 request-parameter-became-required: o parâmetro de requisição do tipo %s e nome %s tornou-se obrigatório
 request-parameter-became-optional: o parâmetro de requisição do tipo %s e nome %s tornou-se opcional
 request-parameter-became-enum: o parâmetro de requisição do tipo %s e nome %s foi restrito a uma lista de valores enum
+request-parameter-became-nullable: o parâmetro de requisição %s %s tornou-se anulável
+request-parameter-became-not-nullable: o parâmetro de requisição %s %s tornou-se não anulável
+request-parameter-property-became-nullable: a propriedade %s do parâmetro de requisição %s %s tornou-se anulável
+request-parameter-property-became-not-nullable: a propriedade %s do parâmetro de requisição %s %s tornou-se não anulável
 request-parameter-enum-value-removed: valor %s do enum removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-enum-value-added: valor %s do enum adicionado ao parâmetro de requisição do tipo %s e nome %s
 request-parameter-property-enum-value-removed: valor %s do enum removido da propriedade %s do parâmetro de requisição do tipo %s e nome %s
@@ -456,6 +460,10 @@ request-optional-property-became-not-write-only-description: propriedade opciona
 request-optional-property-became-read-only-description: propriedade opcional da requisição tornou-se somente leitura
 request-optional-property-became-write-only-description: propriedade opcional da requisição tornou-se somente escrita
 request-parameter-became-enum-description: parâmetro da requisição restrito a enum
+request-parameter-became-nullable-description: o parâmetro de requisição tornou-se anulável
+request-parameter-became-not-nullable-description: o parâmetro de requisição tornou-se não anulável
+request-parameter-property-became-nullable-description: a propriedade do parâmetro de requisição tornou-se anulável
+request-parameter-property-became-not-nullable-description: a propriedade do parâmetro de requisição tornou-se não anulável
 request-parameter-became-optional-description: parâmetro da requisição tornou-se opcional
 request-parameter-became-required-description: parâmetro da requisição tornou-se obrigatório
 request-parameter-default-value-added-description: valor padrão do parâmetro da requisição definido

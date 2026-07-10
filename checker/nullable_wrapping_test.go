@@ -62,7 +62,7 @@ func TestNullableWrapping_SingleFindingPerLevel(t *testing.T) {
 	// })
 	t.Run("parameter", func(t *testing.T) {
 		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_param_base.yaml", "../data/checker/nullable_wrap_param_revision.yaml")
-		require.Equal(t, []string{checker.RequestParameterListOfTypesWidenedId}, ids)
+		require.Equal(t, []string{checker.RequestParameterBecameNullableId}, ids)
 	})
 }
 
@@ -85,10 +85,29 @@ func TestNullableUnwrapping_SingleFindingPerLevel(t *testing.T) {
 	})
 	t.Run("parameter", func(t *testing.T) {
 		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_param_revision.yaml", "../data/checker/nullable_wrap_param_base.yaml")
-		require.Equal(t, []string{checker.RequestParameterListOfTypesNarrowedId}, ids)
+		require.Equal(t, []string{checker.RequestParameterBecameNotNullableId}, ids)
 	})
 	t.Run("response property", func(t *testing.T) {
 		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_response_revision.yaml", "../data/checker/nullable_wrap_response_base.yaml")
 		require.Equal(t, []string{checker.ResponsePropertyBecameNotNullableId}, ids)
+	})
+}
+
+// A parameter or parameter property losing the "null" type is breaking (the
+// request no longer accepts null); gaining it is informational.
+func TestParameterTypeArrayNullability(t *testing.T) {
+	t.Run("became not nullable", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_type_array_param_base.yaml", "../data/checker/nullable_type_array_param_revision.yaml")
+		require.ElementsMatch(t, []string{
+			checker.RequestParameterBecameNotNullableId,         // q
+			checker.RequestParameterPropertyBecameNotNullableId, // filter.tag
+		}, ids)
+	})
+	t.Run("became nullable", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_type_array_param_revision.yaml", "../data/checker/nullable_type_array_param_base.yaml")
+		require.ElementsMatch(t, []string{
+			checker.RequestParameterBecameNullableId,
+			checker.RequestParameterPropertyBecameNullableId,
+		}, ids)
 	})
 }
