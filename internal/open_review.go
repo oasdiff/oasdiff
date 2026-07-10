@@ -167,15 +167,17 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 // whether the review came through the plaintext path or the encrypted one.
 // Color is forced off: the output is data, not a terminal render.
 func renderChangelogJSON(flags *Flags, errs checker.Changes, specInfoPair *load.SpecInfoPair, isBreaking, diffEmpty bool) ([]byte, error) {
-	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{Language: flags.getLang()})
+	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{
+		Language:        flags.getLang(),
+		BaseVersion:     specInfoPair.GetBaseVersion(),
+		RevisionVersion: specInfoPair.GetRevisionVersion(),
+	})
 	if err != nil {
 		return nil, err
 	}
 	return formatter.RenderChangelog(
 		errs,
 		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
-		specInfoPair.GetBaseVersion(),
-		specInfoPair.GetRevisionVersion(),
 	)
 }
 
@@ -269,7 +271,7 @@ func parseReviewMeta(entries []string) (map[string]string, error) {
 }
 
 // reviewChange is one manifest entry sent alongside the encrypted bundle: a
-// change's fingerprint (see formatters.ComputeFingerprint) and its level.
+// change's fingerprint (see checker.ComputeFingerprint) and its level.
 type reviewChange struct {
 	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
 	Level       int    `json:"level" yaml:"level"`
@@ -282,7 +284,7 @@ func reviewManifest(errs checker.Changes) []reviewChange {
 	manifest := make([]reviewChange, 0, len(errs))
 	for _, change := range errs {
 		manifest = append(manifest, reviewChange{
-			Fingerprint: formatters.ComputeFingerprint(change.GetId(), change.GetOperation(), change.GetPath(), change.GetArgs()),
+			Fingerprint: checker.Fingerprint(change),
 			Level:       int(change.GetLevel()),
 		})
 	}

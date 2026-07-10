@@ -1,8 +1,7 @@
 
 [![CI](https://github.com/oasdiff/oasdiff/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/oasdiff/oasdiff/actions)
 [![codecov](https://codecov.io/gh/oasdiff/oasdiff/branch/main/graph/badge.svg?token=Y8BM6X77JY)](https://codecov.io/gh/oasdiff/oasdiff)
-[![Go Report Card](https://goreportcard.com/badge/github.com/oasdiff/oasdiff)](https://goreportcard.com/report/github.com/oasdiff/oasdiff)
-[![GoDoc](https://godoc.org/github.com/oasdiff/oasdiff?status.svg)](https://godoc.org/github.com/oasdiff/oasdiff)
+[![Go Reference](https://pkg.go.dev/badge/github.com/oasdiff/oasdiff.svg)](https://pkg.go.dev/github.com/oasdiff/oasdiff)
 [![Docker Image Version](https://img.shields.io/docker/v/tufin/oasdiff?sort=semver)](https://hub.docker.com/r/tufin/oasdiff/tags)
 
 ![oasdiff banner](https://github.com/yonatanmgr/oasdiff/assets/31913495/ac9b154e-72d1-4969-bc3b-f527bbe7751d)
@@ -22,7 +21,7 @@ docker run --rm -t tufin/oasdiff changelog \
   https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test5.yaml
 ```
 
-That prints a human-readable changelog of every significant change between the two specs. Swap `changelog` for `breaking` to see only breaking changes, or `diff` for the full machine-readable diff.
+That prints a human-readable changelog of the changes that can affect API consumers, breaking and non-breaking. Swap `changelog` for `breaking` to see only the changes that break existing API clients, or `diff` for the full machine-readable diff of the API definition, including documentation-only edits.
 
 ## Installation
 
@@ -64,14 +63,15 @@ Grouped by what you're trying to do. New to oasdiff? Start with **Commands**.
 ### Commands
 The top-level subcommands.
 
-- [`diff`](DIFF.md) — full diff between two OpenAPI specs (output: html, json, markdown, markup, text, or yaml — default yaml)
+- [`diff`](DIFF.md) — full diff of the API definition, including documentation-only edits (output: html, json, markdown, markup, text, or yaml — default yaml)
 - [`summary`](DIFF.md) — high-level count of changes between two specs (built on the diff engine; same shared options)
-- [`breaking`](BREAKING-CHANGES.md) — only breaking changes
-- [`changelog`](BREAKING-CHANGES.md) — every significant change, breaking or not, in human-readable form
+- [`breaking`](BREAKING-CHANGES.md) — only the changes that break existing API clients
+- [`changelog`](BREAKING-CHANGES.md) — changes that can affect API consumers, breaking or not, in human-readable form
 - [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
 - [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade) — canonicalize an OpenAPI 3.0 spec to the latest 3.x
 - [`validate`](VALIDATE.md) — check a single spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)
 - [`checks`](CHECKS.md) — list the rules oasdiff uses to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
+- [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
 - [`git-diff-driver`](GIT-DIFF-DRIVER.md) — run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
 
 ### Inputs
@@ -84,6 +84,7 @@ Where specs come from.
 How oasdiff pairs up base and revision and what counts as a difference.
 
 - [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
+- [Nullability changes](NULLABILITY.md) — the three equivalent nullable forms and when changing them is breaking
 - [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
 - [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
 

@@ -56,7 +56,7 @@ func newDuplicateEnumFinding(s *openapi3.Schema, section string, dups []string, 
 	for i, d := range dups {
 		args[i] = d
 	}
-	f.Fingerprint = formatters.ComputeFingerprint(f.Id, "", section, args)
+	f.Fingerprint = checker.ComputeFingerprint(f.Id, "", section, args)
 	return f
 }
 

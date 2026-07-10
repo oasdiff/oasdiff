@@ -45,15 +45,10 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 
 					if paramItem.DeprecatedDiff.To == nil || paramItem.DeprecatedDiff.To == false {
 						// not breaking changes
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							RequestParameterReactivatedId,
-							config,
 							[]any{paramLocation, paramName},
 							"",
-							operationsSources,
-							op,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
 						continue
 					}
@@ -73,15 +68,10 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 							result = append(result, getParameterDeprecatedSunsetMissing(opInfo, param).WithSources(baseSource, revisionSource))
 						} else {
 							// no policy, report deprecation without sunset as INFO
-							result = append(result, NewApiChange(
+							result = append(result, opInfo.NewApiChange(
 								RequestParameterDeprecatedId,
-								config,
 								[]any{paramLocation, paramName},
 								"",
-								operationsSources,
-								op,
-								operation,
-								path,
 							).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(op.Extensions)))
 						}
 						continue
@@ -89,15 +79,10 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 
 					date, err := getSunsetDate(sunset)
 					if err != nil {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							RequestParameterSunsetParseId,
-							config,
 							[]any{param.In, param.Name, err},
 							"",
-							operationsSources,
-							op,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource))
 						continue
 					}
@@ -105,29 +90,19 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					days := date.DaysSince(civil.DateOf(time.Now()))
 
 					if days < int(deprecationDays) {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							RequestParameterSunsetDateTooSmallId,
-							config,
 							[]any{param.In, param.Name, date, deprecationDays},
 							"",
-							operationsSources,
-							op,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource))
 						continue
 					}
 
 					// not breaking changes
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						RequestParameterDeprecatedId,
-						config,
 						[]any{paramLocation, paramName},
 						"",
-						operationsSources,
-						op,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetailsWithSunset(date, op.Extensions)))
 				}
 			}
@@ -138,14 +113,9 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 }
 
 func getParameterDeprecatedSunsetMissing(opInfo opInfo, param *openapi3.Parameter) ApiChange {
-	return NewApiChange(
+	return opInfo.NewApiChange(
 		RequestParameterDeprecatedSunsetMissingId,
-		opInfo.config,
 		[]any{param.In, param.Name},
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	)
 }

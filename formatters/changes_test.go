@@ -64,7 +64,7 @@ func TestNewChanges_FingerprintIndependentOfLocale(t *testing.T) {
 		Source: &load.Source{}, Args: []any{"v1"},
 	}
 	english := formatters.NewChanges(checker.Changes{change}, MockLocalizer)[0]
-	other := formatters.NewChanges(checker.Changes{change}, func(originalKey string, args ...interface{}) string {
+	other := formatters.NewChanges(checker.Changes{change}, func(originalKey string, args ...any) string {
 		return "completely different rendering: " + originalKey
 	})[0]
 

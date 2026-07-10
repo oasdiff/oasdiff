@@ -28,7 +28,7 @@ func TestYamlFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Equal(t, "- id: change_id\n  text: This is a breaking change.\n  level: 3\n  section: components\n  fingerprint: f8cd9af6b117\n", string(out))
 }
@@ -41,7 +41,7 @@ func TestYamlFormatter_RenderChangelogWithWrapInObject(t *testing.T) {
 		},
 	}
 
-	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.RenderOpts{WrapInObject: true}, "", "")
+	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.RenderOpts{WrapInObject: true})
 	require.NoError(t, err)
 	require.True(t, strings.HasPrefix(string(out), "changes:"))
 }
@@ -109,7 +109,7 @@ func TestYamlFormatter_RenderChangelog_WithSources(t *testing.T) {
 		},
 	}
 
-	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := yamlFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 
 	expected := `- id: change_id

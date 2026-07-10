@@ -2,17 +2,22 @@ package checker
 
 //go:generate go-localize -input localizations_src -output localizations
 import (
+	"maps"
 	"slices"
 
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// CheckBackwardCompatibility runs the checks with level WARN and ERR
+// CheckBackwardCompatibility runs the checks and returns the changes with
+// level WARN or ERR; see CheckBackwardCompatibilityUntilLevel.
 func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
 	return CheckBackwardCompatibilityUntilLevel(config, diffReport, operationsSources, WARN)
 }
 
-// CheckBackwardCompatibilityUntilLevel runs the checks with level equal or higher than the given level.
+// CheckBackwardCompatibilityUntilLevel runs the checks and returns the changes
+// with level equal or higher than the given level. Changes claimed by a
+// recognized schema transition are dropped, so each transition is reported
+// only by its own finding (see transition_claims.go).
 // It does not mutate the caller's diffReport; clonePathsDiffForCheck isolates the pipeline's mutation surface.
 func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, level Level) Changes {
 	result := make(Changes, 0)
@@ -37,6 +42,9 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	filteredResult := make(Changes, 0)
 	for _, change := range result {
+		if apiChange, ok := change.(ApiChange); ok && apiChange.claimed {
+			continue
+		}
 		if config.getLogLevel(change.GetId()) >= level {
 			filteredResult = append(filteredResult, change)
 		}
@@ -81,9 +89,7 @@ func clonePathsDiffForCheck(d *diff.Diff) *diff.Diff {
 				pdElem.OperationsDiff.Deleted = slices.Clone(v.OperationsDiff.Deleted)
 				if v.OperationsDiff.Modified != nil {
 					pdElem.OperationsDiff.Modified = make(diff.ModifiedOperations, len(v.OperationsDiff.Modified))
-					for ok, ov := range v.OperationsDiff.Modified {
-						pdElem.OperationsDiff.Modified[ok] = ov
-					}
+					maps.Copy(pdElem.OperationsDiff.Modified, v.OperationsDiff.Modified)
 				}
 			}
 			cloned.PathsDiff.Modified[k] = &pdElem

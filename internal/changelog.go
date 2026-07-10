@@ -131,7 +131,9 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 
 	// formatter lookup
 	formatter, err := formatters.Lookup(flags.getFormat(), formatters.FormatterOpts{
-		Language: flags.getLang(),
+		Language:        flags.getLang(),
+		BaseVersion:     specInfoPair.GetBaseVersion(),
+		RevisionVersion: specInfoPair.GetRevisionVersion(),
 	})
 	if err != nil {
 		return getErrUnsupportedFormat(flags.getFormat(), changelogCmd)
@@ -148,7 +150,7 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 		return getErrInvalidColorMode(err)
 	}
 
-	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode, TemplatePath: flags.getTemplate(), DiffEmpty: diffEmpty, IsBreaking: isBreaking}, specInfoPair.GetBaseVersion(), specInfoPair.GetRevisionVersion())
+	bytes, err := formatter.RenderChangelog(errs, formatters.RenderOpts{ColorMode: colorMode, TemplatePath: flags.getTemplate(), DiffEmpty: diffEmpty, IsBreaking: isBreaking})
 	if err != nil {
 		return getErrFailedPrint(changelogCmd+" "+flags.getFormat(), err)
 	}

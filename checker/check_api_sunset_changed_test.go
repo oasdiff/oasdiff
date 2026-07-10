@@ -25,6 +25,27 @@ func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 	require.Equal(t, "api sunset date deleted, but deprecated=true kept", requireChange(t, errs, checker.APISunsetDeletedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
+// the sunset change points at the x-sunset field in the base spec
+func TestBreaking_SunsetDeleted_WithSources(t *testing.T) {
+
+	s1, err := open(deprecationFile("deprecated-with-sunset.yaml"), newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"), newLoaderWithOriginTracking())
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
+	require.Len(t, errs, 1)
+
+	require.Equal(t, checker.APISunsetDeletedId, errs[0].GetId())
+	require.NotEmpty(t, errs[0].GetBaseSource())
+	require.Equal(t, deprecationFile("deprecated-with-sunset.yaml"), errs[0].GetBaseSource().File)
+	require.Equal(t, 13, errs[0].GetBaseSource().Line) // the x-sunset field
+	require.Empty(t, errs[0].GetRevisionSource())
+}
+
 // changing sunset to an earlier date for a deprecated endpoint with a deprecation policy is breaking
 func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 

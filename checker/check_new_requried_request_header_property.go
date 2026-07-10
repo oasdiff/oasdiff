@@ -25,6 +25,8 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 				continue
 			}
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 
 				if paramLocation != "header" {
@@ -43,15 +45,10 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 								return
 							}
 
-							result = append(result, NewApiChange(
+							result = append(result, opInfo.NewApiChange(
 								NewRequiredRequestHeaderPropertyId,
-								config,
 								[]any{paramName, propertyFullName(propertyPath, newPropertyName)},
 								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
 							).WithSources(baseSource, revisionSource))
 						})
 				}

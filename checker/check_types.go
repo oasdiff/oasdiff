@@ -8,6 +8,10 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
+// TypeChangeLooselyTypedCommentId explains the surprising "compatible" verdict:
+// a type change that is safe only because the media type isn't strongly typed.
+const TypeChangeLooselyTypedCommentId = "type-change-loosely-typed-comment"
+
 // requestTypeFormatBreaking reports whether a request type/format change is
 // breaking. Requests are contravariant, so the change is evaluated toward the
 // revision type.
@@ -19,7 +23,7 @@ import (
 // format axis is evaluated independently, so a co-occurring breaking format
 // change is still reported.
 func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-	if isRequestTypeWidening(typeDiff, schemaDiff) {
+	if typeSetWidened(typeDiff, schemaDiff) {
 		typeDiff = nil
 	}
 	return typeFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff.Revision.Type)
@@ -34,35 +38,42 @@ func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Valu
 // returns only types the base could) is backward compatible on the type axis,
 // and is detected and dropped the same way.
 func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
-	if isResponseTypeNarrowing(typeDiff, schemaDiff) {
+	if typeSetNarrowed(typeDiff, schemaDiff) {
 		typeDiff = nil
 	}
 	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff.Base.Type)
 }
 
-// isRequestTypeWidening reports whether a request type change widens the accepted
-// type set: the base set is contained in the revision set, so the server accepts
-// every type it did before plus possibly more. Backward compatible for a request.
-func isRequestTypeWidening(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+// typeSetWidened reports whether the change added types (base is contained in
+// revision). Safe for a request (accepts more), breaking for a response (may
+// return more); the caller decides which.
+func typeSetWidened(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
 	return typeDiff != nil && isTypeSetSubset(getBaseType(schemaDiff), getRevisionType(schemaDiff))
 }
 
-// isResponseTypeNarrowing reports whether a response type change narrows the
-// returned type set: the revision set is contained in the base set, so the server
-// returns only types it could before. Backward compatible for a response. Mirror
-// of isRequestTypeWidening.
-func isResponseTypeNarrowing(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+// typeSetNarrowed is the mirror: the change removed types (revision is contained
+// in base). Safe for a response, breaking for a request.
+func typeSetNarrowed(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
 	return typeDiff != nil && isTypeSetSubset(getRevisionType(schemaDiff), getBaseType(schemaDiff))
 }
 
-// isResponseTypeWidening reports whether a response type change widens the
-// returned type set: the base set is contained in the revision set, so the server
-// may now return types it could not before. This is the breaking direction for a
-// response and gets the dedicated generalize verdict, separating it from a
-// genuinely incompatible change. Same predicate as isRequestTypeWidening, named
-// per direction for the response call site.
-func isResponseTypeWidening(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
-	return typeDiff != nil && isTypeSetSubset(getBaseType(schemaDiff), getRevisionType(schemaDiff))
+// bothTypesConcrete distinguishes a type swap (string -> object) from adding or
+// removing the type constraint entirely, which is a real generalize/specialize.
+func bothTypesConcrete(schemaDiff *diff.SchemaDiff) bool {
+	return len(getBaseType(schemaDiff)) > 0 && len(getRevisionType(schemaDiff)) > 0
+}
+
+// isRequestLooseTypeSwap reports a concrete type swap that is not a genuine
+// widening. Its caller reaches it only when the change is non-breaking, so the
+// swap is safe only because the media type isn't strongly typed.
+func isRequestLooseTypeSwap(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	return !typeDiff.Empty() && bothTypesConcrete(schemaDiff) && !typeSetWidened(typeDiff, schemaDiff)
+}
+
+// isResponseLooseTypeSwap is the response mirror: a concrete swap that is not a
+// genuine narrowing.
+func isResponseLooseTypeSwap(typeDiff *diff.StringsDiff, schemaDiff *diff.SchemaDiff) bool {
+	return !typeDiff.Empty() && bothTypesConcrete(schemaDiff) && !typeSetNarrowed(typeDiff, schemaDiff)
 }
 
 // isTypeSetSubset reports whether sub is non-empty and every type in it is
@@ -144,46 +155,6 @@ func isTypeContained(to, from []string, stronglyTyped bool) bool {
 	}
 
 	return false
-}
-
-/*
-checkRequestParameterPropertyTypeChanged checks the level of the change in the request parameter property type
-Explanation:
-Objects can be passed in the request parameters, for example, the following calls are equivalent:
-PHP style: GET http://localhost:8080/api/tickets?params[id]=123&params[color]=green
-JSON: GET http://localhost:8080/api/tickets?params={"id":"123","color":"green"}
-
-The "params" object has two properties: "id" and "color", both with type "string", but note that the "id" values are actually numbers.
-Imagine that the OpenAPI type of property "id" was changed from "number" to "string".
-In the first example, the change is non-breaking, because the PHP format for numbers and strings is the same: we refer to this as non-strongly-typed.
-But in the second example, the change is breaking, because the JSON format requires quotes for strings: we refer to this as strongly-typed.
-
-This is the only request type location that forks three ways
-(generalized / specialized / changed-as-a-warning). The other request type
-locations resolve strong-vs-non-strong definitively (the body and body
-properties from a known media type; a scalar parameter is always a string on
-the wire), so a binary generalized/changed verdict is correct there. Only an
-object parameter's serialization is unknown here, so when the two verdicts
-disagree we can't be sure it's breaking and report a warning.
-*/
-func checkRequestParameterPropertyTypeChanged(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, schemaDiff *diff.SchemaDiff) (string, string) {
-
-	// since we don't know if the object is strogly-typed or not, we check both
-	stronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, true, schemaDiff.Revision.Type)
-	nonStronglyTyped := typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type)
-
-	// if strongly-typed and non-strongly-typed don't agree, it's a warning since we can't be sure that it's breaking
-	if stronglyTyped != nonStronglyTyped {
-		return RequestParameterPropertyTypeChangedId, RequestParameterPropertyTypeChangedCommentId
-	}
-
-	// if both are breaking it's an error
-	if stronglyTyped {
-		return RequestParameterPropertyTypeSpecializedId, ""
-	}
-
-	// if neither are breaking it's an informational change
-	return RequestParameterPropertyTypeGeneralizedId, ""
 }
 
 /*

@@ -27,6 +27,7 @@ func ResponseHeaderAddedCheck(diffReport *diff.Diff, operationsSources *diff.Ope
 			if operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
 				if responseDiff.HeadersDiff == nil {
 					continue
@@ -38,15 +39,10 @@ func ResponseHeaderAddedCheck(diffReport *diff.Diff, operationsSources *diff.Ope
 					}
 					header := responseDiff.Revision.Headers[headerName].Value
 					revisionSource := NewSourceFromOrigin(operationsSources, operationItem.Revision, header.Origin)
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						ResponseHeaderAddedId,
-						config,
 						[]any{headerName, responseStatus},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(nil, revisionSource))
 				}
 			}

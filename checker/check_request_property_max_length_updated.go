@@ -20,7 +20,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
 			maxLengthDiff.From != nil &&
 			maxLengthDiff.To != nil {
-			if IsDecreasedValue(maxLengthDiff) {
+			if isDecreasedValue(maxLengthDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMaxLengthDecreasedId,
 					[]any{maxLengthDiff.To},
@@ -48,7 +48,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
 
-			if IsDecreasedValue(maxLengthDiff) {
+			if isDecreasedValue(maxLengthDiff) {
 
 				id := RequestPropertyMaxLengthDecreasedId
 

@@ -33,7 +33,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 
 			for paramLocation, paramItems := range operationDiff.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
-					baseSource, revisionSource := ParameterSources(operationsSources, operationDiff, paramItem)
+					baseSource, revisionSource := parameterFieldSources(operationsSources, operationDiff, paramItem, diff.SunsetExtension)
 
 					paramBase := paramItem.Base
 					paramRevision := paramItem.Revision
@@ -67,14 +67,14 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 					date, err := getSunsetDate(paramRevision.Extensions[diff.SunsetExtension])
 					if err != nil {
 						opInfo := newOpInfo(config, opRevision, operationsSources, operation, path)
-						result = append(result, getRequestParameterSunsetParse(opInfo, paramRevision, err))
+						result = append(result, getRequestParameterSunsetParse(opInfo, paramRevision, err).WithSources(nil, revisionSource))
 						continue
 					}
 
 					baseDate, err := getSunsetDate(paramBase.Extensions[diff.SunsetExtension])
 					if err != nil {
 						opInfo := newOpInfo(config, opBase, operationsSources, operation, path)
-						result = append(result, getRequestParameterSunsetParse(opInfo, paramBase, err))
+						result = append(result, getRequestParameterSunsetParse(opInfo, paramBase, err).WithSources(baseSource, nil))
 						continue
 					}
 

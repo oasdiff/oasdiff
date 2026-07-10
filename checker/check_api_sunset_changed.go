@@ -26,7 +26,7 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			opRevision := pathItem.Revision.GetOperation(operation)
 			opBase := pathItem.Base.GetOperation(operation)
-			baseSource, revisionSource := operationSources(operationsSources, operationDiff.Base, operationDiff.Revision)
+			baseSource, revisionSource := operationFieldSources(operationsSources, operationDiff, diff.SunsetExtension)
 
 			if !opRevision.Deprecated {
 				continue
@@ -130,14 +130,9 @@ func getDeprecationDays(config *Config, stability string) uint {
 }
 
 func getAPIDeprecatedSunsetMissing(opInfo opInfo) ApiChange {
-	return NewApiChange(
+	return opInfo.NewApiChange(
 		APIDeprecatedSunsetMissingId,
-		opInfo.config,
 		nil,
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	)
 }

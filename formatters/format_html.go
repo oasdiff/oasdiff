@@ -23,12 +23,16 @@ type GroupEntry struct {
 
 type HTMLFormatter struct {
 	notImplementedFormatter
-	Localizer checker.Localizer
+	Localizer       checker.Localizer
+	BaseVersion     string
+	RevisionVersion string
 }
 
-func newHTMLFormatter(l checker.Localizer) HTMLFormatter {
+func newHTMLFormatter(l checker.Localizer, baseVersion, revisionVersion string) HTMLFormatter {
 	return HTMLFormatter{
-		Localizer: l,
+		Localizer:       l,
+		BaseVersion:     baseVersion,
+		RevisionVersion: revisionVersion,
 	}
 }
 
@@ -44,7 +48,7 @@ func (f HTMLFormatter) RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, err
 //go:embed templates/changelog.html
 var changelogHtml string
 
-func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error) {
+func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	var tmpl *template.Template
 	var err error
 
@@ -57,7 +61,7 @@ func (f HTMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts,
 		tmpl = template.Must(template.New("changelog").Funcs(HtmlTemplateFuncs()).Parse(changelogHtml))
 	}
 
-	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), baseVersion, revisionVersion, opts.DiffEmpty, opts.IsBreaking)
+	return ExecuteHtmlTemplate(tmpl, GroupChanges(changes, f.Localizer), f.BaseVersion, f.RevisionVersion, opts.DiffEmpty, opts.IsBreaking)
 }
 
 func (f HTMLFormatter) loadCustomTemplate(templatePath string) (*template.Template, error) {

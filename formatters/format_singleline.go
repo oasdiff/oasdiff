@@ -18,7 +18,7 @@ func newSingleLineFormatter(l checker.Localizer) SingleLineFormatter {
 	}
 }
 
-func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
+func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
 	if len(changes) == 0 {

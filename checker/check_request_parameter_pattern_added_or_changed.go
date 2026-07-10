@@ -29,6 +29,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 			if operationItem.ParametersDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
 					if paramItem.SchemaDiff == nil {
@@ -41,27 +42,17 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 					}
 
 					if patternDiff.From == "" {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							RequestParameterPatternAddedId,
-							config,
 							[]any{patternDiff.To, paramLocation, paramName},
 							PatternAddedCommentId,
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(nil, revisionSource))
+						).WithSchema(paramItem.SchemaDiff).WithSources(nil, revisionSource))
 					} else if patternDiff.To == "" {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							RequestParameterPatternRemovedId,
-							config,
 							[]any{patternDiff.From, paramLocation, paramName},
 							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, nil))
+						).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, nil))
 					} else {
 						id := RequestParameterPatternChangedId
 						comment := PatternChangedCommentId
@@ -71,16 +62,11 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 							comment = ""
 						}
 
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							id,
-							config,
 							[]any{paramLocation, paramName, patternDiff.From, patternDiff.To},
 							comment,
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
-						).WithSources(baseSource, revisionSource))
+						).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, revisionSource))
 					}
 				}
 			}

@@ -1,7 +1,7 @@
 # Breaking Changes and Changelog
 As your API evolves, it undergoes changes. Some of these changes may be "breaking" while others are not.  
-The `oasdiff breaking` command displays the breaking changes between OpenAPI specifications.  
-The `oasdiff changelog` command displays all significant changes between OpenAPI specifications, including breaking and non-breaking changes.  
+The `oasdiff breaking` command displays the changes that break existing API clients.  
+The `oasdiff changelog` command displays the changes that can affect API consumers, both breaking and non-breaking. Documentation-only edits, such as descriptions and examples, are not included; use `oasdiff diff` to see every difference in the API definition.  
 These commands are typically used in the CI to report or prevent breaking changes.
 
 > **Note:** `breaking` and `changelog` run on the diff engine described in [DIFF.md](DIFF.md). The flags and concepts there — extension tracking, path matching, `allOf` flattening, the path-prefix family, header case, `--allow-external-refs`, `--fail-on-diff` — apply here too, in addition to the breaking-specific options below.
@@ -73,6 +73,12 @@ For example:
 oasdiff breaking -f yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
 ```
 
+### JSON Schema
+`oasdiff schema` prints a [JSON Schema](https://json-schema.org/) for the `json` output of `breaking` and `changelog` (the `yaml` output has the same structure):
+```
+oasdiff schema
+```
+
 ## Color
 When outputting changes to a Unix terminal, oasdiff automatically adds colors with ANSI color escape sequences.  
 If output is piped into another process or redirected to a file, oasdiff disables color.  
@@ -84,6 +90,10 @@ Assigning [stability levels](STABILITY.md) to APIs allows fine-grained control o
 ## Deprecating APIs
 Before deleting an endpoint, it is recommended to give consumers a heads-up in the form of "deprecation". 
 Oasdiff allows you to [deprecate APIs gracefully](DEPRECATION.md) without triggering a breaking-change error.
+
+## Nullability Changes
+A schema can allow `null` in three equivalent ways, and whether a nullability change is breaking depends on whether it appears in a request or a response.
+See [Nullability Changes](NULLABILITY.md).
 
 ## Ignoring Specific Breaking Changes
 Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  

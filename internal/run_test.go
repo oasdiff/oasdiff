@@ -547,3 +547,23 @@ func Test_Changelog_WithInvalidCustomTemplate(t *testing.T) {
 	require.Equal(t, 105, internal.Run(cmdToArgs("oasdiff changelog ../data/run_test/changelog_base.yaml ../data/run_test/changelog_revision.yaml --format markdown --template /nonexistent/template.md"), io.Discard, &stderr))
 	require.Contains(t, stderr.String(), "failed to load custom template")
 }
+
+// Two "-" operands name the same document (as in diff, where both stand for
+// the same file): the single stdin read serves both sides, and the revision
+// side carries the document's version, not an empty second read's ("n/a").
+func Test_BothSidesStdin(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(path, []byte("openapi: 3.0.0\ninfo: {title: t, version: \"1.2.3\"}\npaths: {}\n"), 0644))
+	f, err := os.Open(path)
+	require.NoError(t, err)
+	defer f.Close() //nolint:errcheck
+	orig := os.Stdin
+	os.Stdin = f
+	t.Cleanup(func() { os.Stdin = orig })
+
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog - - --format html"), &stdout, io.Discard))
+	require.Equal(t, 2, strings.Count(stdout.String(), "1.2.3"), "both sides carry the document's version")
+	require.NotContains(t, stdout.String(), "n/a")
+}

@@ -211,11 +211,11 @@ func commitExistsLocally(ref string) bool {
 // the input has no `:` separator. The cost is one extra `git cat-file -t` call
 // per spec load on the git path, which git serves in single-digit milliseconds.
 func blobHashFromRef(gitRef string) (string, bool) {
-	idx := strings.Index(gitRef, ":")
-	if idx < 0 {
+	before, _, ok := strings.Cut(gitRef, ":")
+	if !ok {
 		return "", false
 	}
-	ref := gitRef[:idx]
+	ref := before
 	out, err := exec.Command("git", "cat-file", "-t", ref).Output()
 	if err != nil {
 		return "", false

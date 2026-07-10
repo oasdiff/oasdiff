@@ -127,9 +127,7 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSo
 	}
 
 	operationsSources := *operationsSources1
-	for k, v := range *operationsSources2 {
-		operationsSources[k] = v
-	}
+	maps.Copy(operationsSources, *operationsSources2)
 	return result, &operationsSources, nil
 }
 

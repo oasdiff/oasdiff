@@ -21,6 +21,7 @@ func RequestParameterMaxLengthSetCheck(diffReport *diff.Diff, operationsSources 
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -36,15 +37,10 @@ func RequestParameterMaxLengthSetCheck(diffReport *diff.Diff, operationsSources 
 					}
 
 					_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maxLength")
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						RequestParameterMaxLengthSetId,
-						config,
 						[]any{paramLocation, paramName, maxLengthDiff.To},
 						commentId(RequestParameterMaxLengthSetId),
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(nil, revisionSource))
 				}
 			}

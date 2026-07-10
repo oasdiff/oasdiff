@@ -14,7 +14,7 @@ import (
 type Formatter interface {
 	RenderDiff(diff *diff.Diff, opts RenderOpts) ([]byte, error)
 	RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, error)
-	RenderChangelog(changes checker.Changes, opts RenderOpts, baseVersion, revisionVersion string) ([]byte, error)
+	RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error)
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
 	RenderValidate(findings Findings, opts RenderOpts) ([]byte, error)
@@ -47,11 +47,11 @@ func Lookup(format string, opts FormatterOpts) (Formatter, error) {
 	case FormatText:
 		return newTEXTFormatter(l), nil
 	case FormatMarkup, FormatMarkdown:
-		return newMarkupFormatter(l), nil
+		return newMarkupFormatter(l, opts.BaseVersion, opts.RevisionVersion), nil
 	case FormatSingleLine:
 		return newSingleLineFormatter(l), nil
 	case FormatHTML:
-		return newHTMLFormatter(l), nil
+		return newHTMLFormatter(l, opts.BaseVersion, opts.RevisionVersion), nil
 	case FormatGithubActions:
 		return newGitHubActionsFormatter(l), nil
 	case FormatJUnit:

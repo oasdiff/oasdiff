@@ -26,6 +26,7 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 			if operationItem.ResponsesDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for responseStatus, responsesDiff := range operationItem.ResponsesDiff.Modified {
 				if responsesDiff.ContentDiff == nil {
 					continue
@@ -41,15 +42,10 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 
 					// If parameters changed, this is a changed media type
 					if !mediaType.NameDiff.ParametersDiff.Empty() {
-						result = append(result, NewApiChange(
+						result = append(result, opInfo.NewApiChange(
 							ResponseMediaTypeNameChangedId,
-							config,
 							[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
 							"",
-							operationsSources,
-							operationItem.Revision,
-							operation,
-							path,
 						).WithSources(baseSource, revisionSource))
 						continue
 					}
@@ -60,15 +56,10 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 						id = ResponseMediaTypeNameSpecializedId
 					}
 
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						id,
-						config,
 						[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource))
 				}
 			}

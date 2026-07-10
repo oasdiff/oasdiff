@@ -30,6 +30,8 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 				continue
 			}
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			mediaTypeChanges := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 
 			for _, mediaTypeItem := range mediaTypeChanges {
@@ -44,15 +46,10 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 				}
 				for _, enumVal := range enumDiff.Deleted {
 					baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						RequestBodyEnumValueRemovedId,
-						config,
 						[]any{enumVal},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource))
 				}
 			}

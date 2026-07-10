@@ -55,7 +55,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 		}
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			op := pathItem.Revision.GetOperation(operation)
-			baseSource, revisionSource := OperationFieldSources(operationsSources, operationDiff, "deprecated")
+			baseSource, revisionSource := operationFieldSources(operationsSources, operationDiff, "deprecated")
 
 			if operationDiff.DeprecatedDiff == nil {
 				continue

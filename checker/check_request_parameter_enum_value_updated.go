@@ -80,30 +80,20 @@ func checkParameterEnumDiff(
 
 	for _, enumVal := range enumDiff.Deleted {
 		baseSource, revisionSource := SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-		result = append(result, NewApiChange(
+		result = append(result, opInfo.NewApiChange(
 			removedId,
-			opInfo.config,
 			makeArgs(enumVal),
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
-		).WithSources(baseSource, revisionSource))
+		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 	}
 
 	for _, enumVal := range enumDiff.Added {
 		baseSource, revisionSource := SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-		result = append(result, NewApiChange(
+		result = append(result, opInfo.NewApiChange(
 			addedId,
-			opInfo.config,
 			makeArgs(enumVal),
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
-		).WithSources(baseSource, revisionSource))
+		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 	}
 
 	return result

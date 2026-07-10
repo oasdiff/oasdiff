@@ -28,20 +28,20 @@ func TestSingleLineFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := singleLineFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := singleLineFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Equal(t, "1 changes: 1 error, 0 warning, 0 info\nerror, in components/test This is a breaking change. [change_id]. \n\n", string(out))
 }
 
 func TestSingleLineFormatter_RenderChangelog_EmptyChangesDifferentSpecs(t *testing.T) {
-	out, err := singleLineFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{}, "", "")
+	out, err := singleLineFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{})
 	require.NoError(t, err)
 	// Singleline keeps everything on one line: period separator, no newline.
 	require.Equal(t, "No changes to report, but the specs are different. Run 'oasdiff diff' to see structural differences.", string(out))
 }
 
 func TestSingleLineFormatter_RenderChangelog_EmptyChangesDifferentSpecs_BreakingMode(t *testing.T) {
-	out, err := singleLineFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{IsBreaking: true}, "", "")
+	out, err := singleLineFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{IsBreaking: true})
 	require.NoError(t, err)
 	require.Equal(t, "No breaking changes to report, but the specs are different. Run 'oasdiff diff' to see structural differences.", string(out))
 }

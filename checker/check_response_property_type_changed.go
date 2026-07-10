@@ -8,26 +8,31 @@ const (
 	ResponseBodyTypeChangedId         = "response-body-type-changed"
 	ResponseBodyTypeGeneralizedId     = "response-body-type-generalized"
 	ResponseBodyTypeSpecializedId     = "response-body-type-specialized"
+	ResponseBodyTypeCompatibleId      = "response-body-type-compatible"
 	ResponsePropertyTypeChangedId     = "response-property-type-changed"
 	ResponsePropertyTypeGeneralizedId = "response-property-type-generalized"
 	ResponsePropertyTypeSpecializedId = "response-property-type-specialized"
+	ResponsePropertyTypeCompatibleId  = "response-property-type-compatible"
 )
 
-// responseTypeChangeId classifies a response type/format change into one of three
-// verdicts, the contravariant mirror of the request side:
-//   - specialized (info): the returned type set narrowed (e.g. number -> integer),
-//     so clients keep getting values they already handled. Safe.
-//   - generalized (error): the returned type set widened (e.g. integer -> number),
-//     so the server may now return a type the client did not expect. Breaking.
-//   - changed (error): a genuinely incompatible change (e.g. string -> integer).
-func responseTypeChangeId(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff, specializedId, generalizedId, changedId string) string {
-	if !responseTypeFormatBreaking(typeDiff, formatDiff, mediaType, schemaDiff) {
-		return specializedId
+// responseTypeChangeId classifies a response type/format change (the
+// contravariant mirror of the request side):
+//   - specialized (info): the returned type set narrowed (number -> integer).
+//   - compatible (info): a type swap that's safe only because the media type
+//     isn't strongly typed (string -> object in application/xml), not a narrowing.
+//   - generalized (error): the returned type set widened (integer -> number).
+//   - changed (error): a genuinely incompatible change (string -> integer).
+func responseTypeChangeId(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff, specializedId, compatibleId, generalizedId, changedId string) (id, comment string) {
+	if responseTypeFormatBreaking(typeDiff, formatDiff, mediaType, schemaDiff) {
+		if typeSetWidened(typeDiff, schemaDiff) {
+			return generalizedId, ""
+		}
+		return changedId, ""
 	}
-	if isResponseTypeWidening(typeDiff, schemaDiff) {
-		return generalizedId
+	if isResponseLooseTypeSwap(typeDiff, schemaDiff) {
+		return compatibleId, TypeChangeLooselyTypedCommentId
 	}
-	return changedId
+	return specializedId, ""
 }
 
 func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -39,30 +44,13 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 		formatDiff := schemaDiff.FormatDiff
 
 		if !typeDiff.Empty() || !formatDiff.Empty() {
-			// Body-level suppression also skips the property walk for this
-			// media type.
-			if shouldSuppressTypeChangedForListOfTypes(schemaDiff) {
-				return
-			}
-			// A oneOf wrapping (#702) reads as a top-level type change to "any"
-			// (the oneOf wrapper has no type of its own); it's reported once per
-			// body as response-body-wrapped-in-one-of, so don't also report a body
-			// type change.
-			if !schemaDiff.OneOfWrappingDiff.Empty() {
-				return
-			}
-			// Suppress null-only type changes (handled by nullable checkers).
-			if isNullTypeChange(typeDiff) && formatDiff.Empty() {
-				return
-			}
-
-			id := responseTypeChangeId(typeDiff, formatDiff, info.mediaType, schemaDiff,
-				ResponseBodyTypeSpecializedId, ResponseBodyTypeGeneralizedId, ResponseBodyTypeChangedId)
+			id, comment := responseTypeChangeId(typeDiff, formatDiff, info.mediaType, schemaDiff,
+				ResponseBodyTypeSpecializedId, ResponseBodyTypeCompatibleId, ResponseBodyTypeGeneralizedId, ResponseBodyTypeChangedId)
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
 				id,
 				[]any{getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), info.responseStatus},
-				"",
+				comment,
 			).WithSources(baseSource, revisionSource))
 		}
 
@@ -71,25 +59,18 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 				return
 			}
 
-			if shouldSuppressPropertyTypeChangedForListOfTypes(p.propertyDiff) {
-				return
-			}
-			if isNullTypeChange(p.propertyDiff.TypeDiff) && p.propertyDiff.FormatDiff.Empty() {
-				return
-			}
-
 			propSchemaDiff := p.propertyDiff
 			propTypeDiff := propSchemaDiff.TypeDiff
 			propFormatDiff := propSchemaDiff.FormatDiff
 
 			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
-				id := responseTypeChangeId(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff,
-					ResponsePropertyTypeSpecializedId, ResponsePropertyTypeGeneralizedId, ResponsePropertyTypeChangedId)
+				id, comment := responseTypeChangeId(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff,
+					ResponsePropertyTypeSpecializedId, ResponsePropertyTypeCompatibleId, ResponsePropertyTypeGeneralizedId, ResponsePropertyTypeChangedId)
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff), info.responseStatus},
-					"",
+					comment,
 				).WithSources(propBaseSource, propRevisionSource))
 			}
 		})

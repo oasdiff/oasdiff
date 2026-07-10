@@ -73,6 +73,10 @@ request-header-property-became-enum: the %s request header's property %s was res
 request-parameter-became-required: the %s request parameter %s became required
 request-parameter-became-optional: the %s request parameter %s became optional
 request-parameter-became-enum: the %s request parameter %s was restricted to a list of enum values
+request-parameter-became-nullable: the %s request parameter %s became nullable
+request-parameter-became-not-nullable: the %s request parameter %s became not nullable
+request-parameter-property-became-nullable: the %s property of the %s request parameter %s became nullable
+request-parameter-property-became-not-nullable: the %s property of the %s request parameter %s became not nullable
 request-parameter-enum-value-removed: removed the enum value %s from the %s request parameter %s
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
 request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
@@ -170,8 +174,10 @@ request-property-min-set-comment: This is a warning because the restriction is s
 request-property-removed: removed the request property %s
 request-body-type-changed: the request's body %s changed from %s to %s
 request-body-type-generalized: the request's body %s was widened from %s to %s
+request-body-type-compatible: the request's body %s changed from %s to %s (backward compatible)
 request-property-type-changed: the %s request property %s changed from %s to %s
 request-property-type-generalized: the %s request property %s was widened from %s to %s
+request-property-type-compatible: the %s request property %s changed from %s to %s (backward compatible)
 request-property-x-extensible-enum-value-removed: removed the x-extensible-enum value %s of the request property %s
 response-header-became-optional: the response header %s became optional for the status %s
 required-response-header-removed: the mandatory response header %s removed for the status %s
@@ -186,6 +192,8 @@ response-optional-property-removed: removed the optional property %s from the re
 response-property-became-optional: the response property %s became optional for the status %s
 response-property-became-nullable: the response property %s became nullable for the status %s
 response-body-became-nullable: the response's body became nullable
+response-property-became-not-nullable: the response property %s became not nullable for the status %s
+response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
 response-property-enum-value-added-comment: Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
@@ -452,6 +460,7 @@ response-body-wrapped-in-one-of-description: "response body wrapped in a oneOf"
 request-body-one-of-removed-description: sub-schema deleted from oneOf in request body
 request-body-type-changed-description: request body type changed
 request-body-type-generalized-description: request body type generalized
+request-body-type-compatible-description: request body type changed but backward compatible
 request-header-property-became-enum-description: request header property restricted to enum
 request-header-property-became-required-description: request header property became required
 request-optional-property-became-not-read-only-description: request optional property became not read-only
@@ -459,6 +468,10 @@ request-optional-property-became-not-write-only-description: request optional pr
 request-optional-property-became-read-only-description: request optional property became read-only
 request-optional-property-became-write-only-description: request optional property became write-only
 request-parameter-became-enum-description: request parameter restricted to enum
+request-parameter-became-nullable-description: request parameter became nullable
+request-parameter-became-not-nullable-description: request parameter became not nullable
+request-parameter-property-became-nullable-description: request parameter property became nullable
+request-parameter-property-became-not-nullable-description: request parameter property became not nullable
 request-parameter-became-optional-description: request parameter became optional
 request-parameter-became-required-description: request parameter became required
 request-parameter-default-value-added-description: request parameter default value set
@@ -545,6 +558,7 @@ request-property-pattern-removed-description: request property pattern unset
 request-property-removed-description: request property removed
 request-property-type-changed-description: request property type changed
 request-property-type-generalized-description: request property type generalized
+request-property-type-compatible-description: request property type changed but backward compatible
 request-property-x-extensible-enum-value-removed-description: request property x-extensible-enum value removed
 request-required-property-became-not-read-only-description: request required property became not read-only
 request-required-property-became-not-write-only-description: request required property became not write-only
@@ -556,6 +570,8 @@ response-body-all-of-removed-description: sub-schema removed from allOf in respo
 response-body-any-of-added-description: sub-schema added to anyOf in response body
 response-body-any-of-removed-description: sub-schema removed from anyOf in response body
 response-body-became-nullable-description: response body became nullable
+response-property-became-not-nullable-description: response property became not nullable
+response-body-became-not-nullable-description: response body became not nullable
 response-body-default-value-added-description: response body default value set
 response-body-default-value-changed-description: response body default value changed
 response-body-default-value-removed-description: response body default value unset
@@ -1024,9 +1040,14 @@ response-body-media-type-schema-added-description: response media-type schema ad
 response-body-media-type-schema-removed-description: response media-type schema removed
 response-body-type-generalized: the response's body %s was widened from %s to %s for status %s
 response-body-type-specialized: the response's body %s was narrowed from %s to %s for status %s
+response-body-type-compatible: the response's body %s changed from %s to %s for status %s (backward compatible)
+type-change-loosely-typed-comment: "This change is backward compatible because the media type is not strongly typed (for example XML), where any value can be represented as text, so the type is not enforced on the wire. Under a strongly typed media type such as JSON the same change would be breaking."
 response-property-type-generalized: the %s response's property %s was widened from %s to %s for status %s
 response-property-type-specialized: the %s response's property %s was narrowed from %s to %s for status %s
+response-property-type-compatible: the %s response's property %s changed from %s to %s for status %s (backward compatible)
 response-body-type-generalized-description: response body type generalized
 response-body-type-specialized-description: response body type specialized
+response-body-type-compatible-description: response body type changed but backward compatible
 response-property-type-generalized-description: response property type generalized
 response-property-type-specialized-description: response property type specialized
+response-property-type-compatible-description: response property type changed but backward compatible

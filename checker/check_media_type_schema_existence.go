@@ -35,18 +35,18 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 		}
 		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			if operationItem.RequestBodyDiff != nil && operationItem.RequestBodyDiff.ContentDiff != nil {
 				for mediaType, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
 					added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff)
 					if added {
-						result = append(result, NewApiChange(
-							RequestBodyMediaTypeSchemaAddedId, config, []any{mediaType}, "",
-							operationsSources, operationItem.Revision, operation, path,
+						result = append(result, opInfo.NewApiChange(
+							RequestBodyMediaTypeSchemaAddedId, []any{mediaType}, "",
 						).WithSources(nil, requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)))
 					} else if removed {
-						result = append(result, NewApiChange(
-							RequestBodyMediaTypeSchemaRemovedId, config, []any{mediaType}, "",
-							operationsSources, operationItem.Revision, operation, path,
+						result = append(result, opInfo.NewApiChange(
+							RequestBodyMediaTypeSchemaRemovedId, []any{mediaType}, "",
 						).WithSources(requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType), nil))
 					}
 				}
@@ -62,14 +62,12 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 				for mediaType, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
 					added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff)
 					if added {
-						result = append(result, NewApiChange(
-							ResponseBodyMediaTypeSchemaAddedId, config, []any{mediaType, responseStatus}, "",
-							operationsSources, operationItem.Revision, operation, path,
+						result = append(result, opInfo.NewApiChange(
+							ResponseBodyMediaTypeSchemaAddedId, []any{mediaType, responseStatus}, "",
 						).WithSources(nil, mediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, mediaType)))
 					} else if removed {
-						result = append(result, NewApiChange(
-							ResponseBodyMediaTypeSchemaRemovedId, config, []any{mediaType, responseStatus}, "",
-							operationsSources, operationItem.Revision, operation, path,
+						result = append(result, opInfo.NewApiChange(
+							ResponseBodyMediaTypeSchemaRemovedId, []any{mediaType, responseStatus}, "",
 						).WithSources(mediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, mediaType), nil))
 					}
 				}

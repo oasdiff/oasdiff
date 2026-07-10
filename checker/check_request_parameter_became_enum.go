@@ -24,6 +24,7 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 			if operationItem.ParametersDiff.Modified == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
 				for paramName, paramItem := range paramItems {
 					if paramItem.SchemaDiff == nil {
@@ -35,16 +36,11 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 						continue
 					}
 
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						RequestParameterBecameEnumId,
-						config,
 						[]any{paramLocation, paramName},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
-					).WithSources(baseSource, revisionSource))
+					).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, revisionSource))
 				}
 			}
 		}

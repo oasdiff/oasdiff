@@ -27,21 +27,18 @@ func RequestBodyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 				continue
 			}
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			id := RequestBodyBecameOptionalId
 			if operationItem.RequestBodyDiff.RequiredDiff.To == true {
 				id = RequestBodyBecameRequiredId
 			}
 
 			baseSource, revisionSource := requestBodyFieldSources(operationsSources, operationItem, "required")
-			result = append(result, NewApiChange(
+			result = append(result, opInfo.NewApiChange(
 				id,
-				config,
 				nil,
 				"",
-				operationsSources,
-				operationItem.Revision,
-				operation,
-				path,
 			).WithSources(baseSource, revisionSource))
 		}
 	}

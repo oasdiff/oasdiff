@@ -122,8 +122,7 @@ func getErrDisallowedExternalRef(err error) *ReturnError {
 // a genuine load failure. Centralised so every spec-loading site stays a single
 // line at the call site.
 func asFlattenError(err error) *load.FlattenError {
-	var flatErr *load.FlattenError
-	if errors.As(err, &flatErr) {
+	if flatErr, ok := errors.AsType[*load.FlattenError](err); ok {
 		return flatErr
 	}
 	return nil

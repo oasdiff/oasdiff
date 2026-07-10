@@ -27,6 +27,18 @@ func Test_MergeSpecInvalid(t *testing.T) {
 	require.EqualError(t, err, "failed to flatten allOf in \"../../data/allof/invalid.yaml\": unable to resolve Type conflict: all Type values must be identical")
 }
 
+// A 3.1 multi-type property inside an allOf branch flattens without a
+// spurious Type conflict (https://github.com/oasdiff/oasdiff/issues/1078).
+func Test_MergeSpecMultiType(t *testing.T) {
+	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("testdata/multi_type.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	merged := spec.Spec.Components.Schemas["LimitHitsByDateRequest"].Value
+	require.Empty(t, merged.AllOf)
+	require.True(t, merged.Properties["fromDate"].Value.Type.Is("string"))
+	require.Equal(t, &openapi3.Types{"integer", "null"}, merged.Properties["nullablePrimitive"].Value.Type)
+}
+
 func TestMergeSpec_CircularAdditionalPropsWithoutAllOf(t *testing.T) {
 	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("testdata/circular_additional_props1.yaml"), load.WithFlattenAllOf())
 	require.NoError(t, err)

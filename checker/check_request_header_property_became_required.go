@@ -23,6 +23,8 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 				continue
 			}
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 
 				if paramLocation != "header" {
@@ -49,15 +51,10 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 							}
 
 							baseSource, revisionSource := SchemaAddedItemSources(operationsSources, operationItem, paramDiff.SchemaDiff, "required", changedRequiredPropertyName)
-							result = append(result, NewApiChange(
+							result = append(result, opInfo.NewApiChange(
 								RequestHeaderPropertyBecameRequiredId,
-								config,
 								[]any{paramName, changedRequiredPropertyName},
 								"",
-								operationsSources,
-								operationItem.Revision,
-								operation,
-								path,
 							).WithSources(baseSource, revisionSource))
 						}
 					}
@@ -77,15 +74,10 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 									continue
 								}
 								propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, operationItem, propertyDiff, "required", changedRequiredPropertyName)
-								result = append(result, NewApiChange(
+								result = append(result, opInfo.NewApiChange(
 									RequestHeaderPropertyBecameRequiredId,
-									config,
 									[]any{paramName, propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))},
 									"",
-									operationsSources,
-									operationItem.Revision,
-									operation,
-									path,
 								).WithSources(propBaseSource, propRevisionSource))
 							}
 						})

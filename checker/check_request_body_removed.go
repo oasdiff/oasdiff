@@ -24,17 +24,14 @@ func RequestBodyRemovedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 				continue
 			}
 
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+
 			if operationItem.RequestBodyDiff.Deleted {
 				baseSource := requestBodySource(operationsSources, operationItem.Base)
-				result = append(result, NewApiChange(
+				result = append(result, opInfo.NewApiChange(
 					RequestBodyRemovedId,
-					config,
 					nil,
 					"",
-					operationsSources,
-					operationItem.Revision,
-					operation,
-					path,
 				).WithSources(baseSource, nil))
 			}
 		}

@@ -106,14 +106,18 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 		return nil, getErrFailedToLoadSpec("base", flags.getBase(), err)
 	}
 
-	s2, err := load.NewSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
-	if err != nil {
-		return nil, getErrFailedToLoadSpec("revision", flags.getRevision(), err)
-	}
-
+	var s2 *load.SpecInfo
 	if flags.getBase().IsStdin() && flags.getRevision().IsStdin() {
-		// io.ReadAll can only read stdin once, so in this edge case, we copy base into revision
-		s2.Spec = s1.Spec
+		// Two "-" operands name the same document (as in diff, where both stand
+		// for the same file): stdin cannot be read twice, so the one read
+		// serves both sides.
+		specInfo := *s1
+		s2 = &specInfo
+	} else {
+		s2, err = load.NewSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
+		if err != nil {
+			return nil, getErrFailedToLoadSpec("revision", flags.getRevision(), err)
+		}
 	}
 
 	autoUpgradeSpecs(flags.getAutoUpgrade(), s1, s2)

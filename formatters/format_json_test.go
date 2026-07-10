@@ -27,7 +27,7 @@ func TestJsonFormatter_RenderChangelog(t *testing.T) {
 		},
 	}
 
-	out, err := jsonFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := jsonFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 	require.Equal(t, "[{\"id\":\"change_id\",\"text\":\"This is a breaking change.\",\"level\":3,\"section\":\"components\",\"fingerprint\":\"f8cd9af6b117\"}]", string(out))
 }
@@ -86,11 +86,11 @@ func TestJsonFormatter_RenderChangelog_WrappedCarriesDiffEmpty(t *testing.T) {
 	// When WrapInObject is set, the JSON wrapper carries diff_empty alongside
 	// the changes list so HTTP consumers can distinguish "specs are identical"
 	// from "specs differ but no rule fired."
-	emptyOut, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{WrapInObject: true, DiffEmpty: true}, "", "")
+	emptyOut, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{WrapInObject: true, DiffEmpty: true})
 	require.NoError(t, err)
 	require.JSONEq(t, `{"changes":[], "diff_empty":true}`, string(emptyOut))
 
-	differOut, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{WrapInObject: true, DiffEmpty: false}, "", "")
+	differOut, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{WrapInObject: true, DiffEmpty: false})
 	require.NoError(t, err)
 	require.JSONEq(t, `{"changes":[], "diff_empty":false}`, string(differOut))
 }
@@ -98,7 +98,7 @@ func TestJsonFormatter_RenderChangelog_WrappedCarriesDiffEmpty(t *testing.T) {
 func TestJsonFormatter_RenderChangelog_BareArrayIgnoresOpts(t *testing.T) {
 	// Without WrapInObject the output is a bare JSON array. DiffEmpty has
 	// nowhere to live and is ignored, preserving the existing CLI shape.
-	out, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{DiffEmpty: false}, "", "")
+	out, err := jsonFormatter.RenderChangelog(checker.Changes{}, formatters.RenderOpts{DiffEmpty: false})
 	require.NoError(t, err)
 	require.Equal(t, "[]", string(out))
 }
@@ -118,7 +118,7 @@ func TestJsonFormatter_RenderChangelog_WithSources(t *testing.T) {
 		},
 	}
 
-	out, err := jsonFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts(), "", "")
+	out, err := jsonFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
 	require.NoError(t, err)
 
 	// Parse and check that baseSource is included but revisionSource is not (due to omitempty)

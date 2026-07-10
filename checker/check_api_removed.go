@@ -80,70 +80,45 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 	revisionSource := NewEmptySource()
 
 	if !opInfo.operation.Deprecated {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			getWithoutDeprecationId(isPath),
-			opInfo.config,
 			nil,
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		).WithSources(baseSource, revisionSource)
 	}
 	sunset, ok := getSunset(opInfo.operation.Extensions)
 	if !ok {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			getWithDeprecationId(isPath),
-			opInfo.config,
 			nil,
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		).WithSources(baseSource, revisionSource)
 	}
 
 	date, err := getSunsetDate(sunset)
 	if err != nil {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			APIPathSunsetParseId,
-			opInfo.config,
 			[]any{err},
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		).WithSources(baseSource, nil)
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {
-		return NewApiChange(
+		return opInfo.NewApiChange(
 			getBeforeSunsetId(isPath),
-			opInfo.config,
 			[]any{date},
 			"",
-			opInfo.operationsSources,
-			opInfo.operation,
-			opInfo.method,
-			opInfo.path,
 		).WithSources(baseSource, revisionSource)
 	}
 	return nil
 }
 
 func getAPIPathSunsetParse(opInfo opInfo, err error) ApiChange {
-	return NewApiChange(
+	return opInfo.NewApiChange(
 		APIPathSunsetParseId,
-		opInfo.config,
 		[]any{err},
 		"",
-		opInfo.operationsSources,
-		opInfo.operation,
-		opInfo.method,
-		opInfo.path,
 	)
 }
 

@@ -46,7 +46,7 @@ func newJUnitFormatter(l checker.Localizer) JUnitFormatter {
 	}
 }
 
-func (f JUnitFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts, _, _ string) ([]byte, error) {
+func (f JUnitFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	var testSuite = JUnitTestSuite{
 		Package:   "com.oasdiff",
 		Time:      "0",

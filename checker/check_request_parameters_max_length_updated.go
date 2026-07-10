@@ -22,6 +22,7 @@ func RequestParameterMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 			if operationItem.ParametersDiff == nil {
 				continue
 			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
 				for paramName, paramDiff := range paramDiffs {
 					if paramDiff.SchemaDiff == nil {
@@ -37,20 +38,15 @@ func RequestParameterMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 					}
 
 					id := RequestParameterMaxLengthDecreasedId
-					if !IsDecreasedValue(maxLengthDiff) {
+					if !isDecreasedValue(maxLengthDiff) {
 						id = RequestParameterMaxLengthIncreasedId
 					}
 
 					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maxLength")
-					result = append(result, NewApiChange(
+					result = append(result, opInfo.NewApiChange(
 						id,
-						config,
 						[]any{paramLocation, paramName, maxLengthDiff.From, maxLengthDiff.To},
 						"",
-						operationsSources,
-						operationItem.Revision,
-						operation,
-						path,
 					).WithSources(baseSource, revisionSource))
 				}
 			}
