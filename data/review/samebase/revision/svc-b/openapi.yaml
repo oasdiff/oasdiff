@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info: {title: B, version: "1"}
+paths:
+  /b:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/User'}
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id: {type: string}
+        extra: {type: boolean}

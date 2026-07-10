@@ -23,6 +23,24 @@ func fileBase(f string) string {
 	return b
 }
 
+// fileDisplay is fileBase plus one parent segment when available
+// ("svc-a/openapi.yaml"): composed sets commonly repeat a basename across
+// directories, so the qualifier needs the extra segment to stay unique.
+func fileDisplay(f string) string {
+	if f == "" {
+		return ""
+	}
+	if i := strings.LastIndex(f, ":"); i >= 0 {
+		f = f[i+1:] // strip a git "<rev>:" prefix
+	}
+	f = filepath.ToSlash(f)
+	parts := strings.Split(f, "/")
+	if len(parts) >= 2 {
+		return parts[len(parts)-2] + "/" + parts[len(parts)-1]
+	}
+	return parts[len(parts)-1]
+}
+
 // otherChangesKey collects changes with no resolvable block; they group under a
 // single "Other changes" key with no source slice.
 const otherChangesKey = "__other__"
@@ -64,6 +82,9 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 			byKey[r.key] = b
 			spansByKey[r.key] = r
 			order = append(order, r.key)
+		} else if prev := spansByKey[r.key]; prev.base == nil && prev.rev == nil && (r.base != nil || r.rev != nil) {
+			// a sourced change resolves the spans a fallback-keyed one couldn't
+			spansByKey[r.key] = r
 		}
 		b.ChangeIDs = append(b.ChangeIDs, c.GetId())
 		b.Fingerprints = append(b.Fingerprints, checker.Fingerprint(c))
@@ -135,17 +156,17 @@ func matchSpan(idx docIndex, src *checker.Source) *span {
 func newResolution(key string, base, rev *span, baseIdx, revIdx docIndex) resolution {
 	id := key
 	if len(baseIdx.byKey[key]) > 1 || len(revIdx.byKey[key]) > 1 {
-		if f := firstFileBase(rev, base); f != "" {
+		if f := firstFileDisplay(rev, base); f != "" {
 			id = f + ": " + key
 		}
 	}
 	return resolution{key: id, title: key, base: base, rev: rev}
 }
 
-func firstFileBase(spans ...*span) string {
+func firstFileDisplay(spans ...*span) string {
 	for _, s := range spans {
 		if s != nil {
-			if f := fileBase(s.file); f != "" {
+			if f := fileDisplay(s.file); f != "" {
 				return f
 			}
 		}
@@ -230,8 +251,11 @@ func buildIndex(docs ...*openapi3.T) docIndex {
 }
 
 // spanFor returns the span to slice for key: the unique one, or, among several
-// (composed specs repeating a name), the one from preferredFile. Nil when
-// absent or ambiguous: a missing slice is safe, the wrong file's slice is not.
+// (composed specs repeating a name), the one whose file is preferredFile. The
+// match is on the full origin path (composed sets commonly repeat a basename
+// across directories, so a basename match could pick another file's block).
+// Nil when absent or ambiguous: a missing slice is safe, the wrong file's
+// slice is not.
 func (idx docIndex) spanFor(key, preferredFile string) *span {
 	entries := idx.byKey[key]
 	if len(entries) == 1 {
@@ -239,7 +263,7 @@ func (idx docIndex) spanFor(key, preferredFile string) *span {
 	}
 	if preferredFile != "" {
 		for i := range entries {
-			if fileBase(entries[i].file) == fileBase(preferredFile) {
+			if entries[i].file == preferredFile || fileMatches(entries[i].file, preferredFile) || fileMatches(preferredFile, entries[i].file) {
 				return &entries[i]
 			}
 		}

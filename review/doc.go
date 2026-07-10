@@ -46,8 +46,9 @@ just its start. The specs must be loaded with IncludeOrigin = true.
 Indexed block types are operations, path items, named components (schemas,
 security schemes, responses, parameters, request bodies, headers), the
 top-level sections (info/servers/tags/security), and schemas $ref'd from
-another file (sliced from that file via the per-file texts Extract takes). Composed mode indexes every spec in the set, disambiguating
-same-named blocks by file. Known gaps:
+another file (sliced from that file via the per-file texts Extract takes).
+Composed mode indexes every spec in the set, disambiguating same-named blocks
+by file. Known gaps:
 
   - Schemas reached through a non-OpenAPI key. Whole-file refs (./User.yaml) and
     refs into a components-structured file (./defs.yaml#/components/schemas/User,

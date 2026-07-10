@@ -147,9 +147,7 @@ func fromGlob(loader *openapi3.Loader, glob string, capture bool) ([]*SpecInfo, 
 		var cap *sourceCapture
 		if capture {
 			cap = newSourceCapture()
-			lc := *loader
-			lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, cap)
-			l = &lc
+			l = withCapture(loader, cap)
 		}
 		spec, err := l.LoadFromFile(file)
 		if err != nil {

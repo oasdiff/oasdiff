@@ -10,6 +10,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
@@ -111,4 +112,60 @@ func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
 	require.Len(t, blocks, 1, "the two sides pair into one block")
 	require.NotEmpty(t, blocks[0].BaseText, "base side sliced (paired, not delete + add)")
 	require.NotEmpty(t, blocks[0].RevText, "revision side sliced")
+}
+
+// Composed sets commonly repeat a basename across directories (one
+// openapi.yaml per service). Same-named components in same-named files stay
+// separate blocks, each sliced from its own file; the block key is qualified
+// with a directory segment so the two don't merge.
+func TestExtract_ComposedSameBasenameStaysSeparate(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	base, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/base/*/openapi.yaml")
+	require.NoError(t, err)
+	rev, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/revision/*/openapi.yaml")
+	require.NoError(t, err)
+
+	var baseDocs, revDocs []*openapi3.T
+	baseTexts, revTexts := map[string]string{}, map[string]string{}
+	for _, si := range base {
+		baseDocs = append(baseDocs, si.Spec)
+		for k, v := range si.Sources {
+			baseTexts[k] = v
+		}
+	}
+	for _, si := range rev {
+		revDocs = append(revDocs, si.Spec)
+		for k, v := range si.Sources {
+			revTexts[k] = v
+		}
+	}
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), base, rev)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+
+	blocks := Extract(changes, baseDocs, revDocs, baseTexts, revTexts)
+
+	var a, b *Block
+	for i := range blocks {
+		switch {
+		case strings.HasPrefix(blocks[i].Key, "svc-a/"):
+			a = &blocks[i]
+		case strings.HasPrefix(blocks[i].Key, "svc-b/"):
+			b = &blocks[i]
+		}
+	}
+	require.NotNil(t, a, "svc-a's User is its own block")
+	require.NotNil(t, b, "svc-b's User is its own block")
+	require.Equal(t, "components/schemas/User", a.Title)
+	require.Equal(t, "components/schemas/User", b.Title)
+
+	// each block slices its own file's schema, on both sides
+	require.Contains(t, a.BaseText, "name:")
+	require.NotContains(t, a.BaseText, "id:")
+	require.Contains(t, a.RevText, "name:")
+	require.Contains(t, b.BaseText, "id:")
+	require.NotContains(t, b.BaseText, "name:")
+	require.Contains(t, b.RevText, "extra:")
 }
