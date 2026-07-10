@@ -83,3 +83,14 @@ func TestMergeSpec_MergeCircularAdditionalPropsNestedWithinAllOf(t *testing.T) {
 	NestedSelfReferentialSchema := merged.Components.Schemas["NestedSelfReferentialSchema"].Value
 	require.Equal(t, baseSchemaReferencedAdditionalPropSchema, NestedSelfReferentialSchema)
 }
+
+// allOf under a webhook is merged like everywhere else; the walk covers every
+// schema attachment point in the document.
+func Test_MergeSpecWebhook(t *testing.T) {
+	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/webhook.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+	schema := spec.Spec.Webhooks["newPet"].Post.RequestBody.Value.Content["application/json"].Schema.Value
+	require.Empty(t, schema.AllOf)
+	require.True(t, schema.Properties["a"].Value.Type.Is("string"))
+	require.True(t, schema.Properties["b"].Value.Type.Is("integer"))
+}

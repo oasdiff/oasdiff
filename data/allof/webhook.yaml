@@ -1,0 +1,22 @@
+openapi: 3.1.0
+info:
+  title: webhook allOf
+  version: "1.0"
+paths: {}
+webhooks:
+  newPet:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    a: {type: string}
+                - type: object
+                  properties:
+                    b: {type: integer}
+      responses:
+        "200":
+          description: ok
