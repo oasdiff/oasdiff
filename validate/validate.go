@@ -40,11 +40,15 @@ func Validate(spec *openapi3.T, source string) formatters.Findings {
 	if spec == nil {
 		return nil
 	}
-	verr := spec.Validate(context.Background(), openapi3.EnableMultiError())
-	if verr == nil {
-		return formatters.Findings{}
+	// Non-nil empty so the formatters' nil guard renders `[]`, not empty
+	// bytes, for a valid spec with no findings (oasdiff #1045/#1046).
+	findings := formatters.Findings{}
+	if verr := spec.Validate(context.Background(), openapi3.EnableMultiError()); verr != nil {
+		findings = mapKinErrors(source, verr)
 	}
-	return mapKinErrors(source, verr)
+	// oasdiff-native SHOULD-level lints that kin-openapi does not enforce.
+	findings = append(findings, lintDuplicateEnums(spec, source)...)
+	return findings
 }
 
 // mapKinErrors flattens kin-openapi's MultiError tree into a list of
