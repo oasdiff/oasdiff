@@ -68,10 +68,8 @@ var transitions = []transition{
 	// added since they moved between the top level and the branch, the
 	// oneOf reads as added or removed, and for object schemas the branch's
 	// properties and required entries read as added or removed. Reported as
-	// became-(not-)nullable at body and property level; at parameter level,
-	// where no became-nullable rules exist, the parameter list-of-types
-	// findings are the reporters, and listing them here is what keeps them
-	// alive there via the reportedBy exemption.
+	// became-(not-)nullable at every level: body, property, parameter, and
+	// parameter property.
 	{
 		present: func(d *diff.SchemaDiff) bool { return !d.NullableWrappingDiff.Empty() },
 		claims: map[Kind]bool{
@@ -83,7 +81,8 @@ var transitions = []transition{
 			RequestBodyBecomeNotNullableId, RequestPropertyBecomeNotNullableId,
 			ResponseBodyBecameNullableId, ResponsePropertyBecameNullableId,
 			ResponseBodyBecameNotNullableId, ResponsePropertyBecameNotNullableId,
-			RequestParameterListOfTypesWidenedId, RequestParameterListOfTypesNarrowedId,
+			RequestParameterBecameNullableId, RequestParameterBecameNotNullableId,
+			RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId,
 		},
 	},
 	// oneOf wrapping: a concrete object schema became a oneOf of object
@@ -129,6 +128,8 @@ var transitions = []transition{
 			RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId,
 			ResponseBodyBecameNullableId, ResponsePropertyBecameNullableId,
 			ResponseBodyBecameNotNullableId, ResponsePropertyBecameNotNullableId,
+			RequestParameterBecameNullableId, RequestParameterBecameNotNullableId,
+			RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId,
 		},
 	},
 }

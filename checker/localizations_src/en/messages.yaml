@@ -73,6 +73,10 @@ request-header-property-became-enum: the %s request header's property %s was res
 request-parameter-became-required: the %s request parameter %s became required
 request-parameter-became-optional: the %s request parameter %s became optional
 request-parameter-became-enum: the %s request parameter %s was restricted to a list of enum values
+request-parameter-became-nullable: the %s request parameter %s became nullable
+request-parameter-became-not-nullable: the %s request parameter %s became not nullable
+request-parameter-property-became-nullable: the %s property of the %s request parameter %s became nullable
+request-parameter-property-became-not-nullable: the %s property of the %s request parameter %s became not nullable
 request-parameter-enum-value-removed: removed the enum value %s from the %s request parameter %s
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
 request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
@@ -464,6 +468,10 @@ request-optional-property-became-not-write-only-description: request optional pr
 request-optional-property-became-read-only-description: request optional property became read-only
 request-optional-property-became-write-only-description: request optional property became write-only
 request-parameter-became-enum-description: request parameter restricted to enum
+request-parameter-became-nullable-description: request parameter became nullable
+request-parameter-became-not-nullable-description: request parameter became not nullable
+request-parameter-property-became-nullable-description: request parameter property became nullable
+request-parameter-property-became-not-nullable-description: request parameter property became not nullable
 request-parameter-became-optional-description: request parameter became optional
 request-parameter-became-required-description: request parameter became required
 request-parameter-default-value-added-description: request parameter default value set

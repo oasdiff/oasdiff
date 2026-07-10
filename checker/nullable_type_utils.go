@@ -82,6 +82,11 @@ func nullabilityChangeId(d *diff.SchemaDiff, nullableId, notNullableId string) s
 // type array (OpenAPI 3.1), and the nullable oneOf wrapping
 // (oneOf: [{type: "null"}, <equivalent schema>]).
 func nullabilityChange(d *diff.SchemaDiff) nullability {
+	// A schema present on one side only is not a nullability transition (and
+	// the type-array checks below read both sides).
+	if d == nil || d.Base == nil || d.Revision == nil {
+		return nullabilityUnchanged
+	}
 	if d.NullableDiff != nil {
 		if d.NullableDiff.From == true {
 			return becameNotNullable

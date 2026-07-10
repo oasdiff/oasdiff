@@ -61,6 +61,10 @@ request-header-property-became-enum: la propiedad %s del encabezado de solicitud
 request-parameter-became-required: el parámetro %s de solicitud %s se volvió requerido
 request-parameter-became-optional: el parámetro %s de solicitud %s se volvió opcional
 request-parameter-became-enum: el parámetro %s de solicitud %s fue restringido a una lista de valores enum
+request-parameter-became-nullable: el parámetro de solicitud %s %s se volvió nulable
+request-parameter-became-not-nullable: el parámetro de solicitud %s %s se volvió no nulable
+request-parameter-property-became-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió nulable
+request-parameter-property-became-not-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió no nulable
 request-parameter-enum-value-removed: removido el valor enum %s del parámetro %s de solicitud %s
 request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro %s de solicitud %s
 request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
@@ -461,6 +465,10 @@ request-optional-property-became-not-write-only-description: propiedad opcional 
 request-optional-property-became-read-only-description: propiedad opcional de solicitud se volvió de solo lectura
 request-optional-property-became-write-only-description: propiedad opcional de solicitud se volvió de solo escritura
 request-parameter-became-enum-description: parámetro de solicitud restringido a enum
+request-parameter-became-nullable-description: el parámetro de solicitud se volvió nulable
+request-parameter-became-not-nullable-description: el parámetro de solicitud se volvió no nulable
+request-parameter-property-became-nullable-description: la propiedad del parámetro de solicitud se volvió nulable
+request-parameter-property-became-not-nullable-description: la propiedad del parámetro de solicitud se volvió no nulable
 request-parameter-became-optional-description: parámetro de solicitud se volvió opcional
 request-parameter-became-required-description: parámetro de solicitud se volvió requerido
 request-parameter-default-value-added-description: valor por defecto del parámetro de solicitud establecido

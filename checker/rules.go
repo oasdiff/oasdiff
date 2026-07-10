@@ -288,6 +288,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestHeaderPropertyBecameRequiredId, ERR, RequestHeaderPropertyBecameRequiredCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
 		// RequestParameterBecameEnumCheck
 		newBackwardCompatibilityRule(RequestParameterBecameEnumId, ERR, RequestParameterBecameEnumCheck, DirectionRequest, AreaParameters, KindValues, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterBecameNullableId, INFO, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterPropertyBecameNullableId, INFO, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestParameterPropertyBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, ActionChange),
 		// RequestParameterDefaultValueChangedCheck
 		newBackwardCompatibilityRule(RequestParameterDefaultValueChangedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, ActionChange),
 		newBackwardCompatibilityRule(RequestParameterDefaultValueAddedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, ActionAdd),

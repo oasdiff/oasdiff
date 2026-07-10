@@ -54,8 +54,10 @@ func TestClaimedByTransition(t *testing.T) {
 	// regardless of the kind they are registered under.
 	require.False(t, claimedByTransition(listOfTypes, RequestPropertyListOfTypesWidenedId),
 		"a KindType reporter at its own KindType-claiming transition still reports")
-	require.False(t, claimedByTransition(nullable, RequestParameterListOfTypesWidenedId),
-		"the parameter list-of-types finding is the nullable transition's parameter-level reporter")
+	require.True(t, claimedByTransition(nullable, RequestParameterListOfTypesWidenedId),
+		"the parameter list-of-types finding yields to the dedicated parameter became-nullable reporter")
+	require.False(t, claimedByTransition(nullable, RequestParameterBecameNullableId),
+		"the parameter became-nullable finding is the nullable transition's parameter-level reporter")
 	require.True(t, claimedByTransition(nullable, RequestPropertyListOfTypesWidenedId),
 		"the property list-of-types finding yields to became-nullable")
 
