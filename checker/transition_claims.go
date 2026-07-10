@@ -62,20 +62,28 @@ type transition struct {
 var transitions = []transition{
 	// Nullable wrapping: base X became oneOf: [{type: "null"}, X], the
 	// OpenAPI 3.1 idiom for making a $ref'd schema nullable (see
-	// diff.NullableWrappingDiff). Claims every raw reflection of the wrap:
-	// the type reads as changed, the value and constraint keywords (enum,
-	// pattern) read as removed since they moved into the branch, and the
-	// oneOf reads as added. Reported as became-nullable at body and property
-	// level; at parameter level, where no became-nullable rule exists, the
-	// parameter list-of-types finding is the reporter, and listing it here is
-	// what keeps it alive there via the reportedBy exemption.
+	// diff.NullableWrappingDiff), or the reverse (the wrapper removed).
+	// Claims every raw reflection of the wrap: the type reads as changed,
+	// the value and constraint keywords (enum, pattern) read as removed or
+	// added since they moved between the top level and the branch, the
+	// oneOf reads as added or removed, and for object schemas the branch's
+	// properties and required entries read as added or removed. Reported as
+	// became-(not-)nullable at body and property level; at parameter level,
+	// where no became-nullable rules exist, the parameter list-of-types
+	// findings are the reporters, and listing them here is what keeps them
+	// alive there via the reportedBy exemption.
 	{
 		present: func(d *diff.SchemaDiff) bool { return !d.NullableWrappingDiff.Empty() },
-		claims:  map[Kind]bool{KindType: true, KindValues: true, KindConstraints: true, KindStructure: true},
+		claims: map[Kind]bool{
+			KindType: true, KindValues: true, KindConstraints: true,
+			KindStructure: true, KindExistence: true, KindRequiredness: true,
+		},
 		reportedBy: []string{
 			RequestBodyBecomeNullableId, RequestPropertyBecomeNullableId,
+			RequestBodyBecomeNotNullableId, RequestPropertyBecomeNotNullableId,
 			ResponseBodyBecameNullableId, ResponsePropertyBecameNullableId,
-			RequestParameterListOfTypesWidenedId,
+			ResponseBodyBecameNotNullableId, ResponsePropertyBecameNotNullableId,
+			RequestParameterListOfTypesWidenedId, RequestParameterListOfTypesNarrowedId,
 		},
 	},
 	// oneOf wrapping: a concrete object schema became a oneOf of object
@@ -120,6 +128,7 @@ var transitions = []transition{
 			RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId,
 			RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId,
 			ResponseBodyBecameNullableId, ResponsePropertyBecameNullableId,
+			ResponseBodyBecameNotNullableId, ResponsePropertyBecameNotNullableId,
 		},
 	},
 }
@@ -163,12 +172,8 @@ func claimedByTransition(schemaDiff *diff.SchemaDiff, ruleId string) bool {
 		return false
 	}
 	for _, t := range transitions {
-		if t.claims[kind] && t.present(schemaDiff) {
-			if slices.Contains(t.reportedBy, ruleId) {
-				return false
-			} else {
-				return true
-			}
+		if t.claims[kind] && t.present(schemaDiff) && !slices.Contains(t.reportedBy, ruleId) {
+			return true
 		}
 	}
 	return false

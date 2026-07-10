@@ -185,6 +185,8 @@ response-property-sunset-date-too-small: "a data de expiração %s da propriedad
 response-property-became-optional: a propriedade de resposta %s tornou-se opcional para o status %s
 response-property-became-nullable: a propriedade de resposta %s tornou-se anulável para o status %s
 response-body-became-nullable: o corpo da resposta tornou-se anulável
+response-property-became-not-nullable: a propriedade de resposta %s tornou-se não anulável para o status %s
+response-body-became-not-nullable: o corpo da resposta tornou-se não anulável
 response-property-enum-value-added: o novo valor %s do enum foi adicionado à propriedade de resposta %s para o status %s
 response-property-enum-value-added-comment: Adicionar novos valores enum à resposta pode ser inesperado para os clientes, use x-extensible-enum em vez disso.
 response-property-enum-value-removed: o valor %s do enum foi removido da propriedade de resposta %s para o status %s
@@ -549,6 +551,8 @@ response-body-all-of-removed-description: subesquema removido do allOf no corpo 
 response-body-any-of-added-description: subesquema adicionado ao anyOf no corpo da resposta
 response-body-any-of-removed-description: subesquema removido do anyOf no corpo da resposta
 response-body-became-nullable-description: corpo da resposta tornou-se anulável
+response-property-became-not-nullable-description: a propriedade de resposta tornou-se não anulável
+response-body-became-not-nullable-description: o corpo da resposta tornou-se não anulável
 response-body-default-value-added-description: valor padrão do corpo da resposta definido
 response-body-default-value-changed-description: valor padrão do corpo da resposta alterado
 response-body-default-value-removed-description: valor padrão do corpo da resposta removido

@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -24,40 +26,55 @@ type NullableWrappingDiff struct {
 	// NullabilityAdded is true when the base schema was wrapped (the revision
 	// accepts everything the base did, plus null).
 	NullabilityAdded bool `json:"nullabilityAdded,omitempty" yaml:"nullabilityAdded,omitempty"`
+	// NullabilityRemoved is true when the base was the wrapper and the
+	// revision is its non-null branch (the revision accepts everything the
+	// base did, except null).
+	NullabilityRemoved bool `json:"nullabilityRemoved,omitempty" yaml:"nullabilityRemoved,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element.
 func (diff *NullableWrappingDiff) Empty() bool {
-	return diff == nil || !diff.NullabilityAdded
+	return diff == nil || (!diff.NullabilityAdded && !diff.NullabilityRemoved)
 }
 
-// getNullableWrappingDiff detects the nullable-wrapping pattern (revision
-// wraps a schema equivalent to the base in oneOf: [{type: "null"}, base]) and
-// returns nil when it doesn't apply. Only this direction is detected; the
-// reverse (removing the wrap, i.e. removing nullability) keeps today's
-// conservative reporting.
+// getNullableWrappingDiff detects the nullable-wrapping pattern in either
+// direction (the revision wraps a schema equivalent to the base, or the base
+// was the wrapper and the revision is its non-null branch) and returns nil
+// when neither applies.
 func getNullableWrappingDiff(config *Config, base, revision *openapi3.Schema) *NullableWrappingDiff {
 	if base == nil || revision == nil {
 		return nil
 	}
-	// The base must itself be free of compositions (so the equivalence below is
-	// meaningful) and must reject null: wrapping an already-nullable schema
-	// changes acceptance under oneOf's exactly-one rule (null would match both
-	// branches and be rejected), so it is not a pure widening.
-	if len(base.OneOf) > 0 || len(base.AnyOf) > 0 || len(base.AllOf) > 0 || base.Not != nil {
-		return nil
+	if isNullableWrap(config, base, revision) {
+		return &NullableWrappingDiff{NullabilityAdded: true}
 	}
-	if schemaAcceptsNull(base) {
-		return nil
+	if isNullableWrap(config, revision, base) {
+		return &NullableWrappingDiff{NullabilityRemoved: true}
 	}
-	// The revision must be a bare wrapper: exactly a two-branch oneOf, nothing
-	// constraining at the top level.
-	if len(revision.OneOf) != 2 || !constrainsNothingBeyondOneOf(config, revision) {
-		return nil
+	return nil
+}
+
+// isNullableWrap reports whether wrapped is exactly plain made nullable:
+// oneOf: [{type: "null"}, plain'] with plain' validation-equivalent to plain.
+func isNullableWrap(config *Config, plain, wrapped *openapi3.Schema) bool {
+	// The plain side must itself be free of compositions (so the equivalence
+	// below is meaningful) and must reject null: wrapping an already-nullable
+	// schema changes acceptance under oneOf's exactly-one rule (null would
+	// match both branches and be rejected), so it is not a pure widening.
+	if len(plain.OneOf) > 0 || len(plain.AnyOf) > 0 || len(plain.AllOf) > 0 || plain.Not != nil {
+		return false
+	}
+	if schemaAcceptsNull(plain) {
+		return false
+	}
+	// The wrapped side must be a bare wrapper: exactly a two-branch oneOf,
+	// nothing constraining at the top level.
+	if len(wrapped.OneOf) != 2 || !constrainsNothingBeyondOneOf(config, wrapped) {
+		return false
 	}
 	var payload *openapi3.SchemaRef
 	nullBranches := 0
-	for _, ref := range revision.OneOf {
+	for _, ref := range wrapped.OneOf {
 		if isBareNullSchema(config, schemaValue(ref)) {
 			nullBranches++
 			continue
@@ -65,12 +82,9 @@ func getNullableWrappingDiff(config *Config, base, revision *openapi3.Schema) *N
 		payload = ref
 	}
 	if nullBranches != 1 || payload == nil {
-		return nil
+		return false
 	}
-	if !SchemaRefsValidationEquivalent(config, &openapi3.SchemaRef{Value: base}, payload) {
-		return nil
-	}
-	return &NullableWrappingDiff{NullabilityAdded: true}
+	return SchemaRefsValidationEquivalent(config, &openapi3.SchemaRef{Value: plain}, payload)
 }
 
 // schemaAcceptsNull reports whether the schema accepts a null value via the
@@ -79,12 +93,7 @@ func schemaAcceptsNull(schema *openapi3.Schema) bool {
 	if schema.Nullable {
 		return true
 	}
-	for _, t := range schema.Type.Slice() {
-		if t == "null" {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(schema.Type.Slice(), "null")
 }
 
 // constrainsNothingBeyondOneOf reports whether the schema, with its oneOf

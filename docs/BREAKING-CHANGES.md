@@ -91,6 +91,10 @@ Assigning [stability levels](STABILITY.md) to APIs allows fine-grained control o
 Before deleting an endpoint, it is recommended to give consumers a heads-up in the form of "deprecation". 
 Oasdiff allows you to [deprecate APIs gracefully](DEPRECATION.md) without triggering a breaking-change error.
 
+## Nullability Changes
+A schema can allow `null` in three equivalent ways, and whether a nullability change is breaking depends on whether it appears in a request or a response.
+See [Nullability Changes](NULLABILITY.md).
+
 ## Ignoring Specific Breaking Changes
 Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  
 Oasdiff allows you define breaking changes that you want to ignore in a configuration file.  

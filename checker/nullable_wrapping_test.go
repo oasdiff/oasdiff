@@ -65,3 +65,30 @@ func TestNullableWrapping_SingleFindingPerLevel(t *testing.T) {
 		require.Equal(t, []string{checker.RequestParameterListOfTypesWidenedId}, ids)
 	})
 }
+
+// The reverse direction: removing the wrapper reports one became-not-nullable
+// per level (the same fixtures, compared in reverse). At parameter level the
+// reporter is the parameter list-of-types finding, as in the forward
+// direction (oasdiff/oasdiff#1091).
+func TestNullableUnwrapping_SingleFindingPerLevel(t *testing.T) {
+	t.Run("request property", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_revision.yaml", "../data/checker/nullable_wrap_base.yaml")
+		require.ElementsMatch(t, []string{
+			checker.RequestPropertyBecomeNotNullableId, // optionalEnum, unwrapped
+			checker.RequestPropertyBecomeNotNullableId, // optionalRef, unwrapped
+			checker.RequestPropertyBecomeNotNullableId, // optionalPrimitive, type array
+		}, ids)
+	})
+	t.Run("request body", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_body_revision.yaml", "../data/checker/nullable_wrap_body_base.yaml")
+		require.Equal(t, []string{checker.RequestBodyBecomeNotNullableId}, ids)
+	})
+	t.Run("parameter", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_param_revision.yaml", "../data/checker/nullable_wrap_param_base.yaml")
+		require.Equal(t, []string{checker.RequestParameterListOfTypesNarrowedId}, ids)
+	})
+	t.Run("response property", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_response_revision.yaml", "../data/checker/nullable_wrap_response_base.yaml")
+		require.Equal(t, []string{checker.ResponsePropertyBecameNotNullableId}, ids)
+	})
+}
