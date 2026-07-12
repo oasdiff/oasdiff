@@ -114,6 +114,57 @@ func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
 	require.NotEmpty(t, blocks[0].RevText, "revision side sliced")
 }
 
+// A $ref to a schema under an arbitrary top-level key in another file
+// ("./schemas.yaml#/User", the Swagger-2-era "definitions bag") must card to a
+// block sliced from that file, like a components-structured ref does. Runs the
+// real diff + checker so the change's source location is the one users get.
+//
+// Skipped on the released kin-openapi: it resolves this ref shape through a
+// generic map that drops the origin, so the change sources at the operation in
+// the root file and the block slices from there. Unskip when the kin fix
+// (preserve origins for refs to arbitrary top-level keys) is released and the
+// dependency is bumped; see also TestCrossFileSource_ArbitraryTopLevelKeyRef.
+func TestExtract_ArbitraryTopLevelKeyRefSlicedFromExternalFile(t *testing.T) {
+	t.Skip("origin lost for a $ref to an arbitrary top-level key; pending kin-openapi fix")
+	const rootSpec = `openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './schemas.yaml#/User'
+      responses:
+        "201": { description: created }
+`
+	loadSide := func(schemas string) *load.SpecInfo {
+		dir := t.TempDir()
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "schemas.yaml"), []byte(schemas), 0644))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(rootSpec), 0644))
+		loader := openapi3.NewLoader()
+		loader.IncludeOrigin = true
+		loader.IsExternalRefsAllowed = true
+		si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(filepath.Join(dir, "openapi.yaml")))
+		require.NoError(t, err)
+		return si
+	}
+	baseSI := loadSide("User:\n  type: object\n  properties:\n    id:\n      type: string\n")
+	revSI := loadSide("User:\n  type: object\n  properties:\n    id:\n      type: integer\n")
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), baseSI, revSI)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibility(checker.NewConfig(checker.GetAllChecks()), d, osm)
+	require.Len(t, changes, 1)
+
+	blocks := Extract(changes, docs(baseSI.Spec), docs(revSI.Spec), baseSI.Sources, revSI.Sources)
+	require.Len(t, blocks, 1)
+	require.Equal(t, "schemas.yaml", blocks[0].RevFile, "the block slices from the file the schema lives in")
+	require.Contains(t, blocks[0].RevText, "User:")
+	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from schemas.yaml, not the root spec")
+}
+
 // Composed sets commonly repeat a basename across directories (one
 // openapi.yaml per service). Same-named components in same-named files stay
 // separate blocks, each sliced from its own file; the block key is qualified
