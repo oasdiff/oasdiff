@@ -455,7 +455,7 @@ func Test_ValidateCmd_MultipleClusters(t *testing.T) {
 	}
 	require.True(t, ids["value-or-external-value-required"], "EitherFieldRequiredError via joinFieldsForRuleID")
 	require.True(t, ids["operation-id-or-operation-ref-required"], "ExactlyOneFieldError via joinFieldsForRuleID")
-	require.True(t, ids["o-auth-flow-scopes-required"])
+	require.True(t, ids["oauth-flow-scopes-required"])
 	require.True(t, ids["example-violates-schema"])
 }
 

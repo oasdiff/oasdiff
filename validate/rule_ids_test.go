@@ -31,7 +31,7 @@ func TestKnownRuleID_GatesUnregisteredIDs(t *testing.T) {
 	require.Equal(t, unknownValidationID, knownRuleID(renamed), "unregistered id is demoted")
 
 	known := ruleIDForKinError(&openapi3.RequiredFieldError{Field: "oAuthFlow.scopes"})
-	require.Equal(t, "o-auth-flow-scopes-required", knownRuleID(known), "registered id passes through")
+	require.Equal(t, "oauth-flow-scopes-required", knownRuleID(known), "registered id passes through")
 }
 
 // A 3.2-gated field reports a 3-2-plus id, not 3-1-plus (kin's MinVersion

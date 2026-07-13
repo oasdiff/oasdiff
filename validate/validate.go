@@ -743,6 +743,8 @@ func joinFieldsForRuleID(fields []string) string {
 func ruleIDFromField(field string) string {
 	field = strings.TrimPrefix(field, "$")
 	field = strings.ReplaceAll(field, ".", "-")
+	// acronyms: camel-splitting "oAuthFlow" would yield "o-auth-flow"
+	field = strings.ReplaceAll(field, "oAuth", "oauth")
 	var b strings.Builder
 	for i, r := range field {
 		if i > 0 && unicode.IsUpper(r) {
