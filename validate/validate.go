@@ -77,7 +77,7 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 	}
 	path, operation := pathOperationForKinError(err)
 	f := formatters.Finding{
-		Id:        ruleIDForKinError(err),
+		Id:        knownRuleID(ruleIDForKinError(err)),
 		Text:      unwrapContext(err).Error(),
 		Level:     severityForKinError(err),
 		Operation: operation,
@@ -615,7 +615,7 @@ func ruleIDForKinError(err error) string {
 	}
 
 	if fvm, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
-		return ruleIDFromField(fvm.Field) + "-field-for-3-1-plus"
+		return ruleIDFromField(fvm.Field) + "-field-for-" + minVersionForRuleID(fvm.MinVersion) + "-plus"
 	}
 
 	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
@@ -721,6 +721,13 @@ func ruleIDForKinError(err error) string {
 // fragment as kebab-case fields joined by "-or-" (e.g. ["value",
 // "externalValue"] → "value-or-external-value"). The caller appends
 // the cluster-specific suffix ("-required", "-exactly-one", ...).
+// minVersionForRuleID renders a kin MinVersion ("3.1", "3.2") as a rule-id
+// segment ("3-1", "3-2"). An unexpected value yields an id outside the
+// registry, which knownRuleID demotes to spec-validation-error.
+func minVersionForRuleID(v string) string {
+	return strings.ReplaceAll(v, ".", "-")
+}
+
 func joinFieldsForRuleID(fields []string) string {
 	parts := make([]string, len(fields))
 	for i, f := range fields {
@@ -736,6 +743,9 @@ func joinFieldsForRuleID(fields []string) string {
 func ruleIDFromField(field string) string {
 	field = strings.TrimPrefix(field, "$")
 	field = strings.ReplaceAll(field, ".", "-")
+	// acronyms: camel-splitting "oAuthFlow" would yield "o-auth-flow"
+	field = strings.ReplaceAll(field, "oAuth", "oauth")
+	field = strings.ReplaceAll(field, "openId", "openid")
 	var b strings.Builder
 	for i, r := range field {
 		if i > 0 && unicode.IsUpper(r) {
