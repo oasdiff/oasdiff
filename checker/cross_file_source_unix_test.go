@@ -82,13 +82,7 @@ func TestCrossFileSource_WholeFileRef(t *testing.T) {
 // Arbitrary top-level key $ref: the schema lives under "User" in schemas.yaml,
 // so the change's source must be schemas.yaml, not the referencing operation in
 // the root document.
-//
-// Skipped on the released kin-openapi: it resolves this ref shape through a
-// generic map that drops the origin, so the source falls back to the operation
-// in the root file. Unskip when the kin fix (preserve origins for refs to
-// arbitrary top-level keys) is released and the dependency is bumped.
 func TestCrossFileSource_ArbitraryTopLevelKeyRef(t *testing.T) {
-	t.Skip("origin lost for a $ref to an arbitrary top-level key; pending kin-openapi fix")
 	change, revSchemaPath := crossFileTypeChange(t, "./schemas.yaml#/User", "schemas.yaml",
 		"User:\n  type: object\n  properties:\n    id:\n      type: string\n",
 		"User:\n  type: object\n  properties:\n    id:\n      type: integer\n")

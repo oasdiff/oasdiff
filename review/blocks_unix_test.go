@@ -118,14 +118,7 @@ func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
 // ("./schemas.yaml#/User", the Swagger-2-era "definitions bag") must card to a
 // block sliced from that file, like a components-structured ref does. Runs the
 // real diff + checker so the change's source location is the one users get.
-//
-// Skipped on the released kin-openapi: it resolves this ref shape through a
-// generic map that drops the origin, so the change sources at the operation in
-// the root file and the block slices from there. Unskip when the kin fix
-// (preserve origins for refs to arbitrary top-level keys) is released and the
-// dependency is bumped; see also TestCrossFileSource_ArbitraryTopLevelKeyRef.
 func TestExtract_ArbitraryTopLevelKeyRefSlicedFromExternalFile(t *testing.T) {
-	t.Skip("origin lost for a $ref to an arbitrary top-level key; pending kin-openapi fix")
 	const rootSpec = `openapi: 3.0.0
 info: { title: t, version: "1" }
 paths:
