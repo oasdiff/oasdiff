@@ -73,13 +73,13 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from other.yaml, not the root spec")
 }
 
-// An external $ref authored "other.yaml" on the base side and "./other.yaml" on
-// the revision side names the same target; kin preserves the authored "./" in
-// sr.Ref, so indexExternalSchemas strips it before keying. That makes both sides
-// key the block identically, so resolve() pairs them into one block rather than a
-// spurious delete + add. Remove the strip and this fails: base and rev key
-// differently and the base side no longer slices.
-func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
+// loadRefStyleSpecs writes the fixture where the base side authors the $ref as
+// "other.yaml" and the revision side as "./other.yaml" (the same target), loads
+// both, and returns each side with its external block's key and span.
+// Requiring the block on each side here makes it a shared precondition of the
+// index and extract tests below.
+func loadRefStyleSpecs(t *testing.T) (baseSI, revSI *load.SpecInfo, baseKey, revKey string, baseSpan, revSpan span) {
+	t.Helper()
 	dir := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "other.yaml"), []byte(crossFileSubDoc), 0644))
 	baseRoot := filepath.Join(dir, "base.yaml")
@@ -95,7 +95,7 @@ func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
 		require.NoError(t, err)
 		return si
 	}
-	baseSI, revSI := loadSpec(baseRoot), loadSpec(revRoot)
+	baseSI, revSI = loadSpec(baseRoot), loadSpec(revRoot)
 
 	findExternal := func(d *openapi3.T) (string, span) {
 		for k, spans := range buildIndex(d).byKey {
@@ -105,10 +105,25 @@ func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
 		}
 		return "", span{}
 	}
-	baseKey, baseSpan := findExternal(baseSI.Spec)
-	revKey, revSpan := findExternal(revSI.Spec)
+	baseKey, baseSpan = findExternal(baseSI.Spec)
+	revKey, revSpan = findExternal(revSI.Spec)
 	require.NotEmpty(t, baseKey, "the external User schema must be indexed on the base side")
-	require.Equal(t, baseKey, revKey, "'other.yaml' and './other.yaml' must key the same block")
+	require.NotEmpty(t, revKey, "the external User schema must be indexed on the revision side")
+	return baseSI, revSI, baseKey, revKey, baseSpan, revSpan
+}
+
+// kin preserves the authored "./" in sr.Ref, so indexExternalSchemas strips it
+// before keying: "other.yaml" and "./other.yaml" name the same target and must
+// key the same block.
+func TestBuildIndex_CrossFileRefStylesKeyIdentically(t *testing.T) {
+	_, _, baseKey, revKey, _, _ := loadRefStyleSpecs(t)
+	require.Equal(t, baseKey, revKey)
+}
+
+// Because both ref styles key identically, resolve() pairs the two sides into
+// one block rather than a spurious delete + add, and both sides slice.
+func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
+	baseSI, revSI, _, _, baseSpan, revSpan := loadRefStyleSpecs(t)
 
 	// one change, sourced inside other.yaml on each side (as the changelog reports)
 	c := checker.ApiChange{
