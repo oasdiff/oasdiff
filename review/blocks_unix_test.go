@@ -240,3 +240,48 @@ func TestExtract_ComposedSameBasenameStaysSeparate(t *testing.T) {
 	require.NotContains(t, b.BaseText, "name:")
 	require.Contains(t, b.RevText, "extra:")
 }
+
+// A one-sided change (a property added in svc-b only, so only a revision
+// source) still slices the base side from svc-b's file: the cross-side lookup
+// matches the full origin path among the same-named candidates.
+func TestExtract_ComposedSameBasenameCrossSideLookup(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	base, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/base/*/openapi.yaml")
+	require.NoError(t, err)
+	rev, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/revision/*/openapi.yaml")
+	require.NoError(t, err)
+
+	var baseDocs, revDocs []*openapi3.T
+	baseTexts, revTexts := map[string]string{}, map[string]string{}
+	for _, si := range base {
+		baseDocs = append(baseDocs, si.Spec)
+		for k, v := range si.Sources {
+			baseTexts[k] = v
+		}
+	}
+	var revUserSpan span
+	for _, si := range rev {
+		revDocs = append(revDocs, si.Spec)
+		for k, v := range si.Sources {
+			revTexts[k] = v
+		}
+		if strings.Contains(si.Url, "svc-b") {
+			for _, sp := range buildIndex(si.Spec).byKey["components/schemas/User"] {
+				revUserSpan = sp
+			}
+		}
+	}
+	require.Positive(t, revUserSpan.start, "svc-b's User span found")
+
+	c := checker.ApiChange{
+		Id:           "new-optional-request-property",
+		Operation:    "GET",
+		Path:         "/b",
+		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: revUserSpan.file, Line: revUserSpan.end}},
+	}
+	blocks := Extract(checker.Changes{c}, baseDocs, revDocs, baseTexts, revTexts)
+	require.Len(t, blocks, 1)
+	require.Contains(t, blocks[0].BaseText, "id:", "base sliced from svc-b's file")
+	require.NotContains(t, blocks[0].BaseText, "name:", "not svc-a's same-named schema")
+}

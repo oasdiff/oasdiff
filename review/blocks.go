@@ -82,9 +82,6 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 			byKey[r.key] = b
 			spansByKey[r.key] = r
 			order = append(order, r.key)
-		} else if prev := spansByKey[r.key]; prev.base == nil && prev.rev == nil && (r.base != nil || r.rev != nil) {
-			// a sourced change resolves the spans a fallback-keyed one couldn't
-			spansByKey[r.key] = r
 		}
 		b.ChangeIDs = append(b.ChangeIDs, c.GetId())
 		b.Fingerprints = append(b.Fingerprints, checker.Fingerprint(c))
@@ -249,24 +246,51 @@ func buildIndex(docs ...*openapi3.T) docIndex {
 }
 
 // spanFor returns the span to slice for key: the unique one, or, among several
-// (composed specs repeating a name), the one whose file is preferredFile. The
-// match is on the full origin path (composed sets commonly repeat a basename
-// across directories, so a basename match could pick another file's block).
-// Nil when absent or ambiguous: a missing slice is safe, the wrong file's
-// slice is not.
+// (composed specs repeating a name), the one whose file best corresponds to
+// preferredFile. Correspondence is the longest path-suffix match in segments:
+// the two sides of a comparison commonly live in sibling directories
+// (base/svc-b/openapi.yaml vs revision/svc-b/openapi.yaml), so an exact path
+// can't match across sides, while a basename alone can't tell same-named
+// files apart (svc-a/openapi.yaml vs svc-b/openapi.yaml). Nil when absent or
+// tied: a missing slice is safe, the wrong file's slice is not.
 func (idx docIndex) spanFor(key, preferredFile string) *span {
 	entries := idx.byKey[key]
 	if len(entries) == 1 {
 		return &entries[0]
 	}
-	if preferredFile != "" {
-		for i := range entries {
-			if entries[i].file == preferredFile || fileMatches(entries[i].file, preferredFile) || fileMatches(preferredFile, entries[i].file) {
-				return &entries[i]
-			}
+	if preferredFile == "" {
+		return nil
+	}
+	best, bestLen, tied := -1, 0, false
+	for i := range entries {
+		if l := suffixSegmentMatch(entries[i].file, preferredFile); l > bestLen {
+			best, bestLen, tied = i, l, false
+		} else if l == bestLen && l > 0 {
+			tied = true
 		}
 	}
-	return nil
+	if best < 0 || tied {
+		return nil
+	}
+	return &entries[best]
+}
+
+// suffixSegmentMatch counts how many trailing path segments a and b share,
+// after stripping any git "<rev>:" prefix. 0 means no correspondence (even the
+// filenames differ).
+func suffixSegmentMatch(a, b string) int {
+	segs := func(f string) []string {
+		if i := strings.LastIndex(f, ":"); i >= 0 {
+			f = f[i+1:]
+		}
+		return strings.Split(filepath.ToSlash(f), "/")
+	}
+	sa, sb := segs(a), segs(b)
+	n := 0
+	for i, j := len(sa)-1, len(sb)-1; i >= 0 && j >= 0 && sa[i] == sb[j]; i, j = i-1, j-1 {
+		n++
+	}
+	return n
 }
 
 // addDoc indexes one document's blocks into idx.

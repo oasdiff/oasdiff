@@ -569,3 +569,55 @@ func TestExtract_ComponentResponseBlock(t *testing.T) {
 	require.NotContains(t, blocks[0].BaseText, "/users:", "not the operation block")
 	require.NotContains(t, blocks[0].BaseText, "UserBody:", "sibling components excluded")
 }
+
+func TestFileBaseAndDisplay(t *testing.T) {
+	for _, tc := range []struct {
+		in, base, display string
+	}{
+		{"", "", ""},
+		{"openapi.yaml", "openapi.yaml", "openapi.yaml"},
+		{"specs/openapi.yaml", "openapi.yaml", "specs/openapi.yaml"},
+		{"a/specs/openapi.yaml", "openapi.yaml", "specs/openapi.yaml"},
+		{"HEAD:openapi.yaml", "openapi.yaml", "openapi.yaml"},
+		{"main:specs/openapi.yaml", "openapi.yaml", "specs/openapi.yaml"},
+	} {
+		require.Equal(t, tc.base, fileBase(tc.in), "fileBase(%q)", tc.in)
+		require.Equal(t, tc.display, fileDisplay(tc.in), "fileDisplay(%q)", tc.in)
+	}
+}
+
+// A change with no operation, path, or source, whose rule belongs to a
+// non-schema area, buckets under that area's name.
+func TestFallbackKey_Area(t *testing.T) {
+	key, title := fallbackKey(checker.ApiChange{Id: "api-security-added"})
+	require.Equal(t, "security", key)
+	require.Equal(t, "security", title)
+}
+
+// A nil doc in the set (a spec that failed to parse upstream) is skipped.
+func TestBuildIndex_NilDocSkipped(t *testing.T) {
+	doc := loadWithOrigin(t, topLevelSpec)
+	require.Equal(t, len(buildIndex(doc).spans), len(buildIndex(nil, doc, nil).spans))
+}
+
+// The last top-level section has no next key line, so it runs to EOF.
+const trailingSecuritySpec = `openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+paths:
+  /x:
+    get:
+      responses:
+        "200": { description: ok }
+security:
+  - {}
+`
+
+func TestBuildIndex_LastTopLevelSectionRunsToEOF(t *testing.T) {
+	idx := buildIndex(loadWithOrigin(t, trailingSecuritySpec))
+	s := singleSpan(t, idx, "security")
+	got := sliceLines(trailingSecuritySpec, s.start, s.end)
+	require.Contains(t, got, "security:")
+	require.Contains(t, got, "- {}", "the section's content, clamped to EOF")
+}
