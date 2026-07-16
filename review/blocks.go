@@ -218,13 +218,11 @@ type span struct {
 	start, end int
 }
 
-// docIndex indexes a document's enumerated structural blocks for two lookups:
-// the smallest block containing a line, and the spans for a key. A key can map
-// to several spans when composed specs define the same component name or
-// top-level section in more than one file.
+// docIndex holds a document's enumerated structural blocks, indexed both ways
+// the resolver looks them up.
 type docIndex struct {
-	spans []span            // every block, flat: scanned by smallestContaining (find the block a source line is in)
-	byKey map[string][]span // the same blocks by key: cross-side and fallback lookup (spanFor), duplicate-name detection
+	spans []span            // flat, for smallestContaining: which block contains a source line
+	byKey map[string][]span // by key, for spanFor (cross-side and fallback lookup); several spans per key when composed specs repeat a name
 }
 
 // buildIndex enumerates the sliceable structural blocks of one or more docs
