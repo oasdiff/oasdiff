@@ -223,8 +223,8 @@ type span struct {
 // to several spans when composed specs define the same component name or
 // top-level section in more than one file.
 type docIndex struct {
-	spans []span
-	byKey map[string][]span
+	spans []span            // every block, flat: scanned by smallestContaining (find the block a source line is in)
+	byKey map[string][]span // the same blocks by key: cross-side and fallback lookup (spanFor), duplicate-name detection
 }
 
 // buildIndex enumerates the sliceable structural blocks of one or more docs
