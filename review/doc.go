@@ -48,16 +48,13 @@ security schemes, responses, parameters, request bodies, headers), the
 top-level sections (info/servers/tags/security), and schemas $ref'd from
 another file (sliced from that file via the per-file texts Extract takes).
 Composed mode indexes every spec in the set, disambiguating same-named blocks
-by file. Known gaps:
+by file. All external-$ref shapes slice from the file the schema lives in:
+whole-file refs (./User.yaml), refs into a components-structured file
+(./defs.yaml#/components/schemas/User, even without openapi:/info:), and refs
+to a schema under an arbitrary top-level key (./schemas.yaml#/User, the
+Swagger-2-era "definitions bag" shape; see
+TestExtract_ArbitraryTopLevelKeyRefSlicedFromExternalFile). Known gaps:
 
-  - Schemas reached through a non-OpenAPI key. Whole-file refs (./User.yaml) and
-    refs into a components-structured file (./defs.yaml#/components/schemas/User,
-    even without openapi:/info:) slice correctly. But a ref to a schema under an
-    arbitrary top-level key (./schemas.yaml#/User, a Swagger-2-era "definitions
-    bag" shape) is resolved generically by kin, which JSON-round-trips the value
-    and drops its origin, so its change sources at the referencing operation and
-    isn't sliced from that file. Uncommon in idiomatic OpenAPI 3; needs an
-    upstream kin fix.
   - Because blocks are keyed off the changelog, a block whose only change has no
     changelog entry (e.g. a description-only edit) is not extracted; that
     schema-shape completeness is a later phase.
