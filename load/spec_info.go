@@ -142,6 +142,12 @@ func fromGlob(loader *openapi3.Loader, glob string, capture bool) ([]*SpecInfo, 
 		return nil, err
 	}
 	result := make([]*SpecInfo, 0)
+	// Members load via LoadFromFile directly rather than through from():
+	// glob expansion already proves each member is a local file, and
+	// re-classifying the path as a Source could misread exotic names (a file
+	// named "main:openapi.yaml" would parse as a git revision). Capture is
+	// per member: each SpecInfo carries its own Sources, so a consumer can
+	// slice each member's blocks from that member's files.
 	for _, file := range files {
 		l := loader
 		var cap *sourceCapture
