@@ -41,7 +41,7 @@ paths:
 // revision-side path of that external file.
 func crossFileTypeChange(t *testing.T, ref, schemaFile, baseSchema, revSchema string) (checker.Change, string) {
 	t.Helper()
-	root := []byte(fmt.Sprintf(crossFileSourceRoot, ref))
+	root := fmt.Appendf(nil, crossFileSourceRoot, ref)
 
 	loadSide := func(schema string) (*load.SpecInfo, string) {
 		dir := t.TempDir()
