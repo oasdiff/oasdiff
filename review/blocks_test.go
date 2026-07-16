@@ -641,4 +641,15 @@ func TestSpanFor_SuffixCorrespondence(t *testing.T) {
 		"both candidates match only by basename: a tie stays nil")
 	require.Nil(t, idx.spanFor("components/schemas/User", ""), "no preference, ambiguous")
 	require.Nil(t, idx.spanFor("absent", "x.yaml"))
+
+	// git spans carry a "<rev>:" prefix; correspondence strips it on either side
+	gitIdx := docIndex{byKey: map[string][]span{
+		"components/schemas/User": {
+			{key: "components/schemas/User", file: "HEAD:svc-a/openapi.yaml"},
+			{key: "components/schemas/User", file: "HEAD:svc-b/openapi.yaml"},
+		},
+	}}
+	got = gitIdx.spanFor("components/schemas/User", "svc-b/openapi.yaml")
+	require.NotNil(t, got)
+	require.Equal(t, "HEAD:svc-b/openapi.yaml", got.file)
 }
