@@ -621,3 +621,24 @@ func TestBuildIndex_LastTopLevelSectionRunsToEOF(t *testing.T) {
 	require.Contains(t, got, "security:")
 	require.Contains(t, got, "- {}", "the section's content, clamped to EOF")
 }
+
+// Among several same-key spans, the cross-side lookup picks the unique best
+// path-suffix match and refuses ties: a missing slice is safe, the wrong
+// file's slice is not.
+func TestSpanFor_SuffixCorrespondence(t *testing.T) {
+	idx := docIndex{byKey: map[string][]span{
+		"components/schemas/User": {
+			{key: "components/schemas/User", file: "base/svc-a/openapi.yaml"},
+			{key: "components/schemas/User", file: "base/svc-b/openapi.yaml"},
+		},
+	}}
+
+	got := idx.spanFor("components/schemas/User", "revision/svc-b/openapi.yaml")
+	require.NotNil(t, got, "the shared svc-b segment decides")
+	require.Equal(t, "base/svc-b/openapi.yaml", got.file)
+
+	require.Nil(t, idx.spanFor("components/schemas/User", "elsewhere/openapi.yaml"),
+		"both candidates match only by basename: a tie stays nil")
+	require.Nil(t, idx.spanFor("components/schemas/User", ""), "no preference, ambiguous")
+	require.Nil(t, idx.spanFor("absent", "x.yaml"))
+}
