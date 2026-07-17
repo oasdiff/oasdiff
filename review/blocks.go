@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
@@ -182,7 +183,7 @@ func fallbackKey(c checker.Change) (key, title string) {
 	// No operation/path: bucket top-level changes by their Area name (security,
 	// tags, ...). Schema changes with no path fall through to "Other" rather
 	// than being mis-bucketed.
-	if area, ok := areaByID[c.GetId()]; ok && area != checker.AreaSchema {
+	if area, ok := areaByID()[c.GetId()]; ok && area != checker.AreaSchema {
 		a := area.String()
 		return a, a
 	}
@@ -195,16 +196,17 @@ func changeSources(c checker.Change) (base, rev *checker.Source) {
 	return c.GetBaseSource(), c.GetRevisionSource()
 }
 
-// areaByID maps each rule id to its Area, so a change's Area can be looked up
-// from its id for the fallback bucketing.
-var areaByID = func() map[string]checker.Area {
+// areaByID returns the rule id -> Area map for the fallback bucketing. Built
+// once on first use, not at package init: commands that never build a review
+// bundle shouldn't pay for enumerating the rules at startup.
+var areaByID = sync.OnceValue(func() map[string]checker.Area {
 	rules := checker.GetAllRules()
 	m := make(map[string]checker.Area, len(rules))
 	for _, r := range rules {
 		m[r.Id] = r.Area
 	}
 	return m
-}()
+})
 
 // span is one enumerated structural block: its key/title, the file it lives in
 // (the element's origin File; "" for an in-memory spec), and its 1-based
