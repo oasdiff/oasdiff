@@ -3,6 +3,7 @@ package review
 import (
 	"math"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -180,13 +181,12 @@ func fallbackKey(c checker.Change) (key, title string) {
 	case path != "":
 		return path, path
 	}
-	// No operation/path: bucket top-level changes by their Area name. The
-	// area names used here (security, tags, ...) are real document sections
-	// with indexed spans, so the bucket is a block with a slice. "schema" is
-	// not a document section: a schema-area change with no locator at all
-	// would get a made-up sliceless block, so it falls through to the honest
-	// "Other" bucket instead.
-	if area, ok := areaByID()[c.GetId()]; ok && area != checker.AreaSchema {
+	// No operation/path: bucket the change by its Area name, but only when
+	// that name is an indexed top-level section (see topLevelSections), so the
+	// bucket is a real block with a source slice. Any other area (schema,
+	// components, ...) would get a made-up sliceless block, so those fall
+	// through to the honest "Other" bucket instead.
+	if area, ok := areaByID()[c.GetId()]; ok && slices.Contains(topLevelSections, area.String()) {
 		a := area.String()
 		return a, a
 	}
@@ -390,10 +390,16 @@ func addComponentMap[R any](add func(key, title string, o *openapi3.Origin), sec
 	}
 }
 
-// addTopLevelSections indexes info/servers/tags/security, each spanning from
-// its key line to just before the next top-level key. Key-line based on
-// purpose: security items are bare maps with no origin of their own, so
-// per-element spans aren't available.
+// topLevelSections are the document sections indexed as blocks by
+// addTopLevelSections. fallbackKey buckets a locator-less change by its Area
+// only when the area names one of these, so every Area bucket is a real block
+// with a slice.
+var topLevelSections = []string{"info", "servers", "tags", "security"}
+
+// addTopLevelSections indexes the topLevelSections, each spanning from its key
+// line to just before the next top-level key. Key-line based on purpose:
+// security items are bare maps with no origin of their own, so per-element
+// spans aren't available.
 func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 	if doc.Origin == nil {
 		return
@@ -413,7 +419,7 @@ func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 		}
 		return math.MaxInt // last section: to EOF (sliceLines clamps)
 	}
-	for _, name := range []string{"info", "servers", "tags", "security"} {
+	for _, name := range topLevelSections {
 		if loc, ok := doc.Origin.Fields[name]; ok && loc.Line > 0 {
 			s := span{key: name, title: name, file: loc.File, start: loc.Line, end: sectionEnd(loc.Line)}
 			idx.spans = append(idx.spans, s)

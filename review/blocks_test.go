@@ -586,12 +586,17 @@ func TestFileBaseAndDisplay(t *testing.T) {
 	}
 }
 
-// A change with no operation, path, or source, whose rule belongs to a
-// non-schema area, buckets under that area's name.
+// A change with no operation, path, or source buckets under its Area name
+// only when that area is an indexed top-level section; any other area gets
+// the honest "Other" bucket rather than a made-up sliceless block.
 func TestFallbackKey_Area(t *testing.T) {
 	key, title := fallbackKey(checker.ApiChange{Id: "api-security-added"})
 	require.Equal(t, "security", key)
 	require.Equal(t, "security", title)
+
+	key, title = fallbackKey(checker.ApiChange{Id: "api-schema-removed"})
+	require.Equal(t, otherChangesKey, key, "components is not an indexed section")
+	require.Equal(t, "Other changes", title)
 }
 
 // A nil doc in the set (a spec that failed to parse upstream) is skipped.
