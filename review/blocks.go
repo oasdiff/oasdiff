@@ -180,9 +180,12 @@ func fallbackKey(c checker.Change) (key, title string) {
 	case path != "":
 		return path, path
 	}
-	// No operation/path: bucket top-level changes by their Area name (security,
-	// tags, ...). Schema changes with no path fall through to "Other" rather
-	// than being mis-bucketed.
+	// No operation/path: bucket top-level changes by their Area name. The
+	// area names used here (security, tags, ...) are real document sections
+	// with indexed spans, so the bucket is a block with a slice. "schema" is
+	// not a document section: a schema-area change with no locator at all
+	// would get a made-up sliceless block, so it falls through to the honest
+	// "Other" bucket instead.
 	if area, ok := areaByID()[c.GetId()]; ok && area != checker.AreaSchema {
 		a := area.String()
 		return a, a
