@@ -393,8 +393,9 @@ func addComponentMap[R any](add func(key, title string, o *openapi3.Origin), sec
 // topLevelSections are the document sections indexed as blocks by
 // addTopLevelSections. fallbackKey buckets a locator-less change by its Area
 // only when the area names one of these, so every Area bucket is a real block
-// with a slice.
-var topLevelSections = []string{"info", "servers", "tags", "security"}
+// with a slice. tags and security come from their Area constants to keep the
+// correspondence type-anchored; info and servers are sections with no Area.
+var topLevelSections = []string{"info", "servers", checker.AreaTags.String(), checker.AreaSecurity.String()}
 
 // addTopLevelSections indexes the topLevelSections, each spanning from its key
 // line to just before the next top-level key. Key-line based on purpose:
