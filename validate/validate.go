@@ -77,7 +77,7 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 	}
 	path, operation := pathOperationForKinError(err)
 	f := formatters.Finding{
-		Id:        ruleIDForKinError(err),
+		Id:        knownRuleID(ruleIDForKinError(err)),
 		Text:      unwrapContext(err).Error(),
 		Level:     severityForKinError(err),
 		Operation: operation,
@@ -113,8 +113,7 @@ func severityForKinError(err error) checker.Level {
 	// accuracy nit; the contract (the schema) is still valid. A default,
 	// by contrast, is consumed at runtime by some tooling, so a mismatch
 	// there is a real risk and stays a warning.
-	var sve *openapi3.SchemaValueError
-	if errors.As(err, &sve) {
+	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
 		if sve.ValueKind == "example" {
 			return checker.INFO
 		}
@@ -122,23 +121,19 @@ func severityForKinError(err error) checker.Level {
 	}
 
 	// WARN: structurally valid but a portability or correctness risk.
-	var fvm *openapi3.FieldVersionMismatchError
-	if errors.As(err, &fvm) {
+	if _, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
 		// e.g. a 3.1-only field in a doc that declares an older version.
 		return checker.WARN
 	}
-	var esf *openapi3.ExtraSiblingFieldsError
-	if errors.As(err, &esf) {
+	if _, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok {
 		// Fields alongside a $ref are silently ignored in 3.0 rather than
 		// breaking the spec; the author's intent is lost, not the document.
 		return checker.WARN
 	}
-	var cpe *openapi3.ConflictingPathsError
-	if errors.As(err, &cpe) {
+	if _, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok {
 		return checker.WARN
 	}
-	var dpe *openapi3.DuplicateParameterError
-	if errors.As(err, &dpe) {
+	if _, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok {
 		return checker.WARN
 	}
 
@@ -197,12 +192,10 @@ func dedupePreferringComponents(in formatters.Findings) formatters.Findings {
 // return value is "" when the error chain carries no such scope, e.g.
 // doc-root findings like info-version-required.
 func pathOperationForKinError(err error) (path, operation string) {
-	var pve *openapi3.PathValidationError
-	if errors.As(err, &pve) {
+	if pve, ok := errors.AsType[*openapi3.PathValidationError](err); ok {
 		path = pve.Path
 	}
-	var ove *openapi3.OperationValidationError
-	if errors.As(err, &ove) {
+	if ove, ok := errors.AsType[*openapi3.OperationValidationError](err); ok {
 		operation = ove.Method
 	}
 	return path, operation
@@ -255,68 +248,53 @@ func sectionForKinError(err error) string {
 	// predate it and only approximate (e.g. they miscount inline component
 	// schemas as "paths"). The cluster logic remains the fallback for
 	// doc-root errors that aren't wrapped in a section at all.
-	var secErr *openapi3.SectionValidationError
-	if errors.As(err, &secErr) {
+	if secErr, ok := errors.AsType[*openapi3.SectionValidationError](err); ok {
 		return secErr.Section
 	}
 
 	// Cluster types that have a structural section regardless of payload.
-	var ppe *openapi3.PathParametersError
-	if errors.As(err, &ppe) {
+	if _, ok := errors.AsType[*openapi3.PathParametersError](err); ok {
 		return "paths"
 	}
-	var wne *openapi3.WebhookNilError
-	if errors.As(err, &wne) {
+	if _, ok := errors.AsType[*openapi3.WebhookNilError](err); ok {
 		return "webhooks"
 	}
-	var sute *openapi3.ServerURLTemplateError
-	if errors.As(err, &sute) {
+	if _, ok := errors.AsType[*openapi3.ServerURLTemplateError](err); ok {
 		return "servers"
 	}
-	var pre *openapi3.PathParameterRequiredError
-	if errors.As(err, &pre) {
+	if _, ok := errors.AsType[*openapi3.PathParameterRequiredError](err); ok {
 		return "paths"
 	}
-	var doid *openapi3.DuplicateOperationIDError
-	if errors.As(err, &doid) {
+	if _, ok := errors.AsType[*openapi3.DuplicateOperationIDError](err); ok {
 		return "paths"
 	}
-	var ipe *openapi3.InvalidParameterInError
-	if errors.As(err, &ipe) {
+	if _, ok := errors.AsType[*openapi3.InvalidParameterInError](err); ok {
 		return "paths"
 	}
-	var isste *openapi3.InvalidSecuritySchemeTypeError
-	if errors.As(err, &isste) {
+	if _, ok := errors.AsType[*openapi3.InvalidSecuritySchemeTypeError](err); ok {
 		return "components"
 	}
-	var ihse *openapi3.InvalidHTTPSchemeError
-	if errors.As(err, &ihse) {
+	if _, ok := errors.AsType[*openapi3.InvalidHTTPSchemeError](err); ok {
 		return "components"
 	}
-	var akie *openapi3.APIKeyInInvalidError
-	if errors.As(err, &akie) {
+	if _, ok := errors.AsType[*openapi3.APIKeyInInvalidError](err); ok {
 		return "components"
 	}
-	var pmss *openapi3.PathMustStartWithSlashError
-	if errors.As(err, &pmss) {
+	if _, ok := errors.AsType[*openapi3.PathMustStartWithSlashError](err); ok {
 		return "paths"
 	}
-	var cpe *openapi3.ConflictingPathsError
-	if errors.As(err, &cpe) {
+	if _, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok {
 		return "paths"
 	}
-	var dpe *openapi3.DuplicateParameterError
-	if errors.As(err, &dpe) {
+	if _, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok {
 		return "paths"
 	}
 
 	// Cluster types with a Field that hints at the section.
-	var rfe *openapi3.RequiredFieldError
-	if errors.As(err, &rfe) {
+	if rfe, ok := errors.AsType[*openapi3.RequiredFieldError](err); ok {
 		return sectionFromField(rfe.Field)
 	}
-	var fvm *openapi3.FieldVersionMismatchError
-	if errors.As(err, &fvm) {
+	if fvm, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
 		return sectionFromField(fvm.Field)
 	}
 
@@ -324,12 +302,10 @@ func sectionForKinError(err error) string {
 	// validation surfaces from request/response schemas inside
 	// operations. Inline component schemas miscount here, but the
 	// section is a navigational hint, not a hard claim.
-	var sve *openapi3.SchemaValueError
-	if errors.As(err, &sve) {
+	if _, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
 		return "paths"
 	}
-	var sbf *openapi3.SchemaBothFormsExclusive
-	if errors.As(err, &sbf) {
+	if _, ok := errors.AsType[*openapi3.SchemaBothFormsExclusive](err); ok {
 		return "paths"
 	}
 	return ""
@@ -365,88 +341,67 @@ func sectionFromField(field string) string {
 // per-finding field, the args are empty and identity is already
 // captured by the rule ID + Source.
 func argsForKinError(err error) []any {
-	var rfe *openapi3.RequiredFieldError
-	if errors.As(err, &rfe) {
+	if rfe, ok := errors.AsType[*openapi3.RequiredFieldError](err); ok {
 		return []any{rfe.Field}
 	}
-	var fvm *openapi3.FieldVersionMismatchError
-	if errors.As(err, &fvm) {
+	if fvm, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
 		return []any{fvm.Field}
 	}
-	var mef *openapi3.MutuallyExclusiveFieldsError
-	if errors.As(err, &mef) {
+	if mef, ok := errors.AsType[*openapi3.MutuallyExclusiveFieldsError](err); ok {
 		return []any{mef.Field1, mef.Field2}
 	}
-	var ffe *openapi3.ForbiddenFieldError
-	if errors.As(err, &ffe) {
+	if ffe, ok := errors.AsType[*openapi3.ForbiddenFieldError](err); ok {
 		return []any{ffe.Field}
 	}
-	var efr *openapi3.EitherFieldRequiredError
-	if errors.As(err, &efr) {
+	if efr, ok := errors.AsType[*openapi3.EitherFieldRequiredError](err); ok {
 		return []any{strings.Join(efr.Fields, "-or-")}
 	}
-	var sbf *openapi3.SchemaBothFormsExclusive
-	if errors.As(err, &sbf) {
+	if sbf, ok := errors.AsType[*openapi3.SchemaBothFormsExclusive](err); ok {
 		return []any{sbf.Field}
 	}
-	var eofe *openapi3.ExactlyOneFieldError
-	if errors.As(err, &eofe) {
+	if eofe, ok := errors.AsType[*openapi3.ExactlyOneFieldError](err); ok {
 		return []any{strings.Join(eofe.Fields, "-or-")}
 	}
-	var sec *openapi3.SingleEntryContentError
-	if errors.As(err, &sec) {
+	if sec, ok := errors.AsType[*openapi3.SingleEntryContentError](err); ok {
 		return []any{sec.Subject}
 	}
-	var sve *openapi3.SchemaValueError
-	if errors.As(err, &sve) {
+	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
 		return []any{sve.ValueKind}
 	}
-	var pre *openapi3.PathParameterRequiredError
-	if errors.As(err, &pre) {
+	if pre, ok := errors.AsType[*openapi3.PathParameterRequiredError](err); ok {
 		return []any{pre.Param}
 	}
-	var doid *openapi3.DuplicateOperationIDError
-	if errors.As(err, &doid) {
+	if doid, ok := errors.AsType[*openapi3.DuplicateOperationIDError](err); ok {
 		return []any{doid.OperationID}
 	}
-	var esf *openapi3.ExtraSiblingFieldsError
-	if errors.As(err, &esf) {
+	if esf, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok {
 		return []any{strings.Join(esf.Fields, ",")}
 	}
-	var ste *openapi3.SchemaTypeError
-	if errors.As(err, &ste) {
+	if ste, ok := errors.AsType[*openapi3.SchemaTypeError](err); ok {
 		return []any{ste.Type}
 	}
-	var ipe *openapi3.InvalidParameterInError
-	if errors.As(err, &ipe) {
+	if ipe, ok := errors.AsType[*openapi3.InvalidParameterInError](err); ok {
 		return []any{ipe.Value}
 	}
-	var spre *openapi3.SchemaPatternRegexError
-	if errors.As(err, &spre) {
+	if spre, ok := errors.AsType[*openapi3.SchemaPatternRegexError](err); ok {
 		return []any{spre.Pattern}
 	}
-	var isste *openapi3.InvalidSecuritySchemeTypeError
-	if errors.As(err, &isste) {
+	if isste, ok := errors.AsType[*openapi3.InvalidSecuritySchemeTypeError](err); ok {
 		return []any{isste.Type}
 	}
-	var ihse *openapi3.InvalidHTTPSchemeError
-	if errors.As(err, &ihse) {
+	if ihse, ok := errors.AsType[*openapi3.InvalidHTTPSchemeError](err); ok {
 		return []any{ihse.Scheme}
 	}
-	var ure *openapi3.UnresolvedRefError
-	if errors.As(err, &ure) {
+	if ure, ok := errors.AsType[*openapi3.UnresolvedRefError](err); ok {
 		return []any{ure.Ref}
 	}
-	var akie *openapi3.APIKeyInInvalidError
-	if errors.As(err, &akie) {
+	if akie, ok := errors.AsType[*openapi3.APIKeyInInvalidError](err); ok {
 		return []any{akie.Value}
 	}
-	var pmss *openapi3.PathMustStartWithSlashError
-	if errors.As(err, &pmss) {
+	if pmss, ok := errors.AsType[*openapi3.PathMustStartWithSlashError](err); ok {
 		return []any{pmss.Path}
 	}
-	var cpe *openapi3.ConflictingPathsError
-	if errors.As(err, &cpe) {
+	if cpe, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok {
 		// Fingerprint by both paths in sorted order so flipped
 		// argument order produces a stable identity.
 		p1, p2 := cpe.Path1, cpe.Path2
@@ -455,12 +410,10 @@ func argsForKinError(err error) []any {
 		}
 		return []any{p1 + "|" + p2}
 	}
-	var dpe *openapi3.DuplicateParameterError
-	if errors.As(err, &dpe) {
+	if dpe, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok {
 		return []any{dpe.In + ":" + dpe.Name}
 	}
-	var isme *openapi3.InvalidSerializationMethodError
-	if errors.As(err, &isme) {
+	if isme, ok := errors.AsType[*openapi3.InvalidSerializationMethodError](err); ok {
 		return []any{isme.Subject, isme.Style, isme.Explode}
 	}
 	return nil
@@ -499,140 +452,115 @@ func columnForKinError(err error) int {
 // Falls back to Key when the per-field entry is missing, and finally
 // to nil for clusters with no Origin at all (WebhookNilError).
 func locationForKinError(err error) *openapi3.Location {
-	var rfe *openapi3.RequiredFieldError
-	if errors.As(err, &rfe) && rfe.Origin != nil {
+	if rfe, ok := errors.AsType[*openapi3.RequiredFieldError](err); ok && rfe.Origin != nil {
 		return fieldLoc(rfe.Origin, rfe.Field)
 	}
-	var fvm *openapi3.FieldVersionMismatchError
-	if errors.As(err, &fvm) && fvm.Origin != nil {
+	if fvm, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok && fvm.Origin != nil {
 		return fieldLoc(fvm.Origin, fvm.Field)
 	}
-	var sve *openapi3.SchemaValueError
-	if errors.As(err, &sve) && sve.Origin != nil {
+	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok && sve.Origin != nil {
 		// SchemaValueError carries ValueKind (e.g. "example", "default")
 		// — the per-field key under the schema where the value lives.
 		return fieldLoc(sve.Origin, sve.ValueKind)
 	}
-	var ppe *openapi3.PathParametersError
-	if errors.As(err, &ppe) && ppe.Origin != nil {
+	if ppe, ok := errors.AsType[*openapi3.PathParametersError](err); ok && ppe.Origin != nil {
 		return ppe.Origin.Key
 	}
-	var mef *openapi3.MutuallyExclusiveFieldsError
-	if errors.As(err, &mef) && mef.Origin != nil {
+	if mef, ok := errors.AsType[*openapi3.MutuallyExclusiveFieldsError](err); ok && mef.Origin != nil {
 		// Prefer Field1's location; either offender pins the finding to
 		// the right object. We don't carry both since a single Source
 		// is the contract.
 		return fieldLoc(mef.Origin, mef.Field1)
 	}
-	var ffe *openapi3.ForbiddenFieldError
-	if errors.As(err, &ffe) && ffe.Origin != nil {
+	if ffe, ok := errors.AsType[*openapi3.ForbiddenFieldError](err); ok && ffe.Origin != nil {
 		return fieldLoc(ffe.Origin, ffe.Field)
 	}
-	var sute *openapi3.ServerURLTemplateError
-	if errors.As(err, &sute) && sute.Origin != nil {
+	if sute, ok := errors.AsType[*openapi3.ServerURLTemplateError](err); ok && sute.Origin != nil {
 		return sute.Origin.Key
 	}
-	var efr *openapi3.EitherFieldRequiredError
-	if errors.As(err, &efr) && efr.Origin != nil {
+	if efr, ok := errors.AsType[*openapi3.EitherFieldRequiredError](err); ok && efr.Origin != nil {
 		// EitherFieldRequiredError fires when none of {Fields...} are
 		// present, so per-field lookup wouldn't match anything — the
 		// enclosing object's Key is the right pin.
 		return efr.Origin.Key
 	}
-	var sbf *openapi3.SchemaBothFormsExclusive
-	if errors.As(err, &sbf) && sbf.Origin != nil {
+	if sbf, ok := errors.AsType[*openapi3.SchemaBothFormsExclusive](err); ok && sbf.Origin != nil {
 		return fieldLoc(sbf.Origin, sbf.Field)
 	}
-	var eofe *openapi3.ExactlyOneFieldError
-	if errors.As(err, &eofe) && eofe.Origin != nil {
+	if eofe, ok := errors.AsType[*openapi3.ExactlyOneFieldError](err); ok && eofe.Origin != nil {
 		// Same reasoning as EitherFieldRequiredError: cluster fires
 		// when the constraint is violated across multiple fields; the
 		// object Key is the cleanest pin.
 		return eofe.Origin.Key
 	}
-	var sec *openapi3.SingleEntryContentError
-	if errors.As(err, &sec) && sec.Origin != nil {
+	if sec, ok := errors.AsType[*openapi3.SingleEntryContentError](err); ok && sec.Origin != nil {
 		return fieldLoc(sec.Origin, sec.Subject)
 	}
-	var pre *openapi3.PathParameterRequiredError
-	if errors.As(err, &pre) && pre.Origin != nil {
+	if pre, ok := errors.AsType[*openapi3.PathParameterRequiredError](err); ok && pre.Origin != nil {
 		// PathParameterRequiredError fires on a parameter declared with
 		// in: path but without required: true. The Key of the parameter
 		// object pins the finding correctly; the `required` field would
 		// be more precise but is absent (that's the whole bug).
 		return pre.Origin.Key
 	}
-	var ste *openapi3.SchemaTypeError
-	if errors.As(err, &ste) && ste.Origin != nil {
+	if ste, ok := errors.AsType[*openapi3.SchemaTypeError](err); ok && ste.Origin != nil {
 		// SchemaTypeError fires on the offending `type:` field of a
 		// schema. Pin to the type field if the Origin tracks it,
 		// otherwise to the schema's Key.
 		return fieldLoc(ste.Origin, "type")
 	}
-	var doid *openapi3.DuplicateOperationIDError
-	if errors.As(err, &doid) && doid.Origin != nil {
+	if doid, ok := errors.AsType[*openapi3.DuplicateOperationIDError](err); ok && doid.Origin != nil {
 		// Pin to the offending operationId scalar inside the second
 		// operation (not the operation's start), since the duplicate
 		// is the field value, not the surrounding block. Falls back
 		// to the operation Key if the loader didn't track the field.
 		return fieldLoc(doid.Origin, "operationId")
 	}
-	var esf *openapi3.ExtraSiblingFieldsError
-	if errors.As(err, &esf) && esf.Origin != nil {
+	if esf, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok && esf.Origin != nil {
 		// Origin points at the parent object carrying the unexpected
 		// sibling fields. The fields themselves may not have Origin
 		// entries (Yaml parser tracks structural keys, not the
 		// offending ones), so the object Key is the best pin.
 		return esf.Origin.Key
 	}
-	var ipe *openapi3.InvalidParameterInError
-	if errors.As(err, &ipe) && ipe.Origin != nil {
+	if ipe, ok := errors.AsType[*openapi3.InvalidParameterInError](err); ok && ipe.Origin != nil {
 		// Pin to the parameter's `in` field if the loader tracks it,
 		// otherwise the parameter object's Key.
 		return fieldLoc(ipe.Origin, "in")
 	}
-	var spre *openapi3.SchemaPatternRegexError
-	if errors.As(err, &spre) && spre.Origin != nil {
+	if spre, ok := errors.AsType[*openapi3.SchemaPatternRegexError](err); ok && spre.Origin != nil {
 		// Pin to the schema's `pattern` field where the bad regex
 		// lives, otherwise the schema's Key.
 		return fieldLoc(spre.Origin, "pattern")
 	}
-	var isste *openapi3.InvalidSecuritySchemeTypeError
-	if errors.As(err, &isste) && isste.Origin != nil {
+	if isste, ok := errors.AsType[*openapi3.InvalidSecuritySchemeTypeError](err); ok && isste.Origin != nil {
 		return fieldLoc(isste.Origin, "type")
 	}
-	var ihse *openapi3.InvalidHTTPSchemeError
-	if errors.As(err, &ihse) && ihse.Origin != nil {
+	if ihse, ok := errors.AsType[*openapi3.InvalidHTTPSchemeError](err); ok && ihse.Origin != nil {
 		return fieldLoc(ihse.Origin, "scheme")
 	}
-	var ure *openapi3.UnresolvedRefError
-	if errors.As(err, &ure) && ure.Origin != nil {
+	if ure, ok := errors.AsType[*openapi3.UnresolvedRefError](err); ok && ure.Origin != nil {
 		// Pin to the $ref field if the loader tracks it, otherwise
 		// the ref-bearing object's Key.
 		return fieldLoc(ure.Origin, "$ref")
 	}
-	var akie *openapi3.APIKeyInInvalidError
-	if errors.As(err, &akie) && akie.Origin != nil {
+	if akie, ok := errors.AsType[*openapi3.APIKeyInInvalidError](err); ok && akie.Origin != nil {
 		return fieldLoc(akie.Origin, "in")
 	}
-	var pmss *openapi3.PathMustStartWithSlashError
-	if errors.As(err, &pmss) && pmss.Origin != nil {
+	if pmss, ok := errors.AsType[*openapi3.PathMustStartWithSlashError](err); ok && pmss.Origin != nil {
 		// Origin is the paths object; the offending path key lives
 		// inside it but Fields tracks struct fields, not map keys, so
 		// fall back to the paths object's Key.
 		return pmss.Origin.Key
 	}
-	var cpe *openapi3.ConflictingPathsError
-	if errors.As(err, &cpe) && cpe.Origin != nil {
+	if cpe, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok && cpe.Origin != nil {
 		return cpe.Origin.Key
 	}
-	var dpe *openapi3.DuplicateParameterError
-	if errors.As(err, &dpe) && dpe.Origin != nil {
+	if dpe, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok && dpe.Origin != nil {
 		// Origin is on the second (offending) parameter; pin to its Key.
 		return dpe.Origin.Key
 	}
-	var isme *openapi3.InvalidSerializationMethodError
-	if errors.As(err, &isme) && isme.Origin != nil {
+	if isme, ok := errors.AsType[*openapi3.InvalidSerializationMethodError](err); ok && isme.Origin != nil {
 		// Pin to the `style` field if the loader tracks it on the
 		// encoding/parameter/header object.
 		return fieldLoc(isme.Origin, "style")
@@ -682,133 +610,107 @@ func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
 // PathParametersError carries Path+Method+Missing), a static rule ID
 // is returned for the whole cluster.
 func ruleIDForKinError(err error) string {
-	var rfe *openapi3.RequiredFieldError
-	if errors.As(err, &rfe) {
+	if rfe, ok := errors.AsType[*openapi3.RequiredFieldError](err); ok {
 		return ruleIDFromField(rfe.Field) + "-required"
 	}
 
-	var fvm *openapi3.FieldVersionMismatchError
-	if errors.As(err, &fvm) {
-		return ruleIDFromField(fvm.Field) + "-field-for-3-1-plus"
+	if fvm, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
+		return ruleIDFromField(fvm.Field) + "-field-for-" + minVersionForRuleID(fvm.MinVersion) + "-plus"
 	}
 
-	var sve *openapi3.SchemaValueError
-	if errors.As(err, &sve) {
+	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
 		return ruleIDFromField(sve.ValueKind) + "-violates-schema"
 	}
 
-	var ppe *openapi3.PathParametersError
-	if errors.As(err, &ppe) {
+	if _, ok := errors.AsType[*openapi3.PathParametersError](err); ok {
 		return "path-parameters-mismatch"
 	}
 
-	var mef *openapi3.MutuallyExclusiveFieldsError
-	if errors.As(err, &mef) {
+	if mef, ok := errors.AsType[*openapi3.MutuallyExclusiveFieldsError](err); ok {
 		return ruleIDFromField(mef.Field1) + "-" + ruleIDFromField(mef.Field2) + "-mutually-exclusive"
 	}
 
-	var ffe *openapi3.ForbiddenFieldError
-	if errors.As(err, &ffe) {
+	if ffe, ok := errors.AsType[*openapi3.ForbiddenFieldError](err); ok {
 		return ruleIDFromField(ffe.Field) + "-forbidden"
 	}
 
-	var sute *openapi3.ServerURLTemplateError
-	if errors.As(err, &sute) {
+	if _, ok := errors.AsType[*openapi3.ServerURLTemplateError](err); ok {
 		return "server-url-template-invalid"
 	}
 
-	var efr *openapi3.EitherFieldRequiredError
-	if errors.As(err, &efr) {
+	if efr, ok := errors.AsType[*openapi3.EitherFieldRequiredError](err); ok {
 		return joinFieldsForRuleID(efr.Fields) + "-required"
 	}
 
-	var sbf *openapi3.SchemaBothFormsExclusive
-	if errors.As(err, &sbf) {
+	if sbf, ok := errors.AsType[*openapi3.SchemaBothFormsExclusive](err); ok {
 		return ruleIDFromField(sbf.Field) + "-both-forms-exclusive"
 	}
 
-	var eofe *openapi3.ExactlyOneFieldError
-	if errors.As(err, &eofe) {
+	if eofe, ok := errors.AsType[*openapi3.ExactlyOneFieldError](err); ok {
 		return joinFieldsForRuleID(eofe.Fields) + "-exactly-one"
 	}
 
-	var sec *openapi3.SingleEntryContentError
-	if errors.As(err, &sec) {
+	if sec, ok := errors.AsType[*openapi3.SingleEntryContentError](err); ok {
 		return ruleIDFromField(sec.Subject) + "-content-single-entry"
 	}
 
-	var wne *openapi3.WebhookNilError
-	if errors.As(err, &wne) {
+	if _, ok := errors.AsType[*openapi3.WebhookNilError](err); ok {
 		return "webhook-nil"
 	}
 
-	var pre *openapi3.PathParameterRequiredError
-	if errors.As(err, &pre) {
+	if _, ok := errors.AsType[*openapi3.PathParameterRequiredError](err); ok {
 		return "path-parameter-required"
 	}
 
-	var doid *openapi3.DuplicateOperationIDError
-	if errors.As(err, &doid) {
+	if _, ok := errors.AsType[*openapi3.DuplicateOperationIDError](err); ok {
 		return "duplicate-operation-id"
 	}
 
-	var esf *openapi3.ExtraSiblingFieldsError
-	if errors.As(err, &esf) {
+	if _, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok {
 		return "extra-sibling-fields"
 	}
 
-	var ste *openapi3.SchemaTypeError
-	if errors.As(err, &ste) {
+	if _, ok := errors.AsType[*openapi3.SchemaTypeError](err); ok {
 		return "schema-type-unsupported"
 	}
 
-	var ipe *openapi3.InvalidParameterInError
-	if errors.As(err, &ipe) {
+	if _, ok := errors.AsType[*openapi3.InvalidParameterInError](err); ok {
 		return "parameter-in-invalid"
 	}
 
-	var spre *openapi3.SchemaPatternRegexError
-	if errors.As(err, &spre) {
+	if _, ok := errors.AsType[*openapi3.SchemaPatternRegexError](err); ok {
 		return "schema-pattern-regex-invalid"
 	}
 
-	var isste *openapi3.InvalidSecuritySchemeTypeError
-	if errors.As(err, &isste) {
+	if _, ok := errors.AsType[*openapi3.InvalidSecuritySchemeTypeError](err); ok {
 		return "security-scheme-type-invalid"
 	}
 
-	var ihse *openapi3.InvalidHTTPSchemeError
-	if errors.As(err, &ihse) {
+	if _, ok := errors.AsType[*openapi3.InvalidHTTPSchemeError](err); ok {
 		return "security-scheme-http-scheme-invalid"
 	}
 
-	var ure *openapi3.UnresolvedRefError
-	if errors.As(err, &ure) {
+	if _, ok := errors.AsType[*openapi3.UnresolvedRefError](err); ok {
 		return "unresolved-ref"
 	}
 
-	var akie *openapi3.APIKeyInInvalidError
-	if errors.As(err, &akie) {
+	if _, ok := errors.AsType[*openapi3.APIKeyInInvalidError](err); ok {
 		return "security-scheme-apikey-in-invalid"
 	}
 
-	var pmss *openapi3.PathMustStartWithSlashError
-	if errors.As(err, &pmss) {
+	if _, ok := errors.AsType[*openapi3.PathMustStartWithSlashError](err); ok {
 		return "path-must-start-with-slash"
 	}
 
-	var cpe *openapi3.ConflictingPathsError
-	if errors.As(err, &cpe) {
+	if _, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok {
 		return "conflicting-paths"
 	}
 
-	var dpe *openapi3.DuplicateParameterError
-	if errors.As(err, &dpe) {
+	if _, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok {
 		return "duplicate-parameter"
 	}
 
-	var isme *openapi3.InvalidSerializationMethodError
-	if errors.As(err, &isme) {
+	if _, ok := errors.AsType[*openapi3.InvalidSerializationMethodError](err); ok {
 		return "serialization-method-invalid"
 	}
 
@@ -819,6 +721,13 @@ func ruleIDForKinError(err error) string {
 // fragment as kebab-case fields joined by "-or-" (e.g. ["value",
 // "externalValue"] → "value-or-external-value"). The caller appends
 // the cluster-specific suffix ("-required", "-exactly-one", ...).
+// minVersionForRuleID renders a kin MinVersion ("3.1", "3.2") as a rule-id
+// segment ("3-1", "3-2"). An unexpected value yields an id outside the
+// registry, which knownRuleID demotes to spec-validation-error.
+func minVersionForRuleID(v string) string {
+	return strings.ReplaceAll(v, ".", "-")
+}
+
 func joinFieldsForRuleID(fields []string) string {
 	parts := make([]string, len(fields))
 	for i, f := range fields {
@@ -834,6 +743,9 @@ func joinFieldsForRuleID(fields []string) string {
 func ruleIDFromField(field string) string {
 	field = strings.TrimPrefix(field, "$")
 	field = strings.ReplaceAll(field, ".", "-")
+	// acronyms: camel-splitting "oAuthFlow" would yield "o-auth-flow"
+	field = strings.ReplaceAll(field, "oAuth", "oauth")
+	field = strings.ReplaceAll(field, "openId", "openid")
 	var b strings.Builder
 	for i, r := range field {
 		if i > 0 && unicode.IsUpper(r) {
