@@ -47,6 +47,7 @@ func Validate(spec *openapi3.T, source string) formatters.Findings {
 	}
 	// oasdiff-native SHOULD-level lints that kin-openapi does not enforce.
 	findings = append(findings, lintDuplicateEnums(spec, source)...)
+	findings = append(findings, lintAmbiguousParamSerialization(spec, source)...)
 	return findings
 }
 

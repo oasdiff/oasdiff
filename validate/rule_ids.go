@@ -11,6 +11,7 @@ import "slices"
 // spec-validation-error (loud, triaged). Sorted; add new IDs in order.
 var ruleIDs = []string{
 	"additional-properties-both-forms-exclusive",
+	"ambiguous-parameter-serialization",
 	"anchor-field-for-3-1-plus",
 	"authorization-url-forbidden",
 	"bearer-format-forbidden",
@@ -110,6 +111,7 @@ var ruleIDs = []string{
 // oasdiff-native lints and the unknown-error fallback. Kept apart so
 // TestRuleIDs_MatchKinCatalog can assert ruleIDs == kin's codes ∪ these.
 var nativeRuleIDs = []string{
+	AmbiguousParameterSerializationID,
 	DuplicateEnumValueID,
 	unknownValidationID,
 }
