@@ -3,11 +3,12 @@ package validate
 import "slices"
 
 // ruleIDs is the registry of every rule ID validate can emit: the fixed, public
-// ID surface. ruleIDForKinError derives most IDs from strings kin embeds in its
-// typed errors, so without this gate an upstream rename would silently change a
-// public ID; instead, an ID not in the registry is demoted to
-// spec-validation-error, which is loud in the output and is triaged by adding
-// the new ID (or an alias) here deliberately. Sorted; add new IDs in order.
+// ID surface. Most IDs are the stable codes kin-openapi declares on its
+// validation errors (openapi3.ValidationErrorCodes), plus a few oasdiff-native
+// lint IDs. TestRuleIDs_MatchKinCatalog pins the registry to that union, so a
+// kin code added or renamed on a bump fails the build until the registry is
+// updated deliberately. At runtime, a code not in the registry is demoted to
+// spec-validation-error (loud, triaged). Sorted; add new IDs in order.
 var ruleIDs = []string{
 	"additional-properties-both-forms-exclusive",
 	"anchor-field-for-3-1-plus",
@@ -29,6 +30,8 @@ var ruleIDs = []string{
 	"duplicate-enum-value",
 	"duplicate-operation-id",
 	"duplicate-parameter",
+	"duplicate-required-field",
+	"duplicate-tag",
 	"dynamic-anchor-field-for-3-1-plus",
 	"dynamic-ref-field-for-3-1-plus",
 	"else-field-for-3-1-plus",
@@ -101,6 +104,14 @@ var ruleIDs = []string{
 	"value-or-external-value-required",
 	"webhook-nil",
 	"webhooks-field-for-3-1-plus",
+}
+
+// nativeRuleIDs are the ids validate emits that do not come from kin: the
+// oasdiff-native lints and the unknown-error fallback. Kept apart so
+// TestRuleIDs_MatchKinCatalog can assert ruleIDs == kin's codes ∪ these.
+var nativeRuleIDs = []string{
+	DuplicateEnumValueID,
+	unknownValidationID,
 }
 
 // RuleIDs returns every rule ID validate can emit, sorted.
