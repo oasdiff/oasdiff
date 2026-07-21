@@ -3,14 +3,12 @@ package internal
 import (
 	"bytes"
 	"context"
-	"crypto/aes"
-	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
@@ -20,9 +18,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
+	"github.com/oasdiff/oasdiff/review"
 )
 
 // oasdiffSiteURL is the base URL of the web product. Defaults to the canonical
@@ -48,65 +48,39 @@ func oasdiffAPIBaseURL() string {
 	return "https://api.oasdiff.com"
 }
 
-// encryptedReviewBlobVersion is the first byte of the uploaded blob. It lets
-// the browser decryptor reject a format it doesn't understand instead of
-// trying to decrypt garbage. Bump it only on an incompatible layout change.
-const encryptedReviewBlobVersion = 1
-
-// reviewPayload is the cleartext bundle the CLI encrypts and uploads. The
-// server (oasdiff.com by default, or whatever OASDIFF_URL points at) never
-// sees it in cleartext: the CLI AES-256-GCM-encrypts the JSON below with a
-// fresh random key, uploads only the ciphertext, and puts the key in the
-// review URL's #fragment (which browsers never send to a server). The browser
-// decrypts and renders.
-//
-// BaseSpec / RevisionSpec hold each spec's bytes verbatim as a string. A YAML
-// spec stays YAML text and a JSON spec stays JSON text -- this JSON object is
-// only the envelope that bundles the several fields into one blob; it does not
-// reformat or reparse the spec content.
-//
-// Changes is the JSON changelog the CLI already computed, embedded raw. The
-// server can't recompute it (it can't read the specs), so the CLI ships it.
-// It is byte-identical to what the service's /public/changelog returns for the
-// plaintext path, so the review page renders it the same way.
-type reviewPayload struct {
-	BaseSpec         string          `json:"base_spec" yaml:"base_spec"`
-	RevisionSpec     string          `json:"revision_spec" yaml:"revision_spec"`
-	BaseFilename     string          `json:"base_filename" yaml:"base_filename"`
-	RevisionFilename string          `json:"revision_filename" yaml:"revision_filename"`
-	Changes          json.RawMessage `json:"changes" yaml:"changes"`
-	Mode             string          `json:"mode" yaml:"mode"`
-}
-
 // uploadAndOpen runs at the end of `oasdiff changelog --open` (and
-// `breaking --open`): it bundles the two specs and the computed changelog,
-// encrypts the bundle with a fresh key, uploads only the ciphertext to the
-// configured server (oasdiff.com by default; see oasdiffSiteURL), prints the
-// resulting review URL (with the key in its #fragment) to stderr, and opens it
-// in the default browser. The terminal changelog/breaking output has already
-// been printed by the caller; --open is purely additive.
+// `breaking --open`): it bundles the changelog, the per-change blocks, and
+// (for a non-composed diff) the two specs, encrypts the bundle with a fresh
+// key, uploads only the ciphertext to the configured server (oasdiff.com by
+// default; see oasdiffSiteURL), prints the resulting review URL (with the key
+// in its #fragment) to stderr, and opens it in the default browser. The
+// terminal changelog/breaking output has already been printed by the caller;
+// --open is purely additive.
 //
 // The review URL and browser-fallback notice go to stderr, never stdout, so
 // they can't corrupt piped machine-readable output (e.g. changelog
 // --format json --open > out.json). stderr is passed in by the caller.
 //
-// There is no sign-in: the upload is zero-knowledge, so the server stores an
-// opaque blob it cannot read and never needs to know who the visitor is. The
-// decryption key lives only in the URL fragment on the visitor's machine.
-func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, specInfoPair *load.SpecInfoPair, diffEmpty bool) error {
-	// Composed mode (-c) is rejected up front in argument validation
-	// (checkOpenWithComposed: --open compares exactly two specs), so it never
-	// reaches here.
-	baseBytes, baseName, err := readSpecSource(flags.getBase())
-	if err != nil {
-		return fmt.Errorf("read base spec: %w", err)
-	}
-	revBytes, revName, err := readSpecSource(flags.getRevision())
-	if err != nil {
-		return fmt.Errorf("read revision spec: %w", err)
+// The upload is anonymous and zero-knowledge: the server receives an opaque
+// blob it cannot read, and the decryption key exists only in the URL fragment.
+func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker.Changes, baseSpecs, revSpecs []*load.SpecInfo, diffEmpty bool) error {
+	// A composed diff has no single spec: the full-spec and filename fields
+	// stay empty and Payload.Composed marks it (presentation is the consumer's).
+	var baseSpec, revSpec, baseName, revName string
+	if !flags.getComposed() {
+		baseBytes, bn, err := readSpecSource(flags.getBase(), baseSpecs)
+		if err != nil {
+			return fmt.Errorf("read base spec: %w", err)
+		}
+		revBytes, rn, err := readSpecSource(flags.getRevision(), revSpecs)
+		if err != nil {
+			return fmt.Errorf("read revision spec: %w", err)
+		}
+		baseSpec, baseName = string(baseBytes), bn
+		revSpec, revName = string(revBytes), rn
 	}
 
-	changesJSON, err := renderChangelogJSON(flags, errs, specInfoPair, isBreaking, diffEmpty)
+	changesJSON, err := renderChangelogJSON(flags, errs, isBreaking, diffEmpty)
 	if err != nil {
 		return fmt.Errorf("render changelog: %w", err)
 	}
@@ -116,19 +90,23 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		mode = "breaking"
 	}
 
-	plaintext, err := json.Marshal(reviewPayload{
-		BaseSpec:         string(baseBytes),
-		RevisionSpec:     string(revBytes),
+	// Slice each change's block from the spec set (one doc normally, N
+	// composed); texts come from the captured Sources, so a cross-file block
+	// slices from the right file.
+	baseDocs, baseTexts := specSetDocsAndSources(baseSpecs)
+	revDocs, revTexts := specSetDocsAndSources(revSpecs)
+	blocks := review.Extract(errs, baseDocs, revDocs, baseTexts, revTexts)
+
+	blob, key, err := review.Payload{
+		BaseSpec:         baseSpec,
+		RevisionSpec:     revSpec,
 		BaseFilename:     baseName,
 		RevisionFilename: revName,
 		Changes:          changesJSON,
 		Mode:             mode,
-	})
-	if err != nil {
-		return fmt.Errorf("marshal review payload: %w", err)
-	}
-
-	blob, key, err := encryptReviewPayload(plaintext)
+		Composed:         flags.getComposed(),
+		Blocks:           blocks,
+	}.Encrypt()
 	if err != nil {
 		return fmt.Errorf("encrypt review: %w", err)
 	}
@@ -161,54 +139,36 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	return nil
 }
 
-// renderChangelogJSON produces the JSON changelog bytes embedded in the
-// encrypted payload. It mirrors the service's /public/changelog rendering
-// (FormatJSON + WrapInObject) so the review page consumes identical bytes
-// whether the review came through the plaintext path or the encrypted one.
-// Color is forced off: the output is data, not a terminal render.
-func renderChangelogJSON(flags *Flags, errs checker.Changes, specInfoPair *load.SpecInfoPair, isBreaking, diffEmpty bool) ([]byte, error) {
-	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{
-		Language:        flags.getLang(),
-		BaseVersion:     specInfoPair.GetBaseVersion(),
-		RevisionVersion: specInfoPair.GetRevisionVersion(),
-	})
+// renderChangelogJSON renders the changelog to JSON for the encrypted
+// payload: the standard object-wrapped shape (WrapInObject), so a consumer
+// parses it like any other JSON changelog output.
+func renderChangelogJSON(flags *Flags, errs checker.Changes, isBreaking, diffEmpty bool) ([]byte, error) {
+	formatter, err := formatters.Lookup(string(formatters.FormatJSON), formatters.FormatterOpts{Language: flags.getLang()})
 	if err != nil {
 		return nil, err
 	}
 	return formatter.RenderChangelog(
 		errs,
-		formatters.RenderOpts{WrapInObject: true, ColorMode: checker.ColorNever, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
+		formatters.RenderOpts{WrapInObject: true, IsBreaking: isBreaking, DiffEmpty: diffEmpty},
 	)
 }
 
-// encryptReviewPayload encrypts plaintext with a freshly generated 256-bit key
-// using AES-256-GCM. It returns the upload blob and the key. The blob layout
-// is: version(1) || nonce(12) || ciphertext+tag. The key is returned to the
-// caller (it goes in the URL fragment) and is never uploaded.
-func encryptReviewPayload(plaintext []byte) (blob, key []byte, err error) {
-	key = make([]byte, 32) // AES-256
-	if _, err := rand.Read(key); err != nil {
-		return nil, nil, fmt.Errorf("generate key: %w", err)
+// specSetDocsAndSources collects the parsed docs and the union of captured file
+// texts across a side's spec set, for review.Extract to slice blocks from.
+// Sources is keyed by resolved file path, so the union is safe: a key repeats
+// only when two specs in a composed set share a $ref'd file, and the same path
+// is the same file with the same text, so the last-write overwrite is a no-op.
+func specSetDocsAndSources(specs []*load.SpecInfo) ([]*openapi3.T, map[string]string) {
+	docs := make([]*openapi3.T, 0, len(specs))
+	texts := map[string]string{}
+	for _, si := range specs {
+		if si == nil || si.Spec == nil {
+			continue
+		}
+		docs = append(docs, si.Spec)
+		maps.Copy(texts, si.Sources)
 	}
-	block, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, nil, err
-	}
-	gcm, err := cipher.NewGCM(block)
-	if err != nil {
-		return nil, nil, err
-	}
-	nonce := make([]byte, gcm.NonceSize())
-	if _, err := rand.Read(nonce); err != nil {
-		return nil, nil, fmt.Errorf("generate nonce: %w", err)
-	}
-	ciphertext := gcm.Seal(nil, nonce, plaintext, nil)
-
-	blob = make([]byte, 0, 1+len(nonce)+len(ciphertext))
-	blob = append(blob, encryptedReviewBlobVersion)
-	blob = append(blob, nonce...)
-	blob = append(blob, ciphertext...)
-	return blob, key, nil
+	return docs, texts
 }
 
 // postEncryptedReview uploads the opaque ciphertext blob to the configured
@@ -270,27 +230,6 @@ func parseReviewMeta(entries []string) (map[string]string, error) {
 	return meta, nil
 }
 
-// reviewChange is one manifest entry sent alongside the encrypted bundle: a
-// change's fingerprint (see checker.ComputeFingerprint) and its level.
-type reviewChange struct {
-	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
-	Level       int    `json:"level" yaml:"level"`
-}
-
-// reviewManifest builds the {fingerprint, level} manifest. Fingerprints are
-// computed as the JSON formatter does, so they match the ones in the encrypted
-// changelog the page renders.
-func reviewManifest(errs checker.Changes) []reviewChange {
-	manifest := make([]reviewChange, 0, len(errs))
-	for _, change := range errs {
-		manifest = append(manifest, reviewChange{
-			Fingerprint: checker.Fingerprint(change),
-			Level:       int(change.GetLevel()),
-		})
-	}
-	return manifest
-}
-
 // uploadAuthenticatedReview posts the encrypted bundle to the token endpoint and
 // prints the returned review URL (key in its #fragment) plus the status. Errors
 // are returned for the caller to demote to a warning, like the free path.
@@ -303,11 +242,11 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 	body, err := json.Marshal(struct {
 		Ciphertext []byte            `json:"ciphertext" yaml:"ciphertext"`
 		Metadata   map[string]string `json:"metadata" yaml:"metadata"`
-		Changes    []reviewChange    `json:"changes" yaml:"changes"`
+		Changes    []review.Change   `json:"changes" yaml:"changes"`
 	}{
 		Ciphertext: blob,
 		Metadata:   metadata,
-		Changes:    reviewManifest(errs),
+		Changes:    review.Manifest(errs),
 	})
 	if err != nil {
 		return fmt.Errorf("marshal authenticated review: %w", err)
@@ -369,23 +308,34 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 // git-ref read, including blob-hash handling, lives in the load package);
 // stdin and URL sources are rejected here because the upload requires bytes
 // the CLI can attribute to a filename.
-func readSpecSource(source *load.Source) ([]byte, string, error) {
+func readSpecSource(source *load.Source, specs []*load.SpecInfo) ([]byte, string, error) {
 	if source == nil {
 		return nil, "", errors.New("spec source is required")
 	}
 	if source.IsStdin() {
-		return nil, "", errors.New("--open does not support stdin (use a file path or git ref)")
+		return nil, "", errors.New("--open does not support stdin (use a file path, URL, or git ref)")
 	}
-	if !source.IsFile() && !source.IsGitRevision() {
-		return nil, "", fmt.Errorf("--open does not support source type for %q", source.Path)
+	// DisplayPath strips the "<ref>:" prefix for git sources; Base trims any
+	// directory so the upload's filename is just "openapi.yaml".
+	name := filepath.Base(source.DisplayPath())
+	if source.IsURL() {
+		// The loader already fetched the URL; take those exact bytes (captured
+		// in Sources) so the bundle cannot disagree with the diff if the remote
+		// content changed between reads.
+		if len(specs) > 0 && specs[0] != nil {
+			if text, ok := specs[0].Sources[source.Path]; ok {
+				return []byte(text), name, nil
+			}
+		}
+		return nil, "", fmt.Errorf("no captured content for %q", source.Path)
 	}
+	// Only file and git-revision sources remain (stdin and URL returned above);
+	// ReadRaw's default rejects anything else.
 	body, err := source.ReadRaw()
 	if err != nil {
 		return nil, "", err
 	}
-	// DisplayPath strips the "<ref>:" prefix for git sources; Base trims any
-	// directory so the upload's filename is just "openapi.yaml".
-	return body, filepath.Base(source.DisplayPath()), nil
+	return body, name, nil
 }
 
 // openBrowser opens the URL in the default browser. xdg-open / open / start

@@ -1,0 +1,287 @@
+//go:build unix
+
+package review
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
+	"github.com/stretchr/testify/require"
+)
+
+// loadCrossFileSpec writes the two-file fixture (a root spec $ref'ing a schema
+// in other.yaml), loads it with capture, and returns the SpecInfo plus the
+// external block's key and span. Requiring the block here makes it a shared
+// precondition of the index and extract tests below.
+// Unix-only file: these tests assert on OS-native $ref path resolution, which
+// uses a different separator on Windows.
+func loadCrossFileSpec(t *testing.T) (*load.SpecInfo, string, span) {
+	t.Helper()
+	dir := t.TempDir()
+	root := filepath.Join(dir, "openapi.yaml")
+	require.NoError(t, os.WriteFile(root, []byte(crossFileRoot), 0644))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "other.yaml"), []byte(crossFileSubDoc), 0644))
+
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	loader.IsExternalRefsAllowed = true
+	si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(root))
+	require.NoError(t, err)
+
+	var userKey string
+	var userSpan span
+	for k, spans := range buildIndex(si.Spec).byKey {
+		if strings.Contains(k, "other.yaml") {
+			userKey, userSpan = k, spans[0]
+		}
+	}
+	require.NotEmpty(t, userKey, "the cross-file User schema must be indexed")
+	return si, userKey, userSpan
+}
+
+// The schema $ref'd from another file is indexed at that file, not the root.
+func TestBuildIndex_CrossFileSchemaIndexedInExternalFile(t *testing.T) {
+	si, _, userSpan := loadCrossFileSpec(t)
+	require.Equal(t, filepath.Join(filepath.Dir(si.Url), "other.yaml"), userSpan.file)
+}
+
+// A change inside a schema $ref'd from another file cards to a block keyed by
+// the ref and slices from that external file, not the referencing operation in
+// the root file. The texts come from the captured Sources, keyed by origin file.
+func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
+	si, userKey, userSpan := loadCrossFileSpec(t)
+
+	// a change sourced inside the external file (as the changelog reports it)
+	c := checker.ApiChange{
+		Id:           "request-property-type-changed",
+		Operation:    "POST",
+		Path:         "/users",
+		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: userSpan.file, Line: userSpan.end}},
+	}
+	blocks := Extract(checker.Changes{c}, docs(si.Spec), docs(si.Spec), si.Sources, si.Sources)
+	require.Len(t, blocks, 1)
+	require.Equal(t, userKey, blocks[0].Key, "cards to the external block, not the operation")
+	require.Equal(t, "other.yaml", blocks[0].RevFile, "the block reports the file it was sliced from")
+	require.Contains(t, blocks[0].RevText, "User:")
+	require.Contains(t, blocks[0].RevText, "role:")
+	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from other.yaml, not the root spec")
+}
+
+// loadRefStyleSpecs writes the fixture where the base side authors the $ref as
+// "other.yaml" and the revision side as "./other.yaml" (the same target), loads
+// both, and returns each side with its external block's key and span.
+// Requiring the block on each side here makes it a shared precondition of the
+// index and extract tests below.
+func loadRefStyleSpecs(t *testing.T) (baseSI, revSI *load.SpecInfo, baseKey, revKey string, baseSpan, revSpan span) {
+	t.Helper()
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "other.yaml"), []byte(crossFileSubDoc), 0644))
+	baseRoot := filepath.Join(dir, "base.yaml")
+	revRoot := filepath.Join(dir, "rev.yaml")
+	require.NoError(t, os.WriteFile(baseRoot, []byte(strings.Replace(crossFileRoot, "./other.yaml", "other.yaml", 1)), 0644))
+	require.NoError(t, os.WriteFile(revRoot, []byte(crossFileRoot), 0644)) // keeps "./other.yaml"
+
+	loadSpec := func(path string) *load.SpecInfo {
+		loader := openapi3.NewLoader()
+		loader.IncludeOrigin = true
+		loader.IsExternalRefsAllowed = true
+		si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(path))
+		require.NoError(t, err)
+		return si
+	}
+	baseSI, revSI = loadSpec(baseRoot), loadSpec(revRoot)
+
+	findExternal := func(d *openapi3.T) (string, span) {
+		for k, spans := range buildIndex(d).byKey {
+			if strings.Contains(k, "other.yaml") {
+				return k, spans[0]
+			}
+		}
+		return "", span{}
+	}
+	baseKey, baseSpan = findExternal(baseSI.Spec)
+	revKey, revSpan = findExternal(revSI.Spec)
+	require.NotEmpty(t, baseKey, "the external User schema must be indexed on the base side")
+	require.NotEmpty(t, revKey, "the external User schema must be indexed on the revision side")
+	return baseSI, revSI, baseKey, revKey, baseSpan, revSpan
+}
+
+// kin preserves the authored "./" in sr.Ref, so indexExternalSchemas strips it
+// before keying: "other.yaml" and "./other.yaml" name the same target and must
+// key the same block.
+func TestBuildIndex_CrossFileRefStylesKeyIdentically(t *testing.T) {
+	_, _, baseKey, revKey, _, _ := loadRefStyleSpecs(t)
+	require.Equal(t, baseKey, revKey)
+}
+
+// Because both ref styles key identically, resolve() pairs the two sides into
+// one block rather than a spurious delete + add, and both sides slice.
+func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
+	baseSI, revSI, _, _, baseSpan, revSpan := loadRefStyleSpecs(t)
+
+	// one change, sourced inside other.yaml on each side (as the changelog reports)
+	c := checker.ApiChange{
+		Id:        "request-property-type-changed",
+		Operation: "POST",
+		Path:      "/users",
+		CommonChange: checker.CommonChange{
+			BaseSource:     &checker.Source{File: baseSpan.file, Line: baseSpan.end},
+			RevisionSource: &checker.Source{File: revSpan.file, Line: revSpan.end},
+		},
+	}
+	blocks := Extract(checker.Changes{c}, docs(baseSI.Spec), docs(revSI.Spec), baseSI.Sources, revSI.Sources)
+	require.Len(t, blocks, 1, "the two sides pair into one block")
+	require.NotEmpty(t, blocks[0].BaseText, "base side sliced (paired, not delete + add)")
+	require.NotEmpty(t, blocks[0].RevText, "revision side sliced")
+}
+
+// A $ref to a schema under an arbitrary top-level key in another file
+// ("./schemas.yaml#/User", the Swagger-2-era "definitions bag") must card to a
+// block sliced from that file, like a components-structured ref does. Runs the
+// real diff + checker so the change's source location is the one users get.
+func TestExtract_ArbitraryTopLevelKeyRefSlicedFromExternalFile(t *testing.T) {
+	const rootSpec = `openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /users:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './schemas.yaml#/User'
+      responses:
+        "201": { description: created }
+`
+	loadSide := func(schemas string) *load.SpecInfo {
+		dir := t.TempDir()
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "schemas.yaml"), []byte(schemas), 0644))
+		require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(rootSpec), 0644))
+		loader := openapi3.NewLoader()
+		loader.IncludeOrigin = true
+		loader.IsExternalRefsAllowed = true
+		si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(filepath.Join(dir, "openapi.yaml")))
+		require.NoError(t, err)
+		return si
+	}
+	baseSI := loadSide("User:\n  type: object\n  properties:\n    id:\n      type: string\n")
+	revSI := loadSide("User:\n  type: object\n  properties:\n    id:\n      type: integer\n")
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), baseSI, revSI)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibility(checker.NewConfig(checker.GetAllChecks()), d, osm)
+	require.Len(t, changes, 1)
+
+	blocks := Extract(changes, docs(baseSI.Spec), docs(revSI.Spec), baseSI.Sources, revSI.Sources)
+	require.Len(t, blocks, 1)
+	require.Equal(t, "schemas.yaml", blocks[0].RevFile, "the block slices from the file the schema lives in")
+	require.Contains(t, blocks[0].RevText, "User:")
+	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from schemas.yaml, not the root spec")
+}
+
+// Composed sets commonly repeat a basename across directories (one
+// openapi.yaml per service). Same-named components in same-named files stay
+// separate blocks, each sliced from its own file; the block key is qualified
+// with a directory segment so the two don't merge.
+func TestExtract_ComposedSameBasenameStaysSeparate(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	base, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/base/*/openapi.yaml")
+	require.NoError(t, err)
+	rev, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/revision/*/openapi.yaml")
+	require.NoError(t, err)
+
+	var baseDocs, revDocs []*openapi3.T
+	baseTexts, revTexts := map[string]string{}, map[string]string{}
+	for _, si := range base {
+		baseDocs = append(baseDocs, si.Spec)
+		for k, v := range si.Sources {
+			baseTexts[k] = v
+		}
+	}
+	for _, si := range rev {
+		revDocs = append(revDocs, si.Spec)
+		for k, v := range si.Sources {
+			revTexts[k] = v
+		}
+	}
+
+	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), base, rev)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+
+	blocks := Extract(changes, baseDocs, revDocs, baseTexts, revTexts)
+
+	var a, b *Block
+	for i := range blocks {
+		switch {
+		case strings.HasPrefix(blocks[i].Key, "svc-a/"):
+			a = &blocks[i]
+		case strings.HasPrefix(blocks[i].Key, "svc-b/"):
+			b = &blocks[i]
+		}
+	}
+	require.NotNil(t, a, "svc-a's User is its own block")
+	require.NotNil(t, b, "svc-b's User is its own block")
+	require.Equal(t, "components/schemas/User", a.Title)
+	require.Equal(t, "components/schemas/User", b.Title)
+
+	// each block slices its own file's schema, on both sides
+	require.Contains(t, a.BaseText, "name:")
+	require.NotContains(t, a.BaseText, "id:")
+	require.Contains(t, a.RevText, "name:")
+	require.Contains(t, b.BaseText, "id:")
+	require.NotContains(t, b.BaseText, "name:")
+	require.Contains(t, b.RevText, "extra:")
+}
+
+// A one-sided change (a property added in svc-b only, so only a revision
+// source) still slices the base side from svc-b's file: the cross-side lookup
+// matches the full origin path among the same-named candidates.
+func TestExtract_ComposedSameBasenameCrossSideLookup(t *testing.T) {
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	base, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/base/*/openapi.yaml")
+	require.NoError(t, err)
+	rev, err := load.NewSpecInfoFromGlobWithCapture(loader, "../data/review/samebase/revision/*/openapi.yaml")
+	require.NoError(t, err)
+
+	var baseDocs, revDocs []*openapi3.T
+	baseTexts, revTexts := map[string]string{}, map[string]string{}
+	for _, si := range base {
+		baseDocs = append(baseDocs, si.Spec)
+		for k, v := range si.Sources {
+			baseTexts[k] = v
+		}
+	}
+	var revUserSpan span
+	for _, si := range rev {
+		revDocs = append(revDocs, si.Spec)
+		for k, v := range si.Sources {
+			revTexts[k] = v
+		}
+		if strings.Contains(si.Url, "svc-b") {
+			for _, sp := range buildIndex(si.Spec).byKey["components/schemas/User"] {
+				revUserSpan = sp
+			}
+		}
+	}
+	require.Positive(t, revUserSpan.start, "svc-b's User span found")
+
+	c := checker.ApiChange{
+		Id:           "new-optional-request-property",
+		Operation:    "GET",
+		Path:         "/b",
+		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: revUserSpan.file, Line: revUserSpan.end}},
+	}
+	blocks := Extract(checker.Changes{c}, baseDocs, revDocs, baseTexts, revTexts)
+	require.Len(t, blocks, 1)
+	require.Contains(t, blocks[0].BaseText, "id:", "base sliced from svc-b's file")
+	require.NotContains(t, blocks[0].BaseText, "name:", "not svc-a's same-named schema")
+}

@@ -85,6 +85,10 @@ type diffResult struct {
 	diffReport        *diff.Diff
 	operationsSources *diff.OperationsSourcesMap
 	specInfoPair      *load.SpecInfoPair
+	// The spec sets per side (one for a normal diff, N for composed); on the
+	// --open path each SpecInfo.Sources carries its captured file texts.
+	baseSpecs []*load.SpecInfo
+	revSpecs  []*load.SpecInfo
 }
 
 func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoPair) *diffResult {
@@ -95,13 +99,27 @@ func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoP
 	}
 }
 
+// loaderForOpen returns the capturing loader variant when --open is set, and the
+// plain one otherwise. --open renders a side-by-side review whose blocks are
+// sliced from source text, so it needs every contributing file (root + $ref'd)
+// recorded; ordinary runs skip the recorder. normalDiff and composedDiff pass
+// their respective loader pairs.
+func loaderForOpen[F any](open bool, plain, capture F) F {
+	if open {
+		return capture
+	}
+	return plain
+}
+
 func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	s1, err := load.NewSpecInfo(loader, flags.getBase(), flattenAllOf, flattenParams, lowerHeaderNames)
+	newSpecInfo := loaderForOpen(flags.getOpen(), load.NewSpecInfo, load.NewSpecInfoWithCapture)
+
+	s1, err := newSpecInfo(loader, flags.getBase(), flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpec("base", flags.getBase(), err)
 	}
@@ -114,7 +132,7 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 		specInfo := *s1
 		s2 = &specInfo
 	} else {
-		s2, err = load.NewSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
+		s2, err = newSpecInfo(loader, flags.getRevision(), flattenAllOf, flattenParams, lowerHeaderNames)
 		if err != nil {
 			return nil, getErrFailedToLoadSpec("revision", flags.getRevision(), err)
 		}
@@ -127,7 +145,9 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 		return nil, getErrDiffFailed(err)
 	}
 
-	return newDiffResult(diffReport, operationsSources, load.NewSpecInfoPair(s1, s2)), nil
+	r := newDiffResult(diffReport, operationsSources, load.NewSpecInfoPair(s1, s2))
+	r.baseSpecs, r.revSpecs = []*load.SpecInfo{s1}, []*load.SpecInfo{s2}
+	return r, nil
 }
 
 func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
@@ -136,12 +156,14 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
 	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
-	s1, err := load.NewSpecInfoFromGlob(loader, flags.getBase().Path, flattenAllOf, flattenParams, lowerHeaderNames)
+	newGlob := loaderForOpen(flags.getOpen(), load.NewSpecInfoFromGlob, load.NewSpecInfoFromGlobWithCapture)
+
+	s1, err := newGlob(loader, flags.getBase().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpecs("base", flags.getBase().Path, err)
 	}
 
-	s2, err := load.NewSpecInfoFromGlob(loader, flags.getRevision().Path, flattenAllOf, flattenParams, lowerHeaderNames)
+	s2, err := newGlob(loader, flags.getRevision().Path, flattenAllOf, flattenParams, lowerHeaderNames)
 	if err != nil {
 		return nil, getErrFailedToLoadSpecs("revision", flags.getRevision().Path, err)
 	}
@@ -156,5 +178,7 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 		return nil, getErrDiffFailed(err)
 	}
 
-	return newDiffResult(diffReport, operationsSources, nil), nil
+	r := newDiffResult(diffReport, operationsSources, nil)
+	r.baseSpecs, r.revSpecs = s1, s2
+	return r, nil
 }

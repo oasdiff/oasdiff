@@ -1,0 +1,65 @@
+/*
+Package review builds the encrypted review bundle: the two specs, the computed
+changelog, and the per-change structural blocks of the specs.
+
+It is the single source of truth for the bundle's on-the-wire shape (Payload),
+its encryption (Encrypt), and the per-change fingerprint manifest (Manifest); a
+decryptor on the receiving side mirrors the same layout.
+
+The bundle is zero-knowledge by construction: Encrypt seals the Payload with a
+fresh AES-256-GCM key and returns the ciphertext and the key separately. The
+caller uploads only the ciphertext and keeps the key out of band, so the server
+receives a blob it cannot read. This package makes no assumption about where the
+bundle is uploaded or consumed; that is the caller's concern.
+
+# Blocks: each change with its source context
+
+Extract slices the specs into just the structural blocks that contain changes,
+so each change carries its enclosing source text without the full specs:
+
+	blocks := review.Extract(changes, baseDocs, revDocs, baseTexts, revTexts)
+
+Each Block carries its key/title (e.g. "POST /users" or
+"components/schemas/User"), the ids and fingerprints of the changes inside it,
+and the block's source-text slice on each side with its starting line.
+
+# Block selection
+
+A change is keyed to the smallest indexed block whose origin span contains its
+source line, not by its (operation, path): line keying follows $refs, so a
+change inside a $ref'd component keys to the component rather than to each
+endpoint that references it, and the per-endpoint changes all group onto that
+one block. When no source line resolves (e.g. a change detected
+after --flatten-allof, whose merged schema has no single location), it falls
+back to the operation it names, then, for a top-level change with no
+operation, the rule's Area (the OpenAPI object the rule concerns, e.g.
+"security" or "tags"; see checker.Area), then an "other changes" bucket.
+
+# Slicing
+
+Slicing relies on kin-openapi origin end positions
+(openapi3.Origin.Key.EndLine/EndColumn) so a block's full extent is known, not
+just its start. The specs must be loaded with IncludeOrigin = true.
+
+# Status and limitations
+
+Indexed block types are operations, path items, named components (schemas,
+security schemes, responses, parameters, request bodies, headers), the
+top-level sections (info/servers/tags/security), and schemas $ref'd from
+another file (sliced from that file via the per-file texts Extract takes).
+Composed mode indexes every spec in the set, disambiguating same-named blocks
+by file. All external-$ref shapes slice from the file the schema lives in:
+whole-file refs (./User.yaml), refs into a components-structured file
+(./defs.yaml#/components/schemas/User, even without openapi:/info:), and refs
+to a schema under an arbitrary top-level key (./schemas.yaml#/User, the
+Swagger-2-era "definitions bag" shape; see
+TestExtract_ArbitraryTopLevelKeyRefSlicedFromExternalFile). Known gaps:
+
+  - Because blocks are keyed off the changelog, a block whose only change has no
+    changelog entry (e.g. a description-only edit) is not extracted; that
+    schema-shape completeness is a later phase.
+
+A block's slice is raw source text, so changed lines within it that have no
+changelog entry are still present.
+*/
+package review

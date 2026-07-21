@@ -17,8 +17,11 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
+	"github.com/oasdiff/oasdiff/review"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +31,7 @@ func TestReadSpecSource_FromFile(t *testing.T) {
 	body := []byte("openapi: 3.0.0\ninfo: {title: t, version: '1'}\npaths: {}\n")
 	require.NoError(t, os.WriteFile(path, body, 0644))
 
-	bytesOut, name, err := readSpecSource(load.NewSource(path))
+	bytesOut, name, err := readSpecSource(load.NewSource(path), nil)
 	require.NoError(t, err)
 	require.Equal(t, body, bytesOut)
 	require.Equal(t, "openapi.yaml", name, "the upload's display filename must be the basename, not the full local path")
@@ -56,14 +59,14 @@ func TestReadSpecSource_FromGitRef(t *testing.T) {
 	require.NoError(t, os.Chdir(dir))
 	defer os.Chdir(oldDir) //nolint:errcheck
 
-	bytesOut, name, err := readSpecSource(load.NewSource("HEAD:openapi.yaml"))
+	bytesOut, name, err := readSpecSource(load.NewSource("HEAD:openapi.yaml"), nil)
 	require.NoError(t, err)
 	require.Equal(t, body, bytesOut)
 	require.Equal(t, "openapi.yaml", name, "display filename must be derived from the path portion of the git ref, not the ref itself")
 }
 
 func TestReadSpecSource_StdinRejected(t *testing.T) {
-	_, _, err := readSpecSource(load.NewSource("-"))
+	_, _, err := readSpecSource(load.NewSource("-"), nil)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "stdin")
 }
@@ -73,7 +76,7 @@ func TestReadSpecSource_StdinRejected(t *testing.T) {
 // returned. If this round-trips, a correct WebCrypto implementation will too.
 func decryptBlob(t *testing.T, blob, key []byte) []byte {
 	t.Helper()
-	require.Equal(t, byte(encryptedReviewBlobVersion), blob[0], "first byte must be the format version")
+	require.Equal(t, byte(review.BlobVersion), blob[0], "first byte must be the format version")
 	block, err := aes.NewCipher(key)
 	require.NoError(t, err)
 	gcm, err := cipher.NewGCM(block)
@@ -83,26 +86,6 @@ func decryptBlob(t *testing.T, blob, key []byte) []byte {
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
 	require.NoError(t, err, "ciphertext must decrypt with the returned key")
 	return plaintext
-}
-
-func TestEncryptReviewPayload_RoundTrip(t *testing.T) {
-	plaintext := []byte(`{"hello":"world","spec":"openapi: 3.0.0"}`)
-	blob, key, err := encryptReviewPayload(plaintext)
-	require.NoError(t, err)
-	require.Len(t, key, 32, "AES-256 needs a 256-bit key")
-
-	// The blob must not contain the plaintext anywhere — it is ciphertext.
-	require.NotContains(t, string(blob), "openapi: 3.0.0")
-
-	got := decryptBlob(t, blob, key)
-	require.Equal(t, plaintext, got)
-
-	// Two encryptions of the same plaintext must differ (fresh key + nonce),
-	// so a server seeing two identical specs can't tell they're identical.
-	blob2, key2, err := encryptReviewPayload(plaintext)
-	require.NoError(t, err)
-	require.NotEqual(t, key, key2, "each upload must use a fresh key")
-	require.NotEqual(t, blob, blob2, "ciphertext must not be deterministic")
 }
 
 func TestPostEncryptedReview_PostsBlobAnonymously(t *testing.T) {
@@ -121,7 +104,7 @@ func TestPostEncryptedReview_PostsBlobAnonymously(t *testing.T) {
 	defer stub.Close()
 	t.Setenv("OASDIFF_URL", stub.URL)
 
-	blob := []byte{encryptedReviewBlobVersion, 9, 9, 9}
+	blob := []byte{review.BlobVersion, 9, 9, 9}
 	id, expires, err := postEncryptedReview(blob)
 	require.NoError(t, err)
 	require.Equal(t, "abc-123", id)
@@ -178,7 +161,7 @@ func TestUploadAndOpen_EncryptsSpecsAndEmitsFragmentURL(t *testing.T) {
 	var out bytes.Buffer
 	// nil specInfoPair is safe (version getters return "n/a"); empty changes
 	// is a valid changelog.
-	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true))
 
 	// The emitted URL must point at the encrypted review surface and carry
 	// the key only in the fragment.
@@ -193,7 +176,7 @@ func TestUploadAndOpen_EncryptsSpecsAndEmitsFragmentURL(t *testing.T) {
 	require.NotContains(t, string(uploadedBlob), "base")
 	require.NotContains(t, string(uploadedBlob), "rev")
 
-	var payload reviewPayload
+	var payload review.Payload
 	require.NoError(t, json.Unmarshal(decryptBlob(t, uploadedBlob, key), &payload))
 	require.Equal(t, "openapi: 3.0.0\nbase\n", payload.BaseSpec, "base spec must round-trip verbatim")
 	require.Equal(t, "openapi: 3.0.0\nrev\n", payload.RevisionSpec, "revision spec must round-trip verbatim")
@@ -225,11 +208,11 @@ func TestUploadAndOpen_BreakingSetsModeBreaking(t *testing.T) {
 	flags.setRevision(load.NewSource(revPath))
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, nil, true))
 
 	key, err := base64.RawURLEncoding.DecodeString(keyFragmentRe.FindStringSubmatch(out.String())[1])
 	require.NoError(t, err)
-	var payload reviewPayload
+	var payload review.Payload
 	require.NoError(t, json.Unmarshal(decryptBlob(t, uploadedBlob, key), &payload))
 	require.Equal(t, "breaking", payload.Mode, "isBreaking=true must propagate as mode=breaking")
 }
@@ -279,7 +262,7 @@ func TestUploadAuthenticatedReview_InvalidMetaIsError(t *testing.T) {
 	// warning), not be silently dropped. Fails during parsing, before any HTTP
 	// call, so no server is needed.
 	var out bytes.Buffer
-	err := uploadAuthenticatedReview("tok", []string{"noequals"}, []byte{encryptedReviewBlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
+	err := uploadAuthenticatedReview("tok", []string{"noequals"}, []byte{review.BlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "expected key=value")
 }
@@ -311,22 +294,6 @@ func writeSpecPair(t *testing.T) *Flags {
 	return flags
 }
 
-func TestReviewManifest(t *testing.T) {
-	changes := checker.Changes{
-		checker.ApiChange{Id: "id-a", Operation: "GET", Path: "/a", Level: checker.ERR},
-		checker.ApiChange{Id: "id-b", Operation: "POST", Path: "/b", Level: checker.INFO},
-	}
-	manifest := reviewManifest(changes)
-	require.Len(t, manifest, 2)
-	for _, m := range manifest {
-		require.NotEmpty(t, m.Fingerprint, "every entry must carry a fingerprint")
-		require.Len(t, m.Fingerprint, 12, "fingerprint is the 12-char ComputeFingerprint output")
-	}
-	require.Equal(t, int(checker.ERR), manifest[0].Level, "level is the change's severity as an int")
-	require.Equal(t, int(checker.INFO), manifest[1].Level)
-	require.NotEqual(t, manifest[0].Fingerprint, manifest[1].Fingerprint, "distinct changes must have distinct fingerprints")
-}
-
 func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 	stubBrowser(t)
 	var (
@@ -355,7 +322,7 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 	flags.v.Set("review-meta", []string{"owner=acme", "pr=42"})
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, true, checker.Changes{}, nil, nil, true))
 
 	require.Equal(t, http.MethodPost, gotMethod)
 	require.Equal(t, "/tenants/tok-123/encrypted-pr-review", gotPath, "the token is path-authenticated")
@@ -364,11 +331,11 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 	var body struct {
 		Ciphertext []byte            `json:"ciphertext"`
 		Metadata   map[string]string `json:"metadata"`
-		Changes    []reviewChange    `json:"changes"`
+		Changes    []review.Change   `json:"changes"`
 	}
 	require.NoError(t, json.Unmarshal(gotBody, &body))
 	require.NotEmpty(t, body.Ciphertext, "the encrypted bundle must ride in ciphertext")
-	require.Equal(t, byte(encryptedReviewBlobVersion), body.Ciphertext[0], "ciphertext is the same blob layout as the free path")
+	require.Equal(t, byte(review.BlobVersion), body.Ciphertext[0], "ciphertext is the same blob layout as the free path")
 	require.Equal(t, map[string]string{"owner": "acme", "pr": "42"}, body.Metadata, "the opaque metadata bag is forwarded verbatim")
 
 	// The output carries the returned URL with the key in its #fragment and the
@@ -385,7 +352,7 @@ func TestUploadAndOpen_AuthenticatedPath(t *testing.T) {
 
 	// The fragment key must decrypt the uploaded ciphertext: same zero-knowledge
 	// contract as the free path.
-	var payload reviewPayload
+	var payload review.Payload
 	require.NoError(t, json.Unmarshal(decryptBlob(t, body.Ciphertext, key), &payload))
 	require.Equal(t, "openapi: 3.0.0\nbase\n", payload.BaseSpec)
 	require.Equal(t, "openapi: 3.0.0\nrev\n", payload.RevisionSpec)
@@ -410,7 +377,7 @@ func TestUploadAndOpen_FreePathWhenNoToken(t *testing.T) {
 	flags := writeSpecPair(t)
 
 	var out bytes.Buffer
-	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true))
+	require.NoError(t, uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true))
 	require.True(t, freeHit, "the free endpoint must be used when --review-token is empty")
 	require.Contains(t, out.String(), "/review/e/free-1#k=")
 }
@@ -423,7 +390,7 @@ func TestUploadAuthenticatedReview_ServerErrorIsNonFatal(t *testing.T) {
 	defer stub.Close()
 	t.Setenv("OASDIFF_API_URL", stub.URL)
 
-	blob := []byte{encryptedReviewBlobVersion, 1, 2, 3}
+	blob := []byte{review.BlobVersion, 1, 2, 3}
 	key := make([]byte, 32)
 	var out bytes.Buffer
 	err := uploadAuthenticatedReview("tok", nil, blob, key, checker.Changes{}, &out)
@@ -436,7 +403,7 @@ func TestUploadAuthenticatedReview_UnreachableIsNonFatal(t *testing.T) {
 	// Port 0 is not connectable; the upload must return an error (which the
 	// caller demotes to a warning) rather than panicking.
 	t.Setenv("OASDIFF_API_URL", "http://127.0.0.1:0")
-	blob := []byte{encryptedReviewBlobVersion, 1, 2, 3}
+	blob := []byte{review.BlobVersion, 1, 2, 3}
 	var out bytes.Buffer
 	err := uploadAuthenticatedReview("tok", nil, blob, make([]byte, 32), checker.Changes{}, &out)
 	require.Error(t, err)
@@ -453,7 +420,7 @@ func TestUploadAuthenticatedReview_InvalidJSONResponse(t *testing.T) {
 	t.Setenv("OASDIFF_API_URL", stub.URL)
 
 	var out bytes.Buffer
-	err := uploadAuthenticatedReview("tok", nil, []byte{encryptedReviewBlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
+	err := uploadAuthenticatedReview("tok", nil, []byte{review.BlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "parse response")
 	require.NotContains(t, out.String(), "Opening", "no URL is emitted when the response can't be parsed")
@@ -469,7 +436,7 @@ func TestUploadAuthenticatedReview_MissingReviewURL(t *testing.T) {
 	t.Setenv("OASDIFF_API_URL", stub.URL)
 
 	var out bytes.Buffer
-	err := uploadAuthenticatedReview("tok", nil, []byte{encryptedReviewBlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
+	err := uploadAuthenticatedReview("tok", nil, []byte{review.BlobVersion, 1}, make([]byte, 32), checker.Changes{}, &out)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "review_url")
 }
@@ -481,7 +448,7 @@ func TestUploadAndOpen_ReadBaseSpecError(t *testing.T) {
 	flags.setRevision(load.NewSource(filepath.Join(t.TempDir(), "also-missing.yaml")))
 
 	var out bytes.Buffer
-	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true)
+	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "read base spec")
 }
@@ -497,7 +464,65 @@ func TestUploadAndOpen_ReadRevisionSpecError(t *testing.T) {
 	flags.setRevision(load.NewSource(filepath.Join(t.TempDir(), "missing.yaml")))
 
 	var out bytes.Buffer
-	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, true)
+	err := uploadAndOpen(flags, &out, false, checker.Changes{}, nil, nil, true)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "read revision spec")
+}
+
+// URL sources ride the capture: the bundle's specs are the exact bytes the
+// loader fetched (no second fetch), and blocks slice from them.
+func TestUploadAndOpen_URLSources(t *testing.T) {
+	stubBrowser(t)
+	const baseSpec = "openapi: 3.0.0\ninfo: {title: t, version: \"1\"}\npaths:\n  /users:\n    get:\n      responses:\n        \"200\": {description: ok}\n        \"404\": {description: gone}\n"
+	const revSpec = "openapi: 3.0.0\ninfo: {title: t, version: \"1\"}\npaths:\n  /users:\n    get:\n      responses:\n        \"200\": {description: ok}\n"
+	specs := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/base/openapi.yaml" {
+			_, _ = w.Write([]byte(baseSpec))
+			return
+		}
+		_, _ = w.Write([]byte(revSpec))
+	}))
+	defer specs.Close()
+
+	var uploadedBlob []byte
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		uploadedBlob, _ = io.ReadAll(r.Body)
+		_, _ = w.Write([]byte(`{"review_id":"r-url","expires_at":0}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_URL", stub.URL)
+
+	baseURL := specs.URL + "/base/openapi.yaml"
+	revURL := specs.URL + "/rev/openapi.yaml"
+	loader := openapi3.NewLoader()
+	loader.IncludeOrigin = true
+	s1, err := load.NewSpecInfoWithCapture(loader, load.NewSource(baseURL))
+	require.NoError(t, err)
+	s2, err := load.NewSpecInfoWithCapture(loader, load.NewSource(revURL))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+	require.NotEmpty(t, errs)
+
+	flags := NewFlags()
+	flags.setBase(load.NewSource(baseURL))
+	flags.setRevision(load.NewSource(revURL))
+
+	var out bytes.Buffer
+	require.NoError(t, uploadAndOpen(flags, &out, false, errs, []*load.SpecInfo{s1}, []*load.SpecInfo{s2}, false))
+
+	m := keyFragmentRe.FindStringSubmatch(out.String())
+	require.Len(t, m, 2)
+	key, err := base64.RawURLEncoding.DecodeString(m[1])
+	require.NoError(t, err)
+
+	var payload review.Payload
+	require.NoError(t, json.Unmarshal(decryptBlob(t, uploadedBlob, key), &payload))
+	require.Equal(t, baseSpec, payload.BaseSpec, "the bundle carries the bytes the loader fetched")
+	require.Equal(t, revSpec, payload.RevisionSpec)
+	require.Equal(t, "openapi.yaml", payload.BaseFilename)
+	require.NotEmpty(t, payload.Blocks)
+	require.NotEmpty(t, payload.Blocks[0].BaseText, "blocks slice from the captured URL text")
 }

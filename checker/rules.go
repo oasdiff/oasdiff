@@ -27,6 +27,13 @@ const (
 	AreaSecurity
 	AreaTags
 	AreaComponents
+	// AreaInfo and AreaServers have no rules yet: info is annotation-only
+	// (title, description, version never affect the wire contract), and
+	// server changes are treated as deployment metadata. They exist so the
+	// area taxonomy covers every top-level document section a future rule
+	// could target.
+	AreaInfo
+	AreaServers
 	AreaNone
 )
 
@@ -90,6 +97,10 @@ func (a Area) String() string {
 		return "tags"
 	case AreaComponents:
 		return "components"
+	case AreaInfo:
+		return "info"
+	case AreaServers:
+		return "servers"
 	default:
 		return "none"
 	}

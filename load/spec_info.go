@@ -14,6 +14,9 @@ type SpecInfo struct {
 	Url     string
 	Spec    *openapi3.T
 	Version string
+	// Sources holds the raw text of every file that contributed to Spec, keyed
+	// by resolved path, when loaded via NewSpecInfoWithCapture; nil otherwise.
+	Sources map[string]string
 }
 
 func (specInfo *SpecInfo) GetVersion() string {
@@ -41,12 +44,34 @@ func getVersion(spec *openapi3.T) string {
 
 // NewSpecInfo creates a SpecInfo from a local file path, a URL, a git revision, or stdin
 func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
-	specInfo, err := loadSpecInfo(loader, source)
+	return newSpecInfoFromSource(loader, source, false, options...)
+}
+
+// NewSpecInfoWithCapture is NewSpecInfo that also records the raw text of
+// every file the loader reads (root and $ref'd) into SpecInfo.Sources, for
+// slicing multi-file specs by origin file (the review bundle).
+func NewSpecInfoWithCapture(loader *openapi3.Loader, source *Source, options ...Option) (*SpecInfo, error) {
+	return newSpecInfoFromSource(loader, source, true, options...)
+}
+
+// newSpecInfoFromSource loads a single SpecInfo and applies the options. When
+// capture is true it also records the raw text of every file read into
+// SpecInfo.Sources. Capture is a constructor choice, not an Option, because the
+// recorder must be installed before the load, whereas options run after it.
+func newSpecInfoFromSource(loader *openapi3.Loader, source *Source, capture bool, options ...Option) (*SpecInfo, error) {
+	var recorder *sourceCapture
+	if capture {
+		recorder = newSourceCapture()
+	}
+	specInfo, err := loadSpecInfo(loader, source, recorder)
 	if err != nil {
 		return nil, err
 	}
-	specInfos := []*SpecInfo{specInfo}
+	if recorder != nil {
+		specInfo.Sources = recorder.asStrings()
+	}
 
+	specInfos := []*SpecInfo{specInfo}
 	for _, option := range options {
 		if specInfos, err = option(loader, specInfos); err != nil {
 			return nil, err
@@ -57,7 +82,17 @@ func NewSpecInfo(loader *openapi3.Loader, source *Source, options ...Option) (*S
 
 // NewSpecInfoFromGlob creates SpecInfos from local files matching the specified glob parameter
 func NewSpecInfoFromGlob(loader *openapi3.Loader, glob string, options ...Option) ([]*SpecInfo, error) {
-	specInfos, err := fromGlob(loader, glob)
+	return newSpecInfoFromGlob(loader, glob, false, options...)
+}
+
+// NewSpecInfoFromGlobWithCapture is NewSpecInfoFromGlob that also records each
+// spec's contributing file texts into its Sources (see NewSpecInfoWithCapture).
+func NewSpecInfoFromGlobWithCapture(loader *openapi3.Loader, glob string, options ...Option) ([]*SpecInfo, error) {
+	return newSpecInfoFromGlob(loader, glob, true, options...)
+}
+
+func newSpecInfoFromGlob(loader *openapi3.Loader, glob string, capture bool, options ...Option) ([]*SpecInfo, error) {
+	specInfos, err := fromGlob(loader, glob, capture)
 	if err != nil {
 		return nil, err
 	}
@@ -93,26 +128,42 @@ func NewSpecInfoFromData(loader *openapi3.Loader, data []byte, name string, opti
 	return specInfos[0], nil
 }
 
-func loadSpecInfo(loader *openapi3.Loader, source *Source) (*SpecInfo, error) {
-	s, err := from(loader, source)
+func loadSpecInfo(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*SpecInfo, error) {
+	s, err := from(loader, source, capture)
 	if err != nil {
 		return nil, err
 	}
 	return newSpecInfo(s, source.DisplayPath()), nil
 }
 
-func fromGlob(loader *openapi3.Loader, glob string) ([]*SpecInfo, error) {
+func fromGlob(loader *openapi3.Loader, glob string, capture bool) ([]*SpecInfo, error) {
 	files, err := filepathx.Glob(glob)
 	if err != nil {
 		return nil, err
 	}
 	result := make([]*SpecInfo, 0)
+	// Members load via LoadFromFile directly rather than through from():
+	// glob expansion already proves each member is a local file, and
+	// re-classifying the path as a Source could misread exotic names (a file
+	// named "main:openapi.yaml" would parse as a git revision). Capture is
+	// per member: each SpecInfo carries its own Sources, so a consumer can
+	// slice each member's blocks from that member's files.
 	for _, file := range files {
-		spec, err := loader.LoadFromFile(file)
+		l := loader
+		var cap *sourceCapture
+		if capture {
+			cap = newSourceCapture()
+			l = withCapture(loader, cap)
+		}
+		spec, err := l.LoadFromFile(file)
 		if err != nil {
 			return nil, fmt.Errorf("failed to load %q: %w", file, err)
 		}
-		result = append(result, &SpecInfo{Url: file, Spec: spec})
+		si := &SpecInfo{Url: file, Spec: spec}
+		if cap != nil {
+			si.Sources = cap.asStrings()
+		}
+		result = append(result, si)
 	}
 
 	if len(result) > 0 {

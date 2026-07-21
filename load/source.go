@@ -112,6 +112,10 @@ func (source *Source) IsGitRevision() bool {
 	return source.Type == SourceTypeGitRevision
 }
 
+func (source *Source) IsURL() bool {
+	return source.Type == SourceTypeURL
+}
+
 // DisplayPath returns the path suitable for display and source-location reporting.
 // For git revisions it strips the ref prefix (e.g. "origin/main:openapi.yaml" → "openapi.yaml").
 func (source *Source) DisplayPath() string {
