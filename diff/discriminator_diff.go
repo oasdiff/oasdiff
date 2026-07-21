@@ -65,7 +65,7 @@ func getDiscriminatorDiffInternal(config *Config, discriminator1, discriminator2
 	return result, nil
 }
 
-func mappingToStringMap(m openapi3.StringMap[openapi3.MappingRef]) map[string]string {
+func mappingToStringMap(m map[string]openapi3.MappingRef) map[string]string {
 	result := make(map[string]string, len(m))
 	for k, v := range m {
 		result[k] = v.Ref
