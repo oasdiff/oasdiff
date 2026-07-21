@@ -10,7 +10,6 @@ import (
 	"errors"
 	"strconv"
 	"strings"
-	"unicode"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
@@ -48,6 +47,7 @@ func Validate(spec *openapi3.T, source string) formatters.Findings {
 	}
 	// oasdiff-native SHOULD-level lints that kin-openapi does not enforce.
 	findings = append(findings, lintDuplicateEnums(spec, source)...)
+	findings = append(findings, lintAmbiguousParamSerialization(spec, source)...)
 	return findings
 }
 
@@ -595,163 +595,14 @@ func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
 	return origin.Key
 }
 
-// ruleIDForKinError dispatches a kin-openapi error to a stable
-// kebab-case rule ID. Uses the typed cluster wrappers from kin's
-// openapi3 package; one arm per cluster covers all the call-site
-// leaves wrapped by that cluster.
-//
-// kin errors not yet migrated to a cluster fall through to
-// unknownValidationID. Where a cluster carries field-name metadata,
-// the rule ID is derived from that — the per-leaf type isn't
-// consulted because (a) the cluster carries enough metadata, and (b)
-// deriving from a single field keeps the dispatch stable as kin adds
-// new leaves. Where a cluster has no useful field for derivation
-// (ServerURLTemplateError carries only the offending URL,
-// PathParametersError carries Path+Method+Missing), a static rule ID
-// is returned for the whole cluster.
+// ruleIDForKinError returns the stable code kin-openapi declares on the
+// validation error (openapi3.CodedError, one per rule), or unknownValidationID
+// for an error that carries no code. knownRuleID gates the result against the
+// registry. See TestRuleIDs_MatchKinCatalog for the registry/kin contract.
 func ruleIDForKinError(err error) string {
-	if rfe, ok := errors.AsType[*openapi3.RequiredFieldError](err); ok {
-		return ruleIDFromField(rfe.Field) + "-required"
+	var coded openapi3.CodedError
+	if errors.As(err, &coded) {
+		return coded.Code()
 	}
-
-	if fvm, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
-		return ruleIDFromField(fvm.Field) + "-field-for-" + minVersionForRuleID(fvm.MinVersion) + "-plus"
-	}
-
-	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
-		return ruleIDFromField(sve.ValueKind) + "-violates-schema"
-	}
-
-	if _, ok := errors.AsType[*openapi3.PathParametersError](err); ok {
-		return "path-parameters-mismatch"
-	}
-
-	if mef, ok := errors.AsType[*openapi3.MutuallyExclusiveFieldsError](err); ok {
-		return ruleIDFromField(mef.Field1) + "-" + ruleIDFromField(mef.Field2) + "-mutually-exclusive"
-	}
-
-	if ffe, ok := errors.AsType[*openapi3.ForbiddenFieldError](err); ok {
-		return ruleIDFromField(ffe.Field) + "-forbidden"
-	}
-
-	if _, ok := errors.AsType[*openapi3.ServerURLTemplateError](err); ok {
-		return "server-url-template-invalid"
-	}
-
-	if efr, ok := errors.AsType[*openapi3.EitherFieldRequiredError](err); ok {
-		return joinFieldsForRuleID(efr.Fields) + "-required"
-	}
-
-	if sbf, ok := errors.AsType[*openapi3.SchemaBothFormsExclusive](err); ok {
-		return ruleIDFromField(sbf.Field) + "-both-forms-exclusive"
-	}
-
-	if eofe, ok := errors.AsType[*openapi3.ExactlyOneFieldError](err); ok {
-		return joinFieldsForRuleID(eofe.Fields) + "-exactly-one"
-	}
-
-	if sec, ok := errors.AsType[*openapi3.SingleEntryContentError](err); ok {
-		return ruleIDFromField(sec.Subject) + "-content-single-entry"
-	}
-
-	if _, ok := errors.AsType[*openapi3.WebhookNilError](err); ok {
-		return "webhook-nil"
-	}
-
-	if _, ok := errors.AsType[*openapi3.PathParameterRequiredError](err); ok {
-		return "path-parameter-required"
-	}
-
-	if _, ok := errors.AsType[*openapi3.DuplicateOperationIDError](err); ok {
-		return "duplicate-operation-id"
-	}
-
-	if _, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok {
-		return "extra-sibling-fields"
-	}
-
-	if _, ok := errors.AsType[*openapi3.SchemaTypeError](err); ok {
-		return "schema-type-unsupported"
-	}
-
-	if _, ok := errors.AsType[*openapi3.InvalidParameterInError](err); ok {
-		return "parameter-in-invalid"
-	}
-
-	if _, ok := errors.AsType[*openapi3.SchemaPatternRegexError](err); ok {
-		return "schema-pattern-regex-invalid"
-	}
-
-	if _, ok := errors.AsType[*openapi3.InvalidSecuritySchemeTypeError](err); ok {
-		return "security-scheme-type-invalid"
-	}
-
-	if _, ok := errors.AsType[*openapi3.InvalidHTTPSchemeError](err); ok {
-		return "security-scheme-http-scheme-invalid"
-	}
-
-	if _, ok := errors.AsType[*openapi3.UnresolvedRefError](err); ok {
-		return "unresolved-ref"
-	}
-
-	if _, ok := errors.AsType[*openapi3.APIKeyInInvalidError](err); ok {
-		return "security-scheme-apikey-in-invalid"
-	}
-
-	if _, ok := errors.AsType[*openapi3.PathMustStartWithSlashError](err); ok {
-		return "path-must-start-with-slash"
-	}
-
-	if _, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok {
-		return "conflicting-paths"
-	}
-
-	if _, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok {
-		return "duplicate-parameter"
-	}
-
-	if _, ok := errors.AsType[*openapi3.InvalidSerializationMethodError](err); ok {
-		return "serialization-method-invalid"
-	}
-
 	return unknownValidationID
-}
-
-// joinFieldsForRuleID renders an N-field "any/exactly one of" rule ID
-// fragment as kebab-case fields joined by "-or-" (e.g. ["value",
-// "externalValue"] → "value-or-external-value"). The caller appends
-// the cluster-specific suffix ("-required", "-exactly-one", ...).
-// minVersionForRuleID renders a kin MinVersion ("3.1", "3.2") as a rule-id
-// segment ("3-1", "3-2"). An unexpected value yields an id outside the
-// registry, which knownRuleID demotes to spec-validation-error.
-func minVersionForRuleID(v string) string {
-	return strings.ReplaceAll(v, ".", "-")
-}
-
-func joinFieldsForRuleID(fields []string) string {
-	parts := make([]string, len(fields))
-	for i, f := range fields {
-		parts[i] = ruleIDFromField(f)
-	}
-	return strings.Join(parts, "-or-")
-}
-
-// ruleIDFromField normalises a field path into a kebab-case identifier.
-// Strips a leading "$" (for JSON Schema keywords like "$defs"),
-// replaces "." with "-" (for paths like "info.version"), and inserts
-// "-" before each uppercase letter (for camelCase like "prefixItems").
-func ruleIDFromField(field string) string {
-	field = strings.TrimPrefix(field, "$")
-	field = strings.ReplaceAll(field, ".", "-")
-	// acronyms: camel-splitting "oAuthFlow" would yield "o-auth-flow"
-	field = strings.ReplaceAll(field, "oAuth", "oauth")
-	field = strings.ReplaceAll(field, "openId", "openid")
-	var b strings.Builder
-	for i, r := range field {
-		if i > 0 && unicode.IsUpper(r) {
-			b.WriteByte('-')
-		}
-		b.WriteRune(unicode.ToLower(r))
-	}
-	return b.String()
 }
