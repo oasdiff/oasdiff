@@ -2,7 +2,7 @@
 
 `oasdiff validate <spec>` checks a single OpenAPI spec for per-RFC violations: invalid `type` values, missing required fields, malformed paths, bad regex patterns, unresolved `$ref`s, and similar structural problems. It validates the document against the OpenAPI and JSON Schema rules.
 
-It is not a configurable style linter (like Spectral); every finding is a spec-defined violation, classified by severity (error, warning, or info).
+It is not a configurable style linter (like Spectral); findings are spec-defined violations, plus a small set of oasdiff-native lints for constructs that are valid JSON Schema but under-specified for OpenAPI (duplicate enum values, ambiguous parameter serialization). Each finding is classified by severity (error, warning, or info).
 
 This is distinct from `breaking` / `changelog`, which compare two specs. `validate` looks at one spec and answers "is this a valid OpenAPI document?".
 
@@ -46,7 +46,7 @@ All findings are reported in one pass (multi-error), not just the first one.
 Every finding comes from the OpenAPI / JSON Schema rules, but they are classified by impact:
 
 - **error** — the spec can't be reliably consumed: missing required fields, unresolved `$ref`s, invalid types, malformed paths, and similar structural breaks. Also `duplicate-operation-id`, since a non-unique operationId breaks code generators.
-- **warning** — structurally valid but a real risk: a 3.1-only field in an older doc, `$ref` siblings that are silently ignored, conflicting paths, duplicate parameters, and a `default` value that doesn't match its schema.
+- **warning** — structurally valid but a real risk: a 3.1-only field in an older doc, `$ref` siblings that are silently ignored, conflicting paths, duplicate parameters, a `default` value that doesn't match its schema, duplicate enum values (JSON Schema says enum entries SHOULD be unique; a duplicate usually signals a copy-paste error), and a parameter whose `type` union mixes a structured type with a scalar (`type: [array, integer]` has no well-defined serialization: a server cannot tell whether `?token=5` is `["5"]` or `5`).
 - **info** — informational only: an `example` that doesn't match its schema (the contract itself is valid).
 
 `--fail-on` decides which severities fail the command (see Exit codes). The classification is currently fixed; per-rule customization may be added later.
