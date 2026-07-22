@@ -586,9 +586,9 @@ func TestBreaking_Items(t *testing.T) {
 	require.Equal(t, []any{"items/id"}, errs[0].GetArgs())
 }
 
-// changing an existing property in request body items to required with a default value is a
-// warning: whether omitting it breaks a client depends on whether the server enforces the
-// field or applies the default, which the spec does not determine.
+// changing an existing property in request body items to required is breaking even when the
+// property has a default: a request that omits it is invalid under the new contract, and the
+// default is a server-side fallback, not a validity rule.
 func TestBreaking_ItemsWithDefault(t *testing.T) {
 	s1, err := open(requiredPropertyFile("items1.yaml"))
 	require.NoError(t, err)
@@ -601,7 +601,7 @@ func TestBreaking_ItemsWithDefault(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	requireSingleChange(t, errs, checker.RequestPropertyBecameRequiredWithDefaultId)
 	require.Equal(t, []any{"items/id"}, errs[0].GetArgs())
-	require.Equal(t, checker.WARN, errs[0].GetLevel())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
 // changing an existing property in request body anyOf to required is breaking
