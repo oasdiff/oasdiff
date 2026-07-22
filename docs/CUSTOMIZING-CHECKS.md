@@ -4,7 +4,7 @@
 1. Create a new go file under [checker](../checker), named after the use case, for example `check_request_property_became_nullable.go`.
 2. Define the check ids as constants at the top of the file. Each id is a unique kebab-case string, for example `request-property-became-nullable`. Related ids (request/response, body/property, added/removed) live in the same file.
 3. Write the check function. Use the existing plumbing rather than walking the diff by hand:
-   - `walkModifiedRequestBodySchemas` / `walkModifiedResponseSchemas` visit each modified media type, and `info.walkProperties` visits every modified property (including inside allOf/oneOf/anyOf/items). Build changes with `info.newChange` / `p.newChange`.
+   - `walkModifiedRequestBodySchemas` / `walkModifiedResponseSchemas` call your function once per modified media type with a `mediaTypeInfo`; its `walkProperties` method visits every modified property under that media type (including inside allOf/oneOf/anyOf/items). Build changes with `info.newChange` at the body level and `p.newChange` at the property level.
    - Operation-level checks iterate the diff directly and build changes with `opInfo.NewApiChange`.
    - A change computed from a schema node should carry that node: the walkers do it automatically; parameter checks chain `.WithSchema(schemaDiff)`. This lets a recognized schema transition (for example, a schema wrapped in a nullable `oneOf`) claim the change so one transition is reported once, not once per raw field it touches. See [checker/transition_claims.go](../checker/transition_claims.go).
 
