@@ -78,6 +78,7 @@ var ruleIDs = []string{
 	"property-names-field-for-3-1-plus",
 	"read-only-write-only-mutually-exclusive",
 	"request-body-content-required",
+	"required-with-default",
 	"response-description-required",
 	"responses-required",
 	"schema-field-for-3-1-plus",
@@ -113,6 +114,7 @@ var ruleIDs = []string{
 var nativeRuleIDs = []string{
 	AmbiguousParameterSerializationID,
 	DuplicateEnumValueID,
+	RequiredWithDefaultID,
 	unknownValidationID,
 }
 

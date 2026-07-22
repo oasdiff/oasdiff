@@ -2,7 +2,7 @@
 
 `oasdiff validate <spec>` checks a single OpenAPI spec for per-RFC violations: invalid `type` values, missing required fields, malformed paths, bad regex patterns, unresolved `$ref`s, and similar structural problems. It validates the document against the OpenAPI and JSON Schema rules.
 
-It is not a configurable style linter (like Spectral); findings are spec-defined violations, plus a small set of oasdiff-native lints for constructs that are valid JSON Schema but under-specified for OpenAPI (duplicate enum values, ambiguous parameter serialization). Each finding is classified by severity (error, warning, or info).
+It is not a configurable style linter (like Spectral); findings are spec-defined violations, plus a small set of oasdiff-native lints for constructs that are valid OpenAPI but contradictory or under-specified (duplicate enum values, ambiguous parameter serialization, and a required parameter or property that also declares a default, where the default can never apply). Each finding is classified by severity (error, warning, or info).
 
 This is distinct from `breaking` / `changelog`, which compare two specs. `validate` looks at one spec and answers "is this a valid OpenAPI document?".
 
