@@ -132,6 +132,7 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.NewRequiredRequestPropertyWithDefaultId,
 		Args:        []any{"description"},
+		Comment:     checker.RequiredRequestPropertyWithDefaultCommentId,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_added_with_default.yaml"),

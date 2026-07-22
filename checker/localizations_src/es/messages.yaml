@@ -49,6 +49,7 @@ new-required-request-parameter: agregado el nuevo parámetro %s de solicitud req
 new-optional-request-parameter: agregado el nuevo parámetro %s de solicitud opcional %s
 new-required-request-property: agregada la nueva propiedad de solicitud requerida %s
 new-required-request-property-with-default: agregada la nueva propiedad de solicitud requerida %s con un valor por defecto
+required-request-property-with-default-warn-comment: "Esta propiedad es obligatoria pero tiene un valor por defecto, por lo que el cambio rompe a los clientes si el servidor rechaza las solicitudes que la omiten, y es seguro si el servidor aplica el valor por defecto; oasdiff no puede determinar cuál de los dos casos aplica a partir de la especificación, por lo que informa una advertencia."
 new-optional-request-property: agregada la nueva propiedad de solicitud opcional %s
 new-required-request-header-property: agregada la nueva propiedad %s requerida del encabezado de solicitud %s
 request-body-became-required: el cuerpo de solicitud se volvió requerido

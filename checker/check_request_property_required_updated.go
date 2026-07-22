@@ -28,8 +28,11 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 					result = append(result, info.newChange(RequestPropertyBecameRequiredId, args, "").
 						WithSources(srcBase, srcRevision))
 				} else {
-					// property has a default value, so making it required is not a breaking change
-					result = append(result, info.newChange(RequestPropertyBecameRequiredWithDefaultId, args, "").
+					// The property has a default value. Whether making it required
+					// breaks a client depends on the server (enforce the field, or
+					// apply the default?), which the spec does not settle, so this is
+					// a warning with a comment, not a safe change.
+					result = append(result, info.newChange(RequestPropertyBecameRequiredWithDefaultId, args, RequiredRequestPropertyWithDefaultCommentId).
 						WithSources(srcBase, srcRevision))
 				}
 			}
