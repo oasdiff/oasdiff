@@ -15,11 +15,12 @@ const (
 	RequestBodyWrappedInOneOfId             = "request-body-wrapped-in-one-of"
 
 	// Shared by the two "required request property with a default" checks. A
-	// required property with a default is a self-contradictory contract, and
-	// whether omitting it breaks a client depends on the server (does it enforce
-	// the field or apply the default?), which the spec does not say. So these are
-	// warnings, not safe, with this comment explaining the condition.
-	RequiredRequestPropertyWithDefaultCommentId = "required-request-property-with-default-warn-comment"
+	// request that omits a required property is invalid under the new contract
+	// whether or not the property has a default: the default is a server-side
+	// fallback, not a rule that makes the omitted property valid. So these are
+	// breaking (ERR), same as the no-default siblings, with this comment
+	// explaining why the default does not make them safe.
+	RequiredRequestPropertyWithDefaultCommentId = "required-request-property-with-default-error-comment"
 )
 
 func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {

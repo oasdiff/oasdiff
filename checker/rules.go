@@ -468,7 +468,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyPatternGeneralizedId, INFO, RequestPropertyPatternUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionGeneralize),
 		// RequestPropertyRequiredUpdatedCheck
 		newBackwardCompatibilityRule(RequestPropertyBecameRequiredId, ERR, RequestPropertyRequiredUpdatedCheck, DirectionRequest, AreaSchema, KindRequiredness, ActionChange),
-		newBackwardCompatibilityRule(RequestPropertyBecameRequiredWithDefaultId, WARN, RequestPropertyRequiredUpdatedCheck, DirectionRequest, AreaSchema, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(RequestPropertyBecameRequiredWithDefaultId, ERR, RequestPropertyRequiredUpdatedCheck, DirectionRequest, AreaSchema, KindRequiredness, ActionChange),
 		newBackwardCompatibilityRule(RequestPropertyBecameOptionalId, INFO, RequestPropertyRequiredUpdatedCheck, DirectionRequest, AreaSchema, KindRequiredness, ActionChange),
 		// RequestPropertyTypeChangedCheck
 		newBackwardCompatibilityRule(RequestBodyTypeGeneralizedId, INFO, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, ActionGeneralize),
@@ -480,7 +480,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestPropertyUpdatedCheck
 		newBackwardCompatibilityRule(RequestPropertyRemovedId, WARN, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
-		newBackwardCompatibilityRule(NewRequiredRequestPropertyWithDefaultId, WARN, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(NewRequiredRequestPropertyWithDefaultId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(NewOptionalRequestPropertyId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyWrappedInOneOfId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindStructure, ActionChange),
 		// RequestPropertyWriteOnlyReadOnlyCheck

@@ -49,7 +49,7 @@ new-required-request-parameter: adicionado o novo parâmetro de requisição obr
 new-optional-request-parameter: adicionado o novo parâmetro de requisição opcional %s %s
 new-required-request-property: adicionada a nova propriedade de requisição obrigatória %s
 new-required-request-property-with-default: adicionada a nova propriedade de requisição obrigatória %s com valor padrão
-required-request-property-with-default-warn-comment: "Esta propriedade é obrigatória mas tem um valor padrão, portanto a mudança quebra os clientes se o servidor rejeitar as requisições que a omitem, e é segura se o servidor aplicar o valor padrão; oasdiff não consegue determinar qual dos casos se aplica a partir da especificação, por isso reporta um aviso."
+required-request-property-with-default-error-comment: "Uma requisição que omite esta propriedade obrigatória é inválida sob o novo contrato, mesmo que a propriedade tenha um valor padrão. O valor padrão é um recurso do servidor, ele não torna a propriedade omitida válida. Reduza a severidade desta verificação com --severity-levels se omitir a propriedade for seguro para os seus clientes."
 new-optional-request-property: adicionada a nova propriedade de requisição opcional %s
 new-required-request-header-property: adicionada a nova propriedade obrigatória do cabeçalho de requisição %s %s
 request-body-became-required: o corpo da requisição tornou-se obrigatório
