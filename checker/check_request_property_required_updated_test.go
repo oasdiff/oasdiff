@@ -66,6 +66,7 @@ func TestRequestPropertyWithDefaultMarkedRequired(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecameRequiredWithDefaultId,
 		Args:        []any{"name"},
+		Comment:     checker.RequiredRequestPropertyWithDefaultCommentId,
 		Operation:   "POST",
 		Path:        "/products",
 		Source:      load.NewSource("../data/checker/request_property_became_required_base.yaml"),
