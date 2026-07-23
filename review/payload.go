@@ -35,6 +35,12 @@ type Payload struct {
 	// clients that predate this field. The GitHub Action inherits it, it runs
 	// this same CLI with --open.
 	ToolVersion string `json:"tool_version,omitempty" yaml:"tool_version,omitempty"`
+	// Platform is where the bundle was produced, from the PLATFORM environment
+	// variable: "github-action" when the CLI runs inside the oasdiff GitHub
+	// Action (which sets it in its image), empty for a plain CLI invocation. It
+	// lets the review page tailor an upgrade nudge (bump the action vs set up
+	// the action).
+	Platform string `json:"platform,omitempty" yaml:"platform,omitempty"`
 }
 
 // Change is one manifest entry sent alongside the encrypted bundle in

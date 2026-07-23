@@ -108,6 +108,7 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		Composed:         flags.getComposed(),
 		Blocks:           blocks,
 		ToolVersion:      build.Version,
+		Platform:         os.Getenv("PLATFORM"),
 	}.Encrypt()
 	if err != nil {
 		return fmt.Errorf("encrypt review: %w", err)
