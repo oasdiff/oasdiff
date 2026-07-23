@@ -28,7 +28,7 @@ Checks are categorized into three severity levels:
 - `warn` — potential breaking changes which cannot be confirmed programmatically
 - `info` — non-breaking changes
 
-Run `oasdiff checks` for the current list, or browse the full catalog at [oasdiff.com/checks](https://www.oasdiff.com/checks).
+Run `oasdiff checks` for the current list, or browse the full catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes).
 
 ## Categorization
 Every check is categorized along independent axes, emitted as fields in the `json` and `yaml` output:
