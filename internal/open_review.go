@@ -39,6 +39,18 @@ func oasdiffSiteURL() string {
 	return "https://www.oasdiff.com"
 }
 
+// internalReviewMarker returns "?internal=1" when OASDIFF_INTERNAL=1 is set,
+// otherwise "". Setting it tags a review as a test review, both on the upload
+// and in the opened URL, so the web app can tell an author checking their own
+// changes apart from a real user's review. Unset (the default) for every
+// normal run.
+func internalReviewMarker() string {
+	if os.Getenv("OASDIFF_INTERNAL") == "1" {
+		return "?internal=1"
+	}
+	return ""
+}
+
 // oasdiffAPIBaseURL is the backend API base, used only by the authenticated
 // review upload (the free path posts to oasdiffSiteURL). Override with
 // OASDIFF_API_URL; defaults to api.oasdiff.com.
@@ -129,9 +141,10 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 	// fragment to a server (not in the request path, query, or Referer), so
 	// neither the server nor any intermediary sees the key -- only code
 	// running in the visitor's own browser can read it.
-	reviewURL := fmt.Sprintf("%s/review/e/%s#k=%s",
+	reviewURL := fmt.Sprintf("%s/review/e/%s%s#k=%s",
 		oasdiffSiteURL(),
 		url.PathEscape(reviewID),
+		internalReviewMarker(),
 		base64.RawURLEncoding.EncodeToString(key),
 	)
 
@@ -180,7 +193,7 @@ func specSetDocsAndSources(specs []*load.SpecInfo) ([]*openapi3.T, map[string]st
 // it cannot read, so it has nothing to attribute to a user. The body is the
 // raw blob; the response is JSON {review_id, expires_at}.
 func postEncryptedReview(blob []byte) (string, time.Time, error) {
-	endpoint := oasdiffSiteURL() + "/api/encrypted-review"
+	endpoint := oasdiffSiteURL() + "/api/encrypted-review" + internalReviewMarker()
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, endpoint, bytes.NewReader(blob))
 	if err != nil {
 		return "", time.Time{}, err

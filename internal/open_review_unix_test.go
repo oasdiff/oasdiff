@@ -127,6 +127,30 @@ func TestPostEncryptedReview_ServerError(t *testing.T) {
 	require.Contains(t, err.Error(), "413")
 }
 
+func TestInternalReviewMarker(t *testing.T) {
+	require.Empty(t, internalReviewMarker(), "unset by default")
+	t.Setenv("OASDIFF_INTERNAL", "0")
+	require.Empty(t, internalReviewMarker(), "only \"1\" enables the marker")
+	t.Setenv("OASDIFF_INTERNAL", "1")
+	require.Equal(t, "?internal=1", internalReviewMarker())
+}
+
+func TestPostEncryptedReview_InternalMarkerOnUpload(t *testing.T) {
+	var gotQuery string
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		require.Equal(t, "/api/encrypted-review", r.URL.Path)
+		gotQuery = r.URL.RawQuery
+		_, _ = w.Write([]byte(`{"review_id":"abc-123","expires_at":1700000000}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_URL", stub.URL)
+	t.Setenv("OASDIFF_INTERNAL", "1")
+
+	_, _, err := postEncryptedReview([]byte{review.BlobVersion, 9, 9, 9})
+	require.NoError(t, err)
+	require.Equal(t, "internal=1", gotQuery, "OASDIFF_INTERNAL tags the upload so it can be excluded from review stats")
+}
+
 // keyFragmentRe extracts the base64url key from a #k= fragment.
 var keyFragmentRe = regexp.MustCompile(`#k=([A-Za-z0-9_-]+)`)
 
