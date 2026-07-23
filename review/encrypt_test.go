@@ -26,7 +26,7 @@ func decryptBlob(t *testing.T, blob, key []byte) []byte {
 }
 
 func TestPayloadEncrypt_RoundTrip(t *testing.T) {
-	p := Payload{RevisionSpec: "openapi: 3.0.0", Mode: "changelog"}
+	p := Payload{RevisionSpec: "openapi: 3.0.0", Mode: "changelog", ToolVersion: "v1.25.1", Platform: "github-action"}
 	blob, key, err := p.Encrypt()
 	require.NoError(t, err)
 	require.Len(t, key, 32, "AES-256 needs a 256-bit key")
@@ -38,6 +38,8 @@ func TestPayloadEncrypt_RoundTrip(t *testing.T) {
 	require.NoError(t, json.Unmarshal(decryptBlob(t, blob, key), &got))
 	require.Equal(t, p.RevisionSpec, got.RevisionSpec)
 	require.Equal(t, p.Mode, got.Mode)
+	require.Equal(t, p.ToolVersion, got.ToolVersion, "the producing oasdiff version travels inside the bundle")
+	require.Equal(t, p.Platform, got.Platform, "the producing platform travels inside the bundle")
 
 	// Two encryptions of the same payload must differ (fresh key + nonce), so a
 	// server seeing two identical specs can't tell they're identical.

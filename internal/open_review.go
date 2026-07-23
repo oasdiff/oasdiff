@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/build"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
@@ -106,6 +107,8 @@ func uploadAndOpen(flags *Flags, stderr io.Writer, isBreaking bool, errs checker
 		Mode:             mode,
 		Composed:         flags.getComposed(),
 		Blocks:           blocks,
+		ToolVersion:      build.Version,
+		Platform:         os.Getenv("PLATFORM"),
 	}.Encrypt()
 	if err != nil {
 		return fmt.Errorf("encrypt review: %w", err)

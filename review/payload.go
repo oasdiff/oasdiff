@@ -28,6 +28,19 @@ type Payload struct {
 	// the filenames are empty and the blocks carry the comparison.
 	Composed bool    `json:"composed,omitempty" yaml:"composed,omitempty"`
 	Blocks   []Block `json:"blocks,omitempty" yaml:"blocks,omitempty"`
+	// ToolVersion is the oasdiff version that produced the bundle (build.Version,
+	// e.g. "v1.25.1"; "main" for a dev build). It travels inside the encrypted
+	// bundle, so the receiving review page can tell when a review came from an
+	// outdated oasdiff and nudge an upgrade. Empty for bundles from older
+	// clients that predate this field. The GitHub Action inherits it, it runs
+	// this same CLI with --open.
+	ToolVersion string `json:"tool_version,omitempty" yaml:"tool_version,omitempty"`
+	// Platform is where the bundle was produced, from the PLATFORM environment
+	// variable: "github-action" when the CLI runs inside the oasdiff GitHub
+	// Action (which sets it in its image), empty for a plain CLI invocation. It
+	// lets the review page tailor an upgrade nudge (bump the action vs set up
+	// the action).
+	Platform string `json:"platform,omitempty" yaml:"platform,omitempty"`
 }
 
 // Change is one manifest entry sent alongside the encrypted bundle in
