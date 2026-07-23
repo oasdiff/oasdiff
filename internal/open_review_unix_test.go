@@ -127,12 +127,12 @@ func TestPostEncryptedReview_ServerError(t *testing.T) {
 	require.Contains(t, err.Error(), "413")
 }
 
-func TestInternalReviewMarker(t *testing.T) {
-	require.Empty(t, internalReviewMarker(), "unset by default")
+func TestInternalReview(t *testing.T) {
+	require.False(t, internalReview(), "unset by default")
 	t.Setenv("OASDIFF_INTERNAL", "0")
-	require.Empty(t, internalReviewMarker(), "only \"1\" enables the marker")
+	require.False(t, internalReview(), "only \"1\" enables the marker")
 	t.Setenv("OASDIFF_INTERNAL", "1")
-	require.Equal(t, "?internal=1", internalReviewMarker())
+	require.True(t, internalReview())
 }
 
 func TestPostEncryptedReview_InternalMarkerOnUpload(t *testing.T) {
