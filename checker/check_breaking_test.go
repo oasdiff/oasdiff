@@ -263,7 +263,6 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	// No WithOptionalCheck: it must be reported as breaking on the default path.
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	for _, err := range errs {
 		require.Equal(t, checker.ERR, err.GetLevel())
