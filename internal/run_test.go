@@ -48,6 +48,24 @@ func Test_InvalidFlag(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --invalid"), io.Discard, io.Discard))
 }
 
+// A deprecated hidden flag (e.g. --flatten) still works but warns on stderr,
+// never stdout, so json/yaml output stays clean.
+func Test_DeprecatedFlagWarnsOnStderrOnly(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --flatten -f json"), &stdout, &stderr)
+
+	require.Contains(t, stderr.String(), "Flag --flatten is deprecated: use --flatten-allof instead")
+	require.NotContains(t, stdout.String(), "deprecated")
+	var parsed any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &parsed), "stdout must stay valid json")
+}
+
+func Test_NoDeprecatedFlagNoWarning(t *testing.T) {
+	var stderr bytes.Buffer
+	internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml -f json"), io.Discard, &stderr)
+	require.NotContains(t, stderr.String(), "deprecated")
+}
+
 func Test_OpenWithComposedAllowed(t *testing.T) {
 	// A composed diff (-c) can now be reviewed with --open: the cards carry the
 	// composed comparison, so composed no longer conflicts with --open. Point the
