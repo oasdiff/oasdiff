@@ -1,0 +1,79 @@
+package checker
+
+import (
+	"github.com/oasdiff/oasdiff/diff"
+)
+
+const (
+	ResponseHeaderTypeChangedId     = "response-header-type-changed"
+	ResponseHeaderTypeGeneralizedId = "response-header-type-generalized"
+	ResponseHeaderTypeSpecializedId = "response-header-type-specialized"
+	ResponseHeaderTypeCompatibleId  = "response-header-type-compatible"
+
+	// ResponseHeaderTypeCompatibleCommentId explains the surprising "compatible"
+	// verdict for a header, where the shared media-type comment (which talks about
+	// XML) does not apply: a header value is text on the wire regardless.
+	ResponseHeaderTypeCompatibleCommentId = "response-header-type-compatible-comment"
+)
+
+// ResponseHeaderTypeChangedCheck reports a type or format change on a response
+// header's schema, the response-header mirror of ResponsePropertyTypeChangedCheck
+// (response headers previously had existence-level checks only, no schema walk).
+//
+// A response header value is text on the wire, never a strongly typed media
+// type, so it is classified non-strongly-typed (mediaType ""), the same way a
+// scalar parameter is: a bare string -> integer is a loosely typed compatible
+// change (the value "123" is still valid text a string client reads), while
+// dropping a format a client parses -- the motivating case, Retry-After
+// string/date-time -> integer -- is breaking on the format axis.
+func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+	result := make(Changes, 0)
+	if diffReport.PathsDiff == nil {
+		return result
+	}
+	for path, pathItem := range diffReport.PathsDiff.Modified {
+		if pathItem.OperationsDiff == nil {
+			continue
+		}
+		for operation, operationItem := range pathItem.OperationsDiff.Modified {
+			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
+				continue
+			}
+			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
+			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
+				if responseDiff.HeadersDiff == nil {
+					continue
+				}
+				for headerName, headerDiff := range responseDiff.HeadersDiff.Modified {
+					schemaDiff := headerDiff.SchemaDiff
+					if schemaDiff == nil || schemaDiff.Base == nil || schemaDiff.Revision == nil {
+						continue
+					}
+					typeDiff := schemaDiff.TypeDiff
+					formatDiff := schemaDiff.FormatDiff
+					if typeDiff.Empty() && formatDiff.Empty() {
+						continue
+					}
+
+					// mediaType "" -> non-strongly-typed: a header value is text on
+					// the wire, like a scalar parameter.
+					id, comment := responseTypeChangeId(typeDiff, formatDiff, "", schemaDiff,
+						ResponseHeaderTypeSpecializedId, ResponseHeaderTypeCompatibleId, ResponseHeaderTypeGeneralizedId, ResponseHeaderTypeChangedId)
+					// The shared compatible comment talks about media types (XML);
+					// swap in the header-specific reasoning (header values are text).
+					if id == ResponseHeaderTypeCompatibleId {
+						comment = ResponseHeaderTypeCompatibleCommentId
+					}
+
+					baseSource, revisionSource := headerSources(operationsSources, operationItem, responseDiff, headerName)
+					result = append(result, opInfo.NewApiChange(
+						id,
+						[]any{headerName, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), responseStatus},
+						comment,
+					).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+				}
+			}
+		}
+	}
+	return result
+}
