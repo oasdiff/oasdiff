@@ -514,6 +514,14 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(OptionalResponseHeaderRemovedId, WARN, ResponseHeaderRemovedCheck, DirectionResponse, AreaHeaders, KindExistence, ActionRemove),
 		// ResponseHeaderAddedCheck
 		newBackwardCompatibilityRule(ResponseHeaderAddedId, INFO, ResponseHeaderAddedCheck, DirectionResponse, AreaHeaders, KindExistence, ActionAdd),
+		// ResponseHeaderTypeChangedCheck
+		newBackwardCompatibilityRule(ResponseHeaderTypeChangedId, ERR, ResponseHeaderTypeChangedCheck, DirectionResponse, AreaHeaders, KindType, ActionChange),
+		newBackwardCompatibilityRule(ResponseHeaderTypeGeneralizedId, ERR, ResponseHeaderTypeChangedCheck, DirectionResponse, AreaHeaders, KindType, ActionGeneralize),
+		newBackwardCompatibilityRule(ResponseHeaderTypeSpecializedId, INFO, ResponseHeaderTypeChangedCheck, DirectionResponse, AreaHeaders, KindType, ActionSpecialize),
+		newBackwardCompatibilityRule(ResponseHeaderTypeCompatibleId, INFO, ResponseHeaderTypeChangedCheck, DirectionResponse, AreaHeaders, KindType, ActionChange),
+		// ResponseHeaderBecameNullableCheck
+		newBackwardCompatibilityRule(ResponseHeaderBecameNullableId, ERR, ResponseHeaderBecameNullableCheck, DirectionResponse, AreaHeaders, KindRequiredness, ActionChange),
+		newBackwardCompatibilityRule(ResponseHeaderBecameNotNullableId, INFO, ResponseHeaderBecameNullableCheck, DirectionResponse, AreaHeaders, KindRequiredness, ActionChange),
 		// ResponseMediaTypeUpdatedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeRemovedId, ERR, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseMediaTypeAddedId, INFO, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),

@@ -175,7 +175,7 @@ func TestRequestTypeConstraintRemovedNotBreaking(t *testing.T) {
 		Revision: &openapi3.Schema{},
 		TypeDiff: typeDiff,
 	}
-	require.False(t, requestTypeFormatBreaking(typeDiff, nil, "application/json", schemaDiff))
+	require.False(t, requestTypeFormatBreaking(typeDiff, nil, isStronglyTyped("application/json"), schemaDiff))
 }
 
 // Adding a type constraint to a response body where there was none is a
@@ -191,7 +191,7 @@ func TestResponseTypeConstraintAddedNotBreaking(t *testing.T) {
 		Revision: &openapi3.Schema{Type: &openapi3.Types{"object"}},
 		TypeDiff: typeDiff,
 	}
-	require.False(t, responseTypeFormatBreaking(typeDiff, nil, "application/json", schemaDiff))
+	require.False(t, responseTypeFormatBreaking(typeDiff, nil, isStronglyTyped("application/json"), schemaDiff))
 }
 
 func TestIsJsonMediaType(t *testing.T) {

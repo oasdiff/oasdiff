@@ -171,6 +171,13 @@ response-header-became-optional: заголовок ответа %s стал н�
 required-response-header-removed: удалён ранее обязательный заголовок ответа %s для ответа со статусом %s
 optional-response-header-removed: удалён ранее необязательный заголовок ответа %s для ответа со статусом %s
 response-header-added: добавлен заголовок ответа %s для ответа со статусом %s
+response-header-type-changed: у заголовка ответа %s %s изменён с %s на %s для статуса %s
+response-header-type-generalized: у заголовка ответа %s %s расширен с %s до %s для статуса %s
+response-header-type-specialized: у заголовка ответа %s %s сужен с %s до %s для статуса %s
+response-header-type-compatible: у заголовка ответа %s %s изменён с %s до %s для статуса %s (обратно совместимо)
+response-header-type-compatible-comment: "Это изменение обратно совместимо, потому что значение заголовка передаётся как текст, поэтому любой тип может быть представлен строкой и не проверяется при передаче."
+response-header-became-nullable: заголовок ответа %s стал обнуляемым для ответа со статусом %s
+response-header-became-not-nullable: заголовок ответа %s стал необнуляемым для ответа со статусом %s
 response-media-type-removed: удалён media type %s для ответа со статусом %s
 response-media-type-added: добавлен тип медиа %s для ответа со статусом %s
 response-optional-property-removed: удалено необязательное поле %s из ответа со статусом %s

@@ -18,19 +18,23 @@ const (
 // responseTypeChangeId classifies a response type/format change (the
 // contravariant mirror of the request side):
 //   - specialized (info): the returned type set narrowed (number -> integer).
-//   - compatible (info): a type swap that's safe only because the media type
-//     isn't strongly typed (string -> object in application/xml), not a narrowing.
+//   - compatible (info): a type swap that's safe only because the location isn't
+//     strongly typed (string -> object in application/xml), not a narrowing;
+//     looseComment explains this verdict.
 //   - generalized (error): the returned type set widened (integer -> number).
 //   - changed (error): a genuinely incompatible change (string -> integer).
-func responseTypeChangeId(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff, specializedId, compatibleId, generalizedId, changedId string) (id, comment string) {
-	if responseTypeFormatBreaking(typeDiff, formatDiff, mediaType, schemaDiff) {
+//
+// stronglyTyped is the location's strong-typing (isStronglyTyped for a media
+// type; false for a text location such as a response header).
+func responseTypeChangeId(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, looseComment string, schemaDiff *diff.SchemaDiff, specializedId, compatibleId, generalizedId, changedId string) (id, comment string) {
+	if responseTypeFormatBreaking(typeDiff, formatDiff, stronglyTyped, schemaDiff) {
 		if typeSetWidened(typeDiff, schemaDiff) {
 			return generalizedId, ""
 		}
 		return changedId, ""
 	}
 	if isResponseLooseTypeSwap(typeDiff, schemaDiff) {
-		return compatibleId, TypeChangeLooselyTypedCommentId
+		return compatibleId, looseComment
 	}
 	return specializedId, ""
 }
@@ -44,7 +48,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 		formatDiff := schemaDiff.FormatDiff
 
 		if !typeDiff.Empty() || !formatDiff.Empty() {
-			id, comment := responseTypeChangeId(typeDiff, formatDiff, info.mediaType, schemaDiff,
+			id, comment := responseTypeChangeId(typeDiff, formatDiff, isStronglyTyped(info.mediaType), TypeChangeLooselyTypedCommentId, schemaDiff,
 				ResponseBodyTypeSpecializedId, ResponseBodyTypeCompatibleId, ResponseBodyTypeGeneralizedId, ResponseBodyTypeChangedId)
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
@@ -64,7 +68,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 			propFormatDiff := propSchemaDiff.FormatDiff
 
 			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
-				id, comment := responseTypeChangeId(propTypeDiff, propFormatDiff, info.mediaType, propSchemaDiff,
+				id, comment := responseTypeChangeId(propTypeDiff, propFormatDiff, isStronglyTyped(info.mediaType), TypeChangeLooselyTypedCommentId, propSchemaDiff,
 					ResponsePropertyTypeSpecializedId, ResponsePropertyTypeCompatibleId, ResponsePropertyTypeGeneralizedId, ResponsePropertyTypeChangedId)
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
