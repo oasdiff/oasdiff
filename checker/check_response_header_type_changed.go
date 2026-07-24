@@ -45,6 +45,11 @@ func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *di
 					continue
 				}
 				for headerName, headerDiff := range responseDiff.HeadersDiff.Modified {
+					// Only the simple schema serialization (the common case), where
+					// the value is text on the wire and non-strongly-typed. A header
+					// serialized via `content` (e.g. content: application/json)
+					// produces a ContentDiff, not a SchemaDiff, and would be
+					// strongly typed; that is a separate slice, not covered here.
 					schemaDiff := headerDiff.SchemaDiff
 					if schemaDiff == nil || schemaDiff.Base == nil || schemaDiff.Revision == nil {
 						continue
