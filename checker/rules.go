@@ -656,8 +656,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove), // optional
 		// ResponseMediaTypeEnumValueRemovedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove), // optional
-		// RequestBodyEnumValueRemovedCheck
-		newBackwardCompatibilityRule(RequestBodyEnumValueRemovedId, INFO, RequestBodyEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, ActionRemove), // optional
+		// RequestBodyEnumValueRemovedCheck: removing a value from a request body
+		// enum rejects input a client used to send, so it is breaking, the same
+		// as its request-property and request-parameter siblings.
+		newBackwardCompatibilityRule(RequestBodyEnumValueRemovedId, ERR, RequestBodyEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, ActionRemove),
 		// RequestPropertyListOfTypesChangedCheck
 		newBackwardCompatibilityRule(RequestBodyListOfTypesWidenedId, INFO, RequestPropertyListOfTypesChangedCheck, DirectionRequest, AreaSchema, KindType, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyListOfTypesNarrowedId, ERR, RequestPropertyListOfTypesChangedCheck, DirectionRequest, AreaSchema, KindType, ActionRemove),
@@ -826,7 +828,6 @@ func GetOptionalRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APISchemasRemovedId, INFO, APIComponentsSchemaRemovedCheck, DirectionNone, AreaComponents, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove),
 		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove),
-		newBackwardCompatibilityRule(RequestBodyEnumValueRemovedId, INFO, RequestBodyEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, ActionRemove),
 	}
 }
 

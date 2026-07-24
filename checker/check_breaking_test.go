@@ -249,7 +249,8 @@ func TestBreaking_OperationIdRemoved(t *testing.T) {
 	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.APIOperationIdRemovedId)
 }
 
-// removing/updating an enum in request body is breaking (optional)
+// removing a value from a request body enum is breaking by default: it rejects
+// input a client used to send, the same as its property and parameter siblings.
 func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	s1, err := open("../data/enums/request-body-enum.yaml")
 	require.NoError(t, err)
@@ -262,7 +263,8 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.RequestBodyEnumValueRemovedId)), d, osm)
+	// No WithOptionalCheck: it must be reported as breaking on the default path.
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	for _, err := range errs {
 		require.Equal(t, checker.ERR, err.GetLevel())
 	}
