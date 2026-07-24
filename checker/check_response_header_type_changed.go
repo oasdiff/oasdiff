@@ -55,15 +55,12 @@ func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *di
 						continue
 					}
 
-					// mediaType "" -> non-strongly-typed: a header value is text on
-					// the wire, like a scalar parameter.
-					id, comment := responseTypeChangeId(typeDiff, formatDiff, "", schemaDiff,
+					// A header value is text on the wire, never a strongly typed
+					// media type, so stronglyTyped is false (like a scalar
+					// parameter); the compatible verdict carries a header-specific
+					// comment rather than the shared media-type (XML) one.
+					id, comment := responseTypeChangeId(typeDiff, formatDiff, false, ResponseHeaderTypeCompatibleCommentId, schemaDiff,
 						ResponseHeaderTypeSpecializedId, ResponseHeaderTypeCompatibleId, ResponseHeaderTypeGeneralizedId, ResponseHeaderTypeChangedId)
-					// The shared compatible comment talks about media types (XML);
-					// swap in the header-specific reasoning (header values are text).
-					if id == ResponseHeaderTypeCompatibleId {
-						comment = ResponseHeaderTypeCompatibleCommentId
-					}
 
 					baseSource, revisionSource := headerSources(operationsSources, operationItem, responseDiff, headerName)
 					result = append(result, opInfo.NewApiChange(

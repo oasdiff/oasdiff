@@ -22,11 +22,11 @@ const TypeChangeLooselyTypedCommentId = "type-change-loosely-typed-comment"
 // widening. We detect it from the full type sets and drop the type axis; the
 // format axis is evaluated independently, so a co-occurring breaking format
 // change is still reported.
-func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, schemaDiff *diff.SchemaDiff) bool {
 	if typeSetWidened(typeDiff, schemaDiff) {
 		typeDiff = nil
 	}
-	return typeFormatBreaking(typeDiff, formatDiff, isStronglyTyped(mediaType), schemaDiff.Revision.Type)
+	return typeFormatBreaking(typeDiff, formatDiff, stronglyTyped, schemaDiff.Revision.Type)
 }
 
 // responseTypeFormatBreaking reports whether a response type/format change is
@@ -37,11 +37,11 @@ func requestTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.Valu
 // The mirror of the request widening case: a type-set narrowing (the revision
 // returns only types the base could) is backward compatible on the type axis,
 // and is detected and dropped the same way.
-func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, mediaType string, schemaDiff *diff.SchemaDiff) bool {
+func responseTypeFormatBreaking(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff, stronglyTyped bool, schemaDiff *diff.SchemaDiff) bool {
 	if typeSetNarrowed(typeDiff, schemaDiff) {
 		typeDiff = nil
 	}
-	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), isStronglyTyped(mediaType), schemaDiff.Base.Type)
+	return typeFormatBreaking(typeDiff.Reverse(), formatDiff.Reverse(), stronglyTyped, schemaDiff.Base.Type)
 }
 
 // typeSetWidened reports whether the change added types (base is contained in
