@@ -37,21 +37,6 @@ func NewConfig(checks BackwardCompatibilityChecks, opts ...Option) *Config {
 	return c
 }
 
-// WithOptionalCheck adds a single check to the list of optional checks.
-func WithOptionalCheck(id string) Option {
-	return WithOptionalChecks([]string{id})
-}
-
-// WithOptionalChecks overrides the log level of the given checks to ERR
-// so they will appear in `oasdiff breaking`.
-func WithOptionalChecks(ids []string) Option {
-	return func(c *Config) {
-		for _, id := range ids {
-			c.setLogLevel(id, ERR)
-		}
-	}
-}
-
 // WithSeverityLevels overrides per-check log levels from the given map.
 func WithSeverityLevels(severityLevels map[string]Level) Option {
 	return func(c *Config) {

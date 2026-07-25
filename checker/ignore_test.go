@@ -59,10 +59,11 @@ func TestIgnoreComponent(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.APISchemasRemovedId)), d, osm)
-	require.Equal(t, 8, len(errs))
-
-	errs, err = checker.ProcessIgnoredBackwardCompatibilityErrors(checker.ERR, errs, "../data/ignore-err-example.txt", checker.NewDefaultLocalizer())
+	// api-schema-removed is informational, so walk the full changelog for it to
+	// appear, then check the ignore file suppresses the two schema removals
+	// (network-policies, rules) at INFO level.
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	ignored, err := checker.ProcessIgnoredBackwardCompatibilityErrors(checker.INFO, errs, "../data/ignore-err-example.txt", checker.NewDefaultLocalizer())
 	require.NoError(t, err)
-	require.Equal(t, 5, len(errs))
+	require.Equal(t, len(errs)-2, len(ignored))
 }

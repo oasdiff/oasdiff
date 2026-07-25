@@ -28,12 +28,6 @@ func TestNewConfigWithDeprecation(t *testing.T) {
 	require.Equal(t, uint(20), config.MinSunsetStableDays)
 }
 
-func TestNewConfigWithOptionalCheck(t *testing.T) {
-	const id = checker.RequestPropertyDefaultValueChangedId
-	config := allChecksConfig(checker.WithOptionalCheck(id))
-	require.Equal(t, checker.ERR, config.LogLevels[id])
-}
-
 func TestNewConfigWithSeverityLevels(t *testing.T) {
 	const id = checker.RequestPropertyDefaultValueChangedId
 	config := allChecksConfig(checker.WithSeverityLevels(map[string]checker.Level{id: checker.ERR}))

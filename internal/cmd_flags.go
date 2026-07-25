@@ -85,7 +85,9 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 	cmd.PersistentFlags().String("err-ignore", "", "configuration file for ignoring errors")
 	cmd.PersistentFlags().String("warn-ignore", "", "configuration file for ignoring warnings")
-	cmd.PersistentFlags().VarPF(newEnumSliceValue(checker.GetOptionalRuleIds(), nil), "include-checks", "i", "optional checks")
+	// Accepted for back-compat but ignored: the optional-checks mechanism it
+	// drove was retired. Deprecated (see deprecatedFlags); use --severity-levels.
+	cmd.PersistentFlags().StringSliceP("include-checks", "i", nil, "deprecated: use --severity-levels")
 	hideFlag(cmd, "include-checks")
 	cmd.PersistentFlags().Uint("deprecation-days-beta", checker.DefaultBetaDeprecationDays, "min days required between deprecating a beta resource and removing it")
 	cmd.PersistentFlags().Uint("deprecation-days-stable", checker.DefaultStableDeprecationDays, "min days required between deprecating a stable resource and removing it")
