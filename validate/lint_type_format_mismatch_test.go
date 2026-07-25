@@ -101,6 +101,23 @@ components:
           format: uuid
 `
 
+// formatOwner is built by inverting formatsByType, which silently drops a
+// format claimed by two types. Assert the invariant it relies on: every format
+// appears under exactly one type, and every entry survives the inversion.
+func TestFormatOwner_OneTypePerFormat(t *testing.T) {
+	seen := map[string]string{}
+	for declaredType, formats := range formatsByType {
+		for _, format := range formats {
+			if other, dup := seen[format]; dup {
+				t.Errorf("format %q is claimed by both %q and %q; formatOwner can only record one", format, other, declaredType)
+			}
+			seen[format] = declaredType
+			require.Equal(t, declaredType, formatOwner[format], "format %q lost its owner in the inversion", format)
+		}
+	}
+	require.Len(t, formatOwner, len(seen))
+}
+
 // WARN on a known format that belongs to a different type; stay silent for
 // correct pairings, unrecognized formats, and schemas with no declared type.
 func TestLintTypeFormatMismatch(t *testing.T) {

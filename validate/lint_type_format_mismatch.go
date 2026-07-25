@@ -78,32 +78,32 @@ func mismatchedFormatOwner(s *openapi3.Schema) (string, bool) {
 		return "", false
 	}
 
-	// A format any declared type defines is correct; only a format that fits
-	// none of them is a mismatch.
-	for _, t := range types {
-		if slices.Contains(formatsByType[t], s.Format) {
-			return "", false
-		}
-	}
-
-	owner := formatOwner(s.Format)
-	if owner == "" {
+	owner, known := formatOwner[s.Format]
+	if !known {
 		// Unrecognized format: allowed by the spec, so not reported.
+		return "", false
+	}
+	if slices.Contains(types, owner) {
+		// A declared type defines this format, so it applies.
 		return "", false
 	}
 	return owner, true
 }
 
-// formatOwner returns the type that defines the given format, or "" when no
-// type does (an unrecognized or custom format).
-func formatOwner(format string) string {
-	// Iterate the types in a stable order so the message is deterministic.
-	for _, t := range []string{"string", "integer", "number"} {
-		if slices.Contains(formatsByType[t], format) {
-			return t
+// formatOwner maps each known format to the type that defines it, derived from
+// formatsByType so that table stays the single source of truth (adding a type
+// there needs no change here). Every format belongs to exactly one type, which
+// TestFormatOwner_OneTypePerFormat asserts.
+var formatOwner = invertFormatsByType()
+
+func invertFormatsByType() map[string]string {
+	owners := map[string]string{}
+	for declaredType, formats := range formatsByType {
+		for _, format := range formats {
+			owners[format] = declaredType
 		}
 	}
-	return ""
+	return owners
 }
 
 // withoutNullType drops the JSON Schema "null" type so an OpenAPI 3.1 nullable
