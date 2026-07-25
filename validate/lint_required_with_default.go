@@ -27,7 +27,7 @@ func lintRequiredWithDefault(spec *openapi3.T, source string) formatters.Finding
 	_ = spec.WalkParameters(func(jsonPointer string, ref *openapi3.ParameterRef) error {
 		p := ref.Value // WalkParameters guarantees ref and ref.Value are non-nil
 		if p.Required && p.Schema != nil && p.Schema.Value != nil && p.Schema.Value.Default != nil {
-			line, column := defaultLocation(p.Schema.Value)
+			line, column := schemaFieldLocation(p.Schema.Value, "default")
 			findings = append(findings, newRequiredWithDefaultFinding(
 				fmt.Sprintf("required parameter %q has a default value, which is never used because a required parameter must always be sent", p.Name),
 				jsonPointer, p.Name, line, column, source))
@@ -44,7 +44,7 @@ func lintRequiredWithDefault(spec *openapi3.T, source string) formatters.Finding
 			if !ok || prop.Value == nil || prop.Value.Default == nil {
 				continue
 			}
-			line, column := defaultLocation(prop.Value)
+			line, column := schemaFieldLocation(prop.Value, "default")
 			findings = append(findings, newRequiredWithDefaultFinding(
 				fmt.Sprintf("required property %q has a default value, which is never used because a required property must always be present", name),
 				jsonPointer+"/properties/"+name, name, line, column, source))
@@ -69,18 +69,4 @@ func newRequiredWithDefaultFinding(text, section, name string, line, column int,
 	}
 	f.Fingerprint = checker.ComputeFingerprint(f.Id, "", section, []any{name})
 	return f
-}
-
-// defaultLocation returns the line/column of the schema's `default` field when
-// origin tracking is enabled, falling back to the schema's own location, then 0.
-func defaultLocation(s *openapi3.Schema) (int, int) {
-	if s.Origin != nil {
-		if loc, ok := s.Origin.Fields["default"]; ok {
-			return loc.Line, loc.Column
-		}
-		if s.Origin.Key != nil {
-			return s.Origin.Key.Line, s.Origin.Key.Column
-		}
-	}
-	return 0, 0
 }

@@ -49,6 +49,7 @@ func Validate(spec *openapi3.T, source string) formatters.Findings {
 	findings = append(findings, lintDuplicateEnums(spec, source)...)
 	findings = append(findings, lintAmbiguousParamSerialization(spec, source)...)
 	findings = append(findings, lintRequiredWithDefault(spec, source)...)
+	findings = append(findings, lintTypeFormatMismatch(spec, source)...)
 	return findings
 }
 
@@ -569,6 +570,20 @@ func locationForKinError(err error) *openapi3.Location {
 	// WebhookNilError carries no Origin (the offending key is on the
 	// document root, which the loader doesn't track per-key).
 	return nil
+}
+
+// schemaFieldLocation returns the line/column of the named field inside a
+// schema when origin tracking is enabled, falling back to the schema's own
+// location, then 0. Shared by the native lints, which each report a finding
+// against one schema field ("enum", "default", "format").
+func schemaFieldLocation(s *openapi3.Schema, field string) (int, int) {
+	if s == nil || s.Origin == nil {
+		return 0, 0
+	}
+	if loc := fieldLoc(s.Origin, field); loc != nil {
+		return loc.Line, loc.Column
+	}
+	return 0, 0
 }
 
 // fieldLoc returns the location of a specific scalar field inside an

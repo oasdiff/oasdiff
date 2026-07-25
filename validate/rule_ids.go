@@ -96,6 +96,7 @@ var ruleIDs = []string{
 	"summary-field-for-3-1-plus",
 	"then-field-for-3-1-plus",
 	"token-url-forbidden",
+	"type-format-mismatch",
 	"unevaluated-items-both-forms-exclusive",
 	"unevaluated-items-field-for-3-1-plus",
 	"unevaluated-properties-both-forms-exclusive",
@@ -115,6 +116,7 @@ var nativeRuleIDs = []string{
 	AmbiguousParameterSerializationID,
 	DuplicateEnumValueID,
 	RequiredWithDefaultID,
+	TypeFormatMismatchID,
 	unknownValidationID,
 }
 

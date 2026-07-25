@@ -40,7 +40,7 @@ func newDuplicateEnumFinding(s *openapi3.Schema, section string, dups []string, 
 	for i, d := range dups {
 		quoted[i] = fmt.Sprintf("%q", d)
 	}
-	line, column := enumLocation(s)
+	line, column := schemaFieldLocation(s, "enum")
 	f := formatters.Finding{
 		Id:      DuplicateEnumValueID,
 		Text:    fmt.Sprintf("enum contains duplicate value(s): %s", strings.Join(quoted, ", ")),
@@ -58,21 +58,6 @@ func newDuplicateEnumFinding(s *openapi3.Schema, section string, dups []string, 
 	}
 	f.Fingerprint = checker.ComputeFingerprint(f.Id, "", section, args)
 	return f
-}
-
-// enumLocation returns the line/column of the schema's enum field when origin
-// tracking is enabled, falling back to the schema's own location, then 0.
-func enumLocation(s *openapi3.Schema) (int, int) {
-	if s.Origin == nil {
-		return 0, 0
-	}
-	if loc, ok := s.Origin.Fields["enum"]; ok {
-		return loc.Line, loc.Column
-	}
-	if s.Origin.Key != nil {
-		return s.Origin.Key.Line, s.Origin.Key.Column
-	}
-	return 0, 0
 }
 
 // duplicateEnumValues returns the distinct enum values that appear more than
