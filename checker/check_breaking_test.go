@@ -211,7 +211,7 @@ func TestBreaking_ResponseSuccessStatusUpdated(t *testing.T) {
 	require.Equal(t, "removed the success response with the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing an existing response with non-successful status is breaking (optional)
+// removing an existing response with a non-success status is informational, reported in the changelog
 func TestBreaking_ResponseNonSuccessStatusUpdated(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -220,16 +220,13 @@ func TestBreaking_ResponseNonSuccessStatusUpdated(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.ResponseNonSuccessStatusRemovedId)), d, osm)
-	for _, err := range errs {
-		require.Equal(t, checker.ERR, err.GetLevel())
-	}
-	require.NotEmpty(t, errs)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.ResponseNonSuccessStatusRemovedId)
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Equal(t, "removed the non-success response with the status `400`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing/updating an operation id is breaking (optional)
+// removing/updating an operation id is informational, reported in the changelog
 func TestBreaking_OperationIdRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -239,14 +236,10 @@ func TestBreaking_OperationIdRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.APIOperationIdRemovedId)), d, osm)
-	for _, err := range errs {
-		require.Equal(t, checker.ERR, err.GetLevel())
-	}
-	require.NotEmpty(t, errs)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.APIOperationIdRemovedId)
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Equal(t, "api operation id `GetSecurityScores` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-	verifyNonBreakingChangeIsChangelogEntry(t, d, osm, checker.APIOperationIdRemovedId)
 }
 
 // removing a value from a request body enum is breaking by default: it rejects
@@ -273,7 +266,7 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 	require.Equal(t, "request body enum value removed `VALUE_1`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing/updating a property enum in response is breaking (optional)
+// removing an enum value from a response property is informational (it narrows the server's output), reported in the changelog
 func TestBreaking_ResponsePropertyEnumRemoved(t *testing.T) {
 	s1 := l(t, 704)
 	s2 := l(t, 703)
@@ -281,17 +274,16 @@ func TestBreaking_ResponsePropertyEnumRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.ResponsePropertyEnumValueRemovedId)), d, osm)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	for _, err := range errs {
-		require.Equal(t, checker.ERR, err.GetLevel())
+		require.Equal(t, checker.INFO, err.GetLevel())
 	}
-	require.NotEmpty(t, errs)
 	require.Len(t, errs, 2)
 	requireChange(t, errs, checker.ResponsePropertyEnumValueRemovedId)
 	require.Equal(t, "removed the `QWE` enum value from the `respenum` response property for the response status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing/updating a tag is breaking (optional)
+// removing/updating a tag is informational, reported in the changelog
 func TestBreaking_TagRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -300,16 +292,15 @@ func TestBreaking_TagRemoved(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.APITagRemovedId)), d, osm)
-	for _, err := range errs {
-		require.Equal(t, checker.ERR, err.GetLevel())
-	}
-	require.NotEmpty(t, errs)
-	requireSingleChange(t, errs, checker.APITagRemovedId)
-	require.Equal(t, "api tag `security` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	// Replacing the tag both removes "security" and adds "newTag"; assert the
+	// removal specifically (both are informational).
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	c := requireChange(t, errs, checker.APITagRemovedId)
+	require.Equal(t, checker.INFO, c.GetLevel())
+	require.Equal(t, "api tag `security` removed", c.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing/updating a media type enum in response (optional)
+// removing an enum value from a response media type is informational (it narrows the server's output), reported in the changelog
 func TestBreaking_ResponseMediaTypeEnumRemoved(t *testing.T) {
 	s1, err := open("../data/enums/response-enum.yaml")
 	require.NoError(t, err)
@@ -319,12 +310,9 @@ func TestBreaking_ResponseMediaTypeEnumRemoved(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(checker.WithOptionalCheck(checker.ResponseMediaTypeEnumValueRemovedId)), d, osm)
-	for _, err := range errs {
-		require.Equal(t, checker.ERR, err.GetLevel())
-	}
-	require.NotEmpty(t, errs)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.ResponseMediaTypeEnumValueRemovedId)
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Equal(t, "response schema `application/json` enum value removed `VALUE_3`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
@@ -575,7 +563,7 @@ func TestBreaking_ModifyRequiredRequiredParamDefaultValue(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// removing an schema object from components is breaking (optional)
+// removing a schema object from components is informational, reported in the changelog
 func TestBreaking_SchemaRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -588,10 +576,9 @@ func TestBreaking_SchemaRemoved(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	checks := allChecksConfig(checker.WithOptionalCheck(checker.APISchemasRemovedId))
-	errs := checker.CheckBackwardCompatibility(checks, d, osm)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	for _, err := range errs {
-		require.Equal(t, checker.ERR, err.GetLevel())
+		require.Equal(t, checker.INFO, err.GetLevel())
 	}
 	require.NotEmpty(t, errs)
 	requireChange(t, errs, checker.APISchemasRemovedId)
