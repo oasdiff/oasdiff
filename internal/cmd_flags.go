@@ -68,7 +68,7 @@ func hideFlag(cmd *cobra.Command, flag string) {
 var deprecatedFlags = map[string]string{
 	"flatten":          "use --flatten-allof instead",
 	"max-circular-dep": "it is no longer needed and is ignored",
-	"include-checks":   "use --severity-levels instead",
+	"include-checks":   "it is now ignored; use --severity-levels to enforce a check as breaking",
 }
 
 // warnDeprecatedFlags writes a stderr notice for each deprecated flag the user
