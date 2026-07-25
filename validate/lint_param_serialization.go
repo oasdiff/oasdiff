@@ -85,17 +85,12 @@ func newAmbiguousParamFinding(p *openapi3.Parameter, section string, types []str
 	return f
 }
 
-// paramTypeLocation returns the line/column of the schema's type field when
-// origin tracking is enabled, falling back to the schema's own location, then
-// the parameter's, then 0.
+// paramTypeLocation returns the line/column of the schema's type field, adding
+// one fallback beyond schemaFieldLocation: the parameter's own location, for a
+// parameter whose schema carries no origin at all.
 func paramTypeLocation(p *openapi3.Parameter) (int, int) {
-	if s := p.Schema.Value; s.Origin != nil {
-		if loc, ok := s.Origin.Fields["type"]; ok {
-			return loc.Line, loc.Column
-		}
-		if s.Origin.Key != nil {
-			return s.Origin.Key.Line, s.Origin.Key.Column
-		}
+	if line, column := schemaFieldLocation(p.Schema.Value, "type"); line != 0 || column != 0 {
+		return line, column
 	}
 	if p.Origin != nil && p.Origin.Key != nil {
 		return p.Origin.Key.Line, p.Origin.Key.Column
