@@ -14,6 +14,17 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
+// lineColumnForKinError returns the line and column of a typed kin error's
+// Origin, resolving the location once for both. Zero when origin metadata
+// isn't available (untyped error, doc-root field, or loader.IncludeOrigin
+// = false).
+func lineColumnForKinError(err error) (int, int) {
+	if loc := locationForKinError(err); loc != nil {
+		return loc.Line, loc.Column
+	}
+	return 0, 0
+}
+
 // locationForKinError returns the most-specific *Location available
 // for a typed kin error. kin's Origin model:
 //

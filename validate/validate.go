@@ -78,6 +78,7 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 		return out
 	}
 	path, operation := pathOperationForKinError(err)
+	line, column := lineColumnForKinError(err)
 	f := formatters.Finding{
 		Id:        knownRuleID(ruleIDForKinError(err)),
 		Text:      unwrapContext(err).Error(),
@@ -87,8 +88,8 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 		Section:   sectionForKinError(err),
 		Source: formatters.Source{
 			File:   source,
-			Line:   lineForKinError(err),
-			Column: columnForKinError(err),
+			Line:   line,
+			Column: column,
 		},
 	}
 	// Fingerprint last so it hashes over the populated fields.
@@ -419,25 +420,6 @@ func argsForKinError(err error) []any {
 		return []any{isme.Subject, isme.Style, isme.Explode}
 	}
 	return nil
-}
-
-// lineForKinError extracts the line number from the typed cluster
-// errors' Origin. Returns 0 when origin metadata isn't available
-// (untyped error, doc-root field, or loader.IncludeOrigin = false).
-func lineForKinError(err error) int {
-	if k := locationForKinError(err); k != nil {
-		return k.Line
-	}
-	return 0
-}
-
-// columnForKinError extracts the column number from the typed cluster
-// errors' Origin. Returns 0 when origin metadata isn't available.
-func columnForKinError(err error) int {
-	if k := locationForKinError(err); k != nil {
-		return k.Column
-	}
-	return 0
 }
 
 // ruleIDForKinError returns the stable code kin-openapi declares on the
