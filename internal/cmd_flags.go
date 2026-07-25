@@ -58,11 +58,36 @@ func hideFlag(cmd *cobra.Command, flag string) {
 	}
 }
 
+// deprecatedFlags maps a hidden, legacy flag to the guidance shown when it is
+// used. These stay hidden and functional (so existing scripts don't break) but
+// warn the user, via warnDeprecatedFlags, to move off them. We can't use cobra's
+// MarkDeprecated because it writes the notice to stdout, which corrupts the
+// json/yaml result (the same reason hideFlag exists); the notice goes to stderr
+// instead. review-token / review-meta are intentionally not here: they are
+// hidden because they are an automation interface, not because they are legacy.
+var deprecatedFlags = map[string]string{
+	"flatten":          "use --flatten-allof instead",
+	"max-circular-dep": "it is no longer needed and is ignored",
+	"include-checks":   "it is now ignored; use --severity-levels to enforce a check as breaking",
+}
+
+// warnDeprecatedFlags writes a stderr notice for each deprecated flag the user
+// actually set on cmd. Stderr, never stdout, so it can't corrupt machine output.
+func warnDeprecatedFlags(cmd *cobra.Command) {
+	for name, guidance := range deprecatedFlags {
+		if f := cmd.Flags().Lookup(name); f != nil && f.Changed {
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Flag --%s is deprecated: %s\n", name, guidance)
+		}
+	}
+}
+
 func addCommonBreakingFlags(cmd *cobra.Command) {
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 	cmd.PersistentFlags().String("err-ignore", "", "configuration file for ignoring errors")
 	cmd.PersistentFlags().String("warn-ignore", "", "configuration file for ignoring warnings")
-	cmd.PersistentFlags().VarPF(newEnumSliceValue(checker.GetOptionalRuleIds(), nil), "include-checks", "i", "optional checks")
+	// Accepted for back-compat but ignored: the optional-checks mechanism it
+	// drove was retired. Deprecated (see deprecatedFlags); use --severity-levels.
+	cmd.PersistentFlags().StringSliceP("include-checks", "i", nil, "deprecated: use --severity-levels")
 	hideFlag(cmd, "include-checks")
 	cmd.PersistentFlags().Uint("deprecation-days-beta", checker.DefaultBetaDeprecationDays, "min days required between deprecating a beta resource and removing it")
 	cmd.PersistentFlags().Uint("deprecation-days-stable", checker.DefaultStableDeprecationDays, "min days required between deprecating a stable resource and removing it")

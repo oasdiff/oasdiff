@@ -13,6 +13,11 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	rootCmd := &cobra.Command{
 		Use:   "oasdiff",
 		Short: "OpenAPI specification diff",
+		// Warn (on stderr) about any deprecated hidden flag the user set, for
+		// every subcommand. Runs after flag parsing, before the command body.
+		PersistentPreRun: func(cmd *cobra.Command, _ []string) {
+			warnDeprecatedFlags(cmd)
+		},
 	}
 
 	rootCmd.SetArgs(args[1:])

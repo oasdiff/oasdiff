@@ -639,23 +639,23 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseSuccessStatusRemovedId, ERR, ResponseSuccessStatusUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseSuccessStatusAddedId, INFO, ResponseSuccessStatusUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
 		// ResponseNonSuccessStatusUpdatedCheck
-		newBackwardCompatibilityRule(ResponseNonSuccessStatusRemovedId, INFO, ResponseNonSuccessStatusUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove), // optional
+		newBackwardCompatibilityRule(ResponseNonSuccessStatusRemovedId, INFO, ResponseNonSuccessStatusUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseNonSuccessStatusAddedId, INFO, ResponseNonSuccessStatusUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
 		// APIOperationIdUpdatedCheck
-		newBackwardCompatibilityRule(APIOperationIdRemovedId, INFO, APIOperationIdUpdatedCheck, DirectionNone, AreaPaths, KindExistence, ActionRemove), // optional
+		newBackwardCompatibilityRule(APIOperationIdRemovedId, INFO, APIOperationIdUpdatedCheck, DirectionNone, AreaPaths, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(APIOperationIdAddId, INFO, APIOperationIdUpdatedCheck, DirectionNone, AreaPaths, KindExistence, ActionAdd),
 		// APITagUpdatedCheck
-		newBackwardCompatibilityRule(APITagRemovedId, INFO, APITagUpdatedCheck, DirectionNone, AreaTags, KindExistence, ActionRemove), // optional
+		newBackwardCompatibilityRule(APITagRemovedId, INFO, APITagUpdatedCheck, DirectionNone, AreaTags, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(APITagAddedId, INFO, APITagUpdatedCheck, DirectionNone, AreaTags, KindExistence, ActionAdd),
 		// WebhookUpdatedCheck
 		newBackwardCompatibilityRule(WebhookAddedId, INFO, WebhookUpdatedCheck, DirectionNone, AreaComponents, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(WebhookRemovedId, ERR, WebhookUpdatedCheck, DirectionNone, AreaComponents, KindExistence, ActionRemove),
 		// APIComponentsSchemaRemovedCheck
-		newBackwardCompatibilityRule(APISchemasRemovedId, INFO, APIComponentsSchemaRemovedCheck, DirectionNone, AreaComponents, KindExistence, ActionRemove), // optional
+		newBackwardCompatibilityRule(APISchemasRemovedId, INFO, APIComponentsSchemaRemovedCheck, DirectionNone, AreaComponents, KindExistence, ActionRemove),
 		// ResponseParameterEnumValueRemovedCheck
-		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove), // optional
+		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove),
 		// ResponseMediaTypeEnumValueRemovedCheck
-		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove), // optional
+		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove),
 		// RequestBodyEnumValueRemovedCheck: removing a value from a request body
 		// enum rejects input a client used to send, so it is breaking, the same
 		// as its request-property and request-parameter siblings.
@@ -820,17 +820,6 @@ func GetAllRules() BackwardCompatibilityRules {
 	}
 }
 
-func GetOptionalRules() BackwardCompatibilityRules {
-	return BackwardCompatibilityRules{
-		newBackwardCompatibilityRule(ResponseNonSuccessStatusRemovedId, INFO, ResponseNonSuccessStatusUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
-		newBackwardCompatibilityRule(APIOperationIdRemovedId, INFO, APIOperationIdUpdatedCheck, DirectionNone, AreaPaths, KindExistence, ActionRemove),
-		newBackwardCompatibilityRule(APITagRemovedId, INFO, APITagUpdatedCheck, DirectionNone, AreaTags, KindExistence, ActionRemove),
-		newBackwardCompatibilityRule(APISchemasRemovedId, INFO, APIComponentsSchemaRemovedCheck, DirectionNone, AreaComponents, KindExistence, ActionRemove),
-		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove),
-		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, ActionRemove),
-	}
-}
-
 // GetCheckLevels gets levels for all backward compatibility checks
 func GetCheckLevels() map[string]Level {
 	return rulesToLevels(GetAllRules())
@@ -854,10 +843,6 @@ func rulesToChecks(rules BackwardCompatibilityRules) BackwardCompatibilityChecks
 		}
 	}
 	return result
-}
-
-func GetOptionalRuleIds() []string {
-	return rulesToIIs(GetOptionalRules())
 }
 
 func GetAllRuleIds() []string {

@@ -48,6 +48,24 @@ func Test_InvalidFlag(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --invalid"), io.Discard, io.Discard))
 }
 
+// A deprecated hidden flag (e.g. --flatten) still works but warns on stderr,
+// never stdout, so json/yaml output stays clean.
+func Test_DeprecatedFlagWarnsOnStderrOnly(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --flatten -f json"), &stdout, &stderr)
+
+	require.Contains(t, stderr.String(), "Flag --flatten is deprecated: use --flatten-allof instead")
+	require.NotContains(t, stdout.String(), "deprecated")
+	var parsed any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &parsed), "stdout must stay valid json")
+}
+
+func Test_NoDeprecatedFlagNoWarning(t *testing.T) {
+	var stderr bytes.Buffer
+	internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml -f json"), io.Discard, &stderr)
+	require.NotContains(t, stderr.String(), "deprecated")
+}
+
 func Test_OpenWithComposedAllowed(t *testing.T) {
 	// A composed diff (-c) can now be reviewed with --open: the cards carry the
 	// composed comparison, so composed no longer conflicts with --open. Point the
@@ -162,15 +180,15 @@ func Test_DiffInvalidFormat(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml --format xxx"), io.Discard, io.Discard))
 }
 
-func Test_BreakingChangesIncludeChecks(t *testing.T) {
+// --include-checks is accepted for back-compat but ignored (the optional-checks
+// mechanism was retired). The named checks stay informational, so breaking
+// reports nothing and the run does not error on the flag.
+func Test_IncludeChecksAcceptedButIgnored(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/run_test/breaking_changes_include_checks_base.yaml ../data/run_test/breaking_changes_include_checks_revision.yaml --include-checks response-non-success-status-removed,api-tag-removed --format json"), &stdout, io.Discard))
 	bc := formatters.Changes{}
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &bc))
-	require.Len(t, bc, 2)
-	for _, c := range bc {
-		require.Equal(t, c.Level, checker.ERR)
-	}
+	require.Empty(t, bc)
 }
 
 func Test_BasicBreakingChanges(t *testing.T) {
@@ -324,17 +342,6 @@ func Test_BreakingChangesChangelogOptionalCheckersAreInfoLevel(t *testing.T) {
 	require.Len(t, cl, 2)
 	for _, c := range cl {
 		require.Equal(t, c.Level, checker.INFO)
-	}
-}
-
-func Test_BreakingChangesChangelogOptionalCheckersAreErrorLevelWhenSpecified(t *testing.T) {
-	var stdout bytes.Buffer
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/run_test/changelog_include_checks_base.yaml ../data/run_test/changelog_include_checks_revision.yaml --format json --include-checks api-tag-removed,response-non-success-status-removed"), &stdout, io.Discard))
-	cl := formatters.Changes{}
-	require.NoError(t, json.Unmarshal(stdout.Bytes(), &cl))
-	require.Len(t, cl, 2)
-	for _, c := range cl {
-		require.Equal(t, c.Level, checker.ERR)
 	}
 }
 

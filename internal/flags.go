@@ -106,10 +106,6 @@ func (flags *Flags) getReviewMeta() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("review-meta"))
 }
 
-func (flags *Flags) getIncludeChecks() []string {
-	return fixViperStringSlice(flags.v.GetStringSlice("include-checks"))
-}
-
 func (flags *Flags) getDeprecationDaysBeta() uint {
 	return flags.v.GetUint("deprecation-days-beta")
 }

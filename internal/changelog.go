@@ -60,7 +60,6 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 
 	bcConfig := checker.NewConfig(
 		checker.GetAllChecks(),
-		checker.WithOptionalChecks(flags.getIncludeChecks()),
 		checker.WithSeverityLevels(severityLevels),
 		checker.WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()),
 		checker.WithAttributes(flags.getAttributes()),
