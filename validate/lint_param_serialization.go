@@ -84,21 +84,3 @@ func newAmbiguousParamFinding(p *openapi3.Parameter, section string, types []str
 	f.Fingerprint = checker.ComputeFingerprint(f.Id, "", section, args)
 	return f
 }
-
-// paramTypeLocation returns the line/column of the schema's type field when
-// origin tracking is enabled, falling back to the schema's own location, then
-// the parameter's, then 0.
-func paramTypeLocation(p *openapi3.Parameter) (int, int) {
-	if s := p.Schema.Value; s.Origin != nil {
-		if loc, ok := s.Origin.Fields["type"]; ok {
-			return loc.Line, loc.Column
-		}
-		if s.Origin.Key != nil {
-			return s.Origin.Key.Line, s.Origin.Key.Column
-		}
-	}
-	if p.Origin != nil && p.Origin.Key != nil {
-		return p.Origin.Key.Line, p.Origin.Key.Column
-	}
-	return 0, 0
-}
