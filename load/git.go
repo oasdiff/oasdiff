@@ -172,6 +172,30 @@ func hintMissingObject(gitRef string, err error) error {
 
 // refBeforeColon returns the "<ref>" portion of a "<ref>:<path>" git revision,
 // or the whole string when there is no colon.
+// ErrRefLooksLikeOption is returned for a git revision starting with "-".
+//
+// Refs are passed to git as operands. Without protection git parses a
+// leading-dash operand as an OPTION, which is a real capability and not a
+// theoretical one: "--output=<path>" on git show writes git's output to that
+// path, giving an arbitrary file overwrite as the invoking user, and
+// "--upload-pack=<program>" on git fetch makes git execute that program.
+//
+// Every call site also passes --end-of-options, which instructs git to treat
+// everything after it as an operand. This check is the belt to that braces: it
+// does not depend on the git version (--end-of-options landed in git 2.24), and
+// it fails with a clear message instead of a confusing git error.
+//
+// No legitimate git revision begins with "-".
+var ErrRefLooksLikeOption = errors.New("git revision must not start with '-'")
+
+// checkRef rejects a revision that git would parse as an option.
+func checkRef(ref string) error {
+	if strings.HasPrefix(ref, "-") {
+		return fmt.Errorf("%w: %q", ErrRefLooksLikeOption, ref)
+	}
+	return nil
+}
+
 func refBeforeColon(gitRef string) string {
 	if before, _, found := strings.Cut(gitRef, ":"); found {
 		return before
@@ -185,7 +209,10 @@ func refBeforeColon(gitRef string) string {
 // is why it runs only under the opt-in --fetch flag. It mirrors the manual
 // "git fetch origin <ref>" that hintMissingObject suggests when --fetch is off.
 func gitFetch(ref string) error {
-	if out, err := exec.Command("git", "fetch", "origin", ref).CombinedOutput(); err != nil {
+	if err := checkRef(ref); err != nil {
+		return err
+	}
+	if out, err := exec.Command("git", "fetch", "--end-of-options", "origin", ref).CombinedOutput(); err != nil {
 		return fmt.Errorf("%s", strings.TrimSpace(string(out)))
 	}
 	return nil
@@ -195,7 +222,10 @@ func gitFetch(ref string) error {
 // local repository, via "git cat-file -e". Returns false when the object is
 // absent or when git cannot run.
 func commitExistsLocally(ref string) bool {
-	return exec.Command("git", "cat-file", "-e", ref).Run() == nil
+	if checkRef(ref) != nil {
+		return false
+	}
+	return exec.Command("git", "cat-file", "-e", "--end-of-options", ref).Run() == nil
 }
 
 // blobHashFromRef returns (hex, true) when the part before `:` in gitRef names
@@ -205,10 +235,10 @@ func commitExistsLocally(ref string) bool {
 // per spec load on the git path, which git serves in single-digit milliseconds.
 func blobHashFromRef(gitRef string) (string, bool) {
 	ref, _, found := strings.Cut(gitRef, ":")
-	if !found {
+	if !found || checkRef(ref) != nil {
 		return "", false
 	}
-	out, err := exec.Command("git", "cat-file", "-t", ref).Output()
+	out, err := exec.Command("git", "cat-file", "-t", "--end-of-options", ref).Output()
 	if err != nil {
 		return "", false
 	}
@@ -220,7 +250,10 @@ func blobHashFromRef(gitRef string) (string, bool) {
 
 // gitShow runs "git show <ref>" and returns its stdout, or a descriptive error.
 func gitShow(ref string) ([]byte, error) {
-	out, err := exec.Command("git", "show", ref).Output()
+	if err := checkRef(ref); err != nil {
+		return nil, err
+	}
+	out, err := exec.Command("git", "show", "--end-of-options", ref).Output()
 	if err != nil {
 		var exitErr *exec.ExitError
 		if errors.As(err, &exitErr) && len(exitErr.Stderr) > 0 {
