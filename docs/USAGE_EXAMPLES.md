@@ -115,4 +115,16 @@ docker run --rm -t -v $(pwd)/data:/data:ro tufin/oasdiff diff /data/openapi-test
 ```
 
 Replace `$(pwd)/data` by the path that contains your files.  
-Note that the spec paths must begin with `/`.  
+Note that the spec paths must begin with `/`.
+
+## Passing arguments from a script or CI
+
+When `base` and `revision` come from variables rather than being typed by hand, put `--` after the flags so their values are always read as arguments and never as flags:
+
+```bash
+oasdiff breaking $flags -- "$base" "$revision"
+```
+
+Note the ordering: `--` must come *after* the flags. Everything following it is treated as a positional argument, so any flag placed after `--` is read as a spec instead.
+
+This applies to every input type — local files, URLs, and git revisions alike. Without `--`, a value that begins with `-` is parsed as an oasdiff flag, and a value that happens to match a real flag name changes what the command does.

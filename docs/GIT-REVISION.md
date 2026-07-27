@@ -39,18 +39,6 @@ Compare yesterday's `HEAD` against today's:
 oasdiff diff HEAD~1:openapi.yaml HEAD:openapi.yaml
 ```
 
-## Passing revisions from a script or CI
-
-When the revision comes from a variable rather than being typed by hand, put `--` after the flags so oasdiff treats the value as a revision and never as a flag:
-
-```bash
-oasdiff breaking $flags -- "$base" "$revision"
-```
-
-Note the ordering: `--` must come *after* the flags. Everything following it is treated as a positional argument, so flags placed after `--` are read as revisions instead.
-
-This matters when the value could originate from somewhere you do not control — a branch name, a workflow input, a config value. Without `--`, a value beginning with `-` is parsed as an oasdiff flag.
-
 ## How it works
 
 oasdiff detects the `<ref>:<path>` pattern and runs `git show <ref>:<path>` internally to retrieve the spec content. Relative `$ref`s in the spec are resolved against the spec's path, matching the behaviour of loading from a local file.
