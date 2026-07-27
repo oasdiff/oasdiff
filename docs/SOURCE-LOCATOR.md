@@ -3,6 +3,8 @@
 oasdiff can correlate breaking changes and changelog entries with the exact line and column in the OpenAPI spec file where the change occurred.  
 This enables inline annotations on GitHub pull requests, pointing reviewers directly to the relevant lines.
 
+Source locations require a spec in YAML format. See [Limitations](#limitations).
+
 ## What it does
 
 When source location tracking is enabled, reported changes include:
@@ -16,13 +18,35 @@ Changes that represent a modification (e.g., maxLength increased) will have both
 
 ### Multi-file specs
 
-When a spec uses `$ref` to import schemas from other YAML or JSON files, source locations point to the file where the changed element actually lives, with the precise line and column. The `file` field on `BaseSource` and `RevisionSource` reflects the imported file, not just the top-level spec entry point, and inline GitHub Actions annotations use that path.
+When a spec uses `$ref` to import schemas from other YAML files, source locations point to the file where the changed element actually lives, with the precise line and column. The `file` field on `BaseSource` and `RevisionSource` reflects the imported file, not just the top-level spec entry point, and inline GitHub Actions annotations use that path.
+
+Imported JSON files behave differently. See [Limitations](#limitations).
+
+## Limitations
+
+### Specs in JSON format
+
+Source locations are available only for specs that oasdiff parses as YAML. A spec parsed as JSON carries no position information, so:
+
+- In `-f json` and `-f yaml` output, `baseSource` and `revisionSource` are usually omitted entirely. Where one is present, it carries a `file` with no `line` or `column`.
+- GitHub Actions annotations are emitted without `line` and `col`, so GitHub attaches them to the file rather than to the changed line.
+- `oasdiff validate` reports findings with a file but no line or column.
+
+This follows the content of the file, not its extension. A `.yaml` file that contains JSON is parsed as JSON and behaves the same way.
+
+In a multi-file spec, a change inside an imported JSON file does not simply lose its location. It falls back to the nearest enclosing element that has one, which is usually the `$ref` site in the parent file. The reported `file` and `line` can therefore point at a different file from the one that changed.
+
+To get precise locations today, convert the spec to YAML. If source location support for JSON specs would be useful to you, add a 👍 to [issue #1128](https://github.com/oasdiff/oasdiff/issues/1128) so we can gauge demand.
 
 ## Output formats
+
+`-f` selects the format oasdiff writes its report in. It is unrelated to the format the spec itself is written in.
 
 Source locations are available in:
 - **JSON** (`-f json`) and **YAML** (`-f yaml`) output as `baseSource` and `revisionSource` fields on each change
 - **GitHub Actions** (`-f githubactions`) output includes `revisionSource` fields to use as inline annotations on the "Files changed" tab of PRs. Note that `baseSource` isn't displayed because GitHub can only display annotations on the latest version of the file.
+
+In each of these, the values are populated only for a spec parsed as YAML. See [Limitations](#limitations).
 
 ### Precision levels
 
