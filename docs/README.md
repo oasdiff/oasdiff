@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/pulsemcp%2Foasdiff.svg)](https://mcptoplist.com/server/pulsemcp%2Foasdiff)
+
 
 [![CI](https://github.com/oasdiff/oasdiff/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/oasdiff/oasdiff/actions)
 [![codecov](https://codecov.io/gh/oasdiff/oasdiff/branch/main/graph/badge.svg?token=Y8BM6X77JY)](https://codecov.io/gh/oasdiff/oasdiff)
