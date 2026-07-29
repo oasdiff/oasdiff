@@ -34,10 +34,10 @@ func TestChecks_SortFunc_Equal(t *testing.T) {
 	require.Equal(t, 0, result)
 }
 
-// Check's fields are omitempty so an IDs-only listing (`oasdiff checks
-// validate`) doesn't render rows of empty strings. That is only safe while the
-// changelog and breaking-change rules populate every field: an empty one would
-// silently disappear from json/yaml rather than show as "".
+// Check's fields are omitempty so the validate listing, which has no direction,
+// area, kind or action, doesn't render rows of empty strings. That is only safe
+// while the changelog and breaking-change rules populate every field: an empty
+// one would silently disappear from json/yaml rather than show as "".
 //
 // This pins the invariant at the source, so a new rule missing an area, kind,
 // action or description fails here instead of quietly changing machine output.

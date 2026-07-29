@@ -11,12 +11,9 @@ import (
 
 const checksValidateCmd = "checks validate"
 
-// getChecksValidateCmd lists the rule IDs `oasdiff validate` can report, the
+// getChecksValidateCmd lists the rules `oasdiff validate` can report, the
 // counterpart of `oasdiff checks` for the breaking-change rules.
 //
-// IDs only, no descriptions or levels: a validate finding takes its text from
-// the parser's typed error and its severity from the classifier at runtime, so
-// unlike a breaking-change rule there is nothing static to list beyond the ID.
 // The IDs are stable API, which is what a CI dashboard needs.
 func getChecksValidateCmd() *cobra.Command {
 
@@ -32,7 +29,8 @@ never renamed or repurposed, so external tooling can depend on them.`,
 		RunE:              getRun(runChecksValidate),
 	}
 
-	// severity / tags do not apply: a validate rule has no static level or tags.
+	// No severity / tags filters: unlike a breaking-change rule, a validate rule
+	// carries no tags, and there is no --severity-levels equivalent to reflect.
 	addChecksFormatFlags(&cmd)
 
 	return &cmd
@@ -53,12 +51,17 @@ func outputValidateRuleIDs(stdout io.Writer, flags *Flags) *ReturnError {
 		return getErrUnsupportedFormat(format, checksValidateCmd)
 	}
 
-	// RuleIDs() is already sorted. Level is left empty: a validate rule's
-	// severity is decided per finding at runtime, not statically.
+	// RuleIDs() is already sorted. Level comes from the same mapping the
+	// runtime classifier uses, so the listing cannot advertise a severity a
+	// finding won't carry.
 	ids := validate.RuleIDs()
 	checks := make(formatters.Checks, 0, len(ids))
 	for _, id := range ids {
-		checks = append(checks, formatters.Check{Id: id, Description: validate.RuleDescription(id)})
+		checks = append(checks, formatters.Check{
+			Id:          id,
+			Description: validate.RuleDescription(id),
+			Level:       validate.RuleLevel(id).String(),
+		})
 	}
 
 	bytes, err := formatter.RenderChecks(checks, formatters.NewRenderOpts())

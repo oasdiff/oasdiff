@@ -4,11 +4,11 @@ import "cmp"
 
 // Check is one rule in a `oasdiff checks` listing.
 //
-// Every field except Id is omitempty: the changelog and breaking-change rules
-// populate all of them (TestChecks_AllFieldsPopulated pins that), so their
-// output is unchanged, while a listing that only has IDs to report
-// (`oasdiff checks validate`, where a rule's text and severity are determined
-// at runtime) renders as ids alone instead of rows of empty strings.
+// Every field except Id is omitempty. The changelog and breaking-change rules
+// populate all of them (TestChecks_AllRuleFieldsPopulated pins that), so their
+// output is unchanged; the validate rules have an id, a description and a
+// level but no direction, area, kind or action, and those are omitted rather
+// than rendered as empty strings.
 type Check struct {
 	Id          string `json:"id" yaml:"id"`
 	Level       string `json:"level,omitempty" yaml:"level,omitempty"`

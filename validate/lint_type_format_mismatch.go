@@ -125,7 +125,7 @@ func newTypeFormatMismatchFinding(s *openapi3.Schema, section, owner, source str
 		Id: TypeFormatMismatchID,
 		Text: fmt.Sprintf("format %q is defined for type %q, not %q, so it is ignored",
 			s.Format, owner, declared),
-		Level:   checker.WARN,
+		Level:   RuleLevel(TypeFormatMismatchID),
 		Section: section,
 		Source: formatters.Source{
 			File:   source,

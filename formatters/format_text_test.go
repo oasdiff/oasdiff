@@ -82,28 +82,3 @@ func TestTextFormatter_NotImplemented(t *testing.T) {
 	_, err = textFormatter.RenderSummary(nil, formatters.NewRenderOpts())
 	assert.Error(t, err)
 }
-
-// An IDs-only listing (oasdiff checks validate) prints just the ID column: a
-// DESCRIPTION or LEVEL header over blank cells would promise data that a
-// validate rule has no static value for.
-func TestTextFormatter_RenderChecks_IdOnlyDropsEmptyColumns(t *testing.T) {
-	out, err := formatters.TEXTFormatter{Localizer: MockLocalizer}.RenderChecks(
-		formatters.Checks{{Id: "some-rule"}, {Id: "other-rule"}}, formatters.NewRenderOpts())
-	require.NoError(t, err)
-
-	require.NotContains(t, string(out), "DESCRIPTION")
-	require.NotContains(t, string(out), "LEVEL")
-	require.Contains(t, string(out), "ID")
-	require.Contains(t, string(out), "some-rule")
-}
-
-// A populated listing keeps every column.
-func TestTextFormatter_RenderChecks_KeepsPopulatedColumns(t *testing.T) {
-	out, err := formatters.TEXTFormatter{Localizer: MockLocalizer}.RenderChecks(
-		formatters.Checks{{Id: "some-rule", Description: "d", Level: "error"}}, formatters.NewRenderOpts())
-	require.NoError(t, err)
-
-	for _, want := range []string{"ID", "DESCRIPTION", "LEVEL", "some-rule", "error"} {
-		require.Contains(t, string(out), want)
-	}
-}

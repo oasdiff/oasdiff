@@ -3,8 +3,6 @@ package formatters
 import (
 	"bytes"
 	"fmt"
-	"slices"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/TwiN/go-color"
@@ -51,33 +49,13 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	return result.Bytes(), nil
 }
 
-// RenderChecks prints one row per check. Columns follow the same rule as
-// Check's omitempty json tags: a column that is empty for every row is left out
-// rather than printed as a blank column under a header promising data. That
-// keeps an IDs-only listing (`oasdiff checks validate`, where a rule's text and
-// severity are only known at runtime) to a plain list of ids, while the
-// changelog listing, which populates both, is unchanged.
 func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
-	withDescription := slices.ContainsFunc(checks, func(c Check) bool { return c.Description != "" })
-	withLevel := slices.ContainsFunc(checks, func(c Check) bool { return c.Level != "" })
-
-	row := func(id, description, level string) string {
-		cells := []string{id}
-		if withDescription {
-			cells = append(cells, description)
-		}
-		if withLevel {
-			cells = append(cells, level)
-		}
-		return strings.Join(cells, "\t")
-	}
-
 	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
-	_, _ = fmt.Fprintln(w, row("ID", "DESCRIPTION", "LEVEL"))
+	_, _ = fmt.Fprintln(w, "ID\tDESCRIPTION\tLEVEL")
 	for _, check := range checks {
-		_, _ = fmt.Fprintln(w, row(check.Id, f.Localizer(check.Description), check.Level))
+		_, _ = fmt.Fprintln(w, check.Id+"\t"+f.Localizer(check.Description)+"\t"+check.Level)
 	}
 	_ = w.Flush()
 

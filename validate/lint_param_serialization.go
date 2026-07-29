@@ -69,7 +69,7 @@ func newAmbiguousParamFinding(p *openapi3.Parameter, section string, types []str
 	f := formatters.Finding{
 		Id:      AmbiguousParameterSerializationID,
 		Text:    fmt.Sprintf("parameter %q mixes a structured type with a scalar (%s): its serialization is ambiguous", p.Name, strings.Join(types, ", ")),
-		Level:   checker.WARN,
+		Level:   RuleLevel(AmbiguousParameterSerializationID),
 		Section: section,
 		Source: formatters.Source{
 			File:   source,
