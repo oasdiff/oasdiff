@@ -13,18 +13,28 @@ import (
 
 const checksChangelogCmd = "checks changelog"
 
-// getChecksCmd groups the per-rule-set listings and has no body of its own:
+// getChecksCmd groups the per-rule-set listings and lists no rules itself:
 // naming one rule set by omission stopped being tenable once `checks validate`
-// existed, so the rule set is always explicit. Run bare, cobra prints the help
-// listing the subcommands.
+// existed, so the rule set is always explicit. Run bare it prints the help.
+//
+// It has a RunE only so that it stays Runnable, which is what makes cobra
+// reach Args and reject `checks <typo>` with a non-zero exit. A non-runnable
+// parent returns flag.ErrHelp before Args is ever evaluated, so a typo'd
+// subcommand would print help and exit 0, which a script cannot detect.
+// DisableFlagsInUseLine keeps `[flags]` out of the usage: the flags belong to
+// the subcommands.
 func getChecksCmd() *cobra.Command {
 
 	cmd := cobra.Command{
-		Use:               "checks",
-		Short:             "Display checks",
-		Long:              `Display the rules oasdiff applies, one listing per rule set.`,
-		Args:              cobra.NoArgs,
-		ValidArgsFunction: cobra.NoFileCompletions, // see https://github.com/spf13/cobra/issues/1969
+		Use:                   "checks",
+		Short:                 "Display checks",
+		Long:                  `Display the rules oasdiff applies, one listing per rule set.`,
+		Args:                  cobra.NoArgs,
+		DisableFlagsInUseLine: true,
+		ValidArgsFunction:     cobra.NoFileCompletions,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return cmd.Help()
+		},
 	}
 
 	cmd.AddCommand(getChecksChangelogCmd(), getChecksValidateCmd())

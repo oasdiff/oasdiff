@@ -24,6 +24,15 @@ func Test_ChecksRequiresASubcommand(t *testing.T) {
 	require.NotContains(t, out, "api-deprecated-sunset-missing")
 }
 
+// A typo'd subcommand is a user error, so it has to be reported like one: a
+// script redirecting the output would otherwise write help text to its target
+// and see success.
+func Test_ChecksUnknownSubcommandFails(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks chnagelog"), &stdout, &stderr))
+	require.Contains(t, stderr.String(), `unknown command "chnagelog" for "oasdiff checks"`)
+}
+
 // The parent carries no listing flags, so an old `oasdiff checks --format json`
 // fails loudly rather than quietly producing nothing for a caller piping it.
 func Test_ChecksWithListingFlagsFails(t *testing.T) {
