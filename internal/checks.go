@@ -24,12 +24,49 @@ func getChecksCmd() *cobra.Command {
 		RunE:              getRun(runChecks),
 	}
 
-	enumWithOptions(&cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
-	enumWithOptions(&cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChecks), string(formatters.FormatText)), "format", "f", "output format")
-	enumWithOptions(&cmd, newEnumSliceValue([]string{"info", "warn", "error"}, nil), "severity", "s", "include only checks with any of specified severities")
-	enumWithOptions(&cmd, newEnumSliceValue(getAllTags(), nil), "tags", "t", "include only checks with all specified tags")
+	addChecksRuleFlags(&cmd)
+
+	cmd.AddCommand(getChecksChangelogCmd(), getChecksValidateCmd())
 
 	return &cmd
+}
+
+// getChecksChangelogCmd is the explicit form of bare `oasdiff checks`: it lists
+// the breaking-change and changelog rules. It exists so the two rule sets are
+// addressed symmetrically (`checks changelog` alongside `checks validate`)
+// rather than one being the unnamed default. Bare `oasdiff checks` keeps
+// working and behaves identically.
+func getChecksChangelogCmd() *cobra.Command {
+
+	cmd := cobra.Command{
+		Use:               "changelog",
+		Short:             "Display changelog and breaking-change checks",
+		Long:              `Display a list of all supported changelog and breaking-change checks. Same as 'oasdiff checks' with no subcommand.`,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
+		RunE:              getRun(runChecks),
+	}
+
+	// Registered per command rather than inherited: viper binds a command's own
+	// persistent flags (see bindFlags), so an inherited flag would parse but
+	// never reach the config.
+	addChecksRuleFlags(&cmd)
+
+	return &cmd
+}
+
+// addChecksRuleFlags registers the flags for listing the changelog and
+// breaking-change rules, shared by `checks` and `checks changelog`.
+func addChecksRuleFlags(cmd *cobra.Command) {
+	addChecksFormatFlags(cmd)
+	enumWithOptions(cmd, newEnumSliceValue([]string{"info", "warn", "error"}, nil), "severity", "s", "include only checks with any of specified severities")
+	enumWithOptions(cmd, newEnumSliceValue(getAllTags(), nil), "tags", "t", "include only checks with all specified tags")
+}
+
+// addChecksFormatFlags registers the output flags every checks listing needs.
+func addChecksFormatFlags(cmd *cobra.Command) {
+	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
+	enumWithOptions(cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChecks), string(formatters.FormatText)), "format", "f", "output format")
 }
 
 func runChecks(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
