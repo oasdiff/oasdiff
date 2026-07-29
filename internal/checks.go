@@ -11,37 +11,35 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const checksCmd = "checks"
+const checksChangelogCmd = "checks changelog"
 
+// getChecksCmd groups the per-rule-set listings and has no body of its own:
+// naming one rule set by omission stopped being tenable once `checks validate`
+// existed, so the rule set is always explicit. Run bare, cobra prints the help
+// listing the subcommands.
 func getChecksCmd() *cobra.Command {
 
 	cmd := cobra.Command{
-		Use:               "checks [flags]",
+		Use:               "checks",
 		Short:             "Display checks",
-		Long:              `Display a list of all supported checks.`,
+		Long:              `Display the rules oasdiff applies, one listing per rule set.`,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions, // see https://github.com/spf13/cobra/issues/1969
-		RunE:              getRun(runChecks),
 	}
-
-	addChecksRuleFlags(&cmd)
 
 	cmd.AddCommand(getChecksChangelogCmd(), getChecksValidateCmd())
 
 	return &cmd
 }
 
-// getChecksChangelogCmd is the explicit form of bare `oasdiff checks`: it lists
-// the breaking-change and changelog rules. It exists so the two rule sets are
-// addressed symmetrically (`checks changelog` alongside `checks validate`)
-// rather than one being the unnamed default. Bare `oasdiff checks` keeps
-// working and behaves identically.
+// getChecksChangelogCmd lists the breaking-change and changelog rules, the
+// counterpart of `checks validate`.
 func getChecksChangelogCmd() *cobra.Command {
 
 	cmd := cobra.Command{
 		Use:               "changelog",
 		Short:             "Display changelog and breaking-change checks",
-		Long:              `Display a list of all supported changelog and breaking-change checks. Same as 'oasdiff checks' with no subcommand.`,
+		Long:              `Display a list of all supported changelog and breaking-change checks.`,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE:              getRun(runChecks),
@@ -50,23 +48,57 @@ func getChecksChangelogCmd() *cobra.Command {
 	// Registered per command rather than inherited: viper binds a command's own
 	// persistent flags (see bindFlags), so an inherited flag would parse but
 	// never reach the config.
-	addChecksRuleFlags(&cmd)
+	addChecksChangelogFlags(&cmd)
 
 	return &cmd
 }
 
-// addChecksRuleFlags registers the flags for listing the changelog and
-// breaking-change rules, shared by `checks` and `checks changelog`.
-func addChecksRuleFlags(cmd *cobra.Command) {
+// addChecksChangelogFlags registers the flags for the changelog listing.
+// --lang belongs here and not on the validate listing: these descriptions are
+// localized, and --tags likewise, since only these rules carry tags.
+func addChecksChangelogFlags(cmd *cobra.Command) {
 	addChecksFormatFlags(cmd)
-	enumWithOptions(cmd, newEnumSliceValue([]string{"info", "warn", "error"}, nil), "severity", "s", "include only checks with any of specified severities")
+	addChecksSeverityFlag(cmd)
 	enumWithOptions(cmd, newEnumSliceValue(getAllTags(), nil), "tags", "t", "include only checks with all specified tags")
+	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 }
 
-// addChecksFormatFlags registers the output flags every checks listing needs.
+// addChecksValidateFlags registers the flags for the validate listing: output
+// and severity only. The descriptions are plain English rather than localized
+// (a finding's text comes from the parser at runtime), so --lang would have
+// nothing to translate, and validate rules carry no tags.
+func addChecksValidateFlags(cmd *cobra.Command) {
+	addChecksFormatFlags(cmd)
+	addChecksSeverityFlag(cmd)
+}
+
+// addChecksFormatFlags registers the output format flag every listing needs.
 func addChecksFormatFlags(cmd *cobra.Command) {
-	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 	enumWithOptions(cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChecks), string(formatters.FormatText)), "format", "f", "output format")
+}
+
+// addChecksSeverityFlag registers --severity, which both listings support now
+// that a validate rule has a severity of its own.
+func addChecksSeverityFlag(cmd *cobra.Command) {
+	enumWithOptions(cmd, newEnumSliceValue([]string{"info", "warn", "error"}, nil), "severity", "s", "include only checks with any of specified severities")
+}
+
+// matchSeverity reports whether level passes the --severity filter. An empty
+// filter matches every rule. The flag's values are the short forms, which do
+// not all match Level.String(), so this switches on the level itself.
+func matchSeverity(severity []string, level checker.Level) bool {
+	if len(severity) == 0 {
+		return true
+	}
+	switch level {
+	case checker.ERR:
+		return slices.Contains(severity, "error")
+	case checker.WARN:
+		return slices.Contains(severity, "warn")
+	case checker.INFO:
+		return slices.Contains(severity, "info")
+	}
+	return true
 }
 
 func runChecks(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
@@ -82,7 +114,7 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 		Language: flags.getLang(),
 	})
 	if err != nil {
-		return getErrUnsupportedFormat(format, checksCmd)
+		return getErrUnsupportedFormat(format, checksChangelogCmd)
 	}
 
 	localizer := checker.NewLocalizer(flags.getLang())
@@ -91,17 +123,8 @@ func outputChecks(stdout io.Writer, flags *Flags, rules []checker.BackwardCompat
 	severity := flags.getSeverity()
 	checks := make(formatters.Checks, 0, len(rules))
 	for _, rule := range rules {
-		// severity
-		if len(severity) > 0 {
-			if rule.Level == checker.ERR && !slices.Contains(severity, "error") {
-				continue
-			}
-			if rule.Level == checker.WARN && !slices.Contains(severity, "warn") {
-				continue
-			}
-			if rule.Level == checker.INFO && !slices.Contains(severity, "info") {
-				continue
-			}
+		if !matchSeverity(severity, rule.Level) {
+			continue
 		}
 
 		// tags

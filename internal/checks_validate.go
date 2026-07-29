@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/oasdiff/oasdiff/checker/localizations"
+
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/validate"
 	"github.com/spf13/cobra"
@@ -18,12 +20,9 @@ const checksValidateCmd = "checks validate"
 func getChecksValidateCmd() *cobra.Command {
 
 	cmd := cobra.Command{
-		Use:   "validate",
-		Short: "Display validate rule IDs",
-		Long: `Display the rule IDs that 'oasdiff validate' can report.
-
-IDs are stable: new ones may be added in later releases, but an existing ID is
-never renamed or repurposed, so external tooling can depend on them.`,
+		Use:               "validate",
+		Short:             "Display validate checks",
+		Long:              `Display a list of all supported validate checks.`,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE:              getRun(runChecksValidate),
@@ -31,7 +30,7 @@ never renamed or repurposed, so external tooling can depend on them.`,
 
 	// No severity / tags filters: unlike a breaking-change rule, a validate rule
 	// carries no tags, and there is no --severity-levels equivalent to reflect.
-	addChecksFormatFlags(&cmd)
+	addChecksValidateFlags(&cmd)
 
 	return &cmd
 }
@@ -44,8 +43,10 @@ func outputValidateRuleIDs(stdout io.Writer, flags *Flags) *ReturnError {
 
 	format := flags.getFormat()
 
+	// The default language, not flags.getLang(): these descriptions are plain
+	// English, so the validate listing registers no --lang to read.
 	formatter, err := formatters.Lookup(format, formatters.FormatterOpts{
-		Language: flags.getLang(),
+		Language: localizations.LangDefault,
 	})
 	if err != nil {
 		return getErrUnsupportedFormat(format, checksValidateCmd)
@@ -54,13 +55,18 @@ func outputValidateRuleIDs(stdout io.Writer, flags *Flags) *ReturnError {
 	// RuleIDs() is already sorted. Level comes from the same mapping the
 	// runtime classifier uses, so the listing cannot advertise a severity a
 	// finding won't carry.
+	severity := flags.getSeverity()
 	ids := validate.RuleIDs()
 	checks := make(formatters.Checks, 0, len(ids))
 	for _, id := range ids {
+		level := validate.RuleLevel(id)
+		if !matchSeverity(severity, level) {
+			continue
+		}
 		checks = append(checks, formatters.Check{
 			Id:          id,
 			Description: validate.RuleDescription(id),
-			Level:       validate.RuleLevel(id).String(),
+			Level:       level.String(),
 		})
 	}
 

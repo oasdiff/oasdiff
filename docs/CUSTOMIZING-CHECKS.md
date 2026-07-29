@@ -19,7 +19,7 @@ newBackwardCompatibilityRule(RequestParameterBecameNotNullableId, ERR, RequestPa
 - **Direction / Area / Kind / Action** classify the rule in the taxonomy. `TestRuleSymmetry` audits it: a rule with no mirror across an axis fails the build unless the asymmetry is waived with a reason in [checker/rule_symmetry_test.go](../checker/rule_symmetry_test.go). When you add a check, add its mirror too, or record why it is intentionally absent.
 
 ## Localized Messages
-1. For each id, add two keys in **all four locales** under [checker/localizations_src](../checker/localizations_src) (en, es, pt-br, ru): the message (`request-parameter-became-not-nullable: the %s request parameter %s became not nullable`) and the description (`request-parameter-became-not-nullable-description: ...`), which the `oasdiff checks` command and the rule catalog display. If a translation isn't ready, copy the English text as a placeholder so the key exists.
+1. For each id, add two keys in **all four locales** under [checker/localizations_src](../checker/localizations_src) (en, es, pt-br, ru): the message (`request-parameter-became-not-nullable: the %s request parameter %s became not nullable`) and the description (`request-parameter-became-not-nullable-description: ...`), which the `oasdiff checks changelog` command and the rule catalog display. If a translation isn't ready, copy the English text as a placeholder so the key exists.
 2. Run `make localize` to regenerate [checker/localizations/localizations.go](../checker/localizations/localizations.go).
 
 ## Tests

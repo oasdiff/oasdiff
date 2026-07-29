@@ -1,11 +1,16 @@
 # Checks
-The `oasdiff checks` command displays all checks that oasdiff uses to detect API changes.
-Checks are the individual rules that `oasdiff breaking` and `oasdiff changelog` apply when comparing two OpenAPI specs.
+The `oasdiff checks` command displays the rules oasdiff applies. There is one listing per rule set:
+
+- `oasdiff checks changelog` — the checks that `oasdiff breaking` and `oasdiff changelog` apply when comparing two specs. The rest of this page describes these.
+- `oasdiff checks validate` — the rules `oasdiff validate` reports for a single spec.
+
 This command is typically used to explore what oasdiff can detect or to identify check IDs for ignoring or customizing specific rules.
+
+`oasdiff checks` on its own prints the two subcommands: a listing always names its rule set.
 
 ## Example: display all checks
 ```
-oasdiff checks
+oasdiff checks changelog
 ```
 
 ## Output Formats
@@ -18,9 +23,9 @@ Additional formats can be generated using the `--format` flag:
 ## Filtering by Severity
 Use `--severity` to show only checks at a given level:
 ```
-oasdiff checks --severity error
-oasdiff checks --severity warn
-oasdiff checks --severity info
+oasdiff checks changelog --severity error
+oasdiff checks changelog --severity warn
+oasdiff checks changelog --severity info
 ```
 
 Checks are categorized into three severity levels:
@@ -28,7 +33,7 @@ Checks are categorized into three severity levels:
 - `warn` — potential breaking changes which cannot be confirmed programmatically
 - `info` — non-breaking changes
 
-Run `oasdiff checks` for the current list, or browse the full catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes).
+Run `oasdiff checks changelog` for the current list, or browse the full catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes).
 
 ## Categorization
 Every check is categorized along independent axes, emitted as fields in the `json` and `yaml` output:
@@ -41,8 +46,8 @@ Every check is categorized along independent axes, emitted as fields in the `jso
 ## Filtering by Tag
 Use `--tags` to show only checks in a specific area, kind, action, or direction:
 ```
-oasdiff checks --tags request,parameters
-oasdiff checks --tags schema,constraints
+oasdiff checks changelog --tags request,parameters
+oasdiff checks changelog --tags schema,constraints
 ```
 
 Available tags: `request`, `response`, `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`.
@@ -52,9 +57,19 @@ Multiple tags are combined with AND — only checks that match all specified tag
 ## Localization
 Use `--lang` to view check descriptions in a supported language:
 ```
-oasdiff checks --lang ru
+oasdiff checks changelog --lang ru
 ```
 Supported languages: `en` (default), `ru`, `pt-br`, `es`.
+
+Only the changelog listing takes `--lang`. The validate rule descriptions are not localized.
+
+## Validate checks
+`oasdiff checks validate` lists the rules `oasdiff validate` reports, with the same `--format` and `--severity` flags:
+```
+oasdiff checks validate
+oasdiff checks validate --severity error --format json
+```
+It takes no `--tags` (validate rules carry none) and no `--lang`.
 
 ## Using Check IDs
 Each check has a unique ID (e.g. `api-path-removed-without-deprecation`) which can be used to:
