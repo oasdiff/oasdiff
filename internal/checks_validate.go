@@ -14,7 +14,7 @@ import (
 const checksValidateCmd = "checks validate"
 
 // getChecksValidateCmd lists the rules `oasdiff validate` can report, the
-// counterpart of `oasdiff checks` for the breaking-change rules.
+// counterpart of `oasdiff checks changelog` for the breaking-change rules.
 //
 // The IDs are stable API, which is what a CI dashboard needs.
 func getChecksValidateCmd() *cobra.Command {

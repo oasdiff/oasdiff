@@ -70,7 +70,8 @@ The top-level subcommands.
 - [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
 - [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade) — canonicalize an OpenAPI 3.0 spec to the latest 3.x
 - [`validate`](VALIDATE.md) — check a single spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)
-- [`checks`](CHECKS.md) — list the rules oasdiff uses to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
+- [`checks changelog`](CHECKS.md) — list the rules `breaking` and `changelog` use to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
+- [`checks validate`](CHECKS.md#validate-checks) — list the rules `validate` reports
 - [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
 - [`git-diff-driver`](GIT-DIFF-DRIVER.md) — run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
 
