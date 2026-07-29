@@ -30,7 +30,26 @@ func Test_ChecksRequiresASubcommand(t *testing.T) {
 func Test_ChecksUnknownSubcommandFails(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks chnagelog"), &stdout, &stderr))
-	require.Contains(t, stderr.String(), `unknown command "chnagelog" for "oasdiff checks"`)
+	// Same shape as the top-level form, so the same mistake reads the same at
+	// either depth: the error, then the hint, and no wall of usage text.
+	require.Equal(t,
+		"Error: unknown command \"chnagelog\" for \"oasdiff checks\"\nRun 'oasdiff checks --help' for usage.\n",
+		stderr.String())
+	require.Empty(t, stdout.String())
+}
+
+// The top-level form is the reference for the message above.
+func Test_UnknownCommandShapeMatchesTopLevel(t *testing.T) {
+	var top, nested bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff bogus"), io.Discard, &top))
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks bogus"), io.Discard, &nested))
+
+	require.Equal(t,
+		"Error: unknown command \"bogus\" for \"oasdiff\"\nRun 'oasdiff --help' for usage.\n",
+		top.String())
+	require.Equal(t,
+		"Error: unknown command \"bogus\" for \"oasdiff checks\"\nRun 'oasdiff checks --help' for usage.\n",
+		nested.String())
 }
 
 // The parent carries no listing flags, so an old `oasdiff checks --format json`

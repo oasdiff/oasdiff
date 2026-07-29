@@ -29,7 +29,7 @@ func getChecksCmd() *cobra.Command {
 		Use:                   "checks",
 		Short:                 "Display checks",
 		Long:                  `Display the rules oasdiff applies, one listing per rule set.`,
-		Args:                  cobra.NoArgs,
+		Args:                  noSubcommandArgs,
 		DisableFlagsInUseLine: true,
 		ValidArgsFunction:     cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -61,6 +61,33 @@ func getChecksChangelogCmd() *cobra.Command {
 	addChecksChangelogFlags(&cmd)
 
 	return &cmd
+}
+
+// noSubcommandArgs rejects a stray argument to `checks` as an unknown
+// subcommand, reported exactly as cobra reports one at the top level, so the
+// same mistake reads the same at either depth.
+//
+// Reporting it here rather than letting cobra do it: cobra only prints that
+// form when it fails to *find* a command, and `checks <typo>` resolves to
+// `checks` with a leftover argument, which otherwise prints the whole help.
+// The two lines are emitted the way cobra emits them (ErrPrefix + the hint as
+// its own line, not as part of the error string), so the error text stays free
+// of trailing punctuation and the output is byte-identical.
+func noSubcommandArgs(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return nil
+	}
+
+	err := fmt.Errorf("unknown command %q for %q", args[0], cmd.CommandPath())
+	cmd.PrintErrln(cmd.ErrPrefix(), err.Error())
+	cmd.PrintErrf("Run '%v --help' for usage.\n", cmd.CommandPath())
+
+	// Already reported, so cobra must not print it again or follow it with the
+	// usage block.
+	cmd.SilenceErrors = true
+	cmd.SilenceUsage = true
+
+	return err
 }
 
 // addChecksChangelogFlags registers the flags for the changelog listing.
