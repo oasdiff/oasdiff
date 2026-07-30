@@ -98,50 +98,11 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 	return formatters.Findings{f}
 }
 
-// severityForKinError classifies a kin validation error into a severity.
-// The default is ERR: every kin Validate result is a spec violation, so
-// errors are the safe default and any kin cluster we don't recognise (or
-// a newly-typed one) stays an error. A few clusters are downgraded
-// because the spec still parses and the issue is a portability or
-// doc-accuracy concern rather than a structural break.
-//
-// The mapping is hardcoded for now. Per-rule severity customization (like
-// the changelog command's --severity-levels) can be layered on later, so
-// these classifications aren't engraved in stone.
-//
-// Deliberately kept as errors despite being downgrade candidates:
-// duplicate-operation-id violates the spec's uniqueness MUST and breaks
-// code generators that key method names off operationId.
+// severityForKinError classifies a kin validation error into a severity by
+// its rule id, so a finding carries exactly the severity `oasdiff checks
+// validate` lists for that rule. See ruleLevels for the classifications.
 func severityForKinError(err error) checker.Level {
-	// INFO: an example that doesn't match its schema is a documentation
-	// accuracy nit; the contract (the schema) is still valid. A default,
-	// by contrast, is consumed at runtime by some tooling, so a mismatch
-	// there is a real risk and stays a warning.
-	if sve, ok := errors.AsType[*openapi3.SchemaValueError](err); ok {
-		if sve.ValueKind == "example" {
-			return checker.INFO
-		}
-		return checker.WARN
-	}
-
-	// WARN: structurally valid but a portability or correctness risk.
-	if _, ok := errors.AsType[*openapi3.FieldVersionMismatchError](err); ok {
-		// e.g. a 3.1-only field in a doc that declares an older version.
-		return checker.WARN
-	}
-	if _, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok {
-		// Fields alongside a $ref are silently ignored in 3.0 rather than
-		// breaking the spec; the author's intent is lost, not the document.
-		return checker.WARN
-	}
-	if _, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok {
-		return checker.WARN
-	}
-	if _, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok {
-		return checker.WARN
-	}
-
-	return checker.ERR
+	return RuleLevel(knownRuleID(ruleIDForKinError(err)))
 }
 
 // dedupePreferringComponents groups findings by their underlying

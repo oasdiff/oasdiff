@@ -44,7 +44,7 @@ func newDuplicateEnumFinding(s *openapi3.Schema, section string, dups []string, 
 	f := formatters.Finding{
 		Id:      DuplicateEnumValueID,
 		Text:    fmt.Sprintf("enum contains duplicate value(s): %s", strings.Join(quoted, ", ")),
-		Level:   checker.WARN,
+		Level:   RuleLevel(DuplicateEnumValueID),
 		Section: section,
 		Source: formatters.Source{
 			File:   source,

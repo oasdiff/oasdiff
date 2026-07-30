@@ -44,3 +44,24 @@ func TestKnownRuleID_GatesUnregisteredCodes(t *testing.T) {
 	require.Equal(t, unknownValidationID, knownRuleID(unregistered), "an unregistered code is demoted")
 	require.Equal(t, "oauth-flow-scopes-required", knownRuleID("oauth-flow-scopes-required"), "a registered code passes through")
 }
+
+// Every rule the command can list has a description, so `oasdiff checks
+// validate` never prints a blank cell. A kin bump that adds a code fails
+// TestRuleIDs_MatchKinCatalog first; this then requires it to be described.
+func TestRuleDescriptions_CoverEveryRuleID(t *testing.T) {
+	for _, id := range RuleIDs() {
+		require.NotEmpty(t, RuleDescription(id), "rule %q has no description", id)
+	}
+}
+
+func TestRuleDescription_UnknownID(t *testing.T) {
+	require.Empty(t, RuleDescription("not-a-rule"))
+}
+
+// The version-gate description is derived from the ID, so a newly gated field
+// upstream is described without touching the table.
+func TestRuleDescription_VersionGateIsDerived(t *testing.T) {
+	require.Equal(t, "field is only valid in OpenAPI 3.1 or later", RuleDescription("const-field-for-3-1-plus"))
+	require.Equal(t, "field is only valid in OpenAPI 3.2 or later", RuleDescription("item-schema-field-for-3-2-plus"))
+	require.Equal(t, "field is only valid in OpenAPI 3.1 or later", RuleDescription("some-future-field-for-3-1-plus"))
+}

@@ -30,7 +30,7 @@ The comparison is encrypted on your machine before upload, with a one-time key t
 The resulting URL works for 7 days. Paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Anyone you give the full link to can open it (the part after the `#` is the decryption key), so treat it like a secret.
 
 ## Checks
-Oasdiff supports hundreds of checks (run `oasdiff checks` for the current list, or browse the full catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes)), categorized into three levels:  
+Oasdiff supports hundreds of checks (run `oasdiff checks changelog` for the current list, or browse the full catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes)), categorized into three levels:  
 - `ERR` - Errors are definite breaking changes which should be avoided
 - `WARN` - Warnings are potential breaking changes which developers should be aware of, but cannot be confirmed programmatically as breaking
 - `INFO` - Non-breaking changes
@@ -40,7 +40,7 @@ Oasdiff supports hundreds of checks (run `oasdiff checks` for the current list, 
 
 To see the full list of checks and their descriptions, run:
 ```
-oasdiff checks
+oasdiff checks changelog
 ```
 See also [Customizing Severity Levels](#customizing-severity-levels)
 
@@ -146,7 +146,7 @@ Currently English, Russian and Brazilian Portuguese are supported.
 
 ## Customizing Severity Levels
 Oasdiff allows you to change the default severity levels according to your needs.  
-For example, the default severity level of the `api-security-removed` check is `INFO`. You can verify this by running `oasdiff checks`.  
+For example, the default severity level of the `api-security-removed` check is `INFO`. You can verify this by running `oasdiff checks changelog`.  
 To change the `api-security-removed` check's severity level to `ERR` use the following command:
 ```
 oasdiff changelog data/checker/api_security_added_revision.yaml data/checker/api_security_added_base.yaml --severity-levels oasdiff-levels.txt
@@ -166,7 +166,7 @@ Checks can be customized with the following levels:
 
 ## Customizing Breaking Changes Checks
 If you encounter a change that isn't reported, you may:
-1. Run `oasdiff checks` to see if the check is available, and [customize the level as needed](#customizing-severity-levels).  
+1. Run `oasdiff checks changelog` to see if the check is available, and [customize the level as needed](#customizing-severity-levels).  
 2. Add a [custom check](CUSTOMIZING-CHECKS.md)
 
 ## Known Limitations

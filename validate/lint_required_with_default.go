@@ -59,7 +59,7 @@ func newRequiredWithDefaultFinding(text, section, name string, line, column int,
 	f := formatters.Finding{
 		Id:      RequiredWithDefaultID,
 		Text:    text,
-		Level:   checker.WARN,
+		Level:   RuleLevel(RequiredWithDefaultID),
 		Section: section,
 		Source: formatters.Source{
 			File:   source,

@@ -460,7 +460,7 @@ func Test_AutoUpgradeDiff_SameVersionIsHarmless(t *testing.T) {
 }
 
 func Test_Checks(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks -l ru --tags decrease,parameters --severity info,warn,error"), io.Discard, io.Discard))
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags decrease,parameters --severity info,warn,error"), io.Discard, io.Discard))
 }
 
 func Test_Color(t *testing.T) {
