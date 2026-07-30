@@ -16,7 +16,7 @@ func nullableWrapChanges(t *testing.T, base, revision string) []string {
 	require.NoError(t, err)
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(checker.NewConfig(checker.GetAllChecks(), withoutVersioningPolicy()), d, osm, checker.INFO)
 	ids := make([]string, 0, len(errs))
 	for _, e := range errs {
 		ids = append(ids, e.GetId())

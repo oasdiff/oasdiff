@@ -170,7 +170,7 @@ func TestListOfTypes_SuppressionWhenRunWithTypeAndOneOfChecks(t *testing.T) {
 		checker.ResponsePropertyAnyOfUpdatedCheck,
 		checker.RequestPropertyListOfTypesChangedCheck,
 		checker.ResponsePropertyListOfTypesChangedCheck,
-	})
+	}, withoutVersioningPolicy())
 
 	for _, tc := range []struct {
 		name       string

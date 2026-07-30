@@ -26,43 +26,76 @@ func versioningPolicyIds(t *testing.T, baseVersion, revisionVersion string) chec
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	return checker.CheckBackwardCompatibilityUntilLevel(
-		singleCheckConfig(checker.RequestPropertyRequiredUpdatedCheck), d, osm, checker.INFO)
+	// Not singleCheckConfig: that switches the versioning policy off (see its
+	// comment), which is exactly what these tests exercise.
+	check := checker.RequestPropertyRequiredUpdatedCheck
+	config := checker.NewConfig(checker.BackwardCompatibilityChecks{check}, checker.WithSingleCheck(check))
+
+	return checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
 }
 
-func requireVersioningPolicy(t *testing.T, baseVersion, revisionVersion string) {
+// requireViolation asserts the policy reported exactly the given id.
+func requireViolation(t *testing.T, baseVersion, revisionVersion, id string) {
 	t.Helper()
 	changes := versioningPolicyIds(t, baseVersion, revisionVersion)
-	require.True(t, containsId(changes, checker.APIMajorVersionNotBumpedId),
-		"expected %s for %q -> %q", checker.APIMajorVersionNotBumpedId, baseVersion, revisionVersion)
+	require.True(t, containsId(changes, id),
+		"expected %s for %q -> %q, got %v", id, baseVersion, revisionVersion, ids(changes))
+	for _, other := range versioningIds {
+		if other != id {
+			require.False(t, containsId(changes, other),
+				"expected only %s for %q -> %q, also got %s", id, baseVersion, revisionVersion, other)
+		}
+	}
+}
+
+var versioningIds = []string{
+	checker.APIVersionNotBumpedId,
+	checker.APIVersionDecreasedId,
+	checker.APIMajorVersionNotBumpedId,
+}
+
+func ids(changes checker.Changes) []string {
+	out := make([]string, 0, len(changes))
+	for _, c := range changes {
+		out = append(out, c.GetId())
+	}
+	return out
 }
 
 func requireVersioningPolicySilent(t *testing.T, baseVersion, revisionVersion string) {
 	t.Helper()
 	changes := versioningPolicyIds(t, baseVersion, revisionVersion)
-	require.False(t, containsId(changes, checker.APIMajorVersionNotBumpedId),
-		"expected silence for %q -> %q", baseVersion, revisionVersion)
+	for _, id := range versioningIds {
+		require.False(t, containsId(changes, id),
+			"expected silence for %q -> %q, got %s", baseVersion, revisionVersion, id)
+	}
 	// The breaking change itself must still be reported: the policy adds a
 	// finding, it never suppresses one.
 	require.True(t, containsId(changes, checker.RequestPropertyBecameRequiredId))
 }
 
 func TestVersioningPolicy_BreakingChangeWithoutMajorBump(t *testing.T) {
-	requireVersioningPolicy(t, "1.0.0", "1.1.0")
-	requireVersioningPolicy(t, "1.0.0", "1.0.1")
-	requireVersioningPolicy(t, "v1.0.0", "v1.1.0")
+	requireViolation(t, "1.0.0", "1.1.0", checker.APIMajorVersionNotBumpedId)
+	requireViolation(t, "1.0.0", "1.0.1", checker.APIMajorVersionNotBumpedId)
+	requireViolation(t, "v1.0.0", "v1.1.0", checker.APIMajorVersionNotBumpedId)
+}
+
+// The worst violation of the policy: shipping a breaking change under the same
+// version the previous release used.
+func TestVersioningPolicy_BreakingChangeWithoutAnyBump(t *testing.T) {
+	requireViolation(t, "1.0.0", "1.0.0", checker.APIVersionNotBumpedId)
+	requireViolation(t, "0.3.1", "0.3.1", checker.APIVersionNotBumpedId)
+}
+
+func TestVersioningPolicy_BreakingChangeWithVersionDecrease(t *testing.T) {
+	requireViolation(t, "2.0.0", "1.0.0", checker.APIVersionDecreasedId)
+	requireViolation(t, "1.2.0", "1.1.0", checker.APIVersionDecreasedId)
+	requireViolation(t, "1.0.1", "1.0.0", checker.APIVersionDecreasedId)
 }
 
 func TestVersioningPolicy_MajorBumpIsSilent(t *testing.T) {
 	requireVersioningPolicySilent(t, "1.0.0", "2.0.0")
 	requireVersioningPolicySilent(t, "1.9.3", "2.0.0")
-}
-
-// An unchanged version is not evidence of a missed bump: it is the normal
-// state of a spec that doesn't use info.version as a release signal, so the
-// policy says nothing rather than firing on nearly every comparison.
-func TestVersioningPolicy_UnchangedVersionIsSilent(t *testing.T) {
-	requireVersioningPolicySilent(t, "1.0.0", "1.0.0")
 }
 
 // Anything that isn't semver leaves the policy with no definition of a major
@@ -84,19 +117,12 @@ func TestVersioningPolicy_NonSemverIsSilent(t *testing.T) {
 // a breaking change and a patch bump does not.
 func TestVersioningPolicy_PreOneZero(t *testing.T) {
 	requireVersioningPolicySilent(t, "0.1.0", "0.2.0")
-	requireVersioningPolicy(t, "0.1.0", "0.1.1")
-}
-
-// A version moving backwards is a different question, deliberately unjudged
-// (see the symmetry waiver for this rule).
-func TestVersioningPolicy_DecreaseIsSilent(t *testing.T) {
-	requireVersioningPolicySilent(t, "2.0.0", "1.0.0")
-	requireVersioningPolicySilent(t, "1.2.0", "1.1.0")
+	requireViolation(t, "0.1.0", "0.1.1", checker.APIMajorVersionNotBumpedId)
 }
 
 // Prerelease and build metadata don't decide which number was bumped.
 func TestVersioningPolicy_PrereleaseAndBuildMetadata(t *testing.T) {
-	requireVersioningPolicy(t, "1.0.0", "1.1.0-rc.1")
+	requireViolation(t, "1.0.0", "1.1.0-rc.1", checker.APIMajorVersionNotBumpedId)
 	requireVersioningPolicySilent(t, "1.0.0", "2.0.0+build.5")
 }
 
@@ -128,6 +154,10 @@ func TestVersioningPolicy_NonBreakingChangeIsSilent(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
-	require.False(t, containsId(changes, checker.APIMajorVersionNotBumpedId))
+	// allChecksConfig would switch the policy off, making this vacuous.
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+	for _, id := range versioningIds {
+		require.False(t, containsId(changes, id))
+	}
 }

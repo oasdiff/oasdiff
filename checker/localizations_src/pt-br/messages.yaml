@@ -19,6 +19,8 @@ request-property-pattern-changed: "alterado o padrão da propriedade de requisi�
 request-property-pattern-generalized: "alterado o padrão da propriedade de requisição %s de %s para um padrão mais geral %s"
 api-deprecated-sunset-parse: "falha ao analisar a data de depreciação: %v"
 api-path-sunset-parse: "falha ao analisar a data de depreciação: %v"
+api-version-not-bumped: "uma mudança incompatível foi detectada mas a versão continua sendo %s"
+api-version-decreased: "uma mudança incompatível foi detectada mas a versão diminuiu de %s para %s"
 api-major-version-not-bumped: "uma mudança incompatível foi detectada mas a versão maior não aumentou, de %s para %s"
 api-stability-decreased: "nível de estabilidade do endpoint reduzido de %s para %s"
 api-stability-increased: "nível de estabilidade do endpoint aumentado de %s para %s"
@@ -265,6 +267,8 @@ api-global-security-removed: o esquema de segurança %s foi removido da api
 api-global-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança global %s
 api-global-security-scope-added: o escopo de segurança %s foi adicionado ao esquema de segurança global %s
 api-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança do endpoint %s
+api-version-not-bumped-description: uma mudança incompatível foi detectada mas a versão não foi incrementada
+api-version-decreased-description: uma mudança incompatível foi detectada mas a versão diminuiu
 api-major-version-not-bumped-description: uma mudança incompatível foi detectada mas a versão maior não aumentou
 api-stability-decreased-description: o nível de estabilidade do endpoint foi reduzido
 api-stability-increased-description: o nível de estabilidade do endpoint foi aumentado

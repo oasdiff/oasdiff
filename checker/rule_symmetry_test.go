@@ -34,8 +34,6 @@ var symmetryWaivers = map[string]string{
 	// --- add <-> remove (same direction/area/kind) ---
 	"add<->remove none/paths/lifecycle missing-add": "a sunset date being added is part of the deprecation flow and is reported by the deprecation rules; only its removal (sunset-deleted) is a standalone change.",
 
-	"increase<->decrease none/info/lifecycle missing-decrease": "the mirror would report info.version decreasing. Whether that is a violation is undecided (re-releasing an older version is unusual but not necessarily wrong), so no rule claims it; the versioning policy only judges whether a bump was large enough for the changes it carries.",
-
 	// --- generalize <-> specialize (same direction/area/kind) ---
 	"generalize<->specialize request/schema/type missing-specialize":            "narrowing a request type is breaking and already reported by request-*-type-changed (ERR); the generalize rule exists only to carve out the safe widening as INFO.",
 	"generalize<->specialize request/schema/constraints missing-specialize":     "tightening a request pattern is reported by request-*-pattern-changed; the generalize rule carves out the safe loosening.",

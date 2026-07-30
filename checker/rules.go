@@ -223,6 +223,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		// the checks, since it judges info.version against what they found.
 		// INFO by default so it is quiet for teams that don't version with
 		// semver; raise with --severity-levels to enforce.
+		newBackwardCompatibilityRule(APIVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, ActionChange),
+		newBackwardCompatibilityRule(APIVersionDecreasedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, ActionDecrease),
 		newBackwardCompatibilityRule(APIMajorVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, ActionIncrease),
 		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, ActionDecrease),

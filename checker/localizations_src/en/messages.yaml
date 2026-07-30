@@ -19,6 +19,8 @@ request-property-pattern-changed: "changed the pattern of the request property %
 request-property-pattern-generalized: "changed the pattern of the request property %s from %s to a more general pattern %s"
 api-deprecated-sunset-parse: "failed to parse sunset date: %v"
 api-path-sunset-parse: "failed to parse sunset date: %v"
+api-version-not-bumped: "a breaking change was detected but the version is still %s"
+api-version-decreased: "a breaking change was detected but the version decreased from %s to %s"
 api-major-version-not-bumped: "a breaking change was detected but the major version did not increase, from %s to %s"
 api-stability-decreased: "endpoint stability level decreased from %s to %s"
 api-stability-increased: "endpoint stability level increased from %s to %s"
@@ -268,6 +270,8 @@ api-global-security-removed: the security scheme %s was removed from the API
 api-global-security-scope-removed: the security scope %s was removed from the global security scheme %s
 api-global-security-scope-added: the security scope %s was added to the global security scheme %s
 api-security-scope-removed: the security scope %s was removed from the endpoint's security scheme %s
+api-version-not-bumped-description: a breaking change was detected but the version was not bumped
+api-version-decreased-description: a breaking change was detected but the version decreased
 api-major-version-not-bumped-description: a breaking change was detected but the major version did not increase
 api-stability-decreased-description: endpoint stability level decreased
 api-stability-increased-description: endpoint stability level increased
