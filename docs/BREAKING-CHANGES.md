@@ -103,6 +103,10 @@ Assigning [stability levels](STABILITY.md) to APIs allows fine-grained control o
 Before deleting an endpoint, it is recommended to give consumers a heads-up in the form of "deprecation". 
 Oasdiff allows you to [deprecate APIs gracefully](DEPRECATION.md) without triggering a breaking-change error.
 
+## Version Bumps
+If you use semantic versioning, oasdiff can report a breaking change that was released without a major version bump.
+See [Version Bumps and Breaking Changes](VERSIONING.md).
+
 ## Nullability Changes
 A schema can allow `null` in three equivalent ways, and whether a nullability change is breaking depends on whether it appears in a request or a response.
 See [Nullability Changes](NULLABILITY.md).

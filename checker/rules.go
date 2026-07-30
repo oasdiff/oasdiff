@@ -27,12 +27,13 @@ const (
 	AreaSecurity
 	AreaTags
 	AreaComponents
-	// AreaInfo and AreaServers have no rules yet: info is annotation-only
-	// (title, description, version never affect the wire contract), and
-	// server changes are treated as deployment metadata. They exist so the
-	// area taxonomy covers every top-level document section a future rule
-	// could target.
+	// AreaInfo's rules judge the versioning policy, not the wire contract:
+	// info is annotation-only, so nothing in it can break a client, but
+	// info.version is the declared shape of the change and can contradict it.
 	AreaInfo
+	// AreaServers has no rules yet: server changes are treated as deployment
+	// metadata. It exists so the area taxonomy covers every top-level
+	// document section a future rule could target.
 	AreaServers
 	AreaNone
 )
@@ -218,6 +219,13 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityAddedCheckId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, ActionRemove),
+		// Versioning policy: run as part of CheckBackwardCompatibility, after
+		// the checks, since it judges info.version against what they found.
+		// INFO by default so it is quiet for teams that don't version with
+		// semver; raise with --severity-levels to enforce.
+		newBackwardCompatibilityRule(APIVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, ActionChange),
+		newBackwardCompatibilityRule(APIVersionDecreasedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, ActionDecrease),
+		newBackwardCompatibilityRule(APIMajorVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, ActionIncrease),
 		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, ActionDecrease),
 		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, AreaPaths, KindLifecycle, ActionIncrease),

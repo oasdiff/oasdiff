@@ -93,12 +93,26 @@ func stabilityChanges(t *testing.T, baseFile, revisionFile string, sl checker.St
 	return checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
 }
 
+// withoutVersioningPolicy switches off the versioning rules. They run on
+// whatever the checks found rather than on a spec element, so without this
+// they add a finding to every test whose fixture carries a breaking change
+// under an unbumped semver version, which is most of them. Tests that
+// exercise the policy build their own config; see versioning_policy_test.go.
+func withoutVersioningPolicy() checker.Option {
+	return checker.WithSeverityLevels(map[string]checker.Level{
+		checker.APIVersionNotBumpedId:      checker.NONE,
+		checker.APIVersionDecreasedId:      checker.NONE,
+		checker.APIMajorVersionNotBumpedId: checker.NONE,
+	})
+}
+
 func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
-	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, append([]checker.Option{checker.WithSingleCheck(c)}, opts...)...)
+	opts = append([]checker.Option{checker.WithSingleCheck(c), withoutVersioningPolicy()}, opts...)
+	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, opts...)
 }
 
 func allChecksConfig(opts ...checker.Option) *checker.Config {
-	return checker.NewConfig(checker.GetAllChecks(), opts...)
+	return checker.NewConfig(checker.GetAllChecks(), append([]checker.Option{withoutVersioningPolicy()}, opts...)...)
 }
 
 // findChange returns the first Change with the given id, or nil if none match.

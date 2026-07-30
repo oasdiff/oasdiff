@@ -102,6 +102,7 @@ Communicate intent across versions.
 
 - [Deprecate APIs and parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md) (draft / alpha / beta / stable)
+- [Version bumps](VERSIONING.md) — report a breaking change released without a major version bump
 
 ### Filtering changes
 Choose which kinds of differences are reported.

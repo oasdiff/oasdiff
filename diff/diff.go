@@ -31,6 +31,22 @@ type Diff struct {
 	ExternalDocsDiff      *ExternalDocsDiff         `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
 	ComponentsDiff        *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
 	JSONSchemaDialectDiff *ValueDiff                `json:"jsonSchemaDialect,omitempty" yaml:"jsonSchemaDialect,omitempty"`
+
+	// BaseInfo and RevisionInfo are the info object from each spec, carried as
+	// context for checkers that judge it against the changes (see the
+	// versioning policy in checker). Same Base/Revision convention as
+	// PathsDiff, SchemaDiff and the rest.
+	//
+	// They live here rather than on InfoDiff because InfoDiff is nil exactly
+	// when info is unchanged, which is the case the versioning policy cares
+	// about most, and making it non-nil would emit "info": {} into every diff
+	// whose info did not change.
+	//
+	// Set only on a non-empty diff, which keeps Empty() (a struct comparison)
+	// meaning what it says: a diff carrying nothing else carries no info
+	// either. Excluded from output because they are context, not a change.
+	BaseInfo     *openapi3.Info `json:"-" yaml:"-"`
+	RevisionInfo *openapi3.Info `json:"-" yaml:"-"`
 }
 
 // OperationsSourcesMap maps OpenAPI operations to their source file paths
@@ -256,6 +272,8 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	if diff.Empty() {
 		return nil, nil
 	}
+
+	diff.BaseInfo, diff.RevisionInfo = s1.Info, s2.Info
 
 	return diff, nil
 }
