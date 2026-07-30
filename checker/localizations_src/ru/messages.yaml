@@ -15,6 +15,7 @@ request-property-pattern-changed: изменён pattern у поля запро�
 request-property-pattern-generalized: изменил шаблон поля запроса %s со значения %s на более общее значение %s
 api-deprecated-sunset-parse: "не удалось проанализировать дату заката: %v"
 api-path-sunset-parse: "не удалось проанализировать дату заката: %v"
+api-major-version-not-bumped: "обнаружено обратно несовместимое изменение, но мажорная версия не увеличилась, с %s до %s"
 api-stability-decreased: "уровень стабильности конечной точки уменьшен с %s до %s"
 api-stability-increased: "уровень стабильности конечной точки увеличен с %s до %s"
 request-property-stability-decreased: "уровень стабильности свойства запроса %s уменьшен с %s до %s"
@@ -399,6 +400,7 @@ api-security-component-type-changed-description: тип схемы безопа�
 api-security-removed-description: требования безопасности удалены из эндпоинта
 api-security-scope-added-description: разрешение добавлено к схеме безопасности эндпоинта
 api-security-scope-removed-description: разрешение удалено из схемы безопасности эндпоинта
+api-major-version-not-bumped-description: обнаружено обратно несовместимое изменение, но мажорная версия не увеличилась
 api-stability-decreased-description: уровень стабильности эндпоинта уменьшен
 api-stability-increased-description: уровень стабильности эндпоинта увеличен
 request-property-stability-decreased-description: уровень стабильности свойства запроса уменьшен

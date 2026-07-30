@@ -40,6 +40,11 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		result = append(result, errs...)
 	}
 
+	// After the checks: the versioning policy judges info.version against what
+	// they found, so it needs their output. Before the filter below, so it sees
+	// changes of every level.
+	result = applyVersioningPolicy(config, diffReport, result)
+
 	filteredResult := make(Changes, 0)
 	for _, change := range result {
 		if apiChange, ok := change.(ApiChange); ok && apiChange.claimed {

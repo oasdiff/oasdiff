@@ -330,7 +330,7 @@ func Test_ChangelogWithAttributes(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test3.yaml --attributes x-beta,x-extension-test -f yaml"), &stdout, io.Discard))
 	cl := formatters.Changes{}
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &cl))
-	require.Len(t, cl, 21)
+	require.Len(t, cl, 22)
 	require.Equal(t, map[string]any{"x-beta": true, "x-extension-test": any(nil)}, cl[12].Attributes)
 }
 

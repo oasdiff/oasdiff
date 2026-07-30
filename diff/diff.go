@@ -31,6 +31,24 @@ type Diff struct {
 	ExternalDocsDiff      *ExternalDocsDiff         `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
 	ComponentsDiff        *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
 	JSONSchemaDialectDiff *ValueDiff                `json:"jsonSchemaDialect,omitempty" yaml:"jsonSchemaDialect,omitempty"`
+
+	// Versions carries info.version from both specs as context for checkers
+	// that judge the version against the changes (see checker's versioning
+	// policy). InfoDiff can't serve that purpose: it is nil when the version
+	// is unchanged, which is precisely the case a versioning policy cares
+	// about most.
+	//
+	// Set only on a non-empty diff, which keeps Empty() (a struct comparison)
+	// meaning what it says: a diff carrying nothing else carries no versions
+	// either. Excluded from output because it is context, not a change.
+	Versions *VersionPair `json:"-" yaml:"-"`
+}
+
+// VersionPair is info.version on each side of the diff. Either side is empty
+// when the spec has no info object.
+type VersionPair struct {
+	Base     string
+	Revision string
 }
 
 // OperationsSourcesMap maps OpenAPI operations to their source file paths
@@ -257,7 +275,16 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 		return nil, nil
 	}
 
+	diff.Versions = &VersionPair{Base: infoVersion(s1), Revision: infoVersion(s2)}
+
 	return diff, nil
+}
+
+func infoVersion(spec *openapi3.T) string {
+	if spec.Info == nil {
+		return ""
+	}
+	return spec.Info.Version
 }
 
 func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {

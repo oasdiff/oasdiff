@@ -19,6 +19,7 @@ request-property-pattern-changed: "cambiado el patrón de la propiedad de solici
 request-property-pattern-generalized: "cambiado el patrón de la propiedad de solicitud %s de %s a un patrón más general %s"
 api-deprecated-sunset-parse: "fallo al parsear la fecha de expiración: %v"
 api-path-sunset-parse: "fallo al parsear la fecha de expiración: %v"
+api-major-version-not-bumped: "se detectó un cambio incompatible pero la versión mayor no aumentó, de %s a %s"
 api-stability-decreased: "nivel de estabilidad del endpoint disminuido de %s a %s"
 api-stability-increased: "nivel de estabilidad del endpoint aumentado de %s a %s"
 request-property-stability-decreased: "nivel de estabilidad de la propiedad de solicitud %s disminuido de %s a %s"
@@ -267,6 +268,7 @@ api-global-security-removed: el esquema de seguridad %s fue removido de la api
 api-global-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad global %s
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
+api-major-version-not-bumped-description: se detectó un cambio incompatible pero la versión mayor no aumentó
 api-stability-decreased-description: el nivel de estabilidad del endpoint fue disminuido
 api-stability-increased-description: el nivel de estabilidad del endpoint fue aumentado
 request-property-stability-decreased-description: el nivel de estabilidad de la propiedad de solicitud fue disminuido
