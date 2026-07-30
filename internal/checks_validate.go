@@ -35,11 +35,20 @@ func getChecksValidateCmd() *cobra.Command {
 	return &cmd
 }
 
-func runChecksValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
-	return false, outputValidateRuleIDs(stdout, flags)
+// addChecksValidateFlags registers the flags for the validate listing: output
+// and severity only. The descriptions are plain English rather than localized
+// (a finding's text comes from the parser at runtime), so --lang would have
+// nothing to translate, and validate rules carry no tags.
+func addChecksValidateFlags(cmd *cobra.Command) {
+	addChecksFormatFlags(cmd)
+	addChecksSeverityFlag(cmd)
 }
 
-func outputValidateRuleIDs(stdout io.Writer, flags *Flags) *ReturnError {
+func runChecksValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+	return false, outputValidateRules(stdout, flags)
+}
+
+func outputValidateRules(stdout io.Writer, flags *Flags) *ReturnError {
 
 	format := flags.getFormat()
 
