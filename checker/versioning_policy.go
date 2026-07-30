@@ -57,12 +57,13 @@ func parseSemver(version string) (semver, bool) {
 // the policy enforced raise these ids with --severity-levels and gate with
 // --fail-on, like any other rule.
 func applyVersioningPolicy(config *Config, diffReport *diff.Diff, result Changes) Changes {
-	if diffReport.Versions == nil {
+	if diffReport.BaseInfo == nil || diffReport.RevisionInfo == nil {
 		return result
 	}
+	baseVersion, revisionVersion := diffReport.BaseInfo.Version, diffReport.RevisionInfo.Version
 
-	base, baseOk := parseSemver(diffReport.Versions.Base)
-	revision, revisionOk := parseSemver(diffReport.Versions.Revision)
+	base, baseOk := parseSemver(baseVersion)
+	revision, revisionOk := parseSemver(revisionVersion)
 	if !baseOk || !revisionOk {
 		return result
 	}
@@ -71,7 +72,7 @@ func applyVersioningPolicy(config *Config, diffReport *diff.Diff, result Changes
 		return result
 	}
 
-	id, args := versioningViolation(diffReport.Versions, base, revision)
+	id, args := versioningViolation(baseVersion, revisionVersion, base, revision)
 	if id == "" {
 		return result
 	}
@@ -85,14 +86,14 @@ func applyVersioningPolicy(config *Config, diffReport *diff.Diff, result Changes
 
 // versioningViolation names how this version pair fails to carry a breaking
 // change, or returns an empty id when it carries one correctly.
-func versioningViolation(versions *diff.VersionPair, base, revision semver) (string, []any) {
+func versioningViolation(baseVersion, revisionVersion string, base, revision semver) (string, []any) {
 	switch {
-	case versions.Base == versions.Revision:
-		return APIVersionNotBumpedId, []any{versions.Revision}
+	case baseVersion == revisionVersion:
+		return APIVersionNotBumpedId, []any{revisionVersion}
 	case !increased(base, revision):
-		return APIVersionDecreasedId, []any{versions.Base, versions.Revision}
+		return APIVersionDecreasedId, []any{baseVersion, revisionVersion}
 	case !majorBumped(base, revision):
-		return APIMajorVersionNotBumpedId, []any{versions.Base, versions.Revision}
+		return APIMajorVersionNotBumpedId, []any{baseVersion, revisionVersion}
 	}
 	return "", nil
 }

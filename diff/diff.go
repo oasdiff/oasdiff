@@ -32,23 +32,21 @@ type Diff struct {
 	ComponentsDiff        *ComponentsDiff           `json:"components,omitempty" yaml:"components,omitempty"`
 	JSONSchemaDialectDiff *ValueDiff                `json:"jsonSchemaDialect,omitempty" yaml:"jsonSchemaDialect,omitempty"`
 
-	// Versions carries info.version from both specs as context for checkers
-	// that judge the version against the changes (see checker's versioning
-	// policy). InfoDiff can't serve that purpose: it is nil when the version
-	// is unchanged, which is precisely the case a versioning policy cares
-	// about most.
+	// BaseInfo and RevisionInfo are the info object from each spec, carried as
+	// context for checkers that judge it against the changes (see the
+	// versioning policy in checker). Same Base/Revision convention as
+	// PathsDiff, SchemaDiff and the rest.
+	//
+	// They live here rather than on InfoDiff because InfoDiff is nil exactly
+	// when info is unchanged, which is the case the versioning policy cares
+	// about most, and making it non-nil would emit "info": {} into every diff
+	// whose info did not change.
 	//
 	// Set only on a non-empty diff, which keeps Empty() (a struct comparison)
-	// meaning what it says: a diff carrying nothing else carries no versions
-	// either. Excluded from output because it is context, not a change.
-	Versions *VersionPair `json:"-" yaml:"-"`
-}
-
-// VersionPair is info.version on each side of the diff. Either side is empty
-// when the spec has no info object.
-type VersionPair struct {
-	Base     string
-	Revision string
+	// meaning what it says: a diff carrying nothing else carries no info
+	// either. Excluded from output because they are context, not a change.
+	BaseInfo     *openapi3.Info `json:"-" yaml:"-"`
+	RevisionInfo *openapi3.Info `json:"-" yaml:"-"`
 }
 
 // OperationsSourcesMap maps OpenAPI operations to their source file paths
@@ -275,16 +273,9 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 		return nil, nil
 	}
 
-	diff.Versions = &VersionPair{Base: infoVersion(s1), Revision: infoVersion(s2)}
+	diff.BaseInfo, diff.RevisionInfo = s1.Info, s2.Info
 
 	return diff, nil
-}
-
-func infoVersion(spec *openapi3.T) string {
-	if spec.Info == nil {
-		return ""
-	}
-	return spec.Info.Version
 }
 
 func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
