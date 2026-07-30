@@ -17,7 +17,7 @@ import (
 )
 
 // unknownValidationID is the fallback rule ID for any spec-validation
-// error our dispatcher (ruleIDForKinError) has no errors.As arm for.
+// error our dispatcher (ruleIDForKinError) has no errors.AsType arm for.
 // If we encounter this in the output, we should replace it with a more
 // specific ID.
 const unknownValidationID = "spec-validation-error"
@@ -388,8 +388,7 @@ func argsForKinError(err error) []any {
 // for an error that carries no code. knownRuleID gates the result against the
 // registry. See TestRuleIDs_MatchKinCatalog for the registry/kin contract.
 func ruleIDForKinError(err error) string {
-	var coded openapi3.CodedError
-	if errors.As(err, &coded) {
+	if coded, ok := errors.AsType[openapi3.CodedError](err); ok {
 		return coded.Code()
 	}
 	return unknownValidationID
