@@ -61,7 +61,7 @@ func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation 
 		return nil
 	}
 
-	if location, ok := origin.Fields[field]; ok {
+	if location, ok := origin.Fields.Lookup(field); ok {
 		file := displayFilePath(location.File)
 		if file == "" {
 			file = (*operationsSources)[operation]
@@ -530,7 +530,7 @@ func sourceFromField(origin *openapi3.Origin, field string) *Source {
 	if origin == nil {
 		return nil
 	}
-	if location, ok := origin.Fields[field]; ok {
+	if location, ok := origin.Fields.Lookup(field); ok {
 		return &Source{
 			File:   displayFilePath(location.File),
 			Line:   location.Line,
