@@ -54,4 +54,4 @@ require (
 // Pins kin-openapi to the branch of oasdiff/kin-openapi#25, which changes
 // Origin.Fields to a slice. This PR adapts to that change, so it cannot build
 // against a published kin until #25 has landed upstream and been released.
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260801214513-adb07f048be2
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260802103949-db614a920e92
