@@ -482,11 +482,7 @@ func originEndRange(o *openapi3.Origin, bi *boundaryIndex) (start, end int, ok b
 	if o == nil || o.Key == nil || o.Key.Line == 0 {
 		return 0, 0, false
 	}
-	// The end is derived, never read from the origin. Origin.Key.EndLine exists
-	// today because our yaml fork records it, but a block's extent is
-	// recoverable from start positions alone, so relying on it is the only
-	// reason that fork has to exist. Deriving it lets kin run on the stock
-	// parser. See derived_ends.go.
+	// The end is derived rather than read from the origin: see derived_ends.go.
 	end = bi.endFor(o.Key.File, o.Key.Line, o.Key.Column)
 	if end < o.Key.Line {
 		return 0, 0, false

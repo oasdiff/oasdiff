@@ -7,19 +7,16 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// Deriving a block's extent from start positions, so no end position is needed
-// from the parser.
+// A block's extent, derived from start positions.
 //
 // A block runs to the line before the next key or sequence item at the same or
-// shallower indentation. Every such boundary is already present in the origin
-// data kin produces: Origin.Key is a key, Origin.Fields holds every field key
-// of a mapping, and Origin.Sequences holds each scalar item of a
-// sequence-valued field. Collecting those per file gives the boundary set.
+// shallower indentation. Every such boundary is in the origin data: Origin.Key
+// is a key, Origin.Fields holds every field key of a mapping, and
+// Origin.Sequences holds each scalar item of a sequence-valued field.
+// Collecting those per file gives the boundary set.
 //
-// Measured against parser-recorded end positions on ~11.9M spans (kin's
-// corpus, oasdiff's, the GitHub and Stripe specs), the two agree on ~99.98%.
-// The residual is whether a trailing blank or comment line between two blocks
-// belongs to the earlier one -- a boundary convention, not a different block.
+// A trailing blank or comment line between two blocks falls to the earlier
+// one, since the boundary is the next content.
 
 type boundary struct {
 	line, column int
@@ -78,9 +75,9 @@ func (bi *boundaryIndex) sortAll() {
 	}
 }
 
-// endFor returns the last line of the block headed by the key at line/column
-// in file: the line before the next boundary at the same or shallower
-// indentation, or the file's last content line.
+// endFor returns the last line of the block headed by the key at line/column in
+// file: the line before the next boundary at the same or shallower
+// indentation, or the file's last content line when none follows.
 func (bi *boundaryIndex) endFor(file string, line, column int) int {
 	bs := bi.byFile[file]
 	// Boundaries are sorted by line, so binary-search past our own.
