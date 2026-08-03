@@ -97,7 +97,7 @@ func TestSpecInfo_GlobOK(t *testing.T) {
 
 func TestSpecInfo_InvalidSpec(t *testing.T) {
 	_, err := load.NewSpecInfoFromGlob(openapi3.NewLoader(), "../data/ignore-err-example.txt")
-	require.EqualError(t, err, "failed to load \"../data/ignore-err-example.txt\": failed to unmarshal data: json error: invalid character 'G' looking for beginning of value, yaml error: error unmarshaling JSON: while decoding JSON: json: cannot unmarshal string into Go value of type openapi3.TBis")
+	require.EqualError(t, err, "failed to load \"../data/ignore-err-example.txt\": failed to unmarshal data: json error: invalid character 'G' looking for beginning of value, yaml error: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `GET /ap...` into openapi3.bis")
 }
 
 func TestSpecInfo_InvalidGlob(t *testing.T) {

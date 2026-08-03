@@ -70,8 +70,8 @@ type Block struct {
 // file's path, as reported on element origins, to its raw source (see
 // load.NewSpecInfoWithCapture), so a block slices from the file it lives in.
 func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts, revTexts map[string]string) []Block {
-	baseIdx := buildIndex(baseTexts, baseDocs...)
-	revIdx := buildIndex(revTexts, revDocs...)
+	baseIdx := buildIndex(baseDocs...)
+	revIdx := buildIndex(revDocs...)
 
 	byKey := map[string]*Block{}
 	spansByKey := map[string]resolution{}
@@ -232,28 +232,10 @@ type docIndex struct {
 // components, all of which carry Origin. Component names and top-level
 // sections repeat across composed specs, so byKey keeps every span and
 // resolution disambiguates by file.
-func buildIndex(texts map[string]string, docs ...*openapi3.T) docIndex {
+func buildIndex(docs ...*openapi3.T) docIndex {
 	idx := docIndex{byKey: map[string][]span{}}
-
-	// Pass 1: every position any origin knows about is a potential block
-	// boundary. See derived_ends.go for why this replaces a parser-recorded
-	// end position.
-	bi := newBoundaryIndex()
-	// The last block in a file ends at the file's last content line, since no
-	// boundary follows it.
-	for file, text := range texts {
-		bi.setFileLength(file, lastContentLine(text))
-	}
-	for _, doc := range docs {
-		if doc != nil {
-			addDoc(&idx, doc, func(_, _ string, o *openapi3.Origin) { bi.collect(o) }, bi)
-		}
-	}
-	bi.sortAll()
-	idx = docIndex{byKey: map[string][]span{}}
-
 	add := func(key, title string, o *openapi3.Origin) {
-		if start, end, ok := originEndRange(o, bi); ok {
+		if start, end, ok := originEndRange(o); ok {
 			s := span{key: key, title: title, file: o.Key.File, start: start, end: end}
 			idx.spans = append(idx.spans, s)
 			idx.byKey[key] = append(idx.byKey[key], s)
@@ -263,7 +245,7 @@ func buildIndex(texts map[string]string, docs ...*openapi3.T) docIndex {
 		if doc == nil {
 			continue
 		}
-		addDoc(&idx, doc, add, bi)
+		addDoc(&idx, doc, add)
 	}
 	return idx
 }
@@ -317,7 +299,7 @@ func suffixSegmentMatch(a, b string) int {
 }
 
 // addDoc indexes one document's blocks into idx.
-func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *openapi3.Origin), bi *boundaryIndex) {
+func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *openapi3.Origin)) {
 	if doc.Paths != nil {
 		for path, pi := range doc.Paths.Map() {
 			if pi == nil {
@@ -369,13 +351,13 @@ func addDoc(idx *docIndex, doc *openapi3.T, add func(key, title string, o *opena
 		})
 	}
 	addTopLevelSections(idx, doc)
-	indexExternalSchemas(idx, doc, bi)
+	indexExternalSchemas(idx, doc)
 }
 
 // indexExternalSchemas indexes schemas $ref'd from another file: they live at
 // the usage site (not in this doc's Components) and carry the external file's
 // origin. Keyed by the ref, stable across sides and deduped across operations.
-func indexExternalSchemas(idx *docIndex, doc *openapi3.T, bi *boundaryIndex) {
+func indexExternalSchemas(idx *docIndex, doc *openapi3.T) {
 	_ = doc.WalkSchemas(func(_ string, sr *openapi3.SchemaRef) error {
 		if sr == nil || sr.Value == nil {
 			return nil
@@ -384,8 +366,7 @@ func indexExternalSchemas(idx *docIndex, doc *openapi3.T, bi *boundaryIndex) {
 		if before, _, _ := strings.Cut(sr.Ref, "#"); before == "" {
 			return nil
 		}
-		bi.collect(sr.Value.Origin)
-		if start, end, ok := originEndRange(sr.Value.Origin, bi); ok {
+		if start, end, ok := originEndRange(sr.Value.Origin); ok {
 			key := strings.TrimPrefix(sr.Ref, "./")
 			if len(idx.byKey[key]) > 0 {
 				return nil
@@ -478,16 +459,11 @@ func fileMatches(spanFile, srcFile string) bool {
 // originEndRange returns the 1-based [start, end] line span a key origin heads,
 // using the kin-openapi end-position support. ok is false when origin or end
 // info is absent (older yaml, or a node with no recorded end).
-func originEndRange(o *openapi3.Origin, bi *boundaryIndex) (start, end int, ok bool) {
-	if o == nil || o.Key == nil || o.Key.Line == 0 {
+func originEndRange(o *openapi3.Origin) (start, end int, ok bool) {
+	if o == nil || o.Key == nil || o.Key.Line == 0 || o.Key.EndLine == 0 {
 		return 0, 0, false
 	}
-	// The end is derived rather than read from the origin: see derived_ends.go.
-	end = bi.endFor(o.Key.File, o.Key.Line, o.Key.Column)
-	if end < o.Key.Line {
-		return 0, 0, false
-	}
-	return o.Key.Line, end, true
+	return o.Key.Line, o.Key.EndLine, true
 }
 
 // sliceLines returns lines [start, end] (1-based, inclusive) of text, clamped

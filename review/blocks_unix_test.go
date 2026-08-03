@@ -36,7 +36,7 @@ func loadCrossFileSpec(t *testing.T) (*load.SpecInfo, string, span) {
 
 	var userKey string
 	var userSpan span
-	for k, spans := range buildIndex(nil, si.Spec).byKey {
+	for k, spans := range buildIndex(si.Spec).byKey {
 		if strings.Contains(k, "other.yaml") {
 			userKey, userSpan = k, spans[0]
 		}
@@ -98,7 +98,7 @@ func loadRefStyleSpecs(t *testing.T) (baseSI, revSI *load.SpecInfo, baseKey, rev
 	baseSI, revSI = loadSpec(baseRoot), loadSpec(revRoot)
 
 	findExternal := func(d *openapi3.T) (string, span) {
-		for k, spans := range buildIndex(nil, d).byKey {
+		for k, spans := range buildIndex(d).byKey {
 			if strings.Contains(k, "other.yaml") {
 				return k, spans[0]
 			}
@@ -267,7 +267,7 @@ func TestExtract_ComposedSameBasenameCrossSideLookup(t *testing.T) {
 			revTexts[k] = v
 		}
 		if strings.Contains(si.Url, "svc-b") {
-			for _, sp := range buildIndex(nil, si.Spec).byKey["components/schemas/User"] {
+			for _, sp := range buildIndex(si.Spec).byKey["components/schemas/User"] {
 				revUserSpan = sp
 			}
 		}

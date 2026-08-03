@@ -159,7 +159,7 @@ components:
 // operation (whose source only shows the $ref).
 func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
 	doc := loadWithOrigin(t, refdComponentSpec)
-	userSpan := singleSpan(t, buildIndex(nil, doc), "components/schemas/User")
+	userSpan := singleSpan(t, buildIndex(doc), "components/schemas/User")
 
 	// change reported under the endpoint, but sourced inside User (the role line)
 	c := checker.ApiChange{
@@ -289,7 +289,7 @@ components:
 // The four top-level sections are indexed, each spanning from its key line to
 // just before the next top-level key.
 func TestBuildIndex_TopLevelSections(t *testing.T) {
-	idx := buildIndex(nil, loadWithOrigin(t, topLevelSpec))
+	idx := buildIndex(loadWithOrigin(t, topLevelSpec))
 	for _, name := range []string{"info", "servers", "tags", "security"} {
 		s := singleSpan(t, idx, name)
 		require.Positive(t, s.start)
@@ -305,7 +305,7 @@ func TestBuildIndex_TopLevelSections(t *testing.T) {
 // index and the interface-based source lookup that resolves non-ApiChange types.
 func TestExtract_SecurityChangeCardsToSection(t *testing.T) {
 	doc := loadWithOrigin(t, topLevelSpec)
-	sec := singleSpan(t, buildIndex(nil, doc), "security")
+	sec := singleSpan(t, buildIndex(doc), "security")
 
 	c := checker.SecurityChange{
 		Id:           "api-security-removed",
@@ -367,7 +367,7 @@ components:
 // that scheme's block instead of falling back.
 func TestExtract_SecuritySchemeBlock(t *testing.T) {
 	doc := loadWithOrigin(t, securitySchemeSpec)
-	idx := buildIndex(nil, doc)
+	idx := buildIndex(doc)
 	oauth := singleSpan(t, idx, "components/securitySchemes/OAuth")
 
 	// change reported at the OAuth scheme's source line (as the checker sources it)
@@ -450,8 +450,8 @@ func TestExtract_ComposedDuplicateComponentName(t *testing.T) {
 	petsRev := loadWithOriginNamed(t, "pets.yaml", dupPetsRev)
 
 	// The change is inside pets.yaml's Error schema on both sides.
-	baseSpan := buildIndex(nil, petsBase).byKey["components/schemas/Error"][0]
-	revSpan := buildIndex(nil, petsRev).byKey["components/schemas/Error"][0]
+	baseSpan := buildIndex(petsBase).byKey["components/schemas/Error"][0]
+	revSpan := buildIndex(petsRev).byKey["components/schemas/Error"][0]
 	c := checker.ApiChange{
 		Id:        "response-property-type-changed",
 		Operation: "GET",
@@ -534,7 +534,7 @@ components:
 // Every named component type is indexed, so a change sourced inside one keys
 // to its own block instead of falling back to the operation.
 func TestBuildIndex_NamedComponentTypes(t *testing.T) {
-	idx := buildIndex(nil, loadWithOrigin(t, namedComponentsSpec))
+	idx := buildIndex(loadWithOrigin(t, namedComponentsSpec))
 	for _, key := range []string{
 		"components/parameters/Limit",
 		"components/responses/NotFound",
@@ -551,7 +551,7 @@ func TestBuildIndex_NamedComponentTypes(t *testing.T) {
 // slices the response block, not the referencing operation.
 func TestExtract_ComponentResponseBlock(t *testing.T) {
 	doc := loadWithOrigin(t, namedComponentsSpec)
-	notFound := singleSpan(t, buildIndex(nil, doc), "components/responses/NotFound")
+	notFound := singleSpan(t, buildIndex(doc), "components/responses/NotFound")
 
 	c := checker.ApiChange{
 		Id:        "response-property-type-changed",
@@ -602,7 +602,7 @@ func TestFallbackKey_Area(t *testing.T) {
 // A nil doc in the set (a spec that failed to parse upstream) is skipped.
 func TestBuildIndex_NilDocSkipped(t *testing.T) {
 	doc := loadWithOrigin(t, topLevelSpec)
-	require.Equal(t, len(buildIndex(nil, doc).spans), len(buildIndex(nil, doc, nil).spans))
+	require.Equal(t, len(buildIndex(doc).spans), len(buildIndex(nil, doc, nil).spans))
 }
 
 // The last top-level section has no next key line, so it runs to EOF.
@@ -620,7 +620,7 @@ security:
 `
 
 func TestBuildIndex_LastTopLevelSectionRunsToEOF(t *testing.T) {
-	idx := buildIndex(nil, loadWithOrigin(t, trailingSecuritySpec))
+	idx := buildIndex(loadWithOrigin(t, trailingSecuritySpec))
 	s := singleSpan(t, idx, "security")
 	got := sliceLines(trailingSecuritySpec, s.start, s.end)
 	require.Contains(t, got, "security:")
