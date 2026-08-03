@@ -209,13 +209,13 @@ func TestSchemaFieldSources(t *testing.T) {
 	baseSchema := &openapi3.Schema{
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "base.yaml", Line: 10, Column: 5},
-			Fields: map[string]openapi3.Location{"type": {File: "base.yaml", Line: 11, Column: 7}},
+			Fields: openapi3.FieldLocations{{File: "base.yaml", Line: 11, Column: 7, Name: "type"}},
 		},
 	}
 	revisionSchema := &openapi3.Schema{
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "revision.yaml", Line: 15, Column: 5},
-			Fields: map[string]openapi3.Location{"type": {File: "revision.yaml", Line: 16, Column: 7}},
+			Fields: openapi3.FieldLocations{{File: "revision.yaml", Line: 16, Column: 7, Name: "type"}},
 		},
 	}
 
@@ -254,8 +254,8 @@ func TestNewSourceFromField_StripsGitRevisionPrefix(t *testing.T) {
 	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
 	origin := &openapi3.Origin{
 		Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 1, Column: 1},
-		Fields: map[string]openapi3.Location{
-			"pattern": {File: "origin/main:openapi.yaml", Line: 15, Column: 14},
+		Fields: openapi3.FieldLocations{
+			{File: "origin/main:openapi.yaml", Line: 15, Column: 14, Name: "pattern"},
 		},
 	}
 
@@ -295,7 +295,7 @@ func TestSubschemaSources_AllOf_Added_Inline(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
-			Fields: map[string]openapi3.Location{"allOf": {File: "revision.yaml", Line: 14, Column: 15}},
+			Fields: openapi3.FieldLocations{{File: "revision.yaml", Line: 14, Column: 15, Name: "allOf"}},
 		},
 	}
 	baseSchema := &openapi3.Schema{
@@ -305,7 +305,7 @@ func TestSubschemaSources_AllOf_Added_Inline(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
-			Fields: map[string]openapi3.Location{"allOf": {File: "base.yaml", Line: 14, Column: 15}},
+			Fields: openapi3.FieldLocations{{File: "base.yaml", Line: 14, Column: 15, Name: "allOf"}},
 		},
 	}
 
@@ -348,7 +348,7 @@ func TestSubschemaSources_AllOf_Added_Ref(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
-			Fields: map[string]openapi3.Location{"allOf": {File: "revision.yaml", Line: 14, Column: 15}},
+			Fields: openapi3.FieldLocations{{File: "revision.yaml", Line: 14, Column: 15, Name: "allOf"}},
 		},
 	}
 	baseSchema := &openapi3.Schema{
@@ -366,7 +366,7 @@ func TestSubschemaSources_AllOf_Added_Ref(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
-			Fields: map[string]openapi3.Location{"allOf": {File: "base.yaml", Line: 14, Column: 15}},
+			Fields: openapi3.FieldLocations{{File: "base.yaml", Line: 14, Column: 15, Name: "allOf"}},
 		},
 	}
 
@@ -396,7 +396,7 @@ func TestSubschemaSources_OneOf_Deleted(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "base.yaml", Line: 9, Column: 7},
-			Fields: map[string]openapi3.Location{"oneOf": {File: "base.yaml", Line: 9, Column: 7}},
+			Fields: openapi3.FieldLocations{{File: "base.yaml", Line: 9, Column: 7, Name: "oneOf"}},
 		},
 	}
 	revisionSchema := &openapi3.Schema{
@@ -406,7 +406,7 @@ func TestSubschemaSources_OneOf_Deleted(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "revision.yaml", Line: 9, Column: 7},
-			Fields: map[string]openapi3.Location{"oneOf": {File: "revision.yaml", Line: 9, Column: 7}},
+			Fields: openapi3.FieldLocations{{File: "revision.yaml", Line: 9, Column: 7, Name: "oneOf"}},
 		},
 	}
 
@@ -435,7 +435,7 @@ func TestSubschemaSources_AnyOf_NoOrigin_FallsBack(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "revision.yaml", Line: 9, Column: 7},
-			Fields: map[string]openapi3.Location{"anyOf": {File: "revision.yaml", Line: 10, Column: 9}},
+			Fields: openapi3.FieldLocations{{File: "revision.yaml", Line: 10, Column: 9, Name: "anyOf"}},
 		},
 	}
 	baseSchema := &openapi3.Schema{
@@ -444,7 +444,7 @@ func TestSubschemaSources_AnyOf_NoOrigin_FallsBack(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "base.yaml", Line: 9, Column: 7},
-			Fields: map[string]openapi3.Location{"anyOf": {File: "base.yaml", Line: 10, Column: 9}},
+			Fields: openapi3.FieldLocations{{File: "base.yaml", Line: 10, Column: 9, Name: "anyOf"}},
 		},
 	}
 
@@ -517,13 +517,13 @@ func TestSubschemaSources_IndexOutOfRange(t *testing.T) {
 		},
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "revision.yaml", Line: 14, Column: 15},
-			Fields: map[string]openapi3.Location{"allOf": {File: "revision.yaml", Line: 14, Column: 15}},
+			Fields: openapi3.FieldLocations{{File: "revision.yaml", Line: 14, Column: 15, Name: "allOf"}},
 		},
 	}
 	baseSchema := &openapi3.Schema{
 		Origin: &openapi3.Origin{
 			Key:    &openapi3.Location{File: "base.yaml", Line: 14, Column: 15},
-			Fields: map[string]openapi3.Location{"allOf": {File: "base.yaml", Line: 14, Column: 15}},
+			Fields: openapi3.FieldLocations{{File: "base.yaml", Line: 14, Column: 15, Name: "allOf"}},
 		},
 	}
 

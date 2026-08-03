@@ -66,7 +66,7 @@ func Test_ValidateCmd_OpenAPIVersionRequired(t *testing.T) {
 //
 // The fixture has `identifier: MIT` on line 7. This pin guards a real
 // regression: until 2026-05-13 we used Origin.Key (the enclosing
-// `license:` line, 5:3) instead of Origin.Fields["identifier"] (the
+// `license:` line, 5:3) instead of Origin.Fields.Lookup("identifier") (the
 // offending line, 7:5).
 func Test_ValidateCmd_FieldVersionMismatch_LicenseIdentifier(t *testing.T) {
 	var stdout bytes.Buffer
