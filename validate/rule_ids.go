@@ -10,6 +10,9 @@ import "slices"
 // updated deliberately. At runtime, a code not in the registry is demoted to
 // spec-validation-error (loud, triaged). Sorted; add new IDs in order.
 var ruleIDs = []string{
+	"additional-operations-duplicate-method",
+	"additional-operations-field-for-3-2-plus",
+	"additional-operations-invalid-method",
 	"additional-properties-both-forms-exclusive",
 	"ambiguous-parameter-serialization",
 	"anchor-field-for-3-1-plus",
@@ -84,6 +87,7 @@ var ruleIDs = []string{
 	"pattern-properties-field-for-3-1-plus",
 	"prefix-items-field-for-3-1-plus",
 	"property-names-field-for-3-1-plus",
+	"query-field-for-3-2-plus",
 	"read-only-write-only-mutually-exclusive",
 	"request-body-content-required",
 	"required-with-default",

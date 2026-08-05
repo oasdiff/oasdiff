@@ -43,6 +43,10 @@ var ruleDescriptions = map[string]string{
 	"responses-required":            "responses object is missing",
 	"response-description-required": "response has no description",
 	"request-body-content-required": "request body has no content",
+	// additionalOperations is the OpenAPI 3.2 map of custom http methods. The
+	// version gate on the field itself is described by versionGateDescription.
+	"additional-operations-duplicate-method": "an additionalOperations key names a method that already has its own path item field",
+	"additional-operations-invalid-method":   "an additionalOperations key is not a valid http method name",
 
 	// Parameters and headers
 	"parameter-name-required":        "parameter name is missing",
