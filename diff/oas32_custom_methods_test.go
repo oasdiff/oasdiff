@@ -10,8 +10,8 @@ import (
 )
 
 // OpenAPI 3.2 adds the QUERY path item field and additionalOperations, a map of
-// custom http methods. Both are operations like any other, so the diff must
-// compare them rather than only the methods with a long-standing fixed field.
+// custom http methods. Both hold operations like any other, so the diff
+// compares them alongside the methods with a dedicated field.
 
 func oas32Diff(t *testing.T) *diff.Diff {
 	t.Helper()

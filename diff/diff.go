@@ -201,9 +201,8 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 }
 
 // copyPathItem returns a shallow copy of the path item.
-// It copies the struct rather than listing fields, so a field kin adds is
-// carried over without a change here. The hand-written list this replaces had
-// silently dropped Connect since it was written.
+// It copies the struct rather than listing the fields, so a field kin adds is
+// carried over without a change here.
 func copyPathItem(pathItem *openapi3.PathItem) *openapi3.PathItem {
 	copied := *pathItem
 	return &copied
