@@ -58,8 +58,8 @@ func getOperationsDiff(config *Config, state *state, pathItemPair *pathItemPair)
 }
 
 // operations are the methods with a dedicated Path Item Object field, in the
-// order diff reports them. QUERY is an OpenAPI 3.2 addition; it is absent from
-// older documents, which simply have no operation under it.
+// order diff reports them. A document that predates one of them simply has no
+// operation under it, so none of them needs a version gate.
 var operations = []string{
 	http.MethodGet,
 	http.MethodHead,
@@ -70,7 +70,7 @@ var operations = []string{
 	http.MethodConnect,
 	http.MethodOptions,
 	http.MethodTrace,
-	openapi3.MethodQuery,
+	openapi3.MethodQuery, // net/http has no constant for QUERY
 }
 
 // methodsToCompare returns the methods to diff for a pair of path items: the
