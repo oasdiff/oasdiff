@@ -1,0 +1,45 @@
+openapi: 3.2.0
+info:
+  title: custom methods
+  version: "1.0"
+paths:
+  /search:
+    query:
+      operationId: search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                term:
+                  type: string
+      responses:
+        "200":
+          description: results
+        "418":
+          description: teapot
+    additionalOperations:
+      COPY:
+        operationId: copySearch
+        responses:
+          "200":
+            description: copied
+      PURGE:
+        operationId: purgeSearch
+        responses:
+          "200":
+            description: purged
+  /gone:
+    query:
+      operationId: goneQuery
+      responses:
+        "200":
+          description: ok
+    additionalOperations:
+      LOCK:
+        operationId: lockGone
+        responses:
+          "200":
+            description: ok
