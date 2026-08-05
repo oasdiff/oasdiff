@@ -2,8 +2,10 @@ package diff
 
 import (
 	"fmt"
+	"maps"
 	"net/http"
 	"regexp"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -55,6 +57,9 @@ func getOperationsDiff(config *Config, state *state, pathItemPair *pathItemPair)
 	return diff, nil
 }
 
+// operations are the methods with a dedicated Path Item Object field, in the
+// order diff reports them. QUERY is an OpenAPI 3.2 addition; it is absent from
+// older documents, which simply have no operation under it.
 var operations = []string{
 	http.MethodGet,
 	http.MethodHead,
@@ -65,6 +70,32 @@ var operations = []string{
 	http.MethodConnect,
 	http.MethodOptions,
 	http.MethodTrace,
+	openapi3.MethodQuery,
+}
+
+// methodsToCompare returns the methods to diff for a pair of path items: the
+// fixed-field methods above, then any custom method (OpenAPI 3.2
+// additionalOperations) either side declares, sorted so output is stable.
+//
+// The custom methods come from Operations() rather than from
+// AdditionalOperations directly, so kin owns which entries count: it drops nil
+// entries and lets a fixed field win over a key that shadows it, and a method
+// counted twice here would be reported added or deleted twice.
+func methodsToCompare(pathItem1, pathItem2 *openapi3.PathItem) []string {
+	custom := map[string]struct{}{}
+	for _, pathItem := range []*openapi3.PathItem{pathItem1, pathItem2} {
+		for method := range pathItem.Operations() {
+			if !slices.Contains(operations, method) {
+				custom[method] = struct{}{}
+			}
+		}
+	}
+
+	if len(custom) == 0 {
+		return operations
+	}
+
+	return append(slices.Clone(operations), slices.Sorted(maps.Keys(custom))...)
 }
 
 func getOperationsDiffInternal(config *Config, state *state, pathItemPair *pathItemPair) (*OperationsDiff, error) {
@@ -72,7 +103,7 @@ func getOperationsDiffInternal(config *Config, state *state, pathItemPair *pathI
 	result := newOperationsDiff()
 	var err error
 
-	for _, op := range operations {
+	for _, op := range methodsToCompare(pathItemPair.PathItem1, pathItemPair.PathItem2) {
 		err = result.diffOperation(config, state, pathItemPair.PathItem1.GetOperation(op), pathItemPair.PathItem2.GetOperation(op), op, pathItemPair.PathParamsMap)
 		if err != nil {
 			return nil, err

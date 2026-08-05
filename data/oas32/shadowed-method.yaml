@@ -1,0 +1,17 @@
+openapi: 3.2.0
+info:
+  title: shadowed method
+  version: "1.0"
+paths:
+  /shadow:
+    get:
+      operationId: realGet
+      responses:
+        "200":
+          description: ok
+    additionalOperations:
+      GET:
+        operationId: shadowedGet
+        responses:
+          "200":
+            description: shadowed
