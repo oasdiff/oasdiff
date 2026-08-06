@@ -2,7 +2,7 @@ package validate
 
 // Source locations for findings. kin-openapi's Origin model is the substrate:
 // Origin.Key points at the start of the enclosing collection and
-// Origin.Fields[X] at a specific scalar field inside it, so pinning a finding
+// Origin.Fields.Lookup(X) at a specific scalar field inside it, so pinning a finding
 // to the offending line means preferring the field entry over the key. These
 // helpers own that resolution for both the kin-error path (locationForKinError)
 // and the native lints (schemaFieldLocation).
@@ -31,10 +31,10 @@ func lineColumnForKinError(err error) (int, int) {
 //   - Origin.Key       points at the start of the enclosing collection
 //     (e.g. for a LicenseIdentifierFieldFor31Plus, Key is the line of
 //     the parent "license:" key, not "identifier:").
-//   - Origin.Fields[X] points at the specific scalar field X inside
+//   - Origin.Fields.Lookup(X) points at the specific scalar field X inside
 //     that collection.
 //
-// For clusters that carry a Field, we want Fields[Field] (the
+// For clusters that carry a Field, we want Fields.Lookup(Field) (the
 // offending line) rather than Key (the enclosing object's line).
 // Falls back to Key when the per-field entry is missing, and finally
 // to nil for clusters with no Origin at all (WebhookNilError).
@@ -179,7 +179,7 @@ func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
 	if origin == nil {
 		return nil
 	}
-	if loc, ok := origin.Fields[field]; ok {
+	if loc, ok := origin.Fields.Lookup(field); ok {
 		return &loc
 	}
 	// Cluster errors carry dotted Field names (e.g. "info.version") for
@@ -189,7 +189,7 @@ func fieldLoc(origin *openapi3.Origin, field string) *openapi3.Location {
 	// last dot so we still resolve to the precise field location instead
 	// of the parent object's Key.
 	if i := strings.LastIndex(field, "."); i >= 0 {
-		if loc, ok := origin.Fields[field[i+1:]]; ok {
+		if loc, ok := origin.Fields.Lookup(field[i+1:]); ok {
 			return &loc
 		}
 	}

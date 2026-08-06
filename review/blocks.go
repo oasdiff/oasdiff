@@ -425,7 +425,7 @@ func addTopLevelSections(idx *docIndex, doc *openapi3.T) {
 		return math.MaxInt // last section: to EOF (sliceLines clamps)
 	}
 	for _, name := range topLevelSections {
-		if loc, ok := doc.Origin.Fields[name]; ok && loc.Line > 0 {
+		if loc, ok := doc.Origin.Fields.Lookup(name); ok && loc.Line > 0 {
 			s := span{key: name, title: name, file: loc.File, start: loc.Line, end: sectionEnd(loc.Line)}
 			idx.spans = append(idx.spans, s)
 			idx.byKey[name] = append(idx.byKey[name], s)
