@@ -5,7 +5,7 @@ go 1.26
 require (
 	cloud.google.com/go v0.123.0
 	github.com/TwiN/go-color v1.4.1
-	github.com/getkin/kin-openapi v0.145.0
+	github.com/getkin/kin-openapi v0.146.0
 	github.com/invopop/jsonschema v0.14.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/spf13/pflag v1.0.10
@@ -49,9 +49,3 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
 )
-
-// TEMPORARY -- remove before merging.
-// Pins kin-openapi to the branch of oasdiff/kin-openapi#25, which changes
-// Origin.Fields to a slice. This PR adapts to that change, so it cannot build
-// against a published kin until #25 has landed upstream and been released.
-replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260802103949-db614a920e92
