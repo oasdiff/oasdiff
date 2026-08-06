@@ -49,3 +49,9 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
 )
+
+// TEMPORARY -- remove before merging.
+// Pins kin-openapi to the branch of getkin/kin-openapi#1241, which exports
+// PathItemMethods. Drop this and move the requirement to a release that
+// includes it.
+replace github.com/getkin/kin-openapi => github.com/oasdiff/kin-openapi v0.0.0-20260806105533-afc811ccf732
