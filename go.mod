@@ -5,7 +5,7 @@ go 1.26
 require (
 	cloud.google.com/go v0.123.0
 	github.com/TwiN/go-color v1.4.1
-	github.com/getkin/kin-openapi v0.146.0
+	github.com/getkin/kin-openapi v0.146.1-0.20260807012752-f5d61a7ecfdc
 	github.com/invopop/jsonschema v0.14.0
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/spf13/pflag v1.0.10
