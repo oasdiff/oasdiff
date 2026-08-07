@@ -7,7 +7,7 @@ require (
 	github.com/TwiN/go-color v1.4.1
 	github.com/getkin/kin-openapi v0.146.0
 	github.com/invopop/jsonschema v0.14.0
-	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/spf13/pflag v1.0.10
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
