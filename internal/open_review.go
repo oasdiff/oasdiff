@@ -198,6 +198,22 @@ func specSetDocsAndSources(specs []*load.SpecInfo) ([]*openapi3.T, map[string]st
 	return docs, texts
 }
 
+// uploadUserAgent identifies the uploading client to the server's request
+// logs: the CLI version, and the CI platform when one is declared. This is
+// the only server-visible attribution for an encrypted review; everything
+// else rides inside the ciphertext (see review.Payload), which is the point.
+func uploadUserAgent() string {
+	ua := "oasdiff-cli/" + build.Version
+	platform := os.Getenv("PLATFORM")
+	if platform == "" && os.Getenv("GITHUB_ACTIONS") == "true" {
+		platform = "github-actions"
+	}
+	if platform != "" {
+		ua += " (" + platform + ")"
+	}
+	return ua
+}
+
 // postEncryptedReview uploads the opaque ciphertext blob to the configured
 // server (see oasdiffSiteURL) and returns the assigned review id plus its TTL
 // expiry. The request is anonymous (no credentials): the server stores a blob
@@ -214,7 +230,7 @@ func postEncryptedReview(blob []byte) (string, time.Time, error) {
 		return "", time.Time{}, err
 	}
 	req.Header.Set("Content-Type", "application/octet-stream")
-	req.Header.Set("User-Agent", "oasdiff-cli")
+	req.Header.Set("User-Agent", uploadUserAgent())
 
 	client := &http.Client{Timeout: 5 * time.Minute}
 	resp, err := client.Do(req)
@@ -289,7 +305,7 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "oasdiff-cli")
+	req.Header.Set("User-Agent", uploadUserAgent())
 
 	client := &http.Client{Timeout: 5 * time.Minute}
 	resp, err := client.Do(req)
