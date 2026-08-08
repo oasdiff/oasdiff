@@ -283,6 +283,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestBodyMediaTypeSchemaRemovedId, INFO, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseBodyMediaTypeSchemaAddedId, INFO, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(ResponseBodyMediaTypeSchemaRemovedId, WARN, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
+		// MediaTypeSchemaExistenceCheck: the same, for the OpenAPI 3.2 itemSchema (#1083).
+		newBackwardCompatibilityRule(RequestBodyMediaTypeItemSchemaAddedId, ERR, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(RequestBodyMediaTypeItemSchemaRemovedId, INFO, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaAddedId, INFO, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaRemovedId, WARN, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		// RequestBodyRemovedCheck
 		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, AreaSchema, KindExistence, ActionRemove),
 		// RequestBodyRequiredUpdatedCheck
