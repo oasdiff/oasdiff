@@ -1043,6 +1043,14 @@ request-body-media-type-schema-added-description: схема типа медиа
 request-body-media-type-schema-removed-description: схема типа медиа удалена из тела запроса
 response-body-media-type-schema-added-description: схема типа медиа добавлена в ответ
 response-body-media-type-schema-removed-description: схема типа медиа удалена из ответа
+request-body-media-type-item-schema-added: схема элемента добавлена к типу медиа %s тела запроса
+request-body-media-type-item-schema-removed: схема элемента удалена из типа медиа %s тела запроса
+response-body-media-type-item-schema-added: схема элемента добавлена к типу медиа %s ответа со статусом %s
+response-body-media-type-item-schema-removed: схема элемента удалена из типа медиа %s ответа со статусом %s
+request-body-media-type-item-schema-added-description: схема элемента типа медиа добавлена в тело запроса
+request-body-media-type-item-schema-removed-description: схема элемента типа медиа удалена из тела запроса
+response-body-media-type-item-schema-added-description: схема элемента типа медиа добавлена в ответ
+response-body-media-type-item-schema-removed-description: схема элемента типа медиа удалена из ответа
 response-body-type-generalized: "%s тела ответа расширен с %s до %s для статуса %s"
 response-body-type-specialized: "%s тела ответа сужен с %s до %s для статуса %s"
 response-body-type-compatible: "%s тела ответа изменён с %s до %s для статуса %s (обратно совместимо)"

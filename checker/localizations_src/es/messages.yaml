@@ -1041,6 +1041,14 @@ request-body-media-type-schema-added-description: esquema del tipo de media del 
 request-body-media-type-schema-removed-description: esquema del tipo de media del cuerpo de solicitud removido
 response-body-media-type-schema-added-description: esquema del tipo de media de la respuesta agregado
 response-body-media-type-schema-removed-description: esquema del tipo de media de la respuesta removido
+request-body-media-type-item-schema-added: agregado un esquema de ítem al tipo de media %s del cuerpo de solicitud
+request-body-media-type-item-schema-removed: removido el esquema de ítem del tipo de media %s del cuerpo de solicitud
+response-body-media-type-item-schema-added: agregado un esquema de ítem al tipo de media %s de la respuesta con estado %s
+response-body-media-type-item-schema-removed: removido el esquema de ítem del tipo de media %s de la respuesta con estado %s
+request-body-media-type-item-schema-added-description: esquema de ítem del tipo de media del cuerpo de solicitud agregado
+request-body-media-type-item-schema-removed-description: esquema de ítem del tipo de media del cuerpo de solicitud removido
+response-body-media-type-item-schema-added-description: esquema de ítem del tipo de media de la respuesta agregado
+response-body-media-type-item-schema-removed-description: esquema de ítem del tipo de media de la respuesta removido
 response-body-type-generalized: el %s del cuerpo de respuesta fue ampliado de %s a %s para el estado %s
 response-body-type-specialized: el %s del cuerpo de respuesta fue reducido de %s a %s para el estado %s
 response-body-type-compatible: el %s del cuerpo de respuesta cambió de %s a %s para el estado %s (retrocompatible)

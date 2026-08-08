@@ -113,13 +113,41 @@ func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff)
 }
 
-// modifiedSchemaPresentBothSides reports whether a media type's schema changed
-// with a schema present on BOTH sides. A schema added (Base nil) or removed
-// (Revision nil) on an existing media type is not a modification of an existing
-// schema, and the per-schema-change checks built on these walkers dereference
-// Base/Revision unconditionally, so walking those cases nil-panics (#1047).
-func modifiedSchemaPresentBothSides(d *diff.MediaTypeDiff) bool {
-	return d.SchemaDiff != nil && d.SchemaDiff.Base != nil && d.SchemaDiff.Revision != nil
+// modifiedSchemaPresentBothSides reports whether a schema changed with a schema
+// present on BOTH sides. A schema added (Base nil) or removed (Revision nil) on
+// an existing media type is not a modification of an existing schema, and the
+// per-schema-change checks built on these walkers dereference Base/Revision
+// unconditionally, so walking those cases nil-panics (#1047).
+// MediaTypeSchemaExistenceCheck reports the one-sided cases instead.
+func modifiedSchemaPresentBothSides(d *diff.SchemaDiff) bool {
+	return d != nil && d.Base != nil && d.Revision != nil
+}
+
+// itemSchemaDetail marks a change found under a media type's itemSchema
+// (OpenAPI 3.2, the schema of one item of a streamed body) rather than under
+// its schema. Unlike the media-type detail this is not conditional on how many
+// media types changed: the checks reached from here are the body-schema checks,
+// whose messages talk about the body, so without this marker a change to a
+// streamed item is indistinguishable from a change to the body itself.
+const itemSchemaDetail = "(item schema)"
+
+// walkMediaTypeSchemas invokes processor for each schema of one media type that
+// changed on both sides: the body schema, then the OpenAPI 3.2 itemSchema.
+// Every check built on the walkers therefore covers streamed items with no
+// per-check change, which is what keeps the two in step as checks are added.
+func walkMediaTypeSchemas(mediaTypeDiff *diff.MediaTypeDiff, info mediaTypeInfo, processor func(info mediaTypeInfo)) {
+	mediaTypeDetails := info.mediaTypeDetails
+
+	if modifiedSchemaPresentBothSides(mediaTypeDiff.SchemaDiff) {
+		info.schemaDiff = mediaTypeDiff.SchemaDiff
+		processor(info)
+	}
+
+	if modifiedSchemaPresentBothSides(mediaTypeDiff.ItemSchemaDiff) {
+		info.schemaDiff = mediaTypeDiff.ItemSchemaDiff
+		info.mediaTypeDetails = combineDetails(mediaTypeDetails, itemSchemaDetail)
+		processor(info)
+	}
 }
 
 // walkModifiedRequestBodySchemas invokes processor once for each modified
@@ -149,19 +177,15 @@ func walkModifiedRequestBodySchemas(
 			}
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if !modifiedSchemaPresentBothSides(mediaTypeDiff) {
-					continue
-				}
-				processor(mediaTypeInfo{
+				walkMediaTypeSchemas(mediaTypeDiff, mediaTypeInfo{
 					path:              path,
 					method:            method,
 					operationItem:     operationItem,
 					mediaType:         mediaType,
 					mediaTypeDetails:  formatMediaTypeDetails(mediaType, len(modifiedMediaTypes)),
-					schemaDiff:        mediaTypeDiff.SchemaDiff,
 					config:            config,
 					operationsSources: operationsSources,
-				})
+				}, processor)
 			}
 		}
 	}
@@ -195,20 +219,16 @@ func walkModifiedResponseSchemas(
 				}
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					if !modifiedSchemaPresentBothSides(mediaTypeDiff) {
-						continue
-					}
-					processor(mediaTypeInfo{
+					walkMediaTypeSchemas(mediaTypeDiff, mediaTypeInfo{
 						path:              path,
 						method:            method,
 						responseStatus:    responseStatus,
 						operationItem:     operationItem,
 						mediaType:         mediaType,
 						mediaTypeDetails:  formatMediaTypeDetails(mediaType, len(modifiedMediaTypes)),
-						schemaDiff:        mediaTypeDiff.SchemaDiff,
 						config:            config,
 						operationsSources: operationsSources,
-					})
+					}, processor)
 				}
 			}
 		}

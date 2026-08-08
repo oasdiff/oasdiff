@@ -9,6 +9,11 @@ const (
 	RequestBodyMediaTypeSchemaRemovedId  = "request-body-media-type-schema-removed"
 	ResponseBodyMediaTypeSchemaAddedId   = "response-body-media-type-schema-added"
 	ResponseBodyMediaTypeSchemaRemovedId = "response-body-media-type-schema-removed"
+
+	RequestBodyMediaTypeItemSchemaAddedId    = "request-body-media-type-item-schema-added"
+	RequestBodyMediaTypeItemSchemaRemovedId  = "request-body-media-type-item-schema-removed"
+	ResponseBodyMediaTypeItemSchemaAddedId   = "response-body-media-type-item-schema-added"
+	ResponseBodyMediaTypeItemSchemaRemovedId = "response-body-media-type-item-schema-removed"
 )
 
 // MediaTypeSchemaExistenceCheck classifies a schema added to, or removed from, a
@@ -23,6 +28,10 @@ const (
 //	response, schema added       -> info: the response got more specific
 //	response, schema removed     -> breaking (WARN): a typed response is no longer
 //	                                guaranteed (the output contract loosened)
+//
+// The OpenAPI 3.2 itemSchema, which types one item of a streamed body, is
+// classified the same way and for the same reasons: it constrains what may be
+// sent or returned, so adding one narrows and removing one loosens.
 func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
@@ -39,15 +48,17 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 
 			if operationItem.RequestBodyDiff != nil && operationItem.RequestBodyDiff.ContentDiff != nil {
 				for mediaType, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
-					added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff)
-					if added {
-						result = append(result, opInfo.NewApiChange(
-							RequestBodyMediaTypeSchemaAddedId, []any{mediaType}, "",
-						).WithSources(nil, requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)))
-					} else if removed {
-						result = append(result, opInfo.NewApiChange(
-							RequestBodyMediaTypeSchemaRemovedId, []any{mediaType}, "",
-						).WithSources(requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType), nil))
+					for _, schema := range requestSchemaKinds(mediaTypeDiff) {
+						added, removed := schemaSideAddedRemoved(schema.diff)
+						if added {
+							result = append(result, opInfo.NewApiChange(
+								schema.addedId, []any{mediaType}, "",
+							).WithSources(nil, requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)))
+						} else if removed {
+							result = append(result, opInfo.NewApiChange(
+								schema.removedId, []any{mediaType}, "",
+							).WithSources(requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType), nil))
+						}
 					}
 				}
 			}
@@ -60,15 +71,17 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 					continue
 				}
 				for mediaType, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
-					added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff)
-					if added {
-						result = append(result, opInfo.NewApiChange(
-							ResponseBodyMediaTypeSchemaAddedId, []any{mediaType, responseStatus}, "",
-						).WithSources(nil, mediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, mediaType)))
-					} else if removed {
-						result = append(result, opInfo.NewApiChange(
-							ResponseBodyMediaTypeSchemaRemovedId, []any{mediaType, responseStatus}, "",
-						).WithSources(mediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, mediaType), nil))
+					for _, schema := range responseSchemaKinds(mediaTypeDiff) {
+						added, removed := schemaSideAddedRemoved(schema.diff)
+						if added {
+							result = append(result, opInfo.NewApiChange(
+								schema.addedId, []any{mediaType, responseStatus}, "",
+							).WithSources(nil, mediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, mediaType)))
+						} else if removed {
+							result = append(result, opInfo.NewApiChange(
+								schema.removedId, []any{mediaType, responseStatus}, "",
+							).WithSources(mediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, mediaType), nil))
+						}
 					}
 				}
 			}
@@ -76,6 +89,28 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 	}
 
 	return result
+}
+
+// schemaKind pairs one of a media type's schemas with the check IDs that report
+// it appearing or disappearing.
+type schemaKind struct {
+	diff      *diff.SchemaDiff
+	addedId   string
+	removedId string
+}
+
+func requestSchemaKinds(d *diff.MediaTypeDiff) []schemaKind {
+	return []schemaKind{
+		{d.SchemaDiff, RequestBodyMediaTypeSchemaAddedId, RequestBodyMediaTypeSchemaRemovedId},
+		{d.ItemSchemaDiff, RequestBodyMediaTypeItemSchemaAddedId, RequestBodyMediaTypeItemSchemaRemovedId},
+	}
+}
+
+func responseSchemaKinds(d *diff.MediaTypeDiff) []schemaKind {
+	return []schemaKind{
+		{d.SchemaDiff, ResponseBodyMediaTypeSchemaAddedId, ResponseBodyMediaTypeSchemaRemovedId},
+		{d.ItemSchemaDiff, ResponseBodyMediaTypeItemSchemaAddedId, ResponseBodyMediaTypeItemSchemaRemovedId},
+	}
 }
 
 // schemaSideAddedRemoved reports whether a media type's schema diff represents a

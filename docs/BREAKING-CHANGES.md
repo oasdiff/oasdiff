@@ -56,6 +56,9 @@ Two consequences worth knowing:
 
 If a check's default severity does not match your API's compatibility policy, change it with [Customizing Severity Levels](#customizing-severity-levels).
 
+### Streamed bodies
+A media type in OpenAPI 3.2 can carry an `itemSchema` describing one item of a streamed body, such as an event in a `text/event-stream` response or a line in `application/jsonl`, as opposed to `schema`, which describes the body as a whole. Every check that applies to a body schema applies to an item schema too, and the change is reported with an `(item schema)` note so the two are distinguishable. Contravariance is unchanged: constraining what a request item may contain breaks producers, and loosening what a response item guarantees breaks consumers.
+
 ## Preventing Breaking Changes
 A common way to use oasdiff is by running it as a step the CI/CD pipeline to detect changes.  
 In order to prevent changes, oasdiff can be configured to return an error if changes above a certain level are found.

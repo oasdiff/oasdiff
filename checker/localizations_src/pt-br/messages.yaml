@@ -1042,6 +1042,14 @@ request-body-media-type-schema-added-description: esquema do tipo de mídia adic
 request-body-media-type-schema-removed-description: esquema do tipo de mídia removido do corpo da requisição
 response-body-media-type-schema-added-description: esquema do tipo de mídia da resposta adicionado
 response-body-media-type-schema-removed-description: esquema do tipo de mídia da resposta removido
+request-body-media-type-item-schema-added: um esquema de item foi adicionado ao tipo de mídia %s do corpo da requisição
+request-body-media-type-item-schema-removed: o esquema de item foi removido do tipo de mídia %s do corpo da requisição
+response-body-media-type-item-schema-added: um esquema de item foi adicionado ao tipo de mídia %s da resposta com o status %s
+response-body-media-type-item-schema-removed: o esquema de item foi removido do tipo de mídia %s da resposta com o status %s
+request-body-media-type-item-schema-added-description: esquema de item do tipo de mídia adicionado ao corpo da requisição
+request-body-media-type-item-schema-removed-description: esquema de item do tipo de mídia removido do corpo da requisição
+response-body-media-type-item-schema-added-description: esquema de item do tipo de mídia adicionado à resposta
+response-body-media-type-item-schema-removed-description: esquema de item do tipo de mídia removido da resposta
 response-body-type-generalized: o %s do corpo da resposta foi expandido de %s para %s para o status %s
 response-body-type-specialized: o %s do corpo da resposta foi restringido de %s para %s para o status %s
 response-body-type-compatible: o %s do corpo da resposta mudou de %s para %s para o status %s (retrocompatível)
