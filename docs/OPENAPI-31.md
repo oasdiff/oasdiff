@@ -1,6 +1,7 @@
 # OpenAPI 3.1 Support
 
 oasdiff supports OpenAPI 3.1 specs across all commands: `diff`, `breaking`, and `changelog`.
+The [OpenAPI 3.2](#openapi-32) section below covers the 3.2 additions oasdiff handles.
 
 OpenAPI 3.1 support is generally available starting with `v1.15.0`. Previous beta tags (`v1.15.0-openapi31.beta.*` and `v2.2.0-openapi31.beta.*`) are superseded.
 
@@ -39,6 +40,59 @@ Changes are detected for all 3.1-specific fields:
 - **propertyNames**: added/removed
 - **unevaluatedItems/unevaluatedProperties**: added/removed
 - **contentSchema/contentMediaType/contentEncoding**: added/removed/changed
+
+## OpenAPI 3.2
+
+Support is scoped to the 3.2 features listed here, not to the whole of 3.2.
+
+### Streamed bodies (`itemSchema`)
+
+A 3.2 media type can carry an `itemSchema` describing **one item** of a streamed body, such as a
+single Server-Sent Event or one JSON Lines record, as opposed to `schema`, which describes the whole
+body.
+
+```yaml
+paths:
+  /events:
+    get:
+      responses:
+        '200':
+          content:
+            application/jsonl:
+              itemSchema:        # one record, not the whole stream
+                type: object
+                properties:
+                  kind: { type: string, enum: [created, updated] }
+```
+
+Every check that runs against a body schema also runs against an item schema, so a change to a
+streamed item's contract is reported like any other body change. Messages carry an `(item schema)`
+marker to say which of the two they refer to:
+
+```
+error   [request-property-became-required]
+          the request property `weight` became required (item schema)
+```
+
+An item schema appearing or disappearing is reported by its own rules, since that is not a
+modification of an existing schema:
+
+| id | level |
+|---|---|
+| `request-body-media-type-item-schema-added` | error (the request narrowed) |
+| `request-body-media-type-item-schema-removed` | info |
+| `response-body-media-type-item-schema-added` | info |
+| `response-body-media-type-item-schema-removed` | warning |
+| `response-body-media-type-item-schema-removed-untyped` | error |
+
+The two removal rules differ by what is left behind. If the media type still declares a whole-body
+`schema`, the response stays typed and only the per-item guarantee is gone, which is a warning: the
+definition cannot say whether a consumer depended on the item shape. If nothing else types the
+body, it is an error.
+
+If you are on an earlier version, changes to a streamed item's contract are missed entirely: the
+item schema is not read, so a required property added to a streamed request item, which breaks every
+producer, is reported as no change at all.
 
 ## Migrating from 3.0 to 3.1
 
