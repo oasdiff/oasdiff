@@ -1051,7 +1051,6 @@ response-body-media-type-item-schema-added-description: esquema de ítem del tip
 response-body-media-type-item-schema-removed-description: esquema de ítem del tipo de media de la respuesta removido
 response-body-media-type-item-schema-removed-untyped: removido el esquema de ítem del tipo de media %s de la respuesta con estado %s, dejando el cuerpo sin esquema
 response-body-media-type-item-schema-removed-untyped-description: esquema de ítem del tipo de media de la respuesta removido, dejando el cuerpo sin tipo
-response-body-media-type-item-schema-removed-comment: "Esto es una advertencia y no un error porque el tipo de media aún declara un esquema para el cuerpo completo, así que la respuesta sigue tipada y solo se perdió la garantía por ítem. La definición no permite determinar si algún consumidor dependía de la forma del ítem."
 response-body-type-generalized: el %s del cuerpo de respuesta fue ampliado de %s a %s para el estado %s
 response-body-type-specialized: el %s del cuerpo de respuesta fue reducido de %s a %s para el estado %s
 response-body-type-compatible: el %s del cuerpo de respuesta cambió de %s a %s para el estado %s (retrocompatible)

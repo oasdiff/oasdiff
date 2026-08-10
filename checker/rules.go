@@ -287,7 +287,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestBodyMediaTypeItemSchemaAddedId, ERR, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionAdd),
 		newBackwardCompatibilityRule(RequestBodyMediaTypeItemSchemaRemovedId, INFO, MediaTypeSchemaExistenceCheck, DirectionRequest, AreaRequestBody, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaAddedId, INFO, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionAdd),
-		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaRemovedId, WARN, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaRemovedId, ERR, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaRemovedUntypedId, ERR, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, ActionRemove),
 		// RequestBodyRemovedCheck
 		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, AreaSchema, KindExistence, ActionRemove),

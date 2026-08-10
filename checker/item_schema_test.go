@@ -62,16 +62,15 @@ func TestItemSchema_ExistenceIsClassifiedByContravariance(t *testing.T) {
 	require.Equal(t, checker.ERR, removed.GetLevel())
 }
 
-// schema and itemSchema can coexist, so removing the item schema does not
-// always leave the response untyped. When a whole-body schema remains the loss
-// is smaller and the definition cannot say how much a consumer relied on the
-// item shape, so the verdict drops to a warning and carries the reason.
-func TestItemSchema_RemovedWhileBodySchemaRemainsIsAWarning(t *testing.T) {
+// A remaining whole-body schema does not soften the removal: schema and
+// itemSchema constrain different things, so `type: object` over a stream says
+// nothing about one item. The separate id exists to be downgradable, not
+// because the default verdict differs.
+func TestItemSchema_RemovedWhileBodySchemaRemainsIsStillAnError(t *testing.T) {
 	change := requireChange(t, itemSchemaChanges(t), checker.ResponseBodyMediaTypeItemSchemaRemovedId)
 
 	require.Equal(t, "/keep", change.GetPath())
-	require.Equal(t, checker.WARN, change.GetLevel())
-	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "still declares a whole-body schema")
+	require.Equal(t, checker.ERR, change.GetLevel())
 }
 
 // The body schema on /drop is unchanged, so nothing may be attributed to it.

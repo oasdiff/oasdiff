@@ -18,9 +18,6 @@ const (
 	ResponseBodyMediaTypeItemSchemaAddedId          = "response-body-media-type-item-schema-added"
 	ResponseBodyMediaTypeItemSchemaRemovedId        = "response-body-media-type-item-schema-removed"
 	ResponseBodyMediaTypeItemSchemaRemovedUntypedId = "response-body-media-type-item-schema-removed-untyped"
-
-	// Comments for the above IDs
-	responseItemSchemaRemovedComment = "response-body-media-type-item-schema-removed-comment"
 )
 
 // MediaTypeSchemaExistenceCheck classifies a schema added to, or removed from, a
@@ -98,19 +95,18 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 							ResponseBodyMediaTypeItemSchemaAddedId, []any{mediaType, responseStatus}, "",
 						).WithSources(nil, addedSource))
 					} else if removed {
-						// Removing a response itemSchema splits, because schema and itemSchema can
-						// coexist. If a whole-body schema remains, the response is still typed and only
-						// the per-item guarantee is gone, which is a warning: the definition does not
-						// say how much a consumer relied on the item shape. If no schema remains, the
-						// body is left with no schema at all, every guarantee the consumer had is gone,
-						// and that is determinate rather than uncertain, so it is an error.
-
-						id, comment := ResponseBodyMediaTypeItemSchemaRemovedId, responseItemSchemaRemovedComment
+						// A remaining whole-body schema does not soften this. It and itemSchema
+						// constrain different things, so `type: object` over a stream says nothing
+						// about one item, and dropping the item schema widens what the server may
+						// send either way. The id is separate only so a team that has decided this
+						// case is safe for their ecosystem can downgrade it alone.
+						id := ResponseBodyMediaTypeItemSchemaRemovedId
 						if !responseMediaTypeHasSchema(responseDiff.Revision, mediaType) {
-							id, comment = ResponseBodyMediaTypeItemSchemaRemovedUntypedId, ""
+							// Nothing types the body at all now, not just its items.
+							id = ResponseBodyMediaTypeItemSchemaRemovedUntypedId
 						}
 						result = append(result, opInfo.NewApiChange(
-							id, []any{mediaType, responseStatus}, comment,
+							id, []any{mediaType, responseStatus}, "",
 						).WithSources(removedSource, nil))
 					}
 				}

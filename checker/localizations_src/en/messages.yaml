@@ -1062,7 +1062,6 @@ response-body-media-type-item-schema-added-description: response media-type item
 response-body-media-type-item-schema-removed-description: response media-type item schema removed
 response-body-media-type-item-schema-removed-untyped: removed the item schema from the media type %s for the response with the status %s, leaving the body with no schema
 response-body-media-type-item-schema-removed-untyped-description: response media-type item schema removed, leaving the body untyped
-response-body-media-type-item-schema-removed-comment: "This is a warning rather than an error because the media type still declares a whole-body schema, so the response remains typed and only the per-item guarantee is gone. Whether a consumer depended on the item shape cannot be determined from the definition."
 response-body-type-generalized: the response's body %s was widened from %s to %s for status %s
 response-body-type-specialized: the response's body %s was narrowed from %s to %s for status %s
 response-body-type-compatible: the response's body %s changed from %s to %s for status %s (backward compatible)
