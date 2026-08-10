@@ -47,12 +47,6 @@ oasdiff reads 3.2 specs. The OpenAPI Initiative guarantees strict compatibility 
 forward (3.2.x, 3.3.x, ...), so a consumer that correctly reads 3.1 reads 3.2 too, and everything
 in the sections above applies unchanged.
 
-That compatibility is why `oasdiff upgrade` targets the latest 3.x it knows about rather than 3.1.
-See [Why the target is 3.2](https://www.oasdiff.com/docs/openapi-31-migration).
-
-Where a 3.2 construct carries a contract of its own, the checks learn it, so a change to it is
-reported against that contract rather than as an opaque one.
-
 If a 3.2 construct is reported wrongly, or a change to one is not reported at all, see
 [Feedback](#feedback) below and put `[3.2]` in the title.
 
@@ -72,6 +66,8 @@ A team migrating their spec from 3.0 to 3.1 has two problems oasdiff can help wi
 
 The `upgrade` subcommand rewrites a 3.0 spec into the latest 3.x canonical form (currently 3.2.0). The transforms are idempotent, so running it on an already-canonical spec just bumps the version string.
 
+It targets the latest 3.x rather than 3.1 because of the compatibility guarantee above, so one migration covers the next few versions. See [Why the target is 3.2](https://www.oasdiff.com/docs/openapi-31-migration).
+
 ```
 oasdiff upgrade old-spec.yaml > new-spec.yaml
 oasdiff upgrade old-spec.yaml --format json > new-spec.json
@@ -80,7 +76,7 @@ cat old-spec.yaml | oasdiff upgrade -
 
 The output goes to stdout; redirect to a file to keep it. The default output format is `yaml`; pass `--format json` for JSON.
 
-The walker handles 3.0 → 3.x only. Swagger 2.0 → 3.0 is out of scope.
+`upgrade` handles 3.0 → 3.x only. Swagger 2.0 → 3.0 is out of scope.
 
 Available since `v1.16.0`.
 
@@ -98,7 +94,7 @@ oasdiff summary   old.yaml new.yaml --auto-upgrade
 
 Without the flag, the diff surfaces the 3.0→3.1 dialect rewrites (`nullable` becomes `type: ["string", "null"]`, etc.) as if they were schema changes. With the flag, both sides are canonicalised first, so only the genuine schema-level differences remain.
 
-The flag is off by default; opt in per invocation. Safe to set even when both specs are already the same version: the walker is idempotent on already-canonical input.
+The flag is off by default; opt in per invocation. Safe to set even when both specs are already the same version: the rewrite is idempotent on already-canonical input.
 
 Available since `v1.16.0`.
 
