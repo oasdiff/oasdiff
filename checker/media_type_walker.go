@@ -4,17 +4,10 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// mediaTypeInfo is the per-media-type plumbing delivered by the walker
-// functions in this file to their processor callbacks. It bundles what
-// every body-level / response-body checker needs (path, method, operation
-// diff, media type plus its formatted detail string) with the schema diff
-// the processor will actually examine.
+// mediaTypeInfo is what the walkers in this file hand their processors.
 //
-// responseStatus is empty for request-body walkers and carries the status
-// code (e.g. "200") for response-body walkers.
-//
-// The unexported config and operationsSources fields back the newChange
-// helper so callers do not have to re-thread them at every emission site.
+// responseStatus is empty for request bodies and carries the status code for
+// responses.
 type mediaTypeInfo struct {
 	path             string
 	method           string
@@ -28,19 +21,12 @@ type mediaTypeInfo struct {
 	operationsSources *diff.OperationsSourcesMap
 }
 
-// newChange constructs an ApiChange pre-filled with the plumbing carried
-// by info: config, operationsSources, the revision operation, method,
-// path, and the media-type detail string attached via WithDetails. The
-// caller supplies the check ID, args, and comment; the returned ApiChange
-// can be further decorated (typically with WithSources(baseSource,
-// revisionSource), or with a further WithDetails(...) to override the
-// auto-attached media-type details when a check needs a combined string).
+// newChange returns an ApiChange with info's plumbing pre-filled, for the
+// caller to decorate further.
 //
-// Args usually contain the change-specific payload (added/deleted names,
-// property names). Response-body checkers conventionally include
-// info.responseStatus in args themselves; this helper does not append it
-// automatically because each check ID's args shape is fixed at the
-// localization layer.
+// It does not append responseStatus to args, though response checks generally
+// pass it: each check ID's args shape is fixed at the localization layer, so
+// the check owns that decision.
 func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiChange {
 	return NewApiChange(
 		id,
@@ -54,26 +40,15 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails)
 }
 
-// walkProperties walks every modified property under info.schemaDiff and
-// invokes processor with a propertyInfo for each. Delegates to
-// checkModifiedPropertiesDiff, so the recursion covers AllOf / AnyOf /
-// OneOf / Items / PatternProperties / DependentSchemas and the OpenAPI 3.1
-// sub-schema fields exactly as that primitive does.
-//
-// p.newChange in the processor produces an ApiChange with the same
-// plumbing as info.newChange (config, operationsSources, operation,
-// method, path, mediaTypeDetails); the caller chains
-// WithSources(propBaseSource, propRevisionSource) with the property-
-// specific sources.
+// walkProperties invokes processor for every modified property under
+// info.schemaDiff. The recursion is checkModifiedPropertiesDiff's, so sub-schema
+// coverage stays whatever that primitive does.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	checkModifiedPropertiesDiff(info.schemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff) {
-		// The traversal also descends into single-valued sub-schemas (items,
-		// not, if/then/else, contentSchema, ...). When such a sub-schema exists
-		// on only one side (e.g. `items` removed in the revision), its diff has
-		// a nil Base or Revision schema. The property-level checks all read
-		// Base/Revision (ReadOnly, WriteOnly, Extensions, ...) and have nothing
-		// actionable to say about a side that doesn't exist, so guard once here
-		// rather than in every check.
+		// A single-valued sub-schema present on one side only (items removed,
+		// say) has a nil Base or Revision. Every property check reads both and
+		// has nothing to say about a side that does not exist, so guard here
+		// rather than in each of them.
 		if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
 			return
 		}
@@ -87,17 +62,8 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	})
 }
 
-// propertyInfo is the per-property plumbing delivered by
-// mediaTypeInfo.walkProperties. It embeds the originating mediaTypeInfo
-// so p.newChange resolves to the body-level helper via field promotion:
-// the same plumbing is pre-filled, and the same mediaTypeDetails is
-// auto-attached. Override Details with a further WithDetails(...) when a
-// property check needs a combined detail string (e.g. deprecation +
-// media-type).
-//
-// propertyPath, propertyName, and propertyDiff are the same triple
-// checkModifiedPropertiesDiff passes to its processor; parent is the
-// containing schema diff.
+// propertyInfo is what walkProperties hands its processor. It embeds
+// mediaTypeInfo so the body-level helpers are promoted onto it.
 type propertyInfo struct {
 	mediaTypeInfo
 	propertyPath string
@@ -113,20 +79,41 @@ func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff)
 }
 
-// modifiedSchemaPresentBothSides reports whether a media type's schema changed
-// with a schema present on BOTH sides. A schema added (Base nil) or removed
-// (Revision nil) on an existing media type is not a modification of an existing
-// schema, and the per-schema-change checks built on these walkers dereference
-// Base/Revision unconditionally, so walking those cases nil-panics (#1047).
-func modifiedSchemaPresentBothSides(d *diff.MediaTypeDiff) bool {
-	return d.SchemaDiff != nil && d.SchemaDiff.Base != nil && d.SchemaDiff.Revision != nil
+// modifiedSchemaPresentBothSides reports whether a schema changed on both
+// sides. The checks built on these walkers dereference Base and Revision
+// unconditionally, so a one-sided schema would panic; those cases are
+// MediaTypeSchemaExistenceCheck's to report.
+func modifiedSchemaPresentBothSides(d *diff.SchemaDiff) bool {
+	return d != nil && d.Base != nil && d.Revision != nil
 }
 
-// walkModifiedRequestBodySchemas invokes processor once for each modified
-// request-body media type across the diff, with the per-media-type schema
-// diff and the plumbing needed to emit ApiChange values. Skips media types
-// whose schema is absent on either side (added or removed; see
-// modifiedSchemaPresentBothSides).
+// itemSchemaDetail marks a change under a media type's itemSchema (OpenAPI 3.2,
+// one item of a streamed body). Unconditional, unlike the media-type detail:
+// these are the body-schema checks, whose messages talk about the body, so
+// without it a streamed item reads as the body itself.
+const itemSchemaDetail = "(item schema)"
+
+// walkMediaTypeSchemas invokes processor for each of a media type's changed
+// schemas: the body schema, then the OpenAPI 3.2 itemSchema. Checks built on
+// the walkers cover streamed items without knowing about them, which is what
+// keeps the two in step as checks are added.
+func walkMediaTypeSchemas(mediaTypeDiff *diff.MediaTypeDiff, info mediaTypeInfo, processor func(info mediaTypeInfo)) {
+	mediaTypeDetails := info.mediaTypeDetails
+
+	if modifiedSchemaPresentBothSides(mediaTypeDiff.SchemaDiff) {
+		info.schemaDiff = mediaTypeDiff.SchemaDiff
+		processor(info)
+	}
+
+	if modifiedSchemaPresentBothSides(mediaTypeDiff.ItemSchemaDiff) {
+		info.schemaDiff = mediaTypeDiff.ItemSchemaDiff
+		info.mediaTypeDetails = combineDetails(mediaTypeDetails, itemSchemaDetail)
+		processor(info)
+	}
+}
+
+// walkModifiedRequestBodySchemas invokes processor for each modified
+// request-body media type.
 func walkModifiedRequestBodySchemas(
 	diffReport *diff.Diff,
 	operationsSources *diff.OperationsSourcesMap,
@@ -149,28 +136,22 @@ func walkModifiedRequestBodySchemas(
 			}
 			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
 			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				if !modifiedSchemaPresentBothSides(mediaTypeDiff) {
-					continue
-				}
-				processor(mediaTypeInfo{
+				walkMediaTypeSchemas(mediaTypeDiff, mediaTypeInfo{
 					path:              path,
 					method:            method,
 					operationItem:     operationItem,
 					mediaType:         mediaType,
 					mediaTypeDetails:  formatMediaTypeDetails(mediaType, len(modifiedMediaTypes)),
-					schemaDiff:        mediaTypeDiff.SchemaDiff,
 					config:            config,
 					operationsSources: operationsSources,
-				})
+				}, processor)
 			}
 		}
 	}
 }
 
 // walkModifiedResponseSchemas mirrors walkModifiedRequestBodySchemas for
-// response bodies. The processor receives an info with responseStatus set
-// to the response status code (e.g. "200"). Skips media types whose
-// schema is absent on either side (see modifiedSchemaPresentBothSides).
+// response bodies, setting responseStatus on the info it passes.
 func walkModifiedResponseSchemas(
 	diffReport *diff.Diff,
 	operationsSources *diff.OperationsSourcesMap,
@@ -195,20 +176,16 @@ func walkModifiedResponseSchemas(
 				}
 				modifiedMediaTypes := responseDiff.ContentDiff.MediaTypeModified
 				for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-					if !modifiedSchemaPresentBothSides(mediaTypeDiff) {
-						continue
-					}
-					processor(mediaTypeInfo{
+					walkMediaTypeSchemas(mediaTypeDiff, mediaTypeInfo{
 						path:              path,
 						method:            method,
 						responseStatus:    responseStatus,
 						operationItem:     operationItem,
 						mediaType:         mediaType,
 						mediaTypeDetails:  formatMediaTypeDetails(mediaType, len(modifiedMediaTypes)),
-						schemaDiff:        mediaTypeDiff.SchemaDiff,
 						config:            config,
 						operationsSources: operationsSources,
-					})
+					}, processor)
 				}
 			}
 		}

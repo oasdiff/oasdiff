@@ -11,6 +11,7 @@ type MediaTypeDiff struct {
 	// fields from openapi media type object
 	ExtensionsDiff *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	SchemaDiff     *SchemaDiff     `json:"schema,omitempty" yaml:"schema,omitempty"`
+	ItemSchemaDiff *SchemaDiff     `json:"itemSchema,omitempty" yaml:"itemSchema,omitempty"`
 	ExampleDiff    *ValueDiff      `json:"example,omitempty" yaml:"example,omitempty"`
 	ExamplesDiff   *ExamplesDiff   `json:"examples,omitempty" yaml:"examples,omitempty"`
 	EncodingsDiff  *EncodingsDiff  `json:"encoding,omitempty" yaml:"encoding,omitempty"`
@@ -55,6 +56,10 @@ func getMediaTypeDiffInternal(config *Config, state *state, name1, name2 string,
 		return nil, err
 	}
 	result.SchemaDiff, err = getSchemaDiff(config, state, mediaType1.Schema, mediaType2.Schema)
+	if err != nil {
+		return nil, err
+	}
+	result.ItemSchemaDiff, err = getSchemaDiff(config, state, mediaType1.ItemSchema, mediaType2.ItemSchema)
 	if err != nil {
 		return nil, err
 	}

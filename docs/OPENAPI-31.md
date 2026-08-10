@@ -1,6 +1,7 @@
 # OpenAPI 3.1 Support
 
-oasdiff supports OpenAPI 3.1 specs across all commands: `diff`, `breaking`, and `changelog`.
+oasdiff supports OpenAPI 3.1 specs across its commands.
+3.2 specs are read too; see [OpenAPI 3.2](#openapi-32) below.
 
 OpenAPI 3.1 support is generally available starting with `v1.15.0`. Previous beta tags (`v1.15.0-openapi31.beta.*` and `v2.2.0-openapi31.beta.*`) are superseded.
 
@@ -24,6 +25,12 @@ Changes are detected for all 3.1-specific fields:
 - Webhooks (added/deleted/modified)
 - Info `summary`, License `identifier`
 
+### Validate
+`validate` knows which fields 3.1 introduced, so a 3.1-only field in a document declaring an earlier version is reported rather than ignored. 29 rules cover that, one per field (`const`, `$anchor`, `$comment`, `contains`, `contentEncoding`, and so on).
+
+### Flatten
+`--flatten-allof` merges the 3.1 keywords across `allOf` siblings: `const`, `contains`/`minContains`/`maxContains`, `contentMediaType`/`contentEncoding`, `dependentRequired`, `propertyNames`, and multi-type arrays. Two behaviours are worth knowing before relying on it, both in [ALLOF.md](ALLOF.md): `contains` merges to something stricter than the original when siblings disagree, and `$defs` is dropped from the flattened output.
+
 ### Breaking changes and changelog
 162 new rule IDs covering:
 - **Nullable type arrays**: `type: ["string", "null"]` correctly detected as nullable changes (not false-positive type changes)
@@ -39,6 +46,15 @@ Changes are detected for all 3.1-specific fields:
 - **propertyNames**: added/removed
 - **unevaluatedItems/unevaluatedProperties**: added/removed
 - **contentSchema/contentMediaType/contentEncoding**: added/removed/changed
+
+## OpenAPI 3.2
+
+oasdiff reads 3.2 specs. The OpenAPI Initiative guarantees strict compatibility within 3.x going
+forward (3.2.x, 3.3.x, ...), so a consumer that correctly reads 3.1 reads 3.2 too, and everything
+in the sections above applies unchanged.
+
+If a 3.2 construct is reported wrongly, or a change to one is not reported at all, see
+[Feedback](#feedback) below and put `[3.2]` in the title.
 
 ## Migrating from 3.0 to 3.1
 
@@ -56,6 +72,8 @@ A team migrating their spec from 3.0 to 3.1 has two problems oasdiff can help wi
 
 The `upgrade` subcommand rewrites a 3.0 spec into the latest 3.x canonical form (currently 3.2.0). The transforms are idempotent, so running it on an already-canonical spec just bumps the version string.
 
+It targets the latest 3.x rather than 3.1 because of the compatibility guarantee above, so one migration covers the next few versions. See [Why the target is 3.2](https://www.oasdiff.com/docs/openapi-31-migration).
+
 ```
 oasdiff upgrade old-spec.yaml > new-spec.yaml
 oasdiff upgrade old-spec.yaml --format json > new-spec.json
@@ -64,7 +82,7 @@ cat old-spec.yaml | oasdiff upgrade -
 
 The output goes to stdout; redirect to a file to keep it. The default output format is `yaml`; pass `--format json` for JSON.
 
-The walker handles 3.0 → 3.x only. Swagger 2.0 → 3.0 is out of scope.
+`upgrade` handles 3.0 → 3.x only. Swagger 2.0 → 3.0 is out of scope.
 
 Available since `v1.16.0`.
 
@@ -82,7 +100,7 @@ oasdiff summary   old.yaml new.yaml --auto-upgrade
 
 Without the flag, the diff surfaces the 3.0→3.1 dialect rewrites (`nullable` becomes `type: ["string", "null"]`, etc.) as if they were schema changes. With the flag, both sides are canonicalised first, so only the genuine schema-level differences remain.
 
-The flag is off by default; opt in per invocation. Safe to set even when both specs are already the same version: the walker is idempotent on already-canonical input.
+The flag is off by default; opt in per invocation. Safe to set even when both specs are already the same version: the rewrite is idempotent on already-canonical input.
 
 Available since `v1.16.0`.
 
@@ -97,4 +115,4 @@ If you hit any of these, please [open an issue](https://github.com/oasdiff/oasdi
 
 ## Feedback
 
-Found an issue? [Open one here](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.1]%20) with `[3.1]` in the title.
+Found an issue? [Open one here](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.1]%20) with `[3.1]` in the title, or [here](https://github.com/oasdiff/oasdiff/issues/new?template=bug_report.md&title=[3.2]%20) with `[3.2]` for the 3.2 features above. 3.2 support is still being built out, so a report that a construct is unhandled is as useful as one that it is handled wrongly.

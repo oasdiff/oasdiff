@@ -129,7 +129,7 @@ Shape and enrich the report.
 - [MCP server](MCP.md) — call oasdiff from an AI assistant (Claude, Cursor, ...) via the hosted server at `https://api.oasdiff.com/mcp`
 
 ### Reference
-- [OpenAPI 3.1 support](OPENAPI-31.md) — what's supported
+- [OpenAPI 3.1 and 3.2 support](OPENAPI-31.md) — what's supported
 - [Security: control external `$ref` loading to prevent SSRF](SECURITY.md)
 - [Usage examples](USAGE_EXAMPLES.md) — recipes for common scenarios
 - [Contributing](CONTRIB.md)
