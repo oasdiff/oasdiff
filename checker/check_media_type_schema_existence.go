@@ -6,18 +6,20 @@ import (
 )
 
 const (
+	// Regular schema
 	RequestBodyMediaTypeSchemaAddedId    = "request-body-media-type-schema-added"
 	RequestBodyMediaTypeSchemaRemovedId  = "request-body-media-type-schema-removed"
 	ResponseBodyMediaTypeSchemaAddedId   = "response-body-media-type-schema-added"
 	ResponseBodyMediaTypeSchemaRemovedId = "response-body-media-type-schema-removed"
 
-	RequestBodyMediaTypeItemSchemaAddedId    = "request-body-media-type-item-schema-added"
-	RequestBodyMediaTypeItemSchemaRemovedId  = "request-body-media-type-item-schema-removed"
-	ResponseBodyMediaTypeItemSchemaAddedId   = "response-body-media-type-item-schema-added"
-	ResponseBodyMediaTypeItemSchemaRemovedId = "response-body-media-type-item-schema-removed"
-
+	// OpenAPI 3.2 itemSchema
+	RequestBodyMediaTypeItemSchemaAddedId           = "request-body-media-type-item-schema-added"
+	RequestBodyMediaTypeItemSchemaRemovedId         = "request-body-media-type-item-schema-removed"
+	ResponseBodyMediaTypeItemSchemaAddedId          = "response-body-media-type-item-schema-added"
+	ResponseBodyMediaTypeItemSchemaRemovedId        = "response-body-media-type-item-schema-removed"
 	ResponseBodyMediaTypeItemSchemaRemovedUntypedId = "response-body-media-type-item-schema-removed-untyped"
 
+	// Comments for the above IDs
 	responseItemSchemaRemovedComment = "response-body-media-type-item-schema-removed-comment"
 )
 
@@ -37,13 +39,6 @@ const (
 // The OpenAPI 3.2 itemSchema, which types one item of a streamed body, is
 // classified the same way and for the same reasons: it constrains what may be
 // sent or returned, so adding one narrows and removing one loosens.
-//
-// Removing a response itemSchema splits, because schema and itemSchema can
-// coexist. If a whole-body schema remains, the response is still typed and only
-// the per-item guarantee is gone, which is a warning: the definition does not
-// say how much a consumer relied on the item shape. If no schema remains, the
-// body is left with no schema at all, every guarantee the consumer had is gone,
-// and that is determinate rather than uncertain, so it is an error.
 func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
@@ -86,6 +81,7 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 					addedSource := mediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, mediaType)
 					removedSource := mediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, mediaType)
 
+					// Regular schema
 					if added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff); added {
 						result = append(result, opInfo.NewApiChange(
 							ResponseBodyMediaTypeSchemaAddedId, []any{mediaType, responseStatus}, "",
@@ -96,13 +92,21 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 						).WithSources(removedSource, nil))
 					}
 
+					// OpenAPI 3.2 itemSchema
 					if added, removed := schemaSideAddedRemoved(mediaTypeDiff.ItemSchemaDiff); added {
 						result = append(result, opInfo.NewApiChange(
 							ResponseBodyMediaTypeItemSchemaAddedId, []any{mediaType, responseStatus}, "",
 						).WithSources(nil, addedSource))
 					} else if removed {
+						// Removing a response itemSchema splits, because schema and itemSchema can
+						// coexist. If a whole-body schema remains, the response is still typed and only
+						// the per-item guarantee is gone, which is a warning: the definition does not
+						// say how much a consumer relied on the item shape. If no schema remains, the
+						// body is left with no schema at all, every guarantee the consumer had is gone,
+						// and that is determinate rather than uncertain, so it is an error.
+
 						id, comment := ResponseBodyMediaTypeItemSchemaRemovedId, responseItemSchemaRemovedComment
-						if responseMediaTypeSchema(responseDiff.Revision, mediaType) == nil {
+						if !responseMediaTypeHasSchema(responseDiff.Revision, mediaType) {
 							id, comment = ResponseBodyMediaTypeItemSchemaRemovedUntypedId, ""
 						}
 						result = append(result, opInfo.NewApiChange(
@@ -132,16 +136,15 @@ func requestSchemaKinds(d *diff.MediaTypeDiff) []schemaKind {
 	}
 }
 
-// responseMediaTypeSchema returns the whole-body schema a response media type
-// declares, or nil if it declares none.
-func responseMediaTypeSchema(response *openapi3.Response, mediaType string) *openapi3.SchemaRef {
+// responseMediaTypeHasSchema reports whether a response media type declares a
+// whole-body schema, which decides whether removing its item schema leaves the
+// body typed.
+func responseMediaTypeHasSchema(response *openapi3.Response, mediaType string) bool {
 	if response == nil || response.Content == nil {
-		return nil
+		return false
 	}
-	if content := response.Content[mediaType]; content != nil {
-		return content.Schema
-	}
-	return nil
+	content := response.Content[mediaType]
+	return content != nil && content.Schema != nil
 }
 
 // schemaSideAddedRemoved reports whether a media type's schema diff represents a
