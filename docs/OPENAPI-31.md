@@ -1,6 +1,6 @@
 # OpenAPI 3.1 Support
 
-oasdiff supports OpenAPI 3.1 specs across all commands: `diff`, `breaking`, and `changelog`.
+oasdiff supports OpenAPI 3.1 specs across its commands.
 3.2 specs are read too; see [OpenAPI 3.2](#openapi-32) below.
 
 OpenAPI 3.1 support is generally available starting with `v1.15.0`. Previous beta tags (`v1.15.0-openapi31.beta.*` and `v2.2.0-openapi31.beta.*`) are superseded.
@@ -24,6 +24,12 @@ Changes are detected for all 3.1-specific fields:
 - `$defs`, `$schema`, `$comment`
 - Webhooks (added/deleted/modified)
 - Info `summary`, License `identifier`
+
+### Validate
+`validate` knows which fields 3.1 introduced, so a 3.1-only field in a document declaring an earlier version is reported rather than ignored. 29 rules cover that, one per field (`const`, `$anchor`, `$comment`, `contains`, `contentEncoding`, and so on).
+
+### Flatten
+`--flatten-allof` merges the 3.1 keywords across `allOf` siblings: `const`, `contains`/`minContains`/`maxContains`, `contentMediaType`/`contentEncoding`, `dependentRequired`, `propertyNames`, and multi-type arrays. Two behaviours are worth knowing before relying on it, both in [ALLOF.md](ALLOF.md): `contains` merges to something stricter than the original when siblings disagree, and `$defs` is dropped from the flattened output.
 
 ### Breaking changes and changelog
 162 new rule IDs covering:
