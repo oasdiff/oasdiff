@@ -2,11 +2,13 @@ package allof_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/flatten/allof"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -3267,7 +3269,8 @@ func TestMerge_SingleSchema_Preserves31Keywords(t *testing.T) {
 			Properties: openapi3.Schemas{prop: openapi3.NewSchemaRef("", openapi3.NewStringSchema())},
 		})
 	}
-	merged, err := allof.Merge(openapi3.SchemaRef{Value: &openapi3.Schema{
+
+	x := openapi3.SchemaRef{Value: &openapi3.Schema{
 		If:                    sub("k"),
 		Then:                  sub("p"),
 		Else:                  sub("q"),
@@ -3284,7 +3287,8 @@ func TestMerge_SingleSchema_Preserves31Keywords(t *testing.T) {
 		DynamicRef:            "#meta",
 		DynamicAnchor:         "meta",
 		Comment:               "c",
-	}})
+	}}
+	merged, err := allof.Merge(x)
 	require.NoError(t, err)
 
 	require.NotNil(t, merged.If, "if")
@@ -3303,4 +3307,129 @@ func TestMerge_SingleSchema_Preserves31Keywords(t *testing.T) {
 	require.Equal(t, "#meta", merged.DynamicRef, "$dynamicRef")
 	require.Equal(t, "meta", merged.DynamicAnchor, "$dynamicAnchor")
 	require.Equal(t, "c", merged.Comment, "$comment")
+}
+
+// The per-field tests above can only catch a regression on a field someone
+// already thought of. They cannot catch an omission, because the list of
+// fields they check is written by hand from the same mental model as the copy
+// block in mergeInternal: a field missing from one is missing from both. That
+// is how sixteen keywords were dropped for as long as they were (#1097).
+//
+// This walks openapi3.Schema by reflection instead, so a field kin adds is
+// covered without anyone remembering. Fields that are deliberately not carried
+// through are listed with a reason, and the list fails if one of them starts
+// surviving, so it cannot rot.
+var notCarriedThrough = map[string]string{
+	"Defs":   "intentionally dropped, see ALLOF.md: after flattening there are no $refs left for the namespace to serve.",
+	"Origin": "source position of the input schema; a merged schema does not come from one place in the file.",
+}
+
+// notPopulated is left unset because the case under test is a schema with no
+// allOf. Populating it would exercise the merge rather than the copy, and its
+// subschemas carry zero values that legitimately win: a fresh subschema is not
+// nullable, and nullable merges to false if any sibling says false.
+var notPopulated = map[string]bool{"AllOf": true}
+
+func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
+	in := &openapi3.Schema{}
+	v := reflect.ValueOf(in).Elem()
+	typ := v.Type()
+
+	populated := make([]string, 0, typ.NumField())
+	for i := range typ.NumField() {
+		f := typ.Field(i)
+		if !f.IsExported() {
+			continue
+		}
+		if notPopulated[f.Name] {
+			continue
+		}
+		if !setNonZero(v.Field(i)) {
+			continue // no generic way to populate this kind; the typed tests cover it
+		}
+		populated = append(populated, f.Name)
+	}
+	require.Greater(t, len(populated), 40, "sanity: most fields should be populated")
+
+	merged, err := allof.Merge(openapi3.SchemaRef{Value: in})
+	require.NoError(t, err)
+
+	out := reflect.ValueOf(merged).Elem()
+	for _, name := range populated {
+		got := out.FieldByName(name)
+		survived := !got.IsZero()
+		if reason, expected := notCarriedThrough[name]; expected {
+			assert.False(t, survived,
+				"%s is listed in notCarriedThrough (%s) but survived the merge; remove it from the list", name, reason)
+			continue
+		}
+		assert.True(t, survived,
+			"Merge dropped %s on a schema with no allOf.\n"+
+				"  add it to the copy block in mergeInternal, or to notCarriedThrough with a reason", name)
+	}
+}
+
+// setNonZero gives v a value distinguishable from its zero, reporting whether
+// it could.
+func setNonZero(v reflect.Value) bool {
+	if !v.CanSet() {
+		return false
+	}
+	// A schema position needs a usable schema, not just a non-nil pointer:
+	// Merge dereferences it.
+	if v.Type() == reflect.TypeOf((*openapi3.SchemaRef)(nil)) {
+		v.Set(reflect.ValueOf(openapi3.NewSchemaRef("", openapi3.NewSchema())))
+		return true
+	}
+	// An empty Types is semantically "no type", which the merge resolves away.
+	if v.Type() == reflect.TypeOf((*openapi3.Types)(nil)) {
+		v.Set(reflect.ValueOf(&openapi3.Types{"object"}))
+		return true
+	}
+	switch v.Kind() {
+	case reflect.String:
+		v.SetString("x")
+		return true
+	case reflect.Bool:
+		v.SetBool(true)
+		return true
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		v.SetInt(1)
+		return true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v.SetUint(1)
+		return true
+	case reflect.Float64:
+		v.SetFloat(1)
+		return true
+	case reflect.Slice:
+		v.Set(reflect.MakeSlice(v.Type(), 1, 1))
+		setNonZero(v.Index(0))
+		return true
+	case reflect.Map:
+		m := reflect.MakeMap(v.Type())
+		k := reflect.New(v.Type().Key()).Elem()
+		setNonZero(k)
+		m.SetMapIndex(k, reflect.New(v.Type().Elem()).Elem())
+		v.Set(m)
+		return true
+	case reflect.Pointer:
+		// Allocated, not filled: Schema points at itself through SchemaRef, so
+		// descending would not terminate, and a non-nil pointer is already
+		// distinguishable from the zero value.
+		v.Set(reflect.New(v.Type().Elem()))
+		return true
+	case reflect.Interface:
+		v.Set(reflect.ValueOf("x"))
+		return true
+	case reflect.Struct:
+		any := false
+		for i := range v.NumField() {
+			if setNonZero(v.Field(i)) {
+				any = true
+			}
+		}
+		return any
+	}
+	return false
 }
