@@ -3194,16 +3194,20 @@ func TestMerge_MultiType_RedundantNumericSet(t *testing.T) {
 	require.Equal(t, &openapi3.Types{"number"}, merged.Type)
 }
 
-// The per-field tests above can only catch a regression on a field someone
-// already thought of. They cannot catch an omission, because the list of
-// fields they check is written by hand from the same mental model as the copy
-// block in mergeInternal: a field missing from one is missing from both. That
-// is how sixteen keywords were dropped for as long as they were (#1097).
+// Merge on a schema with no allOf must return what it was given: there is
+// nothing to combine, so every field should survive.
 //
-// This walks openapi3.Schema by reflection instead, so a field kin adds is
-// covered without anyone remembering. Fields that are deliberately not carried
-// through are listed with a reason, and the list fails if one of them starts
-// surviving, so it cannot rot.
+// This walks openapi3.Schema by reflection rather than naming the fields,
+// which is the point. mergeInternal copies field by field, and a test that
+// lists the fields it checks is written from the same mental model as that
+// copy block, so a field missing from one is missing from both. Sixteen
+// keywords were dropped for exactly that long (#1097). Here a field kin adds
+// is covered without anyone remembering.
+//
+// Each field gets a value derived from its own name, so a copy reading the
+// wrong source shows up as a changed value rather than passing a non-zero
+// check. Fields deliberately not carried through are listed with a reason,
+// and the list fails if one of them starts surviving, so it cannot rot.
 var notCarriedThrough = map[string]string{
 	"Defs":   "intentionally dropped, see ALLOF.md: after flattening there are no $refs left for the namespace to serve.",
 	"Origin": "source position of the input schema; a merged schema does not come from one place in the file.",
