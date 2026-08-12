@@ -263,6 +263,33 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	if base.Value.MaxProps != nil {
 		result.Value.MaxProps = new(*base.Value.MaxProps)
 	}
+	// The 3.1 / JSON Schema 2020-12 keywords the merge does not combine across
+	// allOf siblings. They flow through from the outer schema for the reason
+	// given above, and dropping them is not neutral: without
+	// unevaluatedProperties a closed schema silently becomes open, and without
+	// the conditionals a validation branch disappears from the comparison.
+	//
+	// A subschema carrying one of these still loses it, which is #878. Passed
+	// through as-is rather than merged, the same way contains and propertyNames
+	// are when only one is present.
+	result.Value.If = base.Value.If
+	result.Value.Then = base.Value.Then
+	result.Value.Else = base.Value.Else
+	result.Value.DependentSchemas = base.Value.DependentSchemas
+	result.Value.UnevaluatedProperties = base.Value.UnevaluatedProperties
+	result.Value.UnevaluatedItems = base.Value.UnevaluatedItems
+	result.Value.PatternProperties = base.Value.PatternProperties
+	result.Value.PrefixItems = base.Value.PrefixItems
+	result.Value.ContentSchema = base.Value.ContentSchema
+	result.Value.Examples = base.Value.Examples
+	// Identity and dialect keywords: annotations on the schema itself, nothing
+	// to merge. $defs is deliberately not here, see ALLOF.md.
+	result.Value.SchemaID = base.Value.SchemaID
+	result.Value.SchemaDialect = base.Value.SchemaDialect
+	result.Value.Anchor = base.Value.Anchor
+	result.Value.DynamicRef = base.Value.DynamicRef
+	result.Value.DynamicAnchor = base.Value.DynamicAnchor
+	result.Value.Comment = base.Value.Comment
 
 	// merge all fields of type SchemaRef
 	allOf, err := mergeSchemaRefs(state, base.Value.AllOf)

@@ -3256,3 +3256,51 @@ func TestMerge_MultiType_RedundantNumericSet(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &openapi3.Types{"number"}, merged.Type)
 }
+
+// The 3.1 / JSON Schema 2020-12 keywords were absent from the copy block, so a
+// Merge on a schema with no allOf dropped every one of them (#1097). Dropping
+// them is not neutral: unevaluatedProperties: false turns a closed schema open,
+// and the conditionals are whole validation branches.
+func TestMerge_SingleSchema_Preserves31Keywords(t *testing.T) {
+	sub := func(prop string) *openapi3.SchemaRef {
+		return openapi3.NewSchemaRef("", &openapi3.Schema{
+			Properties: openapi3.Schemas{prop: openapi3.NewSchemaRef("", openapi3.NewStringSchema())},
+		})
+	}
+	merged, err := allof.Merge(openapi3.SchemaRef{Value: &openapi3.Schema{
+		If:                    sub("k"),
+		Then:                  sub("p"),
+		Else:                  sub("q"),
+		DependentSchemas:      openapi3.Schemas{"k": sub("r")},
+		PatternProperties:     openapi3.Schemas{"^x": sub("s")},
+		PrefixItems:           openapi3.SchemaRefs{sub("t")},
+		ContentSchema:         sub("u"),
+		UnevaluatedProperties: openapi3.BoolSchema{Has: openapi3.Ptr(false)},
+		UnevaluatedItems:      openapi3.BoolSchema{Has: openapi3.Ptr(false)},
+		Examples:              []any{"e"},
+		SchemaID:              "https://example.com/s",
+		SchemaDialect:         "https://json-schema.org/draft/2020-12/schema",
+		Anchor:                "a",
+		DynamicRef:            "#meta",
+		DynamicAnchor:         "meta",
+		Comment:               "c",
+	}})
+	require.NoError(t, err)
+
+	require.NotNil(t, merged.If, "if")
+	require.NotNil(t, merged.Then, "then")
+	require.NotNil(t, merged.Else, "else")
+	require.Len(t, merged.DependentSchemas, 1, "dependentSchemas")
+	require.Len(t, merged.PatternProperties, 1, "patternProperties")
+	require.Len(t, merged.PrefixItems, 1, "prefixItems")
+	require.NotNil(t, merged.ContentSchema, "contentSchema")
+	require.NotNil(t, merged.UnevaluatedProperties.Has, "unevaluatedProperties")
+	require.NotNil(t, merged.UnevaluatedItems.Has, "unevaluatedItems")
+	require.Equal(t, []any{"e"}, merged.Examples, "examples")
+	require.Equal(t, "https://example.com/s", merged.SchemaID, "$id")
+	require.Equal(t, "https://json-schema.org/draft/2020-12/schema", merged.SchemaDialect, "$schema")
+	require.Equal(t, "a", merged.Anchor, "$anchor")
+	require.Equal(t, "#meta", merged.DynamicRef, "$dynamicRef")
+	require.Equal(t, "meta", merged.DynamicAnchor, "$dynamicAnchor")
+	require.Equal(t, "c", merged.Comment, "$comment")
+}
