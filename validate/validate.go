@@ -389,8 +389,7 @@ func argsForKinError(err error) []any {
 // for an error that carries no code. knownRuleID gates the result against the
 // registry. See TestRuleIDs_MatchKinCatalog for the registry/kin contract.
 func ruleIDForKinError(err error) string {
-	var coded openapi3.CodedError
-	if errors.As(err, &coded) {
+	if coded, ok := errors.AsType[openapi3.CodedError](err); ok {
 		return coded.Code()
 	}
 	return unknownValidationID

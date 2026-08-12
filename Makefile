@@ -40,6 +40,11 @@ lint: ## Run linter
 	go fmt ./...
 	go vet ./...
 	golangci-lint run --enable=unused
+	$(MAKE) modernize
+
+.PHONY: modernize
+modernize: ## Report code that could use newer Go constructs
+	go run golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize@v0.48.0 -test -omitzero=false $$(go list ./... | grep -v checker/localizations)
 	
 .PHONY: localize
 localize: ## Compile localized changelog messages
