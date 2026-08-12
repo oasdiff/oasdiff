@@ -12,48 +12,18 @@ const (
 
 func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		enumDiff := info.schemaDiff.EnumDiff
+		if enumDiff == nil || enumDiff.Deleted == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil {
-				continue
-			}
-			if operationItem.RequestBodyDiff.ContentDiff == nil {
-				continue
-			}
-			if operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
-			}
-
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-
-			mediaTypeChanges := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-
-			for _, mediaTypeItem := range mediaTypeChanges {
-				if mediaTypeItem.SchemaDiff == nil {
-					continue
-				}
-
-				schemaDiff := mediaTypeItem.SchemaDiff
-				enumDiff := schemaDiff.EnumDiff
-				if enumDiff == nil || enumDiff.Deleted == nil {
-					continue
-				}
-				for _, enumVal := range enumDiff.Deleted {
-					baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-					result = append(result, opInfo.NewApiChange(
-						RequestBodyEnumValueRemovedId,
-						[]any{enumVal},
-						"",
-					).WithSources(baseSource, revisionSource))
-				}
-			}
+		for _, enumVal := range enumDiff.Deleted {
+			baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+			result = append(result, info.newChange(RequestBodyEnumValueRemovedId, []any{enumVal}, "").
+				WithSources(baseSource, revisionSource))
 		}
-	}
+	})
+
 	return result
 }
