@@ -30,71 +30,6 @@ func exclusiveBoundValue(v float64) openapi3.ExclusiveBound {
 // These tests pin "round-trip preserves the field" so a future regression
 // in the copy block is caught.
 
-func TestMerge_SingleSchema_PreservesExample(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Example: "sample-value"},
-	})
-	require.NoError(t, err)
-	require.Equal(t, "sample-value", merged.Example)
-}
-
-func TestMerge_SingleSchema_PreservesDeprecated(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Deprecated: true},
-	})
-	require.NoError(t, err)
-	require.True(t, merged.Deprecated)
-}
-
-func TestMerge_SingleSchema_PreservesAllowEmptyValue(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{AllowEmptyValue: true},
-	})
-	require.NoError(t, err)
-	require.True(t, merged.AllowEmptyValue)
-}
-
-func TestMerge_SingleSchema_PreservesExternalDocs(t *testing.T) {
-	docs := &openapi3.ExternalDocs{Description: "more info", URL: "https://example.com/docs"}
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{ExternalDocs: docs},
-	})
-	require.NoError(t, err)
-	require.Same(t, docs, merged.ExternalDocs)
-}
-
-func TestMerge_SingleSchema_PreservesXML(t *testing.T) {
-	xml := &openapi3.XML{Name: "user", Namespace: "https://example.com/ns"}
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{XML: xml},
-	})
-	require.NoError(t, err)
-	require.Same(t, xml, merged.XML)
-}
-
-func TestMerge_SingleSchema_PreservesExtensions(t *testing.T) {
-	ext := map[string]any{"x-internal-id": "abc-123"}
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Extensions: ext},
-	})
-	require.NoError(t, err)
-	require.Equal(t, ext, merged.Extensions)
-}
-
-// Single-schema with Type set must round-trip the Type. Pins regression
-// against the duplicate `result.Value.Type = base.Value.Type` lines that
-// existed before — if both were removed accidentally, the field would
-// be lost; if only the duplicate was removed (the intended cleanup),
-// this test still passes.
-func TestMerge_SingleSchema_PreservesType(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}},
-	})
-	require.NoError(t, err)
-	require.NotNil(t, merged.Type)
-	require.True(t, merged.Type.Is("string"))
-}
-
 // identical Default fields are merged successfully
 func TestMerge_Default(t *testing.T) {
 	merged, err := allof.Merge(
@@ -3259,56 +3194,6 @@ func TestMerge_MultiType_RedundantNumericSet(t *testing.T) {
 	require.Equal(t, &openapi3.Types{"number"}, merged.Type)
 }
 
-// The 3.1 / JSON Schema 2020-12 keywords were absent from the copy block, so a
-// Merge on a schema with no allOf dropped every one of them (#1097). Dropping
-// them is not neutral: unevaluatedProperties: false turns a closed schema open,
-// and the conditionals are whole validation branches.
-func TestMerge_SingleSchema_Preserves31Keywords(t *testing.T) {
-	sub := func(prop string) *openapi3.SchemaRef {
-		return openapi3.NewSchemaRef("", &openapi3.Schema{
-			Properties: openapi3.Schemas{prop: openapi3.NewSchemaRef("", openapi3.NewStringSchema())},
-		})
-	}
-
-	x := openapi3.SchemaRef{Value: &openapi3.Schema{
-		If:                    sub("k"),
-		Then:                  sub("p"),
-		Else:                  sub("q"),
-		DependentSchemas:      openapi3.Schemas{"k": sub("r")},
-		PatternProperties:     openapi3.Schemas{"^x": sub("s")},
-		PrefixItems:           openapi3.SchemaRefs{sub("t")},
-		ContentSchema:         sub("u"),
-		UnevaluatedProperties: openapi3.BoolSchema{Has: openapi3.Ptr(false)},
-		UnevaluatedItems:      openapi3.BoolSchema{Has: openapi3.Ptr(false)},
-		Examples:              []any{"e"},
-		SchemaID:              "https://example.com/s",
-		SchemaDialect:         "https://json-schema.org/draft/2020-12/schema",
-		Anchor:                "a",
-		DynamicRef:            "#meta",
-		DynamicAnchor:         "meta",
-		Comment:               "c",
-	}}
-	merged, err := allof.Merge(x)
-	require.NoError(t, err)
-
-	require.NotNil(t, merged.If, "if")
-	require.NotNil(t, merged.Then, "then")
-	require.NotNil(t, merged.Else, "else")
-	require.Len(t, merged.DependentSchemas, 1, "dependentSchemas")
-	require.Len(t, merged.PatternProperties, 1, "patternProperties")
-	require.Len(t, merged.PrefixItems, 1, "prefixItems")
-	require.NotNil(t, merged.ContentSchema, "contentSchema")
-	require.NotNil(t, merged.UnevaluatedProperties.Has, "unevaluatedProperties")
-	require.NotNil(t, merged.UnevaluatedItems.Has, "unevaluatedItems")
-	require.Equal(t, []any{"e"}, merged.Examples, "examples")
-	require.Equal(t, "https://example.com/s", merged.SchemaID, "$id")
-	require.Equal(t, "https://json-schema.org/draft/2020-12/schema", merged.SchemaDialect, "$schema")
-	require.Equal(t, "a", merged.Anchor, "$anchor")
-	require.Equal(t, "#meta", merged.DynamicRef, "$dynamicRef")
-	require.Equal(t, "meta", merged.DynamicAnchor, "$dynamicAnchor")
-	require.Equal(t, "c", merged.Comment, "$comment")
-}
-
 // The per-field tests above can only catch a regression on a field someone
 // already thought of. They cannot catch an omission, because the list of
 // fields they check is written by hand from the same mental model as the copy
@@ -3336,6 +3221,7 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 	typ := v.Type()
 
 	populated := make([]string, 0, typ.NumField())
+	want := map[string]any{}
 	for i := range typ.NumField() {
 		f := typ.Field(i)
 		if !f.IsExported() {
@@ -3344,9 +3230,10 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 		if notPopulated[f.Name] {
 			continue
 		}
-		if !setNonZero(v.Field(i)) {
-			continue // no generic way to populate this kind; the typed tests cover it
+		if !setNonZero(v.Field(i), f.Name) {
+			continue // no generic way to populate this kind
 		}
+		want[f.Name] = v.Field(i).Interface()
 		populated = append(populated, f.Name)
 	}
 	require.Greater(t, len(populated), 40, "sanity: most fields should be populated")
@@ -3363,15 +3250,22 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 				"%s is listed in notCarriedThrough (%s) but survived the merge; remove it from the list", name, reason)
 			continue
 		}
-		assert.True(t, survived,
+		if !assert.True(t, survived,
 			"Merge dropped %s on a schema with no allOf.\n"+
-				"  add it to the copy block in mergeInternal, or to notCarriedThrough with a reason", name)
+				"  add it to the copy block in mergeInternal, or to notCarriedThrough with a reason", name) {
+			continue
+		}
+		// Every field gets a value derived from its own name, so a copy reading
+		// the wrong source shows up as a changed value rather than slipping past
+		// a non-zero check.
+		assert.Equal(t, want[name], got.Interface(),
+			"Merge changed %s on a schema with no allOf; the copy block may be reading the wrong source field", name)
 	}
 }
 
 // setNonZero gives v a value distinguishable from its zero, reporting whether
 // it could.
-func setNonZero(v reflect.Value) bool {
+func setNonZero(v reflect.Value, tag string) bool {
 	if !v.CanSet() {
 		return false
 	}
@@ -3388,7 +3282,7 @@ func setNonZero(v reflect.Value) bool {
 	}
 	switch v.Kind() {
 	case reflect.String:
-		v.SetString("x")
+		v.SetString("v-" + tag)
 		return true
 	case reflect.Bool:
 		v.SetBool(true)
@@ -3404,12 +3298,12 @@ func setNonZero(v reflect.Value) bool {
 		return true
 	case reflect.Slice:
 		v.Set(reflect.MakeSlice(v.Type(), 1, 1))
-		setNonZero(v.Index(0))
+		setNonZero(v.Index(0), tag)
 		return true
 	case reflect.Map:
 		m := reflect.MakeMap(v.Type())
 		k := reflect.New(v.Type().Key()).Elem()
-		setNonZero(k)
+		setNonZero(k, tag)
 		m.SetMapIndex(k, reflect.New(v.Type().Elem()).Elem())
 		v.Set(m)
 		return true
@@ -3420,12 +3314,12 @@ func setNonZero(v reflect.Value) bool {
 		v.Set(reflect.New(v.Type().Elem()))
 		return true
 	case reflect.Interface:
-		v.Set(reflect.ValueOf("x"))
+		v.Set(reflect.ValueOf("v-" + tag))
 		return true
 	case reflect.Struct:
 		any := false
 		for i := range v.NumField() {
-			if setNonZero(v.Field(i)) {
+			if setNonZero(v.Field(i), tag) {
 				any = true
 			}
 		}
