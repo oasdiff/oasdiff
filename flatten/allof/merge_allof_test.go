@@ -3271,12 +3271,12 @@ func setNonZero(v reflect.Value, tag string) bool {
 	}
 	// A schema position needs a usable schema, not just a non-nil pointer:
 	// Merge dereferences it.
-	if v.Type() == reflect.TypeOf((*openapi3.SchemaRef)(nil)) {
+	if v.Type() == reflect.TypeFor[*openapi3.SchemaRef]() {
 		v.Set(reflect.ValueOf(openapi3.NewSchemaRef("", openapi3.NewSchema())))
 		return true
 	}
 	// An empty Types is semantically "no type", which the merge resolves away.
-	if v.Type() == reflect.TypeOf((*openapi3.Types)(nil)) {
+	if v.Type() == reflect.TypeFor[*openapi3.Types]() {
 		v.Set(reflect.ValueOf(&openapi3.Types{"object"}))
 		return true
 	}
@@ -3318,8 +3318,8 @@ func setNonZero(v reflect.Value, tag string) bool {
 		return true
 	case reflect.Struct:
 		any := false
-		for i := range v.NumField() {
-			if setNonZero(v.Field(i), tag) {
+		for _, fv := range v.Fields() {
+			if setNonZero(fv, tag) {
 				any = true
 			}
 		}
