@@ -12,50 +12,18 @@ const (
 
 func ResponseMediaTypeEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		enumDiff := info.schemaDiff.EnumDiff
+		if enumDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil {
-				continue
-			}
-			if operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for _, responseItems := range operationItem.ResponsesDiff.Modified {
-				if responseItems.ContentDiff == nil {
-					continue
-				}
-
-				if responseItems.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				for mediaType, mediaTypeItem := range responseItems.ContentDiff.MediaTypeModified {
-					if mediaTypeItem.SchemaDiff == nil {
-						continue
-					}
-
-					enumDiff := mediaTypeItem.SchemaDiff.EnumDiff
-					if enumDiff == nil {
-						continue
-					}
-
-					for _, enumVal := range enumDiff.Deleted {
-						baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, mediaTypeItem.SchemaDiff, "enum", fmt.Sprintf("%v", enumVal))
-						result = append(result, opInfo.NewApiChange(
-							ResponseMediaTypeEnumValueRemovedId,
-							[]any{mediaType, enumVal},
-							"",
-						).WithSources(baseSource, revisionSource))
-					}
-				}
-			}
+		for _, enumVal := range enumDiff.Deleted {
+			baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+			result = append(result, info.newChange(ResponseMediaTypeEnumValueRemovedId, []any{info.mediaType, enumVal}, "").
+				WithSources(baseSource, revisionSource))
 		}
-	}
+	})
+
 	return result
 }

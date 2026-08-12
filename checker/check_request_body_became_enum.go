@@ -10,42 +10,15 @@ const (
 
 func RequestBodyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		if info.schemaDiff.EnumDiff == nil || !info.schemaDiff.EnumDiff.EnumAdded {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")
+		result = append(result, info.newChange(RequestBodyBecameEnumId, nil, "").
+			WithSources(baseSource, revisionSource))
+	})
 
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
-			}
-
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-
-			modifiedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified
-
-			for mediaType, mediaTypeDiff := range modifiedMediaTypes {
-				mediaTypeDetails := formatMediaTypeDetails(mediaType, len(modifiedMediaTypes))
-				if mediaTypeDiff.SchemaDiff == nil {
-					continue
-				}
-				schemaDiff := mediaTypeDiff.SchemaDiff
-				if schemaDiff.EnumDiff == nil || !schemaDiff.EnumDiff.EnumAdded {
-					continue
-				}
-				baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, schemaDiff, "enum")
-				result = append(result, opInfo.NewApiChange(
-					RequestBodyBecameEnumId,
-					nil,
-					"",
-				).WithSources(baseSource, revisionSource).WithDetails(mediaTypeDetails))
-			}
-		}
-	}
 	return result
 }
