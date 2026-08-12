@@ -3235,7 +3235,12 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 			continue
 		}
 		if !setNonZero(v.Field(i), f.Name) {
-			continue // no generic way to populate this kind
+			// Silently skipping would reopen the hole this test exists to
+			// close: a field of a kind setNonZero cannot build would go
+			// unchecked and the test would still pass. Teach setNonZero the
+			// kind instead.
+			t.Errorf("cannot populate %s (%s); extend setNonZero so the field is covered", f.Name, f.Type)
+			continue
 		}
 		want[f.Name] = v.Field(i).Interface()
 		populated = append(populated, f.Name)
