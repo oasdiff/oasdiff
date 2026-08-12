@@ -239,17 +239,41 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.ContentMediaType = base.Value.ContentMediaType
 	result.Value.ContentEncoding = base.Value.ContentEncoding
 	result.Value.DependentRequired = base.Value.DependentRequired
-	result.Value.Discriminator = base.Value.Discriminator
-	// Fields documented in ALLOF.md as "not merged" — i.e. the merge
-	// logic doesn't combine them across allOf subschemas. They MUST
-	// still flow through from the outer (base) schema, otherwise a
-	// single-schema Merge silently loses them.
+	// Never combined across allOf subschemas: the outer schema's value is the
+	// result. ALLOF.md lists these.
+	//
+	// They still have to be copied, or a single-schema Merge, where there is
+	// nothing to combine, loses them. For the 3.1 keywords that is not a
+	// neutral loss: without unevaluatedProperties a closed schema becomes open,
+	// and without the conditionals a validation branch disappears. A subschema
+	// carrying one of them still loses it, which is #878.
 	result.Value.Example = base.Value.Example
 	result.Value.Deprecated = base.Value.Deprecated
 	result.Value.AllowEmptyValue = base.Value.AllowEmptyValue
 	result.Value.ExternalDocs = base.Value.ExternalDocs
 	result.Value.XML = base.Value.XML
 	result.Value.Extensions = base.Value.Extensions
+	result.Value.Discriminator = base.Value.Discriminator
+	result.Value.If = base.Value.If
+	result.Value.Then = base.Value.Then
+	result.Value.Else = base.Value.Else
+	result.Value.DependentSchemas = base.Value.DependentSchemas
+	result.Value.UnevaluatedProperties = base.Value.UnevaluatedProperties
+	result.Value.UnevaluatedItems = base.Value.UnevaluatedItems
+	result.Value.PatternProperties = base.Value.PatternProperties
+	result.Value.PrefixItems = base.Value.PrefixItems
+	result.Value.ContentSchema = base.Value.ContentSchema
+	result.Value.Examples = base.Value.Examples
+	result.Value.SchemaID = base.Value.SchemaID
+	result.Value.SchemaDialect = base.Value.SchemaDialect
+	result.Value.Anchor = base.Value.Anchor
+	result.Value.DynamicRef = base.Value.DynamicRef
+	result.Value.DynamicAnchor = base.Value.DynamicAnchor
+	result.Value.Comment = base.Value.Comment
+
+	// Combined across subschemas further down, most restrictive winning, but
+	// seeded from the outer schema here: with no siblings to combine there
+	// would otherwise be nothing to seed the result with.
 	if base.Value.MaxLength != nil {
 		result.Value.MaxLength = new(*base.Value.MaxLength)
 	}
@@ -263,33 +287,6 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	if base.Value.MaxProps != nil {
 		result.Value.MaxProps = new(*base.Value.MaxProps)
 	}
-	// The 3.1 / JSON Schema 2020-12 keywords the merge does not combine across
-	// allOf siblings. They flow through from the outer schema for the reason
-	// given above, and dropping them is not neutral: without
-	// unevaluatedProperties a closed schema silently becomes open, and without
-	// the conditionals a validation branch disappears from the comparison.
-	//
-	// A subschema carrying one of these still loses it, which is #878. Passed
-	// through as-is rather than merged, the same way contains and propertyNames
-	// are when only one is present.
-	result.Value.If = base.Value.If
-	result.Value.Then = base.Value.Then
-	result.Value.Else = base.Value.Else
-	result.Value.DependentSchemas = base.Value.DependentSchemas
-	result.Value.UnevaluatedProperties = base.Value.UnevaluatedProperties
-	result.Value.UnevaluatedItems = base.Value.UnevaluatedItems
-	result.Value.PatternProperties = base.Value.PatternProperties
-	result.Value.PrefixItems = base.Value.PrefixItems
-	result.Value.ContentSchema = base.Value.ContentSchema
-	result.Value.Examples = base.Value.Examples
-	// Identity and dialect keywords: annotations on the schema itself, nothing
-	// to merge. $defs is deliberately not here, see ALLOF.md.
-	result.Value.SchemaID = base.Value.SchemaID
-	result.Value.SchemaDialect = base.Value.SchemaDialect
-	result.Value.Anchor = base.Value.Anchor
-	result.Value.DynamicRef = base.Value.DynamicRef
-	result.Value.DynamicAnchor = base.Value.DynamicAnchor
-	result.Value.Comment = base.Value.Comment
 
 	// merge all fields of type SchemaRef
 	allOf, err := mergeSchemaRefs(state, base.Value.AllOf)

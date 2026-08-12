@@ -41,9 +41,17 @@ The following schema fields are not merged:
 - Deprecated
 - XML
 - Discriminator
+- `if` / `then` / `else` (OpenAPI 3.1)
+- `dependentSchemas` (OpenAPI 3.1)
+- `unevaluatedProperties` / `unevaluatedItems` (OpenAPI 3.1)
+- `patternProperties` (OpenAPI 3.1)
+- `prefixItems` (OpenAPI 3.1)
+- `contentSchema` (OpenAPI 3.1)
+- `examples` (OpenAPI 3.1)
+- `$id` / `$anchor` / `$dynamicRef` / `$dynamicAnchor` / `$schema` / `$comment` (OpenAPI 3.1)
 - `$defs` (OpenAPI 3.1) — intentionally dropped from the flattened output. `$defs` is a reusable-schema namespace used as the target of `$ref` pointers. After `--flatten-allof` runs, the merged schema has no `$ref`s left to resolve, so the namespace contributes nothing to its semantics. Preserving it would only add noise (and risk silent collisions when two `allOf` subschemas define different things under the same `$defs` key).
 
-The 3.1 / JSON Schema 2020-12 keywords the merge does not combine (`if`/`then`/`else`, `dependentSchemas`, `unevaluatedProperties`/`unevaluatedItems`, `patternProperties`, `prefixItems`, `contentSchema`, and the `$id`/`$anchor`/`$comment` family) are carried through from the outer schema rather than dropped, so a schema with no `allOf` round-trips unchanged. What is still lost is such a keyword on an `allOf` **subschema**: the merge has no rule for combining two `if`s or two `unevaluatedProperties`, so a subschema carrying one loses it ([#878](https://github.com/oasdiff/oasdiff/issues/878)).
+Every field above except `$defs` is taken from the outer schema, so a schema with no `allOf` round-trips unchanged. What is lost is such a field on an `allOf` **subschema**: with no rule for combining two `if`s or two `unevaluatedProperties`, a subschema carrying one loses it ([#878](https://github.com/oasdiff/oasdiff/issues/878)). For the 3.1 keywords that is not a neutral loss, since `unevaluatedProperties: false` turns a closed schema into an open one and the conditionals are whole validation branches.
 
 ## Invalid input handling
 
