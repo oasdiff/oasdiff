@@ -40,6 +40,7 @@ var containmentPairs = [][2]string{
 
 	// Removing an allOf branch removes everything that branch required.
 	{checker.ResponseBodyAllOfRemovedId, checker.ResponseRequiredPropertyRemovedId},
+	{checker.ResponsePropertyAllOfRemovedId, checker.ResponseRequiredPropertyRemovedId},
 }
 
 // monotonicityWaivers records a pair whose severities are deliberately
