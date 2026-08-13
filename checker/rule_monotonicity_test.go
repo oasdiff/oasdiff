@@ -37,6 +37,9 @@ var containmentPairs = [][2]string{
 
 	// A success response contains the headers declared on it.
 	{checker.ResponseSuccessStatusRemovedId, checker.RequiredResponseHeaderRemovedId},
+
+	// Removing an allOf branch removes everything that branch required.
+	{checker.ResponseBodyAllOfRemovedId, checker.ResponseRequiredPropertyRemovedId},
 }
 
 // monotonicityWaivers records a pair whose severities are deliberately
