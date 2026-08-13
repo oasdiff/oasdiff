@@ -36,11 +36,10 @@ deps:  ## Download go module dependencies
 	go mod tidy
 
 .PHONY: lint
-lint: ## Run linter
+lint: modernize ## Run linter
 	go fmt ./...
 	go vet ./...
 	golangci-lint run --enable=unused
-	$(MAKE) modernize
 
 .PHONY: modernize
 modernize: ## Report code that could use newer Go constructs
