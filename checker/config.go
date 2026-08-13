@@ -8,9 +8,7 @@ type Config struct {
 	MinSunsetStableDays uint
 	LogLevels           map[string]Level
 	// overriddenLevels holds the ids whose level the caller set, so a
-	// disclaimer knows not to lower a level that was chosen deliberately.
-	// Distinct from comparing against the registry, which cannot tell a rule
-	// set to the level it already had from one never set at all.
+	// disclaimer does not lower a level that was chosen deliberately.
 	overriddenLevels map[string]bool
 	Attributes       []string
 	StabilityLevel   StabilityLevel

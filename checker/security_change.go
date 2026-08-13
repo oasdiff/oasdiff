@@ -64,6 +64,12 @@ func (c SecurityChange) GetComment(l Localizer) string {
 	return l(c.Comment)
 }
 
+// GetDisclaimers returns none: these changes do not come from a schema
+// comparison, so nothing limits them.
+func (SecurityChange) GetDisclaimers() []Disclaimer {
+	return nil
+}
+
 func (c SecurityChange) GetLevel() Level {
 	return c.Level
 }

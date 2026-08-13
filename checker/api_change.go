@@ -163,6 +163,10 @@ func (c ApiChange) GetLevel() Level {
 	return c.Level
 }
 
+func (c ApiChange) GetDisclaimers() []Disclaimer {
+	return c.Disclaimers
+}
+
 func (c ApiChange) GetOperation() string {
 	return c.Operation
 }

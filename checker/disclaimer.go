@@ -1,16 +1,12 @@
 package checker
 
-// A rule's severity says what a change means when oasdiff can see the whole
-// picture. Sometimes it cannot, and the verdict is then less certain than the
-// severity claims.
+import "encoding/json"
+
+// A Disclaimer names a condition that made a comparison inexact, so a rule's
+// severity claims more certainty than the inputs support. It records only what
+// was imperfect; what that costs a change is policy in disclaimerPolicies.
 //
-// A Disclaimer names one such condition. It records only what was imperfect;
-// what that costs a change, a comment and a severity ceiling, is policy and
-// lives in disclaimerPolicies. Keeping the two apart means a check states a
-// fact about its inputs without also deciding what the fact is worth, and the
-// worth can be revised in one table.
-//
-// Conditions need not be about options the caller did not pass. A construct
+// A condition need not be an option the caller did not pass: a construct
 // oasdiff cannot compare exactly however it is invoked belongs here too.
 type Disclaimer int
 
@@ -36,6 +32,17 @@ func (d Disclaimer) String() string {
 		return "openapi-versions-differ"
 	}
 	return "unknown-disclaimer"
+}
+
+// MarshalJSON and MarshalYAML emit the name, so a consumer reads
+// "all-of-not-flattened" rather than an integer whose meaning depends on
+// declaration order.
+func (d Disclaimer) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.String())
+}
+
+func (d Disclaimer) MarshalYAML() (any, error) {
+	return d.String(), nil
 }
 
 func (d Disclaimer) commentId() string {

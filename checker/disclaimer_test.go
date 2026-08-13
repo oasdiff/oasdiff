@@ -1,12 +1,14 @@
 package checker_test
 
 import (
+	"encoding/json"
 	"regexp"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
@@ -121,4 +123,33 @@ func onlyApiChange(t *testing.T, base, revision string, config *diff.Config) che
 		checker.NewConfig(checker.GetAllChecks(), withoutVersioningPolicy()), d, osm, checker.INFO)
 	require.Len(t, changes, 1)
 	return changes[0]
+}
+
+// Disclaimers reach a machine consumer as their names, so a script can tell a
+// softened verdict from a confident one without matching on comment prose.
+func TestDisclaimersSerializeAsNames(t *testing.T) {
+	change := onlyApiChange(t, "../data/checker/disclaimer_allof_base.yaml", "../data/checker/disclaimer_allof_revision.yaml", diff.NewConfig())
+
+	encoded, err := json.Marshal(formatters.NewChanges(checker.Changes{change}, checker.NewDefaultLocalizer()))
+	require.NoError(t, err)
+	require.Contains(t, string(encoded), `"disclaimers":["all-of-not-flattened"]`)
+}
+
+// A change from an exact comparison carries none, and the field is omitted
+// rather than serialized as an empty list.
+func TestDisclaimersOmittedWhenNone(t *testing.T) {
+	s1, err := open("../data/checker/request_property_added_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_property_added_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.NotEmpty(t, changes)
+
+	encoded, err := json.Marshal(formatters.NewChanges(changes, checker.NewDefaultLocalizer()))
+	require.NoError(t, err)
+	require.NotContains(t, string(encoded), "disclaimers")
 }
