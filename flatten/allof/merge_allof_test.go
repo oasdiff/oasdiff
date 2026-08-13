@@ -2,11 +2,13 @@ package allof_test
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/flatten/allof"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,71 +29,6 @@ func exclusiveBoundValue(v float64) openapi3.ExclusiveBound {
 // every Merge call — including pure passthroughs with no actual merging.
 // These tests pin "round-trip preserves the field" so a future regression
 // in the copy block is caught.
-
-func TestMerge_SingleSchema_PreservesExample(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Example: "sample-value"},
-	})
-	require.NoError(t, err)
-	require.Equal(t, "sample-value", merged.Example)
-}
-
-func TestMerge_SingleSchema_PreservesDeprecated(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Deprecated: true},
-	})
-	require.NoError(t, err)
-	require.True(t, merged.Deprecated)
-}
-
-func TestMerge_SingleSchema_PreservesAllowEmptyValue(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{AllowEmptyValue: true},
-	})
-	require.NoError(t, err)
-	require.True(t, merged.AllowEmptyValue)
-}
-
-func TestMerge_SingleSchema_PreservesExternalDocs(t *testing.T) {
-	docs := &openapi3.ExternalDocs{Description: "more info", URL: "https://example.com/docs"}
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{ExternalDocs: docs},
-	})
-	require.NoError(t, err)
-	require.Same(t, docs, merged.ExternalDocs)
-}
-
-func TestMerge_SingleSchema_PreservesXML(t *testing.T) {
-	xml := &openapi3.XML{Name: "user", Namespace: "https://example.com/ns"}
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{XML: xml},
-	})
-	require.NoError(t, err)
-	require.Same(t, xml, merged.XML)
-}
-
-func TestMerge_SingleSchema_PreservesExtensions(t *testing.T) {
-	ext := map[string]any{"x-internal-id": "abc-123"}
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Extensions: ext},
-	})
-	require.NoError(t, err)
-	require.Equal(t, ext, merged.Extensions)
-}
-
-// Single-schema with Type set must round-trip the Type. Pins regression
-// against the duplicate `result.Value.Type = base.Value.Type` lines that
-// existed before — if both were removed accidentally, the field would
-// be lost; if only the duplicate was removed (the intended cleanup),
-// this test still passes.
-func TestMerge_SingleSchema_PreservesType(t *testing.T) {
-	merged, err := allof.Merge(openapi3.SchemaRef{
-		Value: &openapi3.Schema{Type: &openapi3.Types{"string"}},
-	})
-	require.NoError(t, err)
-	require.NotNil(t, merged.Type)
-	require.True(t, merged.Type.Is("string"))
-}
 
 // identical Default fields are merged successfully
 func TestMerge_Default(t *testing.T) {
@@ -3255,4 +3192,147 @@ func TestMerge_MultiType_RedundantNumericSet(t *testing.T) {
 			}})
 	require.NoError(t, err)
 	require.Equal(t, &openapi3.Types{"number"}, merged.Type)
+}
+
+// Merge on a schema with no allOf must return what it was given: there is
+// nothing to combine, so every field should survive.
+//
+// This walks openapi3.Schema by reflection rather than naming the fields,
+// which is the point. mergeInternal copies field by field, and a test that
+// lists the fields it checks is written from the same mental model as that
+// copy block, so a field missing from one is missing from both. Sixteen
+// keywords were dropped for exactly that long (#1097). Here a field kin adds
+// is covered without anyone remembering.
+//
+// Each field gets a value derived from its own name, so a copy reading the
+// wrong source shows up as a changed value rather than passing a non-zero
+// check. Fields deliberately not carried through are listed with a reason,
+// and the list fails if one of them starts surviving, so it cannot rot.
+var notCarriedThrough = map[string]string{
+	"Defs":   "intentionally dropped, see ALLOF.md: after flattening there are no $refs left for the namespace to serve.",
+	"Origin": "source position of the input schema; a merged schema does not come from one place in the file.",
+}
+
+// notPopulated is left unset because the case under test is a schema with no
+// allOf. Populating it would exercise the merge rather than the copy, and its
+// subschemas carry zero values that legitimately win: a fresh subschema is not
+// nullable, and nullable merges to false if any sibling says false.
+var notPopulated = map[string]bool{"AllOf": true}
+
+func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
+	in := &openapi3.Schema{}
+	v := reflect.ValueOf(in).Elem()
+	typ := v.Type()
+
+	populated := make([]string, 0, typ.NumField())
+	want := map[string]any{}
+	for i := range typ.NumField() {
+		f := typ.Field(i)
+		if !f.IsExported() {
+			continue
+		}
+		if notPopulated[f.Name] {
+			continue
+		}
+		if !setNonZero(v.Field(i), f.Name) {
+			// Silently skipping would reopen the hole this test exists to
+			// close: a field of a kind setNonZero cannot build would go
+			// unchecked and the test would still pass. Teach setNonZero the
+			// kind instead.
+			t.Errorf("cannot populate %s (%s); extend setNonZero so the field is covered", f.Name, f.Type)
+			continue
+		}
+		want[f.Name] = v.Field(i).Interface()
+		populated = append(populated, f.Name)
+	}
+	require.Greater(t, len(populated), 40, "sanity: most fields should be populated")
+
+	merged, err := allof.Merge(openapi3.SchemaRef{Value: in})
+	require.NoError(t, err)
+
+	out := reflect.ValueOf(merged).Elem()
+	for _, name := range populated {
+		got := out.FieldByName(name)
+		survived := !got.IsZero()
+		if reason, expected := notCarriedThrough[name]; expected {
+			assert.False(t, survived,
+				"%s is listed in notCarriedThrough (%s) but survived the merge; remove it from the list", name, reason)
+			continue
+		}
+		if !assert.True(t, survived,
+			"Merge dropped %s on a schema with no allOf.\n"+
+				"  add it to the copy block in mergeInternal, or to notCarriedThrough with a reason", name) {
+			continue
+		}
+		// Every field gets a value derived from its own name, so a copy reading
+		// the wrong source shows up as a changed value rather than slipping past
+		// a non-zero check.
+		assert.Equal(t, want[name], got.Interface(),
+			"Merge changed %s on a schema with no allOf; the copy block may be reading the wrong source field", name)
+	}
+}
+
+// setNonZero gives v a value distinguishable from its zero, reporting whether
+// it could.
+func setNonZero(v reflect.Value, tag string) bool {
+	if !v.CanSet() {
+		return false
+	}
+	// A schema position needs a usable schema, not just a non-nil pointer:
+	// Merge dereferences it.
+	if v.Type() == reflect.TypeFor[*openapi3.SchemaRef]() {
+		v.Set(reflect.ValueOf(openapi3.NewSchemaRef("", openapi3.NewSchema())))
+		return true
+	}
+	// An empty Types is semantically "no type", which the merge resolves away.
+	if v.Type() == reflect.TypeFor[*openapi3.Types]() {
+		v.Set(reflect.ValueOf(&openapi3.Types{"object"}))
+		return true
+	}
+	switch v.Kind() {
+	case reflect.String:
+		v.SetString("v-" + tag)
+		return true
+	case reflect.Bool:
+		v.SetBool(true)
+		return true
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		v.SetInt(1)
+		return true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v.SetUint(1)
+		return true
+	case reflect.Float64:
+		v.SetFloat(1)
+		return true
+	case reflect.Slice:
+		v.Set(reflect.MakeSlice(v.Type(), 1, 1))
+		setNonZero(v.Index(0), tag)
+		return true
+	case reflect.Map:
+		m := reflect.MakeMap(v.Type())
+		k := reflect.New(v.Type().Key()).Elem()
+		setNonZero(k, tag)
+		m.SetMapIndex(k, reflect.New(v.Type().Elem()).Elem())
+		v.Set(m)
+		return true
+	case reflect.Pointer:
+		// Allocated, not filled: Schema points at itself through SchemaRef, so
+		// descending would not terminate, and a non-nil pointer is already
+		// distinguishable from the zero value.
+		v.Set(reflect.New(v.Type().Elem()))
+		return true
+	case reflect.Interface:
+		v.Set(reflect.ValueOf("v-" + tag))
+		return true
+	case reflect.Struct:
+		any := false
+		for _, fv := range v.Fields() {
+			if setNonZero(fv, tag) {
+				any = true
+			}
+		}
+		return any
+	}
+	return false
 }
