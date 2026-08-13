@@ -46,7 +46,16 @@ var containmentPairs = [][2]string{
 // monotonicityWaivers records a pair whose severities are deliberately
 // inverted. Key is "outer>inner". Empty today; a waiver wants a reason that
 // survives review, not a note that the test was failing.
-var monotonicityWaivers = map[string]string{}
+var monotonicityWaivers = map[string]string{
+	// These two report that a branch is gone, not that anything it guaranteed
+	// is gone. Deciding which requires merging the branches, which is
+	// --flatten-allof, and under that flag the loss surfaces as the precise
+	// rule instead. So the coarse rule states uncertainty rather than a known
+	// loss, and uncertainty does not rank above the certain thing it might
+	// turn out to contain.
+	"response-body-all-of-removed>response-required-property-removed":     "warns that a branch is gone; whether it carried a required property is only knowable with --flatten-allof, which reports the loss precisely",
+	"response-property-all-of-removed>response-required-property-removed": "warns that a branch is gone; whether it carried a required property is only knowable with --flatten-allof, which reports the loss precisely",
+}
 
 func TestSeverityMonotonicity(t *testing.T) {
 	levels := map[string]checker.Level{}

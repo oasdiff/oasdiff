@@ -342,6 +342,7 @@ request-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedad
 request-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de requisição %s"
 response-body-all-of-added: "%s foi adicionado à lista `allOf` do corpo da resposta para o status %s"
 response-body-all-of-removed: "%s foi removido da lista `allOf` do corpo da resposta para o status %s"
+response-all-of-removed-comment: "Isto é um aviso porque um ramo de um `allOf` foi removido, não porque se saiba que algo garantido por ele foi perdido. Se ele carregava uma propriedade que os ramos restantes não têm, isso só pode ser decidido mesclando-os: execute com --flatten-allof, que compara os esquemas mesclados e relata qualquer perda real com precisão."
 response-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedade de resposta %s para o status %s"
 response-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de resposta %s para o status %s"
 response-body-discriminator-added: discriminador de resposta adicionado para o status %s
