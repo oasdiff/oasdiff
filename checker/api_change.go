@@ -73,9 +73,8 @@ func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
 }
 
 // WithDetails returns a copy of the ApiChange with Details set
-// WithDisclaimers records conditions that make this change less certain than
-// its severity alone suggests. Additive: a change can gather disclaimers from
-// more than one place, and duplicates are dropped.
+// WithDisclaimers is additive and drops duplicates: a change can gather the
+// same condition from more than one place.
 func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
 	for _, d := range disclaimers {
 		if !slices.Contains(c.Disclaimers, d) {
@@ -139,8 +138,6 @@ func (c ApiChange) GetUncolorizedText(l Localizer) string {
 	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix()
 }
 
-// GetComment returns the rule's own explanation of the verdict, followed by
-// one line per disclaimer saying why the verdict is less certain than usual.
 func (c ApiChange) GetComment(l Localizer) string {
 	parts := make([]string, 0, 1+len(c.Disclaimers))
 	if c.Comment != "" {

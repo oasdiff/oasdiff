@@ -5,12 +5,9 @@ import (
 )
 
 type Change struct {
-	Id      string `json:"id,omitempty" yaml:"id,omitempty"`
-	Text    string `json:"text,omitempty" yaml:"text,omitempty"`
-	Comment string `json:"comment,omitempty" yaml:"comment,omitempty"`
-	// Disclaimers name what made this change's comparison inexact, so a
-	// consumer can tell a softened verdict from a confident one without
-	// reading the comment text.
+	Id             string               `json:"id,omitempty" yaml:"id,omitempty"`
+	Text           string               `json:"text,omitempty" yaml:"text,omitempty"`
+	Comment        string               `json:"comment,omitempty" yaml:"comment,omitempty"`
 	Disclaimers    []checker.Disclaimer `json:"disclaimers,omitempty" yaml:"disclaimers,omitempty"`
 	Level          checker.Level        `json:"level" yaml:"level"`
 	Operation      string               `json:"operation,omitempty" yaml:"operation,omitempty"`

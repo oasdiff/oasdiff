@@ -58,8 +58,6 @@ func (c InfoChange) GetComment(l Localizer) string {
 	return l(c.Comment)
 }
 
-// GetDisclaimers returns none: these changes do not come from a schema
-// comparison, so nothing limits them.
 func (InfoChange) GetDisclaimers() []Disclaimer {
 	return nil
 }

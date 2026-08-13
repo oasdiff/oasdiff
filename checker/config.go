@@ -7,11 +7,9 @@ type Config struct {
 	MinSunsetBetaDays   uint
 	MinSunsetStableDays uint
 	LogLevels           map[string]Level
-	// overriddenLevels holds the ids whose level the caller set, so a
-	// disclaimer does not lower a level that was chosen deliberately.
-	overriddenLevels map[string]bool
-	Attributes       []string
-	StabilityLevel   StabilityLevel
+	overriddenLevels    map[string]bool
+	Attributes          []string
+	StabilityLevel      StabilityLevel
 }
 
 const (

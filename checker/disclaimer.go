@@ -22,8 +22,6 @@ const (
 	DisclaimerVersionsDiffer
 )
 
-// String returns the disclaimer's stable name, used in output and as the stem
-// of its localization key.
 func (d Disclaimer) String() string {
 	switch d {
 	case DisclaimerAllOfNotFlattened:
@@ -49,11 +47,8 @@ func (d Disclaimer) commentId() string {
 	return d.String() + "-disclaimer"
 }
 
-// disclaimerPolicy is what a disclaimer costs a change.
 type disclaimerPolicy struct {
-	// maxLevel caps the change's severity. NONE leaves the severity alone,
-	// which is right when the condition makes some changes doubtful but not
-	// the whole comparison.
+	// maxLevel of NONE leaves the severity alone.
 	maxLevel Level
 }
 
@@ -70,9 +65,8 @@ var disclaimerPolicies = map[Disclaimer]disclaimerPolicy{
 	DisclaimerVersionsDiffer: {},
 }
 
-// applyDisclaimers records the conditions that hold for this comparison and
-// applies their policy. Runs after the checks and before the level filter, so
-// a capped change is filtered and counted at the level it ends up with.
+// Runs after the checks and before the level filter, so a capped change is
+// filtered and counted at the level it ends up with.
 func applyDisclaimers(config *Config, changes Changes, versionsDiffer bool) Changes {
 	for i, change := range changes {
 		apiChange, ok := change.(ApiChange)
@@ -87,9 +81,8 @@ func applyDisclaimers(config *Config, changes Changes, versionsDiffer bool) Chan
 	return changes
 }
 
-// capByDisclaimers lowers a change to the strictest ceiling its disclaimers
-// impose. A level the caller set explicitly wins: an override is a decision
-// about this rule, and a disclaimer is not entitled to overrule it.
+// A level the caller set wins: an override is a decision about that rule, and
+// a disclaimer is not entitled to overrule it.
 func capByDisclaimers(config *Config, change ApiChange) ApiChange {
 	if config.overriddenLevels[change.Id] {
 		return change

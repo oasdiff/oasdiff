@@ -96,7 +96,6 @@ func TestDisclaimer_ExplicitLevelWins(t *testing.T) {
 	require.Equal(t, checker.ERR, change.GetLevel())
 }
 
-// declaredLevel is the level the registry gives a rule, before any disclaimer.
 func declaredLevel(t *testing.T, id string) checker.Level {
 	t.Helper()
 	for _, rule := range checker.GetAllRules() {

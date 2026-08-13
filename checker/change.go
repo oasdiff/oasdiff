@@ -10,8 +10,6 @@ type Change interface {
 	GetComment(l Localizer) string
 	GetLevel() Level
 
-	// GetDisclaimers returns the conditions that made this change's comparison
-	// inexact, empty when it was exact.
 	GetDisclaimers() []Disclaimer
 	GetOperation() string
 	GetOperationId() string
