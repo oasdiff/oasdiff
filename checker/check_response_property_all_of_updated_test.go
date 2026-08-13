@@ -104,7 +104,6 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 		{
 			Id:          checker.ResponseBodyAllOfRemovedId,
 			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
-			Comment:     checker.ResponseAllOfRemovedCommentId,
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
@@ -114,7 +113,6 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 		{
 			Id:          checker.ResponsePropertyAllOfRemovedId,
 			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
-			Comment:     checker.ResponseAllOfRemovedCommentId,
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",

@@ -13,10 +13,6 @@ const (
 	ResponseBodyAllOfRemovedAnnotationOnlyId     = "response-body-all-of-removed-annotation-only"
 	ResponsePropertyAllOfAddedAnnotationOnlyId   = "response-property-all-of-added-annotation-only"
 	ResponsePropertyAllOfRemovedAnnotationOnlyId = "response-property-all-of-removed-annotation-only"
-
-	// ResponseAllOfRemovedCommentId explains a warning that cannot be resolved
-	// without merging the branches, which is what --flatten-allof does.
-	ResponseAllOfRemovedCommentId = "response-all-of-removed-comment"
 )
 
 func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -39,7 +35,7 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 			deleted, annotationOnlyDeleted := splitSubschemasByAnnotationOnly(info.schemaDiff.AllOfDiff.Deleted, info.schemaDiff.Base.AllOf)
 			if len(deleted) > 0 {
 				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "allOf", deleted[0].Index, -1)
-				result = append(result, info.newChange(ResponseBodyAllOfRemovedId, []any{deleted.String(), info.responseStatus}, ResponseAllOfRemovedCommentId).
+				result = append(result, info.newChange(ResponseBodyAllOfRemovedId, []any{deleted.String(), info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
 			}
 			if len(annotationOnlyDeleted) > 0 {
@@ -70,7 +66,7 @@ func ResponsePropertyAllOfUpdatedCheck(diffReport *diff.Diff, operationsSources 
 			deleted, annotationOnlyDeleted := splitSubschemasByAnnotationOnly(p.propertyDiff.AllOfDiff.Deleted, p.propertyDiff.Base.AllOf)
 			if len(deleted) > 0 {
 				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "allOf", deleted[0].Index, -1)
-				result = append(result, p.newChange(ResponsePropertyAllOfRemovedId, []any{deleted.String(), propName, info.responseStatus}, ResponseAllOfRemovedCommentId).
+				result = append(result, p.newChange(ResponsePropertyAllOfRemovedId, []any{deleted.String(), propName, info.responseStatus}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
 			if len(annotationOnlyDeleted) > 0 {

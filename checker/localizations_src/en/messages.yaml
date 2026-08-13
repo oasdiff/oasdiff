@@ -347,7 +347,6 @@ request-property-all-of-added: added %s to the %s request property `allOf` list
 request-property-all-of-removed: removed %s from the %s request property `allOf` list
 response-body-all-of-added: added %s to the response body `allOf` list for the response status %s
 response-body-all-of-removed: removed %s from the response body `allOf` list for the response status %s
-response-all-of-removed-comment: "This is a warning because a branch of an `allOf` was removed, not because anything the branch guaranteed is known to be gone. Whether it carried a property the remaining branches do not is only decidable by merging them: run with --flatten-allof, which compares the merged schemas and reports any real loss precisely."
 all-of-not-flattened-disclaimer: "This compared the `allOf` branches one at a time, so another branch may still guarantee what this one dropped. Run with --flatten-allof to merge the branches and compare what they describe together."
 openapi-versions-differ-disclaimer: "The two specs declare different OpenAPI versions, and the dialects write some constructs differently without changing their meaning, so this difference may be notation alone. Run with --auto-upgrade to canonicalize both before comparing."
 response-property-all-of-added: added %s to the %s response property `allOf` list for the response status %s
