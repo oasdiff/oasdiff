@@ -993,8 +993,8 @@ func TestMerge_MinContains_PicksHigher(t *testing.T) {
 		openapi3.SchemaRef{
 			Value: &openapi3.Schema{
 				AllOf: openapi3.SchemaRefs{
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: uint64Ptr(2)}},
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: uint64Ptr(5)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: new(uint64(2))}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: new(uint64(5))}},
 				},
 			},
 		})
@@ -1010,7 +1010,7 @@ func TestMerge_MinContains_WithAbsentSibling(t *testing.T) {
 		openapi3.SchemaRef{
 			Value: &openapi3.Schema{
 				AllOf: openapi3.SchemaRefs{
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: uint64Ptr(3)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinContains: new(uint64(3))}},
 					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
 				},
 			},
@@ -1042,8 +1042,8 @@ func TestMerge_MaxContains_PicksLower(t *testing.T) {
 		openapi3.SchemaRef{
 			Value: &openapi3.Schema{
 				AllOf: openapi3.SchemaRefs{
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: uint64Ptr(10)}},
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: uint64Ptr(4)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: new(uint64(10))}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: new(uint64(4))}},
 				},
 			},
 		})
@@ -1059,7 +1059,7 @@ func TestMerge_MaxContains_WithAbsentSibling(t *testing.T) {
 		openapi3.SchemaRef{
 			Value: &openapi3.Schema{
 				AllOf: openapi3.SchemaRefs{
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: uint64Ptr(7)}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxContains: new(uint64(7))}},
 					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"array"}}},
 				},
 			},
@@ -1069,8 +1069,8 @@ func TestMerge_MaxContains_WithAbsentSibling(t *testing.T) {
 	require.Equal(t, uint64(7), *merged.MaxContains)
 }
 
-// uint64Ptr is a small helper for *uint64 literal in tests.
-func uint64Ptr(v uint64) *uint64 { return &v }
+//
+//go:fix inline
 
 // merge multiple Not inside AllOf
 func TestMerge_Not(t *testing.T) {

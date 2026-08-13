@@ -3,6 +3,7 @@
 package review
 
 import (
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -201,15 +202,11 @@ func TestExtract_ComposedSameBasenameStaysSeparate(t *testing.T) {
 	baseTexts, revTexts := map[string]string{}, map[string]string{}
 	for _, si := range base {
 		baseDocs = append(baseDocs, si.Spec)
-		for k, v := range si.Sources {
-			baseTexts[k] = v
-		}
+		maps.Copy(baseTexts, si.Sources)
 	}
 	for _, si := range rev {
 		revDocs = append(revDocs, si.Spec)
-		for k, v := range si.Sources {
-			revTexts[k] = v
-		}
+		maps.Copy(revTexts, si.Sources)
 	}
 
 	d, osm, err := diff.GetPathsDiff(diff.NewConfig(), base, rev)
@@ -256,16 +253,12 @@ func TestExtract_ComposedSameBasenameCrossSideLookup(t *testing.T) {
 	baseTexts, revTexts := map[string]string{}, map[string]string{}
 	for _, si := range base {
 		baseDocs = append(baseDocs, si.Spec)
-		for k, v := range si.Sources {
-			baseTexts[k] = v
-		}
+		maps.Copy(baseTexts, si.Sources)
 	}
 	var revUserSpan span
 	for _, si := range rev {
 		revDocs = append(revDocs, si.Spec)
-		for k, v := range si.Sources {
-			revTexts[k] = v
-		}
+		maps.Copy(revTexts, si.Sources)
 		if strings.Contains(si.Url, "svc-b") {
 			for _, sp := range buildIndex(si.Spec).byKey["components/schemas/User"] {
 				revUserSpan = sp
