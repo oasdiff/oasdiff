@@ -7,8 +7,13 @@ type Config struct {
 	MinSunsetBetaDays   uint
 	MinSunsetStableDays uint
 	LogLevels           map[string]Level
-	Attributes          []string
-	StabilityLevel      StabilityLevel
+	// overriddenLevels holds the ids whose level the caller set, so a
+	// disclaimer knows not to lower a level that was chosen deliberately.
+	// Distinct from comparing against the registry, which cannot tell a rule
+	// set to the level it already had from one never set at all.
+	overriddenLevels map[string]bool
+	Attributes       []string
+	StabilityLevel   StabilityLevel
 }
 
 const (
@@ -97,6 +102,10 @@ func (config *Config) getLogLevel(checkId string) Level {
 }
 
 func (config *Config) setLogLevel(checkId string, level Level) {
+	if config.overriddenLevels == nil {
+		config.overriddenLevels = map[string]bool{}
+	}
+	config.overriddenLevels[checkId] = true
 	if _, ok := config.LogLevels[checkId]; !ok {
 		log.Fatal("failed to set log level with invalid check id: ", checkId)
 	}

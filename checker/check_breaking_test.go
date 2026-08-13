@@ -659,12 +659,16 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
+	// The rule declares ERR: adding a conjunct narrows what the request
+	// accepts. Compared branch by branch oasdiff cannot tell whether this
+	// branch narrows anything the others did not already, so the disclaimer
+	// caps it. Under --flatten-allof the merged schemas settle it.
 	requireChange(t, errs, checker.RequestBodyAllOfAddedId)
-	require.Equal(t, checker.ERR, errs[0].GetLevel())
+	require.Equal(t, checker.WARN, errs[0].GetLevel())
 	require.Equal(t, "added `#/components/schemas/Rabbit` to the request body `allOf` list", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 	requireChange(t, errs, checker.RequestPropertyAllOfAddedId)
-	require.Equal(t, checker.ERR, errs[1].GetLevel())
+	require.Equal(t, checker.WARN, errs[1].GetLevel())
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 

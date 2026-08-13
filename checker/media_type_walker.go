@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"strings"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -37,7 +39,22 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.operationItem.Revision,
 		info.method,
 		info.path,
-	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails)
+	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails).
+		WithDisclaimers(allOfDisclaimers("", info.schemaDiff))
+}
+
+// allOfDisclaimers reports the conditions that hold for a change at this
+// location. An allOf surviving into the diff is itself the evidence: had the
+// branches been flattened, there would be none left to compare.
+func allOfDisclaimers(propertyPath string, schemaDiff *diff.SchemaDiff) []Disclaimer {
+	underAllOf := strings.Contains(propertyPath, "allOf[")
+	if schemaDiff != nil && schemaDiff.AllOfDiff != nil {
+		underAllOf = true
+	}
+	if !underAllOf {
+		return nil
+	}
+	return []Disclaimer{DisclaimerAllOfNotFlattened}
 }
 
 // walkProperties invokes processor for every modified property under
@@ -76,7 +93,8 @@ type propertyInfo struct {
 // made against the property's own schema diff (WithSchema recomputes claimed,
 // so the second call overrides the body-level decision).
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
-	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff)
+	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
+		WithDisclaimers(allOfDisclaimers(p.propertyPath, p.propertyDiff))
 }
 
 // modifiedSchemaPresentBothSides reports whether a schema changed on both

@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/TwiN/go-color"
@@ -17,6 +18,7 @@ type ApiChange struct {
 	Id          string
 	Args        []any
 	Comment     string
+	Disclaimers []Disclaimer
 	Details     string
 	Level       Level
 	Operation   string
@@ -71,6 +73,18 @@ func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
 }
 
 // WithDetails returns a copy of the ApiChange with Details set
+// WithDisclaimers records conditions that make this change less certain than
+// its severity alone suggests. Additive: a change can gather disclaimers from
+// more than one place, and duplicates are dropped.
+func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
+	for _, d := range disclaimers {
+		if !slices.Contains(c.Disclaimers, d) {
+			c.Disclaimers = append(c.Disclaimers, d)
+		}
+	}
+	return c
+}
+
 func (c ApiChange) WithDetails(details string) ApiChange {
 	c.Details = details
 	return c
@@ -125,8 +139,17 @@ func (c ApiChange) GetUncolorizedText(l Localizer) string {
 	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix()
 }
 
+// GetComment returns the rule's own explanation of the verdict, followed by
+// one line per disclaimer saying why the verdict is less certain than usual.
 func (c ApiChange) GetComment(l Localizer) string {
-	return l(c.Comment)
+	parts := make([]string, 0, 1+len(c.Disclaimers))
+	if c.Comment != "" {
+		parts = append(parts, l(c.Comment))
+	}
+	for _, d := range c.Disclaimers {
+		parts = append(parts, l(d.commentId()))
+	}
+	return strings.Join(parts, " ")
 }
 
 func (c ApiChange) getDetailsSuffix() string {

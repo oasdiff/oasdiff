@@ -49,6 +49,11 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		return ok && apiChange.claimed
 	})
 
+	// Disclaimers run before the versioning policy and the level filter, so a
+	// change capped by one is counted and filtered at the level it ends up
+	// with rather than the level its rule declares.
+	result = applyDisclaimers(config, result, diffReport.OpenAPIDiff != nil)
+
 	// The versioning policy judges info.version against what the checks found,
 	// so it runs after them, and before the level filter so it sees changes of
 	// every level.
@@ -56,7 +61,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	filteredResult := make(Changes, 0)
 	for _, change := range result {
-		if config.getLogLevel(change.GetId()) >= level {
+		if change.GetLevel() >= level {
 			filteredResult = append(filteredResult, change)
 		}
 	}

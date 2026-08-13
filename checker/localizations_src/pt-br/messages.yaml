@@ -343,6 +343,8 @@ request-property-all-of-removed: "%s foi removido da lista `allOf` da propriedad
 response-body-all-of-added: "%s foi adicionado à lista `allOf` do corpo da resposta para o status %s"
 response-body-all-of-removed: "%s foi removido da lista `allOf` do corpo da resposta para o status %s"
 response-all-of-removed-comment: "Isto é um aviso porque um ramo de um `allOf` foi removido, não porque se saiba que algo garantido por ele foi perdido. Se ele carregava uma propriedade que os ramos restantes não têm, isso só pode ser decidido mesclando-os: execute com --flatten-allof, que compara os esquemas mesclados e relata qualquer perda real com precisão."
+all-of-not-flattened-disclaimer: "Isto comparou os ramos do `allOf` um a um, então outro ramo ainda pode garantir o que este perdeu. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
+openapi-versions-differ-disclaimer: "As duas especificações declaram versões diferentes do OpenAPI, e os dialetos escrevem algumas construções de forma diferente sem mudar seu significado, então esta diferença pode ser apenas de notação. Execute com --auto-upgrade para canonizar ambas antes de comparar."
 response-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedade de resposta %s para o status %s"
 response-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de resposta %s para o status %s"
 response-body-discriminator-added: discriminador de resposta adicionado para o status %s
