@@ -40,7 +40,7 @@ func TestDisclaimersAreLocalized(t *testing.T) {
 	for _, lang := range []string{"en", "es", "pt-br", "ru"} {
 		localizer := checker.NewLocalizer(lang)
 		for _, d := range allDisclaimers {
-			key := d.String() + "-disclaimer"
+			key := d.String() + "-comment"
 			require.NotEqualf(t, key, localizer(key), "disclaimer %q has no %s text", d, lang)
 		}
 	}

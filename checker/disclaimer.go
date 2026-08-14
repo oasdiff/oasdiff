@@ -45,10 +45,6 @@ func (d Disclaimer) MarshalYAML() (any, error) {
 	return d.String(), nil
 }
 
-func (d Disclaimer) commentId() string {
-	return d.String() + "-disclaimer"
-}
-
 type disclaimerPolicy struct {
 	// maxLevel of NONE leaves the severity alone.
 	maxLevel Level

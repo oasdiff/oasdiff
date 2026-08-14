@@ -144,7 +144,7 @@ func (c ApiChange) GetComment(l Localizer) string {
 		parts = append(parts, l(c.Comment))
 	}
 	for _, d := range c.Disclaimers {
-		parts = append(parts, l(d.commentId()))
+		parts = append(parts, l(commentId(d.String())))
 	}
 	return strings.Join(parts, " ")
 }

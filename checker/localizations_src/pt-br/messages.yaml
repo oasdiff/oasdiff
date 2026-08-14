@@ -342,8 +342,8 @@ request-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedad
 request-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de requisição %s"
 response-body-all-of-added: "%s foi adicionado à lista `allOf` do corpo da resposta para o status %s"
 response-body-all-of-removed: "%s foi removido da lista `allOf` do corpo da resposta para o status %s"
-all-of-not-flattened-disclaimer: "Isto comparou os ramos do `allOf` um a um, então outro ramo ainda pode garantir o que este perdeu. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
-openapi-versions-differ-disclaimer: "As duas especificações declaram versões diferentes do OpenAPI, e os dialetos escrevem algumas construções de forma diferente sem mudar seu significado, então esta diferença pode ser apenas de notação. Execute com --auto-upgrade para canonizar ambas antes de comparar."
+all-of-not-flattened-comment: "Isto comparou os ramos do `allOf` um a um, então outro ramo ainda pode garantir o que este perdeu. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
+openapi-versions-differ-comment: "As duas especificações declaram versões diferentes do OpenAPI, e os dialetos escrevem algumas construções de forma diferente sem mudar seu significado, então esta diferença pode ser apenas de notação. Execute com --auto-upgrade para canonizar ambas antes de comparar."
 response-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedade de resposta %s para o status %s"
 response-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de resposta %s para o status %s"
 response-body-discriminator-added: discriminador de resposta adicionado para o status %s
