@@ -37,14 +37,31 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.operationItem.Revision,
 		info.method,
 		info.path,
-	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails)
+	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails).
+		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff))
+}
+
+// allOfDisclaimers reports the conditions that hold for a change at this
+// location. An allOf surviving into the diff is itself the evidence: had the
+// branches been flattened, there would be none left to compare.
+func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer {
+	if schemaDiff != nil && schemaDiff.AllOfDiff != nil {
+		underAllOf = true
+	}
+	if !underAllOf {
+		return nil
+	}
+	return []Disclaimer{DisclaimerAllOfNotFlattened}
 }
 
 // walkProperties invokes processor for every modified property under
 // info.schemaDiff. The recursion is checkModifiedPropertiesDiff's, so sub-schema
 // coverage stays whatever that primitive does.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
-	checkModifiedPropertiesDiff(info.schemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff) {
+	if info.schemaDiff == nil {
+		return
+	}
+	processModifiedPropertiesDiff("", "", info.schemaDiff, nil, false, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
 		// A single-valued sub-schema present on one side only (items removed,
 		// say) has a nil Base or Revision. Every property check reads both and
 		// has nothing to say about a side that does not exist, so guard here
@@ -54,6 +71,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 		}
 		processor(propertyInfo{
 			mediaTypeInfo: info,
+			underAllOf:    underAllOf,
 			propertyPath:  propertyPath,
 			propertyName:  propertyName,
 			propertyDiff:  propertyDiff,
@@ -68,6 +86,7 @@ type propertyInfo struct {
 	mediaTypeInfo
 	propertyPath string
 	propertyName string
+	underAllOf   bool
 	propertyDiff *diff.SchemaDiff
 	parent       *diff.SchemaDiff
 }
@@ -76,7 +95,8 @@ type propertyInfo struct {
 // made against the property's own schema diff (WithSchema recomputes claimed,
 // so the second call overrides the body-level decision).
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
-	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff)
+	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
+		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff))
 }
 
 // modifiedSchemaPresentBothSides reports whether a schema changed on both

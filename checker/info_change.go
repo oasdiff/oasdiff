@@ -58,6 +58,10 @@ func (c InfoChange) GetComment(l Localizer) string {
 	return l(c.Comment)
 }
 
+func (InfoChange) GetDisclaimers() []Disclaimer {
+	return nil
+}
+
 func (c InfoChange) GetLevel() Level {
 	return c.Level
 }

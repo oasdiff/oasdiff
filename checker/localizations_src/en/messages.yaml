@@ -347,6 +347,7 @@ request-property-all-of-added: added %s to the %s request property `allOf` list
 request-property-all-of-removed: removed %s from the %s request property `allOf` list
 response-body-all-of-added: added %s to the response body `allOf` list for the response status %s
 response-body-all-of-removed: removed %s from the response body `allOf` list for the response status %s
+all-of-not-flattened-comment: "This compared the `allOf` branches one at a time, so another branch may still guarantee what this one dropped. Run with --flatten-allof to merge the branches and compare what they describe together."
 response-property-all-of-added: added %s to the %s response property `allOf` list for the response status %s
 response-property-all-of-removed: removed %s from the %s response property `allOf` list for the response status %s
 response-body-discriminator-added: added response discriminator for the response status %s

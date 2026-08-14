@@ -40,14 +40,15 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		result = append(result, errs...)
 	}
 
-	// Drop claimed changes before the versioning policy runs: a change a
-	// transition explains is not reported, so the policy must not count it as
-	// a breaking change either. Doing it here rather than inside the policy
-	// keeps one definition of what survives.
+	// A change a transition explains is reported by the transition instead, so
+	// it is dropped here and nothing downstream sees it.
 	result = slices.DeleteFunc(result, func(change Change) bool {
 		apiChange, ok := change.(ApiChange)
 		return ok && apiChange.claimed
 	})
+
+	// Runs before anything that reads a change's level.
+	result = capByDisclaimers(config, result)
 
 	// The versioning policy judges info.version against what the checks found,
 	// so it runs after them, and before the level filter so it sees changes of
@@ -56,7 +57,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	filteredResult := make(Changes, 0)
 	for _, change := range result {
-		if config.getLogLevel(change.GetId()) >= level {
+		if change.GetLevel() >= level {
 			filteredResult = append(filteredResult, change)
 		}
 	}

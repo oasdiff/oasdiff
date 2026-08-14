@@ -7,6 +7,7 @@ type Config struct {
 	MinSunsetBetaDays   uint
 	MinSunsetStableDays uint
 	LogLevels           map[string]Level
+	overriddenLevels    map[string]bool
 	Attributes          []string
 	StabilityLevel      StabilityLevel
 }
@@ -97,6 +98,10 @@ func (config *Config) getLogLevel(checkId string) Level {
 }
 
 func (config *Config) setLogLevel(checkId string, level Level) {
+	if config.overriddenLevels == nil {
+		config.overriddenLevels = map[string]bool{}
+	}
+	config.overriddenLevels[checkId] = true
 	if _, ok := config.LogLevels[checkId]; !ok {
 		log.Fatal("failed to set log level with invalid check id: ", checkId)
 	}

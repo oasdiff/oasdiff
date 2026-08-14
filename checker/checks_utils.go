@@ -70,12 +70,16 @@ func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(pro
 		return
 	}
 
-	processModifiedPropertiesDiff("", "", schemaDiff, nil, processor)
+	processModifiedPropertiesDiff("", "", schemaDiff, nil, false, func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool) {
+		processor(propertyPath, propertyName, propertyItem, propertyParentItem)
+	})
 }
 
-func processModifiedPropertiesDiff(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff)) {
+type modifiedPropertyProcessor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, underAllOf bool)
+
+func processModifiedPropertiesDiff(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool, processor modifiedPropertyProcessor) {
 	if propertyName != "" || propertyPath != "" {
-		processor(propertyPath, propertyName, schemaDiff, parentDiff)
+		processor(propertyPath, propertyName, schemaDiff, parentDiff, underAllOf)
 	}
 
 	if propertyName != "" {
@@ -88,88 +92,88 @@ func processModifiedPropertiesDiff(propertyPath string, propertyName string, sch
 
 	if schemaDiff.AllOfDiff != nil {
 		for _, v := range schemaDiff.AllOfDiff.Modified {
-			processModifiedPropertiesDiff(joinPath(propertyPath, fmt.Sprintf("allOf[%s]", v)), "", v.Diff, schemaDiff, processor)
+			processModifiedPropertiesDiff(joinPath(propertyPath, fmt.Sprintf("allOf[%s]", v)), "", v.Diff, schemaDiff, true, processor)
 		}
 	}
 
 	if schemaDiff.AnyOfDiff != nil {
 		for _, v := range schemaDiff.AnyOfDiff.Modified {
-			processModifiedPropertiesDiff(joinPath(propertyPath, fmt.Sprintf("anyOf[%s]", v)), "", v.Diff, schemaDiff, processor)
+			processModifiedPropertiesDiff(joinPath(propertyPath, fmt.Sprintf("anyOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf, processor)
 		}
 	}
 
 	if schemaDiff.OneOfDiff != nil {
 		for _, v := range schemaDiff.OneOfDiff.Modified {
-			processModifiedPropertiesDiff(joinPath(propertyPath, fmt.Sprintf("oneOf[%s]", v)), "", v.Diff, schemaDiff, processor)
+			processModifiedPropertiesDiff(joinPath(propertyPath, fmt.Sprintf("oneOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf, processor)
 		}
 	}
 
 	if schemaDiff.ItemsDiff != nil {
-		processModifiedPropertiesDiff(joinPath(propertyPath, "items"), "", schemaDiff.ItemsDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(joinPath(propertyPath, "items"), "", schemaDiff.ItemsDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.PropertiesDiff != nil {
 		for i, v := range schemaDiff.PropertiesDiff.Modified {
-			processModifiedPropertiesDiff(propertyPath, i, v, schemaDiff, processor)
+			processModifiedPropertiesDiff(propertyPath, i, v, schemaDiff, underAllOf, processor)
 		}
 	}
 
 	if schemaDiff.AdditionalPropertiesDiff != nil {
-		processModifiedPropertiesDiff(joinPath(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(joinPath(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, underAllOf, processor)
 	}
 
 	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
 	if schemaDiff.PrefixItemsDiff != nil {
 		for _, v := range schemaDiff.PrefixItemsDiff.Modified {
-			processModifiedPropertiesDiff(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, schemaDiff, processor)
+			processModifiedPropertiesDiff(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, schemaDiff, underAllOf, processor)
 		}
 	}
 
 	if schemaDiff.ContainsDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.PropertyNamesDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.UnevaluatedItemsDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.UnevaluatedPropertiesDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.IfDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.ThenDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.ElseDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.NotDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.ContentSchemaDiff != nil {
-		processModifiedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, schemaDiff, processor)
+		processModifiedPropertiesDiff(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, schemaDiff, underAllOf, processor)
 	}
 
 	if schemaDiff.PatternPropertiesDiff != nil {
 		for i, v := range schemaDiff.PatternPropertiesDiff.Modified {
-			processModifiedPropertiesDiff(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, schemaDiff, processor)
+			processModifiedPropertiesDiff(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, schemaDiff, underAllOf, processor)
 		}
 	}
 
 	if schemaDiff.DependentSchemasDiff != nil {
 		for i, v := range schemaDiff.DependentSchemasDiff.Modified {
-			processModifiedPropertiesDiff(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, schemaDiff, processor)
+			processModifiedPropertiesDiff(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, schemaDiff, underAllOf, processor)
 		}
 	}
 }

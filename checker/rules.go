@@ -559,9 +559,9 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyPatternRemovedId, INFO, ResponsePatternAddedOrChangedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionRemove),
 		// ResponsePropertyAllOfUpdatedCheck
 		newBackwardCompatibilityRule(ResponseBodyAllOfAddedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionAdd),
-		newBackwardCompatibilityRule(ResponseBodyAllOfRemovedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionRemove),
+		newBackwardCompatibilityRule(ResponseBodyAllOfRemovedId, ERR, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionRemove),
 		newBackwardCompatibilityRule(ResponsePropertyAllOfAddedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionAdd),
-		newBackwardCompatibilityRule(ResponsePropertyAllOfRemovedId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionRemove),
+		newBackwardCompatibilityRule(ResponsePropertyAllOfRemovedId, ERR, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionRemove),
 		newBackwardCompatibilityRule(ResponseBodyAllOfAddedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionAdd),
 		newBackwardCompatibilityRule(ResponseBodyAllOfRemovedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionRemove),
 		newBackwardCompatibilityRule(ResponsePropertyAllOfAddedAnnotationOnlyId, INFO, ResponsePropertyAllOfUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, ActionAdd),

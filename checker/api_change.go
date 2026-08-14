@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/TwiN/go-color"
@@ -17,6 +18,7 @@ type ApiChange struct {
 	Id          string
 	Args        []any
 	Comment     string
+	Disclaimers []Disclaimer
 	Details     string
 	Level       Level
 	Operation   string
@@ -68,6 +70,17 @@ func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
 	a.BaseSource = baseSource
 	a.RevisionSource = revisionSource
 	return a
+}
+
+// WithDisclaimers is additive and drops duplicates: a change can gather the
+// same condition from more than one place.
+func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
+	for _, d := range disclaimers {
+		if !slices.Contains(c.Disclaimers, d) {
+			c.Disclaimers = append(c.Disclaimers, d)
+		}
+	}
+	return c
 }
 
 // WithDetails returns a copy of the ApiChange with Details set
@@ -126,7 +139,14 @@ func (c ApiChange) GetUncolorizedText(l Localizer) string {
 }
 
 func (c ApiChange) GetComment(l Localizer) string {
-	return l(c.Comment)
+	parts := make([]string, 0, 1+len(c.Disclaimers))
+	if c.Comment != "" {
+		parts = append(parts, l(c.Comment))
+	}
+	for _, d := range c.Disclaimers {
+		parts = append(parts, l(commentId(d.String())))
+	}
+	return strings.Join(parts, " ")
 }
 
 func (c ApiChange) getDetailsSuffix() string {
@@ -138,6 +158,10 @@ func (c ApiChange) getDetailsSuffix() string {
 
 func (c ApiChange) GetLevel() Level {
 	return c.Level
+}
+
+func (c ApiChange) GetDisclaimers() []Disclaimer {
+	return c.Disclaimers
 }
 
 func (c ApiChange) GetOperation() string {

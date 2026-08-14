@@ -9,6 +9,8 @@ type Change interface {
 	GetUncolorizedText(l Localizer) string
 	GetComment(l Localizer) string
 	GetLevel() Level
+
+	GetDisclaimers() []Disclaimer
 	GetOperation() string
 	GetOperationId() string
 	GetPath() string

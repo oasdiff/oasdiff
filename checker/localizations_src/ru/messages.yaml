@@ -326,6 +326,7 @@ request-property-all-of-added: добавлено %s в список `allOf` с�
 request-property-all-of-removed: удалён %s из списка `allOf` свойства запроса %s
 response-body-all-of-added: добавлено %s в список `allOf` тела ответа для статуса ответа %s
 response-body-all-of-removed: удалён %s из списка `allOf` тела ответа для статуса ответа %s
+all-of-not-flattened-comment: "Ветви `allOf` сравнивались по отдельности, поэтому другая ветвь может по-прежнему гарантировать то, что утрачено в этой. Запустите с --flatten-allof, чтобы объединить ветви и сравнить то, что они описывают вместе."
 response-property-all-of-added: добавлено %s в список `allOf` свойства ответа %s для статуса ответа %s
 response-property-all-of-removed: удалён %s из списка `allOf` свойства ответа %s для статуса ответа %s
 response-body-discriminator-added: добавлен дискриминатор ответа для статуса ответа %s

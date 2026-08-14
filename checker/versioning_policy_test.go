@@ -161,3 +161,48 @@ func TestVersioningPolicy_NonBreakingChangeIsSilent(t *testing.T) {
 		require.False(t, containsId(changes, id))
 	}
 }
+
+// The version-bump checks count a change at the level it is reported at, not
+// the level its rule declares. A disclaimer that lowers a change below error
+// therefore also stops it demanding a bump: reporting that oasdiff cannot tell
+// whether the change is breaking, and then requiring the major version to be
+// raised for it, would contradict itself.
+//
+// Both specs here are 1.0.0, so an uncounted change is the only reason no
+// version finding appears.
+func TestVersioningPolicy_IgnoresAChangeADisclaimerLowered(t *testing.T) {
+	s1, err := open("../data/checker/disclaimer_allof_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/disclaimer_allof_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+
+	change := requireChange(t, changes, checker.ResponsePropertyBecameOptionalId)
+	require.Equal(t, checker.WARN, change.GetLevel(), "the disclaimer lowered it, which is what makes this case interesting")
+
+	requireNoChange(t, changes, checker.APIVersionNotBumpedId)
+	requireNoChange(t, changes, checker.APIMajorVersionNotBumpedId)
+}
+
+// The other half: a change that reaches error still demands the bump, so the
+// test above cannot be satisfied by disabling the policy.
+func TestVersioningPolicy_CountsAChangeNoDisclaimerLowered(t *testing.T) {
+	s1, err := open("../data/checker/disclaimer_allof_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/disclaimer_allof_revision.yaml")
+	require.NoError(t, err)
+
+	// A removed path is an error no disclaimer lowers.
+	s2.Spec.Paths.Delete("/x")
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		checker.NewConfig(checker.GetAllChecks()), d, osm, checker.INFO)
+
+	requireChange(t, changes, checker.APIVersionNotBumpedId)
+}

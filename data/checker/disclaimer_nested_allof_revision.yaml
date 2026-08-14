@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info: {title: t, version: "1.0.0"}
+paths:
+  /x:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  p:
+                    allOf:
+                      - $ref: "#/components/schemas/A"
+                      - $ref: "#/components/schemas/B"
+components:
+  schemas:
+    A: {type: object, properties: {id: {type: string}}}
+    B: {type: object, required: [id], properties: {id: {type: string}}}

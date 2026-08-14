@@ -168,6 +168,13 @@ Checks can be customized with the following levels:
 | info  | Enabled with level INFO |
 | none  | Disabled  |
 
+### When oasdiff reports a change below its check's level
+The level a check declares, which is what `oasdiff checks changelog` lists, is what the change means when oasdiff can compare the two specs exactly. Sometimes it cannot, and the change is then reported below that level, with a comment saying what was missing and what to run to get the exact answer.
+
+A change inside an `allOf` is the common case: without [`--flatten-allof`](ALLOF.md) the branches are compared one at a time, so another branch may still guarantee what one branch dropped. Such a change is reported at `WARN` even where its check declares `ERR`, and the comment points at the flag.
+
+**Setting a level yourself turns this off for that check.** The level you set is the level you get, whether or not oasdiff could compare the specs exactly. This matters in both directions: pinning a check to `err` means it will report `ERR` even where oasdiff would otherwise have softened it, and pinning one to the level it already has is enough to opt out.
+
 ## Customizing Breaking Changes Checks
 If you encounter a change that isn't reported, you may:
 1. Run `oasdiff checks changelog` to see if the check is available, and [customize the level as needed](#customizing-severity-levels).  
