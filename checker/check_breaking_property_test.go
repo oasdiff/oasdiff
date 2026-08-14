@@ -506,7 +506,6 @@ func TestBreaking_WriteOnlyDeleteNonRequiredProperty(t *testing.T) {
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
 	requireChange(t, errs, checker.ResponseOptionalPropertyRemovedId)
 	require.Equal(t, checker.WARN, errs[1].GetLevel())
-	requireChange(t, errs, checker.ResponseOptionalPropertyRemovedId)
 	require.Equal(t, checker.WARN, errs[2].GetLevel())
 }
 
@@ -553,7 +552,6 @@ func TestBreaking_RequiredPropertyWriteOnlyDisabled(t *testing.T) {
 	require.Len(t, errs, 2)
 	requireChange(t, errs, checker.ResponseRequiredPropertyBecameNonWriteOnlyId)
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
-	requireChange(t, errs, checker.ResponseRequiredPropertyBecameNonWriteOnlyId)
 	require.Equal(t, checker.WARN, errs[1].GetLevel())
 }
 

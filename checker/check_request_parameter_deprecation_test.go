@@ -130,9 +130,9 @@ func TestBreaking_ParameterDeprecationWithProperSunset(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
 	require.Len(t, errs, 1)
 	// only a non-breaking change detected
-	requireChange(t, errs, checker.RequestParameterDeprecatedId)
-	require.Equal(t, checker.INFO, errs[0].GetLevel())
-	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "`query` request parameter `id` was deprecated")
+	change := requireChange(t, errs, checker.RequestParameterDeprecatedId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+	require.Contains(t, change.GetUncolorizedText(checker.NewDefaultLocalizer()), "`query` request parameter `id` was deprecated")
 }
 
 // parameters that became deprecated
