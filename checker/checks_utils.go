@@ -71,8 +71,6 @@ func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(pro
 	})
 }
 
-// checkModifiedPropertiesDiffUnderAllOf also tells the processor whether the
-// property sits inside an allOf branch.
 func checkModifiedPropertiesDiffUnderAllOf(schemaDiff *diff.SchemaDiff, processor modifiedPropertyProcessor) {
 	if schemaDiff == nil {
 		return
