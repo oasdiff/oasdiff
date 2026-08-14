@@ -13,10 +13,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// allDisclaimers walks the constants instead of listing them, so a disclaimer
-// added later is covered by the tests below without anyone remembering to add
-// it. The values are consecutive from one, and String falls through to the
-// unnamed form past the last, which is where the walk stops.
 func allDisclaimers(t *testing.T) []checker.Disclaimer {
 	t.Helper()
 
