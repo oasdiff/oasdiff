@@ -128,7 +128,7 @@ func majorBumped(base, revision semver) bool {
 // Claimed changes are already gone by the time this runs (see the caller).
 func hasBreakingChange(config *Config, result Changes) bool {
 	for _, change := range result {
-		if config.getLogLevel(change.GetId()) >= ERR {
+		if change.GetLevel() >= ERR {
 			return true
 		}
 	}
