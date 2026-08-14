@@ -68,7 +68,7 @@ func applyVersioningPolicy(config *Config, diffReport *diff.Diff, result Changes
 		return result
 	}
 
-	if !hasBreakingChange(config, result) {
+	if !hasBreakingChange(result) {
 		return result
 	}
 
@@ -123,10 +123,9 @@ func majorBumped(base, revision semver) bool {
 	return revision.major > base.major
 }
 
-// hasBreakingChange reports whether any change reaches ERR at the configured
-// levels, so a team that has downgraded a check has downgraded it here too.
-// Claimed changes are already gone by the time this runs (see the caller).
-func hasBreakingChange(config *Config, result Changes) bool {
+// A change counts at the level it is reported at, which an override or a
+// disclaimer may have moved.
+func hasBreakingChange(result Changes) bool {
 	for _, change := range result {
 		if change.GetLevel() >= ERR {
 			return true
