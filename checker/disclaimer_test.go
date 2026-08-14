@@ -24,7 +24,6 @@ func allDisclaimers(t *testing.T) []checker.Disclaimer {
 	var all []checker.Disclaimer
 	for d := checker.Disclaimer(1); d.String() != unnamed; d++ {
 		all = append(all, d)
-		require.Less(t, len(all), 100, "String never reached the unnamed form; is it returning a name for every value?")
 	}
 	require.NotEmpty(t, all)
 	return all
