@@ -7,6 +7,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
@@ -41,7 +42,7 @@ func TestDisclaimerNames(t *testing.T) {
 // Every disclaimer explains itself, in every language, or it reaches a user as
 // a bare identifier.
 func TestDisclaimersAreLocalized(t *testing.T) {
-	for _, lang := range []string{"en", "es", "pt-br", "ru"} {
+	for _, lang := range localizations.GetSupportedLanguages() {
 		localizer := checker.NewLocalizer(lang)
 		for _, d := range allDisclaimers(t) {
 			key := d.String() + "-comment"
