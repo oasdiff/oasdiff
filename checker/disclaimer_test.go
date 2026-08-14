@@ -17,9 +17,8 @@ import (
 // dropped. Here both branches require id and one drops it, so the merged
 // schema is unchanged and the error would be a false positive.
 func TestDisclaimer_AllOfCapsSeverity(t *testing.T) {
-	change := onlyApiChange(t, "../data/checker/disclaimer_allof_base.yaml", "../data/checker/disclaimer_allof_revision.yaml", diff.NewConfig())
+	change := singleChange(t, "../data/checker/disclaimer_allof_base.yaml", "../data/checker/disclaimer_allof_revision.yaml", checker.ResponsePropertyBecameOptionalId)
 
-	require.Equal(t, checker.ResponsePropertyBecameOptionalId, change.GetId())
 	require.Equal(t, checker.ERR, declaredLevel(t, change.GetId()), "the rule still declares the level it means when the whole schema is visible")
 	require.Equal(t, checker.WARN, change.GetLevel(), "the disclaimer caps the change")
 	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
@@ -73,7 +72,10 @@ func declaredLevel(t *testing.T, id string) checker.Level {
 	return checker.INVALID
 }
 
-func onlyApiChange(t *testing.T, base, revision string, config *diff.Config) checker.Change {
+// singleChange compares the two specs and asserts they produce exactly the one
+// change named, which is what makes the level assertions in these tests mean
+// something: nothing else is in the result to confuse them.
+func singleChange(t *testing.T, base, revision, id string) checker.Change {
 	t.Helper()
 
 	s1, err := open(base)
@@ -81,19 +83,17 @@ func onlyApiChange(t *testing.T, base, revision string, config *diff.Config) che
 	s2, err := open(revision)
 	require.NoError(t, err)
 
-	d, osm, err := diff.GetWithOperationsSourcesMap(config, s1, s2)
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	changes := checker.CheckBackwardCompatibilityUntilLevel(
-		checker.NewConfig(checker.GetAllChecks(), withoutVersioningPolicy()), d, osm, checker.INFO)
-	require.Len(t, changes, 1)
-	return changes[0]
+	return requireSingleChange(t, checker.CheckBackwardCompatibilityUntilLevel(
+		checker.NewConfig(checker.GetAllChecks(), withoutVersioningPolicy()), d, osm, checker.INFO), id)
 }
 
 // Disclaimers reach a machine consumer as their names, so a script can tell a
 // softened verdict from a confident one without matching on comment prose.
 func TestDisclaimersSerializeAsNames(t *testing.T) {
-	change := onlyApiChange(t, "../data/checker/disclaimer_allof_base.yaml", "../data/checker/disclaimer_allof_revision.yaml", diff.NewConfig())
+	change := singleChange(t, "../data/checker/disclaimer_allof_base.yaml", "../data/checker/disclaimer_allof_revision.yaml", checker.ResponsePropertyBecameOptionalId)
 
 	encoded, err := json.Marshal(formatters.NewChanges(checker.Changes{change}, checker.NewDefaultLocalizer()))
 	require.NoError(t, err)
@@ -123,15 +123,14 @@ func TestDisclaimersOmittedWhenNone(t *testing.T) {
 // the branches are still compared one at a time. Here only the property "p"
 // composes, and a sibling branch still requires what one branch dropped.
 func TestDisclaimer_AllOfOnAnAncestorProperty(t *testing.T) {
-	change := onlyApiChange(t, "../data/checker/disclaimer_nested_allof_base.yaml", "../data/checker/disclaimer_nested_allof_revision.yaml", diff.NewConfig())
+	change := singleChange(t, "../data/checker/disclaimer_nested_allof_base.yaml", "../data/checker/disclaimer_nested_allof_revision.yaml", checker.ResponsePropertyBecameOptionalId)
 
-	require.Equal(t, checker.ResponsePropertyBecameOptionalId, change.GetId())
 	require.Equal(t, checker.WARN, change.GetLevel())
 }
 
 // A property whose name happens to look like a composition path is not one.
 func TestDisclaimer_PropertyNamedLikeAnAllOfPathIsNotOne(t *testing.T) {
-	change := onlyApiChange(t, "../data/checker/disclaimer_allof_lookalike_base.yaml", "../data/checker/disclaimer_allof_lookalike_revision.yaml", diff.NewConfig())
+	change := singleChange(t, "../data/checker/disclaimer_allof_lookalike_base.yaml", "../data/checker/disclaimer_allof_lookalike_revision.yaml", checker.ResponsePropertyBecameOptionalId)
 
 	require.Equal(t, checker.ERR, change.GetLevel(), "nothing composes here, so nothing is uncertain")
 }
