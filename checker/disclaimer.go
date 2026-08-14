@@ -48,8 +48,7 @@ func applyDisclaimerPolicies(config *Config, changes Changes) Changes {
 	return changes
 }
 
-// A level the caller set wins: an override is a decision about that rule, and
-// a disclaimer is not entitled to overrule it.
+// A level the caller set is not lowered.
 func capByDisclaimers(config *Config, change ApiChange) ApiChange {
 	if config.overriddenLevels[change.Id] {
 		return change
