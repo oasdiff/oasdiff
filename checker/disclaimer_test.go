@@ -151,3 +151,20 @@ func TestDisclaimersOmittedWhenNone(t *testing.T) {
 	require.NoError(t, err)
 	require.NotContains(t, string(encoded), "disclaimers")
 }
+
+// The allOf can be on an ancestor of the change rather than on the body, and
+// the branches are still compared one at a time. Here only the property "p"
+// composes, and a sibling branch still requires what one branch dropped.
+func TestDisclaimer_AllOfOnAnAncestorProperty(t *testing.T) {
+	change := onlyApiChange(t, "../data/checker/disclaimer_nested_allof_base.yaml", "../data/checker/disclaimer_nested_allof_revision.yaml", diff.NewConfig())
+
+	require.Equal(t, checker.ResponsePropertyBecameOptionalId, change.GetId())
+	require.Equal(t, checker.WARN, change.GetLevel())
+}
+
+// A property whose name happens to look like a composition path is not one.
+func TestDisclaimer_PropertyNamedLikeAnAllOfPathIsNotOne(t *testing.T) {
+	change := onlyApiChange(t, "../data/checker/disclaimer_allof_lookalike_base.yaml", "../data/checker/disclaimer_allof_lookalike_revision.yaml", diff.NewConfig())
+
+	require.Equal(t, checker.ERR, change.GetLevel(), "nothing composes here, so nothing is uncertain")
+}

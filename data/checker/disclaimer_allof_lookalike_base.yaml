@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info: {title: t, version: "1.0.0"}
+paths:
+  /x:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  "allOf[fake]":
+                    type: object
+                    required: [inner]
+                    properties:
+                      inner: {type: string}

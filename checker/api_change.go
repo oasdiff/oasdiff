@@ -72,7 +72,6 @@ func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
 	return a
 }
 
-// WithDetails returns a copy of the ApiChange with Details set
 // WithDisclaimers is additive and drops duplicates: a change can gather the
 // same condition from more than one place.
 func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
@@ -84,6 +83,7 @@ func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
 	return c
 }
 
+// WithDetails returns a copy of the ApiChange with Details set
 func (c ApiChange) WithDetails(details string) ApiChange {
 	c.Details = details
 	return c
