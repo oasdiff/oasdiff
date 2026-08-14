@@ -6,8 +6,7 @@ package checker
 // A Disclaimer only names the problem. What to do about it, an explanation and
 // a lower severity, is in disclaimerPolicies.
 //
-// Not all of them are about a flag the caller did not pass. Some things oasdiff
-// cannot compare exactly no matter how it is run.
+// Not every disclaimer has a flag that resolves it; some limits are permanent.
 type Disclaimer int
 
 const (
