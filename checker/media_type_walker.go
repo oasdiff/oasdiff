@@ -58,7 +58,10 @@ func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer
 // info.schemaDiff. The recursion is checkModifiedPropertiesDiff's, so sub-schema
 // coverage stays whatever that primitive does.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
-	checkModifiedPropertiesDiffUnderAllOf(info.schemaDiff, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
+	if info.schemaDiff == nil {
+		return
+	}
+	processModifiedPropertiesDiff("", "", info.schemaDiff, nil, false, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
 		// A single-valued sub-schema present on one side only (items removed,
 		// say) has a nil Base or Revision. Every property check reads both and
 		// has nothing to say about a side that does not exist, so guard here

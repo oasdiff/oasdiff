@@ -66,17 +66,13 @@ func interfaceToString(arg any) string {
 }
 
 func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff)) {
-	checkModifiedPropertiesDiffUnderAllOf(schemaDiff, func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool) {
-		processor(propertyPath, propertyName, propertyItem, propertyParentItem)
-	})
-}
-
-func checkModifiedPropertiesDiffUnderAllOf(schemaDiff *diff.SchemaDiff, processor modifiedPropertyProcessor) {
 	if schemaDiff == nil {
 		return
 	}
 
-	processModifiedPropertiesDiff("", "", schemaDiff, nil, false, processor)
+	processModifiedPropertiesDiff("", "", schemaDiff, nil, false, func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool) {
+		processor(propertyPath, propertyName, propertyItem, propertyParentItem)
+	})
 }
 
 type modifiedPropertyProcessor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, underAllOf bool)
