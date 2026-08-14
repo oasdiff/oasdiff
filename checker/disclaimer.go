@@ -1,7 +1,5 @@
 package checker
 
-import "encoding/json"
-
 // A Disclaimer says why oasdiff could not compare something exactly. When one
 // applies, the rule's severity may be too strong for the change it describes.
 //
@@ -32,17 +30,6 @@ func (d Disclaimer) String() string {
 		return "openapi-versions-differ"
 	}
 	return "unknown-disclaimer"
-}
-
-// MarshalJSON and MarshalYAML emit the name, so a consumer reads
-// "all-of-not-flattened" rather than an integer whose meaning depends on
-// declaration order.
-func (d Disclaimer) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.String())
-}
-
-func (d Disclaimer) MarshalYAML() (any, error) {
-	return d.String(), nil
 }
 
 type disclaimerPolicy struct {
