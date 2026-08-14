@@ -44,11 +44,8 @@ var containmentPairs = [][2]string{
 }
 
 // monotonicityWaivers records a pair whose severities are deliberately
-// inverted. Key is "outer>inner". Empty today; a waiver wants a reason that
-// survives review, not a note that the test was failing.
-// monotonicityWaivers records a pair whose severities are deliberately
-// inverted. Key is "outer>inner". Empty today; a waiver wants a reason that
-// survives review, not a note that the test was failing.
+// inverted. Key is "outer>inner". A waiver wants a reason that survives
+// review, not a note that the test was failing.
 var monotonicityWaivers = map[string]string{}
 
 func TestSeverityMonotonicity(t *testing.T) {
