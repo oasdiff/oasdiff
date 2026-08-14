@@ -30,24 +30,19 @@ var disclaimerCeilings = map[Disclaimer]Level{
 	DisclaimerAllOfNotFlattened: WARN,
 }
 
-func applyDisclaimerPolicies(config *Config, changes Changes) Changes {
+// A level the caller set is not lowered.
+func capByDisclaimers(config *Config, changes Changes) Changes {
 	for i, change := range changes {
-		if apiChange, ok := change.(ApiChange); ok {
-			changes[i] = capByDisclaimers(config, apiChange)
+		apiChange, ok := change.(ApiChange)
+		if !ok || config.overriddenLevels[apiChange.Id] {
+			continue
 		}
+		for _, d := range apiChange.Disclaimers {
+			if ceiling := disclaimerCeilings[d]; ceiling != NONE && apiChange.Level > ceiling {
+				apiChange.Level = ceiling
+			}
+		}
+		changes[i] = apiChange
 	}
 	return changes
-}
-
-// A level the caller set is not lowered.
-func capByDisclaimers(config *Config, change ApiChange) ApiChange {
-	if config.overriddenLevels[change.Id] {
-		return change
-	}
-	for _, d := range change.Disclaimers {
-		if ceiling := disclaimerCeilings[d]; ceiling != NONE && change.Level > ceiling {
-			change.Level = ceiling
-		}
-	}
-	return change
 }
