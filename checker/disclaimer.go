@@ -3,8 +3,8 @@ package checker
 // A Disclaimer says why oasdiff could not compare something exactly. When one
 // applies, the rule's severity may be too strong for the change it describes.
 //
-// A Disclaimer only names the problem. What to do about it, an explanation and
-// a lower severity, is in disclaimerPolicies.
+// A Disclaimer only names the problem. The ceiling it puts on a severity is in
+// disclaimerCeilings; its explanation is a localized message.
 type Disclaimer int
 
 const (
@@ -22,16 +22,12 @@ func (d Disclaimer) String() string {
 	return "unknown-disclaimer"
 }
 
-type disclaimerPolicy struct {
-	// maxLevel of NONE leaves the severity alone.
-	maxLevel Level
-}
-
-var disclaimerPolicies = map[Disclaimer]disclaimerPolicy{
+// A disclaimer with no ceiling here leaves the severity alone.
+var disclaimerCeilings = map[Disclaimer]Level{
 	// Every change under an unflattened allOf is doubtful in the same way, so
 	// the ceiling applies to all of them: warning states the doubt, which is
 	// what the severity rule reserves warning for.
-	DisclaimerAllOfNotFlattened: {maxLevel: WARN},
+	DisclaimerAllOfNotFlattened: WARN,
 }
 
 func applyDisclaimerPolicies(config *Config, changes Changes) Changes {
@@ -49,8 +45,8 @@ func capByDisclaimers(config *Config, change ApiChange) ApiChange {
 		return change
 	}
 	for _, d := range change.Disclaimers {
-		if max := disclaimerPolicies[d].maxLevel; max != NONE && change.Level > max {
-			change.Level = max
+		if ceiling := disclaimerCeilings[d]; ceiling != NONE && change.Level > ceiling {
+			change.Level = ceiling
 		}
 	}
 	return change
