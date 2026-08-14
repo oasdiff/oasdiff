@@ -201,7 +201,7 @@ func singleChange(t *testing.T, base, revision, id string) checker.Change {
 	require.NoError(t, err)
 
 	return requireSingleChange(t, checker.CheckBackwardCompatibilityUntilLevel(
-		checker.NewConfig(checker.GetAllChecks(), withoutVersioningPolicy()), d, osm, checker.INFO), id)
+		allChecksConfig(), d, osm, checker.INFO), id)
 }
 
 func declaredLevel(t *testing.T, id string) checker.Level {
