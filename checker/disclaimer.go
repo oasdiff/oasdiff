@@ -37,8 +37,6 @@ var disclaimerPolicies = map[Disclaimer]disclaimerPolicy{
 	DisclaimerAllOfNotFlattened: {maxLevel: WARN},
 }
 
-// Runs after the checks and before the level filter, so a capped change is
-// filtered and counted at the level it ends up with.
 func applyDisclaimerPolicies(config *Config, changes Changes) Changes {
 	for i, change := range changes {
 		if apiChange, ok := change.(ApiChange); ok {
