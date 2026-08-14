@@ -5,8 +5,6 @@ package checker
 //
 // A Disclaimer only names the problem. What to do about it, an explanation and
 // a lower severity, is in disclaimerPolicies.
-//
-// Not every disclaimer has a flag that resolves it; some limits are permanent.
 type Disclaimer int
 
 const (
