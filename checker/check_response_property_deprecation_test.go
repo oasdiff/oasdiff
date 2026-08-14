@@ -43,7 +43,6 @@ func TestResponsePropertyDeprecationCheck_AllOf(t *testing.T) {
 	// With multiple media types (json and xml), we get one report per media type with distinct details
 	require.Len(t, errs, 2)
 	requireChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
-	requireChange(t, errs, checker.ResponsePropertyDeprecatedWithSunsetId)
 	// Each message should include media type context
 	msg0 := errs[0].GetUncolorizedText(checker.NewDefaultLocalizer())
 	msg1 := errs[1].GetUncolorizedText(checker.NewDefaultLocalizer())

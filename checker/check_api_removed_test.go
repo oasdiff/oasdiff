@@ -219,7 +219,6 @@ func TestBreaking_PathDeprecationNoSunset(t *testing.T) {
 	require.Equal(t, "api path removed with deprecation", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
 
-	requireChange(t, errs, checker.APIPathRemovedWithDeprecationId)
 	require.Equal(t, "api path removed with deprecation", errs[1].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.INFO, errs[1].GetLevel())
 	require.Equal(t, checker.NewSource("../data/deprecation/deprecated-path-no-sunset.yaml", 12, 5).WithEnd(16, 26), errs[0].GetBaseSource())
