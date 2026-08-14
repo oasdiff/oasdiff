@@ -2,12 +2,14 @@ package checker
 
 import "encoding/json"
 
-// A Disclaimer names a condition that made a comparison inexact, so a rule's
-// severity claims more certainty than the inputs support. It records only what
-// was imperfect; what that costs a change is policy in disclaimerPolicies.
+// A Disclaimer says why oasdiff could not compare something exactly. When one
+// applies, the rule's severity may be too strong for the change it describes.
 //
-// A condition need not be an option the caller did not pass: a construct
-// oasdiff cannot compare exactly however it is invoked belongs here too.
+// A Disclaimer only names the problem. What to do about it, an explanation and
+// a lower severity, is in disclaimerPolicies.
+//
+// Not all of them are about a flag the caller did not pass. Some things oasdiff
+// cannot compare exactly no matter how it is run.
 type Disclaimer int
 
 const (
