@@ -15,19 +15,12 @@ const (
 	// that was compared branch by branch. A sibling branch can require what
 	// this one dropped, so the change may have no effect on the merged schema.
 	DisclaimerAllOfNotFlattened Disclaimer = iota + 1
-
-	// DisclaimerVersionsDiffer marks a comparison whose two specs declare
-	// different OpenAPI versions. The dialects rewrite constructs without
-	// changing what they mean, so a difference can be notation alone.
-	DisclaimerVersionsDiffer
 )
 
 func (d Disclaimer) String() string {
 	switch d {
 	case DisclaimerAllOfNotFlattened:
 		return "all-of-not-flattened"
-	case DisclaimerVersionsDiffer:
-		return "openapi-versions-differ"
 	}
 	return "unknown-disclaimer"
 }
@@ -42,26 +35,15 @@ var disclaimerPolicies = map[Disclaimer]disclaimerPolicy{
 	// the ceiling applies to all of them: warning states the doubt, which is
 	// what the severity rule reserves warning for.
 	DisclaimerAllOfNotFlattened: {maxLevel: WARN},
-
-	// No ceiling. Differing versions make dialect-shaped changes doubtful, but
-	// most changes are not dialect-shaped: a removed endpoint breaks consumers
-	// whichever version either spec declares, and capping it would be worse
-	// than the false positive the disclaimer warns about.
-	DisclaimerVersionsDiffer: {},
 }
 
 // Runs after the checks and before the level filter, so a capped change is
 // filtered and counted at the level it ends up with.
-func applyDisclaimers(config *Config, changes Changes, versionsDiffer bool) Changes {
+func applyDisclaimerPolicies(config *Config, changes Changes) Changes {
 	for i, change := range changes {
-		apiChange, ok := change.(ApiChange)
-		if !ok {
-			continue
+		if apiChange, ok := change.(ApiChange); ok {
+			changes[i] = capByDisclaimers(config, apiChange)
 		}
-		if versionsDiffer {
-			apiChange.Disclaimers = append(apiChange.Disclaimers, DisclaimerVersionsDiffer)
-		}
-		changes[i] = capByDisclaimers(config, apiChange)
 	}
 	return changes
 }

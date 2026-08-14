@@ -18,7 +18,6 @@ import (
 // test, which the coverage check turns into a failure.
 var allDisclaimers = []checker.Disclaimer{
 	checker.DisclaimerAllOfNotFlattened,
-	checker.DisclaimerVersionsDiffer,
 }
 
 // Names are a public surface: they appear in output and are the key a caller

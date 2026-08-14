@@ -48,7 +48,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	})
 
 	// Runs before anything that reads a change's level.
-	result = applyDisclaimers(config, result, diffReport.OpenAPIDiff != nil)
+	result = applyDisclaimerPolicies(config, result)
 
 	// The versioning policy judges info.version against what the checks found,
 	// so it runs after them, and before the level filter so it sees changes of
