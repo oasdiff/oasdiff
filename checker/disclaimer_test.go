@@ -13,11 +13,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// allDisclaimers is every disclaimer, listed so the tests below cover each one.
-// A new disclaimer that is not added here has no name, no text and no policy
-// test, which the coverage check turns into a failure.
-var allDisclaimers = []checker.Disclaimer{
-	checker.DisclaimerAllOfNotFlattened,
+// allDisclaimers walks the constants instead of listing them, so a disclaimer
+// added later is covered by the tests below without anyone remembering to add
+// it. The values are consecutive from one, and String falls through to the
+// unnamed form past the last, which is where the walk stops.
+func allDisclaimers(t *testing.T) []checker.Disclaimer {
+	t.Helper()
+
+	unnamed := checker.Disclaimer(0).String()
+	var all []checker.Disclaimer
+	for d := checker.Disclaimer(1); d.String() != unnamed; d++ {
+		all = append(all, d)
+		require.Less(t, len(all), 100, "String never reached the unnamed form; is it returning a name for every value?")
+	}
+	require.NotEmpty(t, all)
+	return all
 }
 
 // Names are a public surface: they appear in output and are the key a caller
@@ -25,7 +35,7 @@ var allDisclaimers = []checker.Disclaimer{
 func TestDisclaimerNames(t *testing.T) {
 	kebab := regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 	seen := map[string]bool{}
-	for _, d := range allDisclaimers {
+	for _, d := range allDisclaimers(t) {
 		name := d.String()
 		require.Truef(t, kebab.MatchString(name), "disclaimer name %q is not kebab-case", name)
 		require.Falsef(t, seen[name], "duplicate disclaimer name %q", name)
@@ -38,7 +48,7 @@ func TestDisclaimerNames(t *testing.T) {
 func TestDisclaimersAreLocalized(t *testing.T) {
 	for _, lang := range []string{"en", "es", "pt-br", "ru"} {
 		localizer := checker.NewLocalizer(lang)
-		for _, d := range allDisclaimers {
+		for _, d := range allDisclaimers(t) {
 			key := d.String() + "-comment"
 			require.NotEqualf(t, key, localizer(key), "disclaimer %q has no %s text", d, lang)
 		}
