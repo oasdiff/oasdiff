@@ -61,35 +61,6 @@ func TestDisclaimer_ExplicitLevelWins(t *testing.T) {
 	require.Equal(t, checker.ERR, change.GetLevel())
 }
 
-func declaredLevel(t *testing.T, id string) checker.Level {
-	t.Helper()
-	for _, rule := range checker.GetAllRules() {
-		if rule.Id == id {
-			return rule.Level
-		}
-	}
-	require.FailNowf(t, "unknown rule", "%s", id)
-	return checker.INVALID
-}
-
-// singleChange compares the two specs and asserts they produce exactly the one
-// change named, which is what makes the level assertions in these tests mean
-// something: nothing else is in the result to confuse them.
-func singleChange(t *testing.T, base, revision, id string) checker.Change {
-	t.Helper()
-
-	s1, err := open(base)
-	require.NoError(t, err)
-	s2, err := open(revision)
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-
-	return requireSingleChange(t, checker.CheckBackwardCompatibilityUntilLevel(
-		checker.NewConfig(checker.GetAllChecks(), withoutVersioningPolicy()), d, osm, checker.INFO), id)
-}
-
 // Disclaimers reach a machine consumer as their names, so a script can tell a
 // softened verdict from a confident one without matching on comment prose.
 func TestDisclaimersSerializeAsNames(t *testing.T) {
