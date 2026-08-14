@@ -61,7 +61,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	if info.schemaDiff == nil {
 		return
 	}
-	processModifiedPropertiesDiff("", "", info.schemaDiff, nil, false, func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
+	subschemaWalk{enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
 		// A single-valued sub-schema present on one side only (items removed,
 		// say) has a nil Base or Revision. Every property check reads both and
 		// has nothing to say about a side that does not exist, so guard here
@@ -77,7 +77,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 			propertyDiff:  propertyDiff,
 			parent:        parent,
 		})
-	})
+	}}.walk("", "", info.schemaDiff, nil, false)
 }
 
 // propertyInfo is what walkProperties hands its processor. It embeds
