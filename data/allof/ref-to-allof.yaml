@@ -1,0 +1,30 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: a schema whose allOf is reached through a $ref
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+components:
+  schemas:
+    BaseEntity:
+      type: object
+      required: [id]
+      properties:
+        id: {type: integer}
+    PetFields:
+      type: object
+      required: [name]
+      properties:
+        name: {type: string}
+    Pet:
+      allOf:
+        - $ref: "#/components/schemas/BaseEntity"
+        - $ref: "#/components/schemas/PetFields"

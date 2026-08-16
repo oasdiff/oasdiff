@@ -94,3 +94,18 @@ func Test_MergeSpecWebhook(t *testing.T) {
 	require.True(t, schema.Properties["a"].Value.Type.Is("string"))
 	require.True(t, schema.Properties["b"].Value.Type.Is("integer"))
 }
+
+// A schema used through a $ref must be merged where it is used, not only where
+// it is defined. Each $ref is a separate SchemaRef sharing one Value, so a
+// merge that repointed the definition's SchemaRef left every use unmerged, and
+// the allOf reached the diff even though --flatten-allof was given.
+func TestMergeSpec_SchemaReachedThroughRef(t *testing.T) {
+	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/ref-to-allof.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	used := spec.Spec.Paths.Value("/pets").Get.Responses.Value("200").Value.Content["application/json"].Schema.Value
+	require.Empty(t, used.AllOf, "the allOf survived at the point of use")
+	require.ElementsMatch(t, []string{"id", "name"}, used.Required)
+	require.Contains(t, used.Properties, "id")
+	require.Contains(t, used.Properties, "name")
+}
