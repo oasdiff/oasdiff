@@ -14,7 +14,10 @@ func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 		if err != nil {
 			return err
 		}
-		s.Value = m
+		// Every $ref to this schema shares one Value, so writing the merge
+		// into it updates every use. Assigning s.Value would update only
+		// this reference and leave the rest unmerged.
+		*s.Value = *m
 		return openapi3.SkipSubtree
 	})
 	return spec, err
