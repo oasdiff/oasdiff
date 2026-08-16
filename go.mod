@@ -44,7 +44,6 @@ require (
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/go-openapi/jsonpointer v0.22.5 // indirect
-	github.com/iancoleman/strcase v0.3.0
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/spf13/cobra v1.10.2
 	github.com/wI2L/jsondiff v0.7.1
