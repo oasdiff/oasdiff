@@ -113,3 +113,18 @@ func TestResponsePropertyStability_NilPathsDiff(t *testing.T) {
 	errs := checker.ResponsePropertyStabilityUpdatedCheck(&diff.Diff{}, nil, config)
 	require.Empty(t, errs)
 }
+
+// A property inside an OpenAPI 3.2 itemSchema, which types one item of a
+// streamed body, is checked by the same rules as a body property: both checks
+// reach it through the media-type walkers, and the "(item schema)" detail tells
+// the two apart.
+func TestPropertyStability_ItemSchema_Decreased(t *testing.T) {
+	errs := stabilityChanges(t, "base-item-schema.yaml", "revision-item-schema.yaml", checker.StabilityLevelDraft)
+
+	request := requireChange(t, errs, checker.RequestPropertyStabilityDecreasedId)
+	require.Equal(t, "/stream", request.GetPath())
+	require.Contains(t, request.GetUncolorizedText(checker.NewDefaultLocalizer()), "item schema")
+
+	response := requireChange(t, errs, checker.ResponsePropertyStabilityDecreasedId)
+	require.Contains(t, response.GetUncolorizedText(checker.NewDefaultLocalizer()), "item schema")
+}

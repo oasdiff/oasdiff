@@ -1,0 +1,28 @@
+openapi: "3.2.0"
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /stream:
+    post:
+      operationId: streamTest
+      requestBody:
+        content:
+          application/jsonl:
+            itemSchema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  x-stability-level: draft
+      responses:
+        '200':
+          description: OK
+          content:
+            text/event-stream:
+              itemSchema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    x-stability-level: draft

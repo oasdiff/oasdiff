@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,31 +15,15 @@ const (
 // Only emits changes when the property's base stability meets the configured threshold.
 func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if config == nil || diffReport.PathsDiff == nil {
+	if config == nil {
 		return result
 	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.RequestBodyDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff == nil ||
-				operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified == nil {
-				continue
-			}
-			op := operationItem.Revision
-			for _, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
-				checkModifiedPropertiesDiff(
-					mediaTypeDiff.SchemaDiff,
-					func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-						checkPropertyStabilityChange(propertyDiff, propertyPath, propertyName,
-							RequestPropertyStabilityDecreasedId, RequestPropertyStabilityIncreasedId,
-							config, operationsSources, op, operation, path, &result)
-					})
-			}
-		}
-	}
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			checkPropertyStabilityChange(p,
+				RequestPropertyStabilityDecreasedId, RequestPropertyStabilityIncreasedId, &result)
+		})
+	})
 	return result
 }
 
@@ -48,72 +31,39 @@ func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSourc
 // Only emits changes when the property's base stability meets the configured threshold.
 func ResponsePropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if config == nil || diffReport.PathsDiff == nil {
+	if config == nil {
 		return result
 	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			op := operationItem.Revision
-			for _, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff == nil ||
-					responseDiff.ContentDiff == nil ||
-					responseDiff.ContentDiff.MediaTypeModified == nil {
-					continue
-				}
-				for _, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
-					checkModifiedPropertiesDiff(
-						mediaTypeDiff.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							checkPropertyStabilityChange(propertyDiff, propertyPath, propertyName,
-								ResponsePropertyStabilityDecreasedId, ResponsePropertyStabilityIncreasedId,
-								config, operationsSources, op, operation, path, &result)
-						})
-				}
-			}
-		}
-	}
+	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+		info.walkProperties(func(p propertyInfo) {
+			checkPropertyStabilityChange(p,
+				ResponsePropertyStabilityDecreasedId, ResponsePropertyStabilityIncreasedId, &result)
+		})
+	})
 	return result
 }
 
-func checkPropertyStabilityChange(
-	propertyDiff *diff.SchemaDiff,
-	propertyPath string, propertyName string,
-	decreasedId string, increasedId string,
-	config *Config, operationsSources *diff.OperationsSourcesMap,
-	op *openapi3.Operation, operation string, path string,
-	result *Changes,
-) {
-	if propertyDiff.ExtensionsDiff == nil {
+func checkPropertyStabilityChange(p propertyInfo, decreasedId string, increasedId string, result *Changes) {
+	if p.propertyDiff.ExtensionsDiff == nil {
 		return
 	}
 
-	var baseStability, revisionStability string
-	var err error
+	op := p.operationItem.Revision
 
 	// An unparseable x-stability-level on a property is reported here: unlike
 	// the endpoint case, checkInvalidStabilityLevels does not descend into
 	// property schemas, so there is no other backstop for it.
-	if propertyDiff.Base != nil {
-		baseStability, err = getStabilityLevel(propertyDiff.Base.Extensions)
-		if err != nil {
-			baseSource := stabilityFieldSource(operationsSources, op, propertyDiff.Base.Origin)
-			*result = append(*result, getAPIInvalidStabilityLevel(config, op, operationsSources, operation, path, err).WithSources(baseSource, nil))
-			return
-		}
+	baseStability, err := getStabilityLevel(p.propertyDiff.Base.Extensions)
+	if err != nil {
+		baseSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Base.Origin)
+		*result = append(*result, getAPIInvalidStabilityLevel(p.config, op, p.operationsSources, p.method, p.path, err).WithSources(baseSource, nil))
+		return
 	}
-	if propertyDiff.Revision != nil {
-		revisionStability, err = getStabilityLevel(propertyDiff.Revision.Extensions)
-		if err != nil {
-			revisionSource := stabilityFieldSource(operationsSources, op, propertyDiff.Revision.Origin)
-			*result = append(*result, getAPIInvalidStabilityLevel(config, op, operationsSources, operation, path, err).WithSources(nil, revisionSource))
-			return
-		}
+	revisionStability, err := getStabilityLevel(p.propertyDiff.Revision.Extensions)
+	if err != nil {
+		revisionSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Revision.Origin)
+		*result = append(*result, getAPIInvalidStabilityLevel(p.config, op, p.operationsSources, p.method, p.path, err).WithSources(nil, revisionSource))
+		return
 	}
 
 	baseLabel := normalizedStability(baseStability)
@@ -128,7 +78,7 @@ func checkPropertyStabilityChange(
 	// Gate on the base stability (the level the property is leaving), consistent
 	// with the endpoint-level check, so a destabilization from a tracked level is
 	// reported rather than dropped.
-	if !config.StabilityLevel.IsIncluded(baseLabel) {
+	if !p.config.StabilityLevel.IsIncluded(baseLabel) {
 		return
 	}
 
@@ -137,28 +87,12 @@ func checkPropertyStabilityChange(
 		changeId = decreasedId
 	}
 
-	propName := propertyFullName(propertyPath, propertyName)
+	baseSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Base.Origin)
+	revisionSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Revision.Origin)
 
-	// Base/Revision can be nil here (a sub-schema present on only one side);
-	// stabilityFieldSource tolerates a nil origin.
-	var baseOrigin, revisionOrigin *openapi3.Origin
-	if propertyDiff.Base != nil {
-		baseOrigin = propertyDiff.Base.Origin
-	}
-	if propertyDiff.Revision != nil {
-		revisionOrigin = propertyDiff.Revision.Origin
-	}
-	baseSource := stabilityFieldSource(operationsSources, op, baseOrigin)
-	revisionSource := stabilityFieldSource(operationsSources, op, revisionOrigin)
-
-	*result = append(*result, NewApiChange(
+	*result = append(*result, p.newChange(
 		changeId,
-		config,
-		[]any{propName, baseLabel, revisionLabel},
+		[]any{propertyFullName(p.propertyPath, p.propertyName), baseLabel, revisionLabel},
 		"",
-		operationsSources,
-		op,
-		operation,
-		path,
 	).WithSources(baseSource, revisionSource))
 }
