@@ -34,7 +34,12 @@ var symmetryWaivers = map[string]string{
 	// --- add <-> remove (same direction/area/kind) ---
 	"add<->remove none/paths/lifecycle missing-add": "a sunset date being added is part of the deprecation flow and is reported by the deprecation rules; only its removal (sunset-deleted) is a standalone change.",
 
+	// --- request <-> response (bidirectional areas only) continued ---
+	"request<->response schema/constraints/specialize missing-request": "narrowing a request constraint is breaking and reported by the changed rules (ERR); the specialize INFO carve-out exists only on the response side (multipleOf), mirroring the request-side generalize carve-outs.",
+
 	// --- generalize <-> specialize (same direction/area/kind) ---
+	"generalize<->specialize response/schema/constraints missing-generalize": "loosening a response constraint is breaking and reported by response-*-multiple-of-changed/unset; the specialize rule carves out the safe narrowing as INFO.",
+
 	"generalize<->specialize request/schema/type missing-specialize":            "narrowing a request type is breaking and already reported by request-*-type-changed (ERR); the generalize rule exists only to carve out the safe widening as INFO.",
 	"generalize<->specialize request/schema/constraints missing-specialize":     "tightening a request pattern is reported by request-*-pattern-changed; the generalize rule carves out the safe loosening.",
 	"generalize<->specialize request/parameters/constraints missing-specialize": "same as request schema pattern: tightening is covered by request-parameter-pattern-changed; generalize carves out the safe loosening.",

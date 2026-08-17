@@ -26,8 +26,8 @@ listed per check.
 ## Summary
 
 - 15255 cells in the edit space, 10974 of them wire-relevant
-- 312 wire-relevant cells covered by checks
-- 10662 wire-relevant cells without checks, all accounted for below
+- 332 wire-relevant cells covered by checks
+- 10642 wire-relevant cells without checks, all accounted for below
 
 ## Checked edits
 
@@ -230,9 +230,15 @@ listed per check.
 | `paths.*.*.requestBody.content.*.schema.if` | unset | `request-body-if-removed` (info), `request-property-if-removed` (info) |
 | `paths.*.*.requestBody.content.*.schema.maxContains` | decrease | `request-body-max-contains-decreased` (error), `request-property-max-contains-decreased` (error) |
 | `paths.*.*.requestBody.content.*.schema.maxContains` | increase | `request-body-max-contains-increased` (info), `request-property-max-contains-increased` (info) |
+| `paths.*.*.requestBody.content.*.schema.maxItems` | decrease | `request-body-max-items-decreased` (error), `request-property-max-items-decreased` (error), `request-read-only-property-max-items-decreased` (info) |
+| `paths.*.*.requestBody.content.*.schema.maxItems` | increase | `request-body-max-items-increased` (info), `request-property-max-items-increased` (info) |
+| `paths.*.*.requestBody.content.*.schema.maxItems` | set | `request-body-max-items-set` (warning), `request-property-max-items-set` (warning) |
 | `paths.*.*.requestBody.content.*.schema.maxLength` | decrease | `request-body-max-length-decreased` (error), `request-property-max-length-decreased` (error), `request-read-only-property-max-length-decreased` (info) |
 | `paths.*.*.requestBody.content.*.schema.maxLength` | increase | `request-body-max-length-increased` (info), `request-property-max-length-increased` (info) |
 | `paths.*.*.requestBody.content.*.schema.maxLength` | set | `request-body-max-length-set` (warning), `request-property-max-length-set` (warning) |
+| `paths.*.*.requestBody.content.*.schema.maxProperties` | decrease | `request-body-max-properties-decreased` (error), `request-property-max-properties-decreased` (error), `request-read-only-property-max-properties-decreased` (info) |
+| `paths.*.*.requestBody.content.*.schema.maxProperties` | increase | `request-body-max-properties-increased` (info), `request-property-max-properties-increased` (info) |
+| `paths.*.*.requestBody.content.*.schema.maxProperties` | set | `request-body-max-properties-set` (warning), `request-property-max-properties-set` (warning) |
 | `paths.*.*.requestBody.content.*.schema.maximum` | decrease | `request-body-max-decreased` (error), `request-property-max-decreased` (error), `request-read-only-property-max-decreased` (info) |
 | `paths.*.*.requestBody.content.*.schema.maximum` | increase | `request-body-max-increased` (info), `request-property-max-increased` (info) |
 | `paths.*.*.requestBody.content.*.schema.maximum` | set | `request-body-max-set` (warning), `request-property-max-set` (warning) |
@@ -242,9 +248,14 @@ listed per check.
 | `paths.*.*.requestBody.content.*.schema.minItems` | set | `request-body-min-items-set` (warning), `request-property-min-items-set` (warning) |
 | `paths.*.*.requestBody.content.*.schema.minLength` | decrease | `request-body-min-length-decreased` (info), `request-property-min-length-decreased` (info) |
 | `paths.*.*.requestBody.content.*.schema.minLength` | increase | `request-body-min-length-increased` (error), `request-property-min-length-increased` (error) |
+| `paths.*.*.requestBody.content.*.schema.minProperties` | increase | `request-body-min-properties-increased` (error), `request-property-min-properties-increased` (error) |
 | `paths.*.*.requestBody.content.*.schema.minimum` | decrease | `request-body-min-decreased` (info), `request-property-min-decreased` (info) |
 | `paths.*.*.requestBody.content.*.schema.minimum` | increase | `request-body-min-increased` (error), `request-property-min-increased` (error), `request-read-only-property-min-increased` (info) |
 | `paths.*.*.requestBody.content.*.schema.minimum` | set | `request-body-min-set` (warning), `request-property-min-set` (warning) |
+| `paths.*.*.requestBody.content.*.schema.multipleOf` | decrease | `request-body-multiple-of-changed` (error), `request-body-multiple-of-generalized` (info), `request-property-multiple-of-changed` (error), `request-property-multiple-of-generalized` (info) |
+| `paths.*.*.requestBody.content.*.schema.multipleOf` | increase | `request-body-multiple-of-changed` (error), `request-body-multiple-of-generalized` (info), `request-property-multiple-of-changed` (error), `request-property-multiple-of-generalized` (info) |
+| `paths.*.*.requestBody.content.*.schema.multipleOf` | set | `request-body-multiple-of-set` (warning), `request-property-multiple-of-set` (warning) |
+| `paths.*.*.requestBody.content.*.schema.multipleOf` | unset | `request-body-multiple-of-unset` (info), `request-property-multiple-of-unset` (info) |
 | `paths.*.*.requestBody.content.*.schema.nullable` | set | `request-body-became-nullable` (info), `request-property-became-nullable` (info) |
 | `paths.*.*.requestBody.content.*.schema.nullable` | unset | `request-body-became-not-nullable` (error), `request-property-became-not-nullable` (error) |
 | `paths.*.*.requestBody.content.*.schema.oneOf.*` | add | `request-body-one-of-added` (info), `request-body-wrapped-in-one-of` (error), `request-property-one-of-added` (info) |
@@ -272,6 +283,8 @@ listed per check.
 | `paths.*.*.requestBody.content.*.schema.unevaluatedItems` | unset | `request-body-unevaluated-items-removed` (info), `request-property-unevaluated-items-removed` (info) |
 | `paths.*.*.requestBody.content.*.schema.unevaluatedProperties` | set | `request-body-unevaluated-properties-added` (error), `request-property-unevaluated-properties-added` (error) |
 | `paths.*.*.requestBody.content.*.schema.unevaluatedProperties` | unset | `request-body-unevaluated-properties-removed` (info), `request-property-unevaluated-properties-removed` (info) |
+| `paths.*.*.requestBody.content.*.schema.uniqueItems` | set | `request-body-unique-items-set` (error), `request-property-unique-items-set` (error) |
+| `paths.*.*.requestBody.content.*.schema.uniqueItems` | unset | `request-body-unique-items-unset` (info), `request-property-unique-items-unset` (info) |
 | `paths.*.*.requestBody.content.*.schema.writeOnly` | set | `request-optional-property-became-write-only` (info), `request-required-property-became-write-only` (info) |
 | `paths.*.*.requestBody.content.*.schema.writeOnly` | unset | `request-optional-property-became-not-write-only` (info), `request-required-property-became-not-write-only` (info) |
 | `paths.*.*.requestBody.content.*.schema.x-*` | add | `request-property-deprecated-sunset-invalid` (error), `request-property-stability-decreased` (error), `request-property-stability-increased` (info), `request-property-sunset-date-too-small` (error) |
@@ -336,15 +349,21 @@ listed per check.
 | `paths.*.*.responses.*.content.*.schema.if` | unset | `response-body-if-removed` (error), `response-property-if-removed` (error) |
 | `paths.*.*.responses.*.content.*.schema.maxContains` | decrease | `response-body-max-contains-decreased` (info), `response-property-max-contains-decreased` (info) |
 | `paths.*.*.responses.*.content.*.schema.maxContains` | increase | `response-body-max-contains-increased` (error), `response-property-max-contains-increased` (error) |
+| `paths.*.*.responses.*.content.*.schema.maxItems` | increase | `response-body-max-items-increased` (error), `response-property-max-items-increased` (error) |
 | `paths.*.*.responses.*.content.*.schema.maxLength` | increase | `response-body-max-length-increased` (error), `response-property-max-length-increased` (error) |
 | `paths.*.*.responses.*.content.*.schema.maxLength` | unset | `response-body-max-length-unset` (error), `response-property-max-length-unset` (error) |
+| `paths.*.*.responses.*.content.*.schema.maxProperties` | increase | `response-body-max-properties-increased` (error), `response-property-max-properties-increased` (error) |
 | `paths.*.*.responses.*.content.*.schema.maximum` | increase | `response-body-max-increased` (error), `response-property-max-increased` (error) |
 | `paths.*.*.responses.*.content.*.schema.minContains` | decrease | `response-body-min-contains-decreased` (error), `response-property-min-contains-decreased` (error) |
 | `paths.*.*.responses.*.content.*.schema.minContains` | increase | `response-body-min-contains-increased` (info), `response-property-min-contains-increased` (info) |
 | `paths.*.*.responses.*.content.*.schema.minItems` | decrease | `response-body-min-items-decreased` (error), `response-property-min-items-decreased` (error) |
 | `paths.*.*.responses.*.content.*.schema.minItems` | unset | `response-body-min-items-unset` (error), `response-property-min-items-unset` (error) |
 | `paths.*.*.responses.*.content.*.schema.minLength` | decrease | `response-body-min-length-decreased` (error), `response-property-min-length-decreased` (error) |
+| `paths.*.*.responses.*.content.*.schema.minProperties` | decrease | `response-body-min-properties-decreased` (error), `response-property-min-properties-decreased` (error) |
 | `paths.*.*.responses.*.content.*.schema.minimum` | decrease | `response-body-min-decreased` (error), `response-property-min-decreased` (error) |
+| `paths.*.*.responses.*.content.*.schema.multipleOf` | decrease | `response-body-multiple-of-changed` (error), `response-body-multiple-of-specialized` (info), `response-property-multiple-of-changed` (error), `response-property-multiple-of-specialized` (info) |
+| `paths.*.*.responses.*.content.*.schema.multipleOf` | increase | `response-body-multiple-of-changed` (error), `response-body-multiple-of-specialized` (info), `response-property-multiple-of-changed` (error), `response-property-multiple-of-specialized` (info) |
+| `paths.*.*.responses.*.content.*.schema.multipleOf` | unset | `response-body-multiple-of-unset` (error), `response-property-multiple-of-unset` (error) |
 | `paths.*.*.responses.*.content.*.schema.nullable` | set | `response-body-became-nullable` (error), `response-property-became-nullable` (error) |
 | `paths.*.*.responses.*.content.*.schema.nullable` | unset | `response-body-became-not-nullable` (info), `response-property-became-not-nullable` (info) |
 | `paths.*.*.responses.*.content.*.schema.oneOf.*` | add | `response-body-one-of-added` (error), `response-body-wrapped-in-one-of` (error), `response-property-one-of-added` (error) |
@@ -372,6 +391,7 @@ listed per check.
 | `paths.*.*.responses.*.content.*.schema.unevaluatedItems` | unset | `response-body-unevaluated-items-removed` (error), `response-property-unevaluated-items-removed` (error) |
 | `paths.*.*.responses.*.content.*.schema.unevaluatedProperties` | set | `response-body-unevaluated-properties-added` (info), `response-property-unevaluated-properties-added` (info) |
 | `paths.*.*.responses.*.content.*.schema.unevaluatedProperties` | unset | `response-body-unevaluated-properties-removed` (error), `response-property-unevaluated-properties-removed` (error) |
+| `paths.*.*.responses.*.content.*.schema.uniqueItems` | unset | `response-body-unique-items-unset` (error), `response-property-unique-items-unset` (error) |
 | `paths.*.*.responses.*.content.*.schema.writeOnly` | set | `response-optional-property-became-write-only` (info), `response-required-property-became-write-only` (info) |
 | `paths.*.*.responses.*.content.*.schema.writeOnly` | unset | `response-optional-property-became-not-write-only` (info), `response-required-property-became-not-write-only` (warning) |
 | `paths.*.*.responses.*.content.*.schema.x-*` | add | `response-property-deprecated-sunset-invalid` (error), `response-property-stability-decreased` (error), `response-property-stability-increased` (info), `response-property-sunset-date-too-small` (error) |
@@ -480,13 +500,13 @@ attribute every cell to its first matching entry.
 | `**.discriminator.mapping.*:set,unset` | 4 | covered-as add/remove: a mapping entry appearing or disappearing is the entry add/remove, which is claimed |
 | `**.discriminator.propertyName:set,unset` | 4 | covered-as discriminator set/unset: propertyName is required inside discriminator, so its presence tracks the discriminator's |
 | `**.schema.additionalProperties` | 6 | open: setting additionalProperties:false narrows accepted request objects (breaking) and is unchecked (tracked in #1054) |
-| `**.schema.multipleOf` | 8 | open: multipleOf set/tightened on a request narrows accepted numbers (breaking) and is unchecked (tracked in #1155) |
-| `**.schema.uniqueItems` | 4 | open: uniqueItems set on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1156) |
-| `**.schema.maxProperties` | 8 | open: maxProperties set/decreased on a request narrows accepted objects (breaking) and is unchecked (tracked in #1157) |
-| `**.schema.minProperties` | 8 | open: minProperties set/increased on a request narrows accepted objects (breaking) and is unchecked (tracked in #1157) |
+| `**.schema.multipleOf` | 1 | open: response set (narrowing the output) and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159) |
+| `**.schema.uniqueItems` | 1 | open: response set (narrowing the output) and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159) |
+| `**.schema.maxProperties` | 4 | open: remaining directions and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159) |
+| `**.schema.minProperties` | 6 | open: remaining directions and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159, #1171 for the set case) |
 | `**.schema.items:set,unset` | 4 | open: an items subschema appearing on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1054) |
 | `**.schema.not` | 4 | open: a not subschema appearing on a request narrows the accepted set (breaking) and is unchecked (tracked in #1054) |
-| `**.schema.maxItems` | 8 | open: request-side maxItems has no rules (the parameter analog does: request-parameter-max-items-decreased); response side unchecked (tracked in #1158) |
+| `**.schema.maxItems` | 4 | open: remaining directions (request unset widens, response set/decrease narrow the server's output) and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159) |
 | `**.schema.maximum` | 4 | open: remaining directions (request unset widens, response set/decrease narrows the server's output) are unchecked; the breaking directions have rules (tracked in #1159) |
 | `**.schema.minimum` | 4 | open: remaining directions are unchecked; the breaking directions have rules (tracked in #1159) |
 | `**.schema.maxLength` | 3 | open: remaining directions are unchecked; the breaking directions have rules (tracked in #1159) |

@@ -838,6 +838,60 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyContentSchemaRemovedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, ActionRemove, "paths.*.*.responses.*.content.*.schema.contentSchema:unset"),
 		newBackwardCompatibilityRule(ResponsePropertyContentMediaTypeChangedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, AreaSchema, KindType, ActionChange, "paths.*.*.responses.*.content.*.schema.contentMediaType:set,unset,change"),
 		newBackwardCompatibilityRule(ResponsePropertyContentEncodingChangedId, ERR, ResponsePropertyContentUpdatedCheck, DirectionResponse, AreaSchema, KindType, ActionChange, "paths.*.*.responses.*.content.*.schema.contentEncoding:set,unset,change"),
+		// RequestPropertyMaxItemsUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyMaxItemsDecreasedId, ERR, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.requestBody.content.*.schema.maxItems:decrease"),
+		newBackwardCompatibilityRule(RequestBodyMaxItemsIncreasedId, INFO, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.requestBody.content.*.schema.maxItems:increase"),
+		newBackwardCompatibilityRule(RequestPropertyMaxItemsDecreasedId, ERR, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.requestBody.content.*.schema.maxItems:decrease"),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyMaxItemsDecreasedId, INFO, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.requestBody.content.*.schema.maxItems:decrease"),
+		newBackwardCompatibilityRule(RequestPropertyMaxItemsIncreasedId, INFO, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.requestBody.content.*.schema.maxItems:increase"),
+		// RequestPropertyMaxItemsSetCheck
+		newBackwardCompatibilityRule(RequestBodyMaxItemsSetId, WARN, RequestPropertyMaxItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.maxItems:set"),
+		newBackwardCompatibilityRule(RequestPropertyMaxItemsSetId, WARN, RequestPropertyMaxItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.maxItems:set"),
+		// ResponsePropertyMaxItemsIncreasedCheck
+		newBackwardCompatibilityRule(ResponseBodyMaxItemsIncreasedId, ERR, ResponsePropertyMaxItemsIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.responses.*.content.*.schema.maxItems:increase"),
+		newBackwardCompatibilityRule(ResponsePropertyMaxItemsIncreasedId, ERR, ResponsePropertyMaxItemsIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.responses.*.content.*.schema.maxItems:increase"),
+		// RequestPropertyMaxPropertiesUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyMaxPropertiesDecreasedId, ERR, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.requestBody.content.*.schema.maxProperties:decrease"),
+		newBackwardCompatibilityRule(RequestBodyMaxPropertiesIncreasedId, INFO, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.requestBody.content.*.schema.maxProperties:increase"),
+		newBackwardCompatibilityRule(RequestPropertyMaxPropertiesDecreasedId, ERR, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.requestBody.content.*.schema.maxProperties:decrease"),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyMaxPropertiesDecreasedId, INFO, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.requestBody.content.*.schema.maxProperties:decrease"),
+		newBackwardCompatibilityRule(RequestPropertyMaxPropertiesIncreasedId, INFO, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.requestBody.content.*.schema.maxProperties:increase"),
+		// RequestPropertyMaxPropertiesSetCheck
+		newBackwardCompatibilityRule(RequestBodyMaxPropertiesSetId, WARN, RequestPropertyMaxPropertiesSetCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.maxProperties:set"),
+		newBackwardCompatibilityRule(RequestPropertyMaxPropertiesSetId, WARN, RequestPropertyMaxPropertiesSetCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.maxProperties:set"),
+		// ResponsePropertyMaxPropertiesIncreasedCheck
+		newBackwardCompatibilityRule(ResponseBodyMaxPropertiesIncreasedId, ERR, ResponsePropertyMaxPropertiesIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.responses.*.content.*.schema.maxProperties:increase"),
+		newBackwardCompatibilityRule(ResponsePropertyMaxPropertiesIncreasedId, ERR, ResponsePropertyMaxPropertiesIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.responses.*.content.*.schema.maxProperties:increase"),
+		// RequestPropertyMinPropertiesIncreasedCheck
+		newBackwardCompatibilityRule(RequestBodyMinPropertiesIncreasedId, ERR, RequestPropertyMinPropertiesIncreasedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.requestBody.content.*.schema.minProperties:increase"),
+		newBackwardCompatibilityRule(RequestPropertyMinPropertiesIncreasedId, ERR, RequestPropertyMinPropertiesIncreasedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionIncrease, "paths.*.*.requestBody.content.*.schema.minProperties:increase"),
+		// ResponsePropertyMinPropertiesDecreasedCheck
+		newBackwardCompatibilityRule(ResponseBodyMinPropertiesDecreasedId, ERR, ResponsePropertyMinPropertiesDecreasedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.responses.*.content.*.schema.minProperties:decrease"),
+		newBackwardCompatibilityRule(ResponsePropertyMinPropertiesDecreasedId, ERR, ResponsePropertyMinPropertiesDecreasedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionDecrease, "paths.*.*.responses.*.content.*.schema.minProperties:decrease"),
+		// RequestPropertyUniqueItemsUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyUniqueItemsSetId, ERR, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.uniqueItems:set"),
+		newBackwardCompatibilityRule(RequestPropertyUniqueItemsSetId, ERR, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.uniqueItems:set"),
+		newBackwardCompatibilityRule(RequestBodyUniqueItemsUnsetId, INFO, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.requestBody.content.*.schema.uniqueItems:unset"),
+		newBackwardCompatibilityRule(RequestPropertyUniqueItemsUnsetId, INFO, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.requestBody.content.*.schema.uniqueItems:unset"),
+		// ResponsePropertyUniqueItemsUnsetCheck
+		newBackwardCompatibilityRule(ResponseBodyUniqueItemsUnsetId, ERR, ResponsePropertyUniqueItemsUnsetCheck, DirectionResponse, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.responses.*.content.*.schema.uniqueItems:unset"),
+		newBackwardCompatibilityRule(ResponsePropertyUniqueItemsUnsetId, ERR, ResponsePropertyUniqueItemsUnsetCheck, DirectionResponse, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.responses.*.content.*.schema.uniqueItems:unset"),
+		// RequestPropertyMultipleOfUpdatedCheck
+		newBackwardCompatibilityRule(RequestBodyMultipleOfSetId, WARN, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
+		newBackwardCompatibilityRule(RequestPropertyMultipleOfSetId, WARN, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionSet, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
+		newBackwardCompatibilityRule(RequestBodyMultipleOfUnsetId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.requestBody.content.*.schema.multipleOf:unset"),
+		newBackwardCompatibilityRule(RequestPropertyMultipleOfUnsetId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.requestBody.content.*.schema.multipleOf:unset"),
+		newBackwardCompatibilityRule(RequestBodyMultipleOfChangedId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionChange, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(RequestPropertyMultipleOfChangedId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionChange, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(RequestBodyMultipleOfGeneralizedId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionGeneralize, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(RequestPropertyMultipleOfGeneralizedId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, ActionGeneralize, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
+		// ResponsePropertyMultipleOfUpdatedCheck
+		newBackwardCompatibilityRule(ResponseBodyMultipleOfUnsetId, ERR, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.responses.*.content.*.schema.multipleOf:unset"),
+		newBackwardCompatibilityRule(ResponsePropertyMultipleOfUnsetId, ERR, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionRemove, "paths.*.*.responses.*.content.*.schema.multipleOf:unset"),
+		newBackwardCompatibilityRule(ResponseBodyMultipleOfChangedId, ERR, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionChange, "paths.*.*.responses.*.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(ResponsePropertyMultipleOfChangedId, ERR, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionChange, "paths.*.*.responses.*.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(ResponseBodyMultipleOfSpecializedId, INFO, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionSpecialize, "paths.*.*.responses.*.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(ResponsePropertyMultipleOfSpecializedId, INFO, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, ActionSpecialize, "paths.*.*.responses.*.content.*.schema.multipleOf:increase,decrease"),
 	}
 }
 

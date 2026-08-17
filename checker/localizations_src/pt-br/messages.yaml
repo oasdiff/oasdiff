@@ -1066,3 +1066,99 @@ response-body-type-compatible-description: tipo do corpo da resposta mudou mas �
 response-property-type-generalized-description: tipo da propriedade de resposta generalizado
 response-property-type-specialized-description: tipo da propriedade de resposta especializado
 response-property-type-compatible-description: tipo da propriedade de resposta mudou mas é retrocompatível
+
+# constraint keyword checks (maxItems, minProperties, maxProperties, uniqueItems, multipleOf)
+request-body-max-items-decreased: o número máximo de itens do corpo da requisição foi reduzido para %s
+request-property-max-items-decreased: o número máximo de itens da propriedade de requisição %s foi reduzido para %s
+request-read-only-property-max-items-decreased: o número máximo de itens da propriedade de requisição somente leitura %s foi reduzido para %s
+request-body-max-items-increased: o número máximo de itens do corpo da requisição foi aumentado de %s para %s
+request-property-max-items-increased: o número máximo de itens da propriedade de requisição %s foi aumentado de %s para %s
+request-body-max-items-set: o número máximo de itens do corpo da requisição foi definido como %s
+request-body-max-items-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-max-items-set: o número máximo de itens da propriedade de requisição %s foi definido como %s
+request-property-max-items-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+response-body-max-items-increased: o número máximo de itens do corpo da resposta foi aumentado de %s para %s
+response-property-max-items-increased: o número máximo de itens da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+request-body-max-properties-decreased: o número máximo de propriedades do corpo da requisição foi reduzido para %s
+request-property-max-properties-decreased: o número máximo de propriedades da propriedade de requisição %s foi reduzido para %s
+request-read-only-property-max-properties-decreased: o número máximo de propriedades da propriedade de requisição somente leitura %s foi reduzido para %s
+request-body-max-properties-increased: o número máximo de propriedades do corpo da requisição foi aumentado de %s para %s
+request-property-max-properties-increased: o número máximo de propriedades da propriedade de requisição %s foi aumentado de %s para %s
+request-body-max-properties-set: o número máximo de propriedades do corpo da requisição foi definido como %s
+request-body-max-properties-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-max-properties-set: o número máximo de propriedades da propriedade de requisição %s foi definido como %s
+request-property-max-properties-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+response-body-max-properties-increased: o número máximo de propriedades do corpo da resposta foi aumentado de %s para %s
+response-property-max-properties-increased: o número máximo de propriedades da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+request-body-min-properties-increased: o número mínimo de propriedades do corpo da requisição foi aumentado para %s
+request-property-min-properties-increased: o número mínimo de propriedades da propriedade de requisição %s foi aumentado para %s
+response-body-min-properties-decreased: o número mínimo de propriedades do corpo da resposta foi reduzido de %s para %s
+response-property-min-properties-decreased: o número mínimo de propriedades da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+request-body-unique-items-set: o valor uniqueItems do corpo da requisição foi definido como true
+request-property-unique-items-set: o valor uniqueItems da propriedade de requisição %s foi definido como true
+request-body-unique-items-unset: o valor uniqueItems do corpo da requisição foi removido
+request-property-unique-items-unset: o valor uniqueItems da propriedade de requisição %s foi removido
+response-body-unique-items-unset: o valor uniqueItems do corpo da resposta foi removido
+response-property-unique-items-unset: o valor uniqueItems da propriedade de resposta %s foi removido para o status %s
+request-body-multiple-of-set: o valor multipleOf do corpo da requisição foi definido como %s
+request-body-multiple-of-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-multiple-of-set: o valor multipleOf da propriedade de requisição %s foi definido como %s
+request-property-multiple-of-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-multiple-of-unset: o valor multipleOf do corpo da requisição foi removido de %s
+request-property-multiple-of-unset: o valor multipleOf da propriedade de requisição %s foi removido de %s
+request-body-multiple-of-changed: o valor multipleOf do corpo da requisição foi alterado de %s para %s
+request-property-multiple-of-changed: o valor multipleOf da propriedade de requisição %s foi alterado de %s para %s
+request-body-multiple-of-generalized: o valor multipleOf do corpo da requisição foi generalizado de %s para %s
+request-body-multiple-of-generalized-comment: Esta alteração não é incompatível porque o multipleOf anterior é um múltiplo inteiro do novo, então todos os valores válidos anteriormente continuam válidos.
+request-property-multiple-of-generalized: o valor multipleOf da propriedade de requisição %s foi generalizado de %s para %s
+request-property-multiple-of-generalized-comment: Esta alteração não é incompatível porque o multipleOf anterior é um múltiplo inteiro do novo, então todos os valores válidos anteriormente continuam válidos.
+response-body-multiple-of-unset: o valor multipleOf do corpo da resposta foi removido de %s
+response-property-multiple-of-unset: o valor multipleOf da propriedade de resposta %s foi removido de %s para o status %s
+response-body-multiple-of-changed: o valor multipleOf do corpo da resposta foi alterado de %s para %s
+response-property-multiple-of-changed: o valor multipleOf da propriedade de resposta %s foi alterado de %s para %s para o status %s
+response-body-multiple-of-specialized: o valor multipleOf do corpo da resposta foi especializado de %s para %s
+response-body-multiple-of-specialized-comment: Esta alteração não é incompatível porque o novo multipleOf é um múltiplo inteiro do anterior, então todos os valores que o servidor pode produzir já eram válidos antes.
+response-property-multiple-of-specialized: o valor multipleOf da propriedade de resposta %s foi especializado de %s para %s para o status %s
+response-property-multiple-of-specialized-comment: Esta alteração não é incompatível porque o novo multipleOf é um múltiplo inteiro do anterior, então todos os valores que o servidor pode produzir já eram válidos antes.
+request-body-max-items-decreased-description: número máximo de itens do corpo da requisição reduzido
+request-property-max-items-decreased-description: número máximo de itens da propriedade de requisição reduzido
+request-read-only-property-max-items-decreased-description: número máximo de itens da propriedade de requisição somente leitura reduzido
+request-body-max-items-increased-description: número máximo de itens do corpo da requisição aumentado
+request-property-max-items-increased-description: número máximo de itens da propriedade de requisição aumentado
+request-body-max-items-set-description: número máximo de itens do corpo da requisição definido
+request-property-max-items-set-description: número máximo de itens da propriedade de requisição definido
+response-body-max-items-increased-description: número máximo de itens do corpo da resposta aumentado
+response-property-max-items-increased-description: número máximo de itens da propriedade de resposta aumentado
+request-body-max-properties-decreased-description: número máximo de propriedades do corpo da requisição reduzido
+request-property-max-properties-decreased-description: número máximo de propriedades da propriedade de requisição reduzido
+request-read-only-property-max-properties-decreased-description: número máximo de propriedades da propriedade de requisição somente leitura reduzido
+request-body-max-properties-increased-description: número máximo de propriedades do corpo da requisição aumentado
+request-property-max-properties-increased-description: número máximo de propriedades da propriedade de requisição aumentado
+request-body-max-properties-set-description: número máximo de propriedades do corpo da requisição definido
+request-property-max-properties-set-description: número máximo de propriedades da propriedade de requisição definido
+response-body-max-properties-increased-description: número máximo de propriedades do corpo da resposta aumentado
+response-property-max-properties-increased-description: número máximo de propriedades da propriedade de resposta aumentado
+request-body-min-properties-increased-description: número mínimo de propriedades do corpo da requisição aumentado
+request-property-min-properties-increased-description: número mínimo de propriedades da propriedade de requisição aumentado
+response-body-min-properties-decreased-description: número mínimo de propriedades do corpo da resposta reduzido
+response-property-min-properties-decreased-description: número mínimo de propriedades da propriedade de resposta reduzido
+request-body-unique-items-set-description: valor uniqueItems do corpo da requisição definido
+request-property-unique-items-set-description: valor uniqueItems da propriedade de requisição definido
+request-body-unique-items-unset-description: valor uniqueItems do corpo da requisição removido
+request-property-unique-items-unset-description: valor uniqueItems da propriedade de requisição removido
+response-body-unique-items-unset-description: valor uniqueItems do corpo da resposta removido
+response-property-unique-items-unset-description: valor uniqueItems da propriedade de resposta removido
+request-body-multiple-of-set-description: valor multipleOf do corpo da requisição definido
+request-property-multiple-of-set-description: valor multipleOf da propriedade de requisição definido
+request-body-multiple-of-unset-description: valor multipleOf do corpo da requisição removido
+request-property-multiple-of-unset-description: valor multipleOf da propriedade de requisição removido
+request-body-multiple-of-changed-description: valor multipleOf do corpo da requisição alterado
+request-property-multiple-of-changed-description: valor multipleOf da propriedade de requisição alterado
+request-body-multiple-of-generalized-description: valor multipleOf do corpo da requisição generalizado
+request-property-multiple-of-generalized-description: valor multipleOf da propriedade de requisição generalizado
+response-body-multiple-of-unset-description: valor multipleOf do corpo da resposta removido
+response-property-multiple-of-unset-description: valor multipleOf da propriedade de resposta removido
+response-body-multiple-of-changed-description: valor multipleOf do corpo da resposta alterado
+response-property-multiple-of-changed-description: valor multipleOf da propriedade de resposta alterado
+response-body-multiple-of-specialized-description: valor multipleOf do corpo da resposta especializado
+response-property-multiple-of-specialized-description: valor multipleOf da propriedade de resposta especializado

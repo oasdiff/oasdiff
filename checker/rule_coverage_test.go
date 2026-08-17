@@ -109,13 +109,13 @@ var coverageWaivers = []struct{ Pattern, Reason string }{
 	// unchecked schema keywords in the request/response body contexts;
 	// each is a candidate check surfaced by this audit
 	{"**.schema.additionalProperties", "open: setting additionalProperties:false narrows accepted request objects (breaking) and is unchecked (tracked in #1054)"},
-	{"**.schema.multipleOf", "open: multipleOf set/tightened on a request narrows accepted numbers (breaking) and is unchecked (tracked in #1155)"},
-	{"**.schema.uniqueItems", "open: uniqueItems set on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1156)"},
-	{"**.schema.maxProperties", "open: maxProperties set/decreased on a request narrows accepted objects (breaking) and is unchecked (tracked in #1157)"},
-	{"**.schema.minProperties", "open: minProperties set/increased on a request narrows accepted objects (breaking) and is unchecked (tracked in #1157)"},
+	{"**.schema.multipleOf", "open: response set (narrowing the output) and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159)"},
+	{"**.schema.uniqueItems", "open: response set (narrowing the output) and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159)"},
+	{"**.schema.maxProperties", "open: remaining directions and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159)"},
+	{"**.schema.minProperties", "open: remaining directions and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159, #1171 for the set case)"},
 	{"**.schema.items:set,unset", "open: an items subschema appearing on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1054)"},
 	{"**.schema.not", "open: a not subschema appearing on a request narrows the accepted set (breaking) and is unchecked (tracked in #1054)"},
-	{"**.schema.maxItems", "open: request-side maxItems has no rules (the parameter analog does: request-parameter-max-items-decreased); response side unchecked (tracked in #1158)"},
+	{"**.schema.maxItems", "open: remaining directions (request unset widens, response set/decrease narrow the server's output) and non-body contexts are unchecked; the breaking directions have rules (tracked in #1159)"},
 	{"**.schema.maximum", "open: remaining directions (request unset widens, response set/decrease narrows the server's output) are unchecked; the breaking directions have rules (tracked in #1159)"},
 	{"**.schema.minimum", "open: remaining directions are unchecked; the breaking directions have rules (tracked in #1159)"},
 	{"**.schema.maxLength", "open: remaining directions are unchecked; the breaking directions have rules (tracked in #1159)"},
