@@ -35,8 +35,10 @@ const (
 	PolarityDocument Polarity = "document" // neither wire direction
 )
 
-// Cell is one coordinate of the edit space: Action applied at Location.
-type Cell struct {
+// Edit is one possible edit of an OpenAPI document: an Action applied at a
+// Location. The set of all of them (see Edits) is the edit space the
+// coverage audit works over.
+type Edit struct {
 	Location   string
 	Action     Action
 	Polarity   Polarity
@@ -44,23 +46,23 @@ type Cell struct {
 	Extension  bool // an x-* specification extension
 }
 
-// Cube enumerates every cell of the edit space, sorted by location then
-// action.
-func Cube() []Cell {
-	w := &walker{cells: map[Cell]struct{}{}}
+// Edits enumerates every possible edit of an OpenAPI document, sorted by
+// location then action.
+func Edits() []Edit {
+	w := &walker{edits: map[Edit]struct{}{}}
 	w.walkType(reflect.TypeFor[openapi3.T](), "", false)
 
-	cells := make([]Cell, 0, len(w.cells))
-	for c := range w.cells {
-		cells = append(cells, c)
+	edits := make([]Edit, 0, len(w.edits))
+	for c := range w.edits {
+		edits = append(edits, c)
 	}
-	sort.Slice(cells, func(i, j int) bool {
-		if cells[i].Location != cells[j].Location {
-			return cells[i].Location < cells[j].Location
+	sort.Slice(edits, func(i, j int) bool {
+		if edits[i].Location != edits[j].Location {
+			return edits[i].Location < edits[j].Location
 		}
-		return cells[i].Action < cells[j].Action
+		return edits[i].Action < edits[j].Action
 	})
-	return cells
+	return edits
 }
 
 // annotationFields are spec-defined metadata: editing them never changes
@@ -89,13 +91,13 @@ var (
 )
 
 type walker struct {
-	cells map[Cell]struct{}
+	edits map[Edit]struct{}
 	stack []reflect.Type
 }
 
 func (w *walker) emit(path string, annotation, extension bool, actions ...Action) {
 	for _, a := range actions {
-		w.cells[Cell{
+		w.edits[Edit{
 			Location:   path,
 			Action:     a,
 			Polarity:   polarity(path),

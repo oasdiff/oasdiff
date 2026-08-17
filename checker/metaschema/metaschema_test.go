@@ -6,29 +6,29 @@ import (
 	"github.com/oasdiff/oasdiff/checker/metaschema"
 )
 
-func cellSet(t *testing.T) map[metaschema.Cell]bool {
+func editSet(t *testing.T) map[metaschema.Edit]bool {
 	t.Helper()
-	set := map[metaschema.Cell]bool{}
-	for _, c := range metaschema.Cube() {
+	set := map[metaschema.Edit]bool{}
+	for _, c := range metaschema.Edits() {
 		if set[c] {
-			t.Errorf("duplicate cell: %+v", c)
+			t.Errorf("duplicate edit: %+v", c)
 		}
 		set[c] = true
 	}
 	return set
 }
 
-func find(set map[metaschema.Cell]bool, location string, action metaschema.Action) (metaschema.Cell, bool) {
+func find(set map[metaschema.Edit]bool, location string, action metaschema.Action) (metaschema.Edit, bool) {
 	for c := range set {
 		if c.Location == location && c.Action == action {
 			return c, true
 		}
 	}
-	return metaschema.Cell{}, false
+	return metaschema.Edit{}, false
 }
 
 func TestCube_Deterministic(t *testing.T) {
-	a, b := metaschema.Cube(), metaschema.Cube()
+	a, b := metaschema.Edits(), metaschema.Edits()
 	if len(a) != len(b) {
 		t.Fatalf("cube size changed between runs: %d vs %d", len(a), len(b))
 	}
@@ -40,7 +40,7 @@ func TestCube_Deterministic(t *testing.T) {
 }
 
 func TestCube_KnownCells(t *testing.T) {
-	set := cellSet(t)
+	set := editSet(t)
 
 	for _, tc := range []struct {
 		location string
@@ -72,7 +72,7 @@ func TestCube_KnownCells(t *testing.T) {
 	} {
 		c, ok := find(set, tc.location, tc.action)
 		if !ok {
-			t.Errorf("missing cell: %s %s", tc.location, tc.action)
+			t.Errorf("missing edit: %s %s", tc.location, tc.action)
 			continue
 		}
 		if c.Polarity != tc.polarity {
@@ -82,16 +82,16 @@ func TestCube_KnownCells(t *testing.T) {
 }
 
 func TestCube_RecursionFolds(t *testing.T) {
-	set := cellSet(t)
+	set := editSet(t)
 
 	// schema keywords appear at the top schema node only; deeper nesting is
 	// folded into it
 	if _, ok := find(set, "paths.*.*.requestBody.content.*.schema.properties.*.maxLength", metaschema.ActionDecrease); ok {
-		t.Error("schema recursion not folded: found a property-level maxLength cell")
+		t.Error("schema recursion not folded: found a property-level maxLength edit")
 	}
 	// callbacks fold at the nested path item
 	if _, ok := find(set, "paths.*.*.callbacks.*.*", metaschema.ActionAdd); !ok {
-		t.Error("missing callback path-item cell")
+		t.Error("missing callback path-item edit")
 	}
 	if _, ok := find(set, "paths.*.*.callbacks.*.*.*.requestBody", metaschema.ActionSet); ok {
 		t.Error("path-item recursion not folded under callbacks")
@@ -99,19 +99,19 @@ func TestCube_RecursionFolds(t *testing.T) {
 }
 
 func TestCube_AnnotationAndExtension(t *testing.T) {
-	set := cellSet(t)
+	set := editSet(t)
 
 	c, ok := find(set, "paths.*.*.description", metaschema.ActionChange)
 	if !ok || !c.Annotation {
-		t.Errorf("operation description should be an annotation cell (found=%v cell=%+v)", ok, c)
+		t.Errorf("operation description should be an annotation edit (found=%v edit=%+v)", ok, c)
 	}
 	c, ok = find(set, "paths.*.*.x-*", metaschema.ActionChange)
 	if !ok || !c.Extension {
-		t.Errorf("operation x-* should be an extension cell (found=%v cell=%+v)", ok, c)
+		t.Errorf("operation x-* should be an extension edit (found=%v edit=%+v)", ok, c)
 	}
 	c, ok = find(set, "paths.*.*.requestBody.content.*.schema.maxLength", metaschema.ActionDecrease)
 	if !ok || c.Annotation {
-		t.Errorf("maxLength should not be an annotation cell (found=%v cell=%+v)", ok, c)
+		t.Errorf("maxLength should not be an annotation edit (found=%v edit=%+v)", ok, c)
 	}
 }
 

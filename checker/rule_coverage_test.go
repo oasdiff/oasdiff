@@ -17,7 +17,7 @@ import (
 // syntactic action, see checker/metaschema).
 //
 // TestRuleLocations is the guard: every rule's location claims must parse and
-// match at least one cube cell, so claims cannot drift from the object model.
+// match at least one cube edit, so claims cannot drift from the object model.
 //
 // TestRuleCoverageReport is informational: how much of the wire-relevant edit
 // space the mapped rules cover, and where the holes are. Run with:
@@ -25,10 +25,10 @@ import (
 //	go test ./checker -run RuleCoverageReport -v
 //
 // Set OASDIFF_COVERAGE_DUMP=<path> to also write the full list of uncovered
-// cells as TSV.
+// edits as TSV.
 
 func TestRuleLocations(t *testing.T) {
-	cube := metaschema.Cube()
+	cube := metaschema.Edits()
 
 	for _, rule := range checker.GetAllRules() {
 		for _, loc := range rule.Locations {
@@ -38,18 +38,18 @@ func TestRuleLocations(t *testing.T) {
 				continue
 			}
 			if !slices.ContainsFunc(cube, claim.Matches) {
-				t.Errorf("rule %s: claim %q matches no cell of the metaschema cube", rule.Id, loc)
+				t.Errorf("rule %s: claim %q matches no edit of the metaschema cube", rule.Id, loc)
 			}
 		}
 	}
 }
 
-// coverageWaivers records why each wire-relevant cell with no rule is
+// coverageWaivers records why each wire-relevant edit with no rule is
 // deliberately or knowingly uncovered. A pattern is a location glob
 // (see metaschema.MatchLocation), optionally restricted to actions with
 // ":action[,action...]"; without the suffix it waives every action at the
-// location. TestRuleCoverage fails on any uncovered cell no waiver matches
-// (add a rule or a waiver) and on any waiver matching no uncovered cell
+// location. TestRuleCoverage fails on any uncovered edit no waiver matches
+// (add a rule or a waiver) and on any waiver matching no uncovered edit
 // (remove the stale waiver), so the list stays an honest, reviewed record.
 //
 // Reasons start with a category:
@@ -129,55 +129,55 @@ var coverageWaivers = []struct{ Pattern, Reason string }{
 	{"**.schema.unevaluatedProperties:change", "open: switching unevaluatedProperties between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 }
 
-// TestRuleCoverage is the completeness guard: every wire-relevant cell of
+// TestRuleCoverage is the completeness guard: every wire-relevant edit of
 // the metaschema cube must be covered by a rule's location claim or waived
 // in coverageWaivers with a reason.
 func TestRuleCoverage(t *testing.T) {
 	holes := uncoveredCells(t)
 
 	waived := make([]bool, len(coverageWaivers))
-	var unwaived []metaschema.Cell
-	for _, cell := range holes {
+	var unwaived []metaschema.Edit
+	for _, edit := range holes {
 		found := false
 		for i, w := range coverageWaivers {
-			if waiverMatches(t, w.Pattern, cell) {
+			if waiverMatches(t, w.Pattern, edit) {
 				waived[i], found = true, true
 			}
 		}
 		if !found {
-			unwaived = append(unwaived, cell)
+			unwaived = append(unwaived, edit)
 		}
 	}
 
 	const maxReport = 40
-	for i, cell := range unwaived {
+	for i, edit := range unwaived {
 		if i == maxReport {
-			t.Errorf("... and %d more unwaived cells", len(unwaived)-maxReport)
+			t.Errorf("... and %d more unwaived edits", len(unwaived)-maxReport)
 			break
 		}
-		t.Errorf("uncovered cell with no waiver: %s %s\n  add a rule claim or a coverageWaivers entry", cell.Location, cell.Action)
+		t.Errorf("uncovered edit with no waiver: %s %s\n  add a rule claim or a coverageWaivers entry", edit.Location, edit.Action)
 	}
 	for i, w := range coverageWaivers {
 		if !waived[i] {
-			t.Errorf("stale coverage waiver: %q\n  it matches no uncovered cell; remove it", w.Pattern)
+			t.Errorf("stale coverage waiver: %q\n  it matches no uncovered edit; remove it", w.Pattern)
 		}
 	}
 }
 
-func waiverMatches(t *testing.T, pattern string, cell metaschema.Cell) bool {
+func waiverMatches(t *testing.T, pattern string, edit metaschema.Edit) bool {
 	t.Helper()
 	if !strings.Contains(pattern, ":") {
-		return metaschema.MatchLocation(pattern, cell.Location)
+		return metaschema.MatchLocation(pattern, edit.Location)
 	}
 	claim, err := metaschema.ParseClaim(pattern)
 	if err != nil {
 		t.Fatalf("invalid waiver pattern %q: %v", pattern, err)
 	}
-	return claim.Matches(cell)
+	return claim.Matches(edit)
 }
 
-// uncoveredCells returns the wire-relevant cells no rule claim covers.
-func uncoveredCells(t *testing.T) []metaschema.Cell {
+// uncoveredCells returns the wire-relevant edits no rule claim covers.
+func uncoveredCells(t *testing.T) []metaschema.Edit {
 	t.Helper()
 
 	var claims []metaschema.Claim
@@ -191,27 +191,27 @@ func uncoveredCells(t *testing.T) []metaschema.Cell {
 		}
 	}
 
-	var holes []metaschema.Cell
-	for _, cell := range metaschema.Cube() {
-		if cell.Annotation || cell.Extension {
+	var holes []metaschema.Edit
+	for _, edit := range metaschema.Edits() {
+		if edit.Annotation || edit.Extension {
 			continue
 		}
 		covered := false
 		for _, c := range claims {
-			if c.Matches(cell) {
+			if c.Matches(edit) {
 				covered = true
 				break
 			}
 		}
 		if !covered {
-			holes = append(holes, cell)
+			holes = append(holes, edit)
 		}
 	}
 	return holes
 }
 
 func TestRuleCoverageReport(t *testing.T) {
-	cube := metaschema.Cube()
+	cube := metaschema.Edits()
 	rules := checker.GetAllRules()
 
 	type claimant struct {
@@ -235,35 +235,35 @@ func TestRuleCoverageReport(t *testing.T) {
 	}
 
 	var wire, covered int
-	var holes []metaschema.Cell
-	for _, cell := range cube {
-		if cell.Annotation || cell.Extension {
+	var holes []metaschema.Edit
+	for _, edit := range cube {
+		if edit.Annotation || edit.Extension {
 			continue
 		}
 		wire++
-		cellCovered := false
+		editCovered := false
 		for _, c := range claims {
-			if c.claim.Matches(cell) {
-				cellCovered = true
+			if c.claim.Matches(edit) {
+				editCovered = true
 				break
 			}
 		}
-		if cellCovered {
+		if editCovered {
 			covered++
 		} else {
-			holes = append(holes, cell)
+			holes = append(holes, edit)
 		}
 	}
 
 	t.Logf("rules: %d total, %d mapped to locations", len(rules), mapped)
-	t.Logf("cube: %d cells, %d wire-relevant (excluding annotation and x-*)", len(cube), wire)
-	t.Logf("covered: %d/%d wire-relevant cells (%.1f%%)", covered, wire, 100*float64(covered)/float64(wire))
+	t.Logf("cube: %d edits, %d wire-relevant (excluding annotation and x-*)", len(cube), wire)
+	t.Logf("covered: %d/%d wire-relevant edits (%.1f%%)", covered, wire, 100*float64(covered)/float64(wire))
 
 	byPolarity := map[metaschema.Polarity]int{}
 	byContext := map[string]int{}
-	for _, cell := range holes {
-		byPolarity[cell.Polarity]++
-		byContext[context(cell.Location)]++
+	for _, edit := range holes {
+		byPolarity[edit.Polarity]++
+		byContext[context(edit.Location)]++
 	}
 	t.Logf("holes by polarity: %v", byPolarity)
 	contexts := make([]string, 0, len(byContext))
@@ -277,13 +277,13 @@ func TestRuleCoverageReport(t *testing.T) {
 
 	if path := os.Getenv("OASDIFF_COVERAGE_DUMP"); path != "" {
 		var b strings.Builder
-		for _, cell := range holes {
-			fmt.Fprintf(&b, "%s\t%s\t%s\n", cell.Location, cell.Action, cell.Polarity)
+		for _, edit := range holes {
+			fmt.Fprintf(&b, "%s\t%s\t%s\n", edit.Location, edit.Action, edit.Polarity)
 		}
 		if err := os.WriteFile(path, []byte(b.String()), 0o644); err != nil {
 			t.Fatalf("writing coverage dump: %v", err)
 		}
-		t.Logf("wrote %d uncovered cells to %s", len(holes), path)
+		t.Logf("wrote %d uncovered edits to %s", len(holes), path)
 	}
 }
 

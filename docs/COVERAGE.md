@@ -6,7 +6,7 @@ This page maps the changelog checks onto the full edit space of an OpenAPI
 document. The edit space is derived mechanically from the OpenAPI object
 model: every field location (a dotted path, with `*` standing for any map key
 or list index) paired with the syntactic edits applicable there (add, remove,
-set, unset, change, increase, decrease). Schema locations are folded: a cell
+set, unset, change, increase, decrease). Schema locations are folded: a edit
 like `paths.*.*.requestBody.content.*.schema.maxLength` stands for that
 keyword at any nesting depth inside the request body schema.
 
@@ -14,20 +14,20 @@ Two guarantees are enforced by tests in the checker package:
 
 - Every location a check claims exists in the object model, so this map
   cannot drift from the specification as the parser evolves.
-- Every wire-relevant cell (one whose edit can change which payloads are
+- Every wire-relevant edit (one whose edit can change which payloads are
   valid) is either covered by at least one check or listed in the second
   table below with a reason. A new field in the object model, or a removed
   check, fails the build until this map accounts for it.
 
-Checks for the same cell differ by preconditions on the document (for
+Checks for the same edit differ by preconditions on the document (for
 example, whether the removed endpoint was deprecated); severity levels are
 listed per check.
 
 ## Summary
 
-- 15255 cells in the edit space, 10974 of them wire-relevant
-- 332 wire-relevant cells covered by checks
-- 10642 wire-relevant cells without checks, all accounted for below
+- 15255 edits in the edit space, 10974 of them wire-relevant
+- 332 wire-relevant edits covered by checks
+- 10642 wire-relevant edits without checks, all accounted for below
 
 ## Checked edits
 
@@ -457,8 +457,8 @@ listed per check.
 
 ## Edits without checks
 
-Each remaining wire-relevant cell matches one of the entries below. Counts
-attribute every cell to its first matching entry.
+Each remaining wire-relevant edit matches one of the entries below. Counts
+attribute every edit to its first matching entry.
 
 | Pattern | Cells | Reason |
 |---|---|---|

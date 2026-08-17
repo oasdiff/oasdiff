@@ -19,7 +19,7 @@ type Rule struct {
 	Kind        Kind
 	Effect      Effect
 	Guards      []Guard
-	// Locations are the metaschema cells the rule covers, as
+	// Locations are the metaschema edits the rule covers, as
 	// "location:action[,action...]" claims (see metaschema.ParseClaim).
 	Locations []string
 }

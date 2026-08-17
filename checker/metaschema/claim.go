@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Claim is a rule's statement of which cells it covers: a location pattern
+// Claim is a rule's statement of which edits it covers: a location pattern
 // (see MatchLocation) plus the actions it reports there.
 type Claim struct {
 	Pattern string
@@ -40,7 +40,7 @@ func ParseClaim(s string) (Claim, error) {
 	return c, nil
 }
 
-// Matches reports whether the claim covers the cell.
-func (c Claim) Matches(cell Cell) bool {
-	return MatchLocation(c.Pattern, cell.Location) && slices.Contains(c.Actions, cell.Action)
+// Matches reports whether the claim covers the edit.
+func (c Claim) Matches(edit Edit) bool {
+	return MatchLocation(c.Pattern, edit.Location) && slices.Contains(c.Actions, edit.Action)
 }

@@ -34,7 +34,7 @@ func TestCoverageDoc(t *testing.T) {
 }
 
 func coverageDoc() string {
-	cube := metaschema.Cube()
+	cube := metaschema.Edits()
 
 	type ruleRef struct {
 		id    string
@@ -55,32 +55,32 @@ func coverageDoc() string {
 		}
 	}
 
-	covered := map[metaschema.Cell][]ruleRef{}
+	covered := map[metaschema.Edit][]ruleRef{}
 	var wire, wireCovered int
-	var holes []metaschema.Cell
-	for _, cell := range cube {
+	var holes []metaschema.Edit
+	for _, edit := range cube {
 		for _, c := range claims {
-			if c.claim.Matches(cell) {
-				covered[cell] = append(covered[cell], c.ruleRef)
+			if c.claim.Matches(edit) {
+				covered[edit] = append(covered[edit], c.ruleRef)
 			}
 		}
-		if cell.Annotation || cell.Extension {
+		if edit.Annotation || edit.Extension {
 			continue
 		}
 		wire++
-		if len(covered[cell]) > 0 {
+		if len(covered[edit]) > 0 {
 			wireCovered++
 		} else {
-			holes = append(holes, cell)
+			holes = append(holes, edit)
 		}
 	}
 
-	// attribute each uncovered wire-relevant cell to its first matching waiver
-	waiverCells := make([]int, len(coverageWaivers))
-	for _, cell := range holes {
+	// attribute each uncovered wire-relevant edit to its first matching waiver
+	waiverEdits := make([]int, len(coverageWaivers))
+	for _, edit := range holes {
 		for i, w := range coverageWaivers {
-			if waiverMatchesDoc(w.Pattern, cell) {
-				waiverCells[i]++
+			if waiverMatchesDoc(w.Pattern, edit) {
+				waiverEdits[i]++
 				break
 			}
 		}
@@ -95,7 +95,7 @@ This page maps the changelog checks onto the full edit space of an OpenAPI
 document. The edit space is derived mechanically from the OpenAPI object
 model: every field location (a dotted path, with ` + "`*`" + ` standing for any map key
 or list index) paired with the syntactic edits applicable there (add, remove,
-set, unset, change, increase, decrease). Schema locations are folded: a cell
+set, unset, change, increase, decrease). Schema locations are folded: a edit
 like ` + "`paths.*.*.requestBody.content.*.schema.maxLength`" + ` stands for that
 keyword at any nesting depth inside the request body schema.
 
@@ -103,26 +103,26 @@ Two guarantees are enforced by tests in the checker package:
 
 - Every location a check claims exists in the object model, so this map
   cannot drift from the specification as the parser evolves.
-- Every wire-relevant cell (one whose edit can change which payloads are
+- Every wire-relevant edit (one whose edit can change which payloads are
   valid) is either covered by at least one check or listed in the second
   table below with a reason. A new field in the object model, or a removed
   check, fails the build until this map accounts for it.
 
-Checks for the same cell differ by preconditions on the document (for
+Checks for the same edit differ by preconditions on the document (for
 example, whether the removed endpoint was deprecated); severity levels are
 listed per check.
 
 `)
 
 	fmt.Fprintf(&b, "## Summary\n\n")
-	fmt.Fprintf(&b, "- %d cells in the edit space, %d of them wire-relevant\n", len(cube), wire)
-	fmt.Fprintf(&b, "- %d wire-relevant cells covered by checks\n", wireCovered)
-	fmt.Fprintf(&b, "- %d wire-relevant cells without checks, all accounted for below\n\n", len(holes))
+	fmt.Fprintf(&b, "- %d edits in the edit space, %d of them wire-relevant\n", len(cube), wire)
+	fmt.Fprintf(&b, "- %d wire-relevant edits covered by checks\n", wireCovered)
+	fmt.Fprintf(&b, "- %d wire-relevant edits without checks, all accounted for below\n\n", len(holes))
 
 	b.WriteString("## Checked edits\n")
-	groups := map[string][]metaschema.Cell{}
-	for cell := range covered {
-		groups[context(cell.Location)] = append(groups[context(cell.Location)], cell)
+	groups := map[string][]metaschema.Edit{}
+	for edit := range covered {
+		groups[context(edit.Location)] = append(groups[context(edit.Location)], edit)
 	}
 	groupNames := make([]string, 0, len(groups))
 	for g := range groups {
@@ -130,50 +130,50 @@ listed per check.
 	}
 	sort.Strings(groupNames)
 	for _, g := range groupNames {
-		cells := groups[g]
-		sort.Slice(cells, func(i, j int) bool {
-			if cells[i].Location != cells[j].Location {
-				return cells[i].Location < cells[j].Location
+		edits := groups[g]
+		sort.Slice(edits, func(i, j int) bool {
+			if edits[i].Location != edits[j].Location {
+				return edits[i].Location < edits[j].Location
 			}
-			return cells[i].Action < cells[j].Action
+			return edits[i].Action < edits[j].Action
 		})
 		fmt.Fprintf(&b, "\n### `%s`\n\n", g)
 		b.WriteString("| Location | Action | Checks |\n|---|---|---|\n")
-		for _, cell := range cells {
-			refs := covered[cell]
+		for _, edit := range edits {
+			refs := covered[edit]
 			sort.Slice(refs, func(i, j int) bool { return refs[i].id < refs[j].id })
 			names := make([]string, len(refs))
 			for i, r := range refs {
 				names[i] = fmt.Sprintf("`%s` (%s)", r.id, r.level.String())
 			}
-			fmt.Fprintf(&b, "| `%s` | %s | %s |\n", cell.Location, cell.Action, strings.Join(names, ", "))
+			fmt.Fprintf(&b, "| `%s` | %s | %s |\n", edit.Location, edit.Action, strings.Join(names, ", "))
 		}
 	}
 
 	b.WriteString(`
 ## Edits without checks
 
-Each remaining wire-relevant cell matches one of the entries below. Counts
-attribute every cell to its first matching entry.
+Each remaining wire-relevant edit matches one of the entries below. Counts
+attribute every edit to its first matching entry.
 
 | Pattern | Cells | Reason |
 |---|---|---|
 `)
 	for i, w := range coverageWaivers {
-		fmt.Fprintf(&b, "| `%s` | %d | %s |\n", w.Pattern, waiverCells[i], w.Reason)
+		fmt.Fprintf(&b, "| `%s` | %d | %s |\n", w.Pattern, waiverEdits[i], w.Reason)
 	}
 	return b.String()
 }
 
 // waiverMatchesDoc is waiverMatches without the testing.T plumbing; patterns
 // are validated by TestRuleCoverage.
-func waiverMatchesDoc(pattern string, cell metaschema.Cell) bool {
+func waiverMatchesDoc(pattern string, edit metaschema.Edit) bool {
 	if !strings.Contains(pattern, ":") {
-		return metaschema.MatchLocation(pattern, cell.Location)
+		return metaschema.MatchLocation(pattern, edit.Location)
 	}
 	claim, err := metaschema.ParseClaim(pattern)
 	if err != nil {
 		return false
 	}
-	return claim.Matches(cell)
+	return claim.Matches(edit)
 }
