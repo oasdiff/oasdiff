@@ -40,19 +40,23 @@ Every check is categorized along independent axes, emitted as fields in the `jso
 
 - `area` — the OpenAPI object the check concerns, aligned with the OpenAPI specification's object model: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`.
 - `kind` — the aspect of the API contract that changed: `existence` (an element added or removed), `requiredness` (required / optional / nullable), `mutability` (read-only / write-only), `type` (data type or format), `constraints` (bounds such as min/max, length, pattern, items), `values` (enum, const, default), `structure` (composition and applicator keywords such as allOf/anyOf/oneOf, discriminator, if/then/else, contains), and `lifecycle` (deprecation, sunset, stability).
-- `action` — the verb: `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`.
+- `actions` — the syntactic edits the check covers, derived from its position in the OpenAPI object model: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`.
+- `effect` — the check's verdict about the set of payloads the contract accepts: `widens`, `narrows`, `incomparable` (provably neither), `unknown` (cannot be decided), `violation` (breaks the deprecation/stability contract rather than the wire contract), or `none` (metadata with no effect on accepted payloads). Together with `direction`, the effect determines the default severity: narrowing requests and widening responses break clients.
 - `direction` — `request`, `response`, or `none`.
 
 ## Filtering by Tag
-Use `--tags` to show only checks in a specific area, kind, action, or direction:
+Use `--tags` to show only checks in a specific area, kind, action, effect, or direction:
 ```
 oasdiff checks changelog --tags request,parameters
 oasdiff checks changelog --tags schema,constraints
 ```
 
-Available tags: `request`, `response`, `add`, `remove`, `change`, `generalize`, `specialize`, `increase`, `decrease`, `set`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`.
+Available tags: `request`, `response`, `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`, `widens`, `narrows`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`. The retired action names `generalize` and `specialize` are kept as aliases for `widens` and `narrows`.
 
 Multiple tags are combined with AND — only checks that match all specified tags are shown.
+
+## Coverage Map
+[COVERAGE.md](COVERAGE.md) shows the inverse view: every field location and edit in the OpenAPI object model, with the checks that cover it, and a reasoned account of every edit that has no check.
 
 ## Localization
 Use `--lang` to view check descriptions in a supported language:

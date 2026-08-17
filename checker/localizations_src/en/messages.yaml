@@ -1076,3 +1076,99 @@ response-body-type-compatible-description: response body type changed but backwa
 response-property-type-generalized-description: response property type generalized
 response-property-type-specialized-description: response property type specialized
 response-property-type-compatible-description: response property type changed but backward compatible
+
+# constraint keyword checks (maxItems, minProperties, maxProperties, uniqueItems, multipleOf)
+request-body-max-items-decreased: the request's body maxItems was decreased to %s
+request-property-max-items-decreased: the %s request property's maxItems was decreased to %s
+request-read-only-property-max-items-decreased: the %s request read-only property's maxItems was decreased to %s
+request-body-max-items-increased: the request's body maxItems was increased from %s to %s
+request-property-max-items-increased: the %s request property's maxItems was increased from %s to %s
+request-body-max-items-set: the request's body maxItems was set to %s
+request-body-max-items-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-max-items-set: the %s request property's maxItems was set to %s
+request-property-max-items-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+response-body-max-items-increased: the response's body maxItems was increased from %s to %s
+response-property-max-items-increased: the %s response property's maxItems was increased from %s to %s for the response status %s
+request-body-max-properties-decreased: the request's body maxProperties was decreased to %s
+request-property-max-properties-decreased: the %s request property's maxProperties was decreased to %s
+request-read-only-property-max-properties-decreased: the %s request read-only property's maxProperties was decreased to %s
+request-body-max-properties-increased: the request's body maxProperties was increased from %s to %s
+request-property-max-properties-increased: the %s request property's maxProperties was increased from %s to %s
+request-body-max-properties-set: the request's body maxProperties was set to %s
+request-body-max-properties-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-max-properties-set: the %s request property's maxProperties was set to %s
+request-property-max-properties-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+response-body-max-properties-increased: the response's body maxProperties was increased from %s to %s
+response-property-max-properties-increased: the %s response property's maxProperties was increased from %s to %s for the response status %s
+request-body-min-properties-increased: the request's body minProperties was increased to %s
+request-property-min-properties-increased: the %s request property's minProperties was increased to %s
+response-body-min-properties-decreased: the response's body minProperties was decreased from %s to %s
+response-property-min-properties-decreased: the %s response property's minProperties was decreased from %s to %s for the response status %s
+request-body-unique-items-set: the request's body uniqueItems was set to true
+request-property-unique-items-set: the %s request property's uniqueItems was set to true
+request-body-unique-items-unset: the request's body uniqueItems was unset
+request-property-unique-items-unset: the %s request property's uniqueItems was unset
+response-body-unique-items-unset: the response's body uniqueItems was unset
+response-property-unique-items-unset: the %s response property's uniqueItems was unset for the response status %s
+request-body-multiple-of-set: the request's body multipleOf was set to %s
+request-body-multiple-of-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-multiple-of-set: the %s request property's multipleOf was set to %s
+request-property-multiple-of-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-multiple-of-unset: the request's body multipleOf was unset from %s
+request-property-multiple-of-unset: the %s request property's multipleOf was unset from %s
+request-body-multiple-of-changed: the request's body multipleOf was changed from %s to %s
+request-property-multiple-of-changed: the %s request property's multipleOf was changed from %s to %s
+request-body-multiple-of-generalized: the request's body multipleOf was generalized from %s to %s
+request-body-multiple-of-generalized-comment: This change is not breaking because the old multipleOf is an integer multiple of the new one, so every previously valid value remains valid.
+request-property-multiple-of-generalized: the %s request property's multipleOf was generalized from %s to %s
+request-property-multiple-of-generalized-comment: This change is not breaking because the old multipleOf is an integer multiple of the new one, so every previously valid value remains valid.
+response-body-multiple-of-unset: the response's body multipleOf was unset from %s
+response-property-multiple-of-unset: the %s response property's multipleOf was unset from %s for the response status %s
+response-body-multiple-of-changed: the response's body multipleOf was changed from %s to %s
+response-property-multiple-of-changed: the %s response property's multipleOf was changed from %s to %s for the response status %s
+response-body-multiple-of-specialized: the response's body multipleOf was specialized from %s to %s
+response-body-multiple-of-specialized-comment: This change is not breaking because the new multipleOf is an integer multiple of the old one, so every value the server may now produce was already valid before.
+response-property-multiple-of-specialized: the %s response property's multipleOf was specialized from %s to %s for the response status %s
+response-property-multiple-of-specialized-comment: This change is not breaking because the new multipleOf is an integer multiple of the old one, so every value the server may now produce was already valid before.
+request-body-max-items-decreased-description: request body max items decreased
+request-property-max-items-decreased-description: request property max items decreased
+request-read-only-property-max-items-decreased-description: request read-only property max items decreased
+request-body-max-items-increased-description: request body max items increased
+request-property-max-items-increased-description: request property max items increased
+request-body-max-items-set-description: request body max items set
+request-property-max-items-set-description: request property max items set
+response-body-max-items-increased-description: response body max items increased
+response-property-max-items-increased-description: response property max items increased
+request-body-max-properties-decreased-description: request body max properties decreased
+request-property-max-properties-decreased-description: request property max properties decreased
+request-read-only-property-max-properties-decreased-description: request read-only property max properties decreased
+request-body-max-properties-increased-description: request body max properties increased
+request-property-max-properties-increased-description: request property max properties increased
+request-body-max-properties-set-description: request body max properties set
+request-property-max-properties-set-description: request property max properties set
+response-body-max-properties-increased-description: response body max properties increased
+response-property-max-properties-increased-description: response property max properties increased
+request-body-min-properties-increased-description: request body min properties increased
+request-property-min-properties-increased-description: request property min properties increased
+response-body-min-properties-decreased-description: response body min properties decreased
+response-property-min-properties-decreased-description: response property min properties decreased
+request-body-unique-items-set-description: request body uniqueItems set
+request-property-unique-items-set-description: request property uniqueItems set
+request-body-unique-items-unset-description: request body uniqueItems unset
+request-property-unique-items-unset-description: request property uniqueItems unset
+response-body-unique-items-unset-description: response body uniqueItems unset
+response-property-unique-items-unset-description: response property uniqueItems unset
+request-body-multiple-of-set-description: request body multipleOf set
+request-property-multiple-of-set-description: request property multipleOf set
+request-body-multiple-of-unset-description: request body multipleOf unset
+request-property-multiple-of-unset-description: request property multipleOf unset
+request-body-multiple-of-changed-description: request body multipleOf changed
+request-property-multiple-of-changed-description: request property multipleOf changed
+request-body-multiple-of-generalized-description: request body multipleOf generalized
+request-property-multiple-of-generalized-description: request property multipleOf generalized
+response-body-multiple-of-unset-description: response body multipleOf unset
+response-property-multiple-of-unset-description: response property multipleOf unset
+response-body-multiple-of-changed-description: response body multipleOf changed
+response-property-multiple-of-changed-description: response property multipleOf changed
+response-body-multiple-of-specialized-description: response body multipleOf specialized
+response-property-multiple-of-specialized-description: response property multipleOf specialized

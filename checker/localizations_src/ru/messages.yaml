@@ -1067,3 +1067,99 @@ response-body-type-compatible-description: изменён тип тела отв
 response-property-type-generalized-description: обобщен тип свойства ответа
 response-property-type-specialized-description: специализирован тип свойства ответа
 response-property-type-compatible-description: изменён тип свойства ответа, но обратно совместимо
+
+# constraint keyword checks (maxItems, minProperties, maxProperties, uniqueItems, multipleOf)
+request-body-max-items-decreased: значение maxItems у тела запроса уменьшено до %s
+request-property-max-items-decreased: значение maxItems у поля запроса %s уменьшено до %s
+request-read-only-property-max-items-decreased: значение maxItems у поля запроса только для чтения %s уменьшено до %s
+request-body-max-items-increased: значение maxItems у тела запроса увеличено с %s до %s
+request-property-max-items-increased: значение maxItems у поля запроса %s увеличено с %s до %s
+request-body-max-items-set: значение maxItems у тела запроса задано в %s
+request-body-max-items-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-max-items-set: значение maxItems у поля запроса %s задано в %s
+request-property-max-items-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+response-body-max-items-increased: значение maxItems у тела ответа увеличено с %s до %s
+response-property-max-items-increased: значение maxItems у поля ответа %s увеличено с %s до %s для ответа со статусом %s
+request-body-max-properties-decreased: значение maxProperties у тела запроса уменьшено до %s
+request-property-max-properties-decreased: значение maxProperties у поля запроса %s уменьшено до %s
+request-read-only-property-max-properties-decreased: значение maxProperties у поля запроса только для чтения %s уменьшено до %s
+request-body-max-properties-increased: значение maxProperties у тела запроса увеличено с %s до %s
+request-property-max-properties-increased: значение maxProperties у поля запроса %s увеличено с %s до %s
+request-body-max-properties-set: значение maxProperties у тела запроса задано в %s
+request-body-max-properties-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-max-properties-set: значение maxProperties у поля запроса %s задано в %s
+request-property-max-properties-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+response-body-max-properties-increased: значение maxProperties у тела ответа увеличено с %s до %s
+response-property-max-properties-increased: значение maxProperties у поля ответа %s увеличено с %s до %s для ответа со статусом %s
+request-body-min-properties-increased: значение minProperties у тела запроса увеличено до %s
+request-property-min-properties-increased: значение minProperties у поля запроса %s увеличено до %s
+response-body-min-properties-decreased: значение minProperties у тела ответа уменьшено с %s до %s
+response-property-min-properties-decreased: значение minProperties у поля ответа %s уменьшено с %s до %s для ответа со статусом %s
+request-body-unique-items-set: значение uniqueItems у тела запроса задано в true
+request-property-unique-items-set: значение uniqueItems у поля запроса %s задано в true
+request-body-unique-items-unset: значение uniqueItems у тела запроса удалено
+request-property-unique-items-unset: значение uniqueItems у поля запроса %s удалено
+response-body-unique-items-unset: значение uniqueItems у тела ответа удалено
+response-property-unique-items-unset: значение uniqueItems у поля ответа %s удалено для ответа со статусом %s
+request-body-multiple-of-set: значение multipleOf у тела запроса задано в %s
+request-body-multiple-of-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-multiple-of-set: значение multipleOf у поля запроса %s задано в %s
+request-property-multiple-of-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-multiple-of-unset: значение multipleOf у тела запроса удалено, предыдущее значение - %s
+request-property-multiple-of-unset: значение multipleOf у поля запроса %s удалено, предыдущее значение - %s
+request-body-multiple-of-changed: значение multipleOf у тела запроса изменено с %s на %s
+request-property-multiple-of-changed: значение multipleOf у поля запроса %s изменено с %s на %s
+request-body-multiple-of-generalized: значение multipleOf у тела запроса обобщено с %s на %s
+request-body-multiple-of-generalized-comment: "Это изменение не является ломающим: старое значение multipleOf кратно новому, поэтому все ранее допустимые значения остаются допустимыми."
+request-property-multiple-of-generalized: значение multipleOf у поля запроса %s обобщено с %s на %s
+request-property-multiple-of-generalized-comment: "Это изменение не является ломающим: старое значение multipleOf кратно новому, поэтому все ранее допустимые значения остаются допустимыми."
+response-body-multiple-of-unset: значение multipleOf у тела ответа удалено, предыдущее значение - %s
+response-property-multiple-of-unset: значение multipleOf у поля ответа %s удалено, предыдущее значение - %s для ответа со статусом %s
+response-body-multiple-of-changed: значение multipleOf у тела ответа изменено с %s на %s
+response-property-multiple-of-changed: значение multipleOf у поля ответа %s изменено с %s на %s для ответа со статусом %s
+response-body-multiple-of-specialized: значение multipleOf у тела ответа сужено с %s на %s
+response-body-multiple-of-specialized-comment: "Это изменение не является ломающим: новое значение multipleOf кратно старому, поэтому все значения, которые сервер может вернуть, были допустимы и раньше."
+response-property-multiple-of-specialized: значение multipleOf у поля ответа %s сужено с %s на %s для ответа со статусом %s
+response-property-multiple-of-specialized-comment: "Это изменение не является ломающим: новое значение multipleOf кратно старому, поэтому все значения, которые сервер может вернуть, были допустимы и раньше."
+request-body-max-items-decreased-description: уменьшено значение maxItems у тела запроса
+request-property-max-items-decreased-description: уменьшено значение maxItems у поля запроса
+request-read-only-property-max-items-decreased-description: уменьшено значение maxItems у поля запроса только для чтения
+request-body-max-items-increased-description: увеличено значение maxItems у тела запроса
+request-property-max-items-increased-description: увеличено значение maxItems у поля запроса
+request-body-max-items-set-description: задано значение maxItems у тела запроса
+request-property-max-items-set-description: задано значение maxItems у поля запроса
+response-body-max-items-increased-description: увеличено значение maxItems у тела ответа
+response-property-max-items-increased-description: увеличено значение maxItems у поля ответа
+request-body-max-properties-decreased-description: уменьшено значение maxProperties у тела запроса
+request-property-max-properties-decreased-description: уменьшено значение maxProperties у поля запроса
+request-read-only-property-max-properties-decreased-description: уменьшено значение maxProperties у поля запроса только для чтения
+request-body-max-properties-increased-description: увеличено значение maxProperties у тела запроса
+request-property-max-properties-increased-description: увеличено значение maxProperties у поля запроса
+request-body-max-properties-set-description: задано значение maxProperties у тела запроса
+request-property-max-properties-set-description: задано значение maxProperties у поля запроса
+response-body-max-properties-increased-description: увеличено значение maxProperties у тела ответа
+response-property-max-properties-increased-description: увеличено значение maxProperties у поля ответа
+request-body-min-properties-increased-description: увеличено значение minProperties у тела запроса
+request-property-min-properties-increased-description: увеличено значение minProperties у поля запроса
+response-body-min-properties-decreased-description: уменьшено значение minProperties у тела ответа
+response-property-min-properties-decreased-description: уменьшено значение minProperties у поля ответа
+request-body-unique-items-set-description: задано значение uniqueItems у тела запроса
+request-property-unique-items-set-description: задано значение uniqueItems у поля запроса
+request-body-unique-items-unset-description: удалено значение uniqueItems у тела запроса
+request-property-unique-items-unset-description: удалено значение uniqueItems у поля запроса
+response-body-unique-items-unset-description: удалено значение uniqueItems у тела ответа
+response-property-unique-items-unset-description: удалено значение uniqueItems у поля ответа
+request-body-multiple-of-set-description: задано значение multipleOf у тела запроса
+request-property-multiple-of-set-description: задано значение multipleOf у поля запроса
+request-body-multiple-of-unset-description: удалено значение multipleOf у тела запроса
+request-property-multiple-of-unset-description: удалено значение multipleOf у поля запроса
+request-body-multiple-of-changed-description: изменено значение multipleOf у тела запроса
+request-property-multiple-of-changed-description: изменено значение multipleOf у поля запроса
+request-body-multiple-of-generalized-description: обобщено значение multipleOf у тела запроса
+request-property-multiple-of-generalized-description: обобщено значение multipleOf у поля запроса
+response-body-multiple-of-unset-description: удалено значение multipleOf у тела ответа
+response-property-multiple-of-unset-description: удалено значение multipleOf у поля ответа
+response-body-multiple-of-changed-description: изменено значение multipleOf у тела ответа
+response-property-multiple-of-changed-description: изменено значение multipleOf у поля ответа
+response-body-multiple-of-specialized-description: сужено значение multipleOf у тела ответа
+response-property-multiple-of-specialized-description: сужено значение multipleOf у поля ответа

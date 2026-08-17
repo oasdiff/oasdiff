@@ -45,6 +45,11 @@ lint: modernize ## Run linter
 modernize: ## Report code that could use newer Go constructs
 	go run golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize@v0.48.0 -test -omitzero=false $$(go list ./... | grep -v checker/localizations)
 	
+.PHONY: coverage-doc
+coverage-doc: ## Regenerate docs/COVERAGE.md from the rule registry
+	@echo "==> Regenerating docs/COVERAGE.md..."
+	UPDATE_COVERAGE_DOC=1 go test ./checker -run TestCoverageDoc
+
 .PHONY: localize
 localize: ## Compile localized changelog messages
 	@echo "==> Compiling localized changelog messages..."

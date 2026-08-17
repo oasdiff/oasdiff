@@ -7,15 +7,16 @@ import "cmp"
 // Every field except Id is omitempty. The changelog and breaking-change rules
 // populate all of them (TestChecks_AllRuleFieldsPopulated pins that), so their
 // output is unchanged; the validate rules have an id, a description and a
-// level but no direction, area, kind or action, and those are omitted rather
-// than rendered as empty strings.
+// level but no direction, area, kind, actions or effect, and those are
+// omitted rather than rendered as empty strings.
 type Check struct {
 	Id          string `json:"id" yaml:"id"`
 	Level       string `json:"level,omitempty" yaml:"level,omitempty"`
 	Direction   string `json:"direction,omitempty" yaml:"direction,omitempty"`
 	Area        string `json:"area,omitempty" yaml:"area,omitempty"`
 	Kind        string `json:"kind,omitempty" yaml:"kind,omitempty"`
-	Action      string `json:"action,omitempty" yaml:"action,omitempty"`
+	Actions     string `json:"actions,omitempty" yaml:"actions,omitempty"`
+	Effect      string `json:"effect,omitempty" yaml:"effect,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	Mitigation  string `json:"mitigation,omitempty" yaml:"mitigation,omitempty"`
 }
