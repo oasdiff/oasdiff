@@ -1,4 +1,4 @@
-package rules
+package colorize
 
 import (
 	"fmt"

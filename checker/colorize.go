@@ -5,37 +5,37 @@ import (
 
 	"github.com/TwiN/go-color"
 
-	"github.com/oasdiff/oasdiff/checker/rules"
+	"github.com/oasdiff/oasdiff/colorize"
 )
 
-// ColorMode is defined in checker/rules; the aliases keep the checker
-// package's public surface unchanged.
-type ColorMode = rules.ColorMode
+// ColorMode is defined in the colorize package; the aliases keep the
+// checker package's public surface unchanged.
+type ColorMode = colorize.ColorMode
 
 const (
-	ColorAlways  = rules.ColorAlways
-	ColorNever   = rules.ColorNever
-	ColorAuto    = rules.ColorAuto
-	ColorInvalid = rules.ColorInvalid
+	ColorAlways  = colorize.ColorAlways
+	ColorNever   = colorize.ColorNever
+	ColorAuto    = colorize.ColorAuto
+	ColorInvalid = colorize.ColorInvalid
 )
 
 func GetSupportedColorValues() []string {
-	return rules.GetSupportedColorValues()
+	return colorize.GetSupportedColorValues()
 }
 
 func NewColorMode(color string) (ColorMode, error) {
-	return rules.NewColorMode(color)
+	return colorize.NewColorMode(color)
 }
 
 // IsColorEnabled lets oasdiff packages outside checker (validate, future
 // subcommands) gate their own color logic on the same auto-detect +
 // override convention.
 func IsColorEnabled(colorMode ColorMode) bool {
-	return rules.IsColorEnabled(colorMode)
+	return colorize.IsColorEnabled(colorMode)
 }
 
 func isColorEnabled(colorMode ColorMode) bool {
-	return rules.IsColorEnabled(colorMode)
+	return colorize.IsColorEnabled(colorMode)
 }
 
 func colorizedValues(args []any) []any {
@@ -54,7 +54,7 @@ func quotedValues(args []any) []any {
 	return result
 }
 
-// SetPipedOutput overrides piped-output auto-detection; see checker/rules.
+// SetPipedOutput overrides piped-output auto-detection; see colorize.
 func SetPipedOutput(val *bool) *bool {
-	return rules.SetPipedOutput(val)
+	return colorize.SetPipedOutput(val)
 }

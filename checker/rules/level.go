@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/TwiN/go-color"
+
+	"github.com/oasdiff/oasdiff/colorize"
 )
 
 type Level int
@@ -30,8 +32,8 @@ func NewLevel(level string) (Level, error) {
 	return INVALID, fmt.Errorf("invalid level %s", level)
 }
 
-func (level Level) StringCond(colorMode ColorMode) string {
-	if isColorEnabled(colorMode) {
+func (level Level) StringCond(colorMode colorize.ColorMode) string {
+	if colorize.IsColorEnabled(colorMode) {
 		return level.PrettyString()
 	}
 	return level.String()

@@ -7,6 +7,7 @@ import (
 
 	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/colorize"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/report"
 )
@@ -91,7 +92,7 @@ func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 		count[checker.INFO], checker.INFO.StringCond(opts.ColorMode),
 	)
 
-	useColor := checker.IsColorEnabled(opts.ColorMode)
+	useColor := colorize.IsColorEnabled(opts.ColorMode)
 	for _, finding := range findings {
 		loc := finding.Source.File
 		if finding.Source.Line > 0 {
