@@ -30,11 +30,11 @@ func find(set map[metaschema.Edit]bool, location string, action metaschema.Actio
 func TestCube_Deterministic(t *testing.T) {
 	a, b := metaschema.Edits(), metaschema.Edits()
 	if len(a) != len(b) {
-		t.Fatalf("cube size changed between runs: %d vs %d", len(a), len(b))
+		t.Fatalf("edit enumeration size changed between runs: %d vs %d", len(a), len(b))
 	}
 	for i := range a {
 		if a[i] != b[i] {
-			t.Fatalf("cube order changed between runs at %d: %+v vs %+v", i, a[i], b[i])
+			t.Fatalf("edit enumeration order changed between runs at %d: %+v vs %+v", i, a[i], b[i])
 		}
 	}
 }

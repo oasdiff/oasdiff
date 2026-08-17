@@ -1,6 +1,6 @@
-// Package metaschema enumerates the edit space of an OpenAPI document:
-// every field location in the OpenAPI object model, paired with the
-// syntactic edit actions applicable at that location. The enumeration is
+// Package metaschema enumerates every possible edit of an OpenAPI
+// document: each field location in the OpenAPI object model, paired with
+// the syntactic edit actions applicable at that location. The enumeration is
 // derived by reflection from the kin-openapi types oasdiff parses specs
 // into, so a field added upstream shows up as new edits without a manual
 // update here.

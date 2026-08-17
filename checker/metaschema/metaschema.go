@@ -36,8 +36,8 @@ const (
 )
 
 // Edit is one possible edit of an OpenAPI document: an Action applied at a
-// Location. The set of all of them (see Edits) is the edit space the
-// coverage audit works over.
+// Location. Edits enumerates all of them; the coverage audit checks every
+// one is handled or accounted for.
 type Edit struct {
 	Location   string
 	Action     Action
@@ -300,10 +300,11 @@ func mapWrapperElem(t reflect.Type) (reflect.Type, bool) {
 	return m.Type.Out(0).Elem(), true
 }
 
-// MatchLocation reports whether a rule's location pattern matches a cube
-// location. Pattern segments: "**" matches any run of segments (including
-// none), "*" matches exactly one segment, anything else matches literally
-// (so "*" in a cube location is matched by "*" or "**" in the pattern).
+// MatchLocation reports whether a rule's location pattern matches an
+// edit's location. Pattern segments: "**" matches any run of segments
+// (including none), "*" matches exactly one segment, anything else matches
+// literally (so "*" in an edit's location is matched by "*" or "**" in the
+// pattern).
 func MatchLocation(pattern, location string) bool {
 	return matchSegments(strings.Split(pattern, "."), strings.Split(location, "."))
 }

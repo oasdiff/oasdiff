@@ -12,12 +12,12 @@ import (
 	"github.com/oasdiff/oasdiff/checker/metaschema"
 )
 
-// This file audits the rule registry against the metaschema cube: the full
-// edit space of an OpenAPI document (every field location x applicable
-// syntactic action, see checker/metaschema).
+// This file audits the rule registry against every possible edit of an
+// OpenAPI document (each field location with its applicable syntactic
+// actions, enumerated by checker/metaschema).
 //
 // TestRuleLocations is the guard: every rule's location claims must parse and
-// match at least one cube edit, so claims cannot drift from the object model.
+// match at least one edit, so claims cannot drift from the object model.
 //
 // TestRuleCoverageReport is informational: how much of the wire-relevant edit
 // space the mapped rules cover, and where the holes are. Run with:
@@ -28,7 +28,7 @@ import (
 // edits as TSV.
 
 func TestRuleLocations(t *testing.T) {
-	cube := metaschema.Edits()
+	edits := metaschema.Edits()
 
 	for _, rule := range checker.GetAllRules() {
 		for _, loc := range rule.Locations {
@@ -37,8 +37,8 @@ func TestRuleLocations(t *testing.T) {
 				t.Errorf("rule %s: %v", rule.Id, err)
 				continue
 			}
-			if !slices.ContainsFunc(cube, claim.Matches) {
-				t.Errorf("rule %s: claim %q matches no edit of the metaschema cube", rule.Id, loc)
+			if !slices.ContainsFunc(edits, claim.Matches) {
+				t.Errorf("rule %s: claim %q matches no known edit of an OpenAPI document", rule.Id, loc)
 			}
 		}
 	}
@@ -130,7 +130,7 @@ var coverageWaivers = []struct{ Pattern, Reason string }{
 }
 
 // TestRuleCoverage is the completeness guard: every wire-relevant edit of
-// the metaschema cube must be covered by a rule's location claim or waived
+// the metaschema edits must be covered by a rule's location claim or waived
 // in coverageWaivers with a reason.
 func TestRuleCoverage(t *testing.T) {
 	holes := uncoveredCells(t)
@@ -211,7 +211,7 @@ func uncoveredCells(t *testing.T) []metaschema.Edit {
 }
 
 func TestRuleCoverageReport(t *testing.T) {
-	cube := metaschema.Edits()
+	edits := metaschema.Edits()
 	rules := checker.GetAllRules()
 
 	type claimant struct {
@@ -236,7 +236,7 @@ func TestRuleCoverageReport(t *testing.T) {
 
 	var wire, covered int
 	var holes []metaschema.Edit
-	for _, edit := range cube {
+	for _, edit := range edits {
 		if edit.Annotation || edit.Extension {
 			continue
 		}
@@ -256,7 +256,7 @@ func TestRuleCoverageReport(t *testing.T) {
 	}
 
 	t.Logf("rules: %d total, %d mapped to locations", len(rules), mapped)
-	t.Logf("cube: %d edits, %d wire-relevant (excluding annotation and x-*)", len(cube), wire)
+	t.Logf("edits: %d edits, %d wire-relevant (excluding annotation and x-*)", len(edits), wire)
 	t.Logf("covered: %d/%d wire-relevant edits (%.1f%%)", covered, wire, 100*float64(covered)/float64(wire))
 
 	byPolarity := map[metaschema.Polarity]int{}
