@@ -1,4 +1,4 @@
-package checker
+package rules
 
 // Guard is a named predicate over the document state that a rule requires
 // before it fires. Guards partition a cell's edits into sub-cases: rules at

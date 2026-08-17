@@ -1,4 +1,4 @@
-package checker
+package rules
 
 // Effect is a rule's verdict about the accepted-value set: how the set of
 // payloads (or API surface) the contract admits changes when the rule fires.
