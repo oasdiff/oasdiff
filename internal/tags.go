@@ -1,13 +1,22 @@
 package internal
 
-import "github.com/oasdiff/oasdiff/checker"
+import (
+	"slices"
+	"strings"
+
+	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/metaschema"
+)
 
 func getAllTags() []string {
 	return []string{
 		// direction
 		"request", "response",
-		// action
-		"add", "remove", "change", "generalize", "specialize", "increase", "decrease", "set",
+		// action (syntactic edit, from the rule's location claims)
+		"add", "remove", "change", "increase", "decrease", "set", "unset",
+		// effect (semantic verdict); generalize/specialize are aliases kept
+		// from the retired action vocabulary
+		"widens", "narrows", "generalize", "specialize",
 		// area (OpenAPI object)
 		"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components",
 		// kind (aspect of the contract)
@@ -39,7 +48,11 @@ func matchTag(tag string, rule checker.BackwardCompatibilityRule) bool {
 		return true
 	}
 
-	if matchActionTag(tag, rule.Action) {
+	if matchActionTag(tag, rule.Actions()) {
+		return true
+	}
+
+	if matchEffectTag(tag, rule.Effect) {
 		return true
 	}
 
@@ -61,24 +74,21 @@ func matchDirectionTag(tag string, direction checker.Direction) bool {
 	return false
 }
 
-func matchActionTag(tag string, action checker.Action) bool {
+func matchActionTag(tag string, actions []metaschema.Action) bool {
 	switch tag {
-	case "add":
-		return action == checker.ActionAdd
-	case "remove":
-		return action == checker.ActionRemove
-	case "change":
-		return action == checker.ActionChange
-	case "generalize":
-		return action == checker.ActionGeneralize
-	case "specialize":
-		return action == checker.ActionSpecialize
-	case "increase":
-		return action == checker.ActionIncrease
-	case "decrease":
-		return action == checker.ActionDecrease
-	case "set":
-		return action == checker.ActionSet
+	case "add", "remove", "change", "increase", "decrease", "set", "unset":
+		return slices.Contains(actions, metaschema.Action(tag))
+	}
+
+	return false
+}
+
+func matchEffectTag(tag string, effect checker.Effect) bool {
+	switch tag {
+	case "widens", "generalize":
+		return effect == checker.EffectWidens
+	case "narrows", "specialize":
+		return effect == checker.EffectNarrows
 	}
 
 	return false
@@ -130,4 +140,12 @@ func matchKindTag(tag string, kind checker.Kind) bool {
 	}
 
 	return false
+}
+
+func joinActions(actions []metaschema.Action) string {
+	strs := make([]string, len(actions))
+	for i, a := range actions {
+		strs[i] = string(a)
+	}
+	return strings.Join(strs, ",")
 }

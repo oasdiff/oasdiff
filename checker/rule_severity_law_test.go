@@ -1,253 +1,61 @@
 package checker_test
 
 import (
-	"fmt"
-	"regexp"
-	"sort"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
 )
 
-// Severity-law prototype: assign each rule an Effect (how the accepted-value
-// set changes) and Guards from its semantics — the id's keyword and edit verb,
-// never its level — then derive the expected level from the contravariance
-// law and report agreement with the stored level.
+// The severity law: a rule's expected level follows from its declared Effect
+// and Guards and its Direction. TestSeverityLaw enforces that every rule's
+// stored level equals the derived one or appears in severityDeviations with a
+// reason, and that no deviation entry is stale. Severity is thereby one
+// reviewed table plus a ledger of exceptions instead of 556 independent
+// choices.
 //
-// This is the empirical basis for making severity a derived property: the law
-// plus a handful of policy rows explains the registry, and every mismatch is
-// either a documented convention or a severity bug. Run with:
-//
-//	go test ./checker -run SeverityLawReport -v
+// Deviations marked "pending review" are the open triage entries from
+// SEVERITY-LAW-TRIAGE.md: conventions to be ratified into permanent reasons,
+// or candidate severity bugs to be fixed (at which point the entry is removed
+// and the law holds directly).
 
-type lawEffect string
-
-const (
-	effWidens       lawEffect = "widens"       // accepted set provably grows
-	effNarrows      lawEffect = "narrows"      // accepted set provably shrinks
-	effIncomparable lawEffect = "incomparable" // provably neither contains the other
-	effUnknown      lawEffect = "unknown"      // the check cannot decide
-	effNone         lawEffect = "none"         // no accepted-set semantics (metadata)
-	effViolation    lawEffect = "violation"    // breaks oasdiff's lifecycle governance
-)
-
-type lawEntry struct {
-	pattern *regexp.Regexp
-	effect  lawEffect
-}
-
-func law(pattern string, effect lawEffect) lawEntry {
-	return lawEntry{regexp.MustCompile(pattern), effect}
-}
-
-// effectTable assigns Effect by first match on the rule id.
-var effectTable = []lawEntry{
-	// oasdiff's lifecycle governance: violations of the deprecation contract
-	law(`sunset-(parse|missing|deleted)|sunset-date.*too-small|sunset-invalid|before-sunset`, effViolation),
-	law(`stability-decreased|invalid-stability`, effViolation),
-
-	// lifecycle / metadata: no accepted-set semantics
-	law(`deprecated|reactivated|sunset`, effNone),
-	law(`stability`, effNone),
-	law(`operation-id`, effNone),
-	law(`^api-tag-|^api-global-tag`, effNone),
-	law(`api-.*version`, effNone),
-	law(`discriminator`, effNone),
-	law(`example`, effNone),
-	law(`annotation-only`, effNone),
-	law(`^api-schema-removed`, effNone),
-
-	// element existence and defaults, refined
-	law(`request-body-added-required`, effNarrows),
-	law(`request-body-added-optional`, effNone),
-	law(`new-required-request-default-parameter`, effNarrows),
-	law(`new-optional-request-default-parameter`, effNone),
-	law(`new-request-path-parameter`, effNarrows),
-	law(`default-value`, effNone),
-	// read-only / write-only are SHOULD-level advisory metadata in the spec
-	law(`became-(not-)?(read|write)-only`, effNone),
-	law(`required-write-only-property-added`, effNarrows),
-	law(`optional-write-only-property-added`, effNone),
-
-	// security: requirements are OR-alternatives; scopes are AND-ed within one
-	law(`security-component.*(added|removed|changed|updated)`, effNone),
-	law(`security-scope-added`, effNarrows),
-	law(`security-scope-removed`, effWidens),
-	law(`security-added`, effWidens),
-	law(`security-removed|security-deleted`, effNarrows),
-	law(`security.*(updated|changed)`, effIncomparable),
-
-	// existence of API surface
-	law(`(api|endpoint|path).*removed`, effNarrows),
-	law(`(api|endpoint|path).*added`, effWidens),
-	law(`webhook.*removed`, effNarrows),
-	law(`webhook.*added`, effWidens),
-
-	// a schema appearing on a media type constrains what was unconstrained
-	law(`media-type-(item-)?schema-added`, effNarrows),
-	law(`media-type-(item-)?schema-removed(-untyped)?`, effWidens),
-	// media type names
-	law(`media-type-name-generalized`, effWidens),
-	law(`media-type-name-specialized`, effNarrows),
-	law(`media-type-name-changed`, effIncomparable),
-	// negotiated variants: the client chooses, so removal breaks clients
-	law(`media-type.*removed|media-type.*deleted`, effNarrows),
-	law(`media-type.*added`, effWidens),
-	law(`enum-value-removed`, effNarrows),
-	law(`enum-value-added`, effWidens),
-
-	// requiredness
-	law(`became-required|required-request-body-added`, effNarrows),
-	law(`became-optional`, effWidens),
-	law(`new-required-request-(property|parameter|header)`, effNarrows),
-	law(`new-optional-request`, effNone),
-	law(`required-property-added`, effNarrows),
-	law(`optional-property-added`, effNone),
-	law(`required-property-removed`, effWidens),
-	law(`optional-property-removed`, effNone),
-
-	// nullability
-	law(`became-nullable|became-null`, effWidens),
-	law(`became-not-nullable|became-non-null`, effNarrows),
-
-	// enums / const
-	law(`became-enum`, effNarrows),
-	law(`const-added`, effNarrows),
-	law(`const-removed`, effWidens),
-	law(`const-changed`, effIncomparable),
-
-	// bounds
-	law(`(max-length|max-items|max-properties|maximum|max|exclusive-max[a-z-]*)-decreased`, effNarrows),
-	law(`(max-length|max-items|max-properties|maximum|max|exclusive-max[a-z-]*)-increased`, effWidens),
-	law(`(max-length|max-items|max-properties|maximum|max|exclusive-max[a-z-]*)-set`, effNarrows),
-	law(`(max-length|max-items|max-properties|maximum|max|exclusive-max[a-z-]*)-unset`, effWidens),
-	law(`(min-length|min-items|min-properties|minimum|min|exclusive-min[a-z-]*)-increased`, effNarrows),
-	law(`(min-length|min-items|min-properties|minimum|min|exclusive-min[a-z-]*)-decreased`, effWidens),
-	law(`(min-length|min-items|min-properties|minimum|min|exclusive-min[a-z-]*)-set`, effNarrows),
-	law(`(min-length|min-items|min-properties|minimum|min|exclusive-min[a-z-]*)-unset`, effWidens),
-	law(`min-contains-increased`, effNarrows),
-	law(`min-contains-decreased`, effWidens),
-	law(`max-contains-increased`, effWidens),
-	law(`max-contains-decreased`, effNarrows),
-
-	// pattern
-	law(`pattern-added`, effNarrows),
-	law(`pattern-removed`, effWidens),
-	law(`pattern-generalized`, effWidens),
-	law(`pattern-changed`, effUnknown),
-
-	// uniqueItems / multipleOf
-	law(`unique-items-set`, effNarrows),
-	law(`unique-items-unset`, effWidens),
-	law(`multiple-of-set`, effNarrows),
-	law(`multiple-of-unset`, effWidens),
-	law(`multiple-of-generalized`, effWidens),
-	law(`multiple-of-specialized`, effNarrows),
-	law(`multiple-of-changed`, effIncomparable),
-
-	// types: "compatible" means changed in the safe direction for the rule's side
-	law(`request-parameter-property-type-changed`, effUnknown),
-	law(`^request-.*type-compatible`, effWidens),
-	law(`^response-.*type-compatible`, effNarrows),
-	law(`type-generalized|list-of-types-widened`, effWidens),
-	law(`type-specialized|list-of-types-narrowed`, effNarrows),
-	law(`type-changed`, effIncomparable),
-
-	// composition: adding an allOf conjunct narrows; anyOf/oneOf alternatives widen
-	law(`all-of-added`, effNarrows),
-	law(`all-of-removed`, effWidens),
-	law(`(any-of|one-of)-added`, effWidens),
-	law(`(any-of|one-of)-removed`, effNarrows),
-	law(`wrapped-in-one-of`, effUnknown),
-	// a dormant then/else is activated by if; adding conditionals narrows
-	law(`(if|then|else)-added`, effNarrows),
-	law(`(if|then|else)-removed`, effWidens),
-	law(`contains-added`, effNarrows),
-	law(`contains-removed`, effWidens),
-	law(`property-names-added`, effNarrows),
-	law(`property-names-removed`, effWidens),
-	law(`pattern-property-added`, effNarrows),
-	law(`pattern-property-removed`, effWidens),
-	law(`dependent-required-added|dependent-schema-added`, effNarrows),
-	law(`dependent-required-removed|dependent-schema-removed`, effWidens),
-	law(`dependent-required-changed`, effIncomparable),
-	law(`unevaluated-(items|properties)-added`, effNarrows),
-	law(`unevaluated-(items|properties)-removed`, effWidens),
-	law(`content-schema-added`, effNarrows),
-	law(`content-schema-removed`, effWidens),
-	law(`content-(media-type|encoding)-changed`, effIncomparable),
-	// prefixItems reshapes positional constraints; neither side is contained
-	law(`prefix-items-(added|removed)`, effUnknown),
-
-	// element existence
-	law(`request-body-removed`, effWidens),
-	law(`parameter-removed`, effWidens),
-	law(`property-removed`, effNone),
-	law(`header-removed`, effNarrows),
-	law(`header-added`, effWidens),
-	law(`response-status-removed|success-status-removed|status-removed`, effNarrows),
-	law(`success-status-added|status-added`, effWidens),
-	law(`schema-added`, effNarrows),
-	law(`schema-removed`, effWidens),
-}
-
-// variantCells: the client chooses or relies on the variant's existence
-// (statuses, media types, response headers), so contravariance applies with
-// request polarity regardless of the syntactic side.
-var variantCells = regexp.MustCompile(
-	`(response-media-type-(added|removed)$)|(status-(added|removed))|(response-header-(added|removed))`)
-
-var guardTable = map[string]*regexp.Regexp{
-	"readOnly":   regexp.MustCompile(`read-only`),
-	"writeOnly":  regexp.MustCompile(`write-only`),
-	"sanctioned": regexp.MustCompile(`with-deprecation`),
-	"nonSuccess": regexp.MustCompile(`non-success`),
-	"hasDefault": regexp.MustCompile(`with-default`),
-}
-
-func classifyRule(id string) (lawEffect, map[string]bool, bool) {
-	var effect lawEffect
-	for _, e := range effectTable {
-		if e.pattern.MatchString(id) {
-			effect = e.effect
-			break
+// expectedLevel derives a rule's level from the law.
+func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
+	effect := r.Effect
+	direction := r.Direction
+	for _, g := range r.Guards {
+		switch g {
+		case checker.GuardReadOnly:
+			// a readOnly property does not appear in requests
+			if direction == checker.DirectionRequest {
+				effect = checker.EffectNone
+			}
+		case checker.GuardWriteOnly:
+			// a writeOnly property does not appear in responses
+			if direction == checker.DirectionResponse {
+				effect = checker.EffectNone
+			}
+		case checker.GuardSanctioned:
+			// the deprecation contract was honored
+			return checker.INFO
+		case checker.GuardNegotiated:
+			// the client chooses or relies on the variant
+			direction = checker.DirectionRequest
 		}
 	}
-	guards := map[string]bool{}
-	for name, pat := range guardTable {
-		if pat.MatchString(id) {
-			guards[name] = true
-		}
-	}
-	return effect, guards, variantCells.MatchString(id)
-}
 
-func expectedLevel(effect lawEffect, guards map[string]bool, direction checker.Direction, variant bool) checker.Level {
-	if guards["readOnly"] && direction == checker.DirectionRequest {
-		effect = effNone
-	}
-	if guards["writeOnly"] && direction == checker.DirectionResponse {
-		effect = effNone
-	}
-	if guards["sanctioned"] {
-		return checker.INFO
-	}
-	if variant {
-		direction = checker.DirectionRequest
-	}
 	switch effect {
-	case effViolation, effIncomparable:
+	case checker.EffectViolation, checker.EffectIncomparable:
 		return checker.ERR
-	case effNone:
+	case checker.EffectNone:
 		return checker.INFO
-	case effUnknown:
+	case checker.EffectUnknown:
 		return checker.WARN
-	case effNarrows:
+	case checker.EffectNarrows:
 		if direction == checker.DirectionResponse {
 			return checker.INFO
 		}
 		return checker.ERR
-	case effWidens:
+	case checker.EffectWidens:
 		if direction == checker.DirectionResponse {
 			return checker.ERR
 		}
@@ -256,44 +64,126 @@ func expectedLevel(effect lawEffect, guards map[string]bool, direction checker.D
 	return checker.INFO
 }
 
-func TestSeverityLawReport(t *testing.T) {
-	var matches int
-	var unclassified []string
-	type mismatch struct {
-		id              string
-		stored, derived checker.Level
-		effect          lawEffect
-	}
-	var mismatches []mismatch
+const (
+	// conventions pending ratification (SEVERITY-LAW-TRIAGE.md bucket A)
+	reasonBoundSet     = "convention, pending review (triage A1): setting a bound on a request narrows but is reported WARN with a comment"
+	reasonRemoval      = "convention, pending review (triage A2): the removal widens the contract but signals the server stopped processing the element"
+	reasonWrapped      = "convention, pending review (triage A3): single-to-oneOf wrapping kept breaking per #1037"
+	reasonNonSuccess   = "convention, pending review (triage A4): removing a non-success status is treated as sanctioned cleanup"
+	reasonOptHeader    = "convention, pending review (triage A4): optional softens the removed-variant verdict"
+	reasonNotWriteOnly = "convention, pending review (triage A4): flags that the field now appears in responses"
+	reasonAllOfRemoved = "convention, pending review (triage A4): widening kept WARN as caution"
+	// candidate severity bugs (SEVERITY-LAW-TRIAGE.md bucket B)
+	reasonSecurity     = "candidate bug, pending review (triage B1): security alternatives removed or scopes added break clients but are INFO"
+	reasonAnyOf        = "candidate bug, pending review (triage B2): contradicts response one-of-added which is ERR"
+	reasonPattern1034  = "candidate bug, pending review (triage B3): the #1034 response pattern gap"
+	reasonPrefixItems  = "candidate bug, pending review (triage B4): stored levels assume a containment direction prefixItems does not have"
+	reasonMediaName    = "candidate bug, pending review (triage B5): clients negotiating the old media type name break"
+	reasonEnumAdded    = "candidate bug, pending review (triage B5): the server may emit a value clients never handled"
+	reasonParamDefault = "candidate bug, pending review (triage B5): parameter defaults are ERR while body and property defaults are INFO"
+)
 
+// severityDeviations records every rule whose stored level deviates from the
+// law, with the reason. An unexplained mismatch and a stale entry both fail
+// TestSeverityLaw.
+var severityDeviations = map[string]string{
+	// A1: bound-set WARN convention
+	"request-body-exclusive-max-set":      reasonBoundSet,
+	"request-body-exclusive-min-set":      reasonBoundSet,
+	"request-body-max-items-set":          reasonBoundSet,
+	"request-body-max-length-set":         reasonBoundSet,
+	"request-body-max-properties-set":     reasonBoundSet,
+	"request-body-max-set":                reasonBoundSet,
+	"request-body-min-items-set":          reasonBoundSet,
+	"request-body-min-set":                reasonBoundSet,
+	"request-body-multiple-of-set":        reasonBoundSet,
+	"request-parameter-exclusive-max-set": reasonBoundSet,
+	"request-parameter-exclusive-min-set": reasonBoundSet,
+	"request-parameter-max-length-set":    reasonBoundSet,
+	"request-parameter-max-set":           reasonBoundSet,
+	"request-parameter-min-items-set":     reasonBoundSet,
+	"request-parameter-min-set":           reasonBoundSet,
+	"request-property-exclusive-max-set":  reasonBoundSet,
+	"request-property-exclusive-min-set":  reasonBoundSet,
+	"request-property-max-items-set":      reasonBoundSet,
+	"request-property-max-length-set":     reasonBoundSet,
+	"request-property-max-properties-set": reasonBoundSet,
+	"request-property-max-set":            reasonBoundSet,
+	"request-property-min-items-set":      reasonBoundSet,
+	"request-property-min-set":            reasonBoundSet,
+	"request-property-multiple-of-set":    reasonBoundSet,
+	// A2: removal signals behavior change
+	"request-body-removed":               reasonRemoval,
+	"request-parameter-removed":          reasonRemoval,
+	"request-property-removed":           reasonRemoval,
+	"response-optional-property-removed": reasonRemoval,
+	// A3: wrapped in oneOf
+	"request-body-wrapped-in-one-of":  reasonWrapped,
+	"response-body-wrapped-in-one-of": reasonWrapped,
+	// A4: singles
+	"response-non-success-status-removed":              reasonNonSuccess,
+	"optional-response-header-removed":                 reasonOptHeader,
+	"response-required-property-became-not-write-only": reasonNotWriteOnly,
+	"request-body-all-of-removed":                      reasonAllOfRemoved,
+	"request-property-all-of-removed":                  reasonAllOfRemoved,
+	// B1: security
+	"api-security-removed":            reasonSecurity,
+	"api-global-security-removed":     reasonSecurity,
+	"api-security-scope-added":        reasonSecurity,
+	"api-global-security-scope-added": reasonSecurity,
+	// B2: anyOf vs oneOf
+	"response-body-any-of-added":     reasonAnyOf,
+	"response-property-any-of-added": reasonAnyOf,
+	// B3: #1034
+	"response-property-pattern-removed": reasonPattern1034,
+	"response-property-pattern-changed": reasonPattern1034,
+	// B4: prefixItems
+	"request-body-prefix-items-added":        reasonPrefixItems,
+	"request-body-prefix-items-removed":      reasonPrefixItems,
+	"request-property-prefix-items-added":    reasonPrefixItems,
+	"request-property-prefix-items-removed":  reasonPrefixItems,
+	"response-body-prefix-items-added":       reasonPrefixItems,
+	"response-body-prefix-items-removed":     reasonPrefixItems,
+	"response-property-prefix-items-added":   reasonPrefixItems,
+	"response-property-prefix-items-removed": reasonPrefixItems,
+	// B5: singles
+	"response-media-type-name-changed":        reasonMediaName,
+	"response-property-enum-value-added":      reasonEnumAdded,
+	"request-parameter-default-value-added":   reasonParamDefault,
+	"request-parameter-default-value-changed": reasonParamDefault,
+	"request-parameter-default-value-removed": reasonParamDefault,
+}
+
+func TestSeverityLaw(t *testing.T) {
+	seen := map[string]bool{}
 	for _, rule := range checker.GetAllRules() {
-		effect, guards, variant := classifyRule(rule.Id)
-		if effect == "" {
-			unclassified = append(unclassified, rule.Id)
+		derived := expectedLevel(rule)
+		if derived == rule.Level {
+			if _, ok := severityDeviations[rule.Id]; ok {
+				t.Errorf("stale severity deviation: %q\n  the stored level now matches the law; remove the entry", rule.Id)
+			}
 			continue
 		}
-		derived := expectedLevel(effect, guards, rule.Direction, variant)
-		if derived == rule.Level {
-			matches++
-		} else {
-			mismatches = append(mismatches, mismatch{rule.Id, rule.Level, derived, effect})
+		seen[rule.Id] = true
+		if _, ok := severityDeviations[rule.Id]; !ok {
+			t.Errorf("severity law violation: %s stored=%s derived=%s (effect=%s, direction=%s)\n  fix the level or add a severityDeviations entry with a reason",
+				rule.Id, rule.Level.String(), derived.String(), rule.Effect.String(), rule.Direction.String())
 		}
 	}
+	for id := range severityDeviations {
+		if !seen[id] {
+			if _, ok := severityDeviations[id]; ok && !ruleExists(id) {
+				t.Errorf("stale severity deviation: %q\n  no such rule; remove the entry", id)
+			}
+		}
+	}
+}
 
-	total := len(checker.GetAllRules())
-	t.Logf("rules: %d  matches: %d (%.1f%%)  mismatches: %d  unclassified: %d",
-		total, matches, 100*float64(matches)/float64(total), len(mismatches), len(unclassified))
-	for _, id := range unclassified {
-		t.Logf("unclassified: %s", id)
-	}
-	sort.Slice(mismatches, func(i, j int) bool {
-		if mismatches[i].effect != mismatches[j].effect {
-			return mismatches[i].effect < mismatches[j].effect
+func ruleExists(id string) bool {
+	for _, rule := range checker.GetAllRules() {
+		if rule.Id == id {
+			return true
 		}
-		return mismatches[i].id < mismatches[j].id
-	})
-	for _, m := range mismatches {
-		t.Logf("%s", fmt.Sprintf("mismatch: %-58s stored=%-8s derived=%-8s effect=%s",
-			m.id, m.stored.String(), m.derived.String(), m.effect))
 	}
+	return false
 }
