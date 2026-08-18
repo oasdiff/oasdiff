@@ -1,9 +1,9 @@
 package rules
 
 // Guard is a named predicate over the document state that a rule requires
-// before it fires. Guards partition a edit's edits into sub-cases: rules at
-// the same location claims may carry different Effects and severities
-// because their guards select different document states.
+// before it fires. Rules covering the same edits may carry different
+// Effects and severities because their guards select different document
+// states.
 type Guard string
 
 const (

@@ -129,9 +129,9 @@ var coverageWaivers = []struct{ Pattern, Reason string }{
 	{"**.schema.unevaluatedProperties:change", "open: switching unevaluatedProperties between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 }
 
-// TestRuleCoverage is the completeness guard: every wire-relevant edit of
-// the metaschema edits must be covered by a rule's location claim or waived
-// in coverageWaivers with a reason.
+// TestRuleCoverage is the completeness guard: every wire-relevant edit
+// must be covered by a rule's location claim or waived in coverageWaivers
+// with a reason.
 func TestRuleCoverage(t *testing.T) {
 	holes := uncoveredCells(t)
 

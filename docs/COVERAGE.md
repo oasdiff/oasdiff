@@ -6,7 +6,7 @@ This page maps the changelog checks onto every possible edit of an OpenAPI
 document. The edits are derived mechanically from the OpenAPI object
 model: every field location (a dotted path, with `*` standing for any map key
 or list index) paired with the syntactic edits applicable there (add, remove,
-set, unset, change, increase, decrease). Schema locations are folded: a edit
+set, unset, change, increase, decrease). Schema locations are folded: an edit
 like `paths.*.*.requestBody.content.*.schema.maxLength` stands for that
 keyword at any nesting depth inside the request body schema.
 
