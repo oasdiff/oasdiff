@@ -8,90 +8,131 @@ import (
 	"github.com/oasdiff/oasdiff/checker/metaschema"
 )
 
-func getAllTags() []string {
-	return []string{
-		// direction
-		"request", "response",
-		// action (syntactic edit, from the rule's location claims)
-		"add", "remove", "change", "increase", "decrease", "set", "unset",
-		// effect (semantic verdict); generalize/specialize are aliases kept
-		// from the retired action vocabulary
-		"widens", "narrows", "generalize", "specialize",
-		// area (OpenAPI object)
-		"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components",
-		// kind (aspect of the contract)
-		"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle",
-	}
+// A tagDimension is one axis of a tag vocabulary: its values and how a value
+// matches a row. Tag filtering is OR within a dimension and AND across
+// dimensions: --tags request,response,add selects rows that are (request or
+// response) and add. Values must be unique across the dimensions of one
+// vocabulary so every tag names exactly one axis; TestTagVocabulariesUnique
+// guards that.
+type tagDimension[T any] struct {
+	values []string
+	match  func(value string, row T) bool
 }
 
-// matchTags returns true if the rule matches all the tags
-func matchTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
-	if len(tags) == 0 {
-		return true
+func tagValues[T any](dimensions []tagDimension[T]) []string {
+	var result []string
+	for _, d := range dimensions {
+		result = append(result, d.values...)
 	}
+	return result
+}
 
-	for _, tag := range tags {
-		if !matchTag(tag, rule) {
+func matchTagDimensions[T any](tags []string, dimensions []tagDimension[T], row T) bool {
+	for _, d := range dimensions {
+		matched, requested := false, false
+		for _, tag := range tags {
+			if !slices.Contains(d.values, tag) {
+				continue
+			}
+			requested = true
+			if d.match(tag, row) {
+				matched = true
+				break
+			}
+		}
+		if requested && !matched {
 			return false
 		}
 	}
-
 	return true
 }
 
-func matchTag(tag string, rule checker.BackwardCompatibilityRule) bool {
-	if matchAreaTag(tag, rule.Area) {
-		return true
-	}
-
-	if matchKindTag(tag, rule.Kind) {
-		return true
-	}
-
-	if matchActionTag(tag, rule.Actions()) {
-		return true
-	}
-
-	if matchEffectTag(tag, rule.Effect) {
-		return true
-	}
-
-	if matchDirectionTag(tag, rule.Direction) {
-		return true
-	}
-
-	return false
+// changelogTagDimensions is the tag vocabulary of `checks changelog`:
+// direction, action (the syntactic edits from the rule's location claims),
+// effect (the rule's verdict; generalize and specialize are aliases kept
+// from the retired action vocabulary), area, and kind.
+var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
+	{
+		values: []string{"request", "response"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			switch value {
+			case "request":
+				return rule.Direction == checker.DirectionRequest
+			case "response":
+				return rule.Direction == checker.DirectionResponse
+			}
+			return false
+		},
+	},
+	{
+		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return slices.Contains(rule.Actions(), metaschema.Action(value))
+		},
+	},
+	{
+		values: []string{"widens", "narrows", "generalize", "specialize"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			switch value {
+			case "widens", "generalize":
+				return rule.Effect == checker.EffectWidens
+			case "narrows", "specialize":
+				return rule.Effect == checker.EffectNarrows
+			}
+			return false
+		},
+	},
+	{
+		values: []string{"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return matchAreaTag(value, rule.Area)
+		},
+	},
+	{
+		values: []string{"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return matchKindTag(value, rule.Kind)
+		},
+	},
 }
 
-func matchDirectionTag(tag string, direction checker.Direction) bool {
-	switch tag {
-	case "request":
-		return direction == checker.DirectionRequest
-	case "response":
-		return direction == checker.DirectionResponse
-	}
-
-	return false
+// coverageTagDimensions is the tag vocabulary of `checks changelog coverage`:
+// the audit status, the edit's polarity, and the edit's action.
+var coverageTagDimensions = []tagDimension[checker.CoverageEdit]{
+	{
+		values: []string{"covered", "uncovered", "waived", "non-contract"},
+		match: func(value string, edit checker.CoverageEdit) bool {
+			return value == string(edit.Status)
+		},
+	},
+	{
+		values: []string{"request", "response", "document", "shared"},
+		match: func(value string, edit checker.CoverageEdit) bool {
+			return value == edit.Polarity
+		},
+	},
+	{
+		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
+		match: func(value string, edit checker.CoverageEdit) bool {
+			return value == edit.Action
+		},
+	},
 }
 
-func matchActionTag(tag string, actions []metaschema.Action) bool {
-	switch tag {
-	case "add", "remove", "change", "increase", "decrease", "set", "unset":
-		return slices.Contains(actions, metaschema.Action(tag))
-	}
-
-	return false
+func getAllTags() []string {
+	return tagValues(changelogTagDimensions)
 }
 
-func matchEffectTag(tag string, effect checker.Effect) bool {
-	switch tag {
-	case "widens", "generalize":
-		return effect == checker.EffectWidens
-	case "narrows", "specialize":
-		return effect == checker.EffectNarrows
-	}
+func getCoverageTags() []string {
+	return tagValues(coverageTagDimensions)
+}
 
-	return false
+func matchTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
+	return matchTagDimensions(tags, changelogTagDimensions, rule)
+}
+
+func matchCoverageTags(tags []string, edit checker.CoverageEdit) bool {
+	return matchTagDimensions(tags, coverageTagDimensions, edit)
 }
 
 func matchAreaTag(tag string, area checker.Area) bool {

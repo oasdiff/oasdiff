@@ -51,9 +51,15 @@ oasdiff checks changelog --tags request,parameters
 oasdiff checks changelog --tags schema,constraints
 ```
 
-Available tags: `request`, `response`, `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`, `widens`, `narrows`, `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`, `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`. The retired action names `generalize` and `specialize` are kept as aliases for `widens` and `narrows`.
+Available tags, by dimension:
 
-Multiple tags are combined with AND — only checks that match all specified tags are shown.
+- direction: `request`, `response`
+- action: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`
+- effect: `widens`, `narrows` (the retired action names `generalize` and `specialize` are kept as aliases)
+- area: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`
+- kind: `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`
+
+Values of the same dimension are combined with OR, different dimensions with AND: `--tags request,response,add` selects checks that are (request or response) and add.
 
 ## Coverage Map
 `oasdiff checks changelog coverage` lists every possible edit of an OpenAPI document with the audit's disposition of it, one row per edit:
@@ -63,7 +69,7 @@ Multiple tags are combined with AND — only checks that match all specified tag
 - `uncovered` — no check and no waiver (the build fails in this state, so the listing is normally empty)
 - `non-contract` — the edit cannot change which payloads are valid, so no check is expected
 
-Filter with `--tags` (statuses, `request`/`response`/`document`/`shared` polarity, and the action verbs), pick `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for:
+Filter with `--tags` (status, polarity: `request`/`response`/`document`/`shared`, and the action verbs; same OR-within-dimension, AND-across-dimensions semantics as the changelog listing), pick `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for:
 
 ```
 oasdiff checks changelog coverage --tags waived,request

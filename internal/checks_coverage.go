@@ -30,32 +30,10 @@ func getChecksCoverageCmd() *cobra.Command {
 	}
 
 	addChecksFormatFlags(&cmd)
-	enumWithOptions(&cmd, newEnumSliceValue(getCoverageTags(), nil), "tags", "t", "include only edits with all specified tags")
+	enumWithOptions(&cmd, newEnumSliceValue(getCoverageTags(), nil), "tags", "t", "include only edits matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	cmd.PersistentFlags().Bool("patterns", false, "list the waiver and non-contract patterns instead of the edits")
 
 	return &cmd
-}
-
-// getCoverageTags returns the tags the coverage listing filters by: the
-// audit statuses, the edit's polarity, and the edit's action.
-func getCoverageTags() []string {
-	return []string{
-		// status
-		"covered", "uncovered", "waived", "non-contract",
-		// polarity
-		"request", "response", "document", "shared",
-		// action
-		"add", "remove", "change", "increase", "decrease", "set", "unset",
-	}
-}
-
-func matchCoverageTags(tags []string, edit checker.CoverageEdit) bool {
-	for _, tag := range tags {
-		if tag != string(edit.Status) && tag != edit.Polarity && tag != edit.Action {
-			return false
-		}
-	}
-	return true
 }
 
 func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {

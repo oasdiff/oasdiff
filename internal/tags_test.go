@@ -1,6 +1,8 @@
 package internal_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"testing"
 
@@ -49,4 +51,40 @@ func Test_ChecksTagsKind(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags values"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags structure"), io.Discard, io.Discard))
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags lifecycle"), io.Discard, io.Discard))
+}
+
+// Every tag must name exactly one dimension of its vocabulary: filtering
+// groups requested values by dimension, so a value appearing in two
+// dimensions would be ambiguous. A future dimension whose natural value
+// collides must pick another name.
+func TestTagVocabulariesUnique(t *testing.T) {
+	for name, tags := range map[string][]string{
+		"checks changelog":          internal.GetAllTagsForTest(),
+		"checks changelog coverage": internal.GetCoverageTagsForTest(),
+	} {
+		seen := map[string]bool{}
+		for _, tag := range tags {
+			require.False(t, seen[tag], "%s: tag %q appears in two dimensions", name, tag)
+			seen[tag] = true
+		}
+	}
+}
+
+// Values of the same dimension are ORed, dimensions are ANDed.
+func TestTags_OrWithinDimension(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --format json --tags request,response,decrease"), &stdout, io.Discard))
+
+	var rows []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
+	require.NotEmpty(t, rows)
+	sawRequest, sawResponse := false, false
+	for _, row := range rows {
+		require.Contains(t, []any{"request", "response"}, row["direction"])
+		require.Contains(t, row["actions"], "decrease")
+		sawRequest = sawRequest || row["direction"] == "request"
+		sawResponse = sawResponse || row["direction"] == "response"
+	}
+	require.True(t, sawRequest, "OR within the direction dimension must include request rows")
+	require.True(t, sawResponse, "OR within the direction dimension must include response rows")
 }
