@@ -10,15 +10,19 @@ import "cmp"
 // level but no direction, area, kind, actions or effect, and those are
 // omitted rather than rendered as empty strings.
 type Check struct {
-	Id          string `json:"id" yaml:"id"`
-	Level       string `json:"level,omitempty" yaml:"level,omitempty"`
-	Direction   string `json:"direction,omitempty" yaml:"direction,omitempty"`
-	Area        string `json:"area,omitempty" yaml:"area,omitempty"`
-	Kind        string `json:"kind,omitempty" yaml:"kind,omitempty"`
-	Actions     string `json:"actions,omitempty" yaml:"actions,omitempty"`
-	Effect      string `json:"effect,omitempty" yaml:"effect,omitempty"`
-	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	Mitigation  string `json:"mitigation,omitempty" yaml:"mitigation,omitempty"`
+	Id        string `json:"id" yaml:"id"`
+	Level     string `json:"level,omitempty" yaml:"level,omitempty"`
+	Direction string `json:"direction,omitempty" yaml:"direction,omitempty"`
+	Area      string `json:"area,omitempty" yaml:"area,omitempty"`
+	Kind      string `json:"kind,omitempty" yaml:"kind,omitempty"`
+	Actions   string `json:"actions,omitempty" yaml:"actions,omitempty"`
+	Effect    string `json:"effect,omitempty" yaml:"effect,omitempty"`
+	// Locations are the rule's location claims: where in the document it
+	// fires, as "location:action[,action...]" patterns. Rendered in the
+	// machine formats only; the text table stays scannable without them.
+	Locations   []string `json:"locations,omitempty" yaml:"locations,omitempty"`
+	Description string   `json:"description,omitempty" yaml:"description,omitempty"`
+	Mitigation  string   `json:"mitigation,omitempty" yaml:"mitigation,omitempty"`
 }
 
 type Checks []Check

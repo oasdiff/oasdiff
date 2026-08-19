@@ -33,6 +33,14 @@ func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts))
 }
 
+func (f JSONFormatter) RenderCoverage(edits []checker.CoverageEdit, opts RenderOpts) ([]byte, error) {
+	return printJSON(edits)
+}
+
+func (f JSONFormatter) RenderCoveragePatterns(patterns []checker.CoveragePattern, opts RenderOpts) ([]byte, error) {
+	return printJSON(patterns)
+}
+
 func (f JSONFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
 	return printJSON(checks)
 }

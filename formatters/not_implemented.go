@@ -22,6 +22,14 @@ func (f notImplementedFormatter) RenderChangelog(checker.Changes, RenderOpts) ([
 	return notImplemented()
 }
 
+func (f notImplementedFormatter) RenderCoverage([]checker.CoverageEdit, RenderOpts) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (f notImplementedFormatter) RenderCoveragePatterns([]checker.CoveragePattern, RenderOpts) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
 func (f notImplementedFormatter) RenderChecks(Checks, RenderOpts) ([]byte, error) {
 	return notImplemented()
 }

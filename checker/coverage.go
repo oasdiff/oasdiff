@@ -1,169 +1,234 @@
 package checker
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker/metaschema"
 )
 
-// coverageGroup truncates a location to its coarse position in the document, so
-// the report groups holes into readable buckets.
-func coverageGroup(location string) string {
-	segs := strings.Split(location, ".")
-	for i, seg := range segs {
-		switch seg {
-		case "parameters", "requestBody", "responses", "callbacks", "securitySchemes":
-			return strings.Join(segs[:min(i+1, len(segs))], ".")
-		}
-	}
-	return strings.Join(segs[:min(3, len(segs))], ".")
+// CoverageStatus is the audit's disposition of one possible edit.
+type CoverageStatus string
+
+const (
+	// CoverageCovered: at least one check claims the edit.
+	CoverageCovered CoverageStatus = "covered"
+	// CoverageUncovered: a wire-relevant edit with no check and no waiver;
+	// the audit fails the build until it gains one or the other.
+	CoverageUncovered CoverageStatus = "uncovered"
+	// CoverageWaived: a wire-relevant edit with no check, accounted for by a
+	// coverage waiver.
+	CoverageWaived CoverageStatus = "waived"
+	// CoverageNonContract: the edit cannot change which payloads are valid
+	// (an annotation, a specification extension, or a metaschema.NonContracts
+	// entry), so no check is expected.
+	CoverageNonContract CoverageStatus = "non-contract"
+)
+
+// CoverageEdit is one possible edit of an OpenAPI document with the audit's
+// disposition of it.
+type CoverageEdit struct {
+	Location string         `json:"location" yaml:"location"`
+	Action   string         `json:"action" yaml:"action"`
+	Polarity string         `json:"polarity" yaml:"polarity"`
+	Status   CoverageStatus `json:"status" yaml:"status"`
+	// Checks are the ids of the checks claiming the edit (covered only).
+	Checks []string `json:"checks,omitempty" yaml:"checks,omitempty"`
+	// Reason explains a waived or non-contract disposition.
+	Reason string `json:"reason,omitempty" yaml:"reason,omitempty"`
+	// SuggestedId is a derived candidate check id for an uncovered or waived
+	// edit: a naming hint for the missing check, not a promise of one.
+	SuggestedId string `json:"suggestedId,omitempty" yaml:"suggestedId,omitempty"`
 }
 
-// CoverageDoc renders the coverage map of the changelog checks over every
-// possible edit of an OpenAPI document, as the markdown served by
-// `oasdiff checks changelog coverage`.
-func CoverageDoc() string {
-	edits := metaschema.Edits()
-
-	type ruleRef struct {
-		id    string
-		level Level
-	}
+// Coverage maps every possible edit of an OpenAPI document to its audit
+// disposition, sorted by location then action.
+func Coverage() []CoverageEdit {
 	type claimant struct {
 		claim metaschema.Claim
-		ruleRef
+		id    string
 	}
 	var claims []claimant
 	for _, rule := range GetAllRules() {
 		for _, loc := range rule.Locations {
 			claim, err := metaschema.ParseClaim(loc)
 			if err != nil {
-				continue // TestRuleLocations reports it
+				continue // the checker's TestRuleLocations reports it
 			}
-			claims = append(claims, claimant{claim, ruleRef{rule.Id, rule.Level}})
+			claims = append(claims, claimant{claim, rule.Id})
 		}
 	}
 
-	covered := map[metaschema.Edit][]ruleRef{}
-	var wire, wireCovered int
-	var holes []metaschema.Edit
-	for _, edit := range edits {
+	var result []CoverageEdit
+	for _, edit := range metaschema.Edits() {
+		row := CoverageEdit{
+			Location: edit.Location,
+			Action:   string(edit.Action),
+			Polarity: string(edit.Polarity),
+		}
 		for _, c := range claims {
 			if c.claim.Matches(edit) {
-				covered[edit] = append(covered[edit], c.ruleRef)
+				row.Checks = append(row.Checks, c.id)
 			}
 		}
-		if !metaschema.WireRelevant(edit) {
-			continue
-		}
-		wire++
-		if len(covered[edit]) > 0 {
-			wireCovered++
-		} else {
-			holes = append(holes, edit)
-		}
-	}
-
-	// attribute each uncovered wire-relevant edit to its first matching waiver
-	waiverEdits := make([]int, len(CoverageWaivers))
-	for _, edit := range holes {
-		for i, w := range CoverageWaivers {
-			if matches, _ := metaschema.MatchPattern(w.Pattern, edit); matches {
-				waiverEdits[i]++
-				break
+		switch {
+		case len(row.Checks) > 0:
+			row.Status = CoverageCovered
+			sort.Strings(row.Checks)
+		case edit.Annotation:
+			row.Status = CoverageNonContract
+			row.Reason = "annotation: documentation-only field"
+		case edit.Extension:
+			row.Status = CoverageNonContract
+			row.Reason = "specification extension"
+		default:
+			if reason, ok := nonContractReason(edit); ok {
+				row.Status = CoverageNonContract
+				row.Reason = reason
+			} else if reason, ok := waiverReason(edit); ok {
+				row.Status = CoverageWaived
+				row.Reason = reason
+				row.SuggestedId = suggestId(edit)
+			} else {
+				row.Status = CoverageUncovered
+				row.SuggestedId = suggestId(edit)
 			}
 		}
+		result = append(result, row)
 	}
+	return result
+}
 
-	// count the edits each non-contract entry excludes
-	nonContractEdits := make([]int, len(metaschema.NonContracts))
-	for _, edit := range edits {
+// CoveragePattern is one waiver or non-contract entry with the number of
+// edits it accounts for.
+type CoveragePattern struct {
+	// Kind is "waiver" (relative to the rule registry) or "non-contract"
+	// (a fact about the object model).
+	Kind    string `json:"kind" yaml:"kind"`
+	Pattern string `json:"pattern" yaml:"pattern"`
+	// Edits is the number of edits the entry accounts for; attribution is
+	// first-match, in table order.
+	Edits  int    `json:"edits" yaml:"edits"`
+	Reason string `json:"reason" yaml:"reason"`
+}
+
+// CoveragePatterns lists the waiver and non-contract entries with the number
+// of edits each accounts for.
+func CoveragePatterns() []CoveragePattern {
+	waiverCounts := make([]int, len(CoverageWaivers))
+	nonContractCounts := make([]int, len(metaschema.NonContracts))
+	for _, edit := range metaschema.Edits() {
 		if edit.Annotation || edit.Extension {
 			continue
 		}
-		for i, nc := range metaschema.NonContracts {
-			if matches, _ := metaschema.MatchPattern(nc.Pattern, edit); matches {
-				nonContractEdits[i]++
-				break
-			}
+		if i, ok := firstMatch(edit, len(metaschema.NonContracts), func(i int) string { return metaschema.NonContracts[i].Pattern }); ok {
+			nonContractCounts[i]++
+			continue
+		}
+		if i, ok := firstMatch(edit, len(CoverageWaivers), func(i int) string { return CoverageWaivers[i].Pattern }); ok {
+			waiverCounts[i]++
 		}
 	}
 
-	var b strings.Builder
-	b.WriteString(`# Coverage of OpenAPI Document Edits
-
-This page maps the changelog checks onto every possible edit of an OpenAPI
-document. The edits are derived mechanically from the OpenAPI object
-model: every field location (a dotted path, with ` + "`*`" + ` standing for any map key
-or list index) paired with the syntactic edits applicable there (add, remove,
-set, unset, change, increase, decrease). Schema locations are folded: an edit
-like ` + "`paths.*.*.requestBody.content.*.schema.maxLength`" + ` stands for that
-keyword at any nesting depth inside the request body schema.
-
-Two guarantees are enforced by tests in the checker package:
-
-- Every location a check claims exists in the object model, so this map
-  cannot drift from the specification as the parser evolves.
-- Every wire-relevant edit (one that can change which payloads are valid)
-  is either covered by at least one check or listed in the waiver table
-  below with a reason. A new field in the object model, or a removed
-  check, fails the build until this map accounts for it.
-
-Checks for the same edit differ by preconditions on the document (for
-example, whether the removed endpoint was deprecated); severity levels are
-listed per check.
-
-`)
-
-	fmt.Fprintf(&b, "## Summary\n\n")
-	fmt.Fprintf(&b, "- %d possible edits, %d of them wire-relevant\n", len(edits), wire)
-	fmt.Fprintf(&b, "- %d wire-relevant edits covered by checks\n", wireCovered)
-	fmt.Fprintf(&b, "- %d wire-relevant edits without checks, all accounted for below\n\n", len(holes))
-
-	b.WriteString("## Checked edits\n")
-	groups := map[string][]metaschema.Edit{}
-	for edit := range covered {
-		groups[coverageGroup(edit.Location)] = append(groups[coverageGroup(edit.Location)], edit)
-	}
-	groupNames := make([]string, 0, len(groups))
-	for g := range groups {
-		groupNames = append(groupNames, g)
-	}
-	sort.Strings(groupNames)
-	for _, g := range groupNames {
-		edits := groups[g]
-		sort.Slice(edits, func(i, j int) bool {
-			if edits[i].Location != edits[j].Location {
-				return edits[i].Location < edits[j].Location
-			}
-			return edits[i].Action < edits[j].Action
-		})
-		fmt.Fprintf(&b, "\n### `%s`\n\n", g)
-		b.WriteString("| Location | Action | Checks |\n|---|---|---|\n")
-		for _, edit := range edits {
-			refs := covered[edit]
-			sort.Slice(refs, func(i, j int) bool { return refs[i].id < refs[j].id })
-			names := make([]string, len(refs))
-			for i, r := range refs {
-				names[i] = fmt.Sprintf("`%s` (%s)", r.id, r.level.String())
-			}
-			fmt.Fprintf(&b, "| `%s` | %s | %s |\n", edit.Location, edit.Action, strings.Join(names, ", "))
-		}
-	}
-
-	b.WriteString(`
-## Edits without checks
-
-Each remaining wire-relevant edit matches one of the entries below. Counts
-attribute every edit to its first matching entry.
-
-| Pattern | Edits | Reason |
-|---|---|---|
-`)
+	result := make([]CoveragePattern, 0, len(CoverageWaivers)+len(metaschema.NonContracts))
 	for i, w := range CoverageWaivers {
-		fmt.Fprintf(&b, "| `%s` | %d | %s |\n", w.Pattern, waiverEdits[i], w.Reason)
+		result = append(result, CoveragePattern{Kind: "waiver", Pattern: w.Pattern, Edits: waiverCounts[i], Reason: w.Reason})
+	}
+	for i, nc := range metaschema.NonContracts {
+		result = append(result, CoveragePattern{Kind: "non-contract", Pattern: nc.Pattern, Edits: nonContractCounts[i], Reason: nc.Reason})
+	}
+	return result
+}
+
+func firstMatch(edit metaschema.Edit, n int, pattern func(int) string) (int, bool) {
+	for i := range n {
+		if matches, _ := metaschema.MatchPattern(pattern(i), edit); matches {
+			return i, true
+		}
+	}
+	return 0, false
+}
+
+func nonContractReason(edit metaschema.Edit) (string, bool) {
+	if i, ok := firstMatch(edit, len(metaschema.NonContracts), func(i int) string { return metaschema.NonContracts[i].Pattern }); ok {
+		return metaschema.NonContracts[i].Reason, true
+	}
+	return "", false
+}
+
+func waiverReason(edit metaschema.Edit) (string, bool) {
+	if i, ok := firstMatch(edit, len(CoverageWaivers), func(i int) string { return CoverageWaivers[i].Pattern }); ok {
+		return CoverageWaivers[i].Reason, true
+	}
+	return "", false
+}
+
+// suggestId derives a candidate check id for an unchecked edit, in the
+// naming style of the existing ids: a context prefix from the location, the
+// edited keyword, and the action as a past-tense verb. It is a hint for
+// naming the missing check, in the spirit of the retired generator (#1168).
+func suggestId(edit metaschema.Edit) string {
+	verb := map[metaschema.Action]string{
+		metaschema.ActionAdd:      "added",
+		metaschema.ActionRemove:   "removed",
+		metaschema.ActionChange:   "changed",
+		metaschema.ActionSet:      "set",
+		metaschema.ActionUnset:    "unset",
+		metaschema.ActionIncrease: "increased",
+		metaschema.ActionDecrease: "decreased",
+	}[edit.Action]
+
+	loc := edit.Location
+	var prefix string
+	switch {
+	case strings.HasPrefix(loc, "components.securitySchemes"):
+		prefix = "api-security-scheme"
+	case strings.HasPrefix(loc, "components"):
+		prefix = "api-component"
+	case strings.HasPrefix(loc, "webhooks"):
+		prefix = "webhook"
+	case strings.HasPrefix(loc, "security"):
+		prefix = "api-security"
+	case strings.Contains(loc, ".callbacks."):
+		prefix = "callback"
+	case strings.Contains(loc, ".responses.") && strings.Contains(loc, ".headers."):
+		prefix = "response-header"
+	case strings.Contains(loc, ".responses."):
+		prefix = "response"
+	case strings.Contains(loc, ".requestBody"):
+		prefix = "request-body"
+	case strings.Contains(loc, ".parameters."):
+		prefix = "request-parameter"
+	case strings.HasPrefix(loc, "paths."):
+		prefix = "api"
+	default:
+		prefix = strings.SplitN(loc, ".", 2)[0]
+	}
+
+	// the edited keyword: the last segment that names a field; a map entry
+	// is named by its parent, singular
+	segs := strings.Split(loc, ".")
+	keyword := segs[len(segs)-1]
+	if keyword == "*" && len(segs) > 1 {
+		keyword = strings.TrimSuffix(segs[len(segs)-2], "s")
+	}
+	keyword = strings.TrimPrefix(keyword, "$")
+
+	id := prefix + "-" + toKebab(keyword) + "-" + verb
+	return strings.ReplaceAll(id, "body-body", "body")
+}
+
+func toKebab(s string) string {
+	var b strings.Builder
+	for i, r := range s {
+		if r >= 'A' && r <= 'Z' {
+			if i > 0 {
+				b.WriteByte('-')
+			}
+			b.WriteRune(r - 'A' + 'a')
+		} else {
+			b.WriteRune(r)
+		}
 	}
 	return b.String()
 }

@@ -33,6 +33,14 @@ func (f YAMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	return printYAML(adaptStructure(NewChanges(changes, f.Localizer), opts))
 }
 
+func (f YAMLFormatter) RenderCoverage(edits []checker.CoverageEdit, opts RenderOpts) ([]byte, error) {
+	return printYAML(edits)
+}
+
+func (f YAMLFormatter) RenderCoveragePatterns(patterns []checker.CoveragePattern, opts RenderOpts) ([]byte, error) {
+	return printYAML(patterns)
+}
+
 func (f YAMLFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
 	return printYAML(checks)
 }

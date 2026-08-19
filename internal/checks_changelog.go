@@ -91,6 +91,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 			Kind:        rule.Kind.String(),
 			Actions:     joinActions(rule.Actions()),
 			Effect:      rule.Effect.String(),
+			Locations:   rule.Locations,
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,
 		})

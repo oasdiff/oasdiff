@@ -56,7 +56,21 @@ Available tags: `request`, `response`, `add`, `remove`, `change`, `increase`, `d
 Multiple tags are combined with AND — only checks that match all specified tags are shown.
 
 ## Coverage Map
-`oasdiff checks changelog coverage` renders the inverse view of the changelog listing: every field location and edit in the OpenAPI object model, with the checks that cover it, and a reasoned account of every edit that has no check, as markdown. Run it to audit coverage or to derive candidate checks; the same accounting is enforced by tests, so the map is always current.
+`oasdiff checks changelog coverage` lists every possible edit of an OpenAPI document with the audit's disposition of it, one row per edit:
+
+- `covered` — the checks that claim the edit
+- `waived` — no check yet; the reason and a suggested id for the missing check
+- `uncovered` — no check and no waiver (the build fails in this state, so the listing is normally empty)
+- `non-contract` — the edit cannot change which payloads are valid, so no check is expected
+
+Filter with `--tags` (statuses, `request`/`response`/`document`/`shared` polarity, and the action verbs), pick `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for:
+
+```
+oasdiff checks changelog coverage --tags waived,request
+oasdiff checks changelog coverage --patterns --format json
+```
+
+The same accounting is enforced by tests, so the listing is always current. The `locations` field in `checks changelog --format json|yaml` shows the inverse mapping: each check's claimed edits.
 
 ## Localization
 Use `--lang` to view check descriptions in a supported language:

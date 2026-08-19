@@ -10,6 +10,8 @@ import (
 	"github.com/oasdiff/oasdiff/colorize"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/report"
+	"strconv"
+	"strings"
 )
 
 type TEXTFormatter struct {
@@ -46,6 +48,32 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	for _, c := range changes {
 		_, _ = fmt.Fprintf(result, "%s\n\n", c.MultiLineError(f.Localizer, opts.ColorMode))
 	}
+
+	return result.Bytes(), nil
+}
+
+func (f TEXTFormatter) RenderCoverage(edits []checker.CoverageEdit, opts RenderOpts) ([]byte, error) {
+	result := bytes.NewBuffer(nil)
+
+	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
+	_, _ = fmt.Fprintln(w, "LOCATION\tACTION\tSTATUS\tCHECKS\tSUGGESTED-ID")
+	for _, edit := range edits {
+		_, _ = fmt.Fprintln(w, edit.Location+"\t"+edit.Action+"\t"+string(edit.Status)+"\t"+strings.Join(edit.Checks, ",")+"\t"+edit.SuggestedId)
+	}
+	_ = w.Flush()
+
+	return result.Bytes(), nil
+}
+
+func (f TEXTFormatter) RenderCoveragePatterns(patterns []checker.CoveragePattern, opts RenderOpts) ([]byte, error) {
+	result := bytes.NewBuffer(nil)
+
+	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
+	_, _ = fmt.Fprintln(w, "KIND\tPATTERN\tEDITS\tREASON")
+	for _, p := range patterns {
+		_, _ = fmt.Fprintln(w, p.Kind+"\t"+p.Pattern+"\t"+strconv.Itoa(p.Edits)+"\t"+p.Reason)
+	}
+	_ = w.Flush()
 
 	return result.Bytes(), nil
 }

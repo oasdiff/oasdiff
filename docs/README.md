@@ -72,7 +72,7 @@ The top-level subcommands.
 - [`validate`](VALIDATE.md) — check a single spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)
 - [`checks changelog`](CHECKS.md) — list the rules `breaking` and `changelog` use to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
 - [`checks validate`](CHECKS.md#validate-checks) — list the rules `validate` reports
-- [`checks changelog coverage`](CHECKS.md#coverage-map) — map every possible edit of an OpenAPI document to the checks that cover it
+- [`checks changelog coverage`](CHECKS.md#coverage-map) — list every possible edit of an OpenAPI document with the checks that cover it
 - [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
 - [`git-diff-driver`](GIT-DIFF-DRIVER.md) — run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
 
