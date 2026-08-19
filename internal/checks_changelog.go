@@ -42,7 +42,7 @@ func getChecksChangelogCmd() *cobra.Command {
 func addChecksChangelogFlags(cmd *cobra.Command) {
 	addChecksFormatFlags(cmd)
 	addChecksSeverityFlag(cmd)
-	enumWithOptions(cmd, newEnumSliceValue(getAllTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
+	enumWithOptions(cmd, newEnumSliceValue(getChangelogTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 }
 
@@ -73,7 +73,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 		}
 
 		// tags
-		if !matchTags(flags.getTags(), rule) {
+		if !matchChangelogTags(flags.getTags(), rule) {
 			continue
 		}
 

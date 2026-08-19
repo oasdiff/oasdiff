@@ -59,7 +59,7 @@ func Test_ChecksTagsKind(t *testing.T) {
 // collides must pick another name.
 func TestTagVocabulariesUnique(t *testing.T) {
 	for name, tags := range map[string][]string{
-		"checks changelog":          internal.GetAllTagsForTest(),
+		"checks changelog":          internal.GetChangelogTagsForTest(),
 		"checks changelog coverage": internal.GetCoverageTagsForTest(),
 	} {
 		seen := map[string]bool{}

@@ -119,7 +119,7 @@ var coverageTagDimensions = []tagDimension[checker.CoverageEdit]{
 	},
 }
 
-func getAllTags() []string {
+func getChangelogTags() []string {
 	return tagValues(changelogTagDimensions)
 }
 
@@ -127,7 +127,7 @@ func getCoverageTags() []string {
 	return tagValues(coverageTagDimensions)
 }
 
-func matchTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
+func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
 	return matchTagDimensions(tags, changelogTagDimensions, rule)
 }
 
