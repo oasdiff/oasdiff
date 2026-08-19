@@ -56,7 +56,7 @@ Available tags: `request`, `response`, `add`, `remove`, `change`, `increase`, `d
 Multiple tags are combined with AND — only checks that match all specified tags are shown.
 
 ## Coverage Map
-`oasdiff checks coverage` renders the inverse view: every field location and edit in the OpenAPI object model, with the checks that cover it, and a reasoned account of every edit that has no check. The output is checked in as [COVERAGE.md](COVERAGE.md).
+`oasdiff checks changelog coverage` renders the inverse view of the changelog listing: every field location and edit in the OpenAPI object model, with the checks that cover it, and a reasoned account of every edit that has no check, as markdown. Run it to audit coverage or to derive candidate checks; the same accounting is enforced by tests, so the map is always current.
 
 ## Localization
 Use `--lang` to view check descriptions in a supported language:

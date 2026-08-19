@@ -32,7 +32,7 @@ func getChecksCmd() *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(getChecksChangelogCmd(), getChecksValidateCmd(), getChecksCoverageCmd())
+	cmd.AddCommand(getChecksChangelogCmd(), getChecksValidateCmd())
 
 	return &cmd
 }

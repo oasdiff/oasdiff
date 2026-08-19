@@ -81,7 +81,7 @@ func TestRuleCoverage(t *testing.T) {
 
 func waiverMatches(t *testing.T, pattern string, edit metaschema.Edit) bool {
 	t.Helper()
-	matches, err := checker.WaiverMatches(pattern, edit)
+	matches, err := metaschema.MatchPattern(pattern, edit)
 	if err != nil {
 		t.Fatalf("invalid waiver pattern %q: %v", pattern, err)
 	}
@@ -105,7 +105,7 @@ func uncoveredCells(t *testing.T) []metaschema.Edit {
 
 	var holes []metaschema.Edit
 	for _, edit := range metaschema.Edits() {
-		if edit.Annotation || edit.Extension {
+		if !metaschema.WireRelevant(edit) {
 			continue
 		}
 		covered := false
@@ -149,7 +149,7 @@ func TestRuleCoverageReport(t *testing.T) {
 	var wire, covered int
 	var holes []metaschema.Edit
 	for _, edit := range edits {
-		if edit.Annotation || edit.Extension {
+		if !metaschema.WireRelevant(edit) {
 			continue
 		}
 		wire++

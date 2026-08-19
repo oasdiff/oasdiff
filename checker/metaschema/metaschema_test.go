@@ -138,3 +138,29 @@ func TestMatchLocation(t *testing.T) {
 		}
 	}
 }
+
+// Every NonContract entry must match at least one enumerated edit that is
+// not already excluded as an annotation or extension; an entry that matches
+// nothing is stale and must be removed.
+func TestNonContracts_NotStale(t *testing.T) {
+	edits := metaschema.Edits()
+	for _, nc := range metaschema.NonContracts {
+		found := false
+		for _, edit := range edits {
+			if edit.Annotation || edit.Extension {
+				continue
+			}
+			matches, err := metaschema.MatchPattern(nc.Pattern, edit)
+			if err != nil {
+				t.Fatalf("invalid NonContract pattern %q: %v", nc.Pattern, err)
+			}
+			if matches {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("stale NonContract entry: %q matches no edit", nc.Pattern)
+		}
+	}
+}

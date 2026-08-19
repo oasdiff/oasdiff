@@ -31,6 +31,8 @@ func getChecksChangelogCmd() *cobra.Command {
 	// never reach the config.
 	addChecksChangelogFlags(&cmd)
 
+	cmd.AddCommand(getChecksCoverageCmd())
+
 	return &cmd
 }
 

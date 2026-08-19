@@ -9,14 +9,15 @@ import (
 )
 
 // getChecksCoverageCmd renders the coverage map: every possible edit of an
-// OpenAPI document, the checks that cover it, and the reasoned account of
-// every edit without a check. The output is the markdown document checked in
-// as docs/COVERAGE.md.
+// OpenAPI document, the changelog checks that cover it, and the reasoned
+// account of every edit without a check. It lives under `checks changelog`
+// because only the changelog rules carry location claims; run it on demand
+// to audit coverage and derive tasks.
 func getChecksCoverageCmd() *cobra.Command {
 
 	cmd := cobra.Command{
 		Use:               "coverage",
-		Short:             "Display the coverage map of the changelog checks",
+		Short:             "Display the coverage map of the changelog checks over every possible edit",
 		Long:              `Display every possible edit of an OpenAPI document with the changelog checks that cover it, and the reason for every edit without a check, as markdown.`,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
