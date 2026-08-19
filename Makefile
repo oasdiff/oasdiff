@@ -48,7 +48,7 @@ modernize: ## Report code that could use newer Go constructs
 .PHONY: coverage-doc
 coverage-doc: ## Regenerate docs/COVERAGE.md from the rule registry
 	@echo "==> Regenerating docs/COVERAGE.md..."
-	UPDATE_COVERAGE_DOC=1 go test ./checker -run TestCoverageDoc
+	go run . checks coverage > docs/COVERAGE.md
 
 .PHONY: localize
 localize: ## Compile localized changelog messages
