@@ -18,17 +18,19 @@ var NonContracts = []NonContract{
 	// webhooks, and callbacks): every other ref is a wrapper type the walk
 	// dissolves into its resolved value.
 	{"**.$ref", "a $ref is resolved at load time; the diff compares resolved content"},
-	{"servers.**", "server URLs are deployment metadata, not part of the request/response contract"},
-	{"paths.*.servers.**", "server URLs are deployment metadata"},
-	{"paths.*.*.servers.**", "server URLs are deployment metadata"},
-	{"paths.*.*.responses.*.links.**", "links document relationships between operations; they do not change accepted payloads"},
+	{"**.servers.**", "server URLs are deployment metadata, not part of the request/response contract"},
+	{"**.links.**", "links document relationships between operations; they do not change accepted payloads"},
 	{"openapi", "the OpenAPI dialect version governs parsing, not the API contract"},
 	{"jsonSchemaDialect", "schema dialect governs parsing, not the API contract"},
 	{"info", "the info object is required metadata; its presence is a validation concern"},
 	{"info.version:set,unset", "version is required; presence changes are validation errors, value changes are checked (api-version rules)"},
-	{"paths.*.*.parameters.*.name", "parameters are identified by (name, in); a rename surfaces as parameter remove + add"},
-	{"paths.*.*.parameters.*.in", "parameters are identified by (name, in); a location change surfaces as parameter remove + add"},
-	{"paths.*.*.parameters.*.allowEmptyValue", "allowEmptyValue is deprecated by the OpenAPI spec, which advises against its use"},
+	{"**.parameters.*.name", "parameters are identified by (name, in); a rename surfaces as parameter remove + add"},
+	{"**.parameters.*.in", "parameters are identified by (name, in); a location change surfaces as parameter remove + add"},
+	// headers share the parameter type, but the spec forbids name and in
+	// on Header objects: a header is identified by its map key
+	{"**.headers.*.name", "a header is identified by its map key; the name field is forbidden on Header objects"},
+	{"**.headers.*.in", "a header is identified by its map key; the in field is forbidden on Header objects"},
+	{"**.allowEmptyValue", "allowEmptyValue is deprecated by the OpenAPI spec, which advises against its use"},
 	{"**.schema.$id", "reference-resolution keyword; its effect is visible in the resolved schemas the diff compares"},
 	{"**.schema.$anchor", "reference-resolution keyword"},
 	{"**.schema.$dynamicAnchor", "reference-resolution keyword"},
@@ -36,7 +38,6 @@ var NonContracts = []NonContract{
 	{"**.schema.$schema", "schema dialect declaration, governs validation semantics at parse time"},
 	{"**.schema.$defs.**", "$defs holds definitions that take effect only where referenced"},
 	{"**.schema.$comment", "comments carry no validation semantics"},
-	{"**.schema.allowEmptyValue", "allowEmptyValue is a parameter-object field; on a schema it has no effect"},
 }
 
 // WireRelevant reports whether the edit can change which payloads are

@@ -23,6 +23,10 @@ type CoverageWaiver struct {
 // any waiver matching no uncovered edit (remove the stale waiver), so the
 // list stays an honest, reviewed record.
 var CoverageWaivers = []CoverageWaiver{
+	// security schemes are consumed by name, never resolved through $ref
+	// into usage sites, so the resolved-at-usage reasoning below does not
+	// apply to them; this entry must precede components.**
+	{"components.securitySchemes.**", "open: scheme fields beyond type, flow URLs, and scopes (apiKey name and in, http scheme, bearerFormat, openIdConnectUrl) have no checks (tracked in #1175)"},
 	{"components.**", "resolved-at-usage: edits to component definitions surface as diffs at every referencing operation; only unused-component removal is reported directly (api-schemas-removed)"},
 	{"webhooks.**", "open: webhooks are diffed (WebhooksDiff) but checkers only report webhook add/remove; changes inside a webhook's operations have no checks yet (tracked in #1160)"},
 	{"paths.*.parameters.**", "open: path-level parameter additions are checked (new-request-*-default-parameter-to-existing-path); modifications and removals at path level have no checks yet (tracked in #1163)"},
