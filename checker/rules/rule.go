@@ -20,7 +20,7 @@ type Rule struct {
 	Effect      Effect
 	Guards      []Guard
 	// Locations are the edits the rule covers, as
-	// "location:action[,action...]" claims (see metaschema.ParseClaim).
+	// "pattern:action[,action...]" claims (see metaschema.ParseClaim).
 	Locations []string
 }
 

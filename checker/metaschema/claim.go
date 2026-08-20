@@ -23,12 +23,15 @@ var validActions = map[Action]bool{
 	ActionDecrease: true,
 }
 
-// ParseClaim parses "location:action[,action...]", e.g.
+// ParseClaim parses "pattern:action[,action...]", e.g.
 // "paths.*.*.requestBody.content.*.schema.maxLength:decrease,unset".
+// The pattern is a location pattern (see MatchLocation); a rule's claims
+// usually spell one concrete location, with the wildcards available for
+// covering a family of locations at once.
 func ParseClaim(s string) (Claim, error) {
 	pattern, actions, ok := strings.Cut(s, ":")
 	if !ok || pattern == "" || actions == "" {
-		return Claim{}, fmt.Errorf("claim %q: want location:action[,action...]", s)
+		return Claim{}, fmt.Errorf("claim %q: want pattern:action[,action...]", s)
 	}
 	c := Claim{Pattern: pattern}
 	for a := range strings.SplitSeq(actions, ",") {
