@@ -14,7 +14,10 @@ type NonContract struct {
 }
 
 var NonContracts = []NonContract{
-	{"paths.*.$ref", "a path item $ref is resolved at load time; the diff compares resolved content"},
+	// The only $ref fields that appear as edits are path items' (in paths,
+	// webhooks, and callbacks): every other ref is a wrapper type the walk
+	// dissolves into its resolved value.
+	{"**.$ref", "a $ref is resolved at load time; the diff compares resolved content"},
 	{"servers.**", "server URLs are deployment metadata, not part of the request/response contract"},
 	{"paths.*.servers.**", "server URLs are deployment metadata"},
 	{"paths.*.*.servers.**", "server URLs are deployment metadata"},
