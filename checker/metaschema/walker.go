@@ -4,66 +4,10 @@ import (
 	"encoding"
 	"reflect"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
-
-// Action is a syntactic edit applicable at a location: what can literally
-// happen to the field in the document, independent of whether it breaks
-// clients.
-type Action string
-
-const (
-	ActionAdd      Action = "add"      // add a map entry, list element, or set member
-	ActionRemove   Action = "remove"   // remove a map entry, list element, or set member
-	ActionSet      Action = "set"      // the field appears where it was absent
-	ActionUnset    Action = "unset"    // the field disappears
-	ActionChange   Action = "change"   // the field's value changes to another value
-	ActionIncrease Action = "increase" // an ordered value grows
-	ActionDecrease Action = "decrease" // an ordered value shrinks
-)
-
-// Polarity is the syntactic position of a location in the document.
-type Polarity string
-
-const (
-	PolarityRequest  Polarity = "request"
-	PolarityResponse Polarity = "response"
-	PolarityShared   Polarity = "shared"   // components: request or response depending on the referencing site
-	PolarityDocument Polarity = "document" // neither wire direction
-)
-
-// Edit is one possible edit of an OpenAPI document: an Action applied at a
-// Location. Edits enumerates all of them; the coverage audit checks every
-// one is handled or accounted for.
-type Edit struct {
-	Location   string
-	Action     Action
-	Polarity   Polarity
-	Annotation bool // spec-defined metadata (description, summary, ...) with no effect on accepted payloads
-	Extension  bool // an x-* specification extension
-}
-
-// Edits enumerates every possible edit of an OpenAPI document, sorted by
-// location then action.
-func Edits() []Edit {
-	w := &walker{edits: map[Edit]struct{}{}}
-	w.walkType(reflect.TypeFor[openapi3.T](), "", false)
-
-	edits := make([]Edit, 0, len(w.edits))
-	for c := range w.edits {
-		edits = append(edits, c)
-	}
-	sort.Slice(edits, func(i, j int) bool {
-		if edits[i].Location != edits[j].Location {
-			return edits[i].Location < edits[j].Location
-		}
-		return edits[i].Action < edits[j].Action
-	})
-	return edits
-}
 
 // annotationFields are spec-defined metadata: editing them never changes
 // which payloads are valid.
@@ -105,22 +49,6 @@ func (w *walker) emit(path string, annotation, extension bool, actions ...Action
 			Extension:  extension,
 		}] = struct{}{}
 	}
-}
-
-func polarity(path string) Polarity {
-	p := PolarityDocument
-	if strings.HasPrefix(path, "components.") {
-		p = PolarityShared
-	}
-	for seg := range strings.SplitSeq(path, ".") {
-		switch seg {
-		case "parameters", "requestBody":
-			p = PolarityRequest
-		case "responses":
-			p = PolarityResponse
-		}
-	}
-	return p
 }
 
 func join(path, name string) string {
@@ -298,35 +226,4 @@ func mapWrapperElem(t reflect.Type) (reflect.Type, bool) {
 		return nil, false
 	}
 	return m.Type.Out(0).Elem(), true
-}
-
-// MatchLocation reports whether a rule's location pattern matches an
-// edit's location. Pattern segments: "**" matches any run of segments
-// (including none), "*" matches exactly one segment, anything else matches
-// literally (so "*" in an edit's location is matched by "*" or "**" in the
-// pattern).
-func MatchLocation(pattern, location string) bool {
-	return matchSegments(strings.Split(pattern, "."), strings.Split(location, "."))
-}
-
-func matchSegments(pat, loc []string) bool {
-	if len(pat) == 0 {
-		return len(loc) == 0
-	}
-	if pat[0] == "**" {
-		if matchSegments(pat[1:], loc) {
-			return true
-		}
-		if len(loc) == 0 {
-			return false
-		}
-		return matchSegments(pat, loc[1:])
-	}
-	if len(loc) == 0 {
-		return false
-	}
-	if pat[0] != "*" && pat[0] != loc[0] {
-		return false
-	}
-	return matchSegments(pat[1:], loc[1:])
 }

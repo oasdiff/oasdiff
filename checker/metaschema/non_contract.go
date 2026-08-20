@@ -1,7 +1,5 @@
 package metaschema
 
-import "strings"
-
 // NonContract marks a family of possible edits as outside the wire
 // contract: changing these fields never changes which payloads are valid,
 // so the coverage audit does not expect checks for them. Unlike a coverage
@@ -36,19 +34,6 @@ var NonContracts = []NonContract{
 	{"**.schema.$defs.**", "$defs holds definitions that take effect only where referenced"},
 	{"**.schema.$comment", "comments carry no validation semantics"},
 	{"**.schema.allowEmptyValue", "allowEmptyValue is a parameter-object field; on a schema it has no effect"},
-}
-
-// MatchPattern reports whether a waiver-style pattern (a location glob with
-// an optional ":action[,action...]" restriction) covers the edit.
-func MatchPattern(pattern string, edit Edit) (bool, error) {
-	if !strings.Contains(pattern, ":") {
-		return MatchLocation(pattern, edit.Location), nil
-	}
-	claim, err := ParseClaim(pattern)
-	if err != nil {
-		return false, err
-	}
-	return claim.Matches(edit), nil
 }
 
 // WireRelevant reports whether the edit can change which payloads are
