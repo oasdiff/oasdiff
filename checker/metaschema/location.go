@@ -45,3 +45,12 @@ func MatchPattern(pattern string, edit Edit) (bool, error) {
 	}
 	return claim.Matches(edit), nil
 }
+
+// joinLocation appends a segment to a location path, the constructing
+// counterpart of the splitting MatchLocation does.
+func joinLocation(path, name string) string {
+	if path == "" {
+		return name
+	}
+	return path + "." + name
+}

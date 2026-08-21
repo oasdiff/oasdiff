@@ -51,13 +51,6 @@ func (w *walker) emit(path string, annotation, extension bool, actions ...Action
 	}
 }
 
-func join(path, name string) string {
-	if path == "" {
-		return name
-	}
-	return path + "." + name
-}
-
 func (w *walker) walkType(t reflect.Type, path string, annotation bool) {
 	wasPtr := t.Kind() == reflect.Pointer
 	if wasPtr {
@@ -86,7 +79,7 @@ func (w *walker) walkType(t reflect.Type, path string, annotation bool) {
 	}
 
 	if elem, ok := mapWrapperElem(t); ok {
-		entry := join(path, "*")
+		entry := joinLocation(path, "*")
 		w.emit(entry, annotation, false, ActionAdd, ActionRemove)
 		w.walkType(elem, entry, annotation)
 		return
@@ -100,7 +93,7 @@ func (w *walker) walkType(t reflect.Type, path string, annotation bool) {
 		}
 		w.walkStruct(t, path, annotation)
 	case reflect.Map:
-		entry := join(path, "*")
+		entry := joinLocation(path, "*")
 		w.emit(entry, annotation, false, ActionAdd, ActionRemove)
 		w.walkType(t.Elem(), entry, annotation)
 	case reflect.Slice:
@@ -109,7 +102,7 @@ func (w *walker) walkType(t reflect.Type, path string, annotation bool) {
 			elem = elem.Elem()
 		}
 		if elem.Kind() == reflect.Struct || elem.Kind() == reflect.Map || elem.Kind() == reflect.Slice {
-			entry := join(path, "*")
+			entry := joinLocation(path, "*")
 			w.emit(entry, annotation, false, ActionAdd, ActionRemove)
 			w.walkType(t.Elem(), entry, annotation)
 		} else {
@@ -143,7 +136,7 @@ func (w *walker) walkStruct(t reflect.Type, path string, annotation bool) {
 			continue
 		}
 		if f.Name == "Extensions" {
-			w.emit(join(path, "x-*"), false, true, ActionAdd, ActionRemove, ActionChange)
+			w.emit(joinLocation(path, "x-*"), false, true, ActionAdd, ActionRemove, ActionChange)
 			continue
 		}
 		name := jsonName(f)
@@ -162,13 +155,13 @@ func (w *walker) walkStruct(t reflect.Type, path string, annotation bool) {
 			(f.Type.Kind() == reflect.Map && derefType(f.Type.Elem()) == operationType)) {
 			if !methodDone {
 				methodDone = true
-				entry := join(path, "*")
+				entry := joinLocation(path, "*")
 				w.emit(entry, annotation, false, ActionAdd, ActionRemove)
 				w.walkType(reflect.PointerTo(operationType), entry, annotation)
 			}
 			continue
 		}
-		w.walkType(f.Type, join(path, name), annotation || annotationFields[name])
+		w.walkType(f.Type, joinLocation(path, name), annotation || annotationFields[name])
 	}
 }
 
