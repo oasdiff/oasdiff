@@ -2,6 +2,8 @@ package diff
 
 import (
 	"reflect"
+
+	"github.com/oasdiff/oasdiff/utils"
 )
 
 // ValueDiff describes the changes between a pair of values
@@ -59,51 +61,19 @@ func getValueDiffConditional(exclude bool, value1, value2 any) *ValueDiff {
 }
 
 func getFloat64RefDiff(valueRef1, valueRef2 *float64) *ValueDiff {
-	return getValueDiff(derefFloat64(valueRef1), derefFloat64(valueRef2))
+	return getValueDiff(utils.Deref(valueRef1), utils.Deref(valueRef2))
 }
 
 func getBoolRefDiff(valueRef1, valueRef2 *bool) *ValueDiff {
-	return getValueDiff(derefBool(valueRef1), derefBool(valueRef2))
+	return getValueDiff(utils.Deref(valueRef1), utils.Deref(valueRef2))
 }
 
 func getStringRefDiffConditional(exclude bool, valueRef1, valueRef2 *string) *ValueDiff {
-	return getValueDiffConditional(exclude, derefString(valueRef1), derefString(valueRef2))
+	return getValueDiffConditional(exclude, utils.Deref(valueRef1), utils.Deref(valueRef2))
 }
 
 func getUInt64RefDiff(valueRef1, valueRef2 *uint64) *ValueDiff {
-	return getValueDiff(derefUInt64(valueRef1), derefUInt64(valueRef2))
-}
-
-func derefString(ref *string) any {
-	if ref == nil {
-		return nil
-	}
-
-	return *ref
-}
-
-func derefBool(ref *bool) any {
-	if ref == nil {
-		return nil
-	}
-
-	return *ref
-}
-
-func derefFloat64(ref *float64) any {
-	if ref == nil {
-		return nil
-	}
-
-	return *ref
-}
-
-func derefUInt64(ref *uint64) any {
-	if ref == nil {
-		return nil
-	}
-
-	return *ref
+	return getValueDiff(utils.Deref(valueRef1), utils.Deref(valueRef2))
 }
 
 // exclusiveBoundToValue extracts the meaningful value from an ExclusiveBound.
