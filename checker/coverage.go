@@ -33,6 +33,9 @@ type CoverageEdit struct {
 	Action   string         `json:"action" yaml:"action"`
 	Polarity string         `json:"polarity" yaml:"polarity"`
 	Status   CoverageStatus `json:"status" yaml:"status"`
+	// Category refines a waived status: open (a missing check), or handled
+	// elsewhere (resolved-at-usage, covered-as).
+	Category WaiverCategory `json:"category,omitempty" yaml:"category,omitempty"`
 	// Checks are the ids of the checks claiming the edit (covered only).
 	Checks []string `json:"checks,omitempty" yaml:"checks,omitempty"`
 	// Reason explains a waived or non-contract status.
@@ -86,10 +89,15 @@ func Coverage() []CoverageEdit {
 			if reason, ok := nonContractReason(edit); ok {
 				row.Status = CoverageNonContract
 				row.Reason = reason
-			} else if reason, ok := waiverReason(edit); ok {
+			} else if waiver, ok := matchWaiver(edit); ok {
 				row.Status = CoverageWaived
-				row.Reason = reason
-				row.SuggestedId = suggestId(edit)
+				row.Category = waiver.Category
+				row.Reason = waiver.Reason
+				// only an open waiver implies a missing check; the other
+				// categories say the edit is handled elsewhere
+				if waiver.Category == CategoryOpen {
+					row.SuggestedId = suggestId(edit)
+				}
 			} else {
 				row.Status = CoverageUncovered
 				row.SuggestedId = suggestId(edit)
@@ -105,8 +113,10 @@ func Coverage() []CoverageEdit {
 type CoveragePattern struct {
 	// Kind is "waiver" (relative to the rule registry) or "non-contract"
 	// (a fact about the object model).
-	Kind    string `json:"kind" yaml:"kind"`
-	Pattern string `json:"pattern" yaml:"pattern"`
+	Kind string `json:"kind" yaml:"kind"`
+	// Category refines a waiver: open, resolved-at-usage, or covered-as.
+	Category WaiverCategory `json:"category,omitempty" yaml:"category,omitempty"`
+	Pattern  string         `json:"pattern" yaml:"pattern"`
 	// Edits is the number of edits the entry accounts for; attribution is
 	// first-match, in table order.
 	Edits  int    `json:"edits" yaml:"edits"`
@@ -133,7 +143,7 @@ func CoveragePatterns() []CoveragePattern {
 
 	result := make([]CoveragePattern, 0, len(CoverageWaivers)+len(metaschema.NonContracts))
 	for i, w := range CoverageWaivers {
-		result = append(result, CoveragePattern{Kind: "waiver", Pattern: w.Pattern, Edits: waiverCounts[i], Reason: w.Reason})
+		result = append(result, CoveragePattern{Kind: "waiver", Category: w.Category, Pattern: w.Pattern, Edits: waiverCounts[i], Reason: w.Reason})
 	}
 	for i, nc := range metaschema.NonContracts {
 		result = append(result, CoveragePattern{Kind: "non-contract", Pattern: nc.Pattern, Edits: nonContractCounts[i], Reason: nc.Reason})
@@ -157,11 +167,11 @@ func nonContractReason(edit metaschema.Edit) (string, bool) {
 	return "", false
 }
 
-func waiverReason(edit metaschema.Edit) (string, bool) {
+func matchWaiver(edit metaschema.Edit) (CoverageWaiver, bool) {
 	if i, ok := firstMatch(edit, len(CoverageWaivers), func(i int) string { return CoverageWaivers[i].Pattern }); ok {
-		return CoverageWaivers[i].Reason, true
+		return CoverageWaivers[i], true
 	}
-	return "", false
+	return CoverageWaiver{}, false
 }
 
 // suggestId derives a candidate check id for an unchecked edit, in the

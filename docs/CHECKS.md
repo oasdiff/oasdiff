@@ -65,7 +65,7 @@ Values of the same dimension are combined with OR, different dimensions with AND
 `oasdiff checks changelog coverage` lists every possible edit of an OpenAPI document with what the audit decided about it, one row per edit:
 
 - `covered` — the checks that claim the edit
-- `waived` — no check yet; the reason and a suggested id for the missing check
+- `waived` — no check; the `category` field says why: `open` (a missing check, with its reason and a suggested id), `resolved-at-usage` (component definitions are compared at their referencing operations, which have their own rows), or `covered-as` (the same document edit is reported under another action)
 - `uncovered` — no check and no waiver (the build fails in this state, so the listing is normally empty)
 - `non-contract` — the edit cannot change which payloads are valid, so no check is expected
 
