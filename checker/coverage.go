@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker/metaschema"
+	"github.com/oasdiff/oasdiff/utils"
 )
 
 // CoverageStatus is what the audit decided about one possible edit.
@@ -225,21 +226,6 @@ func suggestId(edit metaschema.Edit) string {
 	}
 	keyword = strings.TrimPrefix(keyword, "$")
 
-	id := prefix + "-" + toKebab(keyword) + "-" + verb
+	id := prefix + "-" + utils.ToKebabCase(keyword) + "-" + verb
 	return strings.ReplaceAll(id, "body-body", "body")
-}
-
-func toKebab(s string) string {
-	var b strings.Builder
-	for i, r := range s {
-		if r >= 'A' && r <= 'Z' {
-			if i > 0 {
-				b.WriteByte('-')
-			}
-			b.WriteRune(r - 'A' + 'a')
-		} else {
-			b.WriteRune(r)
-		}
-	}
-	return b.String()
 }
