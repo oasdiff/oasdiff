@@ -62,7 +62,7 @@ Available tags, by dimension:
 Values of the same dimension are combined with OR, different dimensions with AND: `--tags request,response,add` selects checks that are (request or response) and add.
 
 ## Coverage Map
-`oasdiff checks changelog coverage` lists every possible edit of an OpenAPI document with the audit's disposition of it, one row per edit:
+`oasdiff checks changelog coverage` lists every possible edit of an OpenAPI document with what the audit decided about it, one row per edit:
 
 - `covered` — the checks that claim the edit
 - `waived` — no check yet; the reason and a suggested id for the missing check

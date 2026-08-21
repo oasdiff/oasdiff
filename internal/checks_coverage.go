@@ -13,7 +13,7 @@ import (
 const checksCoverageCmd = "checks changelog coverage"
 
 // getChecksCoverageCmd lists every possible edit of an OpenAPI document with
-// the audit's disposition of it: the changelog checks that cover it, the
+// what the audit decided about it: the changelog checks that cover it, the
 // waiver or non-contract reason when none do, and a suggested id for the
 // missing check otherwise. It lives under `checks changelog` because only
 // the changelog rules carry location claims; run it on demand to audit

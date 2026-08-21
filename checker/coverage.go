@@ -7,7 +7,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker/metaschema"
 )
 
-// CoverageStatus is the audit's disposition of one possible edit.
+// CoverageStatus is what the audit decided about one possible edit.
 type CoverageStatus string
 
 const (
@@ -25,8 +25,9 @@ const (
 	CoverageNonContract CoverageStatus = "non-contract"
 )
 
-// CoverageEdit is one possible edit of an OpenAPI document with the audit's
-// disposition of it.
+// CoverageEdit is one possible edit of an OpenAPI document with what the
+// audit decided about it: its status, the checks that cover it, or the
+// reason none are expected.
 type CoverageEdit struct {
 	Location string         `json:"location" yaml:"location"`
 	Action   string         `json:"action" yaml:"action"`
@@ -34,15 +35,15 @@ type CoverageEdit struct {
 	Status   CoverageStatus `json:"status" yaml:"status"`
 	// Checks are the ids of the checks claiming the edit (covered only).
 	Checks []string `json:"checks,omitempty" yaml:"checks,omitempty"`
-	// Reason explains a waived or non-contract disposition.
+	// Reason explains a waived or non-contract status.
 	Reason string `json:"reason,omitempty" yaml:"reason,omitempty"`
 	// SuggestedId is a derived candidate check id for an uncovered or waived
 	// edit: a naming hint for the missing check, not a promise of one.
 	SuggestedId string `json:"suggestedId,omitempty" yaml:"suggestedId,omitempty"`
 }
 
-// Coverage maps every possible edit of an OpenAPI document to its audit
-// disposition, sorted by location then action.
+// Coverage maps every possible edit of an OpenAPI document to what the
+// audit decided about it, sorted by location then action.
 func Coverage() []CoverageEdit {
 	type claimant struct {
 		claim metaschema.Claim
