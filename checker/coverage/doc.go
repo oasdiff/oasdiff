@@ -17,14 +17,9 @@
 // decides each edit: which checks cover it, or why none are expected. Each
 // rule declares the edits it covers, and every edit that can change which
 // payloads are valid must be covered by a check or waived with a reviewed
-// reason.
-//
-// Two callers act on that: the checker's tests, which fail the build on an
-// edit that is neither covered nor waived and on a waiver that no longer
-// accounts for anything; and `oasdiff checks changelog coverage`, which
-// renders the accounting and names a suggested id for each check still
-// missing. Completeness is thereby a test rather than a claim, and a gap is
-// tracked rather than assumed away.
+// reason. An edit that is neither is a gap; a waiver that accounts for
+// nothing is stale; and an unchecked edit that a check could cover carries a
+// suggested id for it. Completeness is thereby measured rather than assumed.
 //
 // Analyze takes the rules to measure as an argument rather than calling
 // checker.GetAllRules itself, so this package needs only the rule model and
