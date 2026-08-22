@@ -5,8 +5,8 @@ import "github.com/oasdiff/oasdiff/checker/metaschema"
 // Pattern is one waiver or non-contract entry with the number of
 // edits it accounts for.
 type Pattern struct {
-	// Kind is "waiver" (relative to the rule registry) or "non-contract"
-	// (a fact about the object model).
+	// Kind is "waiver" (what the checks miss today) or "non-contract" (a
+	// fact about the object model).
 	Kind string `json:"kind" yaml:"kind"`
 	// Category refines a waiver: open, resolved-at-usage, or covered-as.
 	Category WaiverCategory `json:"category,omitempty" yaml:"category,omitempty"`

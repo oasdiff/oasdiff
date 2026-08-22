@@ -19,8 +19,8 @@ const (
 
 // Waiver explains one family of wire-relevant edits that no rule
 // covers. Facts about the object model itself (fields outside the wire
-// contract) live in metaschema.NonContracts; entries here are relative to
-// the rule registry and go stale as checks are added.
+// contract) live in metaschema.NonContracts; entries here describe what the
+// checks happen to miss today, and go stale as checks are added.
 type Waiver struct {
 	Category WaiverCategory
 	// Pattern is a location glob (see metaschema.MatchLocation), optionally

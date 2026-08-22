@@ -95,7 +95,7 @@ func newBackwardCompatibilityRule(id string, level Level, handler BackwardCompat
 type BackwardCompatibilityRules []BackwardCompatibilityRule
 
 // Metadata returns the rules without their handlers, for callers that audit
-// the registry rather than run it.
+// the rules rather than run them.
 func (bcRules BackwardCompatibilityRules) Metadata() []rules.Rule {
 	metadata := make([]rules.Rule, len(bcRules))
 	for i, rule := range bcRules {
