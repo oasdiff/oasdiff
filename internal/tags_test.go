@@ -14,43 +14,50 @@ func Test_ChecksNoTags(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru"), io.Discard, io.Discard))
 }
 
-func Test_ChecksTagsDirection(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags request"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags response"), io.Discard, io.Discard))
+// countRows runs the command and returns how many rows its json output holds.
+func countRows(t *testing.T, cmd string) int {
+	t.Helper()
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs(cmd), &stdout, io.Discard))
+	var rows []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
+	return len(rows)
 }
 
-func Test_ChecksTagsAction(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags add"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags remove"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags change"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags widens"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags narrows"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags increase"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags decrease"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags set"), io.Discard, io.Discard))
+// The tags are taken from the vocabulary itself, so a tag added there is
+// tested here without anyone remembering to. Every tag must select at
+// least one row: a tag selecting nothing is a dead vocabulary entry or a
+// broken matcher.
+func TestChangelogTags_EachSelectsRules(t *testing.T) {
+	for _, tag := range internal.GetChangelogTagsForTest() {
+		require.Positive(t, countRows(t, "oasdiff checks changelog --format json --tags "+tag), "tag %q selects no rules", tag)
+	}
 }
 
-func Test_ChecksTagsArea(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags schema"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags parameters"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags requestBody"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags responses"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags paths"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags headers"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags security"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags tags"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags components"), io.Discard, io.Discard))
-}
+// Same vocabulary-driven sweep for the coverage listing, against a single
+// run: coverage tags match by equality on the status, polarity, and action
+// fields, so the rows decide each tag without rerunning the command. The
+// uncovered tag is the exception: it must select nothing, because an
+// uncovered edit fails the build.
+func TestCoverageTags_EachSelectsEdits(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --format json"), &stdout, io.Discard))
+	var rows []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
 
-func Test_ChecksTagsKind(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags existence"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags requiredness"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags mutability"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags type"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags constraints"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags values"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags structure"), io.Discard, io.Discard))
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog -l ru --tags lifecycle"), io.Discard, io.Discard))
+	for _, tag := range internal.GetCoverageTagsForTest() {
+		count := 0
+		for _, row := range rows {
+			if row["status"] == tag || row["polarity"] == tag || row["action"] == tag {
+				count++
+			}
+		}
+		if tag == "uncovered" {
+			require.Zero(t, count, "tag %q must select nothing while the coverage audit passes", tag)
+		} else {
+			require.Positive(t, count, "tag %q selects no edits", tag)
+		}
+	}
 }
 
 // Every tag must name exactly one dimension of its vocabulary: filtering
