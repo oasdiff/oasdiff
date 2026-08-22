@@ -58,7 +58,7 @@ func Coverage() []CoverageEdit {
 		for _, loc := range rule.Locations {
 			claim, err := metaschema.ParseClaim(loc)
 			if err != nil {
-				continue // the checker's TestRuleLocations reports it
+				continue // an invalid claim fails the checker's audit; not reported here
 			}
 			claims = append(claims, claimant{claim, rule.Id})
 		}

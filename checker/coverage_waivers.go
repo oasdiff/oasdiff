@@ -31,10 +31,10 @@ type CoverageWaiver struct {
 }
 
 // CoverageWaivers records why each wire-relevant edit with no rule is
-// deliberately or knowingly uncovered. The checker's TestRuleCoverage fails
-// on any uncovered edit no waiver matches (add a rule or a waiver) and on
-// any waiver matching no uncovered edit (remove the stale waiver), so the
-// list stays an honest, reviewed record.
+// deliberately or knowingly uncovered. An uncovered edit no waiver matches
+// (add a rule or a waiver) and a waiver matching no uncovered edit (remove
+// the stale entry) both fail the build, so the list stays an honest,
+// reviewed record.
 var CoverageWaivers = []CoverageWaiver{
 	// security schemes are consumed by name, never resolved through $ref
 	// into usage sites, so the resolved-at-usage reasoning below does not

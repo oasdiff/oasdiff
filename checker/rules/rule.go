@@ -33,7 +33,7 @@ func (r Rule) Actions() []metaschema.Action {
 	for _, loc := range r.Locations {
 		claim, err := metaschema.ParseClaim(loc)
 		if err != nil {
-			continue // the checker's TestRuleLocations reports invalid claims
+			continue // an invalid claim fails the checker's audit; not reported here
 		}
 		for _, a := range claim.Actions {
 			if !slices.Contains(actions, a) {

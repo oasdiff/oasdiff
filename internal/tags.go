@@ -12,8 +12,7 @@ import (
 // matches a row. Tag filtering is OR within a dimension and AND across
 // dimensions: --tags request,response,add selects rows that are (request or
 // response) and add. Values must be unique across the dimensions of one
-// vocabulary so every tag names exactly one axis; TestTagVocabulariesUnique
-// guards that.
+// vocabulary so every tag names exactly one axis.
 type tagDimension[T any] struct {
 	values []string
 	match  func(value string, row T) bool

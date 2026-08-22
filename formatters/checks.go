@@ -5,8 +5,7 @@ import "cmp"
 // Check is one rule in a `oasdiff checks` listing.
 //
 // Every field except Id is omitempty. The changelog and breaking-change rules
-// populate all of them (TestChecks_AllRuleFieldsPopulated pins that), so their
-// output is unchanged; the validate rules have an id, a description and a
+// populate all of them, so their output is unchanged; the validate rules have an id, a description and a
 // level but no direction, area, kind, actions or effect, and those are
 // omitted rather than rendered as empty strings.
 type Check struct {
