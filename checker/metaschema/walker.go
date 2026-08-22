@@ -132,10 +132,10 @@ func (w *walker) walkStruct(t reflect.Type, path string, annotation bool) {
 		if !f.IsExported() {
 			continue
 		}
-		if f.Name == "Origin" {
-			continue
-		}
-		if f.Name == "Extensions" {
+		// kin holds specification extensions in a map tagged json:"-", so
+		// this is matched by name and shape rather than by the tag that
+		// hides every other untagged field
+		if f.Name == "Extensions" && f.Type.Kind() == reflect.Map {
 			w.emit(joinLocation(path, "x-*"), false, true, ActionAdd, ActionRemove, ActionChange)
 			continue
 		}
