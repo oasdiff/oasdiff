@@ -48,8 +48,7 @@ func matchTagDimensions[T any](tags []string, dimensions []tagDimension[T], row 
 
 // changelogTagDimensions is the tag vocabulary of `checks changelog`:
 // direction, action (the syntactic edits from the rule's location claims),
-// effect (the rule's verdict; generalize and specialize are aliases kept
-// from the retired action vocabulary), area, and kind.
+// effect (the rule's verdict), area, and kind.
 var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 	{
 		values: []string{"request", "response"},
@@ -64,12 +63,12 @@ var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 		},
 	},
 	{
-		values: []string{"widens", "narrows", "generalize", "specialize"},
+		values: []string{"widens", "narrows"},
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
 			switch value {
-			case "widens", "generalize":
+			case "widens":
 				return rule.Effect == checker.EffectWidens
-			case "narrows", "specialize":
+			case "narrows":
 				return rule.Effect == checker.EffectNarrows
 			}
 			return false

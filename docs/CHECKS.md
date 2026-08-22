@@ -55,7 +55,7 @@ Available tags, by dimension:
 
 - direction: `request`, `response`
 - action: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`
-- effect: `widens`, `narrows` (the retired action names `generalize` and `specialize` are kept as aliases)
+- effect: `widens`, `narrows`
 - area: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`
 - kind: `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`
 
