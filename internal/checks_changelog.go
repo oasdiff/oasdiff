@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"slices"
-	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
@@ -91,7 +90,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 			Direction:   rule.Direction.String(),
 			Area:        rule.Area.String(),
 			Kind:        rule.Kind.String(),
-			Actions:     joinActions(rule.Actions()),
+			Actions:     actionStrings(rule.Actions()),
 			Effect:      rule.Effect.String(),
 			Locations:   rule.Locations,
 			Description: localizer(rule.Description),
@@ -162,10 +161,10 @@ func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) b
 	return matchTagDimensions(tags, changelogTagDimensions, rule)
 }
 
-func joinActions(actions []metaschema.Action) string {
+func actionStrings(actions []metaschema.Action) []string {
 	strs := make([]string, len(actions))
 	for i, a := range actions {
 		strs[i] = string(a)
 	}
-	return strings.Join(strs, ",")
+	return strs
 }

@@ -2,6 +2,7 @@ package formatters
 
 import (
 	"fmt"
+
 	"github.com/oasdiff/oasdiff/colorize"
 )
 

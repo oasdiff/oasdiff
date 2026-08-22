@@ -61,7 +61,7 @@ func TestChecks_AllRuleFieldsPopulated(t *testing.T) {
 func TestChecks_FullCheckRendersAllFields(t *testing.T) {
 	checks := formatters.Checks{{
 		Id: "some-rule", Level: "error", Direction: "request", Area: "schema",
-		Kind: "type", Actions: "change", Effect: "widens", Description: "d", Mitigation: "m",
+		Kind: "type", Actions: []string{"change"}, Effect: "widens", Description: "d", Mitigation: "m",
 	}}
 
 	out, err := formatters.JSONFormatter{}.RenderChecks(checks, formatters.NewRenderOpts())

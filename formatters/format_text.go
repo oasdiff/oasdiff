@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"text/tabwriter"
 
+	"strconv"
+	"strings"
+
 	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/colorize"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/report"
-	"strconv"
-	"strings"
 )
 
 type TEXTFormatter struct {
