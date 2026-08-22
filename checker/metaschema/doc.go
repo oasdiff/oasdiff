@@ -4,10 +4,9 @@
 //
 // The enumeration is derived independently of the checker's rules, which is
 // the point of the package: it is the yardstick the rules are measured
-// against (see checker/coverage), and a yardstick built from the rules would
-// share their blind spots and measure nothing. It is derived by reflection
-// from the kin-openapi types oasdiff parses specs into, so a field added
-// upstream shows up as new edits without a manual update here.
+// against (see checker/coverage). It comes by reflection from the
+// kin-openapi types oasdiff parses specs into, so a field added upstream
+// shows up as new edits without a manual update here.
 //
 // Actions are syntactic (add, remove, set, unset, change, increase,
 // decrease), not verdicts: whether an edit is breaking is the checker's
