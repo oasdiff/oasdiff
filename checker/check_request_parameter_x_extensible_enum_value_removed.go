@@ -1,8 +1,9 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/diff"
 	"slices"
+
+	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (

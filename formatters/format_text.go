@@ -10,6 +10,7 @@ import (
 
 	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
 	"github.com/oasdiff/oasdiff/colorize"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/report"
@@ -53,7 +54,7 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	return result.Bytes(), nil
 }
 
-func (f TEXTFormatter) RenderCoverage(edits []checker.CoverageEdit, opts RenderOpts) ([]byte, error) {
+func (f TEXTFormatter) RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
 	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
@@ -66,7 +67,7 @@ func (f TEXTFormatter) RenderCoverage(edits []checker.CoverageEdit, opts RenderO
 	return result.Bytes(), nil
 }
 
-func (f TEXTFormatter) RenderCoveragePatterns(patterns []checker.CoveragePattern, opts RenderOpts) ([]byte, error) {
+func (f TEXTFormatter) RenderCoveragePatterns(patterns []coverage.Pattern, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
 	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)

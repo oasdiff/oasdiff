@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/spf13/cobra"
 )
@@ -47,9 +48,9 @@ func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	var bytes []byte
 	if flags.getViper().GetBool("patterns") {
-		bytes, err = formatter.RenderCoveragePatterns(checker.CoveragePatterns(), formatters.NewRenderOpts())
+		bytes, err = formatter.RenderCoveragePatterns(coverage.Patterns(), formatters.NewRenderOpts())
 	} else {
-		edits := slices.DeleteFunc(checker.Coverage(), func(edit checker.CoverageEdit) bool {
+		edits := slices.DeleteFunc(coverage.Analyze(checker.GetAllRules().Metadata()), func(edit coverage.Edit) bool {
 			return !matchCoverageTags(flags.getTags(), edit)
 		})
 		bytes, err = formatter.RenderCoverage(edits, formatters.NewRenderOpts())
@@ -65,22 +66,22 @@ func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 // coverageTagDimensions is the tag vocabulary of `checks changelog coverage`:
 // the audit status, the edit's polarity, and the edit's action.
-var coverageTagDimensions = []tagDimension[checker.CoverageEdit]{
+var coverageTagDimensions = []tagDimension[coverage.Edit]{
 	{
 		values: []string{"covered", "uncovered", "waived", "non-contract"},
-		match: func(value string, edit checker.CoverageEdit) bool {
+		match: func(value string, edit coverage.Edit) bool {
 			return value == string(edit.Status)
 		},
 	},
 	{
 		values: []string{"request", "response", "document", "shared"},
-		match: func(value string, edit checker.CoverageEdit) bool {
+		match: func(value string, edit coverage.Edit) bool {
 			return value == edit.Polarity
 		},
 	},
 	{
 		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
-		match: func(value string, edit checker.CoverageEdit) bool {
+		match: func(value string, edit coverage.Edit) bool {
 			return value == edit.Action
 		},
 	},
@@ -90,6 +91,6 @@ func GetCoverageTags() []string {
 	return tagValues(coverageTagDimensions)
 }
 
-func matchCoverageTags(tags []string, edit checker.CoverageEdit) bool {
+func matchCoverageTags(tags []string, edit coverage.Edit) bool {
 	return matchTagDimensions(tags, coverageTagDimensions, edit)
 }

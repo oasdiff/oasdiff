@@ -6,6 +6,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
 	"github.com/oasdiff/oasdiff/diff"
 	"go.yaml.in/yaml/v3"
 )
@@ -33,11 +34,11 @@ func (f YAMLFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	return printYAML(adaptStructure(NewChanges(changes, f.Localizer), opts))
 }
 
-func (f YAMLFormatter) RenderCoverage(edits []checker.CoverageEdit, opts RenderOpts) ([]byte, error) {
+func (f YAMLFormatter) RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error) {
 	return printYAML(edits)
 }
 
-func (f YAMLFormatter) RenderCoveragePatterns(patterns []checker.CoveragePattern, opts RenderOpts) ([]byte, error) {
+func (f YAMLFormatter) RenderCoveragePatterns(patterns []coverage.Pattern, opts RenderOpts) ([]byte, error) {
 	return printYAML(patterns)
 }
 

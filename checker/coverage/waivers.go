@@ -1,4 +1,4 @@
-package checker
+package coverage
 
 // WaiverCategory says what kind of accounting a waiver is, which decides
 // whether a missing check is implied: only open waivers describe checks
@@ -17,11 +17,11 @@ const (
 	CategoryCoveredAs WaiverCategory = "covered-as"
 )
 
-// CoverageWaiver explains one family of wire-relevant edits that no rule
+// Waiver explains one family of wire-relevant edits that no rule
 // covers. Facts about the object model itself (fields outside the wire
 // contract) live in metaschema.NonContracts; entries here are relative to
 // the rule registry and go stale as checks are added.
-type CoverageWaiver struct {
+type Waiver struct {
 	Category WaiverCategory
 	// Pattern is a location glob (see metaschema.MatchLocation), optionally
 	// restricted to actions with ":action[,action...]"; without the suffix
@@ -30,12 +30,12 @@ type CoverageWaiver struct {
 	Reason  string
 }
 
-// CoverageWaivers records why each wire-relevant edit with no rule is
+// Waivers records why each wire-relevant edit with no rule is
 // deliberately or knowingly uncovered. An uncovered edit no waiver matches
 // (add a rule or a waiver) and a waiver matching no uncovered edit (remove
 // the stale entry) both fail the build, so the list stays an honest,
 // reviewed record.
-var CoverageWaivers = []CoverageWaiver{
+var Waivers = []Waiver{
 	// security schemes are consumed by name, never resolved through $ref
 	// into usage sites, so the resolved-at-usage reasoning below does not
 	// apply to them; this entry must precede components.**
