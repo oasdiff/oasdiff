@@ -3,6 +3,7 @@ package internal_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -51,5 +52,41 @@ func TestChecksCoverage_Patterns(t *testing.T) {
 	for _, row := range rows {
 		require.Contains(t, []string{"waiver", "non-contract"}, row.Kind)
 		require.Positive(t, row.Edits, "stale pattern %q accounts for no edits", row.Pattern)
+	}
+}
+
+// Same vocabulary-driven sweep for the coverage listing, against a single
+// run: coverage tags match by equality on the status, polarity, and action
+// fields, so the rows decide each tag without rerunning the command. The
+// uncovered tag is the exception: it must select nothing, because an
+// uncovered edit fails the build.
+func TestCoverageTags_EachSelectsEdits(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --format json"), &stdout, io.Discard))
+	var rows []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
+
+	for _, tag := range internal.GetCoverageTagsForTest() {
+		count := 0
+		for _, row := range rows {
+			if row["status"] == tag || row["polarity"] == tag || row["action"] == tag {
+				count++
+			}
+		}
+		if tag == "uncovered" {
+			require.Zero(t, count, "tag %q must select nothing while the coverage audit passes", tag)
+		} else {
+			require.Positive(t, count, "tag %q selects no edits", tag)
+		}
+	}
+}
+
+// Every tag must name exactly one dimension of the vocabulary; see the
+// changelog listing's uniqueness test for why.
+func TestCoverageTags_Unique(t *testing.T) {
+	seen := map[string]bool{}
+	for _, tag := range internal.GetCoverageTagsForTest() {
+		require.False(t, seen[tag], "tag %q appears in two dimensions", tag)
+		seen[tag] = true
 	}
 }
