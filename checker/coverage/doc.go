@@ -8,9 +8,9 @@
 //
 // The rules were defined gradually, each covering one more kind of change,
 // which leaves the central question unanswerable: how well does oasdiff do
-// its job? Which changes does it not detect? The checker's symmetry and
-// severity-law tests audit the rules for consistency with each other, but
-// consistency cannot reveal what is absent altogether.
+// its job? Which changes does it not detect? Auditing the rules against each
+// other cannot answer it, because consistency cannot reveal what is absent
+// altogether.
 //
 // Package coverage computes the answer. Analyze measures the rules against
 // every possible edit of an OpenAPI document (see checker/metaschema) and
