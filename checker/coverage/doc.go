@@ -12,16 +12,19 @@
 // severity-law tests audit the rules for consistency with each other, but
 // consistency cannot reveal what is absent altogether.
 //
-// Package coverage answers the question. It measures the rules against every
-// possible edit of an OpenAPI document (see checker/metaschema) and reports
-// what the audit decides about each edit: which checks cover it, or why none
-// are expected. Each rule declares the edits it covers, and every edit that
-// can change which payloads are valid must be covered by a check or waived
-// with a reviewed reason. Completeness thereby stops being a claim and
-// becomes a test: an uncovered edit fails the build, and so does a waiver
-// that no longer accounts for anything, so a gap is identified and tracked
-// rather than assumed away. `oasdiff checks changelog coverage` renders the
-// accounting, and lists a suggested id for each check still missing.
+// Package coverage computes the answer. Analyze measures the rules against
+// every possible edit of an OpenAPI document (see checker/metaschema) and
+// decides each edit: which checks cover it, or why none are expected. Each
+// rule declares the edits it covers, and every edit that can change which
+// payloads are valid must be covered by a check or waived with a reviewed
+// reason.
+//
+// Two callers act on that: the checker's tests, which fail the build on an
+// edit that is neither covered nor waived and on a waiver that no longer
+// accounts for anything; and `oasdiff checks changelog coverage`, which
+// renders the accounting and names a suggested id for each check still
+// missing. Completeness is thereby a test rather than a claim, and a gap is
+// tracked rather than assumed away.
 //
 // Analyze takes the rules to measure as an argument rather than calling
 // checker.GetAllRules itself, so this package needs only the rule model and
