@@ -30,7 +30,7 @@ func getChecksCoverageCmd() *cobra.Command {
 	}
 
 	addChecksFormatFlags(&cmd)
-	enumWithOptions(&cmd, newEnumSliceValue(getCoverageTags(), nil), "tags", "t", "include only edits matching the tags: values of the same dimension are ORed, dimensions are ANDed")
+	enumWithOptions(&cmd, newEnumSliceValue(GetCoverageTags(), nil), "tags", "t", "include only edits matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	cmd.PersistentFlags().Bool("patterns", false, "list the waiver and non-contract patterns instead of the edits")
 
 	return &cmd
@@ -86,7 +86,7 @@ var coverageTagDimensions = []tagDimension[checker.CoverageEdit]{
 	},
 }
 
-func getCoverageTags() []string {
+func GetCoverageTags() []string {
 	return tagValues(coverageTagDimensions)
 }
 

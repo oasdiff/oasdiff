@@ -66,7 +66,7 @@ func TestCoverageTags_EachSelectsEdits(t *testing.T) {
 	var rows []map[string]any
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
 
-	for _, tag := range internal.GetCoverageTagsForTest() {
+	for _, tag := range internal.GetCoverageTags() {
 		count := 0
 		for _, row := range rows {
 			if row["status"] == tag || row["polarity"] == tag || row["action"] == tag {
@@ -85,7 +85,7 @@ func TestCoverageTags_EachSelectsEdits(t *testing.T) {
 // changelog listing's uniqueness test for why.
 func TestCoverageTags_Unique(t *testing.T) {
 	seen := map[string]bool{}
-	for _, tag := range internal.GetCoverageTagsForTest() {
+	for _, tag := range internal.GetCoverageTags() {
 		require.False(t, seen[tag], "tag %q appears in two dimensions", tag)
 		seen[tag] = true
 	}

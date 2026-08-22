@@ -41,7 +41,7 @@ func countRows(t *testing.T, cmd string) int {
 // least one row: a tag selecting nothing is a dead vocabulary entry or a
 // broken matcher.
 func TestChangelogTags_EachSelectsRules(t *testing.T) {
-	for _, tag := range internal.GetChangelogTagsForTest() {
+	for _, tag := range internal.GetChangelogTags() {
 		require.Positive(t, countRows(t, "oasdiff checks changelog --format json --tags "+tag), "tag %q selects no rules", tag)
 	}
 }
@@ -52,7 +52,7 @@ func TestChangelogTags_EachSelectsRules(t *testing.T) {
 // collides must pick another name.
 func TestChangelogTags_Unique(t *testing.T) {
 	seen := map[string]bool{}
-	for _, tag := range internal.GetChangelogTagsForTest() {
+	for _, tag := range internal.GetChangelogTags() {
 		require.False(t, seen[tag], "tag %q appears in two dimensions", tag)
 		seen[tag] = true
 	}
