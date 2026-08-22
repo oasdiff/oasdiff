@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
+	"github.com/oasdiff/oasdiff/checker/metaschema"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/spf13/cobra"
 )
@@ -108,4 +110,62 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 	_, _ = fmt.Fprintf(stdout, "%s\n", bytes)
 
 	return nil
+}
+
+// changelogTagDimensions is the tag vocabulary of `checks changelog`:
+// direction, action (the syntactic edits from the rule's location claims),
+// effect (the rule's verdict), area, and kind.
+var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
+	{
+		values: []string{"request", "response"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return value == rule.Direction.String()
+		},
+	},
+	{
+		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return slices.Contains(rule.Actions(), metaschema.Action(value))
+		},
+	},
+	{
+		values: []string{"widens", "narrows"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			switch value {
+			case "widens":
+				return rule.Effect == checker.EffectWidens
+			case "narrows":
+				return rule.Effect == checker.EffectNarrows
+			}
+			return false
+		},
+	},
+	{
+		values: []string{"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return value == rule.Area.String()
+		},
+	},
+	{
+		values: []string{"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return value == rule.Kind.String()
+		},
+	},
+}
+
+func getChangelogTags() []string {
+	return tagValues(changelogTagDimensions)
+}
+
+func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
+	return matchTagDimensions(tags, changelogTagDimensions, rule)
+}
+
+func joinActions(actions []metaschema.Action) string {
+	strs := make([]string, len(actions))
+	for i, a := range actions {
+		strs[i] = string(a)
+	}
+	return strings.Join(strs, ",")
 }

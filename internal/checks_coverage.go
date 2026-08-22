@@ -62,3 +62,34 @@ func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	return false, nil
 }
+
+// coverageTagDimensions is the tag vocabulary of `checks changelog coverage`:
+// the audit status, the edit's polarity, and the edit's action.
+var coverageTagDimensions = []tagDimension[checker.CoverageEdit]{
+	{
+		values: []string{"covered", "uncovered", "waived", "non-contract"},
+		match: func(value string, edit checker.CoverageEdit) bool {
+			return value == string(edit.Status)
+		},
+	},
+	{
+		values: []string{"request", "response", "document", "shared"},
+		match: func(value string, edit checker.CoverageEdit) bool {
+			return value == edit.Polarity
+		},
+	},
+	{
+		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
+		match: func(value string, edit checker.CoverageEdit) bool {
+			return value == edit.Action
+		},
+	},
+}
+
+func getCoverageTags() []string {
+	return tagValues(coverageTagDimensions)
+}
+
+func matchCoverageTags(tags []string, edit checker.CoverageEdit) bool {
+	return matchTagDimensions(tags, coverageTagDimensions, edit)
+}

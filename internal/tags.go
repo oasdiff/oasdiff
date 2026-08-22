@@ -1,12 +1,6 @@
 package internal
 
-import (
-	"slices"
-	"strings"
-
-	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/checker/metaschema"
-)
+import "slices"
 
 // A tagDimension is one axis of a tag vocabulary: its values and how a value
 // matches a row. Tag filtering is OR within a dimension and AND across
@@ -44,93 +38,4 @@ func matchTagDimensions[T any](tags []string, dimensions []tagDimension[T], row 
 		}
 	}
 	return true
-}
-
-// changelogTagDimensions is the tag vocabulary of `checks changelog`:
-// direction, action (the syntactic edits from the rule's location claims),
-// effect (the rule's verdict), area, and kind.
-var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
-	{
-		values: []string{"request", "response"},
-		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			return value == rule.Direction.String()
-		},
-	},
-	{
-		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
-		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			return slices.Contains(rule.Actions(), metaschema.Action(value))
-		},
-	},
-	{
-		values: []string{"widens", "narrows"},
-		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			switch value {
-			case "widens":
-				return rule.Effect == checker.EffectWidens
-			case "narrows":
-				return rule.Effect == checker.EffectNarrows
-			}
-			return false
-		},
-	},
-	{
-		values: []string{"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components"},
-		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			return value == rule.Area.String()
-		},
-	},
-	{
-		values: []string{"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle"},
-		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			return value == rule.Kind.String()
-		},
-	},
-}
-
-// coverageTagDimensions is the tag vocabulary of `checks changelog coverage`:
-// the audit status, the edit's polarity, and the edit's action.
-var coverageTagDimensions = []tagDimension[checker.CoverageEdit]{
-	{
-		values: []string{"covered", "uncovered", "waived", "non-contract"},
-		match: func(value string, edit checker.CoverageEdit) bool {
-			return value == string(edit.Status)
-		},
-	},
-	{
-		values: []string{"request", "response", "document", "shared"},
-		match: func(value string, edit checker.CoverageEdit) bool {
-			return value == edit.Polarity
-		},
-	},
-	{
-		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
-		match: func(value string, edit checker.CoverageEdit) bool {
-			return value == edit.Action
-		},
-	},
-}
-
-func getChangelogTags() []string {
-	return tagValues(changelogTagDimensions)
-}
-
-func getCoverageTags() []string {
-	return tagValues(coverageTagDimensions)
-}
-
-func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
-	return matchTagDimensions(tags, changelogTagDimensions, rule)
-}
-
-func matchCoverageTags(tags []string, edit checker.CoverageEdit) bool {
-	return matchTagDimensions(tags, coverageTagDimensions, edit)
-}
-
-func joinActions(actions []metaschema.Action) string {
-	strs := make([]string, len(actions))
-	for i, a := range actions {
-		strs[i] = string(a)
-	}
-	return strings.Join(strs, ",")
 }
