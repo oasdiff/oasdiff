@@ -19,8 +19,8 @@
 // changes. Every rule declares which edits it covers, and every edit must
 // be covered by a rule or carry a reviewed reason why not; the gap between
 // the two is thereby identified, tracked, and closed. Completeness stops
-// being a claim and becomes a test (the checker's TestRuleCoverage;
-// `oasdiff checks changelog coverage` renders the same accounting).
+// being a claim and becomes a test: the build fails while the accounting
+// is incomplete, and `oasdiff checks changelog coverage` renders it.
 //
 // The enumeration is derived by reflection from the kin-openapi types
 // oasdiff parses specs into, so a field added upstream shows up as new

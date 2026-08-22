@@ -54,13 +54,7 @@ var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 	{
 		values: []string{"request", "response"},
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			switch value {
-			case "request":
-				return rule.Direction == checker.DirectionRequest
-			case "response":
-				return rule.Direction == checker.DirectionResponse
-			}
-			return false
+			return value == rule.Direction.String()
 		},
 	},
 	{
@@ -84,13 +78,13 @@ var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 	{
 		values: []string{"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components"},
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			return matchAreaTag(value, rule.Area)
+			return value == rule.Area.String()
 		},
 	},
 	{
 		values: []string{"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle"},
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			return matchKindTag(value, rule.Kind)
+			return value == rule.Kind.String()
 		},
 	},
 }
@@ -132,54 +126,6 @@ func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) b
 
 func matchCoverageTags(tags []string, edit checker.CoverageEdit) bool {
 	return matchTagDimensions(tags, coverageTagDimensions, edit)
-}
-
-func matchAreaTag(tag string, area checker.Area) bool {
-	switch tag {
-	case "schema":
-		return area == checker.AreaSchema
-	case "parameters":
-		return area == checker.AreaParameters
-	case "requestBody":
-		return area == checker.AreaRequestBody
-	case "responses":
-		return area == checker.AreaResponses
-	case "paths":
-		return area == checker.AreaPaths
-	case "headers":
-		return area == checker.AreaHeaders
-	case "security":
-		return area == checker.AreaSecurity
-	case "tags":
-		return area == checker.AreaTags
-	case "components":
-		return area == checker.AreaComponents
-	}
-
-	return false
-}
-
-func matchKindTag(tag string, kind checker.Kind) bool {
-	switch tag {
-	case "existence":
-		return kind == checker.KindExistence
-	case "requiredness":
-		return kind == checker.KindRequiredness
-	case "mutability":
-		return kind == checker.KindMutability
-	case "type":
-		return kind == checker.KindType
-	case "constraints":
-		return kind == checker.KindConstraints
-	case "values":
-		return kind == checker.KindValues
-	case "structure":
-		return kind == checker.KindStructure
-	case "lifecycle":
-		return kind == checker.KindLifecycle
-	}
-
-	return false
 }
 
 func joinActions(actions []metaschema.Action) string {
