@@ -23,7 +23,7 @@
 // rather than assumed away. `oasdiff checks changelog coverage` renders the
 // accounting, and lists a suggested id for each check still missing.
 //
-// The analysis takes the rules as input rather than reading the registry, so
-// it depends on the rule model and the enumeration alone, not on the checker
-// engine.
+// Analyze takes the rules to measure as an argument rather than reading the
+// checker's registry, so this package needs only the rule model and the
+// enumeration, never the code that runs the checks.
 package coverage
