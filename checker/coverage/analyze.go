@@ -49,15 +49,10 @@ func decide(edit metaschema.Edit, claims []claimant) Edit {
 		Location: edit.Location,
 		Action:   string(edit.Action),
 		Polarity: string(edit.Polarity),
-	}
-	for _, c := range claims {
-		if c.claim.Matches(edit) {
-			row.Checks = append(row.Checks, c.id)
-		}
+		Checks:   claimingChecks(edit, claims),
 	}
 
 	if len(row.Checks) > 0 {
-		sort.Strings(row.Checks)
 		row.Status = Covered
 		return row
 	}
@@ -83,4 +78,16 @@ func decide(edit metaschema.Edit, claims []claimant) Edit {
 	row.Status = Uncovered
 	row.SuggestedId = suggestId(edit)
 	return row
+}
+
+// claimingChecks returns the ids of the checks whose claims cover the edit.
+func claimingChecks(edit metaschema.Edit, claims []claimant) []string {
+	var ids []string
+	for _, c := range claims {
+		if c.claim.Matches(edit) {
+			ids = append(ids, c.id)
+		}
+	}
+	sort.Strings(ids)
+	return ids
 }
