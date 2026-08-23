@@ -9,6 +9,7 @@ package validate
 
 import (
 	"errors"
+	"reflect"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -34,10 +35,21 @@ func lineColumnForKinError(err error) (int, int) {
 //   - Origin.Fields.Lookup(X) points at the specific scalar field X inside
 //     that collection.
 //
-// For clusters that carry a Field, we want Fields.Lookup(Field) (the
-// offending line) rather than Key (the enclosing object's line).
-// Falls back to Key when the per-field entry is missing, and finally
-// to nil for clusters with no Origin at all (WebhookNilError).
+// The cases below are refinements: each names the field its cluster should
+// pin to, so the finding lands on the offending line rather than on the
+// enclosing object. A cluster with no case here still gets a location from
+// originKey, just a coarser one, so a kin error type nobody has looked at
+// yet degrades in precision rather than reporting no location at all.
+//
+// Key is the right answer, not merely the default, whenever the offending
+// thing has no scalar field of its own to point at: a constraint violated
+// across several fields (none of which may even be present), a duplicated
+// object, or a map key, since Origin.Fields tracks struct fields rather
+// than map keys. Those clusters are left to originKey deliberately.
+//
+// Returns nil only for a cluster carrying no Origin at all (WebhookNilError,
+// whose offending key is on the document root, which the loader does not
+// track per-key), or when the document was loaded without origin tracking.
 func locationForKinError(err error) *openapi3.Location {
 	if rfe, ok := errors.AsType[*openapi3.RequiredFieldError](err); ok && rfe.Origin != nil {
 		return fieldLoc(rfe.Origin, rfe.Field)
@@ -50,9 +62,6 @@ func locationForKinError(err error) *openapi3.Location {
 		// — the per-field key under the schema where the value lives.
 		return fieldLoc(sve.Origin, sve.ValueKind)
 	}
-	if ppe, ok := errors.AsType[*openapi3.PathParametersError](err); ok && ppe.Origin != nil {
-		return ppe.Origin.Key
-	}
 	if mef, ok := errors.AsType[*openapi3.MutuallyExclusiveFieldsError](err); ok && mef.Origin != nil {
 		// Prefer Field1's location; either offender pins the finding to
 		// the right object. We don't carry both since a single Source
@@ -62,33 +71,11 @@ func locationForKinError(err error) *openapi3.Location {
 	if ffe, ok := errors.AsType[*openapi3.ForbiddenFieldError](err); ok && ffe.Origin != nil {
 		return fieldLoc(ffe.Origin, ffe.Field)
 	}
-	if sute, ok := errors.AsType[*openapi3.ServerURLTemplateError](err); ok && sute.Origin != nil {
-		return sute.Origin.Key
-	}
-	if efr, ok := errors.AsType[*openapi3.EitherFieldRequiredError](err); ok && efr.Origin != nil {
-		// EitherFieldRequiredError fires when none of {Fields...} are
-		// present, so per-field lookup wouldn't match anything — the
-		// enclosing object's Key is the right pin.
-		return efr.Origin.Key
-	}
 	if sbf, ok := errors.AsType[*openapi3.SchemaBothFormsExclusive](err); ok && sbf.Origin != nil {
 		return fieldLoc(sbf.Origin, sbf.Field)
 	}
-	if eofe, ok := errors.AsType[*openapi3.ExactlyOneFieldError](err); ok && eofe.Origin != nil {
-		// Same reasoning as EitherFieldRequiredError: cluster fires
-		// when the constraint is violated across multiple fields; the
-		// object Key is the cleanest pin.
-		return eofe.Origin.Key
-	}
 	if sec, ok := errors.AsType[*openapi3.SingleEntryContentError](err); ok && sec.Origin != nil {
 		return fieldLoc(sec.Origin, sec.Subject)
-	}
-	if pre, ok := errors.AsType[*openapi3.PathParameterRequiredError](err); ok && pre.Origin != nil {
-		// PathParameterRequiredError fires on a parameter declared with
-		// in: path but without required: true. The Key of the parameter
-		// object pins the finding correctly; the `required` field would
-		// be more precise but is absent (that's the whole bug).
-		return pre.Origin.Key
 	}
 	if ste, ok := errors.AsType[*openapi3.SchemaTypeError](err); ok && ste.Origin != nil {
 		// SchemaTypeError fires on the offending `type:` field of a
@@ -102,13 +89,6 @@ func locationForKinError(err error) *openapi3.Location {
 		// is the field value, not the surrounding block. Falls back
 		// to the operation Key if the loader didn't track the field.
 		return fieldLoc(doid.Origin, "operationId")
-	}
-	if esf, ok := errors.AsType[*openapi3.ExtraSiblingFieldsError](err); ok && esf.Origin != nil {
-		// Origin points at the parent object carrying the unexpected
-		// sibling fields. The fields themselves may not have Origin
-		// entries (Yaml parser tracks structural keys, not the
-		// offending ones), so the object Key is the best pin.
-		return esf.Origin.Key
 	}
 	if ipe, ok := errors.AsType[*openapi3.InvalidParameterInError](err); ok && ipe.Origin != nil {
 		// Pin to the parameter's `in` field if the loader tracks it,
@@ -134,19 +114,6 @@ func locationForKinError(err error) *openapi3.Location {
 	if akie, ok := errors.AsType[*openapi3.APIKeyInInvalidError](err); ok && akie.Origin != nil {
 		return fieldLoc(akie.Origin, "in")
 	}
-	if pmss, ok := errors.AsType[*openapi3.PathMustStartWithSlashError](err); ok && pmss.Origin != nil {
-		// Origin is the paths object; the offending path key lives
-		// inside it but Fields tracks struct fields, not map keys, so
-		// fall back to the paths object's Key.
-		return pmss.Origin.Key
-	}
-	if cpe, ok := errors.AsType[*openapi3.ConflictingPathsError](err); ok && cpe.Origin != nil {
-		return cpe.Origin.Key
-	}
-	if dpe, ok := errors.AsType[*openapi3.DuplicateParameterError](err); ok && dpe.Origin != nil {
-		// Origin is on the second (offending) parameter; pin to its Key.
-		return dpe.Origin.Key
-	}
 	if isme, ok := errors.AsType[*openapi3.InvalidSerializationMethodError](err); ok && isme.Origin != nil {
 		// Pin to the `style` field if the loader tracks it on the
 		// encoding/parameter/header object.
@@ -158,21 +125,82 @@ func locationForKinError(err error) *openapi3.Location {
 	if aoi, ok := errors.AsType[*openapi3.AdditionalOperationsInvalidMethodError](err); ok && aoi.Origin != nil {
 		return additionalOperationsLoc(aoi.Origin)
 	}
-	// WebhookNilError carries no Origin (the offending key is on the
-	// document root, which the loader doesn't track per-key).
-	return nil
+	if drf, ok := errors.AsType[*openapi3.DuplicateRequiredFieldError](err); ok && drf.Origin != nil {
+		// Origin is the schema; the duplicate is inside its `required`
+		// array, so pin there rather than at the schema's own line.
+		return fieldLoc(drf.Origin, "required")
+	}
+	return originKey(err)
 }
 
 // additionalOperationsLoc pins an additionalOperations key error to the
 // `additionalOperations:` field of the path item.
 //
 // The offending thing is a key inside that map, and the loader does record it
-// (on the keyed Operation's own Origin), but the error carries the path item's
-// Origin, so the map field is as close as the error itself reaches. That still
-// lands in the right block rather than nowhere, which is what these two
-// reported before. Falls back to the path item's Key.
+// on the keyed Operation's own Origin, but the error carries the path item's
+// Origin, so the map field is as close as the error itself reaches. Without
+// this the fallback would pin to the path item instead.
 func additionalOperationsLoc(origin *openapi3.Origin) *openapi3.Location {
 	return fieldLoc(origin, "additionalOperations")
+}
+
+// originKey returns the Key of whatever Origin the error carries, or nil if it
+// carries none.
+//
+// The lookup is by reflection rather than a type switch on purpose. Every kin
+// validation error that tracks a source location exposes it the same way, as a
+// public `Origin *openapi3.Origin` field, so reading that field covers the
+// clusters locationForKinError refines, the ones where the enclosing object is
+// the right answer, and any type a later kin release adds, without oasdiff
+// keeping a parallel list of kin's error types.
+//
+// The coupling is to the field's name and type. TestOriginKey_ReadsTheOriginField
+// pins both, so a kin rename fails there rather than silently dropping every
+// location.
+//
+// kin wraps the offending error in section, path and operation context, so the
+// Origin is on a leaf rather than on what the caller holds. Walk the chain the
+// way errors.AsType does and take the first Origin found, innermost wrappers
+// last, so the nearest enclosing object wins over a distant ancestor.
+func originKey(err error) *openapi3.Location {
+	for err != nil {
+		if origin := declaredOrigin(err); origin != nil && origin.Key != nil {
+			return origin.Key
+		}
+		switch unwrapped := err.(type) {
+		case interface{ Unwrap() error }:
+			err = unwrapped.Unwrap()
+		case interface{ Unwrap() []error }:
+			for _, e := range unwrapped.Unwrap() {
+				if loc := originKey(e); loc != nil {
+					return loc
+				}
+			}
+			return nil
+		default:
+			return nil
+		}
+	}
+	return nil
+}
+
+// declaredOrigin reads an error's public `Origin *openapi3.Origin` field, or
+// nil when it has none.
+func declaredOrigin(err error) *openapi3.Origin {
+	v := reflect.ValueOf(err)
+	if v.Kind() != reflect.Pointer || v.IsNil() {
+		return nil
+	}
+	v = v.Elem()
+	if v.Kind() != reflect.Struct {
+		return nil
+	}
+	field := v.FieldByName("Origin")
+	if !field.IsValid() || !field.CanInterface() {
+		return nil
+	}
+	origin, _ := field.Interface().(*openapi3.Origin)
+	return origin
 }
 
 // schemaFieldLocation returns the line/column of the named field inside a

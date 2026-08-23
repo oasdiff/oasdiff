@@ -479,9 +479,8 @@ func Test_ValidateCmd_DuplicateParameter(t *testing.T) {
 // dedicated path item field, and its keys must be RFC 9110 tokens. Both
 // findings pin to the `additionalOperations:` line: the offending thing is a
 // key inside the map, and the error carries the path item's origin, so that
-// field is the closest the error reaches. Asserting the location keeps them
-// from silently regressing to no location at all, which is what they reported
-// before locationForKinError learned these two clusters.
+// field is the closest the error reaches. The line is asserted so a change
+// that coarsens it to the path item shows up here.
 func Test_ValidateCmd_AdditionalOperationsDuplicateMethod(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/additional-operations-duplicate-method.yaml"), &stdout, io.Discard))
@@ -494,6 +493,36 @@ func Test_ValidateCmd_AdditionalOperationsInvalidMethod(t *testing.T) {
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/additional-operations-invalid-method.yaml"), &stdout, io.Discard))
 	require.Contains(t, stdout.String(), "[additional-operations-invalid-method]")
 	require.Contains(t, stdout.String(), "additional-operations-invalid-method.yaml:7:5")
+}
+
+// The same field listed twice in a schema's `required` array. kin puts the
+// Origin on the schema, so the refinement pins to its `required:` line (10)
+// rather than the schema's own line.
+func Test_ValidateCmd_DuplicateRequiredField(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml ../data/validate/duplicate-required-field.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "duplicate-required-field", findings[0]["id"])
+	src := findings[0]["source"].(map[string]any)
+	require.Equal(t, 10, src["line"], "should pin to the required: line, not the schema's line")
+}
+
+// Two tags with the same name. kin puts the Origin on the second (offending)
+// tag, and the enclosing object is the right pin for a duplicated object, so
+// this resolves through originKey rather than a refinement.
+func Test_ValidateCmd_DuplicateTag(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml --fail-on INFO ../data/validate/duplicate-tag.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "duplicate-tag", findings[0]["id"])
+	src := findings[0]["source"].(map[string]any)
+	require.Equal(t, 7, src["line"], "should pin to the second tag, the duplicate")
 }
 
 // A path key without a leading slash → PathMustStartWithSlashError.
