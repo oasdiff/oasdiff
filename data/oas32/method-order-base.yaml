@@ -1,0 +1,27 @@
+openapi: 3.2.0
+info:
+  title: method order
+  version: "1.0"
+paths:
+  /order:
+    get:
+      responses:
+        "200":
+          description: ok
+    put:
+      responses:
+        "200":
+          description: ok
+    trace:
+      responses:
+        "200":
+          description: ok
+    additionalOperations:
+      PURGE:
+        responses:
+          "200":
+            description: ok
+      LOCK:
+        responses:
+          "200":
+            description: ok

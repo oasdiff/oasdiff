@@ -475,6 +475,27 @@ func Test_ValidateCmd_DuplicateParameter(t *testing.T) {
 	require.Contains(t, stdout.String(), "[duplicate-parameter]")
 }
 
+// OpenAPI 3.2's additionalOperations may only carry methods without a
+// dedicated path item field, and its keys must be RFC 9110 tokens. Both
+// findings pin to the `additionalOperations:` line: the offending thing is a
+// key inside the map, and the error carries the path item's origin, so that
+// field is the closest the error reaches. Asserting the location keeps them
+// from silently regressing to no location at all, which is what they reported
+// before locationForKinError learned these two clusters.
+func Test_ValidateCmd_AdditionalOperationsDuplicateMethod(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/additional-operations-duplicate-method.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "[additional-operations-duplicate-method]")
+	require.Contains(t, stdout.String(), "additional-operations-duplicate-method.yaml:11:5")
+}
+
+func Test_ValidateCmd_AdditionalOperationsInvalidMethod(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/additional-operations-invalid-method.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "[additional-operations-invalid-method]")
+	require.Contains(t, stdout.String(), "additional-operations-invalid-method.yaml:7:5")
+}
+
 // A path key without a leading slash → PathMustStartWithSlashError.
 func Test_ValidateCmd_PathMustStartWithSlash(t *testing.T) {
 	var stdout bytes.Buffer

@@ -1,0 +1,31 @@
+openapi: 3.2.0
+info:
+  title: method order
+  version: "1.0"
+paths:
+  /order:
+    get:
+      responses:
+        "200":
+          description: ok
+    delete:
+      responses:
+        "200":
+          description: ok
+    query:
+      responses:
+        "200":
+          description: ok
+    additionalOperations:
+      MOVE:
+        responses:
+          "200":
+            description: ok
+      COPY:
+        responses:
+          "200":
+            description: ok
+      BREW:
+        responses:
+          "200":
+            description: ok
