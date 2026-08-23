@@ -37,7 +37,9 @@ func TestAnalyze_Covered(t *testing.T) {
 }
 
 // an edit no rule claims and no waiver explains fails the audit, and carries
-// a suggested id for the check that would cover it
+// a suggested id for the check that would cover it. Removing a path is
+// checked in practice, so no waiver accounts for it: passing no rules is
+// what leaves it uncovered here.
 func TestAnalyze_Uncovered(t *testing.T) {
 	edits := coverage.Analyze(nil)
 
@@ -48,7 +50,8 @@ func TestAnalyze_Uncovered(t *testing.T) {
 }
 
 // a waiver explains an unchecked edit; only an open waiver implies a check
-// that could exist
+// that could exist. Both edits below are waived whatever rules are passed,
+// since a waiver exists exactly where the checks do not.
 func TestAnalyze_Waived(t *testing.T) {
 	edits := coverage.Analyze(nil)
 
