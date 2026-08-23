@@ -56,33 +56,31 @@ func decide(edit metaschema.Edit, claims []claimant) Edit {
 		}
 	}
 
-	switch {
-	case len(row.Checks) > 0:
-		row.Status = Covered
+	if len(row.Checks) > 0 {
 		sort.Strings(row.Checks)
-	case edit.Annotation:
+		row.Status = Covered
+		return row
+	}
+
+	if reason, ok := metaschema.NonContractReason(edit); ok {
 		row.Status = NonContract
-		row.Reason = "annotation: documentation-only field"
-	case edit.Extension:
-		row.Status = NonContract
-		row.Reason = "specification extension"
-	default:
-		if reason, ok := nonContractReason(edit); ok {
-			row.Status = NonContract
-			row.Reason = reason
-		} else if waiver, ok := matchWaiver(edit); ok {
-			row.Status = Waived
-			row.Category = waiver.Category
-			row.Reason = waiver.Reason
-			// only an open waiver implies a missing check; the other
-			// categories say the edit is handled elsewhere
-			if waiver.Category == CategoryOpen {
-				row.SuggestedId = suggestId(edit)
-			}
-		} else {
-			row.Status = Uncovered
+		row.Reason = reason
+		return row
+	}
+
+	if waiver, ok := matchWaiver(edit); ok {
+		row.Status = Waived
+		row.Category = waiver.Category
+		row.Reason = waiver.Reason
+		// only an open waiver implies a missing check; the other categories
+		// say the edit is handled elsewhere
+		if waiver.Category == CategoryOpen {
 			row.SuggestedId = suggestId(edit)
 		}
+		return row
 	}
+
+	row.Status = Uncovered
+	row.SuggestedId = suggestId(edit)
 	return row
 }

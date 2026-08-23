@@ -40,17 +40,27 @@ var NonContracts = []NonContract{
 	{"**.schema.$comment", "comments carry no validation semantics"},
 }
 
-// WireRelevant reports whether the edit can change which payloads are
-// valid: not an annotation, not a specification extension, and not covered
-// by a NonContract entry.
-func WireRelevant(edit Edit) bool {
-	if edit.Annotation || edit.Extension {
-		return false
+// The reasons an edit needs no check by the shape of the field itself,
+// rather than by a NonContracts entry.
+const (
+	annotationReason = "annotation: documentation-only field"
+	extensionReason  = "specification extension"
+)
+
+// NonContractReason reports why an edit cannot change which payloads are
+// valid: it edits an annotation, a specification extension, or a field
+// listed in NonContracts. The second result is false for an edit that can.
+func NonContractReason(edit Edit) (string, bool) {
+	if edit.Annotation {
+		return annotationReason, true
+	}
+	if edit.Extension {
+		return extensionReason, true
 	}
 	for _, nc := range NonContracts {
 		if matches, _ := MatchPattern(nc.Pattern, edit); matches {
-			return false
+			return nc.Reason, true
 		}
 	}
-	return true
+	return "", false
 }
