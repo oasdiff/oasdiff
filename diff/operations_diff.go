@@ -3,7 +3,6 @@ package diff
 import (
 	"fmt"
 	"maps"
-	"net/http"
 	"regexp"
 	"slices"
 
@@ -57,21 +56,10 @@ func getOperationsDiff(config *Config, state *state, pathItemPair *pathItemPair)
 	return diff, nil
 }
 
-// operations are the methods with a dedicated Path Item Object field, in the
-// order diff reports them. A document that predates one of them simply has no
+// operations are the methods with a dedicated Path Item Object field, sorted,
+// as kin defines them. A document that predates one of them simply has no
 // operation under it, so none of them needs a version gate.
-var operations = []string{
-	http.MethodGet,
-	http.MethodHead,
-	http.MethodPost,
-	http.MethodPut,
-	http.MethodPatch,
-	http.MethodDelete,
-	http.MethodConnect,
-	http.MethodOptions,
-	http.MethodTrace,
-	openapi3.MethodQuery, // net/http has no constant for QUERY
-}
+var operations = openapi3.PathItemMethods()
 
 // methodsToCompare returns the methods to diff for a pair of path items: the
 // fixed-field methods above, then any custom method (OpenAPI 3.2
