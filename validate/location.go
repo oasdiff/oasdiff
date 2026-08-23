@@ -152,9 +152,27 @@ func locationForKinError(err error) *openapi3.Location {
 		// encoding/parameter/header object.
 		return fieldLoc(isme.Origin, "style")
 	}
+	if aod, ok := errors.AsType[*openapi3.AdditionalOperationsDuplicateMethodError](err); ok && aod.Origin != nil {
+		return additionalOperationsLoc(aod.Origin)
+	}
+	if aoi, ok := errors.AsType[*openapi3.AdditionalOperationsInvalidMethodError](err); ok && aoi.Origin != nil {
+		return additionalOperationsLoc(aoi.Origin)
+	}
 	// WebhookNilError carries no Origin (the offending key is on the
 	// document root, which the loader doesn't track per-key).
 	return nil
+}
+
+// additionalOperationsLoc pins an additionalOperations key error to the
+// `additionalOperations:` field of the path item.
+//
+// The offending thing is a key inside that map, and the loader does record it
+// (on the keyed Operation's own Origin), but the error carries the path item's
+// Origin, so the map field is as close as the error itself reaches. That still
+// lands in the right block rather than nowhere, which is what these two
+// reported before. Falls back to the path item's Key.
+func additionalOperationsLoc(origin *openapi3.Origin) *openapi3.Location {
+	return fieldLoc(origin, "additionalOperations")
 }
 
 // schemaFieldLocation returns the line/column of the named field inside a

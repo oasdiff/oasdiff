@@ -1,0 +1,11 @@
+openapi: 3.2.0
+info:
+  title: t
+  version: "1.0"
+paths:
+  /pets:
+    additionalOperations:
+      PURGE ALL:
+        responses:
+          '200':
+            description: ok
