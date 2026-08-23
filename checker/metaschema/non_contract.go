@@ -49,7 +49,9 @@ const (
 
 // NonContractReason reports why an edit cannot change which payloads are
 // valid: it edits an annotation, a specification extension, or a field
-// listed in NonContracts. The second result is false for an edit that can.
+// listed in NonContracts, which is read in its listed order so a specific
+// pattern must precede a general one. The second result is false for an
+// edit that can.
 func NonContractReason(edit Edit) (string, bool) {
 	if edit.Annotation {
 		return annotationReason, true
