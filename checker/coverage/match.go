@@ -2,9 +2,10 @@ package coverage
 
 import "github.com/oasdiff/oasdiff/checker/metaschema"
 
-// The lookups that decide which entry explains an unchecked edit. Both
-// tables are first-match, in their listed order, so a specific pattern must
-// precede a general one.
+// The lookups that decide which entry explains an unchecked edit:
+// metaschema.NonContracts, then Waivers. Each is first-match in its listed
+// order, so a specific pattern must precede a general one, which would
+// otherwise absorb its edits and leave it accounting for none.
 
 func firstMatch(edit metaschema.Edit, n int, pattern func(int) string) (int, bool) {
 	for i := range n {
