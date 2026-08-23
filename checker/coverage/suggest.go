@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker/metaschema"
@@ -49,15 +50,26 @@ func suggestId(edit metaschema.Edit) string {
 		prefix = strings.SplitN(loc, ".", 2)[0]
 	}
 
-	// the edited keyword: the last segment that names a field; a map entry
-	// is named by its parent, singular
+	// the edited keyword: the last segment that names a field. A map entry
+	// is a wildcard, so it takes the name of its nearest named ancestor,
+	// singular; nested entries under one collection therefore share a hint.
 	segs := strings.Split(loc, ".")
-	keyword := segs[len(segs)-1]
-	if keyword == "*" && len(segs) > 1 {
-		keyword = strings.TrimSuffix(segs[len(segs)-2], "s")
+	var keyword string
+	for i, seg := range slices.Backward(segs) {
+		if seg == "*" || seg == "x-*" {
+			continue
+		}
+		keyword = strings.TrimPrefix(seg, "$")
+		if i < len(segs)-1 {
+			keyword = strings.TrimSuffix(keyword, "s")
+		}
+		break
 	}
-	keyword = strings.TrimPrefix(keyword, "$")
 
-	id := prefix + "-" + utils.ToKebabCase(keyword) + "-" + verb
-	return strings.ReplaceAll(id, "body-body", "body")
+	// the nearest named ancestor can be the one the prefix already names
+	kebab := utils.ToKebabCase(keyword)
+	if prefix == kebab || strings.HasSuffix(prefix, "-"+kebab) {
+		return prefix + "-" + verb
+	}
+	return prefix + "-" + kebab + "-" + verb
 }
