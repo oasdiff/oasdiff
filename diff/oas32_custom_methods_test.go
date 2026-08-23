@@ -49,11 +49,28 @@ func TestDiff_CustomMethodAddedDeletedAndModified(t *testing.T) {
 
 // Custom methods are reported after the fixed-field methods and sorted among
 // themselves, so repeated runs produce the same output despite the map.
+//
+// The fixture interleaves the two groups alphabetically (BREW and COPY sort
+// before DELETE; LOCK and PURGE sort between PUT and TRACE), so sorting every
+// method together rather than keeping the groups apart fails here. Repeating
+// the diff catches a method appearing or vanishing with the map iteration
+// order, which is the reason the custom methods are sorted at all.
 func TestDiff_CustomMethodOrderIsStable(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/oas32/method-order-base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/oas32/method-order.yaml"))
+	require.NoError(t, err)
+
 	for range 10 {
-		operationsDiff := oas32Diff(t).PathsDiff.Modified["/search"].OperationsDiff
-		require.Equal(t, []string{"MOVE"}, operationsDiff.Added)
-		require.Equal(t, []string{"PURGE"}, operationsDiff.Deleted)
+		d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+
+		operationsDiff := d.PathsDiff.Modified["/order"].OperationsDiff
+		require.Equal(t, []string{"DELETE", "QUERY", "BREW", "COPY", "MOVE"}, operationsDiff.Added)
+		require.Equal(t, []string{"PUT", "TRACE", "LOCK", "PURGE"}, operationsDiff.Deleted)
 	}
 }
 
