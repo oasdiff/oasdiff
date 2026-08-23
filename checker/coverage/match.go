@@ -2,9 +2,9 @@ package coverage
 
 import "github.com/oasdiff/oasdiff/checker/metaschema"
 
-// The lookups that decide which entry explains an unchecked edit, shared
-// by Analyze and Patterns. Both tables are first-match, in their listed
-// order, so a specific pattern must precede a general one.
+// The lookups that decide which entry explains an unchecked edit. Both
+// tables are first-match, in their listed order, so a specific pattern must
+// precede a general one.
 
 func firstMatch(edit metaschema.Edit, n int, pattern func(int) string) (int, bool) {
 	for i := range n {
