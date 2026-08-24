@@ -60,7 +60,7 @@ Two entries left this section while it was being reviewed: `request-parameter-re
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
-| `response-optional-property-removed` | WARN | INFO | a conforming client already tolerates the property's absence, so removal is safe for it; the warning hedges against clients that read the field anyway | |
+| `response-optional-property-removed` | WARN | INFO | **settled: keep.** A conforming client already tolerates the property's absence, so the contract does not break. The warning flags a client that treated an optional property as guaranteed: if it fails, that is its own defect rather than a change to the API, and surfacing the risk is worth one glance | **keep** |
 | `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check does not verify that the original branch survives the wrapping, so #1037 kept the breaking verdict; see below | |
 | `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct strictly widens the accepted set, which is provable, so INFO is the sound verdict; the warning exists because the dropped constraints are invisible in the diff, which is a reporting concern rather than a contract one | |
 | `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | see below: this one needs a product decision, not a derivation | |
