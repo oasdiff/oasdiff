@@ -111,11 +111,17 @@ capability, and that is the gap the ledger entry records.
 One asymmetry surfaced while settling it, and it is not a severity question:
 the add side splits by requiredness (`request-body-added-required` is ERR,
 `request-body-added-optional` INFO, since only the first invalidates a
-body-less request), while removal is one rule for both cases. Removal widens
-either way, so the split would not change a verdict; it would let a team
-downgrade the optional case alone with `--severity-levels`. The check already
-holds the base operation, so the requiredness is in reach if that granularity
-is wanted.
+body-less request), while removal is one rule for both cases. Both cases lose
+the same declared input, so the split would not change a verdict; it would let
+a team downgrade the optional case alone with `--severity-levels`. The check
+already holds the base operation, so the requiredness is in reach if that
+granularity is wanted. `TestRequestBodyRemovedOptional` now pins the current
+behaviour, so a split has to be a decision rather than a drift.
+
+Two rules at `paths.*.*.requestBody` also disagreed on their area:
+`request-body-removed` said `schema` while every other rule on that subtree,
+its own add-side mirror included, says `request-body`. Corrected, which is what
+lets `TestRuleSymmetry` compare the pair at all.
 
 ### wrapped-in-one-of, and what would settle it
 
