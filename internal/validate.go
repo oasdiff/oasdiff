@@ -92,9 +92,9 @@ func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	// Findings are always printed; the --fail-on level decides whether they
 	// also fail the command. Default is error, so warnings and info surface
 	// without failing CI unless the caller lowers the threshold.
-	failOn, err := checker.NewLevel(flags.getFailOn())
-	if err != nil {
-		return false, getErrInvalidFlags(fmt.Errorf("invalid fail-on value: %q", flags.getFailOn()))
+	failOn, returnErr := flags.failOnLevel()
+	if returnErr != nil {
+		return false, returnErr
 	}
 
 	return findings.HasLevelOrHigher(failOn), nil
