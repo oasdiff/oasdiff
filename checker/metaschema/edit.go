@@ -7,9 +7,8 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// Edit is one possible edit of an OpenAPI document: an Action applied at a
-// Location. Edits enumerates all of them; the coverage audit checks every
-// one is handled or accounted for.
+// Edit is one way an OpenAPI document can be modified: an Action applied at
+// a Location.
 type Edit struct {
 	Location   string
 	Action     Action
