@@ -68,7 +68,7 @@ const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	reasonBoundSet     = "below the law, pending review: setting a bound on a request narrows, and the WARN rests on the change being sometimes legitimate, which is an exemption rather than a contract argument"
-	reasonRemoval      = "above the law, pending review: the removal widens the contract but signals the server stopped processing the element"
+	reasonRemoval      = "above the law, pending review: the removal reads as widening only while additionalProperties is unrestricted, so the stored level may be the sound one"
 	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
 	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
 	reasonOptHeader    = "below the law, pending review: optional softens the verdict on the strength of what clients ought not rely on"

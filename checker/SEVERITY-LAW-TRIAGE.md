@@ -52,7 +52,7 @@ not a convention.
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-removed` | ERR | INFO | removing the body widens what is accepted, but a client that still sends one loses the effect it relied on | |
-| `request-parameter-removed`, `request-property-removed`, `response-optional-property-removed` | WARN | INFO | same shape, softened to a warning | |
+| `request-parameter-removed`, `request-property-removed`, `response-optional-property-removed` | WARN | INFO | the property rows are above the law only because C2 calls the change safe, which it is not under `additionalProperties: false`; see C2 in more detail | |
 | `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check cannot verify the original branch survives the wrapping, and #1037 decided to keep the breaking verdict | |
 | `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct widens the accepted set; kept as a warning because the removed constraints are invisible in the diff | |
 | `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | a default is server-side, not part of the contract, but the parameter family predates that reading; the body and property defaults are already INFO | |
@@ -128,9 +128,14 @@ neither accepted set contains the other; treating the change as a widening
 makes these an unproven "safe". The sibling four are the same mistake in the
 harsher direction (above the law).
 
-**Recommendation: fix all eight to WARN**, or decide the containment properly
-by comparing the prefix schemas against the items schema, as the multipleOf
-checks compare divisibility.
+**Recommendation: decide the containment rather than pick a level.** The
+comparison already exists: `diff.SchemaRefsValidationEquivalent` answers the
+wire-contract question about two schemas, and three checks already call it.
+Ask it whether each prefix schema is equivalent to the items schema it
+replaces; where it is, the change is proved safe, and where it is not, the
+verdict falls to `unknown` (WARN) rather than to an assumed direction. Fixing
+all eight to WARN is the blunt version of the same correction, and is the
+fallback if the comparison turns out not to fit.
 
 ### Remaining singles (4 rules)
 
@@ -151,7 +156,7 @@ rules appear above, so a verdict here can move entries between the sections.
 | # | Decision | Justification | Decision |
 |---|---|---|---|
 | C1 | A status, media type, or header the client selects (`negotiated`) applies request polarity | the client chooses or relies on the variant, so removing it breaks clients even though it lives on the response side | |
-| C2 | Adding or removing an optional property is effect None | with default `additionalProperties` the field was already allowed, so the accepted set is unchanged | |
+| C2 | Adding or removing an optional property is effect None | **unsound as written.** It holds while `additionalProperties` is unrestricted, but with `additionalProperties: false` a removed optional property is rejected where it used to be accepted, which narrows a request. The claim was reached by failing to find a reason it was unsafe rather than by proving it safe. See the note below | |
 | C3 | Security requirements are alternatives; scopes within one are conjunctive | per the OpenAPI security model; this is what makes the security findings above | |
 | C4 | readOnly and writeOnly are advisory metadata | the specification does not make them validation constraints | |
 | C5 | Adding if/then/else narrows; removing widens | a dormant then or else is activated by if, so conditionals only add constraints | |
@@ -159,6 +164,26 @@ rules appear above, so a verdict here can move entries between the sections.
 | C7 | Lifecycle violations (removal before sunset, invalid or missing sunset, stability decreased) are ERR by policy | oasdiff's deprecation contract, distinct from the wire contract | |
 | C8 | `type-compatible` is direction-relative | on a request it means widened, on a response narrowed: the safe side for each | |
 | C9 | Removing an unused component schema is effect None | an unused component is not part of the wire contract | |
+
+### C2 in more detail
+
+`request-property-removed` and `response-optional-property-removed` appear
+above the law only because C2 calls the change safe. Under
+`additionalProperties: false` it is not: the removed property is no longer
+accepted, so a request that carried it becomes invalid. The stored WARN is
+the sound verdict and the model is what is wrong.
+
+Two ways to correct it:
+
+- **Cheap:** make the removal case `unknown`. Both rules then derive WARN,
+  match their stored level, and leave the ledger honestly.
+- **Precise:** make `additionalProperties` a guard, so a closed object gives
+  `narrows` (ERR on a request) and an open one gives `none`. This is what
+  guards are for, and it needs the checks to read the sibling keyword.
+
+The addition case is different and deliberate: adding an optional property to
+a response is reported INFO, which assumes tolerant readers. That is a stance
+worth stating rather than a proof, and it belongs in the ledger if it stays.
 
 ---
 
