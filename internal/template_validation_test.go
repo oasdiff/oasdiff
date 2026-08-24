@@ -85,3 +85,13 @@ func TestTemplateValidationInChangelog(t *testing.T) {
 		})
 	}
 }
+
+// The template/format mismatch is a flag error, so it is reported before the
+// specs are loaded: an unreadable spec must not pre-empt it.
+func TestTemplateValidation_PrecedesSpecLoading(t *testing.T) {
+	var stderr bytes.Buffer
+	exitCode := internal.Run(cmdToArgsLocal("oasdiff changelog no-such-base.yaml no-such-revision.yaml --format json --template ../data/template.md"), io.Discard, &stderr)
+
+	require.Equal(t, 111, exitCode)
+	require.Contains(t, stderr.String(), "template flag is not supported for format \"json\"")
+}
