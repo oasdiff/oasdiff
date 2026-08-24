@@ -15,9 +15,10 @@ const (
 	EffectWidens
 	// EffectNarrows: the accepted set provably shrinks.
 	EffectNarrows
-	// EffectIncomparable: provably neither set contains the other.
+	// EffectIncomparable: the change both rejects payloads that were valid
+	// and accepts payloads that were not, so neither set contains the other.
 	EffectIncomparable
-	// EffectUnknown: the check cannot decide the containment.
+	// EffectUnknown: the check cannot tell which way the change goes.
 	EffectUnknown
 	// EffectViolation: the change breaks oasdiff's lifecycle governance
 	// (removal before sunset, invalid or missing sunset, stability decrease)
