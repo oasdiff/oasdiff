@@ -68,6 +68,7 @@ const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	reasonBoundSet     = "below the law, pending review: setting a bound on a request narrows, and the WARN rests on the change being sometimes legitimate, which is an exemption rather than a contract argument"
+	reasonBodyRemoved  = "above the law, pending review: the operation withdraws a declared input, so a client that conformed by sending the body can no longer convey it, which the containment question alone does not express"
 	reasonRemoval      = "above the law, pending review: the removal reads as widening only while additionalProperties is unrestricted, so the stored level may be the sound one"
 	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
 	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
@@ -114,7 +115,7 @@ var severityDeviations = map[string]string{
 	"request-property-min-set":            reasonBoundSet,
 	"request-property-multiple-of-set":    reasonBoundSet,
 	// A2: removal signals behavior change
-	"request-body-removed":               reasonRemoval,
+	"request-body-removed":               reasonBodyRemoved,
 	"request-parameter-removed":          reasonRemoval,
 	"request-property-removed":           reasonRemoval,
 	"response-optional-property-removed": reasonRemoval,

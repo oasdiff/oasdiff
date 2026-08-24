@@ -51,7 +51,7 @@ not a convention.
 
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
-| `request-body-removed` | ERR | INFO | removing the body widens what is accepted, but a client that still sends one loses the effect it relied on | |
+| `request-body-removed` | ERR | WARN | **settled: keep.** See the reasoning below | keep |
 | `request-parameter-removed`, `request-property-removed`, `response-optional-property-removed` | WARN | INFO | the property rows are above the law only because C2 calls the change safe, which it is not under `additionalProperties: false`; see C2 in more detail | |
 | `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check cannot verify the original branch survives the wrapping, and #1037 decided to keep the breaking verdict | |
 | `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct widens the accepted set; kept as a warning because the removed constraints are invisible in the diff | |
@@ -62,6 +62,34 @@ not a convention.
 The parameter-default row is the one to look at twice: it is an escalation
 only because the sibling body and property rules are INFO. Whichever way it
 goes, the three families should agree.
+
+### request-body-removed, settled
+
+The effect was `widens`, which asserts that a request still carrying a body is
+accepted once the declaration is gone. The specification does not say that: it
+defines what `requestBody` describes when present, not what an absent one
+permits. The containment is undecided, so the effect is `unknown` and the law
+derives WARN.
+
+ERR then stands on a contract argument rather than an exemption: the operation
+withdraws a declared input, so a client that conformed by sending the body can
+no longer convey that data through the operation, whatever becomes of the
+request's validity. This is the request-side mirror of
+`response-required-property-removed`, which is ERR because an element the
+consumer relied on is gone, and it appeals to the declaration rather than to
+what a server happens to tolerate.
+
+What the containment question cannot express is the loss of a declared
+capability, and that is the gap the ledger entry records.
+
+One asymmetry surfaced while settling it, and it is not a severity question:
+the add side splits by requiredness (`request-body-added-required` is ERR,
+`request-body-added-optional` INFO, since only the first invalidates a
+body-less request), while removal is one rule for both cases. Removal widens
+either way, so the split would not change a verdict; it would let a team
+downgrade the optional case alone with `--severity-levels`. The check already
+holds the base operation, so the requiredness is in reach if that granularity
+is wanted.
 
 ---
 

@@ -211,7 +211,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaRemovedId, ERR, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, EffectWidens, nil, "paths.*.*.responses.*.content.*.itemSchema:unset"),
 		newBackwardCompatibilityRule(ResponseBodyMediaTypeItemSchemaRemovedUntypedId, ERR, MediaTypeSchemaExistenceCheck, DirectionResponse, AreaResponses, KindExistence, EffectWidens, nil, "paths.*.*.responses.*.content.*.itemSchema:unset"),
 		// RequestBodyRemovedCheck
-		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, AreaSchema, KindExistence, EffectWidens, nil, "paths.*.*.requestBody:unset"),
+		newBackwardCompatibilityRule(RequestBodyRemovedId, ERR, RequestBodyRemovedCheck, DirectionRequest, AreaSchema, KindExistence, EffectUnknown, nil, "paths.*.*.requestBody:unset"),
 		// RequestBodyRequiredUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyBecameOptionalId, INFO, RequestBodyRequiredUpdatedCheck, DirectionRequest, AreaRequestBody, KindRequiredness, EffectWidens, nil, "paths.*.*.requestBody.required:unset"),
 		newBackwardCompatibilityRule(RequestBodyBecameRequiredId, ERR, RequestBodyRequiredUpdatedCheck, DirectionRequest, AreaRequestBody, KindRequiredness, EffectNarrows, nil, "paths.*.*.requestBody.required:set"),
