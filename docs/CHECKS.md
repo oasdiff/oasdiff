@@ -69,10 +69,17 @@ Values of the same dimension are combined with OR, different dimensions with AND
 - `uncovered` — no check and no waiver (the build fails in this state, so the listing is normally empty)
 - `non-contract` — the edit cannot change which payloads are valid, so no check is expected
 
-Filter with `--tags` (status, polarity: `request`/`response`/`document`/`shared`, and the action verbs; same OR-within-dimension, AND-across-dimensions semantics as the changelog listing), pick `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for:
+Available tags, by dimension:
+
+- status: `covered`, `uncovered`, `waived`, `non-contract`
+- polarity: `request`, `response`, `document` (neither wire direction), `shared` (a component, whose direction depends on the referencing site)
+- action: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`
+
+Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. Pick the output with `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for:
 
 ```
 oasdiff checks changelog coverage --tags waived,request
+oasdiff checks changelog coverage --tags covered,add,remove
 oasdiff checks changelog coverage --patterns --format json
 ```
 
