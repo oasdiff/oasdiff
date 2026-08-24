@@ -13,10 +13,9 @@ import (
 
 const checksCoverageCmd = "checks changelog coverage"
 
-// getChecksCoverageCmd lists every possible edit of an OpenAPI document with
-// what the audit decided about it: the changelog checks that cover it, the
-// waiver or non-contract reason when none do, and a suggested id for the
-// missing check otherwise.
+// getChecksCoverageCmd lists what the audit decides about every possible
+// edit of an OpenAPI document, the inverse of `checks changelog`, which
+// lists the rules themselves.
 func getChecksCoverageCmd() *cobra.Command {
 
 	cmd := cobra.Command{
