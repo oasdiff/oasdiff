@@ -90,3 +90,11 @@ func TestCoverageTags_Unique(t *testing.T) {
 		seen[tag] = true
 	}
 }
+
+// the patterns listing has no edits to filter, so the flags are rejected
+// together rather than one being silently ignored
+func TestChecksCoverage_PatternsAndTagsRejected(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --patterns --tags covered"), &stdout, &stderr))
+	require.Contains(t, stderr.String(), "[patterns tags]")
+}

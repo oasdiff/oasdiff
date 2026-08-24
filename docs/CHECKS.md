@@ -75,7 +75,7 @@ Available tags, by dimension:
 - polarity: `request`, `response`, `document` (neither wire direction), `shared` (a component, whose direction depends on the referencing site)
 - action: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`
 
-Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. Pick the output with `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for:
+Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. Pick the output with `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for (that listing has no edits to filter, so it takes no `--tags`):
 
 ```
 oasdiff checks changelog coverage --tags waived,request

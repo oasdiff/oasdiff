@@ -30,6 +30,8 @@ func getChecksCoverageCmd() *cobra.Command {
 	addChecksFormatFlags(&cmd)
 	enumWithOptions(&cmd, newEnumSliceValue(GetCoverageTags(), nil), "tags", "t", "include only edits matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	cmd.PersistentFlags().Bool("patterns", false, "list the waiver and non-contract patterns instead of the edits")
+	// the patterns listing has no edits to filter
+	cmd.MarkFlagsMutuallyExclusive("patterns", "tags")
 
 	return &cmd
 }
