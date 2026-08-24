@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"slices"
@@ -22,7 +23,7 @@ func getChecksCoverageCmd() *cobra.Command {
 		Use:               "coverage",
 		Short:             "Display the coverage of the changelog checks over every possible edit",
 		Long:              `Display every possible edit of an OpenAPI document with the changelog checks that cover it, the reason when none are expected, and a suggested id for a missing check otherwise.`,
-		Args:              cobra.NoArgs,
+		Args:              getChecksCoverageArgs(),
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE:              getRun(runChecksCoverage),
 	}
@@ -32,6 +33,30 @@ func getChecksCoverageCmd() *cobra.Command {
 	cmd.PersistentFlags().Bool("patterns", false, "list the waiver and non-contract patterns instead of the edits")
 
 	return &cmd
+}
+
+// getChecksCoverageArgs rejects arguments and the flag combination the
+// command cannot honour.
+func getChecksCoverageArgs() cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if err := cobra.NoArgs(cmd, args); err != nil {
+			return err
+		}
+		return checkPatternsWithoutTags(cmd)
+	}
+}
+
+// checkPatternsWithoutTags rejects --tags with --patterns: the patterns
+// listing has no edits to filter.
+func checkPatternsWithoutTags(cmd *cobra.Command) error {
+	patterns, err := cmd.Flags().GetBool("patterns")
+	if err != nil || !patterns {
+		return nil
+	}
+	if cmd.Flags().Changed("tags") {
+		return errors.New("--tags filters edits, and --patterns lists patterns rather than edits")
+	}
+	return nil
 }
 
 func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
@@ -45,9 +70,6 @@ func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	var bytes []byte
 	if flags.getViper().GetBool("patterns") {
-		if len(flags.getTags()) > 0 {
-			return false, getErrPatternsWithTags()
-		}
 		bytes, err = formatter.RenderCoveragePatterns(coverage.Patterns(), formatters.NewRenderOpts())
 	} else {
 		edits := slices.DeleteFunc(coverage.Analyze(checker.GetAllRules().Metadata()), func(edit coverage.Edit) bool {
