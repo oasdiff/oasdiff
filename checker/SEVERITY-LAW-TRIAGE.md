@@ -1,9 +1,15 @@
 # Severity-Law Triage
 
-Working document for reviewing the 56 rules whose stored level disagrees with
-the level derived by the severity law (see `rule_severity_law_test.go`, run
-with `go test ./checker -run SeverityLaw`). 500 of 556 rules derive exactly;
-every disagreement below has a root cause and a proposed handling.
+Working document for reviewing the rules whose stored level disagrees with the
+level derived by the severity law (see `rule_severity_law_test.go`, run with
+`go test ./checker -run SeverityLaw`). 54 of 556 rules disagree; every
+disagreement below has a root cause and a proposed handling.
+
+Settling one often corrects the model rather than the rule: an effect that
+claims a safety nobody proved is the finding, and the stored level is usually
+sound. Three questions settle an entry: is the effect actually proved? If not,
+what is the honest one? And does any remaining gap rest on the contract or on
+an exemption?
 
 Fill in the Decision column: **keep** (the stored level stands, and the entry
 becomes a permanent ledger row with the stated reason) or **fix** (the stored
@@ -47,21 +53,34 @@ not a convention.
 
 ---
 
-## Above the law (16 rules): conservative, ratify with a reason
+## Above the law (14 rules): conservative, ratify with a reason
+
+Two entries left this section while it was being reviewed: `request-parameter-removed` and `request-property-removed` were above the law only because their effects claimed a safety nobody had proved (see *Removals that cannot be proved safe* below). They now derive their stored WARN and need no entry.
 
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
-| `request-body-removed` | ERR | WARN | **settled: keep.** See the reasoning below | keep |
-| `request-parameter-removed`, `request-property-removed`, `response-optional-property-removed` | WARN | INFO | the property rows are above the law only because C2 calls the change safe, which it is not under `additionalProperties: false`; see C2 in more detail | |
-| `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check cannot verify the original branch survives the wrapping, and #1037 decided to keep the breaking verdict | |
-| `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct widens the accepted set; kept as a warning because the removed constraints are invisible in the diff | |
-| `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | a default is server-side, not part of the contract, but the parameter family predates that reading; the body and property defaults are already INFO | |
-| `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | see the prefixItems finding below: the containment is undecided, so ERR over-reports rather than under-reports | |
-| `response-required-property-became-not-write-only` | WARN | INFO | readOnly and writeOnly are advisory in the specification, so the law reads the change as metadata; the warning flags that the field now appears in responses | |
+| `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
+| `response-optional-property-removed` | WARN | INFO | a conforming client already tolerates the property's absence, so removal is safe for it; the warning hedges against clients that read the field anyway | |
+| `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check does not verify that the original branch survives the wrapping, so #1037 kept the breaking verdict; see below | |
+| `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct strictly widens the accepted set, which is provable, so INFO is the sound verdict; the warning exists because the dropped constraints are invisible in the diff, which is a reporting concern rather than a contract one | |
+| `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | see below: this one needs a product decision, not a derivation | |
+| `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | the containment is undecided, so ERR over-reports rather than under-reports; the fix is to decide it (see the prefixItems finding) | |
+| `response-required-property-became-not-write-only` | WARN | INFO | the effect says metadata, on the reading that writeOnly is advisory; but the change does mean the response may now carry a property it did not, which is a response widening and would derive ERR. C4 is as unproven as C2 was | |
 
-The parameter-default row is the one to look at twice: it is an escalation
-only because the sibling body and property rules are INFO. Whichever way it
-goes, the three families should agree.
+### Removals that cannot be proved safe
+
+`request-parameter-removed` and `request-property-removed` were marked `widens`
+and `none`. Neither is provable:
+
+- Nothing in the specification says an undeclared query parameter is rejected,
+  so a request still carrying the removed parameter cannot be shown to remain
+  valid.
+- With `additionalProperties: false`, a removed property is rejected where it
+  used to be accepted, which narrows the request outright.
+
+Both effects are now `unknown`, which derives WARN and matches what the rules
+already reported. The stored levels were sound and the model was not, which is
+the same correction C2 needs.
 
 ### request-body-removed, settled
 
@@ -90,6 +109,31 @@ either way, so the split would not change a verdict; it would let a team
 downgrade the optional case alone with `--severity-levels`. The check already
 holds the base operation, so the requiredness is in reach if that granularity
 is wanted.
+
+### wrapped-in-one-of, and what would settle it
+
+The effect is `unknown` because the check does not compare the wrapped branch
+against the original schema. That is an implementation gap, not spec
+ambiguity: the information is in the document. `SchemaRefsValidationEquivalent`
+would answer it, as it would for prefixItems, and the verdict would follow from
+the answer rather than from caution: a wrapping that preserves the original
+branch widens, and one that does not is incomparable and breaking either way.
+Until then ERR is the conservative reading, which is the correct side to err on.
+
+### The parameter defaults need a product decision
+
+`request-parameter-default-value-added/changed/removed` are ERR while the body
+and property equivalents are INFO. The derivation calls a default metadata,
+since it does not change which payloads are valid.
+
+The argument for ERR is not about validity: a client that omits the parameter
+had a documented meaning for that omission, and changing the default changes
+what its unchanged request does. The argument for INFO is that a default is a
+server-side fallback, which is where #1109 landed for required-with-default.
+
+Both readings are defensible, and they apply equally to body properties, so
+whichever is chosen the three families should agree. This is the one entry in
+this section that a derivation cannot settle.
 
 ---
 

@@ -116,8 +116,6 @@ var severityDeviations = map[string]string{
 	"request-property-multiple-of-set":    reasonBoundSet,
 	// A2: removal signals behavior change
 	"request-body-removed":               reasonBodyRemoved,
-	"request-parameter-removed":          reasonRemoval,
-	"request-property-removed":           reasonRemoval,
 	"response-optional-property-removed": reasonRemoval,
 	// A3: wrapped in oneOf
 	"request-body-wrapped-in-one-of":  reasonWrapped,
