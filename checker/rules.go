@@ -251,20 +251,20 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterMaxItemsIncreasedId, INFO, RequestParameterMaxItemsUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.maxItems:increase"),
 		newBackwardCompatibilityRule(RequestParameterMaxItemsDecreasedId, ERR, RequestParameterMaxItemsUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maxItems:decrease"),
 		// RequestParameterMaxLengthSetCheck
-		newBackwardCompatibilityRule(RequestParameterMaxLengthSetId, WARN, RequestParameterMaxLengthSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maxLength:set"),
+		newBackwardCompatibilityRule(RequestParameterMaxLengthSetId, ERR, RequestParameterMaxLengthSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maxLength:set"),
 		// RequestParameterMaxLengthUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMaxLengthIncreasedId, INFO, RequestParameterMaxLengthUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.maxLength:increase"),
 		newBackwardCompatibilityRule(RequestParameterMaxLengthDecreasedId, ERR, RequestParameterMaxLengthUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maxLength:decrease"),
 		// RequestParameterMaxSetCheck
-		newBackwardCompatibilityRule(RequestParameterMaxSetId, WARN, RequestParameterMaxSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maximum:set"),
-		newBackwardCompatibilityRule(RequestParameterExclusiveMaxSetId, WARN, RequestParameterMaxSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.exclusiveMaximum:set"),
+		newBackwardCompatibilityRule(RequestParameterMaxSetId, ERR, RequestParameterMaxSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maximum:set"),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMaxSetId, ERR, RequestParameterMaxSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.exclusiveMaximum:set"),
 		// RequestParameterMaxUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMaxIncreasedId, INFO, RequestParameterMaxUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.maximum:increase"),
 		newBackwardCompatibilityRule(RequestParameterMaxDecreasedId, ERR, RequestParameterMaxUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maximum:decrease"),
 		newBackwardCompatibilityRule(RequestParameterExclusiveMaxIncreasedId, INFO, RequestParameterMaxUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.exclusiveMaximum:increase"),
 		newBackwardCompatibilityRule(RequestParameterExclusiveMaxDecreasedId, ERR, RequestParameterMaxUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.exclusiveMaximum:decrease"),
 		// RequestParameterMinItemsSetCheck
-		newBackwardCompatibilityRule(RequestParameterMinItemsSetId, WARN, RequestParameterMinItemsSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minItems:set"),
+		newBackwardCompatibilityRule(RequestParameterMinItemsSetId, ERR, RequestParameterMinItemsSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minItems:set"),
 		// RequestParameterMinItemsUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMinItemsIncreasedId, ERR, RequestParameterMinItemsUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minItems:increase"),
 		newBackwardCompatibilityRule(RequestParameterMinItemsDecreasedId, INFO, RequestParameterMinItemsUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.minItems:decrease"),
@@ -272,8 +272,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterMinLengthIncreasedId, ERR, RequestParameterMinLengthUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minLength:increase"),
 		newBackwardCompatibilityRule(RequestParameterMinLengthDecreasedId, INFO, RequestParameterMinLengthUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.minLength:decrease"),
 		// RequestParameterMinSetCheck
-		newBackwardCompatibilityRule(RequestParameterMinSetId, WARN, RequestParameterMinSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minimum:set"),
-		newBackwardCompatibilityRule(RequestParameterExclusiveMinSetId, WARN, RequestParameterMinSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.exclusiveMinimum:set"),
+		newBackwardCompatibilityRule(RequestParameterMinSetId, ERR, RequestParameterMinSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minimum:set"),
+		newBackwardCompatibilityRule(RequestParameterExclusiveMinSetId, ERR, RequestParameterMinSetCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.exclusiveMinimum:set"),
 		// RequestParameterMinUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMinIncreasedId, ERR, RequestParameterMinUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.minimum:increase"),
 		newBackwardCompatibilityRule(RequestParameterMinDecreasedId, INFO, RequestParameterMinUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.minimum:decrease"),
@@ -351,8 +351,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyExclusiveMaxDecreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.exclusiveMaximum:decrease"),
 		newBackwardCompatibilityRule(RequestPropertyExclusiveMaxIncreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMaximum:increase"),
 		// RequestPropertyMaxLengthSetCheck
-		newBackwardCompatibilityRule(RequestBodyMaxLengthSetId, WARN, RequestPropertyMaxLengthSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxLength:set"),
-		newBackwardCompatibilityRule(RequestPropertyMaxLengthSetId, WARN, RequestPropertyMaxLengthSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxLength:set"),
+		newBackwardCompatibilityRule(RequestBodyMaxLengthSetId, ERR, RequestPropertyMaxLengthSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxLength:set"),
+		newBackwardCompatibilityRule(RequestPropertyMaxLengthSetId, ERR, RequestPropertyMaxLengthSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxLength:set"),
 		// RequestPropertyMaxLengthUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyMaxLengthDecreasedId, ERR, RequestPropertyMaxLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxLength:decrease"),
 		newBackwardCompatibilityRule(RequestBodyMaxLengthIncreasedId, INFO, RequestPropertyMaxLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.maxLength:increase"),
@@ -360,10 +360,10 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyMaxLengthDecreasedId, INFO, RequestPropertyMaxLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.maxLength:decrease"),
 		newBackwardCompatibilityRule(RequestPropertyMaxLengthIncreasedId, INFO, RequestPropertyMaxLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.maxLength:increase"),
 		// RequestPropertyMaxSetCheck
-		newBackwardCompatibilityRule(RequestBodyMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maximum:set"),
-		newBackwardCompatibilityRule(RequestPropertyMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maximum:set"),
-		newBackwardCompatibilityRule(RequestBodyExclusiveMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMaximum:set"),
-		newBackwardCompatibilityRule(RequestPropertyExclusiveMaxSetId, WARN, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMaximum:set"),
+		newBackwardCompatibilityRule(RequestBodyMaxSetId, ERR, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maximum:set"),
+		newBackwardCompatibilityRule(RequestPropertyMaxSetId, ERR, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maximum:set"),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMaxSetId, ERR, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMaximum:set"),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMaxSetId, ERR, RequestPropertyMaxSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMaximum:set"),
 		// RequestPropertyMinIncreasedCheck
 		newBackwardCompatibilityRule(RequestBodyMinIncreasedId, ERR, RequestPropertyMinIncreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minimum:increase"),
 		newBackwardCompatibilityRule(RequestBodyMinDecreasedId, INFO, RequestPropertyMinIncreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.minimum:decrease"),
@@ -379,18 +379,18 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestBodyMinItemsIncreasedId, ERR, RequestPropertyMinItemsIncreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minItems:increase"),
 		newBackwardCompatibilityRule(RequestPropertyMinItemsIncreasedId, ERR, RequestPropertyMinItemsIncreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minItems:increase"),
 		// RequestPropertyMinItemsSetCheck
-		newBackwardCompatibilityRule(RequestBodyMinItemsSetId, WARN, RequestPropertyMinItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minItems:set"),
-		newBackwardCompatibilityRule(RequestPropertyMinItemsSetId, WARN, RequestPropertyMinItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minItems:set"),
+		newBackwardCompatibilityRule(RequestBodyMinItemsSetId, ERR, RequestPropertyMinItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minItems:set"),
+		newBackwardCompatibilityRule(RequestPropertyMinItemsSetId, ERR, RequestPropertyMinItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minItems:set"),
 		// RequestPropertyMinLengthUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyMinLengthIncreasedId, ERR, RequestPropertyMinLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minLength:increase"),
 		newBackwardCompatibilityRule(RequestBodyMinLengthDecreasedId, INFO, RequestPropertyMinLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.minLength:decrease"),
 		newBackwardCompatibilityRule(RequestPropertyMinLengthIncreasedId, ERR, RequestPropertyMinLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minLength:increase"),
 		newBackwardCompatibilityRule(RequestPropertyMinLengthDecreasedId, INFO, RequestPropertyMinLengthUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.minLength:decrease"),
 		// RequestPropertyMinSetCheck
-		newBackwardCompatibilityRule(RequestBodyMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minimum:set"),
-		newBackwardCompatibilityRule(RequestPropertyMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minimum:set"),
-		newBackwardCompatibilityRule(RequestBodyExclusiveMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMinimum:set"),
-		newBackwardCompatibilityRule(RequestPropertyExclusiveMinSetId, WARN, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMinimum:set"),
+		newBackwardCompatibilityRule(RequestBodyMinSetId, ERR, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minimum:set"),
+		newBackwardCompatibilityRule(RequestPropertyMinSetId, ERR, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.minimum:set"),
+		newBackwardCompatibilityRule(RequestBodyExclusiveMinSetId, ERR, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMinimum:set"),
+		newBackwardCompatibilityRule(RequestPropertyExclusiveMinSetId, ERR, RequestPropertyMinSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.exclusiveMinimum:set"),
 		// RequestPropertyOneOfUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyOneOfAddedId, INFO, RequestPropertyOneOfUpdatedCheck, DirectionRequest, AreaSchema, KindStructure, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.oneOf.*:add"),
 		newBackwardCompatibilityRule(RequestBodyOneOfRemovedId, ERR, RequestPropertyOneOfUpdatedCheck, DirectionRequest, AreaSchema, KindStructure, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.oneOf.*:remove"),
@@ -759,8 +759,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyMaxItemsDecreasedId, INFO, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.maxItems:decrease"),
 		newBackwardCompatibilityRule(RequestPropertyMaxItemsIncreasedId, INFO, RequestPropertyMaxItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.maxItems:increase"),
 		// RequestPropertyMaxItemsSetCheck
-		newBackwardCompatibilityRule(RequestBodyMaxItemsSetId, WARN, RequestPropertyMaxItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxItems:set"),
-		newBackwardCompatibilityRule(RequestPropertyMaxItemsSetId, WARN, RequestPropertyMaxItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxItems:set"),
+		newBackwardCompatibilityRule(RequestBodyMaxItemsSetId, ERR, RequestPropertyMaxItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxItems:set"),
+		newBackwardCompatibilityRule(RequestPropertyMaxItemsSetId, ERR, RequestPropertyMaxItemsSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxItems:set"),
 		// ResponsePropertyMaxItemsIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxItemsIncreasedId, ERR, ResponsePropertyMaxItemsIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maxItems:increase"),
 		newBackwardCompatibilityRule(ResponsePropertyMaxItemsIncreasedId, ERR, ResponsePropertyMaxItemsIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maxItems:increase"),
@@ -771,8 +771,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyMaxPropertiesDecreasedId, INFO, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.maxProperties:decrease"),
 		newBackwardCompatibilityRule(RequestPropertyMaxPropertiesIncreasedId, INFO, RequestPropertyMaxPropertiesUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.maxProperties:increase"),
 		// RequestPropertyMaxPropertiesSetCheck
-		newBackwardCompatibilityRule(RequestBodyMaxPropertiesSetId, WARN, RequestPropertyMaxPropertiesSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxProperties:set"),
-		newBackwardCompatibilityRule(RequestPropertyMaxPropertiesSetId, WARN, RequestPropertyMaxPropertiesSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxProperties:set"),
+		newBackwardCompatibilityRule(RequestBodyMaxPropertiesSetId, ERR, RequestPropertyMaxPropertiesSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxProperties:set"),
+		newBackwardCompatibilityRule(RequestPropertyMaxPropertiesSetId, ERR, RequestPropertyMaxPropertiesSetCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maxProperties:set"),
 		// ResponsePropertyMaxPropertiesIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxPropertiesIncreasedId, ERR, ResponsePropertyMaxPropertiesIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maxProperties:increase"),
 		newBackwardCompatibilityRule(ResponsePropertyMaxPropertiesIncreasedId, ERR, ResponsePropertyMaxPropertiesIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maxProperties:increase"),
@@ -791,8 +791,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyUniqueItemsUnsetId, ERR, ResponsePropertyUniqueItemsUnsetCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.uniqueItems:unset"),
 		newBackwardCompatibilityRule(ResponsePropertyUniqueItemsUnsetId, ERR, ResponsePropertyUniqueItemsUnsetCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.uniqueItems:unset"),
 		// RequestPropertyMultipleOfUpdatedCheck
-		newBackwardCompatibilityRule(RequestBodyMultipleOfSetId, WARN, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
-		newBackwardCompatibilityRule(RequestPropertyMultipleOfSetId, WARN, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
+		newBackwardCompatibilityRule(RequestBodyMultipleOfSetId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
+		newBackwardCompatibilityRule(RequestPropertyMultipleOfSetId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
 		newBackwardCompatibilityRule(RequestBodyMultipleOfUnsetId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:unset"),
 		newBackwardCompatibilityRule(RequestPropertyMultipleOfUnsetId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:unset"),
 		newBackwardCompatibilityRule(RequestBodyMultipleOfChangedId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectIncomparable, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),

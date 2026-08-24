@@ -67,7 +67,6 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
-	reasonBoundSet     = "below the law, pending review: setting a bound on a request narrows, and the WARN rests on the change being sometimes legitimate, which is an exemption rather than a contract argument"
 	reasonBodyRemoved  = "above the law, pending review: the operation withdraws a declared input, so a client that conformed by sending the body can no longer convey it, which the containment question alone does not express"
 	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
 	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
@@ -89,30 +88,6 @@ const (
 // TestSeverityLaw.
 var severityDeviations = map[string]string{
 	// A1: bound-set WARN convention
-	"request-body-exclusive-max-set":      reasonBoundSet,
-	"request-body-exclusive-min-set":      reasonBoundSet,
-	"request-body-max-items-set":          reasonBoundSet,
-	"request-body-max-length-set":         reasonBoundSet,
-	"request-body-max-properties-set":     reasonBoundSet,
-	"request-body-max-set":                reasonBoundSet,
-	"request-body-min-items-set":          reasonBoundSet,
-	"request-body-min-set":                reasonBoundSet,
-	"request-body-multiple-of-set":        reasonBoundSet,
-	"request-parameter-exclusive-max-set": reasonBoundSet,
-	"request-parameter-exclusive-min-set": reasonBoundSet,
-	"request-parameter-max-length-set":    reasonBoundSet,
-	"request-parameter-max-set":           reasonBoundSet,
-	"request-parameter-min-items-set":     reasonBoundSet,
-	"request-parameter-min-set":           reasonBoundSet,
-	"request-property-exclusive-max-set":  reasonBoundSet,
-	"request-property-exclusive-min-set":  reasonBoundSet,
-	"request-property-max-items-set":      reasonBoundSet,
-	"request-property-max-length-set":     reasonBoundSet,
-	"request-property-max-properties-set": reasonBoundSet,
-	"request-property-max-set":            reasonBoundSet,
-	"request-property-min-items-set":      reasonBoundSet,
-	"request-property-min-set":            reasonBoundSet,
-	"request-property-multiple-of-set":    reasonBoundSet,
 	// A2: removal signals behavior change
 	"request-body-removed": reasonBodyRemoved,
 	// A3: wrapped in oneOf

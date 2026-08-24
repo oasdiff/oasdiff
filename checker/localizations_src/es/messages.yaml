@@ -86,9 +86,9 @@ request-parameter-max-length-increased: para el parámetro %s de solicitud %s, m
 request-parameter-min-length-increased: para el parámetro %s de solicitud %s, minLength fue aumentado de %s a %s
 request-parameter-min-length-decreased: para el parámetro %s de solicitud %s, minLength fue disminuido de %s a %s
 request-parameter-max-length-set: para el parámetro %s de solicitud %s, maxLength fue establecido en %s
-request-parameter-max-length-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-max-length-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-parameter-max-set: para el parámetro %s de solicitud %s, máximo fue establecido en %s
-request-parameter-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-max-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-parameter-min-increased: para el parámetro %s de solicitud %s, el mínimo fue aumentado de %s a %s
 request-parameter-min-decreased: para el parámetro %s de solicitud %s, el mínimo fue disminuido de %s a %s
 request-parameter-max-items-decreased: para el parámetro %s de solicitud %s, maxItems fue disminuido de %s a %s
@@ -96,9 +96,9 @@ request-parameter-max-items-increased: para el parámetro %s de solicitud %s, ma
 request-parameter-min-items-increased: para el parámetro %s de solicitud %s, minItems fue aumentado de %s a %s
 request-parameter-min-items-decreased: para el parámetro %s de solicitud %s, minItems fue disminuido de %s a %s
 request-parameter-min-items-set: para el parámetro %s de solicitud %s, minItems fue establecido en %s
-request-parameter-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-min-items-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-parameter-min-set: para el parámetro %s de solicitud %s, mínimo fue establecido en %s
-request-parameter-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo por razones de seguridad o para corregir un error en la especificación. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-min-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-parameter-type-changed: para el parámetro %s de solicitud %s, el %s fue cambiado de %s a %s
 request-parameter-type-generalized: para el parámetro %s de solicitud %s, el %s fue ampliado de %s a %s
 request-parameter-property-type-changed: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue cambiado de %s a %s
@@ -145,13 +145,13 @@ request-property-max-increased: el valor máximo de la propiedad de solicitud %s
 request-body-max-length-increased: la longitud máxima del cuerpo de solicitud fue aumentada de %s a %s
 request-property-max-length-increased: la longitud máxima de la propiedad de solicitud %s fue aumentada de %s a %s
 request-body-max-length-set: la longitud máxima del cuerpo de solicitud fue establecida en %s
-request-body-max-length-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-max-length-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-max-length-set: la longitud máxima de la propiedad de solicitud %s fue establecida en %s
-request-property-max-length-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-max-length-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-body-max-set: el valor máximo del cuerpo de solicitud fue establecido en %s
-request-body-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-max-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-max-set: el valor máximo de la propiedad de solicitud %s fue establecido en %s
-request-property-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-max-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-body-min-increased: el valor mínimo del cuerpo de solicitud fue aumentado a %s
 request-property-min-increased: el valor mínimo de la propiedad de solicitud %s fue aumentado a %s
 request-read-only-property-min-increased: el valor mínimo de la propiedad de solicitud de solo lectura %s fue aumentado a %s
@@ -162,13 +162,13 @@ request-property-min-decreased: el valor mínimo de la propiedad de solicitud %s
 request-body-min-items-decreased: el número mínimo de elementos del cuerpo de solicitud fue disminuido de %s a %s
 request-property-min-items-decreased: el número mínimo de elementos de la propiedad de solicitud %s fue disminuido de %s a %s
 request-body-min-items-set: el número mínimo de elementos del cuerpo de solicitud fue establecido en %s
-request-body-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-min-items-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-min-items-set: el número mínimo de elementos de la propiedad de solicitud %s fue establecido en %s
-request-property-min-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-min-items-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-body-min-set: el valor mínimo del cuerpo de solicitud fue establecido en %s
-request-body-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-min-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-min-set: el valor mínimo de la propiedad de solicitud %s fue establecido en %s
-request-property-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-min-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-removed: removida la propiedad de solicitud %s
 request-body-type-changed: el %s del cuerpo de solicitud fue cambiado de %s a %s
 request-body-type-generalized: el %s del cuerpo de solicitud fue ampliado de %s a %s
@@ -238,26 +238,26 @@ request-property-exclusive-min-increased: el valor exclusiveMinimum de la propie
 request-read-only-property-exclusive-min-increased: el valor exclusiveMinimum de la propiedad de solicitud de solo lectura %s fue aumentado a %s
 request-property-exclusive-min-decreased: el valor exclusiveMinimum de la propiedad de solicitud %s fue disminuido de %s a %s
 request-body-exclusive-min-set: el valor exclusiveMinimum del cuerpo de solicitud fue establecido en %s
-request-body-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-exclusive-min-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-exclusive-min-set: el valor exclusiveMinimum de la propiedad de solicitud %s fue establecido en %s
-request-property-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-exclusive-min-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-body-exclusive-max-decreased: el valor exclusiveMaximum del cuerpo de solicitud fue disminuido a %s
 request-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de solicitud fue aumentado de %s a %s
 request-property-exclusive-max-decreased: el valor exclusiveMaximum de la propiedad de solicitud %s fue disminuido a %s
 request-read-only-property-exclusive-max-decreased: el valor exclusiveMaximum de la propiedad de solicitud de solo lectura %s fue disminuido a %s
 request-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de solicitud %s fue aumentado de %s a %s
 request-body-exclusive-max-set: el valor exclusiveMaximum del cuerpo de solicitud fue establecido en %s
-request-body-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-exclusive-max-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-exclusive-max-set: el valor exclusiveMaximum de la propiedad de solicitud %s fue establecido en %s
-request-property-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-exclusive-max-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-parameter-exclusive-min-increased: para el parámetro %s de solicitud %s, el exclusiveMinimum fue aumentado de %s a %s
 request-parameter-exclusive-min-decreased: para el parámetro %s de solicitud %s, el exclusiveMinimum fue disminuido de %s a %s
 request-parameter-exclusive-min-set: para el parámetro %s de solicitud %s, exclusiveMinimum fue establecido en %s
-request-parameter-exclusive-min-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-exclusive-min-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-parameter-exclusive-max-decreased: para el parámetro %s de solicitud %s, el exclusiveMaximum fue disminuido de %s a %s
 request-parameter-exclusive-max-increased: para el parámetro %s de solicitud %s, el exclusiveMaximum fue aumentado de %s a %s
 request-parameter-exclusive-max-set: para el parámetro %s de solicitud %s, exclusiveMaximum fue establecido en %s
-request-parameter-exclusive-max-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-parameter-exclusive-max-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 response-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de respuesta fue aumentado de %s a %s
 response-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 response-body-exclusive-min-decreased: el valor exclusiveMinimum del cuerpo de respuesta fue disminuido de %s a %s
@@ -1073,9 +1073,9 @@ request-read-only-property-max-items-decreased: el número máximo de elementos 
 request-body-max-items-increased: el número máximo de elementos del cuerpo de solicitud fue aumentado de %s a %s
 request-property-max-items-increased: el número máximo de elementos de la propiedad de solicitud %s fue aumentado de %s a %s
 request-body-max-items-set: el número máximo de elementos del cuerpo de solicitud fue establecido en %s
-request-body-max-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-max-items-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-max-items-set: el número máximo de elementos de la propiedad de solicitud %s fue establecido en %s
-request-property-max-items-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-max-items-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 response-body-max-items-increased: el número máximo de elementos del cuerpo de respuesta fue aumentado de %s a %s
 response-property-max-items-increased: el número máximo de elementos de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 request-body-max-properties-decreased: el número máximo de propiedades del cuerpo de solicitud fue disminuido a %s
@@ -1084,9 +1084,9 @@ request-read-only-property-max-properties-decreased: el número máximo de propi
 request-body-max-properties-increased: el número máximo de propiedades del cuerpo de solicitud fue aumentado de %s a %s
 request-property-max-properties-increased: el número máximo de propiedades de la propiedad de solicitud %s fue aumentado de %s a %s
 request-body-max-properties-set: el número máximo de propiedades del cuerpo de solicitud fue establecido en %s
-request-body-max-properties-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-max-properties-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-max-properties-set: el número máximo de propiedades de la propiedad de solicitud %s fue establecido en %s
-request-property-max-properties-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-max-properties-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 response-body-max-properties-increased: el número máximo de propiedades del cuerpo de respuesta fue aumentado de %s a %s
 response-property-max-properties-increased: el número máximo de propiedades de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 request-body-min-properties-increased: el número mínimo de propiedades del cuerpo de solicitud fue aumentado a %s
@@ -1100,9 +1100,9 @@ request-property-unique-items-unset: el valor uniqueItems de la propiedad de sol
 response-body-unique-items-unset: el valor uniqueItems del cuerpo de respuesta fue removido
 response-property-unique-items-unset: el valor uniqueItems de la propiedad de respuesta %s fue removido para el estado %s
 request-body-multiple-of-set: el valor multipleOf del cuerpo de solicitud fue establecido en %s
-request-body-multiple-of-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-body-multiple-of-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-property-multiple-of-set: el valor multipleOf de la propiedad de solicitud %s fue establecido en %s
-request-property-multiple-of-set-comment: Esto es una advertencia porque a veces es necesario establecerlo. Sin embargo, se recomienda verificar si los clientes soportan esta restricción antes de hacer tal cambio en la especificación.
+request-property-multiple-of-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 request-body-multiple-of-unset: el valor multipleOf del cuerpo de solicitud fue removido de %s
 request-property-multiple-of-unset: el valor multipleOf de la propiedad de solicitud %s fue removido de %s
 request-body-multiple-of-changed: el valor multipleOf del cuerpo de solicitud fue cambiado de %s a %s

@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 54 of 556 rules disagree; every
+`go test ./checker -run SeverityLaw`). 29 of 556 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -144,35 +144,30 @@ this section that a derivation cannot settle.
 
 ---
 
-## Below the law (40 rules): each owes a contract argument
+## Below the law (16 rules): each owes a contract argument
 
-### The bound-set family (24 rules)
+### The bound-set family (24 rules) — settled: fixed
 
 `request-body-max-length-set`, `request-property-min-items-set`,
-`request-parameter-exclusive-max-set` and 21 more: **WARN**, derived **ERR**.
+`request-parameter-exclusive-max-set` and 21 more were **WARN**, derived
+**ERR**, and are now ERR.
 
 Setting a bound where none existed narrows the accepted set, so a request that
-was valid can become invalid. The three families with the identical shape are
-already ERR:
+was valid can become invalid. Three families with the identical shape were
+already ERR (`became-enum`, `const-added`, `pattern-added`), and the stated
+reason for the exception ("the restriction is sometimes legitimately required,
+for security reasons or to correct an error in the specification") is a reason
+an author might accept the break, not a reason it is not a break. It is true
+of every breaking change.
 
-| Change | Effect | Stored |
-|---|---|---|
-| `request-body-became-enum` | narrows | error |
-| `request-body-const-added` | narrows | error |
-| `request-parameter-pattern-added` | narrows | error |
-| `request-body-max-length-set` | narrows | **warning** |
+The 24 localized comments were reworded to match: they no longer explain a
+warning, and instead name the override, since a team that knows its clients
+stay within the new limit is the party entitled to decide that.
 
-The stated reason ("the restriction is sometimes legitimately required, for
-security reasons or to correct an error in the specification") is an
-exemption, not a contract argument, and it applies equally to enum, const and
-pattern.
-
-**Recommendation: fix.** 24 levels move WARN to ERR, and the 24 localized
-`-comment` entries are reworded from justifying the warning to naming the
-override: a team that knows its clients are within the new limit downgrades
-the check with `--severity-levels`, or approves the change with a
-justification in the review workflow. This is a user-visible escalation and
-wants a release note.
+This is a user-visible escalation: a spec that adds a bound now fails
+`oasdiff breaking` where it previously passed with a warning. Teams that
+accept the change can lower the check with `--severity-levels` or approve it
+in review.
 
 ### Security (4 rules)
 
