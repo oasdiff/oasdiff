@@ -80,6 +80,13 @@ func getErrUnsupportedFormat(format, cmd string) *ReturnError {
 	)
 }
 
+func getErrPatternsWithTags() *ReturnError {
+	return getError(
+		errors.New("the patterns flag lists waiver and non-contract patterns, which have no edits to filter, so it cannot be combined with the tags flag"),
+		112,
+	)
+}
+
 func getErrTemplateNotSupported(format string) *ReturnError {
 	supportedFormats := formatters.GetSupportedTemplateFormats()
 	return getError(
