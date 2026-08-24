@@ -54,7 +54,7 @@ func checkPatternsWithoutTags(cmd *cobra.Command) error {
 		return nil
 	}
 	if cmd.Flags().Changed("tags") {
-		return errors.New("--tags filters edits, and --patterns lists patterns rather than edits")
+		return errors.New("--tags cannot be used with --patterns: --tags filters edits, and --patterns lists patterns rather than edits")
 	}
 	return nil
 }

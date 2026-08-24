@@ -96,5 +96,5 @@ func TestCoverageTags_Unique(t *testing.T) {
 func TestChecksCoverage_PatternsAndTagsRejected(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --patterns --tags covered"), &stdout, &stderr))
-	require.Contains(t, stderr.String(), "--patterns lists patterns rather than edits")
+	require.Contains(t, stderr.String(), "--tags cannot be used with --patterns")
 }
