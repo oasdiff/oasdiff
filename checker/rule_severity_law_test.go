@@ -65,22 +65,23 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 }
 
 const (
-	// conventions pending ratification (SEVERITY-LAW-TRIAGE.md bucket A)
-	reasonBoundSet     = "convention, pending review (triage A1): setting a bound on a request narrows but is reported WARN with a comment"
-	reasonRemoval      = "convention, pending review (triage A2): the removal widens the contract but signals the server stopped processing the element"
-	reasonWrapped      = "convention, pending review (triage A3): single-to-oneOf wrapping kept breaking per #1037"
-	reasonNonSuccess   = "convention, pending review (triage A4): removing a non-success status is treated as sanctioned cleanup"
-	reasonOptHeader    = "convention, pending review (triage A4): optional softens the removed-variant verdict"
-	reasonNotWriteOnly = "convention, pending review (triage A4): flags that the field now appears in responses"
-	reasonAllOfRemoved = "convention, pending review (triage A4): widening kept WARN as caution"
-	// candidate severity bugs (SEVERITY-LAW-TRIAGE.md bucket B)
-	reasonSecurity     = "candidate bug, pending review (triage B1): security alternatives removed or scopes added break clients but are INFO"
-	reasonAnyOf        = "candidate bug, pending review (triage B2): contradicts response one-of-added which is ERR"
-	reasonPattern1034  = "candidate bug, pending review (triage B3): the #1034 response pattern gap"
-	reasonPrefixItems  = "candidate bug, pending review (triage B4): stored levels assume a containment direction prefixItems does not have"
-	reasonMediaName    = "candidate bug, pending review (triage B5): clients negotiating the old media type name break"
-	reasonEnumAdded    = "candidate bug, pending review (triage B5): the server may emit a value clients never handled"
-	reasonParamDefault = "candidate bug, pending review (triage B5): parameter defaults are ERR while body and property defaults are INFO"
+	// above the law: conservative, and a harsher verdict needs a reason
+	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
+	reasonBoundSet     = "below the law, pending review: setting a bound on a request narrows, and the WARN rests on the change being sometimes legitimate, which is an exemption rather than a contract argument"
+	reasonRemoval      = "above the law, pending review: the removal widens the contract but signals the server stopped processing the element"
+	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
+	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
+	reasonOptHeader    = "below the law, pending review: optional softens the verdict on the strength of what clients ought not rely on"
+	reasonNotWriteOnly = "above the law, pending review: flags that the field now appears in responses"
+	reasonAllOfRemoved = "above the law, pending review: widening kept WARN as caution"
+	// below the law: a milder verdict owes a contract argument
+	reasonSecurity     = "below the law, pending review: security alternatives removed or scopes added break clients but are INFO"
+	reasonAnyOf        = "below the law, pending review: contradicts response one-of-added which is ERR"
+	reasonPattern1034  = "below the law, pending review: the #1034 response pattern gap"
+	reasonPrefixItems  = "below the law, pending review: stored levels assume a containment direction prefixItems does not have"
+	reasonMediaName    = "below the law, pending review: clients negotiating the old media type name break"
+	reasonEnumAdded    = "below the law, pending review: the server may emit a value clients never handled"
+	reasonParamDefault = "below the law, pending review: parameter defaults are ERR while body and property defaults are INFO"
 )
 
 // severityDeviations records every rule whose stored level deviates from the

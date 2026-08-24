@@ -2,201 +2,173 @@
 
 Working document for reviewing the 56 rules whose stored level disagrees with
 the level derived by the severity law (see `rule_severity_law_test.go`, run
-with `go test ./checker -run SeverityLawReport -v`). 500 of 556 rules derive
-exactly; every mismatch below has a root cause and a proposed handling.
+with `go test ./checker -run SeverityLaw`). 500 of 556 rules derive exactly;
+every disagreement below has a root cause and a proposed handling.
 
-Fill in the Decision column: **keep** (stored level stands, entry moves to the
-deviation ledger with the stated reason), **fix** (stored level changes to the
-derived one, files as an issue), or an alternative.
+Fill in the Decision column: **keep** (the stored level stands, and the entry
+becomes a permanent ledger row with the stated reason) or **fix** (the stored
+level changes to the derived one, and the entry is removed).
 
 The law: Narrows x request = ERR, Narrows x response = INFO, Widens x request
 = INFO, Widens x response = ERR, Incomparable = ERR, Unknown = WARN, None
-(metadata) = INFO, lifecycle violation = ERR. Guards: readOnly nullifies
-request-side effect, writeOnly nullifies response-side effect, sanctioned
-removal (deprecated with honored sunset) = INFO.
+(metadata) = INFO, lifecycle violation = ERR. Guards: readOnly nullifies a
+request-side effect, writeOnly nullifies a response-side effect, sanctioned
+removal (deprecated with an honoured sunset) = INFO, negotiated (a status,
+media type, or header the client selects) applies request polarity.
 
 ---
 
-## Bucket A: apparent conventions (35 rules)
+## The two directions are not equally suspect
 
-Stored levels that deviate from the law deliberately and consistently. If
-kept, each group becomes one row in the deviation ledger.
+A deviation is either **below** the law (the rule reports a milder verdict
+than the contract implies) or **above** it (a harsher one). The soundness
+asymmetry oasdiff already follows makes these very different claims:
 
-### A1. Bound-set reported as WARN (24 rules)
+- **Below the law is a safety claim.** Reporting a breaking change as safe
+  ships it silently, and the failure surfaces in production. A milder verdict
+  therefore owes a proof that the change is safe for every consumer that
+  conformed to the old contract.
+- **Above the law costs a reviewer a glance.** A harsher verdict needs no
+  proof, only a reason worth stating.
 
-Setting a bound on a request narrows the contract (derived ERR), but every
-`*-set` rule is WARN with the standard comment ("the restriction is sometimes
-legitimately required..."). This is the documented convention for
-narrowing-from-unbounded on numeric bounds.
+The distinction disqualifies a whole class of justification. "The restriction
+is sometimes legitimately required", "it is only cleanup", "clients should not
+rely on it" are reasons an author might *accept* a breaking change. They are
+not reasons the change is not breaking, and they are true of every breaking
+change: removing an endpoint is sometimes legitimately required too. Such a
+judgment belongs to the operator, through `--severity-levels`, and to the
+reviewer, who records it when approving a change in the review workflow at
+oasdiff.com. It does not belong in the default verdict, where it silently
+weakens the report for everyone.
 
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| request-body-exclusive-max-set | WARN | ERR | |
-| request-body-exclusive-min-set | WARN | ERR | |
-| request-body-max-items-set | WARN | ERR | |
-| request-body-max-length-set | WARN | ERR | |
-| request-body-max-properties-set | WARN | ERR | |
-| request-body-max-set | WARN | ERR | |
-| request-body-min-items-set | WARN | ERR | |
-| request-body-min-set | WARN | ERR | |
-| request-body-multiple-of-set | WARN | ERR | |
-| request-parameter-exclusive-max-set | WARN | ERR | |
-| request-parameter-exclusive-min-set | WARN | ERR | |
-| request-parameter-max-length-set | WARN | ERR | |
-| request-parameter-max-set | WARN | ERR | |
-| request-parameter-min-items-set | WARN | ERR | |
-| request-parameter-min-set | WARN | ERR | |
-| request-property-exclusive-max-set | WARN | ERR | |
-| request-property-exclusive-min-set | WARN | ERR | |
-| request-property-max-items-set | WARN | ERR | |
-| request-property-max-length-set | WARN | ERR | |
-| request-property-max-properties-set | WARN | ERR | |
-| request-property-max-set | WARN | ERR | |
-| request-property-min-items-set | WARN | ERR | |
-| request-property-min-set | WARN | ERR | |
-| request-property-multiple-of-set | WARN | ERR | |
+So: the 16 rules above the law need a sentence each. The 40 below it each owe
+a contract argument, and a reason that is really an exemption is a finding,
+not a convention.
 
-Note the tension: `request-body-became-enum` and `request-body-const-added`
-are the same narrowing-from-unbounded shape and are ERR. If A1 is kept, the
-ledger reason should say why bounds differ from enums/const; if fixed, 24
-levels change at once.
+---
 
-### A2. Removal that widens the contract but signals behavior change (4 rules)
+## Above the law (16 rules): conservative, ratify with a reason
 
-Removing a parameter, property, or body definition widens or leaves unchanged
-the accepted set (unknown fields are allowed by default), so the law derives
-INFO. Stored levels treat removal as a signal that the server stopped
-processing the element.
-
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| request-body-removed | ERR | INFO | |
-| request-parameter-removed | WARN | INFO | |
-| request-property-removed | WARN | INFO | |
-| response-optional-property-removed | WARN | INFO | |
-
-Note the internal inconsistency: request-body-removed is ERR while the
-parameter/property analogs are WARN.
-
-### A3. Single-to-oneOf wrapping kept breaking (2 rules)
-
-Wrapping in oneOf that includes the original branch widens; #1037 deliberately
-kept the breaking verdict. Law derives WARN (unknown, since the check does not
-verify the original branch survives intact).
-
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| request-body-wrapped-in-one-of | ERR | WARN | |
-| response-body-wrapped-in-one-of | ERR | WARN | |
-
-### A4. Miscellaneous single-rule conventions (5 rules)
-
-| Rule | Stored | Derived | Root cause | Decision |
+| Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
-| response-non-success-status-removed | INFO | ERR | removing an error status is treated as sanctioned cleanup, though clients handling that status break | |
-| optional-response-header-removed | WARN | ERR | optional softens the variant-removal verdict; clients "should not" rely on it | |
-| response-required-property-became-not-write-only | WARN | INFO | readOnly/writeOnly are advisory (SHOULD) in the spec, so the law says INFO; stored WARN flags that the field now appears in responses | |
-| request-body-all-of-removed | WARN | INFO | removing an allOf conjunct widens (safe), stored WARN as caution | |
-| request-property-all-of-removed | WARN | INFO | same | |
+| `request-body-removed` | ERR | INFO | removing the body widens what is accepted, but a client that still sends one loses the effect it relied on | |
+| `request-parameter-removed`, `request-property-removed`, `response-optional-property-removed` | WARN | INFO | same shape, softened to a warning | |
+| `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check cannot verify the original branch survives the wrapping, and #1037 decided to keep the breaking verdict | |
+| `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct widens the accepted set; kept as a warning because the removed constraints are invisible in the diff | |
+| `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | a default is server-side, not part of the contract, but the parameter family predates that reading; the body and property defaults are already INFO | |
+| `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | see the prefixItems finding below: the containment is undecided, so ERR over-reports rather than under-reports | |
+| `response-required-property-became-not-write-only` | WARN | INFO | readOnly and writeOnly are advisory in the specification, so the law reads the change as metadata; the warning flags that the field now appears in responses | |
+
+The parameter-default row is the one to look at twice: it is an escalation
+only because the sibling body and property rules are INFO. Whichever way it
+goes, the three families should agree.
 
 ---
 
-## Bucket B: candidate severity bugs (21 rules)
+## Below the law (40 rules): each owes a contract argument
 
-Stored levels that contradict the contract rule with no visible convention
-behind them.
+### The bound-set family (24 rules)
 
-### B1. Security family: unproven "safe" verdicts (4 rules)
+`request-body-max-length-set`, `request-property-min-items-set`,
+`request-parameter-exclusive-max-set` and 21 more: **WARN**, derived **ERR**.
 
-Security requirements are OR-alternatives and scopes are AND-ed within one
-requirement. Removing an alternative breaks clients authenticating with it;
-adding a scope breaks clients lacking it. All stored INFO.
+Setting a bound where none existed narrows the accepted set, so a request that
+was valid can become invalid. The three families with the identical shape are
+already ERR:
 
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| api-security-removed | INFO | ERR | |
-| api-global-security-removed | INFO | ERR | |
-| api-security-scope-added | INFO | ERR | |
-| api-global-security-scope-added | INFO | ERR | |
+| Change | Effect | Stored |
+|---|---|---|
+| `request-body-became-enum` | narrows | error |
+| `request-body-const-added` | narrows | error |
+| `request-parameter-pattern-added` | narrows | error |
+| `request-body-max-length-set` | narrows | **warning** |
 
-### B2. anyOf-added vs oneOf-added contradiction (2 rules)
+The stated reason ("the restriction is sometimes legitimately required, for
+security reasons or to correct an error in the specification") is an
+exemption, not a contract argument, and it applies equally to enum, const and
+pattern.
 
-`response-body-one-of-added` is ERR; the identical widening via anyOf is INFO.
+**Recommendation: fix.** 24 levels move WARN to ERR, and the 24 localized
+`-comment` entries are reworded from justifying the warning to naming the
+override: a team that knows its clients are within the new limit downgrades
+the check with `--severity-levels`, or approves the change with a
+justification in the review workflow. This is a user-visible escalation and
+wants a release note.
 
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| response-body-any-of-added | INFO | ERR | |
-| response-property-any-of-added | INFO | ERR | |
+### Security (4 rules)
 
-### B3. Response pattern rules (2 rules, confirms #1034)
+`api-security-removed`, `api-global-security-removed`,
+`api-security-scope-added`, `api-global-security-scope-added`: **INFO**,
+derived **ERR**.
 
-The law independently re-derived the tracked gap: loosening a response
-pattern weakens the output guarantee.
+Security requirements are alternatives, so removing one breaks clients
+authenticating with it; scopes within a requirement are conjunctive, so adding
+one breaks clients whose tokens lack it. No reason is recorded for the INFO.
+**Recommendation: fix**, tracked with the scheme-field gap in #1175.
 
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| response-property-pattern-removed | INFO | ERR | |
-| response-property-pattern-changed | INFO | WARN | |
+### Response anyOf-added (2 rules)
 
-### B4. prefixItems verdicts assume a direction that does not exist (8 rules)
+`response-body-any-of-added`, `response-property-any-of-added`: **INFO**,
+derived **ERR**, while `response-body-one-of-added` is already ERR for the
+identical widening. **Recommendation: fix**, or explain what distinguishes the
+two keywords.
 
-prefixItems reshapes positional constraints; in general neither the old nor
-the new accepted set contains the other, so the law derives WARN (unknown).
-Stored levels treat added-as-widening / removed-as-narrowing, making
-`request-*-prefix-items-added` an unproven "safe" (INFO) and the ERR entries
-unproven "breaking".
+### Response pattern (2 rules)
 
-| Rule | Stored | Derived | Decision |
-|---|---|---|---|
-| request-body-prefix-items-added | INFO | WARN | |
-| request-body-prefix-items-removed | ERR | WARN | |
-| request-property-prefix-items-added | INFO | WARN | |
-| request-property-prefix-items-removed | ERR | WARN | |
-| response-body-prefix-items-added | ERR | WARN | |
-| response-body-prefix-items-removed | INFO | WARN | |
-| response-property-prefix-items-added | ERR | WARN | |
-| response-property-prefix-items-removed | INFO | WARN | |
+`response-property-pattern-removed` (INFO, derived ERR) and
+`response-property-pattern-changed` (INFO, derived WARN): the law
+independently re-derived the gap already tracked in #1034.
+**Recommendation: fix** under that issue.
 
-A finer fix than WARN across the board: compare the prefix schemas and the
-items schema for containment, as the multipleOf checks do with divisibility.
+### prefixItems (4 of the 8 rules)
 
-### B5. Remaining singles (5 rules)
+`request-*-prefix-items-added` and `response-*-prefix-items-removed`: **INFO**,
+derived **WARN**. prefixItems reshapes positional constraints, so in general
+neither accepted set contains the other; treating the change as a widening
+makes these an unproven "safe". The sibling four are the same mistake in the
+harsher direction (above the law).
 
-| Rule | Stored | Derived | Root cause | Decision |
+**Recommendation: fix all eight to WARN**, or decide the containment properly
+by comparing the prefix schemas against the items schema, as the multipleOf
+checks compare divisibility.
+
+### Remaining singles (4 rules)
+
+| Rule | Stored | Derived | Question it must answer | Decision |
 |---|---|---|---|---|
-| response-media-type-name-changed | INFO | ERR | clients negotiating the old media type name break | |
-| response-property-enum-value-added | WARN | ERR | server may emit a value clients never handled; WARN understates under the law | |
-| request-parameter-default-value-added | ERR | INFO | defaults are server-side fallback, not contract (the #1109 reasoning); note the body/property default rules are INFO, so the parameter family is internally inconsistent either way | |
-| request-parameter-default-value-changed | ERR | INFO | same | |
-| request-parameter-default-value-removed | ERR | INFO | same | |
+| `response-media-type-name-changed` | INFO | ERR | a client negotiating the old media type gets no response; what makes that safe? | |
+| `response-property-enum-value-added` | WARN | ERR | the server may now emit a value no client was written to handle | |
+| `response-non-success-status-removed` | INFO | ERR | a client handling that status loses the behaviour; "it is only cleanup" is an exemption | |
+| `optional-response-header-removed` | WARN | ERR | "clients should not rely on it" describes what clients ought to do, not what the contract said | |
 
 ---
 
-## Bucket C: model refinements the data forced
+## Model refinements the derivations depend on
 
-Not mismatches. These are law/effect-table decisions I made to explain the
-registry; each needs sign-off because the derived levels above depend on them.
+Not deviations. These are decisions in the law itself; each one changes which
+rules appear above, so a verdict here can move entries between the sections.
 
-| # | Decision in the model | Justification | Decision |
+| # | Decision | Justification | Decision |
 |---|---|---|---|
-| C1 | Negotiated variants (response statuses, media types, response headers) obey request polarity | the client chooses or relies on the variant, so removal breaks clients even on the response side; matches stored ERR for success-status-removed, required-header-removed, response-media-type-removed | |
-| C2 | Adding/removing an optional property is effect None | with default additionalProperties the field was already allowed, so the accepted set is unchanged | |
-| C3 | Security requirements are OR-alternatives, scopes AND within one | per the OpenAPI security model; makes security-added INFO correct and makes B1 findings | |
-| C4 | readOnly/writeOnly are advisory (SHOULD-level) metadata | the spec does not make them validation constraints; all became-read-only/write-only transitions derive INFO | |
-| C5 | Adding if/then/else narrows; removing widens | a dormant then/else is activated by if; conditionals only add constraints | |
-| C6 | media-type-schema-added narrows / removed widens | no schema means any payload is accepted | |
+| C1 | A status, media type, or header the client selects (`negotiated`) applies request polarity | the client chooses or relies on the variant, so removing it breaks clients even though it lives on the response side | |
+| C2 | Adding or removing an optional property is effect None | with default `additionalProperties` the field was already allowed, so the accepted set is unchanged | |
+| C3 | Security requirements are alternatives; scopes within one are conjunctive | per the OpenAPI security model; this is what makes the security findings above | |
+| C4 | readOnly and writeOnly are advisory metadata | the specification does not make them validation constraints | |
+| C5 | Adding if/then/else narrows; removing widens | a dormant then or else is activated by if, so conditionals only add constraints | |
+| C6 | A media type schema appearing narrows, disappearing widens | with no schema, any payload is accepted | |
 | C7 | Lifecycle violations (removal before sunset, invalid or missing sunset, stability decreased) are ERR by policy | oasdiff's deprecation contract, distinct from the wire contract | |
-| C8 | type-compatible is direction-relative | request-*-type-compatible means widened, response-*-type-compatible means narrowed; both are the safe side for their direction | |
-| C9 | api-schema-removed (unused component) is effect None | an unused component is not part of the wire contract | |
+| C8 | `type-compatible` is direction-relative | on a request it means widened, on a response narrowed: the safe side for each | |
+| C9 | Removing an unused component schema is effect None | an unused component is not part of the wire contract | |
 
 ---
 
 ## Bookkeeping
 
-- Findings that already have issues: B3 is #1034. The min-items-set dead rules
-  (#1171) intersect A1: three of its 24 rules can never fire at all.
-- If a bucket-B group is confirmed as a bug, it gets its own issue and the fix
-  changes the stored level to the derived one; the law test then passes for it
-  without an entry anywhere.
-- If a bucket-A group is kept, it becomes a deviation-ledger row in the PR A
-  design, and the ledger test enforces that the deviation stays documented.
+- Findings that already have issues: the response pattern rules are #1034, the
+  security family joins #1175. The bound-set family overlaps #1171, where
+  three of its 24 rules cannot fire at all.
+- A **fix** changes the stored level to the derived one and removes the ledger
+  entry, so the law then holds for that rule with nothing recorded.
+- A **keep** turns the entry's reason into a permanent one, and the test keeps
+  it honest: the entry fails the build if the rule's level ever matches the
+  law again.
