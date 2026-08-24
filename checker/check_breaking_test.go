@@ -504,7 +504,7 @@ func TestBreaking_ModifyPatternToAnyString(t *testing.T) {
 	}
 }
 
-// modifying the default value of an optional request parameter is breaking
+// modifying the default value of an optional request parameter is not breaking
 func TestBreaking_ModifyRequiredOptionalParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -516,12 +516,14 @@ func TestBreaking_ModifyRequiredOptionalParamDefaultValue(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.RequestParameterDefaultValueChangedId)
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value was changed from `X` to `Y`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// setting the default value of an optional request parameter is breaking
+// setting the default value of an optional request parameter is not breaking
 func TestBreaking_SettingOptionalParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -533,12 +535,14 @@ func TestBreaking_SettingOptionalParamDefaultValue(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.RequestParameterDefaultValueAddedId)
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value `Y` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing the default value of an optional request parameter is breaking
+// removing the default value of an optional request parameter is not breaking
 func TestBreaking_RemovingOptionalParamDefaultValue(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -550,9 +554,10 @@ func TestBreaking_RemovingOptionalParamDefaultValue(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Len(t, errs, 1)
-	require.Equal(t, "request-parameter-default-value-removed", errs[0].GetId())
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	requireSingleChange(t, errs, checker.RequestParameterDefaultValueRemovedId)
 	require.Equal(t, "for the `header` request parameter `network-policies`, default value `Y` was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 

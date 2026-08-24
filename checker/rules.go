@@ -239,9 +239,9 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterPropertyBecameNullableId, INFO, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectWidens, nil, "paths.*.*.parameters.*.schema.nullable:set", "paths.*.*.parameters.*.schema.type:add"),
 		newBackwardCompatibilityRule(RequestParameterPropertyBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectNarrows, nil, "paths.*.*.parameters.*.schema.nullable:unset", "paths.*.*.parameters.*.schema.type:remove"),
 		// RequestParameterDefaultValueChangedCheck
-		newBackwardCompatibilityRule(RequestParameterDefaultValueChangedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:change"),
-		newBackwardCompatibilityRule(RequestParameterDefaultValueAddedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:set"),
-		newBackwardCompatibilityRule(RequestParameterDefaultValueRemovedId, ERR, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:unset"),
+		newBackwardCompatibilityRule(RequestParameterDefaultValueChangedId, INFO, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:change"),
+		newBackwardCompatibilityRule(RequestParameterDefaultValueAddedId, INFO, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:set"),
+		newBackwardCompatibilityRule(RequestParameterDefaultValueRemovedId, INFO, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:unset"),
 		// RequestParameterEnumValueUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterEnumValueAddedId, INFO, RequestParameterEnumValueUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectWidens, nil, "paths.*.*.parameters.*.schema.enum:add"),
 		newBackwardCompatibilityRule(RequestParameterEnumValueRemovedId, ERR, RequestParameterEnumValueUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectNarrows, nil, "paths.*.*.parameters.*.schema.enum:remove"),

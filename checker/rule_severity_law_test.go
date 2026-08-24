@@ -69,34 +69,31 @@ const (
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	reasonBodyRemoved  = "above the law, pending review: the operation withdraws a declared input, so a client that conformed by sending the body can no longer convey it, which the containment question alone does not express"
 	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
-	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
-	reasonOptHeader    = "below the law, pending review: optional softens the verdict on the strength of what clients ought not rely on"
 	reasonNotWriteOnly = "above the law, pending review: flags that the field now appears in responses"
 	// below the law: a milder verdict owes a contract argument
-	reasonPrefixItems  = "below the law, pending review: stored levels assume a containment direction prefixItems does not have"
-	reasonMediaName    = "below the law, pending review: clients negotiating the old media type name break"
-	reasonEnumAdded    = "below the law, pending review: the server may emit a value clients never handled"
-	reasonParamDefault = "below the law, pending review: parameter defaults are ERR while body and property defaults are INFO"
+	reasonNonSuccess = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
+	reasonOptHeader  = "below the law, pending review: optional softens the verdict on the strength of what clients ought not rely on"
+	reasonMediaName  = "below the law, pending review: clients negotiating the old media type name break"
+	reasonEnumAdded  = "below the law, pending review: the server may emit a value clients never handled"
+	// four rules deviate each way
+	reasonPrefixItems = "pending review: stored levels assume a containment direction prefixItems does not have"
 )
 
 // severityDeviations records every rule whose stored level deviates from the
 // law, with the reason. An unexplained mismatch and a stale entry both fail
 // TestSeverityLaw.
 var severityDeviations = map[string]string{
-	// A1: bound-set WARN convention
-	// A2: removal signals behavior change
-	"request-body-removed": reasonBodyRemoved,
-	// A3: wrapped in oneOf
-	"request-body-wrapped-in-one-of":  reasonWrapped,
-	"response-body-wrapped-in-one-of": reasonWrapped,
-	// A4: singles
-	"response-non-success-status-removed":              reasonNonSuccess,
-	"optional-response-header-removed":                 reasonOptHeader,
+	// above the law
+	"request-body-removed":                             reasonBodyRemoved,
+	"request-body-wrapped-in-one-of":                   reasonWrapped,
+	"response-body-wrapped-in-one-of":                  reasonWrapped,
 	"response-required-property-became-not-write-only": reasonNotWriteOnly,
-	// B1: security
-	// B2: anyOf vs oneOf
-	// B3: #1034
-	// B4: prefixItems
+	// below the law
+	"response-non-success-status-removed": reasonNonSuccess,
+	"optional-response-header-removed":    reasonOptHeader,
+	"response-media-type-name-changed":    reasonMediaName,
+	"response-property-enum-value-added":  reasonEnumAdded,
+	// prefixItems
 	"request-body-prefix-items-added":        reasonPrefixItems,
 	"request-body-prefix-items-removed":      reasonPrefixItems,
 	"request-property-prefix-items-added":    reasonPrefixItems,
@@ -105,12 +102,6 @@ var severityDeviations = map[string]string{
 	"response-body-prefix-items-removed":     reasonPrefixItems,
 	"response-property-prefix-items-added":   reasonPrefixItems,
 	"response-property-prefix-items-removed": reasonPrefixItems,
-	// B5: singles
-	"response-media-type-name-changed":        reasonMediaName,
-	"response-property-enum-value-added":      reasonEnumAdded,
-	"request-parameter-default-value-added":   reasonParamDefault,
-	"request-parameter-default-value-changed": reasonParamDefault,
-	"request-parameter-default-value-removed": reasonParamDefault,
 }
 
 func TestSeverityLaw(t *testing.T) {

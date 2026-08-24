@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 19 of 556 rules disagree; every
+`go test ./checker -run SeverityLaw`). 16 of 556 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -53,9 +53,9 @@ not a convention.
 
 ---
 
-## Above the law (11 rules): conservative, ratify with a reason
+## Above the law (8 rules): conservative, ratify with a reason
 
-Five entries left this section while it was being reviewed.
+Eight entries left this section while it was being reviewed.
 `request-parameter-removed` and `request-property-removed` were above the law
 only because their effects claimed a safety nobody had proved (see *Removals
 that cannot be proved safe* below); they now derive their stored WARN.
@@ -63,14 +63,14 @@ that cannot be proved safe* below); they now derive their stored WARN.
 already tolerates the property's absence, so the contract does not break, and a
 client that treated an optional property as guaranteed is out of specification
 rather than broken by the change. Reporting it as potentially breaking would
-fail a gate over a client-side defect. `request-body-all-of-removed` and
-`request-property-all-of-removed` were **fixed to INFO** (see below).
+fail a gate over a client-side defect. `request-body-all-of-removed`,
+`request-property-all-of-removed` and the three parameter-default rules were
+**fixed to INFO** (see below).
 
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
 | `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check does not verify that the original branch survives the wrapping, so #1037 kept the breaking verdict; see below | |
-| `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | see below: this one needs a product decision, not a derivation | |
 | `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | the containment is undecided, so ERR over-reports rather than under-reports; the fix is to decide it (see the prefixItems finding) | |
 | `response-required-property-became-not-write-only` | WARN | INFO | the effect says metadata, on the reading that writeOnly is advisory; but the change does mean the response may now carry a property it did not, which is a response widening and would derive ERR. C4 is as unproven as C2 was | |
 
@@ -140,20 +140,22 @@ and the message already names the subschema that was dropped. The response-side
 siblings were INFO all along, so this also removes an asymmetry the law had no
 reason to allow.
 
-### The parameter defaults need a product decision
+### The parameter defaults, settled: fixed
 
-`request-parameter-default-value-added/changed/removed` are ERR while the body
-and property equivalents are INFO. The derivation calls a default metadata,
-since it does not change which payloads are valid.
+`request-parameter-default-value-added/changed/removed` were ERR while the body
+and property equivalents were INFO. They are now INFO, so the three families
+agree.
 
-The argument for ERR is not about validity: a client that omits the parameter
-had a documented meaning for that omission, and changing the default changes
-what its unchanged request does. The argument for INFO is that a default is a
-server-side fallback, which is where #1109 landed for required-with-default.
+The derivation calls a default metadata: it does not change which payloads are
+valid, so every request that conformed to the old contract still conforms. The
+argument for ERR was not about validity but about meaning, that a client
+omitting the parameter had a documented behaviour and the change alters what
+its unchanged request does. That is a real effect, and it is the same effect a
+body default has, which #1109 already settled as a server-side fallback rather
+than a contract term.
 
-Both readings are defensible, and they apply equally to body properties, so
-whichever is chosen the three families should agree. This is the one entry in
-this section that a derivation cannot settle.
+The changes are still reported in the changelog, where a reader who cares about
+the fallback will see them.
 
 ---
 
