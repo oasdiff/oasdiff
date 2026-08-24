@@ -82,37 +82,43 @@ func TestBreaking_DeletedTag(t *testing.T) {
 // adding an enum value is not breaking
 func TestBreaking_AddedEnum(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 3)
-	require.Len(t, r, 6)
+	require.Len(t, r, 8)
 	require.Equal(t, checker.ResponseSuccessStatusRemovedId, r[0].GetId())
 	require.Equal(t, checker.ResponseSuccessStatusRemovedId, r[1].GetId())
-	require.Equal(t, checker.RequestParameterRemovedId, r[2].GetId())
-	require.Equal(t, checker.RequestParameterRemovedId, r[3].GetId())
+	require.Equal(t, checker.APISecurityRemovedCheckId, r[2].GetId())
+	require.Equal(t, checker.APISecurityScopeAddedId, r[3].GetId())
 	require.Equal(t, checker.RequestParameterRemovedId, r[4].GetId())
 	require.Equal(t, checker.RequestParameterRemovedId, r[5].GetId())
+	require.Equal(t, checker.RequestParameterRemovedId, r[6].GetId())
+	require.Equal(t, checker.RequestParameterRemovedId, r[7].GetId())
 }
 
 // changing extensions is not breaking
 func TestBreaking_ModifiedExtension(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 3)
-	require.Len(t, r, 6)
+	require.Len(t, r, 8)
 	require.Equal(t, checker.ResponseSuccessStatusRemovedId, r[0].GetId())
 	require.Equal(t, checker.ResponseSuccessStatusRemovedId, r[1].GetId())
-	require.Equal(t, checker.RequestParameterRemovedId, r[2].GetId())
-	require.Equal(t, checker.RequestParameterRemovedId, r[3].GetId())
+	require.Equal(t, checker.APISecurityRemovedCheckId, r[2].GetId())
+	require.Equal(t, checker.APISecurityScopeAddedId, r[3].GetId())
 	require.Equal(t, checker.RequestParameterRemovedId, r[4].GetId())
 	require.Equal(t, checker.RequestParameterRemovedId, r[5].GetId())
+	require.Equal(t, checker.RequestParameterRemovedId, r[6].GetId())
+	require.Equal(t, checker.RequestParameterRemovedId, r[7].GetId())
 }
 
 // changing comments is not breaking
 func TestBreaking_Comments(t *testing.T) {
 	r := d(t, diff.NewConfig(), 1, 3)
-	require.Len(t, r, 6)
+	require.Len(t, r, 8)
 	require.Equal(t, checker.ResponseSuccessStatusRemovedId, r[0].GetId())
 	require.Equal(t, checker.ResponseSuccessStatusRemovedId, r[1].GetId())
-	require.Equal(t, checker.RequestParameterRemovedId, r[2].GetId())
-	require.Equal(t, checker.RequestParameterRemovedId, r[3].GetId())
+	require.Equal(t, checker.APISecurityRemovedCheckId, r[2].GetId())
+	require.Equal(t, checker.APISecurityScopeAddedId, r[3].GetId())
 	require.Equal(t, checker.RequestParameterRemovedId, r[4].GetId())
 	require.Equal(t, checker.RequestParameterRemovedId, r[5].GetId())
+	require.Equal(t, checker.RequestParameterRemovedId, r[6].GetId())
+	require.Equal(t, checker.RequestParameterRemovedId, r[7].GetId())
 }
 
 // new optional header param is not breaking

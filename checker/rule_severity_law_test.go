@@ -72,11 +72,7 @@ const (
 	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
 	reasonOptHeader    = "below the law, pending review: optional softens the verdict on the strength of what clients ought not rely on"
 	reasonNotWriteOnly = "above the law, pending review: flags that the field now appears in responses"
-	reasonAllOfRemoved = "above the law, pending review: widening kept WARN as caution"
 	// below the law: a milder verdict owes a contract argument
-	reasonSecurity     = "below the law, pending review: security alternatives removed or scopes added break clients but are INFO"
-	reasonAnyOf        = "below the law, pending review: contradicts response one-of-added which is ERR"
-	reasonPattern1034  = "below the law, pending review: the #1034 response pattern gap"
 	reasonPrefixItems  = "below the law, pending review: stored levels assume a containment direction prefixItems does not have"
 	reasonMediaName    = "below the law, pending review: clients negotiating the old media type name break"
 	reasonEnumAdded    = "below the law, pending review: the server may emit a value clients never handled"
@@ -97,19 +93,9 @@ var severityDeviations = map[string]string{
 	"response-non-success-status-removed":              reasonNonSuccess,
 	"optional-response-header-removed":                 reasonOptHeader,
 	"response-required-property-became-not-write-only": reasonNotWriteOnly,
-	"request-body-all-of-removed":                      reasonAllOfRemoved,
-	"request-property-all-of-removed":                  reasonAllOfRemoved,
 	// B1: security
-	"api-security-removed":            reasonSecurity,
-	"api-global-security-removed":     reasonSecurity,
-	"api-security-scope-added":        reasonSecurity,
-	"api-global-security-scope-added": reasonSecurity,
 	// B2: anyOf vs oneOf
-	"response-body-any-of-added":     reasonAnyOf,
-	"response-property-any-of-added": reasonAnyOf,
 	// B3: #1034
-	"response-property-pattern-removed": reasonPattern1034,
-	"response-property-pattern-changed": reasonPattern1034,
 	// B4: prefixItems
 	"request-body-prefix-items-added":        reasonPrefixItems,
 	"request-body-prefix-items-removed":      reasonPrefixItems,

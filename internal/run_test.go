@@ -250,7 +250,7 @@ func Test_BreakingChangesIgnoreErrs(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml --err-ignore ../data/ignore-err-example.txt --format json"), &stdout, io.Discard))
 	bc := formatters.Changes{}
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &bc))
-	require.Len(t, bc, 5)
+	require.Len(t, bc, 7)
 }
 
 func Test_BreakingChangesIgnoreErrsAndWarns(t *testing.T) {
@@ -258,7 +258,7 @@ func Test_BreakingChangesIgnoreErrsAndWarns(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml --err-ignore ../data/ignore-err-example.txt --warn-ignore ../data/ignore-warn-example.txt --format json"), &stdout, io.Discard))
 	bc := formatters.Changes{}
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &bc))
-	require.Len(t, bc, 4)
+	require.Len(t, bc, 6)
 }
 
 func Test_BreakingChangesIgnoreErrsApiSchemaOptional(t *testing.T) {
@@ -266,7 +266,7 @@ func Test_BreakingChangesIgnoreErrsApiSchemaOptional(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml --err-ignore ../data/ignore-err-example.txt --warn-ignore ../data/ignore-warn-example.txt --include-checks api-schema-removed --format json"), &stdout, io.Discard))
 	bc := formatters.Changes{}
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &bc))
-	require.Len(t, bc, 4)
+	require.Len(t, bc, 6)
 }
 
 func Test_BreakingChangesInvalidIgnoreFile(t *testing.T) {
@@ -331,7 +331,7 @@ func Test_ChangelogWithAttributes(t *testing.T) {
 	cl := formatters.Changes{}
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &cl))
 	require.Len(t, cl, 22)
-	require.Equal(t, map[string]any{"x-beta": true, "x-extension-test": any(nil)}, cl[12].Attributes)
+	require.Equal(t, map[string]any{"x-beta": true, "x-extension-test": any(nil)}, cl[14].Attributes)
 }
 
 func Test_BreakingChangesChangelogOptionalCheckersAreInfoLevel(t *testing.T) {

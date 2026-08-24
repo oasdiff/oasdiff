@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 29 of 556 rules disagree; every
+`go test ./checker -run SeverityLaw`). 19 of 556 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -47,15 +47,15 @@ reviewer, who records it when approving a change in the review workflow at
 oasdiff.com. It does not belong in the default verdict, where it silently
 weakens the report for everyone.
 
-So: the 16 rules above the law need a sentence each. The 40 below it each owe
+So: the rules above the law need a sentence each. The rules below it each owe
 a contract argument, and a reason that is really an exemption is a finding,
 not a convention.
 
 ---
 
-## Above the law (13 rules): conservative, ratify with a reason
+## Above the law (11 rules): conservative, ratify with a reason
 
-Three entries left this section while it was being reviewed.
+Five entries left this section while it was being reviewed.
 `request-parameter-removed` and `request-property-removed` were above the law
 only because their effects claimed a safety nobody had proved (see *Removals
 that cannot be proved safe* below); they now derive their stored WARN.
@@ -63,13 +63,13 @@ that cannot be proved safe* below); they now derive their stored WARN.
 already tolerates the property's absence, so the contract does not break, and a
 client that treated an optional property as guaranteed is out of specification
 rather than broken by the change. Reporting it as potentially breaking would
-fail a gate over a client-side defect.
+fail a gate over a client-side defect. `request-body-all-of-removed` and
+`request-property-all-of-removed` were **fixed to INFO** (see below).
 
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
 | `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check does not verify that the original branch survives the wrapping, so #1037 kept the breaking verdict; see below | |
-| `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct strictly widens the accepted set, which is provable, so INFO is the sound verdict; the warning exists because the dropped constraints are invisible in the diff, which is a reporting concern rather than a contract one | |
 | `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | see below: this one needs a product decision, not a derivation | |
 | `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | the containment is undecided, so ERR over-reports rather than under-reports; the fix is to decide it (see the prefixItems finding) | |
 | `response-required-property-became-not-write-only` | WARN | INFO | the effect says metadata, on the reading that writeOnly is advisory; but the change does mean the response may now carry a property it did not, which is a response widening and would derive ERR. C4 is as unproven as C2 was | |
@@ -127,6 +127,19 @@ the answer rather than from caution: a wrapping that preserves the original
 branch widens, and one that does not is incomparable and breaking either way.
 Until then ERR is the conservative reading, which is the correct side to err on.
 
+### all-of-removed, settled: fixed
+
+`request-body-all-of-removed` and `request-property-all-of-removed` were WARN
+and are now INFO. The subschemas of an `allOf` are conjunctive, so dropping one
+removes constraints and every payload that was valid still is: the widening is
+provable from the document, which is exactly what INFO asks for.
+
+The warning existed because a relaxed constraint is worth a reader's attention,
+not because the change can invalidate a request. That is a reporting concern,
+and the message already names the subschema that was dropped. The response-side
+siblings were INFO all along, so this also removes an asymmetry the law had no
+reason to allow.
+
 ### The parameter defaults need a product decision
 
 `request-parameter-default-value-added/changed/removed` are ERR while the body
@@ -144,7 +157,7 @@ this section that a derivation cannot settle.
 
 ---
 
-## Below the law (16 rules): each owes a contract argument
+## Below the law (8 rules): each owes a contract argument
 
 ### The bound-set family (24 rules) — settled: fixed
 
@@ -169,30 +182,36 @@ This is a user-visible escalation: a spec that adds a bound now fails
 accept the change can lower the check with `--severity-levels` or approve it
 in review.
 
-### Security (4 rules)
+### Security (4 rules) — settled: fixed
 
 `api-security-removed`, `api-global-security-removed`,
-`api-security-scope-added`, `api-global-security-scope-added`: **INFO**,
-derived **ERR**.
+`api-security-scope-added`, `api-global-security-scope-added` were **INFO** and
+are now **ERR**.
 
-Security requirements are alternatives, so removing one breaks clients
-authenticating with it; scopes within a requirement are conjunctive, so adding
-one breaks clients whose tokens lack it. No reason is recorded for the INFO.
-**Recommendation: fix**, tracked with the scheme-field gap in #1175.
+Security requirements are alternatives, so removing one leaves a client
+authenticating with it unable to call the operation; scopes within a
+requirement are conjunctive, so adding one rejects a client whose token lacks
+it. Both are failures for a client that conformed to the old contract. No
+reason was ever recorded for the INFO. The scheme-field gap in the same family
+stays open in #1175.
 
-### Response anyOf-added (2 rules)
+### Response anyOf-added (2 rules) — settled: fixed
 
-`response-body-any-of-added`, `response-property-any-of-added`: **INFO**,
-derived **ERR**, while `response-body-one-of-added` is already ERR for the
-identical widening. **Recommendation: fix**, or explain what distinguishes the
-two keywords.
+`response-body-any-of-added` and `response-property-any-of-added` were **INFO**
+and are now **ERR**, matching `response-body-one-of-added`, which was already
+ERR for the identical change. Adding a branch to a response union lets the
+server emit a payload the old contract did not allow, so a client that
+validated responses against it rejects them. Nothing distinguishes `anyOf` from
+`oneOf` here.
 
-### Response pattern (2 rules)
+### Response pattern (2 rules) — settled: fixed
 
-`response-property-pattern-removed` (INFO, derived ERR) and
-`response-property-pattern-changed` (INFO, derived WARN): the law
-independently re-derived the gap already tracked in #1034.
-**Recommendation: fix** under that issue.
+`response-property-pattern-removed` was **INFO** and is now **ERR**;
+`response-property-pattern-changed` was **INFO** and is now **WARN**. Removing
+a pattern lets the response carry values the old contract excluded, and a
+changed pattern is undecidable between the two regular languages, hence the
+warning. This is the gap already tracked in #1034, which the law re-derived
+independently.
 
 ### prefixItems (4 of the 8 rules)
 
@@ -263,9 +282,10 @@ worth stating rather than a proof, and it belongs in the ledger if it stays.
 
 ## Bookkeeping
 
-- Findings that already have issues: the response pattern rules are #1034, the
-  security family joins #1175. The bound-set family overlaps #1171, where
-  three of its 24 rules cannot fire at all.
+- Findings that already have issues: the response pattern rules were #1034,
+  now fixed; the scheme-field gap in the security family stays in #1175. The
+  bound-set family overlaps #1171, where three of its 24 rules cannot fire at
+  all.
 - A **fix** changes the stored level to the derived one and removes the ledger
   entry, so the law then holds for that rule with nothing recorded.
 - A **keep** turns the entry's reason into a permanent one, and the test keeps

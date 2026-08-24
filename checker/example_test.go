@@ -64,8 +64,12 @@ func ExampleCheckBackwardCompatibility() {
 	}
 
 	// Output:
-	// 4 breaking changes: 1 error, 3 warning
+	// 6 breaking changes: 3 error, 3 warning
 	// error at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score removed the success response with the status `201` [response-success-status-removed].
+	//
+	// error at ../data/openapi-test3.yaml, in API POST /register the endpoint scheme security `bearerAuth` was removed from the API [api-security-removed].
+	//
+	// error at ../data/openapi-test3.yaml, in API POST /register the security scope `write:pets` was added to the endpoint's security scheme `OAuth` [api-security-scope-added].
 	//
 	// warning at ../data/openapi-test3.yaml, in API GET /api/{domain}/{project}/badges/security-score deleted the `cookie` request parameter `test` [request-parameter-removed]. This is a warning because some clients may return an error when receiving an unexpected parameter. It is recommended to deprecate the parameter first.
 	//

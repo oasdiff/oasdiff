@@ -382,7 +382,8 @@ func TestBreaking_ResponseDeleteMediaType(t *testing.T) {
 	require.Equal(t, "removed the media type `application/json` for the response with the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// deleting a pattern from a schema is not breaking
+// deleting a pattern is safe on the request side and breaking on the
+// response side, where it widens what the server may return
 func TestBreaking_DeletePatten(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -393,7 +394,11 @@ func TestBreaking_DeletePatten(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Empty(t, errs)
+	require.NotEmpty(t, errs)
+	for _, err := range errs {
+		require.Equal(t, checker.ResponsePropertyPatternRemovedId, err.GetId())
+		require.Equal(t, checker.ERR, err.GetLevel())
+	}
 }
 
 // adding a pattern to a schema is breaking
@@ -442,12 +447,14 @@ func TestBreaking_ModifyPattern(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.NotEmpty(t, errs)
-	requireSingleChange(t, errs, checker.RequestPropertyPatternChangedId)
+	requireChange(t, errs, checker.RequestPropertyPatternChangedId)
 	require.Equal(t, "changed the pattern of the request property `created` from `^[a-z]+$` to `.+`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
+	requireChange(t, errs, checker.ResponsePropertyPatternChangedId)
 }
 
-// modifying a pattern to .* in a schema is not breaking
+// modifying a pattern to .* is safe on the request side; on the response
+// side the change cannot be decided, so it is reported as a warning
 func TestBreaking_GeneralizedPattern(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -458,7 +465,10 @@ func TestBreaking_GeneralizedPattern(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Empty(t, errs)
+	for _, err := range errs {
+		require.Equal(t, checker.ResponsePropertyPatternChangedId, err.GetId())
+		require.Equal(t, checker.WARN, err.GetLevel())
+	}
 }
 
 // modifying a pattern in request parameter is breaking
@@ -488,7 +498,10 @@ func TestBreaking_ModifyPatternToAnyString(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Empty(t, errs)
+	for _, err := range errs {
+		require.Equal(t, checker.ResponsePropertyPatternChangedId, err.GetId())
+		require.Equal(t, checker.WARN, err.GetLevel())
+	}
 }
 
 // modifying the default value of an optional request parameter is breaking
@@ -670,7 +683,9 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// removing 'allOf' subschema from the request body or request body property is breaking with warn
+// removing 'allOf' subschema from the request body or request body property
+// drops a conjunct, which widens what the request accepts, so it is reported
+// without being breaking
 func TestBreaking_RequestPropertyAllOfRemoved(t *testing.T) {
 	s1, err := open("../data/checker/request_property_all_of_removed_base.yaml")
 	require.NoError(t, err)
@@ -679,15 +694,15 @@ func TestBreaking_RequestPropertyAllOfRemoved(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
 
-	require.Len(t, errs, 2)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 
 	change := requireChange(t, errs, checker.RequestBodyAllOfRemovedId)
-	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Equal(t, checker.INFO, change.GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Rabbit` from the request body `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 	change = requireChange(t, errs, checker.RequestPropertyAllOfRemovedId)
-	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Equal(t, checker.INFO, change.GetLevel())
 	require.Equal(t, "removed `#/components/schemas/Breed3` from the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
