@@ -75,12 +75,21 @@ Available tags, by dimension:
 - polarity: `request`, `response`, `document` (neither wire direction), `shared` (a component, whose direction depends on the referencing site)
 - action: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`
 
-Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. Pick the output with `--format text|json|yaml`, or pass `--patterns` to list the waiver and non-contract patterns with the number of edits each accounts for (that listing has no edits to filter, so it takes no `--tags`):
+Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. `--format text|json|yaml` picks the output.
 
 ```
 oasdiff checks changelog coverage --tags waived,request
 oasdiff checks changelog coverage --tags covered,add,remove
-oasdiff checks changelog coverage --patterns --format json
+```
+
+`--patterns` summarizes the same accounting instead of listing it: one row per waiver or non-contract entry, with the number of edits it accounts for, which answers which reasons the unchecked edits fall under without reading thousands of rows. It takes no `--tags`, having no edits to filter.
+
+```
+oasdiff checks changelog coverage --patterns
+
+KIND         PATTERN                                       EDITS REASON
+waiver       webhooks.**                                   2353  webhooks are diffed (WebhooksDiff) but checkers only ...
+non-contract **.servers.**                                 84    server URLs are deployment metadata, not part of the ...
 ```
 
 The same accounting is enforced by tests, so the listing is always current. The `locations` field in `checks changelog --format json|yaml` shows the inverse mapping: each check's claimed edits.
