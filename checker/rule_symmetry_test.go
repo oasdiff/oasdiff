@@ -36,21 +36,24 @@ var symmetryWaivers = map[string]string{
 func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 	var out []string
 
-	type aka struct {
-		Area   checker.Area
-		Kind   checker.Kind
-		Action metaschema.Action
-	}
-	type dak struct {
+	// a coordinate of the taxonomy; group is a coordinate without its
+	// action, the scope within which action duals and effects are compared;
+	// mirror is one without its direction, compared across the two
+	type coord struct {
 		Direction checker.Direction
 		Area      checker.Area
 		Kind      checker.Kind
 		Action    metaschema.Action
 	}
-	type dakE struct {
+	type group struct {
 		Direction checker.Direction
 		Area      checker.Area
 		Kind      checker.Kind
+	}
+	type mirror struct {
+		Area   checker.Area
+		Kind   checker.Kind
+		Action metaschema.Action
 	}
 
 	// Axis 1: request <-> response, restricted to Areas that appear in both
@@ -65,13 +68,13 @@ func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 			respAreas[r.Area] = true
 		}
 	}
-	req, resp := map[aka]bool{}, map[aka]bool{}
-	present := map[dak]bool{}
-	effects := map[dakE]map[checker.Effect]bool{}
+	req, resp := map[mirror]bool{}, map[mirror]bool{}
+	present := map[coord]bool{}
+	effects := map[group]map[checker.Effect]bool{}
 	for _, r := range rules {
 		for _, action := range r.Actions() {
 			if reqAreas[r.Area] && respAreas[r.Area] {
-				k := aka{r.Area, r.Kind, action}
+				k := mirror{r.Area, r.Kind, action}
 				switch r.Direction {
 				case checker.DirectionRequest:
 					req[k] = true
@@ -79,9 +82,9 @@ func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 					resp[k] = true
 				}
 			}
-			present[dak{r.Direction, r.Area, r.Kind, action}] = true
+			present[coord{r.Direction, r.Area, r.Kind, action}] = true
 		}
-		e := dakE{r.Direction, r.Area, r.Kind}
+		e := group{r.Direction, r.Area, r.Kind}
 		if effects[e] == nil {
 			effects[e] = map[checker.Effect]bool{}
 		}
@@ -105,15 +108,15 @@ func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 		{metaschema.ActionSet, metaschema.ActionUnset},
 	}
 	for _, p := range pairs {
-		coords := map[dakE]bool{}
+		coords := map[group]bool{}
 		for k := range present {
 			if k.Action == p[0] || k.Action == p[1] {
-				coords[dakE{k.Direction, k.Area, k.Kind}] = true
+				coords[group{k.Direction, k.Area, k.Kind}] = true
 			}
 		}
 		for c := range coords {
-			has0 := present[dak{c.Direction, c.Area, c.Kind, p[0]}]
-			has1 := present[dak{c.Direction, c.Area, c.Kind, p[1]}]
+			has0 := present[coord{c.Direction, c.Area, c.Kind, p[0]}]
+			has1 := present[coord{c.Direction, c.Area, c.Kind, p[1]}]
 			coord := fmt.Sprintf("%s/%s/%s", c.Direction.String(), c.Area.String(), c.Kind.String())
 			if has0 && !has1 {
 				out = append(out, fmt.Sprintf("%s<->%s %s missing-%s", p[0], p[1], coord, p[1]))
