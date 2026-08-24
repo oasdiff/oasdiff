@@ -465,7 +465,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseMediaTypeNameGeneralizedId, ERR, ResponseMediaTypeNameUpdatedCheck, DirectionResponse, AreaResponses, KindType, EffectWidens, nil, "paths.*.*.responses.*.content.*:add,remove"),
 		newBackwardCompatibilityRule(ResponseMediaTypeNameSpecializedId, INFO, ResponseMediaTypeNameUpdatedCheck, DirectionResponse, AreaResponses, KindType, EffectNarrows, nil, "paths.*.*.responses.*.content.*:add,remove"),
 		// ResponseOptionalPropertyUpdatedCheck
-		newBackwardCompatibilityRule(ResponseOptionalPropertyRemovedId, WARN, ResponseOptionalPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
+		newBackwardCompatibilityRule(ResponseOptionalPropertyRemovedId, INFO, ResponseOptionalPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
 		newBackwardCompatibilityRule(ResponseOptionalWriteOnlyPropertyRemovedId, INFO, ResponseOptionalPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
 		newBackwardCompatibilityRule(ResponseOptionalPropertyAddedId, INFO, ResponseOptionalPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.properties.*:add"),
 		newBackwardCompatibilityRule(ResponseOptionalWriteOnlyPropertyAddedId, INFO, ResponseOptionalPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.properties.*:add"),

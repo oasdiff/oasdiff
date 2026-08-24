@@ -69,7 +69,6 @@ const (
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	reasonBoundSet     = "below the law, pending review: setting a bound on a request narrows, and the WARN rests on the change being sometimes legitimate, which is an exemption rather than a contract argument"
 	reasonBodyRemoved  = "above the law, pending review: the operation withdraws a declared input, so a client that conformed by sending the body can no longer convey it, which the containment question alone does not express"
-	reasonOptionalGone = "settled, keep: a conforming client already tolerates the property's absence, so the contract does not break; the warning flags a client that treated an optional property as guaranteed, whose failure is its own defect rather than the API's"
 	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
 	reasonNonSuccess   = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
 	reasonOptHeader    = "below the law, pending review: optional softens the verdict on the strength of what clients ought not rely on"
@@ -115,8 +114,7 @@ var severityDeviations = map[string]string{
 	"request-property-min-set":            reasonBoundSet,
 	"request-property-multiple-of-set":    reasonBoundSet,
 	// A2: removal signals behavior change
-	"request-body-removed":               reasonBodyRemoved,
-	"response-optional-property-removed": reasonOptionalGone,
+	"request-body-removed": reasonBodyRemoved,
 	// A3: wrapped in oneOf
 	"request-body-wrapped-in-one-of":  reasonWrapped,
 	"response-body-wrapped-in-one-of": reasonWrapped,

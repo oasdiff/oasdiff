@@ -53,14 +53,21 @@ not a convention.
 
 ---
 
-## Above the law (14 rules): conservative, ratify with a reason
+## Above the law (13 rules): conservative, ratify with a reason
 
-Two entries left this section while it was being reviewed: `request-parameter-removed` and `request-property-removed` were above the law only because their effects claimed a safety nobody had proved (see *Removals that cannot be proved safe* below). They now derive their stored WARN and need no entry.
+Three entries left this section while it was being reviewed.
+`request-parameter-removed` and `request-property-removed` were above the law
+only because their effects claimed a safety nobody had proved (see *Removals
+that cannot be proved safe* below); they now derive their stored WARN.
+`response-optional-property-removed` was **fixed to INFO**: a conforming client
+already tolerates the property's absence, so the contract does not break, and a
+client that treated an optional property as guaranteed is out of specification
+rather than broken by the change. Reporting it as potentially breaking would
+fail a gate over a client-side defect.
 
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
-| `response-optional-property-removed` | WARN | INFO | **settled: keep.** A conforming client already tolerates the property's absence, so the contract does not break. The warning flags a client that treated an optional property as guaranteed: if it fails, that is its own defect rather than a change to the API, and surfacing the risk is worth one glance | **keep** |
 | `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check does not verify that the original branch survives the wrapping, so #1037 kept the breaking verdict; see below | |
 | `request-body-all-of-removed`, `request-property-all-of-removed` | WARN | INFO | dropping a conjunct strictly widens the accepted set, which is provable, so INFO is the sound verdict; the warning exists because the dropped constraints are invisible in the diff, which is a reporting concern rather than a contract one | |
 | `request-parameter-default-value-added/changed/removed` (3) | ERR | INFO | see below: this one needs a product decision, not a derivation | |
