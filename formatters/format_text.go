@@ -57,10 +57,17 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 func (f TEXTFormatter) RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
+	// the checks and the suggested id never both apply, so they share the
+	// last column, which tabwriter leaves ragged rather than padding every
+	// row to the longest list of checks
 	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
-	_, _ = fmt.Fprintln(w, "LOCATION\tACTION\tSTATUS\tCHECKS\tSUGGESTED-ID")
+	_, _ = fmt.Fprintln(w, "LOCATION\tACTION\tSTATUS\tCHECKS OR SUGGESTION")
 	for _, edit := range edits {
-		_, _ = fmt.Fprintln(w, edit.Location+"\t"+edit.Action+"\t"+string(edit.Status)+"\t"+strings.Join(edit.Checks, ",")+"\t"+edit.SuggestedId)
+		detail := edit.SuggestedId
+		if len(edit.Checks) > 0 {
+			detail = strings.Join(edit.Checks, ",")
+		}
+		_, _ = fmt.Fprintln(w, edit.Location+"\t"+edit.Action+"\t"+string(edit.Status)+"\t"+detail)
 	}
 	_ = w.Flush()
 
