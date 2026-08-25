@@ -68,6 +68,26 @@ For example:
 oasdiff breaking --fail-on ERR data/openapi-test1.yaml data/openapi-test3.yaml
 ```
 
+## Pre-commit hook
+oasdiff ships a [pre-commit](https://pre-commit.com/) hook so breaking changes are caught before a commit lands, not only in CI. Add it to your `.pre-commit-config.yaml`:
+```yaml
+repos:
+  - repo: https://github.com/oasdiff/oasdiff
+    rev: v1.29.1
+    hooks:
+      - id: oasdiff-breaking
+```
+The hook compares each changed spec against its version on `origin/main` and fails the commit on any `ERR`-level change. It uses the `--base` flag, which turns the positional arguments into the changed files and compares each one against the given git ref (`--base` accepts any ref, e.g. `--base origin/develop`):
+```
+oasdiff breaking --base origin/main openapi.yaml
+```
+By default the hook only runs on files named `openapi.yaml`, `openapi.yml`, or `openapi.json`. Override `files` (and any breaking flags via `args`) in your config to match your setup:
+```yaml
+      - id: oasdiff-breaking
+        files: (^|/)api/.*\.yaml$
+        args: [--fail-on, WARN]
+```
+
 ## Output Formats
 By default, oasdiff displays changes in a human-readable [colorized](#color) text format.  
 Additional formats can be generated using the `--format` flag:
