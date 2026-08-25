@@ -10,7 +10,7 @@ import (
 // and Guards and its Direction. TestSeverityLaw enforces that every rule's
 // stored level equals the derived one or appears in severityDeviations with a
 // reason, and that no deviation entry is stale. Severity is thereby one
-// reviewed table plus a ledger of exceptions instead of 556 independent
+// reviewed table plus a ledger of exceptions instead of 558 independent
 // choices.
 //
 // Deviations marked "pending review" are the open triage entries from
@@ -68,7 +68,6 @@ const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	reasonBodyRemoved  = "above the law, pending review: the operation withdraws a declared input, so a client that conformed by sending the body can no longer convey it, which the containment question alone does not express"
-	reasonWrapped      = "above the law, pending review: single-to-oneOf wrapping kept breaking per #1037"
 	reasonNotWriteOnly = "above the law, pending review: flags that the field now appears in responses"
 	// below the law: a milder verdict owes a contract argument
 	reasonNonSuccess = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
@@ -85,8 +84,6 @@ const (
 var severityDeviations = map[string]string{
 	// above the law
 	"request-body-removed":                             reasonBodyRemoved,
-	"request-body-wrapped-in-one-of":                   reasonWrapped,
-	"response-body-wrapped-in-one-of":                  reasonWrapped,
 	"response-required-property-became-not-write-only": reasonNotWriteOnly,
 	// below the law
 	"response-non-success-status-removed": reasonNonSuccess,

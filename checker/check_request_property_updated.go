@@ -14,6 +14,14 @@ const (
 	NewOptionalRequestPropertyId            = "new-optional-request-property"
 	RequestBodyWrappedInOneOfId             = "request-body-wrapped-in-one-of"
 
+	RequestBodyWrappedInOneOfOriginalPreservedId = "request-body-wrapped-in-one-of-original-preserved"
+
+	// Shared by the request and response wrapped-in-one-of-original-preserved
+	// checks. The spec does not say whether the alternatives overlap, and
+	// oneOf rejects a payload matching more than one, so a payload that was
+	// valid before may or may not still be accepted.
+	WrappedInOneOfOriginalPreservedCommentId = "wrapped-in-one-of-original-preserved-warning-comment"
+
 	// Shared by the two "required request property with a default" checks. A
 	// request that omits a required property is invalid under the new contract
 	// whether or not the property has a default: the default is a server-side
@@ -27,19 +35,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// Wrapping a concrete object request body into a oneOf (#702) is a
-		// breaking restructuring: under oneOf a previously valid payload can
-		// match multiple overlapping alternatives and be rejected. Emit one
-		// breaking finding per wrapped body (not per property).
+		// One finding per wrapped body, not per property. Which one depends on
+		// whether an alternative still accepts everything the base did: if none
+		// does, a previously valid payload matches nothing; if one does, the
+		// payload matches it but oneOf rejects it should it match a second
+		// alternative too, which the spec does not say.
 		// A nullable wrapping also matches this shape, but the claim filter
 		// drops this change there (KindStructure is claimed and became-nullable
 		// reports it), so no explicit precedence check is needed.
-		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
-			result = append(result, info.newChange(
-				RequestBodyWrappedInOneOfId,
-				nil,
-				"",
-			).WithSources(nil, nil))
+		if w := info.schemaDiff.OneOfWrappingDiff; !w.Empty() {
+			id, comment := RequestBodyWrappedInOneOfId, ""
+			if w.OriginalPreserved {
+				id, comment = RequestBodyWrappedInOneOfOriginalPreservedId, WrappedInOneOfOriginalPreservedCommentId
+			}
+			result = append(result, info.newChange(id, nil, comment).WithSources(nil, nil))
 		}
 
 		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the

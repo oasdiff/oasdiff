@@ -332,7 +332,9 @@ response-property-any-of-added: "%s fue agregado a la lista `anyOf` de la propie
 response-property-any-of-removed: "%s fue removido de la lista `anyOf` de la propiedad de respuesta %s para el estado %s"
 request-body-one-of-added: "%s fue agregado a la lista `oneOf` del cuerpo de solicitud"
 request-body-wrapped-in-one-of: "el cuerpo de solicitud se reestructuró en un `oneOf`, por lo que una carga útil que antes era válida podría dejar de aceptarse"
+request-body-wrapped-in-one-of-original-preserved: "el cuerpo de solicitud se reestructuró en un `oneOf`, conservando el esquema original como una de las alternativas"
 response-body-wrapped-in-one-of: "el cuerpo de respuesta se reestructuró en un `oneOf`, por lo que un campo que antes estaba garantizado podría dejar de estar presente"
+response-body-wrapped-in-one-of-original-preserved: "el cuerpo de respuesta se reestructuró en un `oneOf`, conservando el esquema original como una de las alternativas"
 request-body-one-of-removed: "%s fue removido de la lista `oneOf` del cuerpo de solicitud"
 request-property-one-of-added: "%s fue agregado a la lista `oneOf` de la propiedad de solicitud %s"
 request-property-one-of-removed: "%s fue removido de la lista `oneOf` de la propiedad de solicitud %s"
@@ -467,7 +469,10 @@ request-body-min-length-increased-description: longitud mínima del cuerpo de so
 request-body-min-set-description: valor mínimo del cuerpo de solicitud establecido
 request-body-one-of-added-description: subesquema agregado al oneOf en el cuerpo de solicitud
 request-body-wrapped-in-one-of-description: "cuerpo de solicitud envuelto en un `oneOf`"
+request-body-wrapped-in-one-of-original-preserved-description: "cuerpo de solicitud envuelto en un `oneOf` que conserva el esquema original"
 response-body-wrapped-in-one-of-description: "cuerpo de respuesta envuelto en un `oneOf`"
+response-body-wrapped-in-one-of-original-preserved-description: "cuerpo de respuesta envuelto en un `oneOf` que conserva el esquema original"
+wrapped-in-one-of-original-preserved-warning-comment: "Esta es una advertencia porque la especificación no indica si las alternativas se solapan. Una carga útil que coincida con más de una es rechazada por `oneOf`, por lo que una carga útil que antes era válida podría o no seguir aceptándose."
 request-body-one-of-removed-description: subesquema removido del oneOf en el cuerpo de solicitud
 request-body-removed-description: cuerpo de solicitud removido
 request-body-type-changed-description: tipo del cuerpo de solicitud cambiado

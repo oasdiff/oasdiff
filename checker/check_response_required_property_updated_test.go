@@ -134,3 +134,23 @@ func TestResponsePropertyOneOfWrappingIsBreaking(t *testing.T) {
 	change := requireChange(t, errs, checker.ResponseBodyWrappedInOneOfId)
 	require.Equal(t, checker.ERR, change.GetLevel())
 }
+
+// wrapping a response body in a oneOf that keeps the original schema as one of
+// the alternatives is a warning, not an error: a response the base described
+// still matches that alternative, but oneOf rejects one matching a second
+// alternative too, and the spec does not say whether the alternatives overlap
+func TestResponsePropertyOneOfWrappedOriginalPreserved(t *testing.T) {
+	s1, err := open("../data/checker/response_property_one_of_wrapped_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_one_of_wrapped_original_preserved_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.Len(t, errs, 1)
+	change := requireChange(t, errs, checker.ResponseBodyWrappedInOneOfOriginalPreservedId)
+	require.Equal(t, checker.WARN, change.GetLevel())
+	require.NotEmpty(t, change.GetComment(checker.NewDefaultLocalizer()))
+}

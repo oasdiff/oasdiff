@@ -328,7 +328,9 @@ response-property-any-of-added: "%s foi adicionado à lista `anyOf` da proprieda
 response-property-any-of-removed: "%s foi removido da lista `anyOf` da propriedade de resposta %s para o status %s"
 request-body-one-of-added: "%s foi adicionado à lista `oneOf` do corpo da requisição"
 request-body-wrapped-in-one-of: "o corpo da requisição foi reestruturado em um `oneOf`, portanto uma carga que antes era válida pode não ser mais aceita"
+request-body-wrapped-in-one-of-original-preserved: "o corpo da requisição foi reestruturado em um `oneOf`, mantendo o esquema original como uma das alternativas"
 response-body-wrapped-in-one-of: "o corpo da resposta foi reestruturado em um `oneOf`, portanto um campo que antes era garantido pode não estar mais presente"
+response-body-wrapped-in-one-of-original-preserved: "o corpo da resposta foi reestruturado em um `oneOf`, mantendo o esquema original como uma das alternativas"
 request-body-one-of-removed: "%s foi removido da lista `oneOf` do corpo da requisição"
 request-property-one-of-added: "%s foi adicionado à lista `oneOf` da propriedade de requisição %s"
 request-property-one-of-removed: "%s foi removido da lista `oneOf` da propriedade de requisição %s"
@@ -463,7 +465,10 @@ request-body-min-length-increased-description: comprimento mínimo do corpo da r
 request-body-min-set-description: valor mínimo do corpo da requisição definido
 request-body-one-of-added-description: subesquema adicionado ao oneOf no corpo da requisição
 request-body-wrapped-in-one-of-description: "corpo da requisição encapsulado em um `oneOf`"
+request-body-wrapped-in-one-of-original-preserved-description: "corpo da requisição encapsulado em um `oneOf` que mantém o esquema original"
 response-body-wrapped-in-one-of-description: "corpo da resposta encapsulado em um `oneOf`"
+response-body-wrapped-in-one-of-original-preserved-description: "corpo da resposta encapsulado em um `oneOf` que mantém o esquema original"
+wrapped-in-one-of-original-preserved-warning-comment: "Este é um aviso porque a especificação não diz se as alternativas se sobrepõem. Uma carga que corresponda a mais de uma é rejeitada pelo `oneOf`, portanto uma carga que antes era válida pode ou não continuar sendo aceita."
 request-body-one-of-removed-description: subesquema removido do oneOf no corpo da requisição
 request-body-type-changed-description: tipo do corpo da requisição alterado
 request-body-type-generalized-description: tipo do corpo da requisição generalizado

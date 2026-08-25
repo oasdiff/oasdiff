@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 16 of 556 rules disagree; every
+`go test ./checker -run SeverityLaw`). 14 of 558 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -53,9 +53,9 @@ not a convention.
 
 ---
 
-## Above the law (8 rules): conservative, ratify with a reason
+## Above the law (6 rules): conservative, ratify with a reason
 
-Eight entries left this section while it was being reviewed.
+Ten entries left this section while it was being reviewed.
 `request-parameter-removed` and `request-property-removed` were above the law
 only because their effects claimed a safety nobody had proved (see *Removals
 that cannot be proved safe* below); they now derive their stored WARN.
@@ -70,7 +70,6 @@ fail a gate over a client-side defect. `request-body-all-of-removed`,
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
-| `request-body-wrapped-in-one-of`, `response-body-wrapped-in-one-of` | ERR | WARN | the check does not verify that the original branch survives the wrapping, so #1037 kept the breaking verdict; see below | |
 | `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | the containment is undecided, so ERR over-reports rather than under-reports; the fix is to decide it (see the prefixItems finding) | |
 | `response-required-property-became-not-write-only` | WARN | INFO | the effect says metadata, on the reading that writeOnly is advisory; but the change does mean the response may now carry a property it did not, which is a response widening and would derive ERR. C4 is as unproven as C2 was | |
 
@@ -123,15 +122,39 @@ Two rules at `paths.*.*.requestBody` also disagreed on their area:
 its own add-side mirror included, says `request-body`. Corrected, which is what
 lets `TestRuleSymmetry` compare the pair at all.
 
-### wrapped-in-one-of, and what would settle it
+### wrapped-in-one-of, settled: fixed
 
-The effect is `unknown` because the check does not compare the wrapped branch
-against the original schema. That is an implementation gap, not spec
-ambiguity: the information is in the document. `SchemaRefsValidationEquivalent`
-would answer it, as it would for prefixItems, and the verdict would follow from
-the answer rather than from caution: a wrapping that preserves the original
-branch widens, and one that does not is incomparable and breaking either way.
-Until then ERR is the conservative reading, which is the correct side to err on.
+The effect was `unknown` because the check never compared the alternatives
+against the original schema. That was an implementation gap, not spec
+ambiguity: the information is in the document, and
+`diff.SchemaRefsValidationEquivalent` answers exactly the question, so the
+verdict now follows from the answer rather than from caution.
+
+`getOneOfWrappingDiff` asks whether any alternative has the base schema's
+validation contract, and the two checks split on it:
+
+- No alternative does, so a payload that was valid may match nothing. That is
+  `incomparable`, which derives the ERR the rules already reported.
+  `request-body-wrapped-in-one-of` and `response-body-wrapped-in-one-of` keep
+  their ids and their level, now earned rather than assumed.
+- One does, so every payload the base accepted still matches it, and the only
+  remaining hazard is `oneOf` rejecting a payload that matches a second
+  alternative as well. The spec does not say whether the alternatives overlap,
+  which is `unknown`, deriving WARN. Reported as the new
+  `request-body-wrapped-in-one-of-original-preserved` and
+  `response-body-wrapped-in-one-of-original-preserved`, with a comment naming
+  the missing information.
+
+The residual is deliberate. Proving the second case safe needs branch
+disjointness, which is not equivalence and which oasdiff cannot decide in
+general. `isNullableWrap` shows the shape of an answer for the one case where
+it is provable, a bare `null` branch against a base that rejects null, and
+`discriminator` is not one: the spec makes it a deserialization aid, not a
+validation constraint, so a payload matching two branches still fails. WARN
+rather than INFO is what the soundness asymmetry requires.
+
+This is a user-visible downgrade for the preserved case: a wrapping that keeps
+the original schema now warns where it previously failed `oasdiff breaking`.
 
 ### all-of-removed, settled: fixed
 

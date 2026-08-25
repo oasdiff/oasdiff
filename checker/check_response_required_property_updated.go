@@ -13,27 +13,29 @@ const (
 	ResponseRequiredPropertyAddedId            = "response-required-property-added"
 	ResponseRequiredWriteOnlyPropertyAddedId   = "response-required-write-only-property-added"
 	ResponseBodyWrappedInOneOfId               = "response-body-wrapped-in-one-of"
+
+	ResponseBodyWrappedInOneOfOriginalPreservedId = "response-body-wrapped-in-one-of-original-preserved"
 )
 
 func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// Wrapping a concrete object response body into a oneOf (#702) is a
-		// breaking restructuring: a field that was previously guaranteed in the
-		// response may now be absent depending on which alternative matches.
-		// Emit one breaking finding per wrapped body (not per property). This
-		// is the single emission point for the response side, mirroring the
-		// request side which emits in RequestPropertyUpdatedCheck.
+		// One finding per wrapped body, not per property, and the single
+		// emission point for the response side. Which one depends on whether an
+		// alternative still describes everything the base did: if none does, a
+		// field that was guaranteed may now be absent; if one does, the
+		// response still matches it, and the spec does not say whether it also
+		// matches a second alternative, which oneOf rejects.
 		// A nullable wrapping also matches this shape, but the claim filter
 		// drops this change there (KindStructure is claimed and became-nullable
 		// reports it), so no explicit precedence check is needed.
-		if !info.schemaDiff.OneOfWrappingDiff.Empty() {
-			result = append(result, info.newChange(
-				ResponseBodyWrappedInOneOfId,
-				nil,
-				"",
-			).WithSources(nil, nil))
+		if w := info.schemaDiff.OneOfWrappingDiff; !w.Empty() {
+			id, comment := ResponseBodyWrappedInOneOfId, ""
+			if w.OriginalPreserved {
+				id, comment = ResponseBodyWrappedInOneOfOriginalPreservedId, WrappedInOneOfOriginalPreservedCommentId
+			}
+			result = append(result, info.newChange(id, nil, comment).WithSources(nil, nil))
 		}
 
 		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff walk
