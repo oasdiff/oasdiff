@@ -81,12 +81,13 @@ The hook compares each changed spec against its version on `origin/main` and fai
 ```
 oasdiff breaking --base origin/main openapi.yaml
 ```
-By default the hook only runs on files named `openapi.yaml`, `openapi.yml`, or `openapi.json`. Override `files` (and any breaking flags via `args`) in your config to match your setup:
+By default the hook only runs on files named `openapi.yaml`, `openapi.yml`, or `openapi.json`. Override `files` (and any breaking flags via `args`) in your config to match your setup. `args` replaces the hook's defaults, so keep `--base` when you override it:
 ```yaml
       - id: oasdiff-breaking
         files: (^|/)api/.*\.yaml$
-        args: [--fail-on, WARN]
+        args: [--base, origin/main, --fail-on, WARN]
 ```
+A spec that is not present in the base ref is treated as newly added and skipped, since a new API has no prior version to break.
 
 ## Output Formats
 By default, oasdiff displays changes in a human-readable [colorized](#color) text format.  

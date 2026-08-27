@@ -218,6 +218,22 @@ func gitFetch(ref string) error {
 	return nil
 }
 
+// IsPathMissingInRef reports whether filePath is absent from an otherwise
+// resolvable git ref: the ref's commit is present in the local clone but does
+// not contain the path. This is the "newly added file" case, where there is no
+// prior version to compare against. It returns false when the commit itself is
+// not in the local clone (a missing-commit problem, surfaced elsewhere with a
+// fetch hint) and when git cannot run, so it never masks those errors as a new
+// file.
+func IsPathMissingInRef(ref, filePath string) bool {
+	if !commitExistsLocally(ref) {
+		return false
+	}
+	// "git cat-file -e <ref>:<path>" exits non-zero when the path is not in the
+	// ref, so a failed run means the file was added after that ref.
+	return exec.Command("git", "cat-file", "-e", "--end-of-options", ref+":"+filePath).Run() != nil
+}
+
 // commitExistsLocally reports whether ref names an object already present in the
 // local repository, via "git cat-file -e". Returns false when the object is
 // absent or when git cannot run.

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"io"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -81,6 +82,10 @@ func runBreakingBase(cmd *cobra.Command, base string, files []string) error {
 
 	failed := false
 	for _, file := range files {
+		// Label each file so a multi-file run says which result belongs to which
+		// spec (otherwise a bare "No changes detected" is ambiguous).
+		fmt.Fprintf(cmd.OutOrStdout(), "=== %s ===\n", file)
+
 		// Same "<ref>:<path>" git-revision syntax the git-diff driver uses; the
 		// revision is the file in the working tree.
 		baseSource := load.NewSource(base + ":" + file)
@@ -93,6 +98,13 @@ func runBreakingBase(cmd *cobra.Command, base string, files []string) error {
 
 		failOn, err := runBreakingChanges(flags, cmd.OutOrStdout())
 		if err != nil {
+			// A file that isn't in the base ref is newly added: it has no prior
+			// version, and a new API cannot contain breaking changes. Skip it and
+			// keep checking the remaining files instead of aborting the whole run.
+			if load.IsPathMissingInRef(base, file) {
+				fmt.Fprintln(cmd.OutOrStdout(), "new file, not in base ref, skipped")
+				continue
+			}
 			setReturnValue(cmd, err.Code)
 			return err
 		}

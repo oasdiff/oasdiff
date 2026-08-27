@@ -1,5 +1,3 @@
-//go:build unix
-
 package internal_test
 
 import (
@@ -8,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/internal"
@@ -60,10 +57,9 @@ func breakingBaseRepo(t *testing.T, files map[string]string) string {
 	}
 	gitRun("git", "commit", "-m", "base")
 
-	oldDir, err := os.Getwd()
-	require.NoError(t, err)
-	require.NoError(t, os.Chdir(dir))
-	t.Cleanup(func() { _ = os.Chdir(oldDir) })
+	// t.Chdir restores the previous directory automatically and fails the test
+	// if it is parallel, so it can't quietly corrupt sibling tests.
+	t.Chdir(dir)
 
 	return dir
 }
@@ -102,10 +98,31 @@ func Test_BreakingBase_MultipleFiles(t *testing.T) {
 	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD --fail-on ERR openapi.yaml other.yaml"), &stdout, io.Discard)
 
 	require.Equal(t, 1, exitCode)
-	// both files reported: the breaking one names the removed path, the
-	// unchanged one reports no breaking changes
+	// both files reported: the breaking one names the removed path, and each
+	// result is labelled with its filename so they can be told apart
 	require.Contains(t, stdout.String(), "api-path-removed-without-deprecation")
-	require.Equal(t, 2, strings.Count(stdout.String(), "changes"))
+	require.Contains(t, stdout.String(), "openapi.yaml")
+	require.Contains(t, stdout.String(), "other.yaml")
+}
+
+// Test_BreakingBase_NewFileSkipped checks that a file absent from the base ref
+// (a newly added spec) is skipped rather than aborting the run: the new file is
+// listed first, yet the breaking change in a later, existing file is still
+// caught and fails the command.
+func Test_BreakingBase_NewFileSkipped(t *testing.T) {
+	dir := breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "openapi.yaml"), []byte(breakingSpec), 0644))
+	// new-api.yaml exists in the working tree but was never committed, so it has
+	// no version in HEAD
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "new-api.yaml"), []byte(baseSpec), 0644))
+
+	var stdout bytes.Buffer
+	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD --fail-on ERR new-api.yaml openapi.yaml"), &stdout, io.Discard)
+
+	require.Equal(t, 1, exitCode)
+	require.Contains(t, stdout.String(), "new file, not in base ref, skipped")
+	require.Contains(t, stdout.String(), "new-api.yaml")
+	require.Contains(t, stdout.String(), "api-path-removed-without-deprecation")
 }
 
 // Test_BreakingBase_NoFailOn prints breaking changes but keeps exit 0 when

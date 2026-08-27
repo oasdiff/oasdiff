@@ -2,6 +2,7 @@
   name: oasdiff breaking
   description: Fail on breaking API changes between the staged OpenAPI spec and its version on the base branch
   language: golang
-  entry: oasdiff breaking --base origin/main --fail-on ERR
+  entry: oasdiff breaking
+  args: [--base, origin/main, --fail-on, ERR]
   files: (^|/)openapi\.(ya?ml|json)$
   pass_filenames: true
