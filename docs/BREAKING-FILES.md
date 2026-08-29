@@ -31,7 +31,7 @@ error	[api-path-removed-without-deprecation] at openapi.yaml
 		api path removed without deprecation
 ```
 
-Every argument must be a spec file in the working tree. Stdin, a URL and a git revision have no version in the base ref to compare against, so they are refused.
+Every argument must be a spec file in the working tree. Stdin, a URL and a git revision are not paths that can be looked up in a ref, so they are refused. Being absent from the base ref is not a reason for refusal: that is the newly added case above.
 
 Results are printed one spec at a time, so a structured `--format` emits one document per spec rather than a single combined one.
 

@@ -48,13 +48,15 @@ func getBreakingFilesArgs() cobra.PositionalArgs {
 			return errors.New("please specify one or more spec files to compare against the base ref")
 		}
 		// Each argument is joined to the base ref as "<ref>:<path>", so it has to
-		// be a plain file path. Stdin, a URL and a git revision have no version in
-		// the ref to compare against, and joining them produces nonsense like
-		// "HEAD:HEAD:openapi.yaml". Check what the argument is rather than listing
-		// what it must not be, so a source type added later is covered.
+		// be a plain file path. Stdin, a URL and a git revision are not paths, and
+		// joining them produces nonsense like "HEAD:HEAD:openapi.yaml". Whether the
+		// path is in the ref is a separate question, answered per spec during the
+		// run, since one that is not is a new file. Check what the argument is
+		// rather than listing what it must not be, so a source type added later is
+		// covered.
 		for _, arg := range args {
 			if !load.NewSource(arg).IsFile() {
-				return fmt.Errorf("%q is not a file path: every argument must be a spec file that also has a version in the base ref", arg)
+				return fmt.Errorf("%q is not a file path: every argument must be a spec file in the working tree", arg)
 			}
 		}
 		return checkCommonFlags(cmd)
