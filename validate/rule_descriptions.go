@@ -34,15 +34,17 @@ var ruleDescriptions = map[string]string{
 	"spec-validation-error":        "a spec violation with no more specific rule",
 
 	// Paths and operations
-	"path-must-start-with-slash":    "path key does not start with a slash",
-	"conflicting-paths":             "two paths differ only by parameter name and cannot be told apart",
-	"path-parameters-mismatch":      "path template and declared path parameters disagree",
-	"path-parameter-required":       "a path parameter is not marked required",
-	"duplicate-operation-id":        "the same operationId is used by more than one operation",
-	"operation-responses-required":  "operation has no responses object",
-	"responses-required":            "responses object is missing",
-	"response-description-required": "response has no description",
-	"request-body-content-required": "request body has no content",
+	"path-must-start-with-slash":         "path key does not start with a slash",
+	"conflicting-paths":                  "two paths differ only by parameter name and cannot be told apart",
+	"path-parameters-mismatch":           "path template and declared path parameters disagree",
+	"path-parameter-required":            "a path parameter is not marked required",
+	"duplicate-operation-id":             "the same operationId is used by more than one operation",
+	"operation-responses-required":       "operation has no responses object",
+	"boolean-schema-for-3-1-plus":        "a schema is written as `true` or `false`, which is only valid in OpenAPI 3.1 or later",
+	"boolean-schema-with-other-keywords": "a boolean schema carries other keywords, which would be lost when it is written back",
+	"responses-required":                 "responses object is missing",
+	"response-description-required":      "response has no description",
+	"request-body-content-required":      "request body has no content",
 	// additionalOperations is the OpenAPI 3.2 map of custom http methods. The
 	// version gate on the field itself is described by versionGateDescription.
 	"additional-operations-duplicate-method": "an additionalOperations key names a method that already has its own path item field",
