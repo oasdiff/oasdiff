@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/flatten/allof"
-	"github.com/oasdiff/oasdiff/internal/populate"
+	"github.com/oasdiff/oasdiff/internal/populatetest"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/assert"
@@ -3235,12 +3235,12 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 		if notPopulated[f.Name] {
 			continue
 		}
-		if !populate.NonZero(v.Field(i), f.Name) {
+		if !populatetest.NonZero(v.Field(i), f.Name) {
 			// Silently skipping would reopen the hole this test exists to
-			// close: a field of a kind populate.NonZero cannot build would go
-			// unchecked and the test would still pass. Teach populate.NonZero the
+			// close: a field of a kind populatetest.NonZero cannot build would go
+			// unchecked and the test would still pass. Teach populatetest.NonZero the
 			// kind instead.
-			t.Errorf("cannot populate %s (%s); extend populate.NonZero so the field is covered", f.Name, f.Type)
+			t.Errorf("cannot populate %s (%s); extend populatetest.NonZero so the field is covered", f.Name, f.Type)
 			continue
 		}
 		want[f.Name] = v.Field(i).Interface()
@@ -3272,6 +3272,3 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 			"Merge changed %s on a schema with no allOf; the copy block may be reading the wrong source field", name)
 	}
 }
-
-// setNonZero gives v a value distinguishable from its zero, reporting whether
-// it could.

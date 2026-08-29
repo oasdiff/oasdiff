@@ -1,9 +1,6 @@
-// Package populate fills reflect values with non-zero samples, for the
-// field-coverage gates that walk a struct's fields and require each one to be
-// visible to the code under test (the allOf merge's preserves-every-field
-// test, the schema diff's field-coverage test). Deriving the sample from the
-// field's type keeps the gates free of per-field value tables.
-package populate
+// Package populatetest fills reflect values with non-zero samples derived
+// from their types. Only tests import it.
+package populatetest
 
 import (
 	"reflect"
@@ -13,14 +10,13 @@ import (
 
 // NonZero fills v with a value distinguishable from the zero value, derived
 // from v's type. String samples include the tag, so a value traces back to
-// the field it was built for. It reports false for a kind it cannot build,
-// so a caller can fail loudly rather than skip the field.
+// the field it was built for. It reports false for a kind it cannot build.
 func NonZero(v reflect.Value, tag string) bool {
 	if !v.CanSet() {
 		return false
 	}
-	// A schema position needs a usable schema, not just a non-nil pointer:
-	// the code under test dereferences it.
+	// A full schema rather than a bare non-nil pointer, so the value
+	// survives being dereferenced and compared.
 	if v.Type() == reflect.TypeFor[*openapi3.SchemaRef]() {
 		v.Set(reflect.ValueOf(&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}}}))
 		return true

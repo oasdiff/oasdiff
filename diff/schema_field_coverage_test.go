@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/internal/populate"
+	"github.com/oasdiff/oasdiff/internal/populatetest"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,11 +33,11 @@ func TestSchemaFieldCoverage(t *testing.T) {
 		}
 
 		revision := &openapi3.Schema{}
-		if !populate.NonZero(reflect.ValueOf(revision).Elem().FieldByName(f.Name), f.Name) {
+		if !populatetest.NonZero(reflect.ValueOf(revision).Elem().FieldByName(f.Name), f.Name) {
 			// Silently skipping would reopen the hole this test exists to
 			// close: a field of a kind setNonZeroValue cannot build would go
 			// unchecked and the test would still pass.
-			t.Errorf("cannot populate %s (%s); extend populate.NonZero so the field is covered", f.Name, f.Type)
+			t.Errorf("cannot populate %s (%s); extend populatetest.NonZero so the field is covered", f.Name, f.Type)
 			continue
 		}
 
