@@ -1,0 +1,19 @@
+openapi: 3.1.0
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /items:
+    post:
+      operationId: createItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              prefixItems:
+                - type: integer
+                - type: string
+      responses:
+        "200":
+          description: OK

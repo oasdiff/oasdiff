@@ -79,3 +79,23 @@ func TestRequestPropertyPrefixItemsRemoved(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.True(t, containsId(errs, checker.RequestPropertyPrefixItemsRemovedId), "expected request-property-prefix-items-removed")
 }
+
+// reordering prefixItems entries changes which schema validates each position,
+// so both positions are reported as type changes; the previous content-based
+// pairing matched each entry with its identical twin and reported nothing
+func TestRequestBodyPrefixItemsReordered(t *testing.T) {
+	s1, err := open("../data/checker/prefix_items_reordered_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/prefix_items_reordered_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+
+	require.Len(t, errs, 2)
+	for _, e := range errs {
+		require.Equal(t, checker.RequestPropertyTypeChangedId, e.GetId())
+		require.Equal(t, checker.ERR, e.GetLevel())
+	}
+}
