@@ -20,7 +20,8 @@ Each argument is a spec file in the working tree, compared against the same path
 --base. A spec that isn't in the base ref is newly added and is skipped, since a new
 API has no prior version to break. The command fails if any spec has changes at or
 above --fail-on, so it can gate a commit or a CI job that already knows which files
-changed. See .pre-commit-hooks.yaml for the pre-commit wiring.
+changed, and it is what the oasdiff pre-commit hook runs. See
+https://github.com/oasdiff/oasdiff/blob/main/docs/BREAKING-FILES.md
 
 Results are printed one spec at a time, so a structured --format emits one document
 per spec rather than a single combined one.`,
@@ -32,10 +33,6 @@ per spec rather than a single combined one.`,
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetBreakingLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
 	cmd.PersistentFlags().String("base", "", "git ref holding the version to compare each spec against (e.g. origin/main)")
-
-	// Composed mode merges the specs matching two globs into a single
-	// comparison, which is the opposite of comparing each spec on its own.
-	hideFlag(&cmd, "composed")
 
 	return &cmd
 }
@@ -60,10 +57,6 @@ func getBreakingFilesArgs() cobra.PositionalArgs {
 				return fmt.Errorf("%q is not a file path: every argument must be a spec file that also has a version in the base ref", arg)
 			}
 		}
-		if composed, err := cmd.Flags().GetBool("composed"); err == nil && composed {
-			return errors.New("--composed merges specs into one comparison, which breaking-files does not do; use 'oasdiff breaking --composed' instead")
-		}
-
 		return checkCommonFlags(cmd)
 	}
 }
@@ -97,13 +90,10 @@ func runBreakingFiles(cmd *cobra.Command, args []string) error {
 
 		failOn, err := runBreakingChanges(flags, cmd.OutOrStdout())
 		if err != nil {
-			// A spec that isn't in the base ref but is in the working tree is
-			// newly added: it has no prior version, and a new API cannot contain
-			// breaking changes. Skip it and keep checking the rest.
-			//
-			// The working-tree check is what separates a new spec from a mistyped
-			// one. Without it a path in neither place looks new, and a typo would
-			// pass the check it was meant to fail.
+			// A spec in the working tree but not in the base ref is newly added,
+			// and a new API cannot contain breaking changes, so skip it and keep
+			// checking the rest. Requiring it in the working tree is what tells a
+			// new spec from a mistyped path, which is absent from the ref too.
 			if fileExists(file) && load.IsPathMissingInRef(base, file) {
 				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "new file, not in base ref, skipped")
 				continue

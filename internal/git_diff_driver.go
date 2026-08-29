@@ -42,6 +42,7 @@ repository root.
 	}
 
 	addCommonDiffFlags(&cmd)
+	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), ""), "fail-on", "o", "ignored in git-diff-driver mode (exit code must stay 0 to keep the diff pipeline alive)")
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), LevelInfo), "level", "", "output errors with this level or higher")

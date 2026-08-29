@@ -68,30 +68,8 @@ For example:
 oasdiff breaking --fail-on ERR data/openapi-test1.yaml data/openapi-test3.yaml
 ```
 
-## Checking changed files against a git ref
-`oasdiff breaking-files` compares each spec you name against the same path in a git ref, one comparison per spec, and fails if any of them has changes at or above `--fail-on`. It suits anything that already knows which files changed, such as a pre-commit hook or a CI job driven by `git diff --name-only`:
-```
-oasdiff breaking-files --base origin/main --fail-on ERR openapi.yaml
-```
-A spec that is not in the base ref is newly added and is skipped, since a new API has no prior version to break. Results are printed one spec at a time, so a structured `--format` emits one document per spec rather than a single combined one.
-
-This is a different operation from `--composed`, which merges the specs matching two globs into a single comparison. Use `oasdiff breaking --composed` when several files describe one API, and `breaking-files` when each file is its own API.
-
-### Pre-commit hook
-oasdiff ships a [pre-commit](https://pre-commit.com/) hook built on it, so breaking changes are caught before a commit lands, not only in CI. Add it to your `.pre-commit-config.yaml`:
-```yaml
-repos:
-  - repo: https://github.com/oasdiff/oasdiff
-    rev: v1.29.1
-    hooks:
-      - id: oasdiff-breaking
-```
-The hook's `files` pattern decides which staged specs pre-commit passes to oasdiff, and by default it matches `openapi.yaml`, `openapi.yml` and `openapi.json`. Override it, and the flags, to match your setup. `args` replaces the hook's defaults rather than adding to them, so keep `--base` when you override it:
-```yaml
-      - id: oasdiff-breaking
-        files: (^|/)api/.*\.yaml$
-        args: [--base, origin/main, --fail-on, WARN]
-```
+## Checking many specs at once
+To check a list of changed specs against their versions in a git ref, one comparison per spec, see [BREAKING-FILES.md](BREAKING-FILES.md). That is what the pre-commit hook uses.
 
 ## Output Formats
 By default, oasdiff displays changes in a human-readable [colorized](#color) text format.  

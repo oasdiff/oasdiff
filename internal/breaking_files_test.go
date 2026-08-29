@@ -173,16 +173,16 @@ func Test_BreakingFiles_RejectsNonFileArguments(t *testing.T) {
 	}
 }
 
-// Composed mode merges several specs into one comparison, which is the opposite
-// of comparing each file against its own version in the base ref.
-func Test_BreakingFiles_RejectsComposed(t *testing.T) {
+// breaking-files compares each spec on its own, so it has no second glob to
+// merge and does not register --composed at all.
+func Test_BreakingFiles_HasNoComposedFlag(t *testing.T) {
 	breakingFilesRepo(t, map[string]string{"openapi.yaml": baseSpec})
 
 	var stderr bytes.Buffer
 	exitCode := internal.Run(cmdToArgs("oasdiff breaking-files --base HEAD --composed openapi.yaml"), io.Discard, &stderr)
 
-	require.Equal(t, 100, exitCode)
-	require.Contains(t, stderr.String(), "--composed merges specs into one comparison")
+	require.NotZero(t, exitCode)
+	require.Contains(t, stderr.String(), "unknown flag: --composed")
 }
 
 // The flag-only validations are shared with the base+revision path, so a check
