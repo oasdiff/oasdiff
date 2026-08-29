@@ -14,6 +14,13 @@ type ReturnError struct {
 	Code int
 }
 
+// Unwrap exposes the wrapped error so callers can inspect it with errors.Is and
+// errors.As. Embedding an interface promotes only its own methods, so without
+// this a ReturnError is opaque to both.
+func (e *ReturnError) Unwrap() error {
+	return e.error
+}
+
 const generalExecutionErr = 100
 
 func getErrInvalidFlags(err error) *ReturnError {

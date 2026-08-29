@@ -94,7 +94,7 @@ func runBreakingFiles(cmd *cobra.Command, args []string) error {
 			// and a new API cannot contain breaking changes, so skip it and keep
 			// checking the rest. Requiring it in the working tree is what tells a
 			// new spec from a mistyped path, which is absent from the ref too.
-			if fileExists(file) && load.IsPathMissingInRef(base, file) {
+			if fileExists(file) && errors.Is(err, load.ErrPathNotInRef) {
 				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "new file, not in base ref, skipped")
 				continue
 			}
