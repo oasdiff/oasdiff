@@ -14,6 +14,12 @@ type ReturnError struct {
 	Code int
 }
 
+// Embedding an interface promotes only its own methods, so without this a
+// ReturnError is opaque to errors.Is and errors.As.
+func (e *ReturnError) Unwrap() error {
+	return e.error
+}
+
 const generalExecutionErr = 100
 
 func getErrInvalidFlags(err error) *ReturnError {

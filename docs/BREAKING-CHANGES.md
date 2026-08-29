@@ -68,6 +68,9 @@ For example:
 oasdiff breaking --fail-on ERR data/openapi-test1.yaml data/openapi-test3.yaml
 ```
 
+## Checking many specs at once
+To check a list of changed specs against their versions in a git ref, one comparison per spec, see [BREAKING-FILES.md](BREAKING-FILES.md). That is what the pre-commit hook uses.
+
 ## Output Formats
 By default, oasdiff displays changes in a human-readable [colorized](#color) text format.  
 Additional formats can be generated using the `--format` flag:

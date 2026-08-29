@@ -161,7 +161,9 @@ func hintMissingObject(gitRef string, err error) error {
 	}
 	ref := refBeforeColon(gitRef)
 	if commitExistsLocally(ref) {
-		return err
+		// The commit resolves, so the path is what is missing. Mark the error
+		// rather than leaving a caller to ask git the same question again.
+		return pathNotInRefError{err}
 	}
 	return fmt.Errorf("%w\n\n"+
 		"oasdiff reads git revisions from local objects only and does not modify your repository.\n"+
@@ -187,6 +189,20 @@ func hintMissingObject(gitRef string, err error) error {
 //
 // No legitimate git revision begins with "-".
 var ErrRefLooksLikeOption = errors.New("git revision must not start with '-'")
+
+// ErrPathNotInRef marks a git-revision load that failed because the path is not
+// in the ref, as opposed to the ref itself not resolving. A path absent from the
+// ref may simply be a file added since, which a caller comparing a working tree
+// against a ref will want to treat differently from a genuine failure.
+var ErrPathNotInRef = errors.New("path not in git ref")
+
+// pathNotInRefError marks an error as ErrPathNotInRef without changing what it
+// says. git's message already names the path and the ref, so wrapping with
+// fmt.Errorf would only prefix it with a worse version of itself.
+type pathNotInRefError struct{ error }
+
+func (e pathNotInRefError) Is(target error) bool { return target == ErrPathNotInRef }
+func (e pathNotInRefError) Unwrap() error        { return e.error }
 
 // checkRef rejects a revision that git would parse as an option.
 func checkRef(ref string) error {

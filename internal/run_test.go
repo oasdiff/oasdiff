@@ -583,3 +583,15 @@ func Test_BothSidesStdin(t *testing.T) {
 	require.Equal(t, 2, strings.Count(stdout.String(), "1.2.3"), "both sides carry the document's version")
 	require.NotContains(t, stdout.String(), "n/a")
 }
+
+// breaking-files takes the specs to check as positionals, so at least one is
+// required, and --base is what they are compared against.
+func Test_BreakingFiles_RequiresArgs(t *testing.T) {
+	var stderr bytes.Buffer
+	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files --base origin/main"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "please specify one or more spec files")
+
+	stderr.Reset()
+	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files openapi.yaml"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "please specify --base")
+}

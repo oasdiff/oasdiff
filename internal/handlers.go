@@ -24,18 +24,24 @@ func getParseArgs() cobra.PositionalArgs {
 		if err := checkStdinWithComposed(cmd, args); err != nil {
 			return err
 		}
-		if err := checkReviewFlagsRequireOpen(cmd); err != nil {
-			return err
-		}
-		if err := checkColor(cmd); err != nil {
-			return err
-		}
-		if err := checkTemplate(cmd); err != nil {
-			return err
-		}
 
-		return nil
+		return checkCommonFlags(cmd)
 	}
+}
+
+// checkCommonFlags runs the validations that depend only on flags, not on the
+// shape of the positional arguments. Every argument validator calls it, so a
+// check added here reaches all of them rather than only the caller it was
+// written for.
+func checkCommonFlags(cmd *cobra.Command) error {
+	if err := checkReviewFlagsRequireOpen(cmd); err != nil {
+		return err
+	}
+	if err := checkColor(cmd); err != nil {
+		return err
+	}
+
+	return checkTemplate(cmd)
 }
 
 type runner func(flags *Flags, stdout io.Writer) (bool, *ReturnError)

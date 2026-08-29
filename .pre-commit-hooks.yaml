@@ -1,0 +1,8 @@
+- id: oasdiff-breaking
+  name: oasdiff breaking
+  description: Fail on breaking API changes between the staged OpenAPI spec and its version on the base branch
+  language: golang
+  entry: oasdiff breaking-files
+  args: [--base, origin/main, --fail-on, ERR]
+  files: (^|/)openapi\.(ya?ml|json)$
+  pass_filenames: true

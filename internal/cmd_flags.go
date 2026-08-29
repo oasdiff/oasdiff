@@ -10,7 +10,6 @@ import (
 )
 
 func addCommonDiffFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolP("composed", "c", false, "work in 'composed' mode, compare paths in all specs matching base and revision globs")
 	cmd.PersistentFlags().StringP("match-path", "p", "", "include only paths that match this regular expression")
 	cmd.PersistentFlags().StringP("unmatch-path", "q", "", "exclude paths that match this regular expression")
 	cmd.PersistentFlags().String("filter-extension", "", "exclude paths and operations with an OpenAPI Extension matching this regular expression")
@@ -79,6 +78,14 @@ func warnDeprecatedFlags(cmd *cobra.Command) {
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Flag --%s is deprecated: %s\n", name, guidance)
 		}
 	}
+}
+
+// addComposedFlag registers 'composed' mode, which compares the specs matching
+// a base glob against those matching a revision glob as one pair. Only the
+// commands that take a base and a revision have it; breaking-files compares
+// each spec on its own, so it has no second glob to merge.
+func addComposedFlag(cmd *cobra.Command) {
+	cmd.PersistentFlags().BoolP("composed", "c", false, "work in 'composed' mode, compare paths in all specs matching base and revision globs")
 }
 
 func addCommonBreakingFlags(cmd *cobra.Command) {

@@ -1,0 +1,32 @@
+# An annotated .pre-commit-config.yaml for the oasdiff breaking-changes hook.
+# Copy this into the root of your own repository, not into oasdiff.
+#
+# The hook runs `oasdiff breaking-files`, which compares each staged spec against
+# its own version in a git ref and fails the commit on a breaking change.
+# See https://github.com/oasdiff/oasdiff/blob/main/docs/BREAKING-FILES.md
+
+repos:
+  - repo: https://github.com/oasdiff/oasdiff
+    # The oasdiff release the hook comes from. `pre-commit autoupdate` moves
+    # this to the newest tag, so it does not need tracking by hand.
+    rev: v1.30.0
+    hooks:
+      - id: oasdiff-breaking
+
+        # `files` is pre-commit's filter, not oasdiff's: it decides which staged
+        # paths are handed over. The hook defaults to specs named openapi.yaml,
+        # openapi.yml or openapi.json, at any depth. Override it to match your
+        # layout. When nothing staged matches, pre-commit skips the hook.
+        #
+        # files: (^|/)api/.*\.yaml$
+
+        # `args` REPLACES the hook's defaults rather than adding to them, so
+        # repeat every flag you still want. The defaults are:
+        #
+        #     [--base, origin/main, --fail-on, ERR]
+        #
+        # --base is the git ref holding the version to compare against, and it
+        # must resolve locally: oasdiff does not fetch. --fail-on is the lowest
+        # severity that blocks the commit.
+        #
+        # args: [--base, origin/develop, --fail-on, WARN]
