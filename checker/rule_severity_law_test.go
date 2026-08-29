@@ -13,10 +13,14 @@ import (
 // reviewed table plus a ledger of exceptions instead of 558 independent
 // choices.
 //
-// Deviations marked "pending review" are the open triage entries from
-// SEVERITY-LAW-TRIAGE.md: conventions to be ratified into permanent reasons,
-// or candidate severity bugs to be fixed (at which point the entry is removed
-// and the law holds directly).
+// A deviation is either below the law, a milder verdict than the effect
+// implies, or above it. The two are not equally suspect: reporting a breaking
+// change as safe ships it silently, so a milder verdict owes a proof that the
+// change is safe for every consumer that conformed to the old contract, while
+// a harsher one costs a reviewer a glance and needs only a reason. "It is
+// sometimes legitimately required" is a reason to accept a breaking change,
+// not a reason it is not one, and belongs in --severity-levels rather than in
+// the default verdict.
 
 // expectedLevel derives a rule's level from the law.
 func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
@@ -68,21 +72,12 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 	return checker.INFO
 }
 
-const (
-	// above the law: conservative, and a harsher verdict needs a reason
-	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
-	// below the law: a milder verdict owes a contract argument
-	// four rules deviate each way
-	reasonPrefixItems = "pending review: stored levels assume a containment direction prefixItems does not have"
-)
+const reasonPrefixItems = "pending review: stored levels assume a containment direction prefixItems does not have; deciding it needs oasdiff#1180, which pairs prefixItems entries by index"
 
 // severityDeviations records every rule whose stored level deviates from the
 // law, with the reason. An unexplained mismatch and a stale entry both fail
 // TestSeverityLaw.
 var severityDeviations = map[string]string{
-	// above the law
-	// below the law
-	// prefixItems
 	"request-body-prefix-items-added":        reasonPrefixItems,
 	"request-body-prefix-items-removed":      reasonPrefixItems,
 	"request-property-prefix-items-added":    reasonPrefixItems,
