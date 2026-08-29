@@ -218,7 +218,6 @@ response-property-min-length-decreased: o comprimento mínimo da propriedade de 
 response-body-type-changed: o %s do corpo da resposta foi alterado de %s para %s para o status %s
 response-property-type-changed: o %s da propriedade de resposta %s foi alterado de %s para %s para o status %s
 response-required-property-became-not-write-only: a propriedade obrigatória de resposta %s deixou de ser somente escrita para o status %s
-response-required-property-became-not-write-only-comment: Isso é válido apenas se a propriedade sempre foi retornada antes de a especificação ter sido alterada.
 response-required-property-removed: a propriedade obrigatória %s foi removida da resposta com o status %s
 response-required-property-added: a propriedade obrigatória %s foi adicionada à resposta com o status %s
 response-success-status-removed: a resposta de sucesso com o status %s foi removida

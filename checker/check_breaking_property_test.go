@@ -537,7 +537,9 @@ func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// changing an existing required property in response body to not-write-only is breaking
+// changing an existing required property in response body to not-write-only is
+// not breaking: the response may now carry a field it did not, same as adding
+// one, and the twelve sibling mutability rules report it the same way
 func TestBreaking_RequiredPropertyWriteOnlyDisabled(t *testing.T) {
 	s1, err := open(requiredPropertyFile("write-only-changed-revision.yaml"))
 	require.NoError(t, err)
@@ -547,12 +549,12 @@ func TestBreaking_RequiredPropertyWriteOnlyDisabled(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.NotEmpty(t, errs)
-	require.Len(t, errs, 2)
-	requireChange(t, errs, checker.ResponseRequiredPropertyBecameNonWriteOnlyId)
-	require.Equal(t, checker.WARN, errs[0].GetLevel())
-	require.Equal(t, checker.WARN, errs[1].GetLevel())
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	change := requireChange(t, errs, checker.ResponseRequiredPropertyBecameNonWriteOnlyId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+	require.Empty(t, change.GetComment(checker.NewDefaultLocalizer()))
 }
 
 // changing an existing property in request body to required is breaking

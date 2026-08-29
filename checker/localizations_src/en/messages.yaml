@@ -222,7 +222,6 @@ response-property-min-length-decreased: the %s response property's minLength was
 response-body-type-changed: the response's body %s changed from %s to %s for status %s
 response-property-type-changed: the %s response's property %s changed from %s to %s for status %s
 response-required-property-became-not-write-only: the response required property %s became not write-only for the status %s
-response-required-property-became-not-write-only-comment: This is valid only if the property was always returned before the specification changed.
 response-required-property-removed: removed the required property %s from the response with the %s status
 response-required-property-added: added the required property %s to the response with the %s status
 response-success-status-removed: removed the success response with the status %s

@@ -48,13 +48,12 @@ func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 
 		Id:          checker.ResponseRequiredPropertyBecameNonWriteOnlyId,
 		Args:        []any{"data/writeOnlyName", "200"},
-		Comment:     checker.ResponseRequiredPropertyBecameNonWriteOnlyId + "-comment",
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
-	require.Equal(t, "This is valid only if the property was always returned before the specification changed.", errs[0].GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Equal(t, "the response required property `data/writeOnlyName` became not write-only for the status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 

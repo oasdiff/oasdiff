@@ -211,7 +211,6 @@ response-property-min-length-decreased: для поля ответа %s minLengt
 response-body-type-changed: "%s тела ответа изменён с %s на %s для статуса %s"
 response-property-type-changed: у свойства ответа %s %s изменён с %s на %s для статуса %s
 response-required-property-became-not-write-only: обязательное поле ответа %s перестало быть write-only для ответа со статусом %s
-response-required-property-became-not-write-only-comment: Изменение допустимо только в том случае, если свойство всегда возвращалось до изменения спецификации.
 response-required-property-removed: удалено обязательное поле ответа %s из ответа со статусом %s
 response-required-property-added: добавил требуемое свойство %s в ответ со статусом %s
 response-success-status-removed: удален успешный (2xx) статус ответа %s

@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 11 of 558 rules disagree; every
+`go test ./checker -run SeverityLaw`). 10 of 558 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -53,7 +53,7 @@ not a convention.
 
 ---
 
-## Above the law (5 rules): conservative, ratify with a reason
+## Above the law (4 rules): conservative, ratify with a reason
 
 Eleven entries left this section while it was being reviewed.
 `request-parameter-removed` and `request-property-removed` were above the law
@@ -70,7 +70,26 @@ fail a gate over a client-side defect. `request-body-all-of-removed`,
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
 | `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | the containment is undecided, so ERR over-reports rather than under-reports; the fix is to decide it (see the prefixItems finding) | |
-| `response-required-property-became-not-write-only` | WARN | INFO | the effect says metadata, on the reading that writeOnly is advisory; but the change does mean the response may now carry a property it did not, which is a response widening and would derive ERR. C4 is as unproven as C2 was | |
+
+### became-not-write-only, settled: fixed
+
+WARN, derived INFO, now **INFO**. It was the lone outlier in a family of
+fourteen mutability rules (request and response, optional and required, across
+readOnly and writeOnly), every other one of which is `none` with the matching
+guard and INFO.
+
+Removing `writeOnly` means the response may now carry a field it did not, which
+is what adding a property does, and both `response-required-property-added` and
+`response-optional-property-added` are INFO. The comment it carried, that the
+change is valid only if the property was always returned before, is a note
+about whether the specification described past behaviour accurately, not a
+question about what a conforming client sees; it is dropped with the WARN.
+
+C4 does not have to be ruled on to settle this, but a related question is left
+open. `GuardWriteOnly` describes the base state, and the four `became-not-X`
+rules fire precisely when that state ends, so nullifying response-side effects
+on them is backwards. It changes no verdict today because the family is
+uniformly `none`, and reshaping eight registrations wants its own pass.
 
 ### Removals that cannot be proved safe
 

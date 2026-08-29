@@ -222,7 +222,6 @@ response-property-min-length-decreased: la longitud mínima de la propiedad de r
 response-body-type-changed: el %s del cuerpo de respuesta fue cambiado de %s a %s para el estado %s
 response-property-type-changed: el %s de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
 response-required-property-became-not-write-only: la propiedad requerida de respuesta %s dejó de ser de solo escritura para el estado %s
-response-required-property-became-not-write-only-comment: Esto es válido solo si la propiedad siempre fue retornada antes de que la especificación fuera cambiada.
 response-required-property-removed: removida la propiedad requerida %s de la respuesta con estado %s
 response-required-property-added: agregada la propiedad requerida %s a la respuesta con estado %s
 response-success-status-removed: removido el estado de respuesta exitosa %s

@@ -67,7 +67,6 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
-	reasonNotWriteOnly = "above the law, pending review: flags that the field now appears in responses"
 	// below the law: a milder verdict owes a contract argument
 	reasonNonSuccess = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
 	reasonEnumAdded  = "below the law, pending review: the server may emit a value clients never handled"
@@ -80,7 +79,6 @@ const (
 // TestSeverityLaw.
 var severityDeviations = map[string]string{
 	// above the law
-	"response-required-property-became-not-write-only": reasonNotWriteOnly,
 	// below the law
 	"response-non-success-status-removed": reasonNonSuccess,
 	"response-property-enum-value-added":  reasonEnumAdded,
