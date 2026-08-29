@@ -270,6 +270,9 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	result.Value.DynamicRef = base.Value.DynamicRef
 	result.Value.DynamicAnchor = base.Value.DynamicAnchor
 	result.Value.Comment = base.Value.Comment
+	// A boolean schema carries no other keyword, so there is nothing to merge
+	// into it and nothing of its own to merge elsewhere; it survives as written.
+	result.Value.Always = base.Value.Always
 
 	// Combined across subschemas further down, most restrictive winning, but
 	// seeded from the outer schema here: with no siblings to combine there

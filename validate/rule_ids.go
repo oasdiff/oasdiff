@@ -18,6 +18,8 @@ var ruleIDs = []string{
 	"anchor-field-for-3-1-plus",
 	"authorization-url-forbidden",
 	"bearer-format-forbidden",
+	"boolean-schema-for-3-1-plus",
+	"boolean-schema-with-other-keywords",
 	"comment-field-for-3-1-plus",
 	"conflicting-paths",
 	"const-field-for-3-1-plus",
