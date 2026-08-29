@@ -7,8 +7,9 @@
 
 repos:
   - repo: https://github.com/oasdiff/oasdiff
-    # Pin a release. Dependabot and Renovate both keep this up to date.
-    rev: v1.29.1
+    # The oasdiff release the hook comes from. `pre-commit autoupdate` moves
+    # this to the newest tag, so it does not need tracking by hand.
+    rev: v1.30.0
     hooks:
       - id: oasdiff-breaking
 

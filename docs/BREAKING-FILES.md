@@ -46,10 +46,12 @@ oasdiff ships a [pre-commit](https://pre-commit.com/) hook built on `breaking-fi
 ```yaml
 repos:
   - repo: https://github.com/oasdiff/oasdiff
-    rev: v1.29.1
+    rev: v1.30.0
     hooks:
       - id: oasdiff-breaking
 ```
+
+`rev` pins the oasdiff release the hook comes from. Run `pre-commit autoupdate` to move it to the newest tag; there is no need to track oasdiff releases by hand.
 
 The hook's `files` pattern decides which staged specs pre-commit passes to oasdiff, and by default it matches `openapi.yaml`, `openapi.yml` and `openapi.json`. Override it, and the flags, to match your setup. `args` replaces the hook's defaults rather than adding to them, so keep `--base` when you override it:
 
