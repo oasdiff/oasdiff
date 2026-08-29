@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 10 of 558 rules disagree; every
+`go test ./checker -run SeverityLaw`). 9 of 558 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -212,7 +212,7 @@ the fallback will see them.
 
 ---
 
-## Below the law (6 rules): each owes a contract argument
+## Below the law (5 rules): each owes a contract argument
 
 ### The bound-set family (24 rules) — settled: fixed
 
@@ -294,6 +294,21 @@ proof the check never had: all it observed is that the parameter maps differ.
 `unknown` is the honest reading and derives WARN. Splitting the id by which of
 the three happened would let each case earn its own verdict, tracked as #1186.
 
+### response-property-enum-value-added, settled: fixed
+
+WARN, derived ERR, now **ERR**. A response `enum` is a promise about what the
+server emits, so adding a value lets it return something the old contract
+excluded and a client written against that contract may not handle it. The
+family already agreed: `response-property-any-of-added` and
+`response-body-list-of-types-widened` are both ERR for the same widening.
+
+The comment is reworded to match. It used to say the change "can be unexpected
+for clients", which reads as a warning; it now states what the server may do
+and names `x-extensible-enum`, which is the declaration to use when the value
+set is meant to grow.
+
+This is a user-visible escalation on a common change.
+
 ### prefixItems (4 of the 8 rules)
 
 `request-*-prefix-items-added` and `response-*-prefix-items-removed`: **INFO**,
@@ -311,11 +326,10 @@ verdict falls to `unknown` (WARN) rather than to an assumed direction. Fixing
 all eight to WARN is the blunt version of the same correction, and is the
 fallback if the comparison turns out not to fit.
 
-### Remaining singles (2 rules)
+### Remaining singles (1 rule)
 
 | Rule | Stored | Derived | Question it must answer | Decision |
 |---|---|---|---|---|
-| `response-property-enum-value-added` | WARN | ERR | the server may now emit a value no client was written to handle | |
 | `response-non-success-status-removed` | INFO | ERR | a client handling that status loses the behaviour; "it is only cleanup" is an exemption | |
 
 ---

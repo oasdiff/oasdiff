@@ -196,7 +196,7 @@ response-body-became-nullable: у тела ответа стало обнуля�
 response-property-became-not-nullable: поле ответа %s стало необнуляемым для ответа со статусом %s
 response-body-became-not-nullable: тело ответа стало необнуляемым
 response-property-enum-value-added: добавлено новое enum значение %s в поле ответа %s для ответа со статусом %s
-response-property-enum-value-added-comment: Добавление новых значений перечисления в ответ может быть неожиданным для клиентов, вместо этого используйте x-extensible-enum.
+response-property-enum-value-added-comment: Сервер теперь может вернуть значение, которое исключал прежний контракт, поэтому клиент, написанный по нему, может не обработать ответ. Если набор значений предполагает расширение, объявите его через x-extensible-enum.
 response-property-enum-value-removed: удалено значение перечисления %s из свойства ответа %s для статуса ответа %s.
 response-body-max-length-increased: у тела ответа maxLength увеличен с %s до %s
 response-property-max-length-increased: у поля ответа %s maxLength увеличен с %s до %s для ответа со статусом %s

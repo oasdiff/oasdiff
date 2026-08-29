@@ -519,7 +519,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyConstRemovedId, ERR, ResponsePropertyConstChangedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.const:unset"),
 		newBackwardCompatibilityRule(ResponsePropertyConstChangedId, ERR, ResponsePropertyConstChangedCheck, DirectionResponse, AreaSchema, KindValues, EffectIncomparable, nil, "paths.*.*.responses.*.content.*.schema.const:change"),
 		// ResponsePropertyEnumValueAddedCheck
-		newBackwardCompatibilityRule(ResponsePropertyEnumValueAddedId, WARN, ResponsePropertyEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
+		newBackwardCompatibilityRule(ResponsePropertyEnumValueAddedId, ERR, ResponsePropertyEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
 		newBackwardCompatibilityRule(ResponseWriteOnlyPropertyEnumValueAddedId, INFO, ResponsePropertyEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.enum:add"),
 		// ResponsePropertyMaxIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maximum:increase"),

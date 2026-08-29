@@ -207,7 +207,7 @@ response-body-became-nullable: the response's body became nullable
 response-property-became-not-nullable: the response property %s became not nullable for the status %s
 response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
-response-property-enum-value-added-comment: Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.
+response-property-enum-value-added-comment: The server may now return a value the previous contract excluded, so a client written against it may not handle the response. If the value set is meant to grow, declare it with x-extensible-enum.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
 response-body-max-length-increased: the response's body maxLength was increased from %s to %s
 response-property-max-length-increased: the %s response property's maxLength was increased from %s to %s for the response status %s

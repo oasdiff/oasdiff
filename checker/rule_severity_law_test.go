@@ -69,7 +69,6 @@ const (
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	// below the law: a milder verdict owes a contract argument
 	reasonNonSuccess = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
-	reasonEnumAdded  = "below the law, pending review: the server may emit a value clients never handled"
 	// four rules deviate each way
 	reasonPrefixItems = "pending review: stored levels assume a containment direction prefixItems does not have"
 )
@@ -81,7 +80,6 @@ var severityDeviations = map[string]string{
 	// above the law
 	// below the law
 	"response-non-success-status-removed": reasonNonSuccess,
-	"response-property-enum-value-added":  reasonEnumAdded,
 	// prefixItems
 	"request-body-prefix-items-added":        reasonPrefixItems,
 	"request-body-prefix-items-removed":      reasonPrefixItems,

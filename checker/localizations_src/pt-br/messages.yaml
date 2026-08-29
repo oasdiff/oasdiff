@@ -203,7 +203,7 @@ response-body-became-nullable: o corpo da resposta tornou-se anulável
 response-property-became-not-nullable: a propriedade de resposta %s tornou-se não anulável para o status %s
 response-body-became-not-nullable: o corpo da resposta tornou-se não anulável
 response-property-enum-value-added: o novo valor %s do enum foi adicionado à propriedade de resposta %s para o status %s
-response-property-enum-value-added-comment: Adicionar novos valores enum à resposta pode ser inesperado para os clientes, use x-extensible-enum em vez disso.
+response-property-enum-value-added-comment: O servidor agora pode retornar um valor que o contrato anterior excluía, portanto um cliente escrito com base nele pode não tratar a resposta. Se o conjunto de valores deve crescer, declare-o com x-extensible-enum.
 response-property-enum-value-removed: o valor %s do enum foi removido da propriedade de resposta %s para o status %s
 response-body-max-length-increased: o comprimento máximo do corpo da resposta foi aumentado de %s para %s
 response-property-max-length-increased: o comprimento máximo da propriedade de resposta %s foi aumentado de %s para %s para o status %s
