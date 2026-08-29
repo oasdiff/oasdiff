@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/spf13/cobra"
 )
@@ -27,6 +28,9 @@ func getParseArgs() cobra.PositionalArgs {
 			return err
 		}
 		if err := checkColor(cmd); err != nil {
+			return err
+		}
+		if err := checkTemplate(cmd); err != nil {
 			return err
 		}
 
@@ -86,6 +90,36 @@ func checkColor(cmd *cobra.Command) error {
 	}
 
 	return errors.New(`--color flag is only relevant with 'text' or 'singleline' formats`)
+}
+
+// checkTemplate rejects --template with a format that renders no template,
+// before the specs are loaded rather than after the diff is computed.
+func checkTemplate(cmd *cobra.Command) error {
+
+	// only the changelog-shaped commands define it (via addCommonChangelogFlags)
+	if cmd.Flags().Lookup("template") == nil {
+		return nil
+	}
+
+	if template, _ := cmd.Flags().GetString("template"); template == "" {
+		return nil
+	}
+
+	format, _ := cmd.Flags().GetString("format")
+	formatter, err := formatters.Lookup(format, formatters.DefaultFormatterOpts())
+	if err != nil {
+		// an unsupported format is reported when the output is rendered
+		return nil
+	}
+	if !formatter.SupportsTemplate() {
+		err := getErrTemplateNotSupported(format)
+		// keep the exit code the command reported when this was checked
+		// after the diff
+		setReturnValue(cmd, err.Code)
+		return err
+	}
+
+	return nil
 }
 
 func checkReviewFlagsRequireOpen(cmd *cobra.Command) error {

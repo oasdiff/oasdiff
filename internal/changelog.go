@@ -95,9 +95,9 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getFailOn() != "" {
-		level, err := checker.NewLevel(flags.getFailOn())
-		if err != nil {
-			return false, getErrInvalidFlags(fmt.Errorf("invalid fail-on value %s", flags.getFailOn()))
+		level, returnErr := flags.failOnLevel()
+		if returnErr != nil {
+			return false, returnErr
 		}
 		return errs.HasLevelOrHigher(level), nil
 	}
@@ -136,11 +136,6 @@ func outputChangelog(flags *Flags, stdout io.Writer, errs checker.Changes, specI
 	})
 	if err != nil {
 		return getErrUnsupportedFormat(flags.getFormat(), changelogCmd)
-	}
-
-	// validate template usage
-	if flags.getTemplate() != "" && !formatter.SupportsTemplate() {
-		return getErrTemplateNotSupported(flags.getFormat())
 	}
 
 	// render

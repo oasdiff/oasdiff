@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"slices"
+
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/diff"
@@ -13,7 +15,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
-	"slices"
 )
 
 // EnvConfigPath is the environment variable that overrides the default
