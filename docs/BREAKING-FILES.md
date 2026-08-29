@@ -60,3 +60,5 @@ The hook's `files` pattern decides which staged specs pre-commit passes to oasdi
 ```
 
 pre-commit shows a hook's output only when it fails, which is when you need the report: the run that blocks the commit is the one that tells you which spec broke and how.
+
+A fully annotated config, covering both settings above and the mistakes they invite, is at [`examples/.pre-commit-config.yaml`](../examples/.pre-commit-config.yaml).
