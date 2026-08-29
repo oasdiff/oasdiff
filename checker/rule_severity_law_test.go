@@ -67,7 +67,6 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
-	reasonBodyRemoved  = "above the law, pending review: the operation withdraws a declared input, so a client that conformed by sending the body can no longer convey it, which the containment question alone does not express"
 	reasonNotWriteOnly = "above the law, pending review: flags that the field now appears in responses"
 	// below the law: a milder verdict owes a contract argument
 	reasonNonSuccess = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
@@ -83,7 +82,6 @@ const (
 // TestSeverityLaw.
 var severityDeviations = map[string]string{
 	// above the law
-	"request-body-removed":                             reasonBodyRemoved,
 	"response-required-property-became-not-write-only": reasonNotWriteOnly,
 	// below the law
 	"response-non-success-status-removed": reasonNonSuccess,

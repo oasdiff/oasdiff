@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 14 of 558 rules disagree; every
+`go test ./checker -run SeverityLaw`). 13 of 558 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -53,9 +53,9 @@ not a convention.
 
 ---
 
-## Above the law (6 rules): conservative, ratify with a reason
+## Above the law (5 rules): conservative, ratify with a reason
 
-Ten entries left this section while it was being reviewed.
+Eleven entries left this section while it was being reviewed.
 `request-parameter-removed` and `request-property-removed` were above the law
 only because their effects claimed a safety nobody had proved (see *Removals
 that cannot be proved safe* below); they now derive their stored WARN.
@@ -69,7 +69,6 @@ fail a gate over a client-side defect. `request-body-all-of-removed`,
 
 | Rules | Stored | Derived | Reason | Decision |
 |---|---|---|---|---|
-| `request-body-removed` | ERR | WARN | the operation withdraws a declared input; see below | **keep** |
 | `request-body-prefix-items-removed`, `request-property-prefix-items-removed`, `response-body-prefix-items-added`, `response-property-prefix-items-added` | ERR | WARN | the containment is undecided, so ERR over-reports rather than under-reports; the fix is to decide it (see the prefixItems finding) | |
 | `response-required-property-became-not-write-only` | WARN | INFO | the effect says metadata, on the reading that writeOnly is advisory; but the change does mean the response may now carry a property it did not, which is a response widening and would derive ERR. C4 is as unproven as C2 was | |
 
@@ -88,24 +87,30 @@ Both effects are now `unknown`, which derives WARN and matches what the rules
 already reported. The stored levels were sound and the model was not, which is
 the same correction C2 needs.
 
-### request-body-removed, settled
+### request-body-removed, settled: the effect was wrong
 
 The effect was `widens`, which asserts that a request still carrying a body is
-accepted once the declaration is gone. The specification does not say that: it
-defines what `requestBody` describes when present, not what an absent one
-permits. The containment is undecided, so the effect is `unknown` and the law
-derives WARN.
+accepted once the declaration is gone. The specification does not say that. It
+was then read as `unknown`, on the argument that removing the whole declaration
+leaves nothing to compare, and ERR was kept above the derived WARN on the
+grounds that the operation withdraws a declared input.
 
-ERR then stands on a contract argument rather than an exemption: the operation
-withdraws a declared input, so a client that conformed by sending the body can
-no longer convey that data through the operation, whatever becomes of the
-request's validity. This is the request-side mirror of
-`response-required-property-removed`, which is ERR because an element the
-consumer relied on is gone, and it appeals to the declaration rather than to
-what a server happens to tolerate.
+Both readings were wrong, and containment shows why. Removing the request body
+removes every media type it declared, and `request-body-media-type-removed` is
+`narrows` and ERR. So the change strictly contains an ERR-level change, and
+`TestSeverityMonotonicity` already pairs the two. "Nothing left to compare" was
+an artifact of comparing the declaration to its absence rather than the media
+types to theirs.
 
-What the containment question cannot express is the loss of a declared
-capability, and that is the gap the ledger entry records.
+The effect is `narrows`, which derives ERR on a request, so nothing is recorded
+in the ledger. The narrowing is real at the media-type level: a content type
+absent from the map has a specified rejection, 415, so the request genuinely
+may become invalid. That is what separates this from `request-parameter-removed`,
+which stays `unknown` because nothing in the specification says a stray query
+parameter is rejected.
+
+Only `request-body-removed` fires on a whole-body removal; the media-type rule
+does not also report. So its level is the only verdict the change gets.
 
 One asymmetry surfaced while settling it, and it is not a severity question:
 the add side splits by requiredness (`request-body-added-required` is ERR,
