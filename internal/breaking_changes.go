@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+	"slices"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/load"
@@ -49,10 +51,17 @@ func getBreakingArgs() cobra.PositionalArgs {
 		if len(args) < 1 {
 			return errors.New("with --base, specify one or more spec files to compare against the base version")
 		}
-		if err := checkReviewFlagsRequireOpen(cmd); err != nil {
-			return err
+		// The positionals are working-tree files to compare against the base
+		// ref, so neither stdin nor a glob has a version in that ref to compare
+		// against. Reject them here rather than let them fail further in.
+		if slices.Contains(args, "-") {
+			return errors.New("can't read from stdin with --base: the positional arguments are files that also exist in the base ref")
 		}
-		return checkColor(cmd)
+		if composed, err := cmd.Flags().GetBool("composed"); err == nil && composed {
+			return errors.New("can't use --composed with --base: each file is compared against its own version in the base ref")
+		}
+
+		return checkCommonFlags(cmd)
 	}
 }
 
@@ -84,7 +93,7 @@ func runBreakingBase(cmd *cobra.Command, base string, files []string) error {
 	for _, file := range files {
 		// Label each file so a multi-file run says which result belongs to which
 		// spec (otherwise a bare "No changes detected" is ambiguous).
-		fmt.Fprintf(cmd.OutOrStdout(), "=== %s ===\n", file)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "=== %s ===\n", file)
 
 		// Same "<ref>:<path>" git-revision syntax the git-diff driver uses; the
 		// revision is the file in the working tree.
@@ -98,11 +107,16 @@ func runBreakingBase(cmd *cobra.Command, base string, files []string) error {
 
 		failOn, err := runBreakingChanges(flags, cmd.OutOrStdout())
 		if err != nil {
-			// A file that isn't in the base ref is newly added: it has no prior
-			// version, and a new API cannot contain breaking changes. Skip it and
-			// keep checking the remaining files instead of aborting the whole run.
-			if load.IsPathMissingInRef(base, file) {
-				fmt.Fprintln(cmd.OutOrStdout(), "new file, not in base ref, skipped")
+			// A file that isn't in the base ref but is in the working tree is
+			// newly added: it has no prior version, and a new API cannot contain
+			// breaking changes. Skip it and keep checking the remaining files
+			// instead of aborting the whole run.
+			//
+			// The working-tree check is what separates a new file from a
+			// mistyped one. Without it a path in neither place looks new, and a
+			// typo would pass the check it was supposed to fail.
+			if fileExists(file) && load.IsPathMissingInRef(base, file) {
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "new file, not in base ref, skipped")
 				continue
 			}
 			setReturnValue(cmd, err.Code)
@@ -122,4 +136,10 @@ func runBreakingBase(cmd *cobra.Command, base string, files []string) error {
 
 func runBreakingChanges(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	return getChangelog(flags, stdout, checker.WARN, true)
+}
+
+// fileExists reports whether path names an existing file in the working tree.
+func fileExists(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && !info.IsDir()
 }

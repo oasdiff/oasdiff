@@ -137,3 +137,55 @@ func Test_BreakingBase_NoFailOn(t *testing.T) {
 	require.Zero(t, exitCode)
 	require.Contains(t, stdout.String(), "api-path-removed-without-deprecation")
 }
+
+// A path in neither the base ref nor the working tree is a mistake, not a new
+// file. Reporting it as newly added would exit 0 and tell the caller their
+// specs are clean when nothing was compared.
+func Test_BreakingBase_MissingFileIsNotNew(t *testing.T) {
+	breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
+
+	var stderr bytes.Buffer
+	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD --fail-on ERR does-not-exist.yaml"), io.Discard, &stderr)
+
+	require.NotZero(t, exitCode, "a path that exists nowhere must not pass")
+	require.NotContains(t, stderr.String(), "skipped")
+}
+
+// The positionals are working-tree files that also have a version in the base
+// ref, so stdin has nothing to compare against and is rejected up front rather
+// than treated as a filename.
+func Test_BreakingBase_RejectsStdin(t *testing.T) {
+	breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
+
+	var stderr bytes.Buffer
+	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD -"), io.Discard, &stderr)
+
+	require.Equal(t, 100, exitCode)
+	require.Contains(t, stderr.String(), "can't read from stdin with --base")
+}
+
+// Composed mode merges several specs into one comparison, which is the opposite
+// of comparing each file against its own version in the base ref.
+func Test_BreakingBase_RejectsComposed(t *testing.T) {
+	breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
+
+	var stderr bytes.Buffer
+	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD --composed openapi.yaml"), io.Discard, &stderr)
+
+	require.Equal(t, 100, exitCode)
+	require.Contains(t, stderr.String(), "can't use --composed with --base")
+}
+
+// The flag-only validations are shared with the base+revision path, so a check
+// added to checkCommonFlags reaches --base too. Pinned here because the two
+// paths validate their positionals differently and could drift again.
+func Test_BreakingBase_SharesCommonFlagChecks(t *testing.T) {
+	breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
+
+	var stderr bytes.Buffer
+	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD --format json --template x.tmpl openapi.yaml"), io.Discard, &stderr)
+
+	require.NotZero(t, exitCode)
+	require.Contains(t, stderr.String(), "template flag is not supported")
+	require.NotContains(t, stderr.String(), "=== openapi.yaml ===", "must fail before any per-file output")
+}
