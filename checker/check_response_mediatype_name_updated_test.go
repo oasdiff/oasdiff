@@ -8,7 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// changing parameters of a media type is not breaking
+// changing the parameters of a media type is a warning: the check cannot tell
+// what the changed parameter constrains, so it cannot order the two media types
 func TestChangeMediaTypeParameters(t *testing.T) {
 	s1, err := open("../data/checker/add_new_media_type_revision.yaml")
 	require.NoError(t, err)
@@ -19,8 +20,9 @@ func TestChangeMediaTypeParameters(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseMediaTypeNameUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Equal(t, checker.WARN, errs[0].GetLevel())
 	require.Equal(t, "media type `application/json` was changed to `application/problem+json;q=1` for the response status `200`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.NotEmpty(t, errs[0].GetComment(checker.NewDefaultLocalizer()))
 }
 
 // modifying a media type name in response to make it more specific is not breaking

@@ -347,7 +347,8 @@ func TestBreaking_ResponseErrorStatusRemoved(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// removing an existing optional response header is breaking as warn
+// removing an existing optional response header is not breaking: a client
+// conforming to the old contract already tolerates the header being absent
 func TestBreaking_OptionalResponseHeaderRemoved(t *testing.T) {
 	s1 := l(t, 1)
 	s2 := l(t, 1)
@@ -357,12 +358,11 @@ func TestBreaking_OptionalResponseHeaderRemoved(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	for _, err := range errs {
-		require.Equal(t, checker.WARN, err.GetLevel())
-	}
-	require.NotEmpty(t, errs)
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.OptionalResponseHeaderRemovedId)
+	require.Equal(t, checker.INFO, errs[0].GetLevel())
 	require.Equal(t, "the optional response header `X-RateLimit-Limit` removed for the status `default`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 

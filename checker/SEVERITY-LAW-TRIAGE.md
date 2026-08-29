@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 13 of 558 rules disagree; every
+`go test ./checker -run SeverityLaw`). 11 of 558 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -193,7 +193,7 @@ the fallback will see them.
 
 ---
 
-## Below the law (8 rules): each owes a contract argument
+## Below the law (6 rules): each owes a contract argument
 
 ### The bound-set family (24 rules) — settled: fixed
 
@@ -249,6 +249,32 @@ changed pattern is undecidable between the two regular languages, hence the
 warning. This is the gap already tracked in #1034, which the law re-derived
 independently.
 
+### optional-response-header-removed, settled: fixed
+
+WARN, derived ERR, now **INFO with effect `none`**, the exact mirror of
+`response-optional-property-removed`. An optional header's absence is already
+permitted by the old contract, so its removal breaks no conforming client, and
+a client that treated it as guaranteed is out of specification rather than
+broken by the change. The two rules previously modelled the same situation
+differently, the header one carrying `narrows` with the negotiated guard; the
+guard is gone with the effect, since nothing about an optional header is
+client-selected.
+
+### response-media-type-name-changed, settled: fixed
+
+INFO, derived ERR from `incomparable`, now **WARN with effect `unknown`** and a
+comment.
+
+The id is narrower than its name suggests. `ResponseMediaTypeNameUpdatedCheck`
+reports it only when the media type *parameters* differ; any other name change
+goes to `-generalized` or `-specialized`. And it reports it for a parameter
+appearing, disappearing or changing value alike, which are a narrowing, a
+widening and an incomparable change respectively. So `incomparable` claimed a
+proof the check never had: all it observed is that the parameter maps differ.
+
+`unknown` is the honest reading and derives WARN. Splitting the id by which of
+the three happened would let each case earn its own verdict, tracked as #1186.
+
 ### prefixItems (4 of the 8 rules)
 
 `request-*-prefix-items-added` and `response-*-prefix-items-removed`: **INFO**,
@@ -266,14 +292,12 @@ verdict falls to `unknown` (WARN) rather than to an assumed direction. Fixing
 all eight to WARN is the blunt version of the same correction, and is the
 fallback if the comparison turns out not to fit.
 
-### Remaining singles (4 rules)
+### Remaining singles (2 rules)
 
 | Rule | Stored | Derived | Question it must answer | Decision |
 |---|---|---|---|---|
-| `response-media-type-name-changed` | INFO | ERR | a client negotiating the old media type gets no response; what makes that safe? | |
 | `response-property-enum-value-added` | WARN | ERR | the server may now emit a value no client was written to handle | |
 | `response-non-success-status-removed` | INFO | ERR | a client handling that status loses the behaviour; "it is only cleanup" is an exemption | |
-| `optional-response-header-removed` | WARN | ERR | "clients should not rely on it" describes what clients ought to do, not what the contract said | |
 
 ---
 

@@ -447,7 +447,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseHeaderBecameOptionalId, ERR, ResponseHeaderBecameOptionalCheck, DirectionResponse, AreaHeaders, KindRequiredness, EffectWidens, nil, "paths.*.*.responses.*.headers.*.required:unset"),
 		// ResponseHeaderRemovedCheck
 		newBackwardCompatibilityRule(RequiredResponseHeaderRemovedId, ERR, ResponseHeaderRemovedCheck, DirectionResponse, AreaHeaders, KindExistence, EffectNarrows, []Guard{GuardNegotiated}, "paths.*.*.responses.*.headers.*:remove"),
-		newBackwardCompatibilityRule(OptionalResponseHeaderRemovedId, WARN, ResponseHeaderRemovedCheck, DirectionResponse, AreaHeaders, KindExistence, EffectNarrows, []Guard{GuardNegotiated}, "paths.*.*.responses.*.headers.*:remove"),
+		newBackwardCompatibilityRule(OptionalResponseHeaderRemovedId, INFO, ResponseHeaderRemovedCheck, DirectionResponse, AreaHeaders, KindExistence, EffectNone, nil, "paths.*.*.responses.*.headers.*:remove"),
 		// ResponseHeaderAddedCheck
 		newBackwardCompatibilityRule(ResponseHeaderAddedId, INFO, ResponseHeaderAddedCheck, DirectionResponse, AreaHeaders, KindExistence, EffectWidens, []Guard{GuardNegotiated}, "paths.*.*.responses.*.headers.*:add"),
 		// ResponseHeaderTypeChangedCheck
@@ -462,7 +462,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseMediaTypeRemovedId, ERR, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, EffectNarrows, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*:remove"),
 		newBackwardCompatibilityRule(ResponseMediaTypeAddedId, INFO, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, EffectWidens, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*:add"),
 		// ResponseMediaTypeNameUpdatedCheck
-		newBackwardCompatibilityRule(ResponseMediaTypeNameChangedId, INFO, ResponseMediaTypeNameUpdatedCheck, DirectionResponse, AreaResponses, KindType, EffectIncomparable, nil, "paths.*.*.responses.*.content.*:add,remove"),
+		newBackwardCompatibilityRule(ResponseMediaTypeNameChangedId, WARN, ResponseMediaTypeNameUpdatedCheck, DirectionResponse, AreaResponses, KindType, EffectUnknown, nil, "paths.*.*.responses.*.content.*:add,remove"),
 		newBackwardCompatibilityRule(ResponseMediaTypeNameGeneralizedId, ERR, ResponseMediaTypeNameUpdatedCheck, DirectionResponse, AreaResponses, KindType, EffectWidens, nil, "paths.*.*.responses.*.content.*:add,remove"),
 		newBackwardCompatibilityRule(ResponseMediaTypeNameSpecializedId, INFO, ResponseMediaTypeNameUpdatedCheck, DirectionResponse, AreaResponses, KindType, EffectNarrows, nil, "paths.*.*.responses.*.content.*:add,remove"),
 		// ResponseOptionalPropertyUpdatedCheck

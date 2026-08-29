@@ -191,6 +191,7 @@ response-header-became-not-nullable: el encabezado de respuesta %s se volvió no
 response-media-type-removed: removido el tipo de media %s de la respuesta con estado %s
 response-media-type-added: agregado el tipo de media %s a la respuesta con estado %s
 response-media-type-name-changed: el tipo de media %s fue cambiado a %s para el estado de respuesta %s
+response-media-type-name-changed-warning-comment: "Esta es una advertencia porque oasdiff no puede saber qué restringe el parámetro de tipo de medio modificado. Añadir uno restringe lo que el servidor puede devolver, eliminarlo lo amplía, y cambiar su valor puede dejar a un cliente sin poder leer la respuesta."
 response-media-type-name-generalized: el tipo de media %s fue cambiado a un tipo de media más general %s para el estado de respuesta %s
 response-media-type-name-specialized: el tipo de media %s fue cambiado a un tipo de media más específico %s para el estado de respuesta %s
 response-optional-property-removed: removida la propiedad opcional %s de la respuesta con estado %s

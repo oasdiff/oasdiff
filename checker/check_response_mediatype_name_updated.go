@@ -8,6 +8,12 @@ const (
 	ResponseMediaTypeNameChangedId     = "response-media-type-name-changed"
 	ResponseMediaTypeNameGeneralizedId = "response-media-type-name-generalized"
 	ResponseMediaTypeNameSpecializedId = "response-media-type-name-specialized"
+
+	// A media type parameter appearing, disappearing or changing value all
+	// reach this id, and the check cannot tell what the parameter
+	// constrains, so it cannot order the two media types. Splitting the id
+	// by which of the three happened is oasdiff#1186.
+	ResponseMediaTypeNameChangedCommentId = "response-media-type-name-changed-warning-comment"
 )
 
 func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -45,7 +51,7 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 						result = append(result, opInfo.NewApiChange(
 							ResponseMediaTypeNameChangedId,
 							[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
-							"",
+							ResponseMediaTypeNameChangedCommentId,
 						).WithSources(baseSource, revisionSource))
 						continue
 					}

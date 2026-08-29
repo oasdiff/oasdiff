@@ -672,6 +672,7 @@ request-parameter-list-of-types-narrowed: "lista de tipos do parâmetro %s %s da
 request-parameter-property-list-of-types-widened: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi expandida adicionando tipos %s"
 request-parameter-property-list-of-types-narrowed: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi restringida removendo tipos %s"
 response-media-type-name-changed: o tipo de mídia %s foi alterado para %s para o status de resposta %s
+response-media-type-name-changed-warning-comment: "Este é um aviso porque o oasdiff não consegue saber o que o parâmetro de tipo de mídia alterado restringe. Adicionar um restringe o que o servidor pode retornar, remover um amplia, e mudar seu valor pode deixar um cliente sem conseguir ler a resposta."
 response-media-type-name-generalized: o tipo de mídia %s foi alterado para um tipo de mídia mais geral %s para o status de resposta %s
 response-media-type-name-specialized: o tipo de mídia %s foi alterado para um tipo de mídia mais específico %s para o status de resposta %s
 request-body-removed: removido o corpo da requisição

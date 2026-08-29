@@ -619,6 +619,7 @@ response-body-type-changed-description: изменен тип тела отве�
 response-header-became-optional-description: заголовок ответа стал необязательным
 response-media-type-added-description: добавлен медиа-тип ответа
 response-media-type-name-changed: медиа-тип %s изменен на %s для ответа со статусом %s
+response-media-type-name-changed-warning-comment: "Это предупреждение, потому что oasdiff не может определить, что ограничивает изменённый параметр типа содержимого. Добавление параметра сужает то, что может вернуть сервер, удаление расширяет, а изменение значения может лишить клиента возможности прочитать ответ."
 response-media-type-name-generalized: медиа-тип %s изменен на более общий медиа-тип %s для ответа со статусом %s
 response-media-type-name-specialized: медиа-тип %s изменен на более специфичный медиа-тип %s для ответа со статусом %s
 response-media-type-removed-description: удален медиа-тип ответа
