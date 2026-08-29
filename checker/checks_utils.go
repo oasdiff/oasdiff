@@ -133,3 +133,12 @@ func splitSubschemasByAnnotationOnly(subschemas diff.Subschemas, schemaRefs open
 	}
 	return kept, annotationOnly
 }
+
+// prefixItemsChangedContract reports whether a prefixItems diff changed which
+// arrays the schema accepts. An entry added or removed at a position the items
+// schema governs identically leaves the accepted arrays untouched, so the
+// syntactic diff alone is not a change to report.
+func prefixItemsChangedContract(schemaDiff *diff.SchemaDiff) bool {
+	return schemaDiff.PrefixItemsDiff != nil &&
+		!diff.PrefixItemsValidationEquivalent(diff.NewConfig(), schemaDiff.Base, schemaDiff.Revision)
+}

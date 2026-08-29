@@ -858,6 +858,7 @@ response-body-prefix-items-added-description: sub-schema added to prefixItems in
 response-body-prefix-items-removed-description: sub-schema removed from prefixItems in response body
 response-property-prefix-items-added-description: sub-schema added to prefixItems in response property
 response-property-prefix-items-removed-description: sub-schema removed from prefixItems in response property
+prefix-items-changed-warning-comment: "This is a warning because the direction of the change cannot be determined. A position no prefixItems entry covers is validated against items, so the entry may constrain a position that was open or open one that items closed, and the two schemas cannot be ordered."
 request-body-if-added-description: if subschema added to request body
 request-body-if-removed-description: if subschema removed from request body
 request-body-then-added-description: then subschema added to request body
