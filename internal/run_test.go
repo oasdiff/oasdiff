@@ -584,10 +584,14 @@ func Test_BothSidesStdin(t *testing.T) {
 	require.NotContains(t, stdout.String(), "n/a")
 }
 
-// breaking --base turns the positionals into the changed files to check, so at
-// least one is required; supplying none is an argument error, not an empty run.
-func Test_BreakingBaseRequiresFiles(t *testing.T) {
+// breaking-files takes the specs to check as positionals, so at least one is
+// required, and --base is what they are compared against.
+func Test_BreakingFiles_RequiresArgs(t *testing.T) {
 	var stderr bytes.Buffer
-	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking --base origin/main"), io.Discard, &stderr))
-	require.Contains(t, stderr.String(), "specify one or more spec files")
+	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files --base origin/main"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "please specify one or more spec files")
+
+	stderr.Reset()
+	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files openapi.yaml"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), "please specify --base")
 }
