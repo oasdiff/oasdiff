@@ -18,7 +18,7 @@ func TestRequestParameterDefaultValueChanged(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueChangedId,
 		Args:        []any{"query", "category", "default_category", "updated_category"},
@@ -38,7 +38,7 @@ func TestRequestParameterDefaultValueChangedAndRenamedParameter(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueChangedId,
 		Args:        []any{"path", "group_id", "2", "1"},
@@ -60,7 +60,7 @@ func TestRequestParameterDefaultValueAdded(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueAddedId,
 		Args:        []any{"query", "category", "default_category"},
@@ -82,7 +82,7 @@ func TestRequestParameterDefaultValueRemoved(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.ERR)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterDefaultValueChangedCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestParameterDefaultValueRemovedId,
 		Args:        []any{"query", "category", "default_category"},

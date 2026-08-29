@@ -1,0 +1,51 @@
+package colorize
+
+import (
+	"fmt"
+)
+
+type ColorMode int
+
+const (
+	ColorAlways ColorMode = iota
+	ColorNever
+	ColorAuto
+	ColorInvalid
+)
+
+func GetSupportedColorValues() []string {
+	return []string{"auto", "always", "never"}
+}
+
+func NewColorMode(color string) (ColorMode, error) {
+	switch color {
+	case "always":
+		return ColorAlways, nil
+	case "never":
+		return ColorNever, nil
+	case "auto":
+		return ColorAuto, nil
+	default:
+		return ColorInvalid, fmt.Errorf("invalid color mode: %s", color)
+	}
+}
+
+// IsColorEnabled is the exported form of isColorEnabled. Lets oasdiff
+// packages outside checker (validate, future subcommands) gate their
+// own color logic on the same auto-detect + override convention.
+func IsColorEnabled(colorMode ColorMode) bool {
+	return isColorEnabled(colorMode)
+}
+
+func isColorEnabled(colorMode ColorMode) bool {
+	switch colorMode {
+	case ColorAlways:
+		return true
+	case ColorNever:
+		return false
+	case ColorAuto:
+		return !isPipedOutput()
+	default:
+		return false
+	}
+}

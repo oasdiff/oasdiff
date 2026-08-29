@@ -4,52 +4,38 @@ import (
 	"fmt"
 
 	"github.com/TwiN/go-color"
+
+	"github.com/oasdiff/oasdiff/colorize"
 )
 
-type ColorMode int
+// ColorMode is defined in the colorize package; the aliases keep the
+// checker package's public surface unchanged.
+type ColorMode = colorize.ColorMode
 
 const (
-	ColorAlways ColorMode = iota
-	ColorNever
-	ColorAuto
-	ColorInvalid
+	ColorAlways  = colorize.ColorAlways
+	ColorNever   = colorize.ColorNever
+	ColorAuto    = colorize.ColorAuto
+	ColorInvalid = colorize.ColorInvalid
 )
 
 func GetSupportedColorValues() []string {
-	return []string{"auto", "always", "never"}
+	return colorize.GetSupportedColorValues()
 }
 
 func NewColorMode(color string) (ColorMode, error) {
-	switch color {
-	case "always":
-		return ColorAlways, nil
-	case "never":
-		return ColorNever, nil
-	case "auto":
-		return ColorAuto, nil
-	default:
-		return ColorInvalid, fmt.Errorf("invalid color mode: %s", color)
-	}
+	return colorize.NewColorMode(color)
 }
 
-// IsColorEnabled is the exported form of isColorEnabled. Lets oasdiff
-// packages outside checker (validate, future subcommands) gate their
-// own color logic on the same auto-detect + override convention.
+// IsColorEnabled lets oasdiff packages outside checker (validate, future
+// subcommands) gate their own color logic on the same auto-detect +
+// override convention.
 func IsColorEnabled(colorMode ColorMode) bool {
-	return isColorEnabled(colorMode)
+	return colorize.IsColorEnabled(colorMode)
 }
 
 func isColorEnabled(colorMode ColorMode) bool {
-	switch colorMode {
-	case ColorAlways:
-		return true
-	case ColorNever:
-		return false
-	case ColorAuto:
-		return !isPipedOutput()
-	default:
-		return false
-	}
+	return colorize.IsColorEnabled(colorMode)
 }
 
 func colorizedValues(args []any) []any {
@@ -66,4 +52,9 @@ func quotedValues(args []any) []any {
 		result[i] = fmt.Sprintf("`%s`", interfaceToString(arg))
 	}
 	return result
+}
+
+// SetPipedOutput overrides piped-output auto-detection; see colorize.
+func SetPipedOutput(val *bool) *bool {
+	return colorize.SetPipedOutput(val)
 }

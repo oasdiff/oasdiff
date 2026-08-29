@@ -32,6 +32,11 @@ type OneOfWrappingDiff struct {
 	// MovedProperties are base property names that appear in at least one
 	// alternative, i.e. they moved into the wrapping rather than being removed.
 	MovedProperties []string `json:"movedProperties,omitempty" yaml:"movedProperties,omitempty"`
+	// OriginalPreserved is true when one alternative has the same validation
+	// contract as the base schema, so every payload the base accepted matches
+	// that alternative. It says nothing about whether such a payload also
+	// matches another alternative, which oneOf rejects.
+	OriginalPreserved bool `json:"originalPreserved,omitempty" yaml:"originalPreserved,omitempty"`
 }
 
 // Empty indicates whether a change was found in this element.
@@ -44,7 +49,7 @@ func (diff *OneOfWrappingDiff) Empty() bool {
 // object schema, revision wraps equivalent alternatives in a oneOf) and returns
 // nil when it doesn't apply. The reverse (unwrapping a oneOf into a concrete
 // schema) is not detected here.
-func getOneOfWrappingDiff(base, revision *openapi3.Schema) *OneOfWrappingDiff {
+func getOneOfWrappingDiff(config *Config, base, revision *openapi3.Schema) *OneOfWrappingDiff {
 	if base == nil || revision == nil {
 		return nil
 	}
@@ -74,9 +79,25 @@ func getOneOfWrappingDiff(base, revision *openapi3.Schema) *OneOfWrappingDiff {
 
 	sort.Strings(moved)
 	return &OneOfWrappingDiff{
-		NumAlternatives: len(alts),
-		MovedProperties: moved,
+		NumAlternatives:   len(alts),
+		MovedProperties:   moved,
+		OriginalPreserved: anyAlternativeEquivalent(config, base, revision.OneOf),
 	}
+}
+
+// anyAlternativeEquivalent reports whether one of the alternatives has the same
+// validation contract as the base schema. Asking the schema diff, rather than
+// comparing a hand-listed set of keywords, means a validation keyword this
+// function doesn't anticipate reads as a difference (so the wrapping is not
+// credited with preserving the base) instead of being silently ignored.
+func anyAlternativeEquivalent(config *Config, base *openapi3.Schema, alts openapi3.SchemaRefs) bool {
+	baseRef := &openapi3.SchemaRef{Value: base}
+	for _, alt := range alts {
+		if SchemaRefsValidationEquivalent(config, baseRef, alt) {
+			return true
+		}
+	}
+	return false
 }
 
 // propertyInAnyAlternative reports whether the named property exists in at least

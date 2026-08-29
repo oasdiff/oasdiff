@@ -251,7 +251,7 @@ func validateViperConfig(v IViper) error {
 		return err
 	}
 
-	if err := validateStrings(getAllTags(), config.Tags, "tags"); err != nil {
+	if err := validateStrings(GetChangelogTags(), config.Tags, "tags"); err != nil {
 		return err
 	}
 

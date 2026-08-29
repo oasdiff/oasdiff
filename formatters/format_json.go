@@ -7,6 +7,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -31,6 +32,14 @@ func (f JSONFormatter) RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, 
 
 func (f JSONFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error) {
 	return printJSON(adaptStructure(NewChanges(changes, f.Localizer), opts))
+}
+
+func (f JSONFormatter) RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error) {
+	return printJSON(edits)
+}
+
+func (f JSONFormatter) RenderCoveragePatterns(patterns []coverage.Pattern, opts RenderOpts) ([]byte, error) {
+	return printJSON(patterns)
 }
 
 func (f JSONFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {

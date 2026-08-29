@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -20,6 +21,14 @@ func (f notImplementedFormatter) RenderSummary(*diff.Diff, RenderOpts) ([]byte, 
 
 func (f notImplementedFormatter) RenderChangelog(checker.Changes, RenderOpts) ([]byte, error) {
 	return notImplemented()
+}
+
+func (f notImplementedFormatter) RenderCoverage([]coverage.Edit, RenderOpts) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (f notImplementedFormatter) RenderCoveragePatterns([]coverage.Pattern, RenderOpts) ([]byte, error) {
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (f notImplementedFormatter) RenderChecks(Checks, RenderOpts) ([]byte, error) {

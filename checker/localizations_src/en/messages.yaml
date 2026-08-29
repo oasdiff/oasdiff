@@ -98,9 +98,9 @@ request-parameter-max-length-increased: for the %s request parameter %s, the max
 request-parameter-min-length-increased: for the %s request parameter %s, the minLength was increased from %s to %s
 request-parameter-min-length-decreased: for the %s request parameter %s, the minLength was decreased from %s to %s
 request-parameter-max-length-set: for the %s request parameter %s, the maxLength was set to %s
-request-parameter-max-length-set-comment: "This is a warning because the restriction is sometimes legitimately required, for security reasons or to correct an error in the specification. Before making such a change, confirm that clients can handle the new restriction."
+request-parameter-max-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-parameter-max-set: for the %s request parameter %s, the max was set to %s
-request-parameter-max-set-comment: "This is a warning because the restriction is sometimes legitimately required, for security reasons or to correct an error in the specification. Before making such a change, confirm that clients can handle the new restriction."
+request-parameter-max-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-parameter-min-increased: for the %s request parameter %s, the min was increased from %s to %s
 request-parameter-min-decreased: for the %s request parameter %s, the min was decreased from %s to %s
 request-parameter-max-items-decreased: for the %s request parameter %s, the maxItems was decreased from %s to %s
@@ -108,9 +108,9 @@ request-parameter-max-items-increased: for the %s request parameter %s, the maxI
 request-parameter-min-items-increased: for the %s request parameter %s, the minItems was increased from %s to %s
 request-parameter-min-items-decreased: for the %s request parameter %s, the minItems was decreased from %s to %s
 request-parameter-min-items-set: for the %s request parameter %s, the minItems was set to %s
-request-parameter-min-items-set-comment: This is a warning because the restriction is sometimes legitimately required, for security reasons or to correct an error in the specification. Before making such a change, confirm that clients can handle the new restriction.
+request-parameter-min-items-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-parameter-min-set: for the %s request parameter %s, the min was set to %s
-request-parameter-min-set-comment: This is a warning because the restriction is sometimes legitimately required, for security reasons or to correct an error in the specification. Before making such a change, confirm that clients can handle the new restriction.
+request-parameter-min-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-parameter-type-changed: for the %s request parameter %s, the %s was changed from %s to %s
 request-parameter-type-generalized: for the %s request parameter %s, the %s was widened from %s to %s
 request-parameter-property-type-changed: for the %s request parameter %s, the %s of property %s was changed from %s to %s
@@ -151,13 +151,13 @@ request-property-max-increased: the %s request property's max was increased from
 request-body-max-length-increased: the request's body maxLength was increased from %s to %s
 request-property-max-length-increased: the %s request property's maxLength was increased from %s to %s
 request-body-max-length-set: the request's body maxLength was set to %s
-request-body-max-length-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-max-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-max-length-set: the %s request property's maxLength was set to %s
-request-property-max-length-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-max-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-max-set: the request's body max was set to %s
-request-body-max-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-max-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-max-set: the %s request property's max was set to %s
-request-property-max-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-max-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-min-increased: the request's body min was increased to %s
 request-property-min-increased: the %s request property's min was increased to %s
 request-read-only-property-min-increased: the %s request read-only property's min was increased to %s
@@ -168,13 +168,13 @@ request-property-min-decreased: the %s request property's min was decreased from
 request-body-min-items-decreased: the request's body minItems was decreased from %s to %s
 request-property-min-items-decreased: the %s request property's minItems was decreased from %s to %s
 request-body-min-items-set: the request's body minItems was set to %s
-request-body-min-items-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-min-items-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-min-items-set: the %s request property's minItems was set to %s
-request-property-min-items-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-min-items-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-min-set: the request's body min was set to %s
-request-body-min-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-min-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-min-set: the %s request property's min was set to %s
-request-property-min-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-min-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-removed: removed the request property %s
 request-body-type-changed: the request's body %s changed from %s to %s
 request-body-type-generalized: the request's body %s was widened from %s to %s
@@ -197,6 +197,7 @@ response-header-became-not-nullable: the response header %s became not nullable 
 response-media-type-removed: removed the media type %s for the response with the status %s
 response-media-type-added: added the media type %s for the response with the status %s
 response-media-type-name-changed: media type %s was changed to %s for the response status %s
+response-media-type-name-changed-warning-comment: "This is a warning because oasdiff cannot tell what the changed media type parameter constrains. Adding one narrows what the server may return, removing one widens it, and changing its value may leave a client unable to read the response."
 response-media-type-name-generalized: media type %s was changed to a more general media type %s for the response status %s
 response-media-type-name-specialized: media type %s was changed to a more specific media type %s for the response status %s
 response-optional-property-removed: removed the optional property %s from the response with the %s status
@@ -206,7 +207,7 @@ response-body-became-nullable: the response's body became nullable
 response-property-became-not-nullable: the response property %s became not nullable for the status %s
 response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
-response-property-enum-value-added-comment: Adding new enum values to a response can be unexpected for clients; use x-extensible-enum instead.
+response-property-enum-value-added-comment: The server may now return a value the previous contract excluded, so a client written against it may not handle the response. If the value set is meant to grow, declare it with x-extensible-enum.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
 response-body-max-length-increased: the response's body maxLength was increased from %s to %s
 response-property-max-length-increased: the %s response property's maxLength was increased from %s to %s for the response status %s
@@ -221,7 +222,6 @@ response-property-min-length-decreased: the %s response property's minLength was
 response-body-type-changed: the response's body %s changed from %s to %s for status %s
 response-property-type-changed: the %s response's property %s changed from %s to %s for status %s
 response-required-property-became-not-write-only: the response required property %s became not write-only for the status %s
-response-required-property-became-not-write-only-comment: This is valid only if the property was always returned before the specification changed.
 response-required-property-removed: removed the required property %s from the response with the %s status
 response-required-property-added: added the required property %s to the response with the %s status
 response-success-status-removed: removed the success response with the status %s
@@ -238,26 +238,26 @@ request-property-exclusive-min-increased: the %s request property's exclusiveMin
 request-read-only-property-exclusive-min-increased: the %s request read-only property's exclusiveMinimum was increased to %s
 request-property-exclusive-min-decreased: the %s request property's exclusiveMinimum was decreased from %s to %s
 request-body-exclusive-min-set: the request's body exclusiveMinimum was set to %s
-request-body-exclusive-min-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-exclusive-min-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-exclusive-min-set: the %s request property's exclusiveMinimum was set to %s
-request-property-exclusive-min-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-exclusive-min-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-exclusive-max-decreased: the request's body exclusiveMaximum was decreased to %s
 request-body-exclusive-max-increased: the request's body exclusiveMaximum was increased from %s to %s
 request-property-exclusive-max-decreased: the %s request property's exclusiveMaximum was decreased to %s
 request-read-only-property-exclusive-max-decreased: the %s request read-only property's exclusiveMaximum was decreased to %s
 request-property-exclusive-max-increased: the %s request property's exclusiveMaximum was increased from %s to %s
 request-body-exclusive-max-set: the request's body exclusiveMaximum was set to %s
-request-body-exclusive-max-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-body-exclusive-max-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-exclusive-max-set: the %s request property's exclusiveMaximum was set to %s
-request-property-exclusive-max-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-property-exclusive-max-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-parameter-exclusive-min-increased: for the %s request parameter %s, the exclusiveMinimum was increased from %s to %s
 request-parameter-exclusive-min-decreased: for the %s request parameter %s, the exclusiveMinimum was decreased from %s to %s
 request-parameter-exclusive-min-set: for the %s request parameter %s, the exclusiveMinimum was set to %s
-request-parameter-exclusive-min-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-parameter-exclusive-min-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-parameter-exclusive-max-decreased: for the %s request parameter %s, the exclusiveMaximum was decreased from %s to %s
 request-parameter-exclusive-max-increased: for the %s request parameter %s, the exclusiveMaximum was increased from %s to %s
 request-parameter-exclusive-max-set: for the %s request parameter %s, the exclusiveMaximum was set to %s
-request-parameter-exclusive-max-set-comment: This is a warning because the restriction is sometimes legitimately required. Before making such a change, confirm that clients can handle the new restriction.
+request-parameter-exclusive-max-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 response-body-exclusive-max-increased: the response's body exclusiveMaximum was increased from %s to %s
 response-property-exclusive-max-increased: the %s response property's exclusiveMaximum was increased from %s to %s for the response status %s
 response-body-exclusive-min-decreased: the response's body exclusiveMinimum was decreased from %s to %s
@@ -331,7 +331,9 @@ response-property-any-of-added: added %s to the %s response property `anyOf` lis
 response-property-any-of-removed: removed %s from the %s response property `anyOf` list for the response status %s
 request-body-one-of-added: added %s to the request body `oneOf` list
 request-body-wrapped-in-one-of: "the request body was restructured into a oneOf, so a payload that was previously valid may no longer be accepted"
+request-body-wrapped-in-one-of-original-preserved: "the request body was restructured into a oneOf, keeping the original schema as one of the alternatives"
 response-body-wrapped-in-one-of: "the response body was restructured into a oneOf, so a field that was previously guaranteed may no longer be present"
+response-body-wrapped-in-one-of-original-preserved: "the response body was restructured into a oneOf, keeping the original schema as one of the alternatives"
 request-body-one-of-removed: removed %s from the request body `oneOf` list
 request-body-removed: removed the request body
 request-body-removed-description: request body removed
@@ -471,7 +473,10 @@ request-body-min-length-increased-description: request body min length increased
 request-body-min-set-description: request body min set
 request-body-one-of-added-description: sub-schema added to oneOf in request body
 request-body-wrapped-in-one-of-description: "request body wrapped in a oneOf"
+request-body-wrapped-in-one-of-original-preserved-description: "request body wrapped in a oneOf that keeps the original schema"
 response-body-wrapped-in-one-of-description: "response body wrapped in a oneOf"
+response-body-wrapped-in-one-of-original-preserved-description: "response body wrapped in a oneOf that keeps the original schema"
+wrapped-in-one-of-original-preserved-warning-comment: "This is a warning because the spec does not say whether the alternatives overlap. A payload matching more than one of them is rejected by oneOf, so a payload that was previously valid may or may not still be accepted."
 request-body-one-of-removed-description: sub-schema deleted from oneOf in request body
 request-body-type-changed-description: request body type changed
 request-body-type-generalized-description: request body type generalized
@@ -1076,3 +1081,99 @@ response-body-type-compatible-description: response body type changed but backwa
 response-property-type-generalized-description: response property type generalized
 response-property-type-specialized-description: response property type specialized
 response-property-type-compatible-description: response property type changed but backward compatible
+
+# constraint keyword checks (maxItems, minProperties, maxProperties, uniqueItems, multipleOf)
+request-body-max-items-decreased: the request's body maxItems was decreased to %s
+request-property-max-items-decreased: the %s request property's maxItems was decreased to %s
+request-read-only-property-max-items-decreased: the %s request read-only property's maxItems was decreased to %s
+request-body-max-items-increased: the request's body maxItems was increased from %s to %s
+request-property-max-items-increased: the %s request property's maxItems was increased from %s to %s
+request-body-max-items-set: the request's body maxItems was set to %s
+request-body-max-items-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-max-items-set: the %s request property's maxItems was set to %s
+request-property-max-items-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+response-body-max-items-increased: the response's body maxItems was increased from %s to %s
+response-property-max-items-increased: the %s response property's maxItems was increased from %s to %s for the response status %s
+request-body-max-properties-decreased: the request's body maxProperties was decreased to %s
+request-property-max-properties-decreased: the %s request property's maxProperties was decreased to %s
+request-read-only-property-max-properties-decreased: the %s request read-only property's maxProperties was decreased to %s
+request-body-max-properties-increased: the request's body maxProperties was increased from %s to %s
+request-property-max-properties-increased: the %s request property's maxProperties was increased from %s to %s
+request-body-max-properties-set: the request's body maxProperties was set to %s
+request-body-max-properties-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-max-properties-set: the %s request property's maxProperties was set to %s
+request-property-max-properties-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+response-body-max-properties-increased: the response's body maxProperties was increased from %s to %s
+response-property-max-properties-increased: the %s response property's maxProperties was increased from %s to %s for the response status %s
+request-body-min-properties-increased: the request's body minProperties was increased to %s
+request-property-min-properties-increased: the %s request property's minProperties was increased to %s
+response-body-min-properties-decreased: the response's body minProperties was decreased from %s to %s
+response-property-min-properties-decreased: the %s response property's minProperties was decreased from %s to %s for the response status %s
+request-body-unique-items-set: the request's body uniqueItems was set to true
+request-property-unique-items-set: the %s request property's uniqueItems was set to true
+request-body-unique-items-unset: the request's body uniqueItems was unset
+request-property-unique-items-unset: the %s request property's uniqueItems was unset
+response-body-unique-items-unset: the response's body uniqueItems was unset
+response-property-unique-items-unset: the %s response property's uniqueItems was unset for the response status %s
+request-body-multiple-of-set: the request's body multipleOf was set to %s
+request-body-multiple-of-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-multiple-of-set: the %s request property's multipleOf was set to %s
+request-property-multiple-of-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-body-multiple-of-unset: the request's body multipleOf was unset from %s
+request-property-multiple-of-unset: the %s request property's multipleOf was unset from %s
+request-body-multiple-of-changed: the request's body multipleOf was changed from %s to %s
+request-property-multiple-of-changed: the %s request property's multipleOf was changed from %s to %s
+request-body-multiple-of-generalized: the request's body multipleOf was generalized from %s to %s
+request-body-multiple-of-generalized-comment: This change is not breaking because the old multipleOf is an integer multiple of the new one, so every previously valid value remains valid.
+request-property-multiple-of-generalized: the %s request property's multipleOf was generalized from %s to %s
+request-property-multiple-of-generalized-comment: This change is not breaking because the old multipleOf is an integer multiple of the new one, so every previously valid value remains valid.
+response-body-multiple-of-unset: the response's body multipleOf was unset from %s
+response-property-multiple-of-unset: the %s response property's multipleOf was unset from %s for the response status %s
+response-body-multiple-of-changed: the response's body multipleOf was changed from %s to %s
+response-property-multiple-of-changed: the %s response property's multipleOf was changed from %s to %s for the response status %s
+response-body-multiple-of-specialized: the response's body multipleOf was specialized from %s to %s
+response-body-multiple-of-specialized-comment: This change is not breaking because the new multipleOf is an integer multiple of the old one, so every value the server may now produce was already valid before.
+response-property-multiple-of-specialized: the %s response property's multipleOf was specialized from %s to %s for the response status %s
+response-property-multiple-of-specialized-comment: This change is not breaking because the new multipleOf is an integer multiple of the old one, so every value the server may now produce was already valid before.
+request-body-max-items-decreased-description: request body max items decreased
+request-property-max-items-decreased-description: request property max items decreased
+request-read-only-property-max-items-decreased-description: request read-only property max items decreased
+request-body-max-items-increased-description: request body max items increased
+request-property-max-items-increased-description: request property max items increased
+request-body-max-items-set-description: request body max items set
+request-property-max-items-set-description: request property max items set
+response-body-max-items-increased-description: response body max items increased
+response-property-max-items-increased-description: response property max items increased
+request-body-max-properties-decreased-description: request body max properties decreased
+request-property-max-properties-decreased-description: request property max properties decreased
+request-read-only-property-max-properties-decreased-description: request read-only property max properties decreased
+request-body-max-properties-increased-description: request body max properties increased
+request-property-max-properties-increased-description: request property max properties increased
+request-body-max-properties-set-description: request body max properties set
+request-property-max-properties-set-description: request property max properties set
+response-body-max-properties-increased-description: response body max properties increased
+response-property-max-properties-increased-description: response property max properties increased
+request-body-min-properties-increased-description: request body min properties increased
+request-property-min-properties-increased-description: request property min properties increased
+response-body-min-properties-decreased-description: response body min properties decreased
+response-property-min-properties-decreased-description: response property min properties decreased
+request-body-unique-items-set-description: request body uniqueItems set
+request-property-unique-items-set-description: request property uniqueItems set
+request-body-unique-items-unset-description: request body uniqueItems unset
+request-property-unique-items-unset-description: request property uniqueItems unset
+response-body-unique-items-unset-description: response body uniqueItems unset
+response-property-unique-items-unset-description: response property uniqueItems unset
+request-body-multiple-of-set-description: request body multipleOf set
+request-property-multiple-of-set-description: request property multipleOf set
+request-body-multiple-of-unset-description: request body multipleOf unset
+request-property-multiple-of-unset-description: request property multipleOf unset
+request-body-multiple-of-changed-description: request body multipleOf changed
+request-property-multiple-of-changed-description: request property multipleOf changed
+request-body-multiple-of-generalized-description: request body multipleOf generalized
+request-property-multiple-of-generalized-description: request property multipleOf generalized
+response-body-multiple-of-unset-description: response body multipleOf unset
+response-property-multiple-of-unset-description: response property multipleOf unset
+response-body-multiple-of-changed-description: response body multipleOf changed
+response-property-multiple-of-changed-description: response property multipleOf changed
+response-body-multiple-of-specialized-description: response body multipleOf specialized
+response-property-multiple-of-specialized-description: response property multipleOf specialized

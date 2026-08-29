@@ -6,6 +6,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -16,6 +17,8 @@ type Formatter interface {
 	RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, error)
 	RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error)
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
+	RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error)
+	RenderCoveragePatterns(patterns []coverage.Pattern, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
 	RenderValidate(findings Findings, opts RenderOpts) ([]byte, error)
 	SupportedOutputs() []Output

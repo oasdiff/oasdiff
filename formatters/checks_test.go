@@ -50,7 +50,8 @@ func TestChecks_AllRuleFieldsPopulated(t *testing.T) {
 		require.NotEmpty(t, rule.Direction.String(), "direction for %s", rule.Id)
 		require.NotEmpty(t, rule.Area.String(), "area for %s", rule.Id)
 		require.NotEmpty(t, rule.Kind.String(), "kind for %s", rule.Id)
-		require.NotEmpty(t, rule.Action.String(), "action for %s", rule.Id)
+		require.NotEmpty(t, rule.Actions(), "actions for %s", rule.Id)
+		require.NotEmpty(t, rule.Effect.String(), "effect for %s", rule.Id)
 		require.NotEmpty(t, localizer(rule.Description), "description for %s", rule.Id)
 	}
 }
@@ -60,7 +61,7 @@ func TestChecks_AllRuleFieldsPopulated(t *testing.T) {
 func TestChecks_FullCheckRendersAllFields(t *testing.T) {
 	checks := formatters.Checks{{
 		Id: "some-rule", Level: "error", Direction: "request", Area: "schema",
-		Kind: "type", Action: "change", Description: "d", Mitigation: "m",
+		Kind: "type", Actions: []string{"change"}, Effect: "widens", Description: "d", Mitigation: "m",
 	}}
 
 	out, err := formatters.JSONFormatter{}.RenderChecks(checks, formatters.NewRenderOpts())
@@ -69,7 +70,7 @@ func TestChecks_FullCheckRendersAllFields(t *testing.T) {
 	var got []map[string]any
 	require.NoError(t, json.Unmarshal(out, &got))
 	require.Len(t, got, 1)
-	for _, field := range []string{"id", "level", "direction", "area", "kind", "action", "description", "mitigation"} {
+	for _, field := range []string{"id", "level", "direction", "area", "kind", "actions", "effect", "description", "mitigation"} {
 		require.Contains(t, got[0], field, "field %s must survive omitempty when populated", field)
 	}
 }

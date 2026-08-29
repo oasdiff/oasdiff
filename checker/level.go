@@ -7,70 +7,24 @@ import (
 	"os"
 	"strings"
 
-	"github.com/TwiN/go-color"
+	"github.com/oasdiff/oasdiff/checker/rules"
 	"github.com/oasdiff/oasdiff/utils"
 )
 
-type Level int
+// Level is defined in checker/rules; the aliases keep the checker package's
+// public surface unchanged.
+type Level = rules.Level
 
 const (
-	ERR     Level = 3
-	WARN    Level = 2
-	INFO    Level = 1
-	NONE    Level = 0
-	INVALID Level = -1
+	ERR     = rules.ERR
+	WARN    = rules.WARN
+	INFO    = rules.INFO
+	NONE    = rules.NONE
+	INVALID = rules.INVALID
 )
 
 func NewLevel(level string) (Level, error) {
-	switch level {
-	case "ERR", "err":
-		return ERR, nil
-	case "WARN", "warn":
-		return WARN, nil
-	case "INFO", "info":
-		return INFO, nil
-	case "NONE", "none":
-		return NONE, nil
-	}
-	return INVALID, fmt.Errorf("invalid level %s", level)
-}
-
-func (level Level) StringCond(colorMode ColorMode) string {
-	if isColorEnabled(colorMode) {
-		return level.PrettyString()
-	}
-	return level.String()
-}
-
-func (level Level) String() string {
-	switch level {
-	case ERR:
-		return "error"
-	case WARN:
-		return "warning"
-	case INFO:
-		return "info"
-	default:
-		return "issue"
-	}
-}
-
-func (level Level) PrettyString() string {
-	levelName := level.String()
-	switch level {
-	case ERR:
-		return color.InRed(levelName)
-	case WARN:
-		return color.InPurple(levelName)
-	case INFO:
-		return color.InCyan(levelName)
-	default:
-		return color.InGray(levelName)
-	}
-}
-
-func (level Level) IsBreaking() bool {
-	return level == ERR || level == WARN
+	return rules.NewLevel(level)
 }
 
 // ProcessSeverityLevels reads a file with severity levels and returns a map of severity levels

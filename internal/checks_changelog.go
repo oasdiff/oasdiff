@@ -7,6 +7,7 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
+	"github.com/oasdiff/oasdiff/checker/metaschema"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/spf13/cobra"
 )
@@ -31,6 +32,8 @@ func getChecksChangelogCmd() *cobra.Command {
 	// never reach the config.
 	addChecksChangelogFlags(&cmd)
 
+	cmd.AddCommand(getChecksCoverageCmd())
+
 	return &cmd
 }
 
@@ -40,7 +43,7 @@ func getChecksChangelogCmd() *cobra.Command {
 func addChecksChangelogFlags(cmd *cobra.Command) {
 	addChecksFormatFlags(cmd)
 	addChecksSeverityFlag(cmd)
-	enumWithOptions(cmd, newEnumSliceValue(getAllTags(), nil), "tags", "t", "include only checks with all specified tags")
+	enumWithOptions(cmd, newEnumSliceValue(GetChangelogTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 }
 
@@ -71,7 +74,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 		}
 
 		// tags
-		if !matchTags(flags.getTags(), rule) {
+		if !matchChangelogTags(flags.getTags(), rule) {
 			continue
 		}
 
@@ -87,7 +90,9 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 			Direction:   rule.Direction.String(),
 			Area:        rule.Area.String(),
 			Kind:        rule.Kind.String(),
-			Action:      rule.Action.String(),
+			Actions:     actionStrings(rule.Actions()),
+			Effect:      rule.Effect.String(),
+			Locations:   rule.Locations,
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,
 		})
@@ -104,4 +109,62 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 	_, _ = fmt.Fprintf(stdout, "%s\n", bytes)
 
 	return nil
+}
+
+// changelogTagDimensions is the tag vocabulary of `checks changelog`:
+// direction, action (the syntactic edits from the rule's location claims),
+// effect (the rule's verdict), area, and kind.
+var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
+	{
+		values: []string{"request", "response"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return value == rule.Direction.String()
+		},
+	},
+	{
+		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return slices.Contains(rule.Actions(), metaschema.Action(value))
+		},
+	},
+	{
+		values: []string{"widens", "narrows"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			switch value {
+			case "widens":
+				return rule.Effect == checker.EffectWidens
+			case "narrows":
+				return rule.Effect == checker.EffectNarrows
+			}
+			return false
+		},
+	},
+	{
+		values: []string{"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return value == rule.Area.String()
+		},
+	},
+	{
+		values: []string{"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return value == rule.Kind.String()
+		},
+	},
+}
+
+func GetChangelogTags() []string {
+	return tagValues(changelogTagDimensions)
+}
+
+func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
+	return matchTagDimensions(tags, changelogTagDimensions, rule)
+}
+
+func actionStrings(actions []metaschema.Action) []string {
+	strs := make([]string, len(actions))
+	for i, a := range actions {
+		strs[i] = string(a)
+	}
+	return strs
 }

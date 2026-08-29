@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"text/tabwriter"
 
+	"strconv"
+	"strings"
+
 	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/coverage"
+	"github.com/oasdiff/oasdiff/colorize"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/report"
 )
@@ -45,6 +50,39 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	for _, c := range changes {
 		_, _ = fmt.Fprintf(result, "%s\n\n", c.MultiLineError(f.Localizer, opts.ColorMode))
 	}
+
+	return result.Bytes(), nil
+}
+
+func (f TEXTFormatter) RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error) {
+	result := bytes.NewBuffer(nil)
+
+	// the checks and the suggested id never both apply, so they share the
+	// last column, which tabwriter leaves ragged rather than padding every
+	// row to the longest list of checks
+	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
+	_, _ = fmt.Fprintln(w, "LOCATION\tACTION\tSTATUS\tCHECKS OR SUGGESTION")
+	for _, edit := range edits {
+		detail := edit.SuggestedId
+		if len(edit.Checks) > 0 {
+			detail = strings.Join(edit.Checks, ",")
+		}
+		_, _ = fmt.Fprintln(w, edit.Location+"\t"+edit.Action+"\t"+string(edit.Status)+"\t"+detail)
+	}
+	_ = w.Flush()
+
+	return result.Bytes(), nil
+}
+
+func (f TEXTFormatter) RenderCoveragePatterns(patterns []coverage.Pattern, opts RenderOpts) ([]byte, error) {
+	result := bytes.NewBuffer(nil)
+
+	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
+	_, _ = fmt.Fprintln(w, "KIND\tPATTERN\tEDITS\tREASON")
+	for _, p := range patterns {
+		_, _ = fmt.Fprintln(w, p.Kind+"\t"+p.Pattern+"\t"+strconv.Itoa(p.Edits)+"\t"+p.Reason)
+	}
+	_ = w.Flush()
 
 	return result.Bytes(), nil
 }
@@ -91,7 +129,7 @@ func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 		count[checker.INFO], checker.INFO.StringCond(opts.ColorMode),
 	)
 
-	useColor := checker.IsColorEnabled(opts.ColorMode)
+	useColor := colorize.IsColorEnabled(opts.ColorMode)
 	for _, finding := range findings {
 		loc := finding.Source.File
 		if finding.Source.Line > 0 {

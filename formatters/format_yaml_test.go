@@ -54,7 +54,8 @@ func TestYamlFormatter_RenderChecks(t *testing.T) {
 			Direction:   "request",
 			Area:        "schema",
 			Kind:        "existence",
-			Action:      "remove",
+			Actions:     []string{"remove"},
+			Effect:      "narrows",
 			Description: "This is a breaking change.",
 			Mitigation:  "Fix it.",
 		},
@@ -62,7 +63,7 @@ func TestYamlFormatter_RenderChecks(t *testing.T) {
 
 	out, err := yamlFormatter.RenderChecks(checks, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Equal(t, "- id: change_id\n  level: info\n  direction: request\n  area: schema\n  kind: existence\n  action: remove\n  description: This is a breaking change.\n  mitigation: Fix it.\n", string(out))
+	require.Equal(t, "- id: change_id\n  level: info\n  direction: request\n  area: schema\n  kind: existence\n  actions:\n    - remove\n  effect: narrows\n  description: This is a breaking change.\n  mitigation: Fix it.\n", string(out))
 }
 
 // An empty (nil) diff renders as the empty YAML mapping, for parity with

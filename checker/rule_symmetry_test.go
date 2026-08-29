@@ -6,46 +6,55 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/metaschema"
 )
 
-// This file audits the rule registry (GetAllRules) for broken symmetries on
-// the Direction/Area/Kind/Action taxonomy: a coordinate populated on one side
-// of a symmetry axis but empty on the mirror. Each such absence is either a
-// real missing check or an intentional asymmetry (the mirror is not a
-// wire-contract change, e.g. by request/response contravariance).
+// This file audits the rule registry (GetAllRules) for broken symmetries: a
+// coordinate populated on one side of a symmetry axis but empty on the
+// mirror. Coordinates are built from each rule's declared Direction, Area and
+// Kind plus the syntactic actions derived from its location claims; the
+// semantic axis uses the rule's declared Effect. Each absence is either a
+// real missing check or an intentional asymmetry (usually request/response
+// contravariance).
 //
-// TestRuleSymmetry is the guard: every absence must be listed in symmetryWaivers
-// with a reason, otherwise the test fails. A new rule that breaks symmetry, or a
-// waiver that no longer applies, both fail the build, so the waiver list stays an
-// honest, reviewed record of every intentional asymmetry.
-//
-// TestRuleSymmetryReport is informational (count mismatches that contravariance
-// makes legitimate); run with: go test ./checker -run RuleSymmetryReport -v
+// TestRuleSymmetry is the guard: every absence must be listed in
+// symmetryWaivers with a reason, otherwise the test fails. A new rule that
+// breaks symmetry, or a waiver that no longer applies, both fail the build,
+// so the waiver list stays an honest, reviewed record of every intentional
+// asymmetry.
 
 // symmetryWaivers records every intentional asymmetry. Key is the canonical
 // absence string emitted by symmetryAbsences; value is why it is acceptable.
 // Removing a real check, or adding one that fills a gap, must update this map.
 var symmetryWaivers = map[string]string{
-	// --- request <-> response (bidirectional areas only) ---
-	"request<->response schema/type/specialize missing-request":         "narrowing a response type is the safe direction and gets a dedicated specialize rule (INFO, #989); on the request side narrowing is breaking and folded into request-*-type-changed (ERR) by contravariance, so there is no request specialize rule.",
-	"request<->response schema/constraints/generalize missing-response": "response pattern generalization is breaking and reported by response-property-pattern-changed; the safe response direction is specialization. Tracked in #1034.",
-	"request<->response schema/constraints/set missing-response":        "setting a constraint on a response narrows the server's output, which is non-breaking for clients, so it is request-only by contravariance (request reports the constraint as newly enforced).",
-
-	// --- add <-> remove (same direction/area/kind) ---
-	"add<->remove none/paths/lifecycle missing-add": "a sunset date being added is part of the deprecation flow and is reported by the deprecation rules; only its removal (sunset-deleted) is a standalone change.",
-
-	// --- generalize <-> specialize (same direction/area/kind) ---
-	"generalize<->specialize request/schema/type missing-specialize":            "narrowing a request type is breaking and already reported by request-*-type-changed (ERR); the generalize rule exists only to carve out the safe widening as INFO.",
-	"generalize<->specialize request/schema/constraints missing-specialize":     "tightening a request pattern is reported by request-*-pattern-changed; the generalize rule carves out the safe loosening.",
-	"generalize<->specialize request/parameters/constraints missing-specialize": "same as request schema pattern: tightening is covered by request-parameter-pattern-changed; generalize carves out the safe loosening.",
+	"add<->remove request/schema/lifecycle missing-remove":  "deprecation rules claim x-* add/change (sunset annotations appearing or changing); deleting a property-level sunset has no check yet, unlike the operation-level sunset-deleted.",
+	"add<->remove response/schema/lifecycle missing-remove": "same as the request side: property-level sunset deletion is unchecked.",
 }
 
 // symmetryAbsences returns the canonical key for every coordinate that is
 // populated on one side of a symmetry axis but completely empty on the mirror.
-// Count mismatches (both sides populated) are intentionally excluded: by
-// request/response contravariance the counts legitimately differ.
 func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 	var out []string
+
+	// a coordinate of the taxonomy; group is a coordinate without its
+	// action, the scope within which action duals and effects are compared;
+	// mirror is one without its direction, compared across the two
+	type coord struct {
+		Direction checker.Direction
+		Area      checker.Area
+		Kind      checker.Kind
+		Action    metaschema.Action
+	}
+	type group struct {
+		Direction checker.Direction
+		Area      checker.Area
+		Kind      checker.Kind
+	}
+	type mirror struct {
+		Area   checker.Area
+		Kind   checker.Kind
+		Action metaschema.Action
+	}
 
 	// Axis 1: request <-> response, restricted to Areas that appear in both
 	// directions (parameters/request-body are request-only, responses/headers
@@ -59,67 +68,73 @@ func symmetryAbsences(rules checker.BackwardCompatibilityRules) []string {
 			respAreas[r.Area] = true
 		}
 	}
-	type aka struct {
-		Area   checker.Area
-		Kind   checker.Kind
-		Action checker.Action
-	}
-	req, resp := map[aka]bool{}, map[aka]bool{}
+	req, resp := map[mirror]bool{}, map[mirror]bool{}
+	present := map[coord]bool{}
+	effects := map[group]map[checker.Effect]bool{}
 	for _, r := range rules {
-		if !reqAreas[r.Area] || !respAreas[r.Area] {
-			continue
+		for _, action := range r.Actions() {
+			if reqAreas[r.Area] && respAreas[r.Area] {
+				k := mirror{r.Area, r.Kind, action}
+				switch r.Direction {
+				case checker.DirectionRequest:
+					req[k] = true
+				case checker.DirectionResponse:
+					resp[k] = true
+				}
+			}
+			present[coord{r.Direction, r.Area, r.Kind, action}] = true
 		}
-		k := aka{r.Area, r.Kind, r.Action}
-		switch r.Direction {
-		case checker.DirectionRequest:
-			req[k] = true
-		case checker.DirectionResponse:
-			resp[k] = true
+		e := group{r.Direction, r.Area, r.Kind}
+		if effects[e] == nil {
+			effects[e] = map[checker.Effect]bool{}
 		}
+		effects[e][r.Effect] = true
 	}
 	for k := range req {
 		if !resp[k] {
-			out = append(out, fmt.Sprintf("request<->response %s/%s/%s missing-response", k.Area.String(), k.Kind.String(), k.Action.String()))
+			out = append(out, fmt.Sprintf("request<->response %s/%s/%s missing-response", k.Area.String(), k.Kind.String(), k.Action))
 		}
 	}
 	for k := range resp {
 		if !req[k] {
-			out = append(out, fmt.Sprintf("request<->response %s/%s/%s missing-request", k.Area.String(), k.Kind.String(), k.Action.String()))
+			out = append(out, fmt.Sprintf("request<->response %s/%s/%s missing-request", k.Area.String(), k.Kind.String(), k.Action))
 		}
 	}
 
 	// Axis 2: dual action pairs within the same Direction/Area/Kind.
-	pairs := [][2]checker.Action{
-		{checker.ActionAdd, checker.ActionRemove},
-		{checker.ActionIncrease, checker.ActionDecrease},
-		{checker.ActionGeneralize, checker.ActionSpecialize},
-	}
-	type dak struct {
-		Direction checker.Direction
-		Area      checker.Area
-		Kind      checker.Kind
-		Action    checker.Action
-	}
-	present := map[dak]bool{}
-	for _, r := range rules {
-		present[dak{r.Direction, r.Area, r.Kind, r.Action}] = true
+	pairs := [][2]metaschema.Action{
+		{metaschema.ActionAdd, metaschema.ActionRemove},
+		{metaschema.ActionIncrease, metaschema.ActionDecrease},
+		{metaschema.ActionSet, metaschema.ActionUnset},
 	}
 	for _, p := range pairs {
-		coords := map[dak]bool{}
+		coords := map[group]bool{}
 		for k := range present {
 			if k.Action == p[0] || k.Action == p[1] {
-				coords[dak{k.Direction, k.Area, k.Kind, 0}] = true
+				coords[group{k.Direction, k.Area, k.Kind}] = true
 			}
 		}
 		for c := range coords {
-			has0 := present[dak{c.Direction, c.Area, c.Kind, p[0]}]
-			has1 := present[dak{c.Direction, c.Area, c.Kind, p[1]}]
+			has0 := present[coord{c.Direction, c.Area, c.Kind, p[0]}]
+			has1 := present[coord{c.Direction, c.Area, c.Kind, p[1]}]
 			coord := fmt.Sprintf("%s/%s/%s", c.Direction.String(), c.Area.String(), c.Kind.String())
 			if has0 && !has1 {
-				out = append(out, fmt.Sprintf("%s<->%s %s missing-%s", p[0].String(), p[1].String(), coord, p[1].String()))
+				out = append(out, fmt.Sprintf("%s<->%s %s missing-%s", p[0], p[1], coord, p[1]))
 			} else if has1 && !has0 {
-				out = append(out, fmt.Sprintf("%s<->%s %s missing-%s", p[0].String(), p[1].String(), coord, p[0].String()))
+				out = append(out, fmt.Sprintf("%s<->%s %s missing-%s", p[0], p[1], coord, p[0]))
 			}
+		}
+	}
+
+	// Axis 3: effect duality within the same Direction/Area/Kind. Where a
+	// narrowing verdict exists, its widening counterpart should exist too
+	// (usually as the safe-direction changelog entry), and vice versa.
+	for e, effs := range effects {
+		coord := fmt.Sprintf("%s/%s/%s", e.Direction.String(), e.Area.String(), e.Kind.String())
+		if effs[checker.EffectNarrows] && !effs[checker.EffectWidens] {
+			out = append(out, fmt.Sprintf("widens<->narrows %s missing-widens", coord))
+		} else if effs[checker.EffectWidens] && !effs[checker.EffectNarrows] {
+			out = append(out, fmt.Sprintf("widens<->narrows %s missing-narrows", coord))
 		}
 	}
 
@@ -140,67 +155,6 @@ func TestRuleSymmetry(t *testing.T) {
 	for w := range symmetryWaivers {
 		if !absent[w] {
 			t.Errorf("stale symmetry waiver: %q\n  this asymmetry no longer exists; remove the waiver", w)
-		}
-	}
-}
-
-// --- informational report (not asserted) ---
-
-func TestRuleSymmetryReport(t *testing.T) {
-	rules := checker.GetAllRules()
-	t.Logf("total rules: %d", len(rules))
-
-	reqAreas, respAreas := map[checker.Area]bool{}, map[checker.Area]bool{}
-	for _, r := range rules {
-		switch r.Direction {
-		case checker.DirectionRequest:
-			reqAreas[r.Area] = true
-		case checker.DirectionResponse:
-			respAreas[r.Area] = true
-		}
-	}
-	type key struct {
-		Area   checker.Area
-		Kind   checker.Kind
-		Action checker.Action
-	}
-	req, resp := map[key][]string{}, map[key][]string{}
-	for _, r := range rules {
-		if !reqAreas[r.Area] || !respAreas[r.Area] {
-			continue
-		}
-		k := key{r.Area, r.Kind, r.Action}
-		switch r.Direction {
-		case checker.DirectionRequest:
-			req[k] = append(req[k], r.Id)
-		case checker.DirectionResponse:
-			resp[k] = append(resp[k], r.Id)
-		}
-	}
-	seen := map[key]bool{}
-	var keys []key
-	for k := range req {
-		keys, seen[k] = append(keys, k), true
-	}
-	for k := range resp {
-		if !seen[k] {
-			keys = append(keys, k)
-		}
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		a, b := keys[i], keys[j]
-		if a.Area != b.Area {
-			return a.Area < b.Area
-		}
-		if a.Kind != b.Kind {
-			return a.Kind < b.Kind
-		}
-		return a.Action < b.Action
-	})
-	t.Log("=== request vs response count mismatches (contravariance expected) ===")
-	for _, k := range keys {
-		if len(req[k]) > 0 && len(resp[k]) > 0 && len(req[k]) != len(resp[k]) {
-			t.Logf("  %d req / %d resp [%s/%s/%s]", len(req[k]), len(resp[k]), k.Area.String(), k.Kind.String(), k.Action.String())
 		}
 	}
 }

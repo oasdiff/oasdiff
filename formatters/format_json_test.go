@@ -40,7 +40,8 @@ func TestJsonFormatter_RenderChecks(t *testing.T) {
 			Direction:   "request",
 			Area:        "schema",
 			Kind:        "existence",
-			Action:      "remove",
+			Actions:     []string{"remove"},
+			Effect:      "narrows",
 			Description: "This is a breaking change.",
 			Mitigation:  "Fix it.",
 		},
@@ -48,7 +49,7 @@ func TestJsonFormatter_RenderChecks(t *testing.T) {
 
 	out, err := jsonFormatter.RenderChecks(checks, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Equal(t, `[{"id":"change_id","level":"info","direction":"request","area":"schema","kind":"existence","action":"remove","description":"This is a breaking change.","mitigation":"Fix it."}]`, string(out))
+	require.Equal(t, `[{"id":"change_id","level":"info","direction":"request","area":"schema","kind":"existence","actions":["remove"],"effect":"narrows","description":"This is a breaking change.","mitigation":"Fix it."}]`, string(out))
 }
 
 // An empty (nil) diff renders as the empty JSON object, not empty bytes,

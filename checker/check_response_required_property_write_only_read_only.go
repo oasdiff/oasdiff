@@ -32,15 +32,13 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "writeOnly")
 				id := ResponseRequiredPropertyBecameNonWriteOnlyId
-				comment := commentId(ResponseRequiredPropertyBecameNonWriteOnlyId)
 				if writeOnlyDiff.To == true {
 					id = ResponseRequiredPropertyBecameWriteOnlyId
-					comment = ""
 				}
 				result = append(result, p.newChange(
 					id,
 					[]any{propName, info.responseStatus},
-					comment,
+					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
 

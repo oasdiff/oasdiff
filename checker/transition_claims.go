@@ -97,6 +97,7 @@ var transitions = []transition{
 		claims:  map[Kind]bool{KindType: true, KindStructure: true},
 		reportedBy: []string{
 			RequestBodyWrappedInOneOfId, ResponseBodyWrappedInOneOfId,
+			RequestBodyWrappedInOneOfOriginalPreservedId, ResponseBodyWrappedInOneOfOriginalPreservedId,
 			RequestPropertyOneOfAddedId, ResponsePropertyOneOfAddedId,
 		},
 	},

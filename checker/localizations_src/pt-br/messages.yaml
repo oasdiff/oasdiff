@@ -86,9 +86,9 @@ request-parameter-max-length-increased: no parâmetro de requisição do tipo %s
 request-parameter-min-length-increased: no parâmetro de requisição do tipo %s e nome %s teve seu comprimento mínimo aumentado de %s para %s
 request-parameter-min-length-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu comprimento mínimo reduzido de %s para %s
 request-parameter-max-length-set: no parâmetro de requisição do tipo %s e nome %s, o comprimento máximo foi definido como %s
-request-parameter-max-length-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-max-length-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-parameter-max-set: no parâmetro de requisição do tipo %s e nome %s, o valor máximo foi definido como %s
-request-parameter-max-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-max-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-parameter-min-increased: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi aumentado de %s para %s
 request-parameter-min-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi reduzido de %s para %s
 request-parameter-max-items-decreased: no parâmetro de requisição do tipo %s e nome %s, o número máximo de itens foi reduzido de %s para %s
@@ -96,9 +96,9 @@ request-parameter-max-items-increased: no parâmetro de requisição do tipo %s 
 request-parameter-min-items-increased: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi aumentado de %s para %s
 request-parameter-min-items-decreased: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi reduzido de %s para %s
 request-parameter-min-items-set: no parâmetro de requisição do tipo %s e nome %s, o número mínimo de itens foi definido como %s
-request-parameter-min-items-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-min-items-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-parameter-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor mínimo foi definido como %s
-request-parameter-min-set-comment: Este é um aviso porque às vezes é necessário definir por razões de segurança ou para corrigir um erro na especificação. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-min-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-parameter-type-changed: no parâmetro de requisição do tipo %s e nome %s, o %s foi alterado de %s para %s
 request-parameter-type-generalized: no parâmetro de requisição do tipo %s e nome %s, o %s foi expandido de %s para %s
 request-parameter-property-type-changed: no parâmetro de requisição do tipo %s e nome %s, o %s da propriedade %s foi alterado de %s para %s
@@ -145,13 +145,13 @@ request-property-max-increased: o valor máximo da propriedade de requisição %
 request-body-max-length-increased: o comprimento máximo do corpo da requisição foi aumentado de %s para %s
 request-property-max-length-increased: o comprimento máximo da propriedade de requisição %s foi aumentado de %s para %s
 request-body-max-length-set: o comprimento máximo do corpo da requisição foi definido como %s
-request-body-max-length-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-max-length-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-max-length-set: o comprimento máximo da propriedade de requisição %s foi definido como %s
-request-property-max-length-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-max-length-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-body-max-set: o valor máximo do corpo da requisição foi definido como %s
-request-body-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-max-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-max-set: o valor máximo da propriedade de requisição %s foi definido como %s
-request-property-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-max-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-body-min-increased: o valor mínimo do corpo da requisição foi aumentado para %s
 request-property-min-increased: o valor mínimo da propriedade de requisição %s foi aumentado para %s
 request-read-only-property-min-increased: o valor mínimo da propriedade de requisição somente leitura %s foi aumentado para %s
@@ -162,13 +162,13 @@ request-property-min-decreased: o valor mínimo da propriedade de requisição %
 request-body-min-items-decreased: o número mínimo de itens do corpo da requisição foi reduzido de %s para %s
 request-property-min-items-decreased: o número mínimo de itens da propriedade de requisição %s foi reduzido de %s para %s
 request-body-min-items-set: o número mínimo de itens do corpo da requisição foi definido como %s
-request-body-min-items-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-min-items-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-min-items-set: o número mínimo de itens da propriedade de requisição %s foi definido como %s
-request-property-min-items-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-min-items-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-body-min-set: o valor mínimo do corpo da requisição foi definido como %s
-request-body-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-min-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-min-set: o valor mínimo da propriedade de requisição %s foi definido como %s
-request-property-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-min-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-removed: a propriedade de requisição %s foi removida
 request-body-type-changed: o %s do corpo da requisição foi alterado de %s para %s
 request-body-type-generalized: o %s do corpo da requisição foi expandido de %s para %s
@@ -203,7 +203,7 @@ response-body-became-nullable: o corpo da resposta tornou-se anulável
 response-property-became-not-nullable: a propriedade de resposta %s tornou-se não anulável para o status %s
 response-body-became-not-nullable: o corpo da resposta tornou-se não anulável
 response-property-enum-value-added: o novo valor %s do enum foi adicionado à propriedade de resposta %s para o status %s
-response-property-enum-value-added-comment: Adicionar novos valores enum à resposta pode ser inesperado para os clientes, use x-extensible-enum em vez disso.
+response-property-enum-value-added-comment: O servidor agora pode retornar um valor que o contrato anterior excluía, portanto um cliente escrito com base nele pode não tratar a resposta. Se o conjunto de valores deve crescer, declare-o com x-extensible-enum.
 response-property-enum-value-removed: o valor %s do enum foi removido da propriedade de resposta %s para o status %s
 response-body-max-length-increased: o comprimento máximo do corpo da resposta foi aumentado de %s para %s
 response-property-max-length-increased: o comprimento máximo da propriedade de resposta %s foi aumentado de %s para %s para o status %s
@@ -218,7 +218,6 @@ response-property-min-length-decreased: o comprimento mínimo da propriedade de 
 response-body-type-changed: o %s do corpo da resposta foi alterado de %s para %s para o status %s
 response-property-type-changed: o %s da propriedade de resposta %s foi alterado de %s para %s para o status %s
 response-required-property-became-not-write-only: a propriedade obrigatória de resposta %s deixou de ser somente escrita para o status %s
-response-required-property-became-not-write-only-comment: Isso é válido apenas se a propriedade sempre foi retornada antes de a especificação ter sido alterada.
 response-required-property-removed: a propriedade obrigatória %s foi removida da resposta com o status %s
 response-required-property-added: a propriedade obrigatória %s foi adicionada à resposta com o status %s
 response-success-status-removed: a resposta de sucesso com o status %s foi removida
@@ -235,26 +234,26 @@ request-property-exclusive-min-increased: o valor exclusiveMinimum da propriedad
 request-read-only-property-exclusive-min-increased: o valor exclusiveMinimum da propriedade de requisição somente leitura %s foi aumentado para %s
 request-property-exclusive-min-decreased: o valor exclusiveMinimum da propriedade de requisição %s foi reduzido de %s para %s
 request-body-exclusive-min-set: o valor exclusiveMinimum do corpo da requisição foi definido como %s
-request-body-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-exclusive-min-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-exclusive-min-set: o valor exclusiveMinimum da propriedade de requisição %s foi definido como %s
-request-property-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-exclusive-min-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-body-exclusive-max-decreased: o valor exclusiveMaximum do corpo da requisição foi reduzido para %s
 request-body-exclusive-max-increased: o valor exclusiveMaximum do corpo da requisição foi aumentado de %s para %s
 request-property-exclusive-max-decreased: o valor exclusiveMaximum da propriedade de requisição %s foi reduzido para %s
 request-read-only-property-exclusive-max-decreased: o valor exclusiveMaximum da propriedade de requisição somente leitura %s foi reduzido para %s
 request-property-exclusive-max-increased: o valor exclusiveMaximum da propriedade de requisição %s foi aumentado de %s para %s
 request-body-exclusive-max-set: o valor exclusiveMaximum do corpo da requisição foi definido como %s
-request-body-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-body-exclusive-max-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-property-exclusive-max-set: o valor exclusiveMaximum da propriedade de requisição %s foi definido como %s
-request-property-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-property-exclusive-max-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-parameter-exclusive-min-increased: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi aumentado de %s para %s
 request-parameter-exclusive-min-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi reduzido de %s para %s
 request-parameter-exclusive-min-set: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi definido como %s
-request-parameter-exclusive-min-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-exclusive-min-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 request-parameter-exclusive-max-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu valor exclusiveMaximum foi reduzido de %s para %s
 request-parameter-exclusive-max-increased: no parâmetro de requisição do tipo %s e nome %s teve seu valor exclusiveMaximum foi aumentado de %s para %s
 request-parameter-exclusive-max-set: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMaximum foi definido como %s
-request-parameter-exclusive-max-set-comment: Este é um aviso porque às vezes é necessário definir. No entanto, é recomendável verificar se os clientes suportam essa restrição antes de fazer tal alteração na especificação.
+request-parameter-exclusive-max-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 response-body-exclusive-max-increased: o valor exclusiveMaximum do corpo da resposta foi aumentado de %s para %s
 response-property-exclusive-max-increased: o valor exclusiveMaximum da propriedade de resposta %s foi aumentado de %s para %s para o status %s
 response-body-exclusive-min-decreased: o valor exclusiveMinimum do corpo da resposta foi reduzido de %s para %s
@@ -328,7 +327,9 @@ response-property-any-of-added: "%s foi adicionado à lista `anyOf` da proprieda
 response-property-any-of-removed: "%s foi removido da lista `anyOf` da propriedade de resposta %s para o status %s"
 request-body-one-of-added: "%s foi adicionado à lista `oneOf` do corpo da requisição"
 request-body-wrapped-in-one-of: "o corpo da requisição foi reestruturado em um `oneOf`, portanto uma carga que antes era válida pode não ser mais aceita"
+request-body-wrapped-in-one-of-original-preserved: "o corpo da requisição foi reestruturado em um `oneOf`, mantendo o esquema original como uma das alternativas"
 response-body-wrapped-in-one-of: "o corpo da resposta foi reestruturado em um `oneOf`, portanto um campo que antes era garantido pode não estar mais presente"
+response-body-wrapped-in-one-of-original-preserved: "o corpo da resposta foi reestruturado em um `oneOf`, mantendo o esquema original como uma das alternativas"
 request-body-one-of-removed: "%s foi removido da lista `oneOf` do corpo da requisição"
 request-property-one-of-added: "%s foi adicionado à lista `oneOf` da propriedade de requisição %s"
 request-property-one-of-removed: "%s foi removido da lista `oneOf` da propriedade de requisição %s"
@@ -463,7 +464,10 @@ request-body-min-length-increased-description: comprimento mínimo do corpo da r
 request-body-min-set-description: valor mínimo do corpo da requisição definido
 request-body-one-of-added-description: subesquema adicionado ao oneOf no corpo da requisição
 request-body-wrapped-in-one-of-description: "corpo da requisição encapsulado em um `oneOf`"
+request-body-wrapped-in-one-of-original-preserved-description: "corpo da requisição encapsulado em um `oneOf` que mantém o esquema original"
 response-body-wrapped-in-one-of-description: "corpo da resposta encapsulado em um `oneOf`"
+response-body-wrapped-in-one-of-original-preserved-description: "corpo da resposta encapsulado em um `oneOf` que mantém o esquema original"
+wrapped-in-one-of-original-preserved-warning-comment: "Este é um aviso porque a especificação não diz se as alternativas se sobrepõem. Uma carga que corresponda a mais de uma é rejeitada pelo `oneOf`, portanto uma carga que antes era válida pode ou não continuar sendo aceita."
 request-body-one-of-removed-description: subesquema removido do oneOf no corpo da requisição
 request-body-type-changed-description: tipo do corpo da requisição alterado
 request-body-type-generalized-description: tipo do corpo da requisição generalizado
@@ -667,6 +671,7 @@ request-parameter-list-of-types-narrowed: "lista de tipos do parâmetro %s %s da
 request-parameter-property-list-of-types-widened: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi expandida adicionando tipos %s"
 request-parameter-property-list-of-types-narrowed: "lista de tipos da propriedade %s do parâmetro %s %s da requisição foi restringida removendo tipos %s"
 response-media-type-name-changed: o tipo de mídia %s foi alterado para %s para o status de resposta %s
+response-media-type-name-changed-warning-comment: "Este é um aviso porque o oasdiff não consegue saber o que o parâmetro de tipo de mídia alterado restringe. Adicionar um restringe o que o servidor pode retornar, remover um amplia, e mudar seu valor pode deixar um cliente sem conseguir ler a resposta."
 response-media-type-name-generalized: o tipo de mídia %s foi alterado para um tipo de mídia mais geral %s para o status de resposta %s
 response-media-type-name-specialized: o tipo de mídia %s foi alterado para um tipo de mídia mais específico %s para o status de resposta %s
 request-body-removed: removido o corpo da requisição
@@ -1066,3 +1071,99 @@ response-body-type-compatible-description: tipo do corpo da resposta mudou mas �
 response-property-type-generalized-description: tipo da propriedade de resposta generalizado
 response-property-type-specialized-description: tipo da propriedade de resposta especializado
 response-property-type-compatible-description: tipo da propriedade de resposta mudou mas é retrocompatível
+
+# constraint keyword checks (maxItems, minProperties, maxProperties, uniqueItems, multipleOf)
+request-body-max-items-decreased: o número máximo de itens do corpo da requisição foi reduzido para %s
+request-property-max-items-decreased: o número máximo de itens da propriedade de requisição %s foi reduzido para %s
+request-read-only-property-max-items-decreased: o número máximo de itens da propriedade de requisição somente leitura %s foi reduzido para %s
+request-body-max-items-increased: o número máximo de itens do corpo da requisição foi aumentado de %s para %s
+request-property-max-items-increased: o número máximo de itens da propriedade de requisição %s foi aumentado de %s para %s
+request-body-max-items-set: o número máximo de itens do corpo da requisição foi definido como %s
+request-body-max-items-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+request-property-max-items-set: o número máximo de itens da propriedade de requisição %s foi definido como %s
+request-property-max-items-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+response-body-max-items-increased: o número máximo de itens do corpo da resposta foi aumentado de %s para %s
+response-property-max-items-increased: o número máximo de itens da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+request-body-max-properties-decreased: o número máximo de propriedades do corpo da requisição foi reduzido para %s
+request-property-max-properties-decreased: o número máximo de propriedades da propriedade de requisição %s foi reduzido para %s
+request-read-only-property-max-properties-decreased: o número máximo de propriedades da propriedade de requisição somente leitura %s foi reduzido para %s
+request-body-max-properties-increased: o número máximo de propriedades do corpo da requisição foi aumentado de %s para %s
+request-property-max-properties-increased: o número máximo de propriedades da propriedade de requisição %s foi aumentado de %s para %s
+request-body-max-properties-set: o número máximo de propriedades do corpo da requisição foi definido como %s
+request-body-max-properties-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+request-property-max-properties-set: o número máximo de propriedades da propriedade de requisição %s foi definido como %s
+request-property-max-properties-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+response-body-max-properties-increased: o número máximo de propriedades do corpo da resposta foi aumentado de %s para %s
+response-property-max-properties-increased: o número máximo de propriedades da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+request-body-min-properties-increased: o número mínimo de propriedades do corpo da requisição foi aumentado para %s
+request-property-min-properties-increased: o número mínimo de propriedades da propriedade de requisição %s foi aumentado para %s
+response-body-min-properties-decreased: o número mínimo de propriedades do corpo da resposta foi reduzido de %s para %s
+response-property-min-properties-decreased: o número mínimo de propriedades da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+request-body-unique-items-set: o valor uniqueItems do corpo da requisição foi definido como true
+request-property-unique-items-set: o valor uniqueItems da propriedade de requisição %s foi definido como true
+request-body-unique-items-unset: o valor uniqueItems do corpo da requisição foi removido
+request-property-unique-items-unset: o valor uniqueItems da propriedade de requisição %s foi removido
+response-body-unique-items-unset: o valor uniqueItems do corpo da resposta foi removido
+response-property-unique-items-unset: o valor uniqueItems da propriedade de resposta %s foi removido para o status %s
+request-body-multiple-of-set: o valor multipleOf do corpo da requisição foi definido como %s
+request-body-multiple-of-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+request-property-multiple-of-set: o valor multipleOf da propriedade de requisição %s foi definido como %s
+request-property-multiple-of-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+request-body-multiple-of-unset: o valor multipleOf do corpo da requisição foi removido de %s
+request-property-multiple-of-unset: o valor multipleOf da propriedade de requisição %s foi removido de %s
+request-body-multiple-of-changed: o valor multipleOf do corpo da requisição foi alterado de %s para %s
+request-property-multiple-of-changed: o valor multipleOf da propriedade de requisição %s foi alterado de %s para %s
+request-body-multiple-of-generalized: o valor multipleOf do corpo da requisição foi generalizado de %s para %s
+request-body-multiple-of-generalized-comment: Esta alteração não é incompatível porque o multipleOf anterior é um múltiplo inteiro do novo, então todos os valores válidos anteriormente continuam válidos.
+request-property-multiple-of-generalized: o valor multipleOf da propriedade de requisição %s foi generalizado de %s para %s
+request-property-multiple-of-generalized-comment: Esta alteração não é incompatível porque o multipleOf anterior é um múltiplo inteiro do novo, então todos os valores válidos anteriormente continuam válidos.
+response-body-multiple-of-unset: o valor multipleOf do corpo da resposta foi removido de %s
+response-property-multiple-of-unset: o valor multipleOf da propriedade de resposta %s foi removido de %s para o status %s
+response-body-multiple-of-changed: o valor multipleOf do corpo da resposta foi alterado de %s para %s
+response-property-multiple-of-changed: o valor multipleOf da propriedade de resposta %s foi alterado de %s para %s para o status %s
+response-body-multiple-of-specialized: o valor multipleOf do corpo da resposta foi especializado de %s para %s
+response-body-multiple-of-specialized-comment: Esta alteração não é incompatível porque o novo multipleOf é um múltiplo inteiro do anterior, então todos os valores que o servidor pode produzir já eram válidos antes.
+response-property-multiple-of-specialized: o valor multipleOf da propriedade de resposta %s foi especializado de %s para %s para o status %s
+response-property-multiple-of-specialized-comment: Esta alteração não é incompatível porque o novo multipleOf é um múltiplo inteiro do anterior, então todos os valores que o servidor pode produzir já eram válidos antes.
+request-body-max-items-decreased-description: número máximo de itens do corpo da requisição reduzido
+request-property-max-items-decreased-description: número máximo de itens da propriedade de requisição reduzido
+request-read-only-property-max-items-decreased-description: número máximo de itens da propriedade de requisição somente leitura reduzido
+request-body-max-items-increased-description: número máximo de itens do corpo da requisição aumentado
+request-property-max-items-increased-description: número máximo de itens da propriedade de requisição aumentado
+request-body-max-items-set-description: número máximo de itens do corpo da requisição definido
+request-property-max-items-set-description: número máximo de itens da propriedade de requisição definido
+response-body-max-items-increased-description: número máximo de itens do corpo da resposta aumentado
+response-property-max-items-increased-description: número máximo de itens da propriedade de resposta aumentado
+request-body-max-properties-decreased-description: número máximo de propriedades do corpo da requisição reduzido
+request-property-max-properties-decreased-description: número máximo de propriedades da propriedade de requisição reduzido
+request-read-only-property-max-properties-decreased-description: número máximo de propriedades da propriedade de requisição somente leitura reduzido
+request-body-max-properties-increased-description: número máximo de propriedades do corpo da requisição aumentado
+request-property-max-properties-increased-description: número máximo de propriedades da propriedade de requisição aumentado
+request-body-max-properties-set-description: número máximo de propriedades do corpo da requisição definido
+request-property-max-properties-set-description: número máximo de propriedades da propriedade de requisição definido
+response-body-max-properties-increased-description: número máximo de propriedades do corpo da resposta aumentado
+response-property-max-properties-increased-description: número máximo de propriedades da propriedade de resposta aumentado
+request-body-min-properties-increased-description: número mínimo de propriedades do corpo da requisição aumentado
+request-property-min-properties-increased-description: número mínimo de propriedades da propriedade de requisição aumentado
+response-body-min-properties-decreased-description: número mínimo de propriedades do corpo da resposta reduzido
+response-property-min-properties-decreased-description: número mínimo de propriedades da propriedade de resposta reduzido
+request-body-unique-items-set-description: valor uniqueItems do corpo da requisição definido
+request-property-unique-items-set-description: valor uniqueItems da propriedade de requisição definido
+request-body-unique-items-unset-description: valor uniqueItems do corpo da requisição removido
+request-property-unique-items-unset-description: valor uniqueItems da propriedade de requisição removido
+response-body-unique-items-unset-description: valor uniqueItems do corpo da resposta removido
+response-property-unique-items-unset-description: valor uniqueItems da propriedade de resposta removido
+request-body-multiple-of-set-description: valor multipleOf do corpo da requisição definido
+request-property-multiple-of-set-description: valor multipleOf da propriedade de requisição definido
+request-body-multiple-of-unset-description: valor multipleOf do corpo da requisição removido
+request-property-multiple-of-unset-description: valor multipleOf da propriedade de requisição removido
+request-body-multiple-of-changed-description: valor multipleOf do corpo da requisição alterado
+request-property-multiple-of-changed-description: valor multipleOf da propriedade de requisição alterado
+request-body-multiple-of-generalized-description: valor multipleOf do corpo da requisição generalizado
+request-property-multiple-of-generalized-description: valor multipleOf da propriedade de requisição generalizado
+response-body-multiple-of-unset-description: valor multipleOf do corpo da resposta removido
+response-property-multiple-of-unset-description: valor multipleOf da propriedade de resposta removido
+response-body-multiple-of-changed-description: valor multipleOf do corpo da resposta alterado
+response-property-multiple-of-changed-description: valor multipleOf da propriedade de resposta alterado
+response-body-multiple-of-specialized-description: valor multipleOf do corpo da resposta especializado
+response-property-multiple-of-specialized-description: valor multipleOf da propriedade de resposta especializado

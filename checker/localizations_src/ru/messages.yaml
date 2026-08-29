@@ -85,9 +85,9 @@ request-parameter-max-length-increased: в %s параметре запроса 
 request-parameter-min-length-increased: в %s параметре запроса %s, minLength увеличен с %s до %s
 request-parameter-min-length-decreased: в %s параметре запроса %s, minLength уменьшен с %s до %s
 request-parameter-max-length-set: в %s параметре запроса %s, maxLength установлен в %s
-request-parameter-max-length-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется по соображениям безопасности или для исправления ошибки в спецификации. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-parameter-max-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-parameter-max-set: в %s параметре запроса %s, max установлен в %s
-request-parameter-max-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется по соображениям безопасности или для исправления ошибки в спецификации. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-parameter-max-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-parameter-min-increased: в %s параметре запроса %s, min увеличен с %s до %s
 request-parameter-min-decreased: в %s параметре запроса %s, min уменьшен с %s до %s
 request-parameter-max-items-decreased: в %s параметре запроса %s, maxItems уменьшен с %s до %s
@@ -95,9 +95,9 @@ request-parameter-max-items-increased: в %s параметре запроса %
 request-parameter-min-items-increased: в %s параметре запроса %s, minItems увеличен с %s до %s
 request-parameter-min-items-decreased: в %s параметре запроса %s, minItems уменьшен с %s до %s
 request-parameter-min-items-set: в %s параметре запроса %s, minItems установлен в %s
-request-parameter-min-items-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется по соображениям безопасности или для исправления ошибки в спецификации. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-parameter-min-items-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-parameter-min-set: в %s параметре запроса %s, min установлен в %s
-request-parameter-min-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется по соображениям безопасности или для исправления ошибки в спецификации. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-parameter-min-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-parameter-type-changed: в параметре запроса %s %s %s изменён с %s на %s
 request-parameter-type-generalized: в параметре запроса %s %s %s расширен с %s до %s
 request-parameter-property-type-changed: в параметре запроса %s %s %s свойства %s изменён с %s на %s
@@ -138,13 +138,13 @@ request-body-max-length-decreased: значение maxLength у тела зап
 request-property-max-length-decreased: значение maxLength у поля запроса %s уменьшено до %s
 request-read-only-property-max-length-decreased: значение maxLength поля запроса только для чтения %s уменьшено до %s
 request-body-max-length-set: у тела запроса задано значение maxLength в %s
-request-body-max-length-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-max-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-max-length-set: у поля запроса %s задано значение maxLength в %s
-request-property-max-length-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-max-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-max-set: у тела запроса задано значение max в %s
-request-body-max-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-max-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-max-set: у поля запроса %s задано значение max в %s
-request-property-max-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-max-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-min-increased: значение min у тела запроса увеличено до %s
 request-property-min-increased: у поля запроса %s, увеличено значение min до %s
 request-read-only-property-min-increased: для поля запроса только для чтения %s минимальное значение увеличено до %s
@@ -155,13 +155,13 @@ request-property-min-decreased: минимум свойства запроса %
 request-body-min-items-decreased: минимальное количество элементов тела запроса было уменьшено с %s до %s
 request-property-min-items-decreased: минимальное количество элементов свойства запроса %s было уменьшено с %s до %s
 request-body-min-items-set: задано значение minItems у тела запроса в %s
-request-body-min-items-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-min-items-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-min-items-set: у поля запроса %s задано значение minItems в %s
-request-property-min-items-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-min-items-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-min-set: задано значение min у тела запроса в %s
-request-body-min-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-min-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-min-set: у поля запроса %s задано значение min в %s
-request-property-min-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-min-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-removed: удалено поле запроса %s
 request-body-type-changed: "%s тела запроса изменён с %s на %s"
 request-body-type-generalized: "%s тела запроса расширен с %s до %s"
@@ -196,7 +196,7 @@ response-body-became-nullable: у тела ответа стало обнуля�
 response-property-became-not-nullable: поле ответа %s стало необнуляемым для ответа со статусом %s
 response-body-became-not-nullable: тело ответа стало необнуляемым
 response-property-enum-value-added: добавлено новое enum значение %s в поле ответа %s для ответа со статусом %s
-response-property-enum-value-added-comment: Добавление новых значений перечисления в ответ может быть неожиданным для клиентов, вместо этого используйте x-extensible-enum.
+response-property-enum-value-added-comment: Сервер теперь может вернуть значение, которое исключал прежний контракт, поэтому клиент, написанный по нему, может не обработать ответ. Если набор значений предполагает расширение, объявите его через x-extensible-enum.
 response-property-enum-value-removed: удалено значение перечисления %s из свойства ответа %s для статуса ответа %s.
 response-body-max-length-increased: у тела ответа maxLength увеличен с %s до %s
 response-property-max-length-increased: у поля ответа %s maxLength увеличен с %s до %s для ответа со статусом %s
@@ -211,7 +211,6 @@ response-property-min-length-decreased: для поля ответа %s minLengt
 response-body-type-changed: "%s тела ответа изменён с %s на %s для статуса %s"
 response-property-type-changed: у свойства ответа %s %s изменён с %s на %s для статуса %s
 response-required-property-became-not-write-only: обязательное поле ответа %s перестало быть write-only для ответа со статусом %s
-response-required-property-became-not-write-only-comment: Изменение допустимо только в том случае, если свойство всегда возвращалось до изменения спецификации.
 response-required-property-removed: удалено обязательное поле ответа %s из ответа со статусом %s
 response-required-property-added: добавил требуемое свойство %s в ответ со статусом %s
 response-success-status-removed: удален успешный (2xx) статус ответа %s
@@ -226,26 +225,26 @@ request-property-exclusive-min-increased: у поля запроса %s, уве�
 request-read-only-property-exclusive-min-increased: для поля запроса только для чтения %s минимальное значение увеличено до %s
 request-property-exclusive-min-decreased: exclusiveMinimum свойства запроса %s был уменьшен с %s до %s
 request-body-exclusive-min-set: задано значение exclusiveMinimum у тела запроса в %s
-request-body-exclusive-min-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-exclusive-min-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-exclusive-min-set: у поля запроса %s задано значение exclusiveMinimum в %s
-request-property-exclusive-min-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-exclusive-min-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-exclusive-max-decreased: значение exclusiveMaximum у тела запроса уменьшено до %s
 request-body-exclusive-max-increased: exclusiveMaximum тела запроса был увеличен с %s до %s
 request-property-exclusive-max-decreased: значение exclusiveMaximum у поля запроса %s уменьшено до %s
 request-read-only-property-exclusive-max-decreased: максимальное значение поля запроса только для чтения %s уменьшено до %s
 request-property-exclusive-max-increased: exclusiveMaximum свойства запроса %s был увеличен с %s до %s
 request-body-exclusive-max-set: у тела запроса задано значение exclusiveMaximum в %s
-request-body-exclusive-max-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-body-exclusive-max-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-exclusive-max-set: у поля запроса %s задано значение exclusiveMaximum в %s
-request-property-exclusive-max-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-property-exclusive-max-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-parameter-exclusive-min-increased: в %s параметре запроса %s, exclusiveMinimum увеличен с %s до %s
 request-parameter-exclusive-min-decreased: в %s параметре запроса %s, exclusiveMinimum уменьшен с %s до %s
 request-parameter-exclusive-min-set: в %s параметре запроса %s, exclusiveMinimum установлен в %s
-request-parameter-exclusive-min-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-parameter-exclusive-min-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-parameter-exclusive-max-decreased: в %s параметре запроса %s, exclusiveMaximum уменьшен с %s до %s
 request-parameter-exclusive-max-increased: в %s параметре запроса %s, exclusiveMaximum увеличен с %s до %s
 request-parameter-exclusive-max-set: в %s параметре запроса %s, exclusiveMaximum установлен в %s
-request-parameter-exclusive-max-set-comment: Это предупреждение, потому что иногда это ограничение действительно требуется. Перед внесением такого изменения убедитесь, что клиенты поддерживают новое ограничение.
+request-parameter-exclusive-max-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 response-body-exclusive-max-increased: у тела ответа exclusiveMaximum увеличен с %s до %s
 response-property-exclusive-max-increased: у поля ответа %s exclusiveMaximum увеличен с %s до %s для ответа со статусом %s
 response-body-exclusive-min-decreased: у тела ответа exclusiveMinimum уменьшено с %s до %s
@@ -312,7 +311,9 @@ response-property-any-of-added: добавлено %s в список `anyOf` с
 response-property-any-of-removed: удалён %s из списка `anyOf` свойства ответа %s для статуса ответа %s
 request-body-one-of-added: добавлено %s в список `oneOf` тела запроса
 request-body-wrapped-in-one-of: "тело запроса было реструктурировано в `oneOf`, поэтому ранее допустимая полезная нагрузка может больше не приниматься"
+request-body-wrapped-in-one-of-original-preserved: "тело запроса было реструктурировано в `oneOf` с сохранением исходной схемы в качестве одной из альтернатив"
 response-body-wrapped-in-one-of: "тело ответа было реструктурировано в `oneOf`, поэтому ранее гарантированное поле может больше не присутствовать"
+response-body-wrapped-in-one-of-original-preserved: "тело ответа было реструктурировано в `oneOf` с сохранением исходной схемы в качестве одной из альтернатив"
 request-body-one-of-removed: удалён %s из списка `oneOf` тела запроса
 request-property-one-of-added: добавлено %s в список `oneOf` свойства запроса %s
 request-property-one-of-removed: удалён %s из списка `oneOf` свойства запроса %s
@@ -468,7 +469,10 @@ request-body-min-length-increased-description: увеличена минимал
 request-body-min-set-description: установлено минимальное значение тела запроса
 request-body-one-of-added-description: подсхема добавлена к oneOf в теле запроса
 request-body-wrapped-in-one-of-description: "тело запроса обёрнуто в `oneOf`"
+request-body-wrapped-in-one-of-original-preserved-description: "тело запроса обёрнуто в `oneOf` с сохранением исходной схемы"
 response-body-wrapped-in-one-of-description: "тело ответа обёрнуто в `oneOf`"
+response-body-wrapped-in-one-of-original-preserved-description: "тело ответа обёрнуто в `oneOf` с сохранением исходной схемы"
+wrapped-in-one-of-original-preserved-warning-comment: "Это предупреждение, потому что спецификация не сообщает, пересекаются ли альтернативы. Полезная нагрузка, соответствующая более чем одной из них, отклоняется `oneOf`, поэтому ранее допустимая полезная нагрузка может как приниматься, так и не приниматься."
 request-body-one-of-removed-description: подсхема удалена из oneOf в теле запроса
 request-body-removed-description: удалено тело запроса
 request-body-type-changed-description: изменен тип тела запроса
@@ -614,6 +618,7 @@ response-body-type-changed-description: изменен тип тела отве�
 response-header-became-optional-description: заголовок ответа стал необязательным
 response-media-type-added-description: добавлен медиа-тип ответа
 response-media-type-name-changed: медиа-тип %s изменен на %s для ответа со статусом %s
+response-media-type-name-changed-warning-comment: "Это предупреждение, потому что oasdiff не может определить, что ограничивает изменённый параметр типа содержимого. Добавление параметра сужает то, что может вернуть сервер, удаление расширяет, а изменение значения может лишить клиента возможности прочитать ответ."
 response-media-type-name-generalized: медиа-тип %s изменен на более общий медиа-тип %s для ответа со статусом %s
 response-media-type-name-specialized: медиа-тип %s изменен на более специфичный медиа-тип %s для ответа со статусом %s
 response-media-type-removed-description: удален медиа-тип ответа
@@ -1067,3 +1072,99 @@ response-body-type-compatible-description: изменён тип тела отв
 response-property-type-generalized-description: обобщен тип свойства ответа
 response-property-type-specialized-description: специализирован тип свойства ответа
 response-property-type-compatible-description: изменён тип свойства ответа, но обратно совместимо
+
+# constraint keyword checks (maxItems, minProperties, maxProperties, uniqueItems, multipleOf)
+request-body-max-items-decreased: значение maxItems у тела запроса уменьшено до %s
+request-property-max-items-decreased: значение maxItems у поля запроса %s уменьшено до %s
+request-read-only-property-max-items-decreased: значение maxItems у поля запроса только для чтения %s уменьшено до %s
+request-body-max-items-increased: значение maxItems у тела запроса увеличено с %s до %s
+request-property-max-items-increased: значение maxItems у поля запроса %s увеличено с %s до %s
+request-body-max-items-set: значение maxItems у тела запроса задано в %s
+request-body-max-items-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-max-items-set: значение maxItems у поля запроса %s задано в %s
+request-property-max-items-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+response-body-max-items-increased: значение maxItems у тела ответа увеличено с %s до %s
+response-property-max-items-increased: значение maxItems у поля ответа %s увеличено с %s до %s для ответа со статусом %s
+request-body-max-properties-decreased: значение maxProperties у тела запроса уменьшено до %s
+request-property-max-properties-decreased: значение maxProperties у поля запроса %s уменьшено до %s
+request-read-only-property-max-properties-decreased: значение maxProperties у поля запроса только для чтения %s уменьшено до %s
+request-body-max-properties-increased: значение maxProperties у тела запроса увеличено с %s до %s
+request-property-max-properties-increased: значение maxProperties у поля запроса %s увеличено с %s до %s
+request-body-max-properties-set: значение maxProperties у тела запроса задано в %s
+request-body-max-properties-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-max-properties-set: значение maxProperties у поля запроса %s задано в %s
+request-property-max-properties-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+response-body-max-properties-increased: значение maxProperties у тела ответа увеличено с %s до %s
+response-property-max-properties-increased: значение maxProperties у поля ответа %s увеличено с %s до %s для ответа со статусом %s
+request-body-min-properties-increased: значение minProperties у тела запроса увеличено до %s
+request-property-min-properties-increased: значение minProperties у поля запроса %s увеличено до %s
+response-body-min-properties-decreased: значение minProperties у тела ответа уменьшено с %s до %s
+response-property-min-properties-decreased: значение minProperties у поля ответа %s уменьшено с %s до %s для ответа со статусом %s
+request-body-unique-items-set: значение uniqueItems у тела запроса задано в true
+request-property-unique-items-set: значение uniqueItems у поля запроса %s задано в true
+request-body-unique-items-unset: значение uniqueItems у тела запроса удалено
+request-property-unique-items-unset: значение uniqueItems у поля запроса %s удалено
+response-body-unique-items-unset: значение uniqueItems у тела ответа удалено
+response-property-unique-items-unset: значение uniqueItems у поля ответа %s удалено для ответа со статусом %s
+request-body-multiple-of-set: значение multipleOf у тела запроса задано в %s
+request-body-multiple-of-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-multiple-of-set: значение multipleOf у поля запроса %s задано в %s
+request-property-multiple-of-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-body-multiple-of-unset: значение multipleOf у тела запроса удалено, предыдущее значение - %s
+request-property-multiple-of-unset: значение multipleOf у поля запроса %s удалено, предыдущее значение - %s
+request-body-multiple-of-changed: значение multipleOf у тела запроса изменено с %s на %s
+request-property-multiple-of-changed: значение multipleOf у поля запроса %s изменено с %s на %s
+request-body-multiple-of-generalized: значение multipleOf у тела запроса обобщено с %s на %s
+request-body-multiple-of-generalized-comment: "Это изменение не является ломающим: старое значение multipleOf кратно новому, поэтому все ранее допустимые значения остаются допустимыми."
+request-property-multiple-of-generalized: значение multipleOf у поля запроса %s обобщено с %s на %s
+request-property-multiple-of-generalized-comment: "Это изменение не является ломающим: старое значение multipleOf кратно новому, поэтому все ранее допустимые значения остаются допустимыми."
+response-body-multiple-of-unset: значение multipleOf у тела ответа удалено, предыдущее значение - %s
+response-property-multiple-of-unset: значение multipleOf у поля ответа %s удалено, предыдущее значение - %s для ответа со статусом %s
+response-body-multiple-of-changed: значение multipleOf у тела ответа изменено с %s на %s
+response-property-multiple-of-changed: значение multipleOf у поля ответа %s изменено с %s на %s для ответа со статусом %s
+response-body-multiple-of-specialized: значение multipleOf у тела ответа сужено с %s на %s
+response-body-multiple-of-specialized-comment: "Это изменение не является ломающим: новое значение multipleOf кратно старому, поэтому все значения, которые сервер может вернуть, были допустимы и раньше."
+response-property-multiple-of-specialized: значение multipleOf у поля ответа %s сужено с %s на %s для ответа со статусом %s
+response-property-multiple-of-specialized-comment: "Это изменение не является ломающим: новое значение multipleOf кратно старому, поэтому все значения, которые сервер может вернуть, были допустимы и раньше."
+request-body-max-items-decreased-description: уменьшено значение maxItems у тела запроса
+request-property-max-items-decreased-description: уменьшено значение maxItems у поля запроса
+request-read-only-property-max-items-decreased-description: уменьшено значение maxItems у поля запроса только для чтения
+request-body-max-items-increased-description: увеличено значение maxItems у тела запроса
+request-property-max-items-increased-description: увеличено значение maxItems у поля запроса
+request-body-max-items-set-description: задано значение maxItems у тела запроса
+request-property-max-items-set-description: задано значение maxItems у поля запроса
+response-body-max-items-increased-description: увеличено значение maxItems у тела ответа
+response-property-max-items-increased-description: увеличено значение maxItems у поля ответа
+request-body-max-properties-decreased-description: уменьшено значение maxProperties у тела запроса
+request-property-max-properties-decreased-description: уменьшено значение maxProperties у поля запроса
+request-read-only-property-max-properties-decreased-description: уменьшено значение maxProperties у поля запроса только для чтения
+request-body-max-properties-increased-description: увеличено значение maxProperties у тела запроса
+request-property-max-properties-increased-description: увеличено значение maxProperties у поля запроса
+request-body-max-properties-set-description: задано значение maxProperties у тела запроса
+request-property-max-properties-set-description: задано значение maxProperties у поля запроса
+response-body-max-properties-increased-description: увеличено значение maxProperties у тела ответа
+response-property-max-properties-increased-description: увеличено значение maxProperties у поля ответа
+request-body-min-properties-increased-description: увеличено значение minProperties у тела запроса
+request-property-min-properties-increased-description: увеличено значение minProperties у поля запроса
+response-body-min-properties-decreased-description: уменьшено значение minProperties у тела ответа
+response-property-min-properties-decreased-description: уменьшено значение minProperties у поля ответа
+request-body-unique-items-set-description: задано значение uniqueItems у тела запроса
+request-property-unique-items-set-description: задано значение uniqueItems у поля запроса
+request-body-unique-items-unset-description: удалено значение uniqueItems у тела запроса
+request-property-unique-items-unset-description: удалено значение uniqueItems у поля запроса
+response-body-unique-items-unset-description: удалено значение uniqueItems у тела ответа
+response-property-unique-items-unset-description: удалено значение uniqueItems у поля ответа
+request-body-multiple-of-set-description: задано значение multipleOf у тела запроса
+request-property-multiple-of-set-description: задано значение multipleOf у поля запроса
+request-body-multiple-of-unset-description: удалено значение multipleOf у тела запроса
+request-property-multiple-of-unset-description: удалено значение multipleOf у поля запроса
+request-body-multiple-of-changed-description: изменено значение multipleOf у тела запроса
+request-property-multiple-of-changed-description: изменено значение multipleOf у поля запроса
+request-body-multiple-of-generalized-description: обобщено значение multipleOf у тела запроса
+request-property-multiple-of-generalized-description: обобщено значение multipleOf у поля запроса
+response-body-multiple-of-unset-description: удалено значение multipleOf у тела ответа
+response-property-multiple-of-unset-description: удалено значение multipleOf у поля ответа
+response-body-multiple-of-changed-description: изменено значение multipleOf у тела ответа
+response-property-multiple-of-changed-description: изменено значение multipleOf у поля ответа
+response-body-multiple-of-specialized-description: сужено значение multipleOf у тела ответа
+response-property-multiple-of-specialized-description: сужено значение multipleOf у поля ответа
