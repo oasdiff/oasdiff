@@ -33,7 +33,7 @@ error	[api-path-removed-without-deprecation] at openapi.yaml
 
 Every argument must be a spec file in the working tree. Stdin, a URL and a git revision are not paths that can be looked up in a ref, so they are refused. Being absent from the base ref is not a reason for refusal: that is the newly added case above.
 
-Results are printed one spec at a time, so a structured `--format` emits one document per spec rather than a single combined one.
+Results are printed one spec at a time, so a structured `--format`, or a `--template`, is rendered once per spec rather than producing a single combined document.
 
 ## Not the same as composed mode
 

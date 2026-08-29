@@ -23,8 +23,8 @@ above --fail-on, so it can gate a commit or a CI job that already knows which fi
 changed, and it is what the oasdiff pre-commit hook runs. See
 https://github.com/oasdiff/oasdiff/blob/main/docs/BREAKING-FILES.md
 
-Results are printed one spec at a time, so a structured --format emits one document
-per spec rather than a single combined one.`,
+Results are printed one spec at a time, so a structured --format, or a --template,
+is rendered once per spec rather than producing a single combined document.`,
 		Args: getBreakingFilesArgs(),
 		RunE: runBreakingFiles,
 	}

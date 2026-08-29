@@ -192,6 +192,9 @@ func Test_BreakingFiles_SharesCommonFlagChecks(t *testing.T) {
 	breakingFilesRepo(t, map[string]string{"openapi.yaml": baseSpec})
 
 	var stderr bytes.Buffer
+	// json renders no template, so checkTemplate rejects the pair. Templates
+	// themselves work here, as they do on breaking and changelog; this is the
+	// shared check firing, not a breaking-files limitation.
 	exitCode := internal.Run(cmdToArgs("oasdiff breaking-files --base HEAD --format json --template x.tmpl openapi.yaml"), io.Discard, &stderr)
 
 	require.NotZero(t, exitCode)
