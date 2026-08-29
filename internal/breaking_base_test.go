@@ -151,17 +151,26 @@ func Test_BreakingBase_MissingFileIsNotNew(t *testing.T) {
 	require.NotContains(t, stderr.String(), "skipped")
 }
 
-// The positionals are working-tree files that also have a version in the base
-// ref, so stdin has nothing to compare against and is rejected up front rather
-// than treated as a filename.
-func Test_BreakingBase_RejectsStdin(t *testing.T) {
-	breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
+// Each positional is joined to the base ref as "<ref>:<path>", so only a file
+// path makes sense. The others are rejected by what they are, not one at a
+// time: stdin and a URL have no version in the ref, and a git revision would
+// be joined into "HEAD:HEAD:openapi.yaml".
+func Test_BreakingBase_RejectsNonFileArguments(t *testing.T) {
+	for name, arg := range map[string]string{
+		"stdin":        "-",
+		"url":          "https://example.com/openapi.yaml",
+		"git revision": "HEAD:openapi.yaml",
+	} {
+		t.Run(name, func(t *testing.T) {
+			breakingBaseRepo(t, map[string]string{"openapi.yaml": baseSpec})
 
-	var stderr bytes.Buffer
-	exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD -"), io.Discard, &stderr)
+			var stderr bytes.Buffer
+			exitCode := internal.Run(cmdToArgs("oasdiff breaking --base HEAD "+arg), io.Discard, &stderr)
 
-	require.Equal(t, 100, exitCode)
-	require.Contains(t, stderr.String(), "can't read from stdin with --base")
+			require.Equal(t, 100, exitCode)
+			require.Contains(t, stderr.String(), "every argument must be a file path")
+		})
+	}
 }
 
 // Composed mode merges several specs into one comparison, which is the opposite

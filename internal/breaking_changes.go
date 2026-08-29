@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"slices"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/load"
@@ -51,11 +50,15 @@ func getBreakingArgs() cobra.PositionalArgs {
 		if len(args) < 1 {
 			return errors.New("with --base, specify one or more spec files to compare against the base version")
 		}
-		// The positionals are working-tree files to compare against the base
-		// ref, so neither stdin nor a glob has a version in that ref to compare
-		// against. Reject them here rather than let them fail further in.
-		if slices.Contains(args, "-") {
-			return errors.New("can't read from stdin with --base: the positional arguments are files that also exist in the base ref")
+		// Each positional is joined to the base ref as "<ref>:<path>", so it has
+		// to be a plain file path. Stdin, a URL and a git revision have no
+		// version in the ref to compare against, and joining them produces
+		// nonsense like "HEAD:HEAD:openapi.yaml". Reject them by what they are
+		// rather than one at a time, so a source type added later is covered.
+		for _, arg := range args {
+			if !load.NewSource(arg).IsFile() {
+				return fmt.Errorf("can't use %q with --base: every argument must be a file path, since each is compared against its own version in the base ref", arg)
+			}
 		}
 		if composed, err := cmd.Flags().GetBool("composed"); err == nil && composed {
 			return errors.New("can't use --composed with --base: each file is compared against its own version in the base ref")
