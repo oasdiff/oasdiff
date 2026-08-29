@@ -51,6 +51,7 @@ type SchemaDiff struct {
 	DiscriminatorDiff               *DiscriminatorDiff      `json:"discriminatorDiff,omitempty" yaml:"discriminatorDiff,omitempty"`
 
 	// OpenAPI 3.1 / JSON Schema 2020-12 fields
+	AlwaysDiff                       *ValueDiff             `json:"always,omitempty" yaml:"always,omitempty"`
 	ConstDiff                        *ValueDiff             `json:"const,omitempty" yaml:"const,omitempty"`
 	ExamplesDiff                     *ValueDiff             `json:"examples,omitempty" yaml:"examples,omitempty"`
 	PrefixItemsDiff                  *SubschemasDiff        `json:"prefixItems,omitempty" yaml:"prefixItems,omitempty"`
@@ -244,6 +245,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 
 	// OpenAPI 3.1 / JSON Schema 2020-12 fields
+	result.AlwaysDiff = getBoolRefDiff(value1.Always, value2.Always)
 	result.ConstDiff = getValueDiff(value1.Const, value2.Const)
 	result.ExamplesDiff = getValueDiff(value1.Examples, value2.Examples)
 	result.PrefixItemsDiff, err = getSubschemasDiff(config, state, value1.PrefixItems, value2.PrefixItems)

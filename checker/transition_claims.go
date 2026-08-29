@@ -85,6 +85,35 @@ var transitions = []transition{
 			RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId,
 		},
 	},
+	// Boolean false schema: the schema at this node was replaced by the
+	// JSON Schema boolean `false`, which accepts no instance, or the
+	// reverse (see diff.SchemaDiff.AlwaysDiff). Every keyword-level diff at
+	// the node is an echo: the boolean side carries no keywords, so the
+	// other side's type, values, constraints and structure all read as
+	// added or removed, with verdicts derived from the wrong comparison
+	// (a type removed by `false` reads as a widening). Reported as
+	// schema-became-(not-)false at every level: body, property, parameter,
+	// parameter property, and response header. A change to or from `true`
+	// claims nothing: `true` accepts what the empty schema accepts, so the
+	// keyword-level findings describe it correctly.
+	{
+		present: func(d *diff.SchemaDiff) bool {
+			return d.AlwaysDiff != nil && (d.AlwaysDiff.From == false || d.AlwaysDiff.To == false)
+		},
+		claims: map[Kind]bool{
+			KindType: true, KindValues: true, KindConstraints: true,
+			KindStructure: true, KindExistence: true, KindRequiredness: true,
+		},
+		reportedBy: []string{
+			RequestBodySchemaBecameFalseId, RequestBodySchemaBecameNotFalseId,
+			RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId,
+			ResponseBodySchemaBecameFalseId, ResponseBodySchemaBecameNotFalseId,
+			ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId,
+			RequestParameterSchemaBecameFalseId, RequestParameterSchemaBecameNotFalseId,
+			RequestParameterPropertySchemaBecameFalseId, RequestParameterPropertySchemaBecameNotFalseId,
+			ResponseHeaderSchemaBecameFalseId, ResponseHeaderSchemaBecameNotFalseId,
+		},
+	},
 	// oneOf wrapping: a concrete object schema became a oneOf of object
 	// alternatives (see diff.OneOfWrappingDiff), a breaking restructuring.
 	// Claims the raw type change (the wrapper reads as type "any") and the

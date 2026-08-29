@@ -1,0 +1,25 @@
+openapi: 3.1.0
+info:
+  title: Test
+  version: "1.0"
+paths:
+  /items:
+    post:
+      operationId: createItem
+      parameters:
+        - name: filter
+          in: query
+          schema: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: false
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: false
