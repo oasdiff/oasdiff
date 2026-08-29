@@ -64,3 +64,49 @@ func TestSchemaBecameNotFalse(t *testing.T) {
 	prop := requireChange(t, errs, checker.RequestPropertySchemaBecameNotFalseId)
 	require.Equal(t, checker.INFO, prop.GetLevel())
 }
+
+// the transition's claims: replacing a schema that declares a type, a required
+// property, an enum and a pattern with `false` produces keyword-level echoes
+// with verdicts from the wrong comparison (the type reads as generalized, the
+// properties as removed), which are suppressed in favor of the one transition
+// finding
+func TestSchemaBecameFalseClaims(t *testing.T) {
+	s1, err := open("../data/checker/schema_became_false_claims_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/schema_became_false_claims_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.False(t, containsId(errs, checker.RequestPropertyRemovedId),
+		"the properties on the replaced schema were not removed one by one")
+	require.False(t, containsId(errs, checker.RequestBodyTypeGeneralizedId),
+		"the type removed by the false schema is not a widening")
+
+	change := requireSingleChange(t, errs, checker.RequestBodySchemaBecameFalseId)
+	require.Equal(t, checker.ERR, change.GetLevel())
+}
+
+// the reverse direction: the echoes of a `false` schema being replaced read as
+// narrowings (the type as changed, the required property as newly required),
+// which would be spurious errors on a change that only widens
+func TestSchemaBecameNotFalseClaims(t *testing.T) {
+	s1, err := open("../data/checker/schema_became_false_claims_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/schema_became_false_claims_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.False(t, containsId(errs, checker.NewRequiredRequestPropertyId),
+		"a property on the restored schema is not a new requirement on existing requests")
+	require.False(t, containsId(errs, checker.RequestBodyTypeChangedId),
+		"the type introduced by the restored schema is not a narrowing")
+
+	change := requireSingleChange(t, errs, checker.RequestBodySchemaBecameNotFalseId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+}
