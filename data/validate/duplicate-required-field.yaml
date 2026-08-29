@@ -1,0 +1,13 @@
+openapi: 3.1.0
+info:
+  title: t
+  version: "1.0"
+paths: {}
+components:
+  schemas:
+    Pet:
+      type: object
+      required: [name, name]
+      properties:
+        name:
+          type: string

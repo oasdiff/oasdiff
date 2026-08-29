@@ -1,0 +1,8 @@
+openapi: 3.1.0
+info:
+  title: t
+  version: "1.0"
+tags:
+  - name: pets
+  - name: pets
+paths: {}
