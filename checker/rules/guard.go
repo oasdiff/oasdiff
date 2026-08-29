@@ -17,7 +17,10 @@ const (
 	// period was honored, so the removal follows the deprecation contract.
 	GuardSanctioned Guard = "sanctioned"
 	// GuardNonSuccess: the affected response status is a non-success
-	// status.
+	// status. The responses map does not promise that the server returns
+	// only the statuses it lists, so neither documenting one more nor
+	// dropping one changes what a conforming client can receive; the
+	// effect is nullified.
 	GuardNonSuccess Guard = "non-success"
 	// GuardHasDefault: the changed element declares a default value.
 	GuardHasDefault Guard = "has-default"

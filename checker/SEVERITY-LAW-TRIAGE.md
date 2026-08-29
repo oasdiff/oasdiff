@@ -2,7 +2,7 @@
 
 Working document for reviewing the rules whose stored level disagrees with the
 level derived by the severity law (see `rule_severity_law_test.go`, run with
-`go test ./checker -run SeverityLaw`). 9 of 558 rules disagree; every
+`go test ./checker -run SeverityLaw`). 8 of 558 rules disagree; every
 disagreement below has a root cause and a proposed handling.
 
 Settling one often corrects the model rather than the rule: an effect that
@@ -212,7 +212,7 @@ the fallback will see them.
 
 ---
 
-## Below the law (5 rules): each owes a contract argument
+## Below the law (4 rules): each owes a contract argument
 
 ### The bound-set family (24 rules) — settled: fixed
 
@@ -326,11 +326,33 @@ verdict falls to `unknown` (WARN) rather than to an assumed direction. Fixing
 all eight to WARN is the blunt version of the same correction, and is the
 fallback if the comparison turns out not to fit.
 
-### Remaining singles (1 rule)
+### response-non-success-status-removed, settled: the law was incomplete
 
-| Rule | Stored | Derived | Question it must answer | Decision |
-|---|---|---|---|---|
-| `response-non-success-status-removed` | INFO | ERR | a client handling that status loses the behaviour; "it is only cleanup" is an exemption | |
+INFO, derived ERR, and the level was right. `GuardNonSuccess` was declared on
+both non-success rules and read by nothing, so the derivation came entirely
+from `GuardNegotiated` flipping to request polarity.
+
+A client that conformed to the old contract handled 200 and 404. Under a
+contract that no longer documents 404 it still handles 200, and still handles a
+404 if one arrives. Nothing it does becomes invalid, which is what `narrows` on
+a response already says: the set of responses shrinks, and every response the
+client can now receive was already possible. `GuardNegotiated` applies where a
+client relies on the variant, which is true of a success status (remove 201 and
+the operation may no longer deliver the outcome the client called it for) and
+not of an error status.
+
+The addition side resolves the same way, and the reason is worth stating
+because it is the disanalogy with `response-property-enum-value-added`. A
+response `enum` **is** a promise that the server emits only the listed values,
+so adding one breaks it. A `responses` map is **not** a promise that the server
+returns only the listed statuses: HTTP guarantees no such thing and `default`
+covers the rest, so an old client always had to cope with an undocumented
+status.
+
+So `GuardNonSuccess` nullifies the effect, both rules derive their stored INFO,
+and the guard stops being decoration. Note `GuardHasDefault` is still declared
+and unread, which is correct and deliberate: #1109 decided a default does not
+lower the verdict, so the two rules carrying it derive ERR without it.
 
 ---
 

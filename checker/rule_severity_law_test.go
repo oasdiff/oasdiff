@@ -34,6 +34,10 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 			if direction == checker.DirectionResponse {
 				effect = checker.EffectNone
 			}
+		case checker.GuardNonSuccess:
+			// the responses map does not promise that the server returns
+			// only the statuses it lists
+			effect = checker.EffectNone
 		case checker.GuardSanctioned:
 			// the deprecation contract was honored
 			return checker.INFO
@@ -68,7 +72,6 @@ const (
 	// above the law: conservative, and a harsher verdict needs a reason
 	// rather than a proof (SEVERITY-LAW-TRIAGE.md)
 	// below the law: a milder verdict owes a contract argument
-	reasonNonSuccess = "below the law, pending review: removing a non-success status is treated as cleanup, though a client handling that status loses the behaviour"
 	// four rules deviate each way
 	reasonPrefixItems = "pending review: stored levels assume a containment direction prefixItems does not have"
 )
@@ -79,7 +82,6 @@ const (
 var severityDeviations = map[string]string{
 	// above the law
 	// below the law
-	"response-non-success-status-removed": reasonNonSuccess,
 	// prefixItems
 	"request-body-prefix-items-added":        reasonPrefixItems,
 	"request-body-prefix-items-removed":      reasonPrefixItems,
