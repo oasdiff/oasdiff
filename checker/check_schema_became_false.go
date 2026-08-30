@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -47,6 +49,29 @@ func falseSchemaChangeId(d *diff.SchemaDiff, falseId, notFalseId string) string 
 	return ""
 }
 
+// falseItemsChangeId is falseSchemaChangeId for an items schema that appears
+// as or disappears from `false` (closing or reopening a tuple). A one-sided
+// diff carries only the added or deleted flag and the property walk skips
+// one-sided nodes, so the transition is detected at the parent, whose
+// document sides hold the schema. Other one-sided sub-schema slots stay
+// unclassified (#1199).
+func falseItemsChangeId(d *diff.SchemaDiff, falseId, notFalseId string) string {
+	if d == nil || d.ItemsDiff == nil {
+		return ""
+	}
+	if d.ItemsDiff.SchemaAdded && d.Revision != nil && isFalseSchemaRef(d.Revision.Items) {
+		return falseId
+	}
+	if d.ItemsDiff.SchemaDeleted && d.Base != nil && isFalseSchemaRef(d.Base.Items) {
+		return notFalseId
+	}
+	return ""
+}
+
+func isFalseSchemaRef(ref *openapi3.SchemaRef) bool {
+	return ref != nil && ref.Value != nil && ref.Value.Always != nil && !*ref.Value.Always
+}
+
 func falseSchemaComment(id string) string {
 	if id == ResponsePropertySchemaBecameFalseId {
 		return ResponsePropertySchemaBecameFalseCommentId
@@ -64,12 +89,26 @@ func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSour
 				WithSources(baseSource, revisionSource))
 		}
 
+		if id := falseItemsChangeId(info.schemaDiff, RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId); id != "" {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "items")
+			result = append(result, info.newChange(id, []any{"items"}, "").
+				WithSources(baseSource, revisionSource))
+		}
+
 		info.walkProperties(func(p propertyInfo) {
 			if id := falseSchemaChangeId(p.propertyDiff, RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId); id != "" {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
 					[]any{propertyFullName(p.propertyPath, p.propertyName)},
+					"",
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+			if id := falseItemsChangeId(p.propertyDiff, RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId); id != "" {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
+				result = append(result, p.newChange(
+					id,
+					[]any{propertyFullName(p.propertyPath, p.propertyName, "items")},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -89,12 +128,26 @@ func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 				WithSources(baseSource, revisionSource))
 		}
 
+		if id := falseItemsChangeId(info.schemaDiff, ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId); id != "" {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "items")
+			result = append(result, info.newChange(id, []any{"items", info.responseStatus}, falseSchemaComment(id)).
+				WithSources(baseSource, revisionSource))
+		}
+
 		info.walkProperties(func(p propertyInfo) {
 			if id := falseSchemaChangeId(p.propertyDiff, ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId); id != "" {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
 					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					falseSchemaComment(id),
+				).WithSources(propBaseSource, propRevisionSource))
+			}
+			if id := falseItemsChangeId(p.propertyDiff, ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId); id != "" {
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
+				result = append(result, p.newChange(
+					id,
+					[]any{propertyFullName(p.propertyPath, p.propertyName, "items"), info.responseStatus},
 					falseSchemaComment(id),
 				).WithSources(propBaseSource, propRevisionSource))
 			}

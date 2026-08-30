@@ -110,3 +110,49 @@ func TestSchemaBecameNotFalseClaims(t *testing.T) {
 	change := requireSingleChange(t, errs, checker.RequestBodySchemaBecameNotFalseId)
 	require.Equal(t, checker.INFO, change.GetLevel())
 }
+
+// an items schema arriving as `false` closes the tuple: arrays longer than
+// prefixItems were valid and no longer are. The diff records a one-sided
+// items arrival with no schema attached, so the transition is detected at the
+// parent schema, at the body level and inside properties alike
+func TestItemsBecameFalse(t *testing.T) {
+	s1, err := open("../data/checker/items_became_false_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/items_became_false_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.Len(t, errs, 2)
+
+	req := requireChange(t, errs, checker.RequestPropertySchemaBecameFalseId)
+	require.Equal(t, checker.ERR, req.GetLevel())
+
+	resp := requireChange(t, errs, checker.ResponsePropertySchemaBecameFalseId)
+	require.Equal(t, checker.INFO, resp.GetLevel())
+	require.NotEmpty(t, resp.GetComment(checker.NewDefaultLocalizer()))
+}
+
+// the reverse reopens the tuple: informational on the request side as any
+// widening, breaking on the response side since the server may now return
+// arrays longer than the prefix
+func TestItemsBecameNotFalse(t *testing.T) {
+	s1, err := open("../data/checker/items_became_false_revision.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/items_became_false_base.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.Len(t, errs, 2)
+
+	req := requireChange(t, errs, checker.RequestPropertySchemaBecameNotFalseId)
+	require.Equal(t, checker.INFO, req.GetLevel())
+
+	resp := requireChange(t, errs, checker.ResponsePropertySchemaBecameNotFalseId)
+	require.Equal(t, checker.ERR, resp.GetLevel())
+}
