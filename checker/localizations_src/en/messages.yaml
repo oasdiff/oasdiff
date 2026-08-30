@@ -1192,7 +1192,7 @@ request-parameter-property-schema-became-false: "the schema of the %s property o
 request-parameter-property-schema-became-not-false: "the schema of the %s property of the %s request parameter %s is no longer `false` and accepts values again"
 response-header-schema-became-false: "the schema of the response header %s became `false` for the status %s: no value passes validation"
 response-header-schema-became-not-false: "the schema of the response header %s is no longer `false` for the status %s and allows values again"
-response-schema-became-false-comment: "This is informational because narrowing what the server returns does not invalidate clients. A schema that accepts no value at all usually indicates an error in the specification, since the server cannot produce a conforming response."
+response-property-schema-became-false-comment: "This is informational because narrowing what the server returns does not invalidate clients. A schema that accepts no value at all usually indicates an error in the specification, since the server cannot produce a conforming response."
 request-body-schema-became-false-description: "request body schema became the boolean `false`"
 request-body-schema-became-not-false-description: "request body schema is no longer the boolean `false`"
 request-property-schema-became-false-description: "request property schema became the boolean `false`"

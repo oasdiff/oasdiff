@@ -24,9 +24,10 @@ const (
 	GuardNonSuccess Guard = "non-success"
 	// GuardHasDefault: the changed element declares a default value.
 	GuardHasDefault Guard = "has-default"
-	// GuardNegotiated: the rule judges the availability of a client-selected
-	// variant (a response status, media type, or header). The client chooses
-	// or relies on the variant, so contravariance applies with request
-	// polarity even though the variant lives on the response side.
+	// GuardNegotiated: the rule judges the availability of something the
+	// client selects or relies on, such as a response status, media type,
+	// or header, or the payload that inhabits one. The client chooses the
+	// variant, so contravariance applies with request polarity even though
+	// the variant lives on the response side.
 	GuardNegotiated Guard = "negotiated"
 )

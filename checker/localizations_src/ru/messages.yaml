@@ -1183,7 +1183,7 @@ request-parameter-property-schema-became-false: "схема свойства %s 
 request-parameter-property-schema-became-not-false: "схема свойства %s параметра запроса %s %s больше не `false` и снова принимает значения"
 response-header-schema-became-false: "схема заголовка ответа %s стала `false` для статуса %s: ни одно значение не проходит валидацию"
 response-header-schema-became-not-false: "схема заголовка ответа %s больше не `false` для статуса %s и снова допускает значения"
-response-schema-became-false-comment: "Это информационное сообщение, потому что сужение того, что возвращает сервер, не ломает клиентов. Схема, не принимающая ни одного значения, обычно указывает на ошибку в спецификации: сервер не может выдать соответствующий ей ответ."
+response-property-schema-became-false-comment: "Это информационное сообщение, потому что сужение того, что возвращает сервер, не ломает клиентов. Схема, не принимающая ни одного значения, обычно указывает на ошибку в спецификации: сервер не может выдать соответствующий ей ответ."
 request-body-schema-became-false-description: "request body schema became the boolean `false`"
 request-body-schema-became-not-false-description: "request body schema is no longer the boolean `false`"
 request-property-schema-became-false-description: "request property schema became the boolean `false`"

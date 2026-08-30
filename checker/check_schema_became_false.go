@@ -23,11 +23,10 @@ const (
 	ResponseHeaderSchemaBecameFalseId    = "response-header-schema-became-false"
 	ResponseHeaderSchemaBecameNotFalseId = "response-header-schema-became-not-false"
 
-	// Shared by the two response schema-became-false checks. A schema
-	// narrowing to nothing is reported at the level the law derives for a
-	// response narrowing, with this comment naming what the reader likely
-	// wants to know instead.
-	ResponseSchemaBecameFalseCommentId = "response-schema-became-false-comment"
+	// A property schema narrowing to nothing is reported at the level the
+	// law derives for a response narrowing, with this comment naming what
+	// the reader likely wants to know instead.
+	ResponsePropertySchemaBecameFalseCommentId = "response-property-schema-became-false-comment"
 )
 
 // falseSchemaChangeId returns the id for a schema that became or stopped
@@ -49,8 +48,8 @@ func falseSchemaChangeId(d *diff.SchemaDiff, falseId, notFalseId string) string 
 }
 
 func falseSchemaComment(id string) string {
-	if id == ResponseBodySchemaBecameFalseId || id == ResponsePropertySchemaBecameFalseId {
-		return ResponseSchemaBecameFalseCommentId
+	if id == ResponsePropertySchemaBecameFalseId {
+		return ResponsePropertySchemaBecameFalseCommentId
 	}
 	return ""
 }

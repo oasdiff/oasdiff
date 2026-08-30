@@ -1182,7 +1182,7 @@ request-parameter-property-schema-became-false: "o esquema da propriedade %s do 
 request-parameter-property-schema-became-not-false: "o esquema da propriedade %s do parâmetro de requisição %s %s não é mais `false` e volta a aceitar valores"
 response-header-schema-became-false: "o esquema do cabeçalho de resposta %s tornou-se `false` para o status %s: nenhum valor passa na validação"
 response-header-schema-became-not-false: "o esquema do cabeçalho de resposta %s não é mais `false` para o status %s e volta a permitir valores"
-response-schema-became-false-comment: "Isto é informativo porque restringir o que o servidor retorna não invalida os clientes. Um esquema que não aceita valor algum geralmente indica um erro na especificação, pois o servidor não pode produzir uma resposta conforme."
+response-property-schema-became-false-comment: "Isto é informativo porque restringir o que o servidor retorna não invalida os clientes. Um esquema que não aceita valor algum geralmente indica um erro na especificação, pois o servidor não pode produzir uma resposta conforme."
 request-body-schema-became-false-description: "request body schema became the boolean `false`"
 request-body-schema-became-not-false-description: "request body schema is no longer the boolean `false`"
 request-property-schema-became-false-description: "request property schema became the boolean `false`"

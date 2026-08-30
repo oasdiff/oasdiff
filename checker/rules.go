@@ -512,8 +512,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyBecameNotNullableId, INFO, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.nullable:unset", "paths.*.*.responses.*.content.*.schema.type:remove"),
 		newBackwardCompatibilityRule(ResponseBodyBecameNotNullableId, INFO, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.nullable:unset", "paths.*.*.responses.*.content.*.schema.type:remove"),
 		// ResponsePropertySchemaBecameFalseCheck
-		newBackwardCompatibilityRule(ResponseBodySchemaBecameFalseId, INFO, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.type:remove"),
-		newBackwardCompatibilityRule(ResponseBodySchemaBecameNotFalseId, ERR, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.type:add"),
+		newBackwardCompatibilityRule(ResponseBodySchemaBecameFalseId, ERR, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectNarrows, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*.schema.type:remove"),
+		newBackwardCompatibilityRule(ResponseBodySchemaBecameNotFalseId, INFO, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectWidens, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*.schema.type:add"),
 		newBackwardCompatibilityRule(ResponsePropertySchemaBecameFalseId, INFO, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.type:remove"),
 		newBackwardCompatibilityRule(ResponsePropertySchemaBecameNotFalseId, ERR, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.type:add"),
 		// ResponsePropertyBecameOptionalCheck

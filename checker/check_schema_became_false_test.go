@@ -8,10 +8,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// a schema replaced by the boolean `false` accepts nothing, so on the request
-// side the change is breaking, on the response side informational, and the
-// keyword-level echoes of the replacement (the type reads as removed) are
-// suppressed in favor of the single transition finding per node
+// a schema replaced by the boolean `false` accepts nothing: breaking on the
+// request side, and for a response body too, since the client's selected
+// media type can no longer be inhabited; the keyword-level echoes of the
+// replacement (the type reads as removed) are suppressed in favor of the
+// single transition finding per node
 func TestSchemaBecameFalse(t *testing.T) {
 	s1, err := open("../data/checker/schema_became_false_base.yaml")
 	require.NoError(t, err)
@@ -36,13 +37,12 @@ func TestSchemaBecameFalse(t *testing.T) {
 	require.Equal(t, checker.ERR, prop.GetLevel())
 
 	body := requireChange(t, errs, checker.ResponseBodySchemaBecameFalseId)
-	require.Equal(t, checker.INFO, body.GetLevel())
-	require.NotEmpty(t, body.GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.ERR, body.GetLevel())
 }
 
 // the reverse direction: a `false` schema replaced by one that accepts values
-// widens, which is breaking on the response side and informational on the
-// request side
+// widens, which is informational everywhere here: for the request side as any
+// widening, and for the response body as a variant becoming usable
 func TestSchemaBecameNotFalse(t *testing.T) {
 	s1, err := open("../data/checker/schema_became_false_revision.yaml")
 	require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestSchemaBecameNotFalse(t *testing.T) {
 	require.Len(t, errs, 3)
 
 	body := requireChange(t, errs, checker.ResponseBodySchemaBecameNotFalseId)
-	require.Equal(t, checker.ERR, body.GetLevel())
+	require.Equal(t, checker.INFO, body.GetLevel())
 
 	param := requireChange(t, errs, checker.RequestParameterSchemaBecameNotFalseId)
 	require.Equal(t, checker.INFO, param.GetLevel())
