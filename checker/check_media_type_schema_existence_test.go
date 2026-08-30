@@ -74,3 +74,68 @@ func TestResponseSchemaRemoved_IsAnError(t *testing.T) {
 	}
 	t.Fatal("expected a response-body-media-type-schema-removed change")
 }
+
+// a body schema arriving as the boolean `false` withdraws the media type's
+// payload, so it is reported as schema-became-false on both sides rather than
+// as a schema addition
+func TestMediaTypeSchemaAddedAsFalse(t *testing.T) {
+	s1, err := open("../data/checker/media_type_schema_degenerate_none.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/media_type_schema_degenerate_false.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.MediaTypeSchemaExistenceCheck), d, osm)
+
+	require.Len(t, errs, 2)
+	require.Equal(t, checker.ERR, requireChange(t, errs, checker.RequestBodySchemaBecameFalseId).GetLevel())
+	require.Equal(t, checker.ERR, requireChange(t, errs, checker.ResponseBodySchemaBecameFalseId).GetLevel())
+}
+
+// a body schema arriving as `true` accepts what the absent schema accepted,
+// so the contract is unchanged and nothing is reported; the diff still shows
+// the document change
+func TestMediaTypeSchemaAddedAsTrue(t *testing.T) {
+	s1, err := open("../data/checker/media_type_schema_degenerate_none.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/media_type_schema_degenerate_true.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.MediaTypeSchemaExistenceCheck), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}
+
+// removing a `true` schema is the same non-event in the other direction
+func TestMediaTypeSchemaTrueRemoved(t *testing.T) {
+	s1, err := open("../data/checker/media_type_schema_degenerate_true.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/media_type_schema_degenerate_none.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.MediaTypeSchemaExistenceCheck), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}
+
+// removing a `false` schema leaves the media type unconstrained, which is the
+// hazard the plain schema-removed rules already report
+func TestMediaTypeSchemaFalseRemoved(t *testing.T) {
+	s1, err := open("../data/checker/media_type_schema_degenerate_false.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/media_type_schema_degenerate_none.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.MediaTypeSchemaExistenceCheck), d, osm, checker.INFO)
+
+	require.Len(t, errs, 2)
+	require.Equal(t, checker.INFO, requireChange(t, errs, checker.RequestBodyMediaTypeSchemaRemovedId).GetLevel())
+	require.Equal(t, checker.ERR, requireChange(t, errs, checker.ResponseBodyMediaTypeSchemaRemovedId).GetLevel())
+}
