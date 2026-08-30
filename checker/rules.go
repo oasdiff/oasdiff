@@ -238,6 +238,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectNarrows, nil, "paths.*.*.parameters.*.schema.nullable:unset", "paths.*.*.parameters.*.schema.type:remove"),
 		newBackwardCompatibilityRule(RequestParameterPropertyBecameNullableId, INFO, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectWidens, nil, "paths.*.*.parameters.*.schema.nullable:set", "paths.*.*.parameters.*.schema.type:add"),
 		newBackwardCompatibilityRule(RequestParameterPropertyBecameNotNullableId, ERR, RequestParameterBecameNullableCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectNarrows, nil, "paths.*.*.parameters.*.schema.nullable:unset", "paths.*.*.parameters.*.schema.type:remove"),
+		// RequestParameterSchemaBecameFalseCheck
+		newBackwardCompatibilityRule(RequestParameterSchemaBecameFalseId, ERR, RequestParameterSchemaBecameFalseCheck, DirectionRequest, AreaParameters, KindType, EffectNarrows, nil, "paths.*.*.parameters.*.schema.type:remove"),
+		newBackwardCompatibilityRule(RequestParameterSchemaBecameNotFalseId, INFO, RequestParameterSchemaBecameFalseCheck, DirectionRequest, AreaParameters, KindType, EffectWidens, nil, "paths.*.*.parameters.*.schema.type:add"),
+		newBackwardCompatibilityRule(RequestParameterPropertySchemaBecameFalseId, ERR, RequestParameterSchemaBecameFalseCheck, DirectionRequest, AreaParameters, KindType, EffectNarrows, nil, "paths.*.*.parameters.*.schema.type:remove"),
+		newBackwardCompatibilityRule(RequestParameterPropertySchemaBecameNotFalseId, INFO, RequestParameterSchemaBecameFalseCheck, DirectionRequest, AreaParameters, KindType, EffectWidens, nil, "paths.*.*.parameters.*.schema.type:add"),
 		// RequestParameterDefaultValueChangedCheck
 		newBackwardCompatibilityRule(RequestParameterDefaultValueChangedId, INFO, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:change"),
 		newBackwardCompatibilityRule(RequestParameterDefaultValueAddedId, INFO, RequestParameterDefaultValueChangedCheck, DirectionRequest, AreaParameters, KindValues, EffectNone, nil, "paths.*.*.parameters.*.schema.default:set"),
@@ -321,6 +326,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestBodyBecomeNullableId, INFO, RequestPropertyBecameNotNullableCheck, DirectionRequest, AreaSchema, KindRequiredness, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.nullable:set", "paths.*.*.requestBody.content.*.schema.type:add"),
 		newBackwardCompatibilityRule(RequestPropertyBecomeNotNullableId, ERR, RequestPropertyBecameNotNullableCheck, DirectionRequest, AreaSchema, KindRequiredness, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.nullable:unset", "paths.*.*.requestBody.content.*.schema.type:remove"),
 		newBackwardCompatibilityRule(RequestPropertyBecomeNullableId, INFO, RequestPropertyBecameNotNullableCheck, DirectionRequest, AreaSchema, KindRequiredness, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.nullable:set", "paths.*.*.requestBody.content.*.schema.type:add"),
+		// RequestPropertySchemaBecameFalseCheck
+		newBackwardCompatibilityRule(RequestBodySchemaBecameFalseId, ERR, RequestPropertySchemaBecameFalseCheck, DirectionRequest, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.type:remove"),
+		newBackwardCompatibilityRule(RequestBodySchemaBecameNotFalseId, INFO, RequestPropertySchemaBecameFalseCheck, DirectionRequest, AreaSchema, KindType, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.type:add"),
+		newBackwardCompatibilityRule(RequestPropertySchemaBecameFalseId, ERR, RequestPropertySchemaBecameFalseCheck, DirectionRequest, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.type:remove"),
+		newBackwardCompatibilityRule(RequestPropertySchemaBecameNotFalseId, INFO, RequestPropertySchemaBecameFalseCheck, DirectionRequest, AreaSchema, KindType, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.type:add"),
 		// RequestPropertyDefaultValueChangedCheck
 		newBackwardCompatibilityRule(RequestBodyDefaultValueAddedId, INFO, RequestPropertyDefaultValueChangedCheck, DirectionRequest, AreaSchema, KindValues, EffectNone, nil, "paths.*.*.requestBody.content.*.schema.default:set"),
 		newBackwardCompatibilityRule(RequestBodyDefaultValueRemovedId, INFO, RequestPropertyDefaultValueChangedCheck, DirectionRequest, AreaSchema, KindValues, EffectNone, nil, "paths.*.*.requestBody.content.*.schema.default:unset"),
@@ -458,6 +468,9 @@ func GetAllRules() BackwardCompatibilityRules {
 		// ResponseHeaderBecameNullableCheck
 		newBackwardCompatibilityRule(ResponseHeaderBecameNullableId, ERR, ResponseHeaderBecameNullableCheck, DirectionResponse, AreaHeaders, KindRequiredness, EffectWidens, nil, "paths.*.*.responses.*.headers.*.schema.nullable:set", "paths.*.*.responses.*.headers.*.schema.type:add"),
 		newBackwardCompatibilityRule(ResponseHeaderBecameNotNullableId, INFO, ResponseHeaderBecameNullableCheck, DirectionResponse, AreaHeaders, KindRequiredness, EffectNarrows, nil, "paths.*.*.responses.*.headers.*.schema.nullable:unset", "paths.*.*.responses.*.headers.*.schema.type:remove"),
+		// ResponseHeaderSchemaBecameFalseCheck
+		newBackwardCompatibilityRule(ResponseHeaderSchemaBecameFalseId, INFO, ResponseHeaderSchemaBecameFalseCheck, DirectionResponse, AreaHeaders, KindType, EffectNarrows, nil, "paths.*.*.responses.*.headers.*.schema.type:remove"),
+		newBackwardCompatibilityRule(ResponseHeaderSchemaBecameNotFalseId, ERR, ResponseHeaderSchemaBecameFalseCheck, DirectionResponse, AreaHeaders, KindType, EffectWidens, nil, "paths.*.*.responses.*.headers.*.schema.type:add"),
 		// ResponseMediaTypeUpdatedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeRemovedId, ERR, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, EffectNarrows, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*:remove"),
 		newBackwardCompatibilityRule(ResponseMediaTypeAddedId, INFO, ResponseMediaTypeUpdatedCheck, DirectionResponse, AreaResponses, KindExistence, EffectWidens, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*:add"),
@@ -498,6 +511,11 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyBecameNullableId, ERR, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.nullable:set", "paths.*.*.responses.*.content.*.schema.type:add"),
 		newBackwardCompatibilityRule(ResponsePropertyBecameNotNullableId, INFO, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.nullable:unset", "paths.*.*.responses.*.content.*.schema.type:remove"),
 		newBackwardCompatibilityRule(ResponseBodyBecameNotNullableId, INFO, ResponsePropertyBecameNullableCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.nullable:unset", "paths.*.*.responses.*.content.*.schema.type:remove"),
+		// ResponsePropertySchemaBecameFalseCheck
+		newBackwardCompatibilityRule(ResponseBodySchemaBecameFalseId, ERR, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectNarrows, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*.schema.type:remove"),
+		newBackwardCompatibilityRule(ResponseBodySchemaBecameNotFalseId, INFO, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectWidens, []Guard{GuardNegotiated}, "paths.*.*.responses.*.content.*.schema.type:add"),
+		newBackwardCompatibilityRule(ResponsePropertySchemaBecameFalseId, INFO, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.type:remove"),
+		newBackwardCompatibilityRule(ResponsePropertySchemaBecameNotFalseId, ERR, ResponsePropertySchemaBecameFalseCheck, DirectionResponse, AreaSchema, KindType, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.type:add"),
 		// ResponsePropertyBecameOptionalCheck
 		newBackwardCompatibilityRule(ResponsePropertyBecameOptionalId, ERR, ResponsePropertyBecameOptionalCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.required:remove"),
 		newBackwardCompatibilityRule(ResponseWriteOnlyPropertyBecameOptionalId, INFO, ResponsePropertyBecameOptionalCheck, DirectionResponse, AreaSchema, KindRequiredness, EffectWidens, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.required:remove"),

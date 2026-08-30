@@ -11,12 +11,25 @@ func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *open
 	// Use a fresh diff state (cycle-detection sets + schema-diff cache)
 	// rather than the caller's, so a call made from inside another diff
 	// traversal is not affected by what that traversal has already visited.
-	schemaDiff, err := getSchemaDiff(config, newState(), schemaRef1, schemaRef2)
+	schemaDiff, err := getSchemaDiff(config, newState(), trueSchemaAsEmpty(schemaRef1), trueSchemaAsEmpty(schemaRef2))
 	if err != nil {
 		return false
 	}
 
 	return !schemaDiffHasValidationChanges(schemaDiff)
+}
+
+// trueSchemaAsEmpty maps a schema written as the boolean `true` to the empty
+// schema, which accepts the same instances, so the two compare as equivalent.
+// A `false` schema accepts none and passes through, and its AlwaysDiff against
+// anything else is a validation change. Keywords beside Always cannot come
+// from a document (a boolean is the whole schema node) and are dropped here as
+// marshaling drops them: the boolean is authoritative.
+func trueSchemaAsEmpty(ref *openapi3.SchemaRef) *openapi3.SchemaRef {
+	if ref == nil || ref.Value == nil || ref.Value.Always == nil || !*ref.Value.Always {
+		return ref
+	}
+	return &openapi3.SchemaRef{Value: &openapi3.Schema{}}
 }
 
 func schemaDiffHasValidationChanges(schemaDiff *SchemaDiff) bool {

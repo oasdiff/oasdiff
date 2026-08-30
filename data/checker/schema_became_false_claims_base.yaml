@@ -1,0 +1,20 @@
+openapi: 3.1.0
+info: {title: T, version: "1.0"}
+paths:
+  /t:
+    post:
+      operationId: op
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [kind]
+              properties:
+                kind:
+                  type: string
+                  enum: [a, b]
+                  pattern: "^[ab]$"
+                note:
+                  type: string
+      responses: {'200': {description: OK}}

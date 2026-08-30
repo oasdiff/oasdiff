@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/flatten/allof"
+	"github.com/oasdiff/oasdiff/internal/populatetest"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/assert"
@@ -3234,12 +3235,12 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 		if notPopulated[f.Name] {
 			continue
 		}
-		if !setNonZero(v.Field(i), f.Name) {
+		if !populatetest.NonZero(v.Field(i), f.Name) {
 			// Silently skipping would reopen the hole this test exists to
-			// close: a field of a kind setNonZero cannot build would go
-			// unchecked and the test would still pass. Teach setNonZero the
+			// close: a field of a kind populatetest.NonZero cannot build would go
+			// unchecked and the test would still pass. Teach populatetest.NonZero the
 			// kind instead.
-			t.Errorf("cannot populate %s (%s); extend setNonZero so the field is covered", f.Name, f.Type)
+			t.Errorf("cannot populate %s (%s); extend populatetest.NonZero so the field is covered", f.Name, f.Type)
 			continue
 		}
 		want[f.Name] = v.Field(i).Interface()
@@ -3270,69 +3271,4 @@ func TestMerge_SingleSchema_PreservesEveryField(t *testing.T) {
 		assert.Equal(t, want[name], got.Interface(),
 			"Merge changed %s on a schema with no allOf; the copy block may be reading the wrong source field", name)
 	}
-}
-
-// setNonZero gives v a value distinguishable from its zero, reporting whether
-// it could.
-func setNonZero(v reflect.Value, tag string) bool {
-	if !v.CanSet() {
-		return false
-	}
-	// A schema position needs a usable schema, not just a non-nil pointer:
-	// Merge dereferences it.
-	if v.Type() == reflect.TypeFor[*openapi3.SchemaRef]() {
-		v.Set(reflect.ValueOf(openapi3.NewSchemaRef("", openapi3.NewSchema())))
-		return true
-	}
-	// An empty Types is semantically "no type", which the merge resolves away.
-	if v.Type() == reflect.TypeFor[*openapi3.Types]() {
-		v.Set(reflect.ValueOf(&openapi3.Types{"object"}))
-		return true
-	}
-	switch v.Kind() {
-	case reflect.String:
-		v.SetString("v-" + tag)
-		return true
-	case reflect.Bool:
-		v.SetBool(true)
-		return true
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		v.SetInt(1)
-		return true
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		v.SetUint(1)
-		return true
-	case reflect.Float64:
-		v.SetFloat(1)
-		return true
-	case reflect.Slice:
-		v.Set(reflect.MakeSlice(v.Type(), 1, 1))
-		setNonZero(v.Index(0), tag)
-		return true
-	case reflect.Map:
-		m := reflect.MakeMap(v.Type())
-		k := reflect.New(v.Type().Key()).Elem()
-		setNonZero(k, tag)
-		m.SetMapIndex(k, reflect.New(v.Type().Elem()).Elem())
-		v.Set(m)
-		return true
-	case reflect.Pointer:
-		// Allocated, not filled: Schema points at itself through SchemaRef, so
-		// descending would not terminate, and a non-nil pointer is already
-		// distinguishable from the zero value.
-		v.Set(reflect.New(v.Type().Elem()))
-		return true
-	case reflect.Interface:
-		v.Set(reflect.ValueOf("v-" + tag))
-		return true
-	case reflect.Struct:
-		any := false
-		for _, fv := range v.Fields() {
-			if setNonZero(fv, tag) {
-				any = true
-			}
-		}
-		return any
-	}
-	return false
 }

@@ -36,6 +36,13 @@ const (
 // The OpenAPI 3.2 itemSchema, which types one item of a streamed body, is
 // classified the same way and for the same reasons: it constrains what may be
 // sent or returned, so adding one narrows and removing one loosens.
+//
+// Two degenerate schemas escape that classification. One equivalent to the
+// empty schema (`{}`, `true`, or annotations only) accepts everything, so its
+// arrival or departure leaves the contract unchanged and is not reported. The
+// boolean `false` accepts nothing, so a body schema arriving as `false`
+// withdraws the media type's payload and is reported as schema-became-false.
+// The itemSchema variants are still classified by shape alone (#1196).
 func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
@@ -54,11 +61,24 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 				for mediaType, mediaTypeDiff := range operationItem.RequestBodyDiff.ContentDiff.MediaTypeModified {
 					for _, schema := range requestSchemaKinds(mediaTypeDiff) {
 						added, removed := schemaSideAddedRemoved(schema.diff)
+						regular := schema.addedId == RequestBodyMediaTypeSchemaAddedId
 						if added {
+							id := schema.addedId
+							if regular {
+								switch classifyOneSidedSchema(requestMediaTypeSchema(operationItem.Revision, mediaType)) {
+								case oneSidedSchemaNoContract:
+									continue
+								case oneSidedSchemaFalse:
+									id = RequestBodySchemaBecameFalseId
+								}
+							}
 							result = append(result, opInfo.NewApiChange(
-								schema.addedId, []any{mediaType}, "",
+								id, mediaTypeSchemaArgs(id, mediaType, ""), "",
 							).WithSources(nil, requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)))
 						} else if removed {
+							if regular && classifyOneSidedSchema(requestMediaTypeSchema(operationItem.Base, mediaType)) == oneSidedSchemaNoContract {
+								continue
+							}
 							result = append(result, opInfo.NewApiChange(
 								schema.removedId, []any{mediaType}, "",
 							).WithSources(requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType), nil))
@@ -80,10 +100,20 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 
 					// Regular schema
 					if added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff); added {
+						id := ResponseBodyMediaTypeSchemaAddedId
+						switch classifyOneSidedSchema(responseMediaTypeSchema(responseDiff.Revision, mediaType)) {
+						case oneSidedSchemaNoContract:
+							continue
+						case oneSidedSchemaFalse:
+							id = ResponseBodySchemaBecameFalseId
+						}
 						result = append(result, opInfo.NewApiChange(
-							ResponseBodyMediaTypeSchemaAddedId, []any{mediaType, responseStatus}, "",
+							id, mediaTypeSchemaArgs(id, mediaType, responseStatus), "",
 						).WithSources(nil, addedSource))
 					} else if removed {
+						if classifyOneSidedSchema(responseMediaTypeSchema(responseDiff.Base, mediaType)) == oneSidedSchemaNoContract {
+							continue
+						}
 						result = append(result, opInfo.NewApiChange(
 							ResponseBodyMediaTypeSchemaRemovedId, []any{mediaType, responseStatus}, "",
 						).WithSources(removedSource, nil))
@@ -135,6 +165,33 @@ func requestSchemaKinds(d *diff.MediaTypeDiff) []schemaKind {
 // responseMediaTypeHasSchema reports whether a response media type declares a
 // whole-body schema, which decides whether removing its item schema leaves the
 // body typed.
+// requestMediaTypeSchema and responseMediaTypeSchema read the schema on the
+// appearing or disappearing side from the document: a one-sided SchemaDiff
+// carries only the added/deleted flag, and its Base/Revision nilness is what
+// the modified-schema checks use to skip one-sided diffs, so the schema is
+// looked up here rather than stored there.
+func requestMediaTypeSchema(op *openapi3.Operation, mediaType string) *openapi3.Schema {
+	if op == nil || op.RequestBody == nil || op.RequestBody.Value == nil {
+		return nil
+	}
+	content := op.RequestBody.Value.Content[mediaType]
+	if content == nil || content.Schema == nil {
+		return nil
+	}
+	return content.Schema.Value
+}
+
+func responseMediaTypeSchema(response *openapi3.Response, mediaType string) *openapi3.Schema {
+	if response == nil {
+		return nil
+	}
+	content := response.Content[mediaType]
+	if content == nil || content.Schema == nil {
+		return nil
+	}
+	return content.Schema.Value
+}
+
 func responseMediaTypeHasSchema(response *openapi3.Response, mediaType string) bool {
 	if response == nil || response.Content == nil {
 		return false
@@ -147,6 +204,48 @@ func responseMediaTypeHasSchema(response *openapi3.Response, mediaType string) b
 // schema added or removed. The diff sets the explicit SchemaAdded / SchemaDeleted
 // flags for these one-sided cases (Base and Revision are both nil then). Returns
 // false, false when the schema changed on both sides or is absent.
+// oneSidedSchemaKind classifies the schema on the side that appeared or
+// disappeared: `false` accepts nothing, so its arrival withdraws the media
+// type's payload rather than constraining it; a schema equivalent to the
+// empty schema (`{}`, `true`, or annotations only) accepts everything, so
+// its arrival or departure leaves the contract unchanged.
+type oneSidedSchemaKind int
+
+const (
+	oneSidedSchemaRegular oneSidedSchemaKind = iota
+	oneSidedSchemaFalse
+	oneSidedSchemaNoContract
+)
+
+func classifyOneSidedSchema(schema *openapi3.Schema) oneSidedSchemaKind {
+	if schema == nil {
+		return oneSidedSchemaRegular
+	}
+	if schema.Always != nil && !*schema.Always {
+		return oneSidedSchemaFalse
+	}
+	if diff.SchemaRefsValidationEquivalent(diff.NewConfig(),
+		&openapi3.SchemaRef{Value: &openapi3.Schema{}},
+		&openapi3.SchemaRef{Value: schema}) {
+		return oneSidedSchemaNoContract
+	}
+	return oneSidedSchemaRegular
+}
+
+// mediaTypeSchemaArgs builds the message arguments for the id that won the
+// classification: the schema-added ids name the media type (and status), the
+// schema-became-false ids take none.
+func mediaTypeSchemaArgs(id, mediaType, responseStatus string) []any {
+	switch id {
+	case RequestBodySchemaBecameFalseId, ResponseBodySchemaBecameFalseId:
+		return nil
+	}
+	if responseStatus == "" {
+		return []any{mediaType}
+	}
+	return []any{mediaType, responseStatus}
+}
+
 func schemaSideAddedRemoved(d *diff.SchemaDiff) (added, removed bool) {
 	if d == nil {
 		return false, false
