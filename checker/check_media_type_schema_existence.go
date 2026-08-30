@@ -165,6 +165,11 @@ func requestSchemaKinds(d *diff.MediaTypeDiff) []schemaKind {
 // responseMediaTypeHasSchema reports whether a response media type declares a
 // whole-body schema, which decides whether removing its item schema leaves the
 // body typed.
+// requestMediaTypeSchema and responseMediaTypeSchema read the schema on the
+// appearing or disappearing side from the document: a one-sided SchemaDiff
+// carries only the added/deleted flag, and its Base/Revision nilness is what
+// the modified-schema checks use to skip one-sided diffs, so the schema is
+// looked up here rather than stored there.
 func requestMediaTypeSchema(op *openapi3.Operation, mediaType string) *openapi3.Schema {
 	if op == nil || op.RequestBody == nil || op.RequestBody.Value == nil {
 		return nil
