@@ -248,7 +248,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	result.AlwaysDiff = getBoolRefDiff(value1.Always, value2.Always)
 	result.ConstDiff = getValueDiff(value1.Const, value2.Const)
 	result.ExamplesDiff = getValueDiff(value1.Examples, value2.Examples)
-	result.PrefixItemsDiff, err = getSubschemasDiff(config, state, value1.PrefixItems, value2.PrefixItems)
+	result.PrefixItemsDiff, err = getPrefixItemsDiff(config, state, value1.PrefixItems, value2.PrefixItems)
 	if err != nil {
 		return nil, err
 	}
