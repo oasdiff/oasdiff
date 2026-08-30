@@ -1,7 +1,8 @@
 package checker
 
 import (
-	"math"
+	"math/big"
+	"strconv"
 
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -18,13 +19,20 @@ const (
 )
 
 // isIntegerMultiple reports whether a is an integer multiple of b, in which
-// case every multiple of a is also a multiple of b.
+// case every multiple of a is also a multiple of b. The comparison is exact:
+// each value is read back as the decimal it round-trips to, so 0.3 over 0.1
+// is the rational 3 rather than a float slightly below it, and a ratio that
+// is merely close to an integer is not one.
 func isIntegerMultiple(a, b float64) bool {
 	if b == 0 {
 		return false
 	}
-	ratio := a / b
-	return math.Abs(ratio-math.Round(ratio)) <= 1e-9*math.Max(math.Abs(ratio), 1)
+	ratioA, okA := new(big.Rat).SetString(strconv.FormatFloat(a, 'g', -1, 64))
+	ratioB, okB := new(big.Rat).SetString(strconv.FormatFloat(b, 'g', -1, 64))
+	if !okA || !okB {
+		return false
+	}
+	return new(big.Rat).Quo(ratioA, ratioB).IsInt()
 }
 
 func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
