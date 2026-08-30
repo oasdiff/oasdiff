@@ -732,7 +732,7 @@ response-body-prefix-items-added-description: subesquema adicionado a 'prefixIte
 response-body-prefix-items-removed-description: subesquema removido de 'prefixItems' em o corpo da resposta
 response-property-prefix-items-added-description: subesquema adicionado a 'prefixItems' em a propriedade de resposta
 response-property-prefix-items-removed-description: subesquema removido de 'prefixItems' em a propriedade de resposta
-prefix-items-changed-warning-comment: "Este é um aviso porque a direção da mudança não pode ser determinada. Uma posição que nenhuma entrada de `prefixItems` cobre é validada contra `items`, portanto a entrada pode restringir uma posição que estava aberta ou abrir uma que `items` fechava, e os dois esquemas não podem ser ordenados."
+prefix-items-changed-warning-comment: "Este é um aviso porque o oasdiff não consegue determinar se a mudança é incompatível. Uma posição do array não coberta por `prefixItems` é validada contra o esquema `items`: quando `items` está ausente a posição aceita qualquer valor, e quando `items` é `false` não permite valor algum, portanto esta mudança pode rejeitar arrays que antes eram válidos ou permitir arrays que antes não eram."
 request-body-if-added: adicionado o subesquema 'if' ao corpo da requisição
 request-body-if-removed: removido o subesquema 'if' do corpo da requisição
 request-body-then-added: adicionado o subesquema 'then' ao corpo da requisição

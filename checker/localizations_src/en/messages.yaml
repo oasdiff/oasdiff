@@ -858,7 +858,7 @@ response-body-prefix-items-added-description: sub-schema added to prefixItems in
 response-body-prefix-items-removed-description: sub-schema removed from prefixItems in response body
 response-property-prefix-items-added-description: sub-schema added to prefixItems in response property
 response-property-prefix-items-removed-description: sub-schema removed from prefixItems in response property
-prefix-items-changed-warning-comment: "This is a warning because the direction of the change cannot be determined. A position no prefixItems entry covers is validated against items, so the entry may constrain a position that was open or open one that items closed, and the two schemas cannot be ordered."
+prefix-items-changed-warning-comment: "This is a warning because oasdiff cannot determine whether the change is breaking. An array position not covered by prefixItems is validated against the items schema: when items is absent the position accepts any value, and when items is false it allows no value, so this change may either reject arrays that were previously valid or allow arrays that previously were not."
 request-body-if-added-description: if subschema added to request body
 request-body-if-removed-description: if subschema removed from request body
 request-body-then-added-description: then subschema added to request body

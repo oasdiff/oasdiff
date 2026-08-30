@@ -735,7 +735,7 @@ response-body-prefix-items-added-description: подсхема добавлен�
 response-body-prefix-items-removed-description: подсхема удалена из 'prefixItems' тела ответа
 response-property-prefix-items-added-description: подсхема добавлена в 'prefixItems' поля ответа
 response-property-prefix-items-removed-description: подсхема удалена из 'prefixItems' поля ответа
-prefix-items-changed-warning-comment: "Это предупреждение, потому что направление изменения невозможно определить. Позиция, не покрытая ни одной записью `prefixItems`, проверяется по `items`, поэтому запись может ограничить ранее открытую позицию или открыть закрытую `items`, и две схемы нельзя упорядочить."
+prefix-items-changed-warning-comment: "Это предупреждение, потому что oasdiff не может определить, ломает ли это изменение совместимость. Позиция массива, не покрытая `prefixItems`, проверяется по схеме `items`: если `items` отсутствует, позиция принимает любое значение, а если `items` равно `false`, не допускает никакого, поэтому это изменение может либо отклонить массивы, которые раньше были допустимы, либо допустить массивы, которые раньше таковыми не были."
 request-body-if-added: добавлена подсхема 'if' в тело запроса
 request-body-if-removed: удалена подсхема 'if' из тела запроса
 request-body-then-added: добавлена подсхема 'then' в тело запроса
