@@ -71,3 +71,35 @@ func TestResponsePropertyPrefixItemsRemoved(t *testing.T) {
 	require.NotEmpty(t, errs)
 	require.True(t, containsId(errs, checker.ResponsePropertyPrefixItemsRemovedId), "expected response-property-prefix-items-removed")
 }
+
+// a prefixItems entry that repeats the items schema constrains the position it
+// covers exactly as items already did, so the described responses are
+// unchanged and there is nothing to report
+func TestResponseBodyPrefixItemsSameAsItems(t *testing.T) {
+	s1, err := open("../data/checker/prefix_items_added_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/prefix_items_same_as_items_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyPrefixItemsUpdatedCheck), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}
+
+// the direction of a prefixItems change depends on the items schema governing
+// the position, so the verdict is a warning carrying the reason
+func TestResponseBodyPrefixItemsAddedIsWarning(t *testing.T) {
+	s1, err := open("../data/checker/prefix_items_added_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/prefix_items_added_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyPrefixItemsUpdatedCheck), d, osm, checker.INFO)
+
+	change := requireChange(t, errs, checker.ResponseBodyPrefixItemsAddedId)
+	require.Equal(t, checker.WARN, change.GetLevel())
+	require.NotEmpty(t, change.GetComment(checker.NewDefaultLocalizer()))
+}

@@ -72,21 +72,10 @@ func expectedLevel(r checker.BackwardCompatibilityRule) checker.Level {
 	return checker.INFO
 }
 
-const reasonPrefixItems = "pending review: stored levels assume a containment direction prefixItems does not have; deciding it needs oasdiff#1180, which pairs prefixItems entries by index"
-
 // severityDeviations records every rule whose stored level deviates from the
 // law, with the reason. An unexplained mismatch and a stale entry both fail
 // TestSeverityLaw.
-var severityDeviations = map[string]string{
-	"request-body-prefix-items-added":        reasonPrefixItems,
-	"request-body-prefix-items-removed":      reasonPrefixItems,
-	"request-property-prefix-items-added":    reasonPrefixItems,
-	"request-property-prefix-items-removed":  reasonPrefixItems,
-	"response-body-prefix-items-added":       reasonPrefixItems,
-	"response-body-prefix-items-removed":     reasonPrefixItems,
-	"response-property-prefix-items-added":   reasonPrefixItems,
-	"response-property-prefix-items-removed": reasonPrefixItems,
-}
+var severityDeviations = map[string]string{}
 
 func TestSeverityLaw(t *testing.T) {
 	seen := map[string]bool{}
