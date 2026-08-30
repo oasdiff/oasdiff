@@ -182,12 +182,18 @@ required-response-header-removed: o cabeçalho de resposta obrigatório %s foi r
 optional-response-header-removed: o cabeçalho de resposta opcional %s foi removido para o status %s
 response-header-added: o cabeçalho de resposta %s foi adicionado para o status %s
 response-header-type-changed: o %s do cabeçalho de resposta %s foi alterado de %s para %s para o status %s
+response-header-type-changed-description: o tipo do cabeçalho de resposta mudou
 response-header-type-generalized: o %s do cabeçalho de resposta %s foi expandido de %s para %s para o status %s
+response-header-type-generalized-description: o tipo do cabeçalho de resposta foi generalizado
 response-header-type-specialized: o %s do cabeçalho de resposta %s foi restringido de %s para %s para o status %s
+response-header-type-specialized-description: o tipo do cabeçalho de resposta foi especializado
 response-header-type-compatible: o %s do cabeçalho de resposta %s mudou de %s para %s para o status %s (retrocompatível)
+response-header-type-compatible-description: o tipo do cabeçalho de resposta mudou de forma retrocompatível
 response-header-type-compatible-comment: "Esta mudança é retrocompatível porque o valor de um cabeçalho é transmitido como texto, então qualquer tipo pode ser representado como uma string e não é imposto na transmissão."
 response-header-became-nullable: o cabeçalho de resposta %s tornou-se anulável para o status %s
+response-header-became-nullable-description: o cabeçalho de resposta tornou-se anulável
 response-header-became-not-nullable: o cabeçalho de resposta %s tornou-se não anulável para o status %s
+response-header-became-not-nullable-description: o cabeçalho de resposta deixou de ser anulável
 response-media-type-removed: o tipo de mídia %s foi removido da resposta com o status %s
 response-media-type-added: o tipo de mídia %s foi adicionado à resposta com o status %s
 response-optional-property-removed: a propriedade opcional %s foi removida da resposta com o status %s
