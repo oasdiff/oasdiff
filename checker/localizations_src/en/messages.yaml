@@ -188,12 +188,18 @@ required-response-header-removed: the mandatory response header %s removed for t
 optional-response-header-removed: the optional response header %s removed for the status %s
 response-header-added: the response header %s was added for the status %s
 response-header-type-changed: the %s response header's %s changed from %s to %s for the status %s
+response-header-type-changed-description: response header type changed
 response-header-type-generalized: the %s response header's %s was widened from %s to %s for the status %s
+response-header-type-generalized-description: response header type generalized
 response-header-type-specialized: the %s response header's %s was narrowed from %s to %s for the status %s
+response-header-type-specialized-description: response header type specialized
 response-header-type-compatible: the %s response header's %s changed from %s to %s for the status %s (backward compatible)
+response-header-type-compatible-description: response header type changed but backward compatible
 response-header-type-compatible-comment: "This change is backward compatible because a header value is transmitted as text, so any type can be represented as a string on the wire and is not enforced there."
 response-header-became-nullable: the response header %s became nullable for the status %s
+response-header-became-nullable-description: response header became nullable
 response-header-became-not-nullable: the response header %s became not nullable for the status %s
+response-header-became-not-nullable-description: response header became not nullable
 response-media-type-removed: removed the media type %s for the response with the status %s
 response-media-type-added: added the media type %s for the response with the status %s
 response-media-type-name-changed: media type %s was changed to %s for the response status %s

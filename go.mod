@@ -2,6 +2,8 @@ module github.com/oasdiff/oasdiff
 
 go 1.26
 
+toolchain go1.26.7
+
 require (
 	cloud.google.com/go v0.123.0
 	github.com/TwiN/go-color v1.4.1
@@ -37,7 +39,7 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/sys v0.43.0 // indirect
-	golang.org/x/text v0.36.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
 )
 
 require (

@@ -175,12 +175,18 @@ required-response-header-removed: удалён ранее обязательны
 optional-response-header-removed: удалён ранее необязательный заголовок ответа %s для ответа со статусом %s
 response-header-added: добавлен заголовок ответа %s для ответа со статусом %s
 response-header-type-changed: у заголовка ответа %s %s изменён с %s на %s для статуса %s
+response-header-type-changed-description: изменился тип заголовка ответа
 response-header-type-generalized: у заголовка ответа %s %s расширен с %s до %s для статуса %s
+response-header-type-generalized-description: тип заголовка ответа был обобщён
 response-header-type-specialized: у заголовка ответа %s %s сужен с %s до %s для статуса %s
+response-header-type-specialized-description: тип заголовка ответа был сужен
 response-header-type-compatible: у заголовка ответа %s %s изменён с %s до %s для статуса %s (обратно совместимо)
+response-header-type-compatible-description: тип заголовка ответа изменился обратно совместимо
 response-header-type-compatible-comment: "Это изменение обратно совместимо, потому что значение заголовка передаётся как текст, поэтому любой тип может быть представлен строкой и не проверяется при передаче."
 response-header-became-nullable: заголовок ответа %s стал обнуляемым для ответа со статусом %s
+response-header-became-nullable-description: заголовок ответа стал допускать null
 response-header-became-not-nullable: заголовок ответа %s стал необнуляемым для ответа со статусом %s
+response-header-became-not-nullable-description: заголовок ответа перестал допускать null
 response-media-type-removed: удалён media type %s для ответа со статусом %s
 response-media-type-added: добавлен тип медиа %s для ответа со статусом %s
 response-optional-property-removed: удалено необязательное поле %s из ответа со статусом %s
@@ -474,6 +480,7 @@ response-body-wrapped-in-one-of-description: "тело ответа обёрну
 response-body-wrapped-in-one-of-original-preserved-description: "тело ответа обёрнуто в `oneOf` с сохранением исходной схемы"
 wrapped-in-one-of-original-preserved-warning-comment: "Это предупреждение, потому что спецификация не сообщает, пересекаются ли альтернативы. Полезная нагрузка, соответствующая более чем одной из них, отклоняется `oneOf`, поэтому ранее допустимая полезная нагрузка может как приниматься, так и не приниматься."
 request-body-one-of-removed-description: подсхема удалена из oneOf в теле запроса
+request-body-removed: тело запроса удалено
 request-body-removed-description: удалено тело запроса
 request-body-type-changed-description: изменен тип тела запроса
 request-body-type-generalized-description: обобщен тип тела запроса
