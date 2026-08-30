@@ -22,7 +22,9 @@ func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *open
 // trueSchemaAsEmpty maps a schema written as the boolean `true` to the empty
 // schema, which accepts the same instances, so the two compare as equivalent.
 // A `false` schema accepts none and passes through, and its AlwaysDiff against
-// anything else is a validation change.
+// anything else is a validation change. Keywords beside Always cannot come
+// from a document (a boolean is the whole schema node) and are dropped here as
+// marshaling drops them: the boolean is authoritative.
 func trueSchemaAsEmpty(ref *openapi3.SchemaRef) *openapi3.SchemaRef {
 	if ref == nil || ref.Value == nil || ref.Value.Always == nil || !*ref.Value.Always {
 		return ref

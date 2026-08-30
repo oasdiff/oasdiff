@@ -42,4 +42,11 @@ func TestSchemaRefsValidationEquivalent_Booleans(t *testing.T) {
 	require.False(t, SchemaRefsValidationEquivalent(cfg, boolSchema(true), boolSchema(false)))
 	require.False(t, SchemaRefsValidationEquivalent(cfg, boolSchema(false), empty))
 	require.True(t, SchemaRefsValidationEquivalent(cfg, boolSchema(false), boolSchema(false)))
+
+	// Keywords beside Always are constructible only through the Go API, and
+	// the boolean is authoritative: marshaling drops them, so equivalence
+	// drops them too.
+	mixed := boolSchema(true)
+	mixed.Value.Type = &openapi3.Types{"integer"}
+	require.True(t, SchemaRefsValidationEquivalent(cfg, empty, mixed))
 }
