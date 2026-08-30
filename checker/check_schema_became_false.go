@@ -106,85 +106,54 @@ func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 
 func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil || operationItem.ParametersDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
-				for paramName, paramItem := range paramItems {
-					if paramItem.SchemaDiff == nil {
-						continue
-					}
 
-					if id := falseSchemaChangeId(paramItem.SchemaDiff, RequestParameterSchemaBecameFalseId, RequestParameterSchemaBecameNotFalseId); id != "" {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramItem.SchemaDiff, "type")
-						result = append(result, opInfo.NewApiChange(
-							id,
-							[]any{paramLocation, paramName},
-							"",
-						).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, revisionSource))
-					}
+		if id := falseSchemaChangeId(p.paramDiff.SchemaDiff, RequestParameterSchemaBecameFalseId, RequestParameterSchemaBecameNotFalseId); id != "" {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "type")
+			result = append(result, p.opInfo.NewApiChange(
+				id,
+				[]any{p.location, p.name},
+				"",
+			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+		}
 
-					checkModifiedPropertiesDiff(
-						paramItem.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							if id := falseSchemaChangeId(propertyDiff, RequestParameterPropertySchemaBecameFalseId, RequestParameterPropertySchemaBecameNotFalseId); id != "" {
-								baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
-								result = append(result, opInfo.NewApiChange(
-									id,
-									[]any{propertyFullName(propertyPath, propertyName), paramLocation, paramName},
-									"",
-								).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
-							}
-						})
+		checkModifiedPropertiesDiff(
+			p.paramDiff.SchemaDiff,
+			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+				if id := falseSchemaChangeId(propertyDiff, RequestParameterPropertySchemaBecameFalseId, RequestParameterPropertySchemaBecameNotFalseId); id != "" {
+					baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
+					result = append(result, p.opInfo.NewApiChange(
+						id,
+						[]any{propertyFullName(propertyPath, propertyName), p.location, p.name},
+						"",
+					).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
 				}
-			}
-		}
-	}
+			})
+	})
+
 	return result
 }
 
 func ResponseHeaderSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+
+	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
+		if h.headerDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
-					continue
-				}
-				for headerName, headerDiff := range responseDiff.HeadersDiff.Modified {
-					if headerDiff.SchemaDiff == nil {
-						continue
-					}
-					if id := falseSchemaChangeId(headerDiff.SchemaDiff, ResponseHeaderSchemaBecameFalseId, ResponseHeaderSchemaBecameNotFalseId); id != "" {
-						baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, headerDiff.SchemaDiff, "type")
-						result = append(result, opInfo.NewApiChange(
-							id,
-							[]any{headerName, responseStatus},
-							"",
-						).WithSchema(headerDiff.SchemaDiff).WithSources(baseSource, revisionSource))
-					}
-				}
-			}
+		if id := falseSchemaChangeId(h.headerDiff.SchemaDiff, ResponseHeaderSchemaBecameFalseId, ResponseHeaderSchemaBecameNotFalseId); id != "" {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, h.opInfo.methodDiff, h.headerDiff.SchemaDiff, "type")
+			result = append(result, h.opInfo.NewApiChange(
+				id,
+				[]any{h.name, h.responseStatus},
+				"",
+			).WithSchema(h.headerDiff.SchemaDiff).WithSources(baseSource, revisionSource))
 		}
-	}
+	})
+
 	return result
 }
