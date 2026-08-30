@@ -26,8 +26,10 @@ const (
 	GuardHasDefault Guard = "has-default"
 	// GuardNegotiated: the rule judges the availability of something the
 	// client selects or relies on, such as a response status, media type,
-	// or header, or the payload that inhabits one. The client chooses the
-	// variant, so contravariance applies with request polarity even though
-	// the variant lives on the response side.
+	// or header, or the payload that inhabits one. Removing an option the
+	// client chooses rejects that choice the way narrowing a request does,
+	// and adding one harms nobody, so the level is derived as if the
+	// element were on the request side: narrowing is breaking, widening is
+	// not, the reverse of plain response polarity.
 	GuardNegotiated Guard = "negotiated"
 )
