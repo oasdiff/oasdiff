@@ -1154,6 +1154,12 @@ response-property-max-items-increased-description: response property max items i
 request-body-max-properties-decreased-description: request body max properties decreased
 request-property-max-properties-decreased-description: request property max properties decreased
 request-read-only-property-max-properties-decreased-description: request read-only property max properties decreased
+request-read-only-property-multiple-of-set: the %s request read-only property's multipleOf was set to %s
+request-read-only-property-multiple-of-changed: the %s request read-only property's multipleOf was changed from %s to %s
+request-read-only-property-unique-items-set: the %s request read-only property's uniqueItems was set to true
+request-read-only-property-multiple-of-set-description: request read-only property multipleOf set
+request-read-only-property-multiple-of-changed-description: request read-only property multipleOf changed
+request-read-only-property-unique-items-set-description: request read-only property uniqueItems set
 request-body-max-properties-increased-description: request body max properties increased
 request-property-max-properties-increased-description: request property max properties increased
 request-body-max-properties-set-description: request body max properties set

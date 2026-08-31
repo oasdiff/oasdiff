@@ -16,6 +16,9 @@ const (
 	RequestPropertyMultipleOfChangedId     = "request-property-multiple-of-changed"
 	RequestBodyMultipleOfGeneralizedId     = "request-body-multiple-of-generalized"
 	RequestPropertyMultipleOfGeneralizedId = "request-property-multiple-of-generalized"
+
+	RequestReadOnlyPropertyMultipleOfSetId     = "request-read-only-property-multiple-of-set"
+	RequestReadOnlyPropertyMultipleOfChangedId = "request-read-only-property-multiple-of-changed"
 )
 
 // isIntegerMultiple reports whether a is an integer multiple of b, in which
@@ -74,19 +77,21 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 			if multipleOfDiff == nil {
 				return
 			}
-			// narrowing a read-only property does not affect requests
-			if p.propertyDiff.Revision.ReadOnly && multipleOfDiff.To != nil {
-				return
-			}
+			readOnly := p.propertyDiff.Revision.ReadOnly
 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "multipleOf")
 			switch {
 			case multipleOfDiff.From == nil:
+				id, comment := RequestPropertyMultipleOfSetId, commentId(RequestPropertyMultipleOfSetId)
+				if readOnly {
+					// a read-only property does not appear in requests
+					id, comment = RequestReadOnlyPropertyMultipleOfSetId, ""
+				}
 				result = append(result, p.newChange(
-					RequestPropertyMultipleOfSetId,
+					id,
 					[]any{propName, multipleOfDiff.To},
-					commentId(RequestPropertyMultipleOfSetId),
+					comment,
 				).WithSources(nil, propRevisionSource))
 			case multipleOfDiff.To == nil:
 				result = append(result, p.newChange(
@@ -101,8 +106,12 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 					commentId(RequestPropertyMultipleOfGeneralizedId),
 				).WithSources(propBaseSource, propRevisionSource))
 			default:
+				id := RequestPropertyMultipleOfChangedId
+				if readOnly {
+					id = RequestReadOnlyPropertyMultipleOfChangedId
+				}
 				result = append(result, p.newChange(
-					RequestPropertyMultipleOfChangedId,
+					id,
 					[]any{propName, multipleOfDiff.From, multipleOfDiff.To},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))

@@ -9,6 +9,8 @@ const (
 	RequestPropertyUniqueItemsSetId   = "request-property-unique-items-set"
 	RequestBodyUniqueItemsUnsetId     = "request-body-unique-items-unset"
 	RequestPropertyUniqueItemsUnsetId = "request-property-unique-items-unset"
+
+	RequestReadOnlyPropertyUniqueItemsSetId = "request-read-only-property-unique-items-set"
 )
 
 func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -42,11 +44,13 @@ func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 
 			if uniqueItemsDiff.To == true {
+				id := RequestPropertyUniqueItemsSetId
 				if p.propertyDiff.Revision.ReadOnly {
-					return
+					// a read-only property does not appear in requests
+					id = RequestReadOnlyPropertyUniqueItemsSetId
 				}
 				result = append(result, p.newChange(
-					RequestPropertyUniqueItemsSetId,
+					id,
 					[]any{propName},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))

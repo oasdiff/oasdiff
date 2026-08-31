@@ -1146,6 +1146,12 @@ response-property-max-items-increased-description: увеличено значе
 request-body-max-properties-decreased-description: уменьшено значение maxProperties у тела запроса
 request-property-max-properties-decreased-description: уменьшено значение maxProperties у поля запроса
 request-read-only-property-max-properties-decreased-description: уменьшено значение maxProperties у поля запроса только для чтения
+request-read-only-property-multiple-of-set: для свойства запроса %s, доступного только для чтения, установлен multipleOf %s
+request-read-only-property-multiple-of-changed: для свойства запроса %s, доступного только для чтения, multipleOf изменён с %s на %s
+request-read-only-property-unique-items-set: для свойства запроса %s, доступного только для чтения, установлен uniqueItems true
+request-read-only-property-multiple-of-set-description: установлен multipleOf у свойства запроса только для чтения
+request-read-only-property-multiple-of-changed-description: изменён multipleOf у свойства запроса только для чтения
+request-read-only-property-unique-items-set-description: установлен uniqueItems у свойства запроса только для чтения
 request-body-max-properties-increased-description: увеличено значение maxProperties у тела запроса
 request-property-max-properties-increased-description: увеличено значение maxProperties у поля запроса
 request-body-max-properties-set-description: задано значение maxProperties у тела запроса

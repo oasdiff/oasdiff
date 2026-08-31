@@ -96,3 +96,24 @@ func TestRequestPropertyUniqueItemsUnset(t *testing.T) {
 		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
+
+// a read-only property does not appear in requests, so setting uniqueItems on
+// one is informational, under a dedicated id so the change stays visible
+func TestRequestReadOnlyPropertyUniqueItemsSet(t *testing.T) {
+	s1, err := open(constraintKeywordsBase)
+	require.NoError(t, err)
+	s2, err := open(constraintKeywordsBase)
+	require.NoError(t, err)
+
+	p1 := s1.Spec.Paths.Value("/products").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["tags"].Value
+	p1.ReadOnly = true
+	p2 := s2.Spec.Paths.Value("/products").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["tags"].Value
+	p2.ReadOnly = true
+	p2.UniqueItems = true
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyUniqueItemsUpdatedCheck), d, osm, checker.INFO)
+	change := requireSingleChange(t, errs, checker.RequestReadOnlyPropertyUniqueItemsSetId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+}

@@ -1144,6 +1144,12 @@ response-property-max-items-increased-description: número máximo de itens da p
 request-body-max-properties-decreased-description: número máximo de propriedades do corpo da requisição reduzido
 request-property-max-properties-decreased-description: número máximo de propriedades da propriedade de requisição reduzido
 request-read-only-property-max-properties-decreased-description: número máximo de propriedades da propriedade de requisição somente leitura reduzido
+request-read-only-property-multiple-of-set: o multipleOf da propriedade somente leitura %s da requisição foi definido como %s
+request-read-only-property-multiple-of-changed: o multipleOf da propriedade somente leitura %s da requisição mudou de %s para %s
+request-read-only-property-unique-items-set: o uniqueItems da propriedade somente leitura %s da requisição foi definido como true
+request-read-only-property-multiple-of-set-description: multipleOf definido em propriedade somente leitura da requisição
+request-read-only-property-multiple-of-changed-description: multipleOf alterado em propriedade somente leitura da requisição
+request-read-only-property-unique-items-set-description: uniqueItems definido em propriedade somente leitura da requisição
 request-body-max-properties-increased-description: número máximo de propriedades do corpo da requisição aumentado
 request-property-max-properties-increased-description: número máximo de propriedades da propriedade de requisição aumentado
 request-body-max-properties-set-description: número máximo de propriedades do corpo da requisição definido

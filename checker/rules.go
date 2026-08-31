@@ -805,6 +805,7 @@ func GetAllRules() BackwardCompatibilityRules {
 		// RequestPropertyUniqueItemsUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyUniqueItemsSetId, ERR, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.uniqueItems:set"),
 		newBackwardCompatibilityRule(RequestPropertyUniqueItemsSetId, ERR, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.uniqueItems:set"),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyUniqueItemsSetId, INFO, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.uniqueItems:set"),
 		newBackwardCompatibilityRule(RequestBodyUniqueItemsUnsetId, INFO, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.uniqueItems:unset"),
 		newBackwardCompatibilityRule(RequestPropertyUniqueItemsUnsetId, INFO, RequestPropertyUniqueItemsUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.uniqueItems:unset"),
 		// ResponsePropertyUniqueItemsUnsetCheck
@@ -817,6 +818,8 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyMultipleOfUnsetId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:unset"),
 		newBackwardCompatibilityRule(RequestBodyMultipleOfChangedId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectIncomparable, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
 		newBackwardCompatibilityRule(RequestPropertyMultipleOfChangedId, ERR, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectIncomparable, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyMultipleOfSetId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.multipleOf:set"),
+		newBackwardCompatibilityRule(RequestReadOnlyPropertyMultipleOfChangedId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectIncomparable, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
 		newBackwardCompatibilityRule(RequestBodyMultipleOfGeneralizedId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
 		newBackwardCompatibilityRule(RequestPropertyMultipleOfGeneralizedId, INFO, RequestPropertyMultipleOfUpdatedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.multipleOf:increase,decrease"),
 		// ResponsePropertyMultipleOfUpdatedCheck
