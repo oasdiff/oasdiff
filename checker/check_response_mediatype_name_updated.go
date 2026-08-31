@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"strings"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -9,10 +11,13 @@ const (
 	ResponseMediaTypeNameGeneralizedId = "response-media-type-name-generalized"
 	ResponseMediaTypeNameSpecializedId = "response-media-type-name-specialized"
 
-	// A media type parameter appearing, disappearing or changing value all
-	// reach this id, and the check cannot tell what the parameter
-	// constrains, so it cannot order the two media types. Splitting the id
-	// by which of the three happened is oasdiff#1186.
+	ResponseMediaTypeParameterAddedId   = "response-media-type-parameter-added"
+	ResponseMediaTypeParameterRemovedId = "response-media-type-parameter-removed"
+	ResponseMediaTypeParameterChangedId = "response-media-type-parameter-changed"
+
+	// Parameter changes that cannot be ordered reach this id: parameters
+	// that moved in more than one direction at once, or a parameter change
+	// arriving together with a change to the media type name itself.
 	ResponseMediaTypeNameChangedCommentId = "response-media-type-name-changed-warning-comment"
 )
 
@@ -46,13 +51,53 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					toMediaType, _ := mediaType.NameDiff.NameDiff.To.(string)
 					baseSource, revisionSource := responseMediaTypeNameSources(operationsSources, operationItem, responsesDiff, fromMediaType, toMediaType)
 
-					// If parameters changed, this is a changed media type
-					if !mediaType.NameDiff.ParametersDiff.Empty() {
-						result = append(result, opInfo.NewApiChange(
-							ResponseMediaTypeNameChangedId,
-							[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
-							ResponseMediaTypeNameChangedCommentId,
-						).WithSources(baseSource, revisionSource))
+					// A difference in the media type parameters, classified by
+					// what happened: a parameter appearing narrows what the
+					// server may return, one disappearing widens it, and a
+					// changed value is neither. Mixed directions cannot be
+					// ordered and stay a warning.
+					if pd := mediaType.NameDiff.ParametersDiff; !pd.Empty() {
+						directions := 0
+						for _, n := range []int{len(pd.Added), len(pd.Deleted), len(pd.Modified)} {
+							if n > 0 {
+								directions++
+							}
+						}
+						nameAlsoChanged := mediaType.NameDiff.TypeDiff != nil ||
+							mediaType.NameDiff.SubtypeDiff != nil ||
+							mediaType.NameDiff.SuffixDiff != nil
+						// the parameter is named separately, so the media type
+						// reads as its bare name
+						bareName := strings.TrimSpace(strings.SplitN(fromMediaType, ";", 2)[0])
+						if directions > 1 || nameAlsoChanged {
+							result = append(result, opInfo.NewApiChange(
+								ResponseMediaTypeNameChangedId,
+								[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},
+								ResponseMediaTypeNameChangedCommentId,
+							).WithSources(baseSource, revisionSource))
+							continue
+						}
+						for _, param := range pd.Added {
+							result = append(result, opInfo.NewApiChange(
+								ResponseMediaTypeParameterAddedId,
+								[]any{param, bareName, responseStatus},
+								"",
+							).WithSources(baseSource, revisionSource))
+						}
+						for _, param := range pd.Deleted {
+							result = append(result, opInfo.NewApiChange(
+								ResponseMediaTypeParameterRemovedId,
+								[]any{param, bareName, responseStatus},
+								"",
+							).WithSources(baseSource, revisionSource))
+						}
+						for param, valueDiff := range pd.Modified {
+							result = append(result, opInfo.NewApiChange(
+								ResponseMediaTypeParameterChangedId,
+								[]any{param, bareName, valueDiff.From, valueDiff.To, responseStatus},
+								"",
+							).WithSources(baseSource, revisionSource))
+						}
 						continue
 					}
 
