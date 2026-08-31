@@ -13,8 +13,7 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if minItemsDiff := info.schemaDiff.MinItemsDiff; minItemsDiff != nil &&
-			minItemsDiff.From == nil && minItemsDiff.To != nil {
+		if minItemsDiff := info.schemaDiff.MinItemsDiff; uintBoundSet(minItemsDiff) {
 			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
 			result = append(result, info.newChange(
 				RequestBodyMinItemsSetId,
@@ -25,7 +24,7 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 
 		info.walkProperties(func(p propertyInfo) {
 			minItemsDiff := p.propertyDiff.MinItemsDiff
-			if minItemsDiff == nil || minItemsDiff.From != nil || minItemsDiff.To == nil {
+			if !uintBoundSet(minItemsDiff) {
 				return
 			}
 			if p.propertyDiff.Revision.ReadOnly {

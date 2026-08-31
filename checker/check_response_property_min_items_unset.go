@@ -13,8 +13,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if minItemsDiff := info.schemaDiff.MinItemsDiff; minItemsDiff != nil &&
-			minItemsDiff.From != nil && minItemsDiff.To == nil {
+		if minItemsDiff := info.schemaDiff.MinItemsDiff; uintBoundUnset(minItemsDiff) {
 			baseSource, _ := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
 			result = append(result, info.newChange(
 				ResponseBodyMinItemsUnsetId,
@@ -25,7 +24,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 
 		info.walkProperties(func(p propertyInfo) {
 			minItemsDiff := p.propertyDiff.MinItemsDiff
-			if minItemsDiff == nil || minItemsDiff.To != nil || minItemsDiff.From == nil {
+			if !uintBoundUnset(minItemsDiff) {
 				return
 			}
 			if p.propertyDiff.Revision.WriteOnly {

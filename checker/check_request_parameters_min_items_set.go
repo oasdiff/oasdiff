@@ -32,8 +32,7 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 					if minItemsDiff == nil {
 						continue
 					}
-					if minItemsDiff.From != nil ||
-						minItemsDiff.To == nil {
+					if !uintBoundSet(minItemsDiff) {
 						continue
 					}
 
