@@ -45,6 +45,7 @@ func walkModifiedParameters(diffReport *diff.Diff, operationsSources *diff.Opera
 type headerInfo struct {
 	opInfo         opInfo
 	responseStatus string
+	responseDiff   *diff.ResponseDiff
 	name           string
 	headerDiff     *diff.HeaderDiff
 }
@@ -72,6 +73,7 @@ func walkModifiedResponseHeaders(diffReport *diff.Diff, operationsSources *diff.
 					processor(headerInfo{
 						opInfo:         opInfo,
 						responseStatus: responseStatus,
+						responseDiff:   responseDiff,
 						name:           name,
 						headerDiff:     headerDiff,
 					})

@@ -10,44 +10,21 @@ const (
 
 func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
+		requiredDiff := h.headerDiff.RequiredDiff
+		if requiredDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil {
-				continue
-			}
-			if operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
-					continue
-				}
-
-				for headerName, headerDiff := range responseDiff.HeadersDiff.Modified {
-					requiredDiff := headerDiff.RequiredDiff
-					if requiredDiff == nil {
-						continue
-					}
-					if requiredDiff.From != true {
-						continue
-					}
-
-					baseSource, revisionSource := headerSources(operationsSources, operationItem, responseDiff, headerName)
-					result = append(result, opInfo.NewApiChange(
-						ResponseHeaderBecameOptionalId,
-						[]any{headerName, responseStatus},
-						"",
-					).WithSources(baseSource, revisionSource))
-				}
-			}
+		if requiredDiff.From != true {
+			return
 		}
-	}
+
+		baseSource, revisionSource := headerSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+		result = append(result, h.opInfo.NewApiChange(
+			ResponseHeaderBecameOptionalId,
+			[]any{h.name, h.responseStatus},
+			"",
+		).WithSources(baseSource, revisionSource))
+	})
 	return result
 }

@@ -13,53 +13,35 @@ const (
 
 func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		param := p.paramDiff.Revision
+		if param == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 
-			// Check modified parameters
-			for _, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for _, paramDiff := range paramDiffs {
-					param := paramDiff.Revision
-					if param == nil {
-						continue
-					}
+		// Check parameter schema
+		changes := checkParameterListOfTypesChange(
+			p.opInfo,
+			p.paramDiff,
+			param,
+		)
+		result = append(result, changes...)
 
-					// Check parameter schema
-					changes := checkParameterListOfTypesChange(
-						opInfo,
-						paramDiff,
+		// Check parameter properties
+		if p.paramDiff.SchemaDiff != nil {
+			checkModifiedPropertiesDiff(
+				p.paramDiff.SchemaDiff,
+				func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+					changes := checkParameterPropertyListOfTypesChange(
+						p.opInfo,
+						propertyPath,
+						propertyName,
+						propertyDiff,
 						param,
 					)
 					result = append(result, changes...)
-
-					// Check parameter properties
-					if paramDiff.SchemaDiff != nil {
-						checkModifiedPropertiesDiff(
-							paramDiff.SchemaDiff,
-							func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-								changes := checkParameterPropertyListOfTypesChange(
-									opInfo,
-									propertyPath,
-									propertyName,
-									propertyDiff,
-									param,
-								)
-								result = append(result, changes...)
-							})
-					}
-				}
-			}
+				})
 		}
-	}
+	})
 	return result
 }

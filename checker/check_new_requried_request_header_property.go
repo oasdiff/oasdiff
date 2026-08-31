@@ -13,48 +13,27 @@ const (
 
 func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.location != "header" {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-
-				if paramLocation != "header" {
-					continue
+		baseSource, revisionSource := ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
+		checkAddedPropertiesDiff(
+			p.paramDiff.SchemaDiff,
+			func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff) {
+				if newProperty.ReadOnly {
+					return
+				}
+				if !slices.Contains(parent.Revision.Required, newPropertyName) {
+					return
 				}
 
-				for paramName, paramDiff := range paramDiffs {
-					baseSource, revisionSource := ParameterSources(operationsSources, operationItem, paramDiff)
-					checkAddedPropertiesDiff(
-						paramDiff.SchemaDiff,
-						func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff) {
-							if newProperty.ReadOnly {
-								return
-							}
-							if !slices.Contains(parent.Revision.Required, newPropertyName) {
-								return
-							}
-
-							result = append(result, opInfo.NewApiChange(
-								NewRequiredRequestHeaderPropertyId,
-								[]any{paramName, propertyFullName(propertyPath, newPropertyName)},
-								"",
-							).WithSources(baseSource, revisionSource))
-						})
-				}
-			}
-		}
-	}
+				result = append(result, p.opInfo.NewApiChange(
+					NewRequiredRequestHeaderPropertyId,
+					[]any{p.name, propertyFullName(propertyPath, newPropertyName)},
+					"",
+				).WithSources(baseSource, revisionSource))
+			})
+	})
 	return result
 }

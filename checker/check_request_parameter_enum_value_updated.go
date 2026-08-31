@@ -15,54 +15,35 @@ const (
 
 func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			if operationItem.ParametersDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
-				for paramName, paramItem := range paramItems {
-					if paramItem.SchemaDiff == nil {
-						continue
-					}
 
-					result = append(result, checkParameterEnumDiff(
-						opInfo,
-						paramItem.SchemaDiff.EnumDiff,
-						paramItem.SchemaDiff,
-						RequestParameterEnumValueRemovedId,
-						RequestParameterEnumValueAddedId,
-						func(enumVal any) []any { return []any{enumVal, paramLocation, paramName} },
-					)...)
+		result = append(result, checkParameterEnumDiff(
+			p.opInfo,
+			p.paramDiff.SchemaDiff.EnumDiff,
+			p.paramDiff.SchemaDiff,
+			RequestParameterEnumValueRemovedId,
+			RequestParameterEnumValueAddedId,
+			func(enumVal any) []any { return []any{enumVal, p.location, p.name} },
+		)...)
 
-					checkModifiedPropertiesDiff(
-						paramItem.SchemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-							result = append(result, checkParameterEnumDiff(
-								opInfo,
-								propertyDiff.EnumDiff,
-								propertyDiff,
-								RequestParameterPropertyEnumValueRemovedId,
-								RequestParameterPropertyEnumValueAddedId,
-								func(enumVal any) []any {
-									return []any{enumVal, propertyFullName(propertyPath, propertyName), paramLocation, paramName}
-								},
-							)...)
-						})
-				}
-			}
-		}
-	}
+		checkModifiedPropertiesDiff(
+			p.paramDiff.SchemaDiff,
+			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+				result = append(result, checkParameterEnumDiff(
+					p.opInfo,
+					propertyDiff.EnumDiff,
+					propertyDiff,
+					RequestParameterPropertyEnumValueRemovedId,
+					RequestParameterPropertyEnumValueAddedId,
+					func(enumVal any) []any {
+						return []any{enumVal, propertyFullName(propertyPath, propertyName), p.location, p.name}
+					},
+				)...)
+			})
+	})
 	return result
 }
 

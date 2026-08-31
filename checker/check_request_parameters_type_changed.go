@@ -105,82 +105,65 @@ func withoutNull(types []string) []string {
 
 func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
 
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "type")
+		schemaDiff := p.paramDiff.SchemaDiff
+		typeDiff := schemaDiff.TypeDiff
+		formatDiff := schemaDiff.FormatDiff
 
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "type")
-					schemaDiff := paramDiff.SchemaDiff
-					typeDiff := schemaDiff.TypeDiff
-					formatDiff := schemaDiff.FormatDiff
+		if !typeDiff.Empty() || !formatDiff.Empty() {
 
-					if !typeDiff.Empty() || !formatDiff.Empty() {
+			id := RequestParameterTypeGeneralizedId
+			comment := ""
 
-						id := RequestParameterTypeGeneralizedId
-						comment := ""
-
-						// The parameter's own value is serialized as a string on the wire
-						// (query/path/header/cookie), so it is non-strongly-typed: a binary
-						// generalized/changed verdict with stronglyTyped=false. This differs
-						// on purpose from the property-level check below, which cannot tell
-						// how an object parameter is serialized and therefore forks three ways.
-						if typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type) {
-							if isParameterScalarToFormExplodeArray(paramDiff, typeDiff) {
-								// The type change would otherwise be breaking; explain why
-								// widening to a form/explode array is safe so the verdict is
-								// not surprising.
-								comment = RequestParameterTypeFormExplodeArrayCommentId
-							} else {
-								id = RequestParameterTypeChangedId
-							}
-						}
-
-						result = append(result, opInfo.NewApiChange(
-							id,
-							[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
-							comment,
-						).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
-					}
-
-					checkModifiedPropertiesDiff(
-						schemaDiff,
-						func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-
-							propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, operationItem, propertyDiff, "type")
-							schemaDiff := propertyDiff
-							typeDiff := schemaDiff.TypeDiff
-							formatDiff := schemaDiff.FormatDiff
-
-							if !typeDiff.Empty() || !formatDiff.Empty() {
-
-								id, comment := checkRequestParameterPropertyTypeChanged(typeDiff, formatDiff, schemaDiff)
-
-								result = append(result, opInfo.NewApiChange(
-									id,
-									[]any{paramLocation, paramName, getTypeFormatDimension(schemaDiff), propertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
-									comment,
-								).WithSchema(schemaDiff).WithSources(propBaseSource, propRevisionSource))
-							}
-						})
+			// The parameter's own value is serialized as a string on the wire
+			// (query/path/header/cookie), so it is non-strongly-typed: a binary
+			// generalized/changed verdict with stronglyTyped=false. This differs
+			// on purpose from the property-level check below, which cannot tell
+			// how an object parameter is serialized and therefore forks three ways.
+			if typeOrFormatBreaking(typeDiff, formatDiff, false, schemaDiff.Revision.Type) {
+				if isParameterScalarToFormExplodeArray(p.paramDiff, typeDiff) {
+					// The type change would otherwise be breaking; explain why
+					// widening to a form/explode array is safe so the verdict is
+					// not surprising.
+					comment = RequestParameterTypeFormExplodeArrayCommentId
+				} else {
+					id = RequestParameterTypeChangedId
 				}
 			}
+
+			result = append(result, p.opInfo.NewApiChange(
+				id,
+				[]any{p.location, p.name, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
+				comment,
+			).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 		}
-	}
+
+		checkModifiedPropertiesDiff(
+			schemaDiff,
+			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
+
+				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
+				schemaDiff := propertyDiff
+				typeDiff := schemaDiff.TypeDiff
+				formatDiff := schemaDiff.FormatDiff
+
+				if !typeDiff.Empty() || !formatDiff.Empty() {
+
+					id, comment := checkRequestParameterPropertyTypeChanged(typeDiff, formatDiff, schemaDiff)
+
+					result = append(result, p.opInfo.NewApiChange(
+						id,
+						[]any{p.location, p.name, getTypeFormatDimension(schemaDiff), propertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
+						comment,
+					).WithSchema(schemaDiff).WithSources(propBaseSource, propRevisionSource))
+				}
+			})
+	})
 	return result
 }
 

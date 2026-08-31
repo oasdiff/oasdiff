@@ -12,72 +12,53 @@ const (
 
 func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			if operationItem.ParametersDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
-				for paramName, paramItem := range paramItems {
-					if paramItem.SchemaDiff == nil {
-						continue
-					}
-					if paramItem.SchemaDiff.ExtensionsDiff == nil {
-						continue
-					}
-					if paramItem.SchemaDiff.ExtensionsDiff.Modified == nil {
-						continue
-					}
-					if paramItem.SchemaDiff.ExtensionsDiff.Modified[diff.XExtensibleEnumExtension] == nil {
-						continue
-					}
-					from, ok := paramItem.SchemaDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]any)
-					if !ok {
-						continue
-					}
-					to, ok := paramItem.SchemaDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]any)
-					if !ok {
-						continue
-					}
+		if p.paramDiff.SchemaDiff.ExtensionsDiff == nil {
+			return
+		}
+		if p.paramDiff.SchemaDiff.ExtensionsDiff.Modified == nil {
+			return
+		}
+		if p.paramDiff.SchemaDiff.ExtensionsDiff.Modified[diff.XExtensibleEnumExtension] == nil {
+			return
+		}
+		from, ok := p.paramDiff.SchemaDiff.Base.Extensions[diff.XExtensibleEnumExtension].([]any)
+		if !ok {
+			return
+		}
+		to, ok := p.paramDiff.SchemaDiff.Revision.Extensions[diff.XExtensibleEnumExtension].([]any)
+		if !ok {
+			return
+		}
 
-					fromSlice := make([]string, len(from))
-					for i, item := range from {
-						fromSlice[i] = item.(string)
-					}
+		fromSlice := make([]string, len(from))
+		for i, item := range from {
+			fromSlice[i] = item.(string)
+		}
 
-					toSlice := make([]string, len(to))
-					for i, item := range to {
-						toSlice[i] = item.(string)
-					}
+		toSlice := make([]string, len(to))
+		for i, item := range to {
+			toSlice[i] = item.(string)
+		}
 
-					deletedVals := make([]string, 0)
-					for _, fromVal := range fromSlice {
-						if !slices.Contains(toSlice, fromVal) {
-							deletedVals = append(deletedVals, fromVal)
-						}
-					}
-
-					for _, enumVal := range deletedVals {
-						baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, operationItem, paramItem.SchemaDiff, diff.XExtensibleEnumExtension, enumVal)
-						result = append(result, opInfo.NewApiChange(
-							RequestParameterXExtensibleEnumValueRemovedId,
-							[]any{enumVal, paramLocation, paramName},
-							"",
-						).WithSources(baseSource, revisionSource))
-					}
-				}
+		deletedVals := make([]string, 0)
+		for _, fromVal := range fromSlice {
+			if !slices.Contains(toSlice, fromVal) {
+				deletedVals = append(deletedVals, fromVal)
 			}
 		}
-	}
+
+		for _, enumVal := range deletedVals {
+			baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, diff.XExtensibleEnumExtension, enumVal)
+			result = append(result, p.opInfo.NewApiChange(
+				RequestParameterXExtensibleEnumValueRemovedId,
+				[]any{enumVal, p.location, p.name},
+				"",
+			).WithSources(baseSource, revisionSource))
+		}
+	})
 	return result
 }

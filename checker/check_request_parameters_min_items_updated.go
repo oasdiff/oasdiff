@@ -11,46 +11,30 @@ const (
 
 func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minItems")
-					minItemsDiff := paramDiff.SchemaDiff.MinItemsDiff
-					if minItemsDiff == nil {
-						continue
-					}
-					if uintBoundSet(minItemsDiff) {
-						// reported by request-parameter-min-items-set
-						continue
-					}
-
-					id := RequestParameterMinItemsIncreasedId
-					if !isIncreasedValue(minItemsDiff) {
-						id = RequestParameterMinItemsDecreasedId
-					}
-
-					result = append(result, opInfo.NewApiChange(
-						id,
-						[]any{paramLocation, paramName, minItemsDiff.From, minItemsDiff.To},
-						"",
-					).WithSources(baseSource, revisionSource))
-				}
-			}
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
+		minItemsDiff := p.paramDiff.SchemaDiff.MinItemsDiff
+		if minItemsDiff == nil {
+			return
 		}
-	}
+		if uintBoundSet(minItemsDiff) {
+			// reported by request-parameter-min-items-set
+			return
+		}
+
+		id := RequestParameterMinItemsIncreasedId
+		if !isIncreasedValue(minItemsDiff) {
+			id = RequestParameterMinItemsDecreasedId
+		}
+
+		result = append(result, p.opInfo.NewApiChange(
+			id,
+			[]any{p.location, p.name, minItemsDiff.From, minItemsDiff.To},
+			"",
+		).WithSources(baseSource, revisionSource))
+	})
 	return result
 }
