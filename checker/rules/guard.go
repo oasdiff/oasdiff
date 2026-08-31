@@ -8,10 +8,15 @@ type Guard string
 
 const (
 	// GuardReadOnly: the changed property is readOnly, so it does not
-	// appear in requests; request-side effects are nullified.
+	// appear in requests; request-side effects are nullified. The keyword
+	// is scoped to object properties ("Relevant only for Schema
+	// \"properties\" definitions" per OpenAPI), so a readOnly on a body,
+	// parameter, or header root schema declares nothing, and only
+	// property-level rules carry this guard.
 	GuardReadOnly Guard = "read-only"
 	// GuardWriteOnly: the changed property is writeOnly, so it does not
-	// appear in responses; response-side effects are nullified.
+	// appear in responses; response-side effects are nullified. Scoped to
+	// object properties, same as readOnly.
 	GuardWriteOnly Guard = "write-only"
 	// GuardSanctioned: the removed element was deprecated and its sunset
 	// period was honored, so the removal follows the deprecation contract.
