@@ -11,44 +11,28 @@ const (
 
 func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
+		for _, entry := range []struct {
+			diff  *diff.ValueDiff
+			id    string
+			field string
+		}{
+			{p.paramDiff.SchemaDiff.MinDiff, RequestParameterMinSetId, "minimum"},
+			{p.paramDiff.SchemaDiff.ExclusiveMinDiff, RequestParameterExclusiveMinSetId, "exclusiveMinimum"},
+		} {
+			if entry.diff == nil || entry.diff.From != nil || entry.diff.To == nil {
 				continue
 			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
-					for _, entry := range []struct {
-						diff  *diff.ValueDiff
-						id    string
-						field string
-					}{
-						{paramDiff.SchemaDiff.MinDiff, RequestParameterMinSetId, "minimum"},
-						{paramDiff.SchemaDiff.ExclusiveMinDiff, RequestParameterExclusiveMinSetId, "exclusiveMinimum"},
-					} {
-						if entry.diff == nil || entry.diff.From != nil || entry.diff.To == nil {
-							continue
-						}
-						_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, entry.field)
-						result = append(result, opInfo.NewApiChange(
-							entry.id,
-							[]any{paramLocation, paramName, entry.diff.To},
-							commentId(entry.id),
-						).WithSources(nil, revisionSource))
-					}
-				}
-			}
+			_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
+			result = append(result, p.opInfo.NewApiChange(
+				entry.id,
+				[]any{p.location, p.name, entry.diff.To},
+				commentId(entry.id),
+			).WithSources(nil, revisionSource))
 		}
-	}
+	})
 	return result
 }

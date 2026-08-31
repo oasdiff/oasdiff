@@ -10,41 +10,25 @@ const (
 
 func RequestParameterMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
-					maxLengthDiff := paramDiff.SchemaDiff.MaxLengthDiff
-					if maxLengthDiff == nil {
-						continue
-					}
-					if maxLengthDiff.From != nil ||
-						maxLengthDiff.To == nil {
-						continue
-					}
+		maxLengthDiff := p.paramDiff.SchemaDiff.MaxLengthDiff
+		if maxLengthDiff == nil {
+			return
+		}
+		if maxLengthDiff.From != nil ||
+			maxLengthDiff.To == nil {
+			return
+		}
 
-					_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maxLength")
-					result = append(result, opInfo.NewApiChange(
-						RequestParameterMaxLengthSetId,
-						[]any{paramLocation, paramName, maxLengthDiff.To},
-						commentId(RequestParameterMaxLengthSetId),
-					).WithSources(nil, revisionSource))
-				}
-			}
-		}
-	}
+		_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "maxLength")
+		result = append(result, p.opInfo.NewApiChange(
+			RequestParameterMaxLengthSetId,
+			[]any{p.location, p.name, maxLengthDiff.To},
+			commentId(RequestParameterMaxLengthSetId),
+		).WithSources(nil, revisionSource))
+	})
 	return result
 }

@@ -11,53 +11,37 @@ const (
 
 func RequestParameterMaxItemsUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "maxItems")
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "maxItems")
 
-					// Check for maxItems on the parameter schema itself (for array parameters)
-					maxItemsDiff := paramDiff.SchemaDiff.MaxItemsDiff
-					if maxItemsDiff == nil && paramDiff.SchemaDiff.ItemsDiff != nil {
-						// Fallback: check for maxItems on the items schema (legacy behavior)
-						maxItemsDiff = paramDiff.SchemaDiff.ItemsDiff.MaxItemsDiff
-					}
-
-					if maxItemsDiff == nil {
-						continue
-					}
-					if maxItemsDiff.From == nil ||
-						maxItemsDiff.To == nil {
-						continue
-					}
-
-					id := RequestParameterMaxItemsDecreasedId
-					if isIncreasedValue(maxItemsDiff) {
-						id = RequestParameterMaxItemsIncreasedId
-					}
-
-					result = append(result, opInfo.NewApiChange(
-						id,
-						[]any{paramLocation, paramName, maxItemsDiff.From, maxItemsDiff.To},
-						"",
-					).WithSources(baseSource, revisionSource))
-				}
-			}
+		// Check for maxItems on the parameter schema itself (for array parameters)
+		maxItemsDiff := p.paramDiff.SchemaDiff.MaxItemsDiff
+		if maxItemsDiff == nil && p.paramDiff.SchemaDiff.ItemsDiff != nil {
+			// Fallback: check for maxItems on the items schema (legacy behavior)
+			maxItemsDiff = p.paramDiff.SchemaDiff.ItemsDiff.MaxItemsDiff
 		}
-	}
+
+		if maxItemsDiff == nil {
+			return
+		}
+		if maxItemsDiff.From == nil ||
+			maxItemsDiff.To == nil {
+			return
+		}
+
+		id := RequestParameterMaxItemsDecreasedId
+		if isIncreasedValue(maxItemsDiff) {
+			id = RequestParameterMaxItemsIncreasedId
+		}
+
+		result = append(result, p.opInfo.NewApiChange(
+			id,
+			[]any{p.location, p.name, maxItemsDiff.From, maxItemsDiff.To},
+			"",
+		).WithSources(baseSource, revisionSource))
+	})
 	return result
 }

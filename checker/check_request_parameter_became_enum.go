@@ -10,40 +10,21 @@ const (
 
 func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			if operationItem.ParametersDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
-				for paramName, paramItem := range paramItems {
-					if paramItem.SchemaDiff == nil {
-						continue
-					}
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramItem.SchemaDiff, "enum")
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
 
-					if enumDiff := paramItem.SchemaDiff.EnumDiff; enumDiff == nil || !enumDiff.EnumAdded {
-						continue
-					}
-
-					result = append(result, opInfo.NewApiChange(
-						RequestParameterBecameEnumId,
-						[]any{paramLocation, paramName},
-						"",
-					).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, revisionSource))
-				}
-			}
+		if enumDiff := p.paramDiff.SchemaDiff.EnumDiff; enumDiff == nil || !enumDiff.EnumAdded {
+			return
 		}
-	}
+
+		result = append(result, p.opInfo.NewApiChange(
+			RequestParameterBecameEnumId,
+			[]any{p.location, p.name},
+			"",
+		).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+	})
 	return result
 }

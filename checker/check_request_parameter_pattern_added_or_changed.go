@@ -15,62 +15,43 @@ const (
 
 func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			if operationItem.ParametersDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Modified {
-				for paramName, paramItem := range paramItems {
-					if paramItem.SchemaDiff == nil {
-						continue
-					}
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramItem.SchemaDiff, "pattern")
-					patternDiff := paramItem.SchemaDiff.PatternDiff
-					if patternDiff == nil {
-						continue
-					}
-
-					if patternDiff.From == "" {
-						result = append(result, opInfo.NewApiChange(
-							RequestParameterPatternAddedId,
-							[]any{patternDiff.To, paramLocation, paramName},
-							PatternAddedCommentId,
-						).WithSchema(paramItem.SchemaDiff).WithSources(nil, revisionSource))
-					} else if patternDiff.To == "" {
-						result = append(result, opInfo.NewApiChange(
-							RequestParameterPatternRemovedId,
-							[]any{patternDiff.From, paramLocation, paramName},
-							"",
-						).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, nil))
-					} else {
-						id := RequestParameterPatternChangedId
-						comment := PatternChangedCommentId
-
-						if patternDiff.To == ".*" {
-							id = RequestParameterPatternGeneralizedId
-							comment = ""
-						}
-
-						result = append(result, opInfo.NewApiChange(
-							id,
-							[]any{paramLocation, paramName, patternDiff.From, patternDiff.To},
-							comment,
-						).WithSchema(paramItem.SchemaDiff).WithSources(baseSource, revisionSource))
-					}
-				}
-			}
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "pattern")
+		patternDiff := p.paramDiff.SchemaDiff.PatternDiff
+		if patternDiff == nil {
+			return
 		}
-	}
+
+		if patternDiff.From == "" {
+			result = append(result, p.opInfo.NewApiChange(
+				RequestParameterPatternAddedId,
+				[]any{patternDiff.To, p.location, p.name},
+				PatternAddedCommentId,
+			).WithSchema(p.paramDiff.SchemaDiff).WithSources(nil, revisionSource))
+		} else if patternDiff.To == "" {
+			result = append(result, p.opInfo.NewApiChange(
+				RequestParameterPatternRemovedId,
+				[]any{patternDiff.From, p.location, p.name},
+				"",
+			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, nil))
+		} else {
+			id := RequestParameterPatternChangedId
+			comment := PatternChangedCommentId
+
+			if patternDiff.To == ".*" {
+				id = RequestParameterPatternGeneralizedId
+				comment = ""
+			}
+
+			result = append(result, p.opInfo.NewApiChange(
+				id,
+				[]any{p.location, p.name, patternDiff.From, patternDiff.To},
+				comment,
+			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+		}
+	})
 	return result
 }

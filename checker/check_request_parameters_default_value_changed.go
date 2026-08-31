@@ -12,59 +12,43 @@ const (
 
 func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+
+		baseParam := p.paramDiff.Base
+		if baseParam == nil || baseParam.Required {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
 
-					baseParam := paramDiff.Base
-					if baseParam == nil || baseParam.Required {
-						continue
-					}
-
-					revisionParam := paramDiff.Revision
-					if revisionParam == nil || revisionParam.Required {
-						continue
-					}
-
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
-
-					defaultValueDiff := paramDiff.SchemaDiff.DefaultDiff
-					if defaultValueDiff.Empty() {
-						continue
-					}
-
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "default")
-					appendResultItem := func(messageId string, a ...any) {
-						result = append(result, opInfo.NewApiChange(
-							messageId,
-							a,
-							"",
-						).WithSources(baseSource, revisionSource))
-					}
-
-					if defaultValueDiff.From == nil {
-						appendResultItem(RequestParameterDefaultValueAddedId, paramLocation, paramName, defaultValueDiff.To)
-					} else if defaultValueDiff.To == nil {
-						appendResultItem(RequestParameterDefaultValueRemovedId, paramLocation, paramName, defaultValueDiff.From)
-					} else {
-						appendResultItem(RequestParameterDefaultValueChangedId, paramLocation, paramName, defaultValueDiff.From, defaultValueDiff.To)
-					}
-				}
-			}
+		revisionParam := p.paramDiff.Revision
+		if revisionParam == nil || revisionParam.Required {
+			return
 		}
-	}
+
+		if p.paramDiff.SchemaDiff == nil {
+			return
+		}
+
+		defaultValueDiff := p.paramDiff.SchemaDiff.DefaultDiff
+		if defaultValueDiff.Empty() {
+			return
+		}
+
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "default")
+		appendResultItem := func(messageId string, a ...any) {
+			result = append(result, p.opInfo.NewApiChange(
+				messageId,
+				a,
+				"",
+			).WithSources(baseSource, revisionSource))
+		}
+
+		if defaultValueDiff.From == nil {
+			appendResultItem(RequestParameterDefaultValueAddedId, p.location, p.name, defaultValueDiff.To)
+		} else if defaultValueDiff.To == nil {
+			appendResultItem(RequestParameterDefaultValueRemovedId, p.location, p.name, defaultValueDiff.From)
+		} else {
+			appendResultItem(RequestParameterDefaultValueChangedId, p.location, p.name, defaultValueDiff.From, defaultValueDiff.To)
+		}
+	})
 	return result
 }

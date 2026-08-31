@@ -16,34 +16,15 @@ const (
 // server's output and is safe (info).
 func ResponseHeaderBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
+		if id := nullabilityChangeId(h.headerDiff.SchemaDiff, ResponseHeaderBecameNullableId, ResponseHeaderBecameNotNullableId); id != "" {
+			baseSource, revisionSource := headerSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+			result = append(result, h.opInfo.NewApiChange(
+				id,
+				[]any{h.name, h.responseStatus},
+				"",
+			).WithSources(baseSource, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
-					continue
-				}
-				for headerName, headerDiff := range responseDiff.HeadersDiff.Modified {
-					if id := nullabilityChangeId(headerDiff.SchemaDiff, ResponseHeaderBecameNullableId, ResponseHeaderBecameNotNullableId); id != "" {
-						baseSource, revisionSource := headerSources(operationsSources, operationItem, responseDiff, headerName)
-						result = append(result, opInfo.NewApiChange(
-							id,
-							[]any{headerName, responseStatus},
-							"",
-						).WithSources(baseSource, revisionSource))
-					}
-				}
-			}
-		}
-	}
+	})
 	return result
 }

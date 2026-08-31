@@ -10,40 +10,24 @@ const (
 
 func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		if p.paramDiff.SchemaDiff == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramDiffs := range operationItem.ParametersDiff.Modified {
-				for paramName, paramDiff := range paramDiffs {
-					if paramDiff.SchemaDiff == nil {
-						continue
-					}
-					_, revisionSource := SchemaFieldSources(operationsSources, operationItem, paramDiff.SchemaDiff, "minItems")
-					minItemsDiff := paramDiff.SchemaDiff.MinItemsDiff
-					if minItemsDiff == nil {
-						continue
-					}
-					if !uintBoundSet(minItemsDiff) {
-						continue
-					}
+		_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
+		minItemsDiff := p.paramDiff.SchemaDiff.MinItemsDiff
+		if minItemsDiff == nil {
+			return
+		}
+		if !uintBoundSet(minItemsDiff) {
+			return
+		}
 
-					result = append(result, opInfo.NewApiChange(
-						RequestParameterMinItemsSetId,
-						[]any{paramLocation, paramName, minItemsDiff.To},
-						commentId(RequestParameterMinItemsSetId),
-					).WithSources(nil, revisionSource))
-				}
-			}
-		}
-	}
+		result = append(result, p.opInfo.NewApiChange(
+			RequestParameterMinItemsSetId,
+			[]any{p.location, p.name, minItemsDiff.To},
+			commentId(RequestParameterMinItemsSetId),
+		).WithSources(nil, revisionSource))
+	})
 	return result
 }

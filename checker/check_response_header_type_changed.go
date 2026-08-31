@@ -28,54 +28,35 @@ const (
 // string/date-time -> integer -- is breaking on the format axis.
 func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
+		// Only the simple schema serialization (the common case), where
+		// the value is text on the wire and non-strongly-typed. A header
+		// serialized via `content` (e.g. content: application/json)
+		// produces a ContentDiff, not a SchemaDiff, and would be
+		// strongly typed; that is a separate slice, not covered here.
+		schemaDiff := h.headerDiff.SchemaDiff
+		if schemaDiff == nil || schemaDiff.Base == nil || schemaDiff.Revision == nil {
+			return
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ResponsesDiff == nil || operationItem.ResponsesDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
-					continue
-				}
-				for headerName, headerDiff := range responseDiff.HeadersDiff.Modified {
-					// Only the simple schema serialization (the common case), where
-					// the value is text on the wire and non-strongly-typed. A header
-					// serialized via `content` (e.g. content: application/json)
-					// produces a ContentDiff, not a SchemaDiff, and would be
-					// strongly typed; that is a separate slice, not covered here.
-					schemaDiff := headerDiff.SchemaDiff
-					if schemaDiff == nil || schemaDiff.Base == nil || schemaDiff.Revision == nil {
-						continue
-					}
-					typeDiff := schemaDiff.TypeDiff
-					formatDiff := schemaDiff.FormatDiff
-					if typeDiff.Empty() && formatDiff.Empty() {
-						continue
-					}
-
-					// A header value is text on the wire, never a strongly typed
-					// media type, so stronglyTyped is false (like a scalar
-					// parameter); the compatible verdict carries a header-specific
-					// comment rather than the shared media-type (XML) one.
-					id, comment := responseTypeChangeId(typeDiff, formatDiff, false, ResponseHeaderTypeCompatibleCommentId, schemaDiff,
-						ResponseHeaderTypeSpecializedId, ResponseHeaderTypeCompatibleId, ResponseHeaderTypeGeneralizedId, ResponseHeaderTypeChangedId)
-
-					baseSource, revisionSource := headerSources(operationsSources, operationItem, responseDiff, headerName)
-					result = append(result, opInfo.NewApiChange(
-						id,
-						[]any{headerName, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), responseStatus},
-						comment,
-					).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
-				}
-			}
+		typeDiff := schemaDiff.TypeDiff
+		formatDiff := schemaDiff.FormatDiff
+		if typeDiff.Empty() && formatDiff.Empty() {
+			return
 		}
-	}
+
+		// A header value is text on the wire, never a strongly typed
+		// media type, so stronglyTyped is false (like a scalar
+		// parameter); the compatible verdict carries a header-specific
+		// comment rather than the shared media-type (XML) one.
+		id, comment := responseTypeChangeId(typeDiff, formatDiff, false, ResponseHeaderTypeCompatibleCommentId, schemaDiff,
+			ResponseHeaderTypeSpecializedId, ResponseHeaderTypeCompatibleId, ResponseHeaderTypeGeneralizedId, ResponseHeaderTypeChangedId)
+
+		baseSource, revisionSource := headerSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+		result = append(result, h.opInfo.NewApiChange(
+			id,
+			[]any{h.name, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), h.responseStatus},
+			comment,
+		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+	})
 	return result
 }
