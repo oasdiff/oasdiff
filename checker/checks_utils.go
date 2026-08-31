@@ -70,6 +70,17 @@ func IsIncreased(from any, to any) bool {
 	return false
 }
 
+// minItems is a value keyword whose zero is the absent constraint: minItems: 0
+// requires nothing, so the diff reports absence as 0 rather than nil, and
+// setting or unsetting the bound is a transition to or from zero.
+func uintBoundSet(d *diff.ValueDiff) bool {
+	return d != nil && d.From == uint64(0) && d.To != uint64(0)
+}
+
+func uintBoundUnset(d *diff.ValueDiff) bool {
+	return d != nil && d.From != uint64(0) && d.To == uint64(0)
+}
+
 func isIncreasedValue(diff *diff.ValueDiff) bool {
 	return IsIncreased(diff.From, diff.To)
 }

@@ -33,8 +33,8 @@ func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					if minItemsDiff == nil {
 						continue
 					}
-					if minItemsDiff.From == nil ||
-						minItemsDiff.To == nil {
+					if uintBoundSet(minItemsDiff) {
+						// reported by request-parameter-min-items-set
 						continue
 					}
 

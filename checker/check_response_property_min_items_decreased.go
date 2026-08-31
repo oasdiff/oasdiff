@@ -14,7 +14,7 @@ func ResponsePropertyMinItemsDecreasedCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minItemsDiff := info.schemaDiff.MinItemsDiff; minItemsDiff != nil &&
-			minItemsDiff.From != nil && minItemsDiff.To != nil && isDecreasedValue(minItemsDiff) {
+			!uintBoundUnset(minItemsDiff) && isDecreasedValue(minItemsDiff) {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
 			result = append(result, info.newChange(
 				ResponseBodyMinItemsDecreasedId,
@@ -25,7 +25,7 @@ func ResponsePropertyMinItemsDecreasedCheck(diffReport *diff.Diff, operationsSou
 
 		info.walkProperties(func(p propertyInfo) {
 			minItemsDiff := p.propertyDiff.MinItemsDiff
-			if minItemsDiff == nil || minItemsDiff.To == nil || minItemsDiff.From == nil {
+			if minItemsDiff == nil || uintBoundUnset(minItemsDiff) {
 				return
 			}
 			if !isDecreasedValue(minItemsDiff) {
