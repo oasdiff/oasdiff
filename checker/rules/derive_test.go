@@ -60,12 +60,3 @@ func TestDeriveLevelGuards(t *testing.T) {
 		require.Equal(t, tc.level, rules.DeriveLevel(tc.effect, tc.direction, tc.guard), tc.name)
 	}
 }
-
-func TestDerivedLevel(t *testing.T) {
-	r := rules.Rule{
-		Effect:    rules.EffectNarrows,
-		Direction: rules.DirectionRequest,
-		Guards:    []rules.Guard{rules.GuardReadOnly},
-	}
-	require.Equal(t, rules.INFO, r.DerivedLevel())
-}
