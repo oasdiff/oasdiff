@@ -55,8 +55,10 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					// changed value is neither. Mixed directions cannot be
 					// ordered and stay a warning.
 					if pd := mediaType.NameDiff.ParametersDiff; !pd.Empty() {
-						// the parameter is named separately, so the media type
-						// reads as its bare name
+						// the messages name the changed parameter in its own
+						// argument, so the media type argument omits the
+						// parameters: "parameter charset was removed from
+						// text/html", not "... from text/html; charset=utf-8"
 						bareName := mediaType.NameDiff.BaseBareName()
 						if pd.Mixed() || mediaType.NameDiff.BareNameChanged() {
 							result = append(result, opInfo.NewApiChange(
