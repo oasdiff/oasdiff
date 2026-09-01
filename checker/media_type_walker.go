@@ -96,7 +96,8 @@ type propertyInfo struct {
 // so the second call overrides the body-level decision).
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
-		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff))
+		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
+		WithGuards(propertyGuards(p.propertyDiff))
 }
 
 // modifiedSchemaPresentBothSides reports whether a schema changed on both

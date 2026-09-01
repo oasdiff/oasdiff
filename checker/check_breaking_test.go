@@ -401,7 +401,9 @@ func TestBreaking_DeletePatten(t *testing.T) {
 	}
 }
 
-// adding a pattern to a schema is breaking
+// adding a pattern to a read-only request property is not breaking: the
+// property never appears in a request, so the read-only guard derives info.
+// The same edit on an ordinary property is an error; see guard_test.go.
 func TestBreaking_AddPattern(t *testing.T) {
 	s1, err := open("../data/pattern-revision.yaml")
 	require.NoError(t, err)
@@ -411,14 +413,15 @@ func TestBreaking_AddPattern(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	require.Equal(t, "request-property-pattern-added", errs[0].GetId())
-	require.Equal(t, "added the pattern `^[a-z]+$` to the request property `created`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	change := requireChange(t, errs, checker.RequestPropertyPatternAddedId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+	require.Equal(t, "added the pattern `^[a-z]+$` to the request property `created`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "read-only")
 }
 
-// adding a pattern to a schema is breaking for recursive properties
+// the read-only guard reaches recursive properties: the walk hands the
+// nested property's own schema, so its readOnly is what the guard reads.
 func TestBreaking_AddPatternRecursive(t *testing.T) {
 	s1, err := open("../data/pattern-revision-recursive.yaml")
 	require.NoError(t, err)
@@ -428,14 +431,16 @@ func TestBreaking_AddPatternRecursive(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	require.Equal(t, "request-property-pattern-added", errs[0].GetId())
-	require.Equal(t, "added the pattern `^[a-z]+$` to the request property `data/created`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	change := requireChange(t, errs, checker.RequestPropertyPatternAddedId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+	require.Equal(t, "added the pattern `^[a-z]+$` to the request property `data/created`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "read-only")
 }
 
-// modifying a pattern in a schema is breaking
+// modifying a pattern is breaking on the response side, where the property
+// does appear; on the request side the read-only guard lowers the change to
+// info because the property never appears in one.
 func TestBreaking_ModifyPattern(t *testing.T) {
 	s1, err := open("../data/pattern-base.yaml")
 	require.NoError(t, err)
@@ -445,12 +450,12 @@ func TestBreaking_ModifyPattern(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.NotEmpty(t, errs)
-	requireChange(t, errs, checker.RequestPropertyPatternChangedId)
-	require.Equal(t, "changed the pattern of the request property `created` from `^[a-z]+$` to `.+`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, checker.WARN, errs[0].GetLevel())
-	requireChange(t, errs, checker.ResponsePropertyPatternChangedId)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Equal(t, checker.WARN, requireChange(t, errs, checker.ResponsePropertyPatternChangedId).GetLevel())
+	request := requireChange(t, errs, checker.RequestPropertyPatternChangedId)
+	require.Equal(t, "changed the pattern of the request property `created` from `^[a-z]+$` to `.+`", request.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.INFO, request.GetLevel())
+	require.Contains(t, request.GetComment(checker.NewDefaultLocalizer()), "read-only")
 }
 
 // modifying a pattern to .* is safe on the request side; on the response

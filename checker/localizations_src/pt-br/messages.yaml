@@ -350,6 +350,8 @@ request-property-all-of-removed: "%s foi removido da lista `allOf` da propriedad
 response-body-all-of-added: "%s foi adicionado à lista `allOf` do corpo da resposta para o status %s"
 response-body-all-of-removed: "%s foi removido da lista `allOf` do corpo da resposta para o status %s"
 all-of-not-flattened-comment: "Isto comparou os ramos do `allOf` um a um, então outro ramo ainda pode garantir o que este perdeu. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
+read-only-comment: "A propriedade é somente leitura, portanto nunca aparece em requisições e esta mudança não pode invalidar nenhuma."
+write-only-comment: "A propriedade é somente escrita, portanto nunca aparece em respostas e esta mudança não pode invalidar nenhuma."
 response-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedade de resposta %s para o status %s"
 response-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de resposta %s para o status %s"
 response-body-discriminator-added: discriminador de resposta adicionado para o status %s

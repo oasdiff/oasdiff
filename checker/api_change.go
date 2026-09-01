@@ -31,6 +31,12 @@ type ApiChange struct {
 	// transition's own finding. Set by WithSchema.
 	claimed bool
 
+	// guards holds the document states observed at the change's location
+	// (a readOnly or writeOnly property). capByGuards derives the level
+	// from them and keeps only the ones that changed it, which GetComment
+	// then explains.
+	guards []Guard
+
 	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
 	SourceFile      string
 	SourceLine      int
@@ -70,6 +76,16 @@ func (a ApiChange) WithSources(baseSource, revisionSource *Source) ApiChange {
 	a.BaseSource = baseSource
 	a.RevisionSource = revisionSource
 	return a
+}
+
+// WithGuards is additive and drops duplicates, like WithDisclaimers.
+func (c ApiChange) WithGuards(guards []Guard) ApiChange {
+	for _, g := range guards {
+		if !slices.Contains(c.guards, g) {
+			c.guards = append(c.guards, g)
+		}
+	}
+	return c
 }
 
 // WithDisclaimers is additive and drops duplicates: a change can gather the
@@ -145,6 +161,9 @@ func (c ApiChange) GetComment(l Localizer) string {
 	}
 	for _, d := range c.Disclaimers {
 		parts = append(parts, l(commentId(d.String())))
+	}
+	for _, g := range c.guards {
+		parts = append(parts, l(commentId(string(g))))
 	}
 	return strings.Join(parts, " ")
 }

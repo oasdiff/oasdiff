@@ -48,6 +48,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	})
 
 	// Runs before anything that reads a change's level.
+	result = capByGuards(config, result)
 	result = capByDisclaimers(config, result)
 
 	// The versioning policy judges info.version against what the checks found,
