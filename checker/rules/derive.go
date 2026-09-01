@@ -11,11 +11,15 @@ package rules
 // only a reason. "It is sometimes legitimately required" is a reason to
 // accept a breaking change, not a reason it is not one, and belongs in
 // --severity-levels rather than in the default verdict.
-//
-// The guards are applied first, then the effect and direction decide:
-// narrowing breaks request consumers, widening breaks response consumers,
-// an incomparable change breaks both, and an unknown one is a warning.
 func DeriveLevel(effect Effect, direction Direction, guards ...Guard) Level {
+	effect, direction = applyGuards(effect, direction, guards)
+	return levelOf(effect, direction)
+}
+
+// applyGuards requalifies the effect and direction by the document states
+// the guards name: a guard either nullifies the effect on the side it
+// speaks about or changes which side the change is judged on.
+func applyGuards(effect Effect, direction Direction, guards []Guard) (Effect, Direction) {
 	for _, g := range guards {
 		switch g {
 		case GuardReadOnly:
@@ -34,13 +38,19 @@ func DeriveLevel(effect Effect, direction Direction, guards ...Guard) Level {
 			effect = EffectNone
 		case GuardSanctioned:
 			// the deprecation contract was honored
-			return INFO
+			effect = EffectNone
 		case GuardNegotiated:
 			// the client chooses or relies on the variant
 			direction = DirectionRequest
 		}
 	}
+	return effect, direction
+}
 
+// levelOf maps effect and direction to a level: narrowing breaks request
+// consumers, widening breaks response consumers, an incomparable change
+// breaks both, and an unknown one is a warning.
+func levelOf(effect Effect, direction Direction) Level {
 	switch effect {
 	case EffectViolation, EffectIncomparable:
 		return ERR
