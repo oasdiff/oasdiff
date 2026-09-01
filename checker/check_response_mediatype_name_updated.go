@@ -52,14 +52,10 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					// A difference in the media type parameters, classified by
 					// what happened: a parameter appearing narrows what the
 					// server may return, one disappearing widens it, and a
-					// changed value is neither. Mixed directions cannot be
-					// ordered and stay a warning.
+					// changed value is neither.
 					if pd := mediaType.NameDiff.ParametersDiff; !pd.Empty() {
-						// the messages name the changed parameter in its own
-						// argument, so the media type argument omits the
-						// parameters: "parameter charset was removed from
-						// text/html", not "... from text/html; charset=utf-8"
-						bareName := mediaType.NameDiff.BaseBareName()
+
+						// Mixed directions cannot be ordered and stay a warning.
 						if pd.Mixed() || mediaType.NameDiff.BareNameChanged() {
 							result = append(result, opInfo.NewApiChange(
 								ResponseMediaTypeNameChangedId,
@@ -68,6 +64,13 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 							).WithSources(baseSource, revisionSource))
 							continue
 						}
+
+						// the messages name the changed parameter in its own
+						// argument, so the media type argument omits the
+						// parameters: "parameter charset was removed from
+						// text/html", not "... from text/html; charset=utf-8"
+						bareName := mediaType.NameDiff.BaseBareName()
+
 						for _, param := range pd.Added {
 							result = append(result, opInfo.NewApiChange(
 								ResponseMediaTypeParameterAddedId,
