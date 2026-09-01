@@ -53,13 +53,18 @@ func TestGuard_ReadOnlyRequestProperty(t *testing.T) {
 
 // The write-only mirror: a type change on a write-only response property is
 // nullified because the property never appears in responses, even though the
-// change is otherwise incomparable and an error.
+// change is otherwise incomparable and an error. The same property in the
+// request body keeps the error: write-only protects only the response side.
 func TestGuard_WriteOnlyResponseProperty(t *testing.T) {
 	changes := guardChanges(t, allChecksConfig())
 
 	writeOnly := findChangeByText(t, changes, checker.ResponsePropertyTypeChangedId, "`secret`")
 	require.Equal(t, checker.INFO, writeOnly.GetLevel())
 	require.Contains(t, writeOnly.GetComment(checker.NewDefaultLocalizer()), "write-only")
+
+	request := findChangeByText(t, changes, checker.RequestPropertyTypeChangedId, "`secret`")
+	require.Equal(t, checker.ERR, request.GetLevel())
+	require.NotContains(t, request.GetComment(checker.NewDefaultLocalizer()), "write-only")
 }
 
 // An explicit --severity-levels entry claims the whole id: the guard neither

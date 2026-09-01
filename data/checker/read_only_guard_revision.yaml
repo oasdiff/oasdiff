@@ -9,23 +9,26 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id:
-                  type: string
-                  readOnly: true
-                  pattern: "^x"
-                name:
-                  type: string
-                  pattern: "^x"
+              $ref: '#/components/schemas/Item'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  secret:
-                    type: boolean
-                    writeOnly: true
+                $ref: '#/components/schemas/Item'
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          pattern: "^x"
+        name:
+          type: string
+          pattern: "^x"
+        secret:
+          type: boolean
+          writeOnly: true
