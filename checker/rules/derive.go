@@ -1,0 +1,68 @@
+package rules
+
+// DeriveLevel is the severity law: a rule's level follows from what the
+// change does to the contract (effect), which side of the wire it judges
+// (direction), and the document states that qualify the verdict (guards).
+//
+// The law is asymmetric on purpose. Reporting a breaking change as safe
+// ships it silently, so a milder verdict than the effect implies owes a
+// proof that the change is safe for every consumer that conformed to the
+// old contract, while a harsher one costs a reviewer a glance and needs
+// only a reason. "It is sometimes legitimately required" is a reason to
+// accept a breaking change, not a reason it is not one, and belongs in
+// --severity-levels rather than in the default verdict.
+//
+// The guards are applied first, then the effect and direction decide:
+// narrowing breaks request consumers, widening breaks response consumers,
+// an incomparable change breaks both, and an unknown one is a warning.
+func DeriveLevel(effect Effect, direction Direction, guards ...Guard) Level {
+	for _, g := range guards {
+		switch g {
+		case GuardReadOnly:
+			// a readOnly property does not appear in requests
+			if direction == DirectionRequest {
+				effect = EffectNone
+			}
+		case GuardWriteOnly:
+			// a writeOnly property does not appear in responses
+			if direction == DirectionResponse {
+				effect = EffectNone
+			}
+		case GuardNonSuccess:
+			// the responses map does not promise that the server returns
+			// only the statuses it lists
+			effect = EffectNone
+		case GuardSanctioned:
+			// the deprecation contract was honored
+			return INFO
+		case GuardNegotiated:
+			// the client chooses or relies on the variant
+			direction = DirectionRequest
+		}
+	}
+
+	switch effect {
+	case EffectViolation, EffectIncomparable:
+		return ERR
+	case EffectNone:
+		return INFO
+	case EffectUnknown:
+		return WARN
+	case EffectNarrows:
+		if direction == DirectionResponse {
+			return INFO
+		}
+		return ERR
+	case EffectWidens:
+		if direction == DirectionResponse {
+			return ERR
+		}
+		return INFO
+	}
+	return INFO
+}
+
+// DerivedLevel applies the severity law to the rule's own metadata.
+func (r Rule) DerivedLevel() Level {
+	return DeriveLevel(r.Effect, r.Direction, r.Guards...)
+}
