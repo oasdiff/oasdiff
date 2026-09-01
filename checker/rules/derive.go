@@ -71,8 +71,3 @@ func levelOf(effect Effect, direction Direction) Level {
 	}
 	return INFO
 }
-
-// DerivedLevel applies the severity law to the rule's own metadata.
-func (r Rule) DerivedLevel() Level {
-	return DeriveLevel(r.Effect, r.Direction, r.Guards...)
-}

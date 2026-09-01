@@ -44,3 +44,8 @@ func (r Rule) Actions() []metaschema.Action {
 	slices.Sort(actions)
 	return actions
 }
+
+// DerivedLevel applies the severity law to the rule's own metadata.
+func (r Rule) DerivedLevel() Level {
+	return DeriveLevel(r.Effect, r.Direction, r.Guards...)
+}
