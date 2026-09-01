@@ -1,8 +1,6 @@
 package checker
 
 import (
-	"strings"
-
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -57,19 +55,10 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 					// changed value is neither. Mixed directions cannot be
 					// ordered and stay a warning.
 					if pd := mediaType.NameDiff.ParametersDiff; !pd.Empty() {
-						directions := 0
-						for _, n := range []int{len(pd.Added), len(pd.Deleted), len(pd.Modified)} {
-							if n > 0 {
-								directions++
-							}
-						}
-						nameAlsoChanged := mediaType.NameDiff.TypeDiff != nil ||
-							mediaType.NameDiff.SubtypeDiff != nil ||
-							mediaType.NameDiff.SuffixDiff != nil
 						// the parameter is named separately, so the media type
 						// reads as its bare name
-						bareName := strings.TrimSpace(strings.SplitN(fromMediaType, ";", 2)[0])
-						if directions > 1 || nameAlsoChanged {
+						bareName := mediaType.NameDiff.BaseBareName()
+						if pd.Mixed() || mediaType.NameDiff.BareNameChanged() {
 							result = append(result, opInfo.NewApiChange(
 								ResponseMediaTypeNameChangedId,
 								[]any{mediaType.NameDiff.NameDiff.From, mediaType.NameDiff.NameDiff.To, responseStatus},

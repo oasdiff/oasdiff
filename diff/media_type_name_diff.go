@@ -7,6 +7,19 @@ type MediaTypeNameDiff struct {
 	SuffixDiff     *ValueDiff     `json:"suffix,omitempty" yaml:"suffix,omitempty"`
 	ParametersDiff *StringMapDiff `json:"parameters,omitempty" yaml:"parameters,omitempty"`
 	contained      bool
+	baseBareName   string
+}
+
+// BareNameChanged reports whether the bare media type name (type, subtype, or
+// suffix) changed, as opposed to a difference confined to the parameters.
+func (diff *MediaTypeNameDiff) BareNameChanged() bool {
+	return diff.TypeDiff != nil || diff.SubtypeDiff != nil || diff.SuffixDiff != nil
+}
+
+// BaseBareName returns the base side's media type name without its parameters,
+// for example "text/html" for "text/html; charset=utf-8".
+func (diff *MediaTypeNameDiff) BaseBareName() string {
+	return diff.baseBareName
 }
 
 func (diff *MediaTypeNameDiff) Empty() bool {
@@ -48,6 +61,7 @@ func getMediaTypeNameDiffInternal(name1, name2 string) (*MediaTypeNameDiff, erro
 		SuffixDiff:     getValueDiff(mediaTypeName1.Suffix, mediaTypeName2.Suffix),
 		ParametersDiff: getStringMapDiff(mediaTypeName1.Parameters, mediaTypeName2.Parameters),
 		contained:      IsMediaTypeNameContained(name1, name2),
+		baseBareName:   mediaTypeName1.BareName(),
 	}, nil
 }
 

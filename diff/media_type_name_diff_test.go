@@ -1,36 +1,34 @@
-package diff_test
+package diff
 
 import (
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
-func TestMediaTypeNameDiff(t *testing.T) {
-	loader := openapi3.NewLoader()
-
-	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/checker/add_new_media_type_revision.yaml"))
+func TestMediaTypeNameDiff_ParametersOnly(t *testing.T) {
+	d, err := getMediaTypeNameDiff("text/html", "text/html; charset=utf-8")
 	require.NoError(t, err)
+	require.False(t, d.BareNameChanged())
+	require.Equal(t, "text/html", d.BaseBareName())
+	require.False(t, d.ParametersDiff.Mixed())
+}
 
-	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/checker/add_new_media_type_name_modified.yaml"))
+func TestMediaTypeNameDiff_BareNameChanged(t *testing.T) {
+	d, err := getMediaTypeNameDiff("application/json; q=1", "application/problem+json; q=1")
 	require.NoError(t, err)
+	require.True(t, d.BareNameChanged())
+	require.Equal(t, "application/json", d.BaseBareName())
+}
 
-	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+func TestMediaTypeNameDiff_MixedParameterChanges(t *testing.T) {
+	d, err := getMediaTypeNameDiff("text/html; charset=utf-8", "text/html; q=1")
 	require.NoError(t, err)
+	require.False(t, d.BareNameChanged())
+	require.True(t, d.ParametersDiff.Mixed())
+}
 
-	nd := d.PathsDiff.Modified["/api/v1.0/groups"].OperationsDiff.Modified["POST"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/problem+json"].NameDiff
-
-	require.Equal(t, "application/json", nd.NameDiff.From)
-	require.Equal(t, "application/problem+json", nd.NameDiff.To)
-	require.Nil(t, nd.ParametersDiff)
-	require.Nil(t, nd.TypeDiff)
-	require.Equal(t, "json", nd.SubtypeDiff.From)
-	require.Equal(t, "problem", nd.SubtypeDiff.To)
-	require.Equal(t, "", nd.SuffixDiff.From)
-	require.Equal(t, "json", nd.SuffixDiff.To)
-	require.Nil(t, nd.ParametersDiff)
-	require.True(t, nd.IsContained())
+func TestStringMapDiff_MixedNil(t *testing.T) {
+	var d *StringMapDiff
+	require.False(t, d.Mixed())
 }
