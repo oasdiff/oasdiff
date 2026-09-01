@@ -55,6 +55,15 @@ func ParseMediaTypeName(mediaType string) (*MediaTypeName, error) {
 	return &result, nil
 }
 
+// BareName returns the media type name without its parameters, for example
+// "text/html" for "text/html; charset=utf-8".
+func (n *MediaTypeName) BareName() string {
+	if n.Suffix == "" {
+		return n.Type + "/" + n.Subtype
+	}
+	return n.Type + "/" + n.Subtype + "+" + n.Suffix
+}
+
 // IsMediaTypeNameContained checks if mediaType2 is a specialization of mediaType1.
 // For example:
 // - "application/xml" contains "application/atom+xml" (base type contains suffixed type)

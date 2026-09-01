@@ -103,3 +103,15 @@ func TestIsMediaTypeNameContainedWithInvalidMediaType1(t *testing.T) {
 func TestIsMediaTypeNameContainedWithInvalidMediaType2(t *testing.T) {
 	require.False(t, diff.IsMediaTypeNameContained("application/xml", "invalid"))
 }
+
+func TestBareName(t *testing.T) {
+	name, err := diff.ParseMediaTypeName("text/html; charset=utf-8")
+	require.NoError(t, err)
+	require.Equal(t, "text/html", name.BareName())
+}
+
+func TestBareNameWithSuffix(t *testing.T) {
+	name, err := diff.ParseMediaTypeName("application/problem+json; q=0.9")
+	require.NoError(t, err)
+	require.Equal(t, "application/problem+json", name.BareName())
+}

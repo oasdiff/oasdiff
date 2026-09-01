@@ -18,6 +18,21 @@ func newStringMapDiffDiff() *StringMapDiff {
 	}
 }
 
+// Mixed reports whether the diff holds changes of more than one kind among
+// added, deleted, and modified.
+func (diff *StringMapDiff) Mixed() bool {
+	if diff == nil {
+		return false
+	}
+	kinds := 0
+	for _, n := range []int{len(diff.Added), len(diff.Deleted), len(diff.Modified)} {
+		if n > 0 {
+			kinds++
+		}
+	}
+	return kinds > 1
+}
+
 // Empty indicates whether a change was found in this element
 func (diff *StringMapDiff) Empty() bool {
 	if diff == nil {

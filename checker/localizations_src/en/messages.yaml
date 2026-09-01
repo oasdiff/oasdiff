@@ -203,6 +203,12 @@ response-header-became-not-nullable-description: response header became not null
 response-media-type-removed: removed the media type %s for the response with the status %s
 response-media-type-added: added the media type %s for the response with the status %s
 response-media-type-name-changed: media type %s was changed to %s for the response status %s
+response-media-type-parameter-added: the media type parameter %s was added to %s for the response status %s
+response-media-type-parameter-removed: the media type parameter %s was removed from %s for the response status %s
+response-media-type-parameter-changed: the media type parameter %s of %s was changed from %s to %s for the response status %s
+response-media-type-parameter-added-description: response media type parameter added
+response-media-type-parameter-removed-description: response media type parameter removed
+response-media-type-parameter-changed-description: response media type parameter value changed
 response-media-type-name-changed-warning-comment: "This is a warning because oasdiff cannot tell what the changed media type parameter constrains. Adding one narrows what the server may return, removing one widens it, and changing its value may leave a client unable to read the response."
 response-media-type-name-generalized: media type %s was changed to a more general media type %s for the response status %s
 response-media-type-name-specialized: media type %s was changed to a more specific media type %s for the response status %s
