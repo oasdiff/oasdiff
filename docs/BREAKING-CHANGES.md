@@ -172,11 +172,12 @@ Checks can be customized with the following levels:
 | none  | Disabled  |
 
 ### When oasdiff reports a change below its check's level
-The level a check declares, which is what `oasdiff checks changelog` lists, is what the change means when oasdiff can compare the two specs exactly. Sometimes it cannot, and the change is then reported below that level, with a comment saying what was missing and what to run to get the exact answer.
+The level a check declares, which is what `oasdiff checks changelog` lists, is what the change means in general. For a specific change, oasdiff may report a lower level, with a comment explaining why. This happens for two reasons:
 
-A change inside an `allOf` is the common case: without [`--flatten-allof`](ALLOF.md) the branches are compared one at a time, so another branch may still guarantee what one branch dropped. Such a change is reported at `WARN` even where its check declares `ERR`, and the comment points at the flag.
+- **The comparison was not exact.** A change inside an `allOf` is the common case: without [`--flatten-allof`](ALLOF.md) the branches are compared one at a time, so another branch may still guarantee what one branch dropped. Such a change is reported at `WARN` even where its check declares `ERR`, and the comment says what was missing and what to run to get the exact answer.
+- **The spec shows the change cannot break anyone.** A property marked `readOnly` never appears in requests, so restricting it (adding a `pattern`, setting a `maximum`) cannot invalidate a request; the same holds for `writeOnly` properties in responses. Such a change is reported at `INFO` even where its check declares `ERR`, and the comment states the reason.
 
-**Setting a level yourself turns this off for that check.** The level you set is the level you get, whether or not oasdiff could compare the specs exactly. This matters in both directions: pinning a check to `err` means it will report `ERR` even where oasdiff would otherwise have softened it, and pinning one to the level it already has is enough to opt out.
+**Setting a level yourself turns this off for that check.** The level you set is the level you get, whether or not one of the reasons above applies. This matters in both directions: pinning a check to `err` means it will report `ERR` even where oasdiff would otherwise have lowered it, and pinning one to the level it already has is enough to opt out.
 
 ## Customizing Breaking Changes Checks
 If you encounter a change that isn't reported, you may:
