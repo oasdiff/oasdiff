@@ -53,6 +53,15 @@ func keywordDoc(direction Direction, scope string, spec keywordSpec, withKeyword
 // with the generated id at the rule's registered level, and the message and
 // comment render as text rather than as their keys. The table that generates
 // the rules also drives this gate, so a row cannot be registered untested.
+// Every keywordSpecs row resolves to a diff.SchemaBound; the keyword string
+// is the join between the checker table and the diff's bound registry.
+func TestKeywordSpecsResolve(t *testing.T) {
+	for _, spec := range keywordSpecs {
+		_, ok := schemaBound(spec.keyword)
+		require.True(t, ok, "%s does not resolve to a diff.SchemaBound", spec.keyword)
+	}
+}
+
 func TestKeywordRulesFire(t *testing.T) {
 	byId := map[string]BackwardCompatibilityRule{}
 	for _, rule := range keywordRules() {

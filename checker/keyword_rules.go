@@ -8,46 +8,43 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// keywordSpec describes one ordered-constraint keyword: its name in ids, in
-// claim locations and messages, where its diff lives, and how absence is
-// represented. The set/unset rules for every keyword are generated from this
+// keywordSpec names one ordered-constraint keyword: its id segment and the
+// schema field name used in claims and messages. The keyword resolves to a
+// diff.SchemaBound, which owns where the diff lives and how absence is
+// encoded; the set/unset rules for every keyword are generated from this
 // table (see keywordRules), so a new ordered keyword is a row here, not a
 // hand-written check per direction and scope.
 type keywordSpec struct {
-	idName    string // id segment, e.g. "max-length"
-	claimName string // schema field name in claims and messages, e.g. "maxLength"
-	fieldDiff func(*diff.SchemaDiff) *diff.ValueDiff
-	// zeroIsAbsent: the schema field is a plain uint64 whose zero requires
-	// nothing, so the diff reports absence as 0 (see uintBoundSet).
-	zeroIsAbsent bool
+	idName  string // id segment, e.g. "max-length"
+	keyword string // schema field name in claims and messages, e.g. "maxLength"
 	// setSample sets a sample value on a schema; it powers the behavioral
 	// gate that proves every generated rule fires (keyword_rules_test.go).
 	setSample func(*openapi3.Schema)
 }
 
 var keywordSpecs = []keywordSpec{
-	{"max", "maximum", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MaxDiff }, false,
-		func(s *openapi3.Schema) { s.Max = new(10.0) }},
-	{"min", "minimum", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MinDiff }, false,
-		func(s *openapi3.Schema) { s.Min = new(10.0) }},
-	{"multiple-of", "multipleOf", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MultipleOfDiff }, false,
-		func(s *openapi3.Schema) { s.MultipleOf = new(10.0) }},
-	{"max-length", "maxLength", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MaxLengthDiff }, false,
-		func(s *openapi3.Schema) { s.MaxLength = openapi3.Ptr[uint64](10) }},
-	{"min-length", "minLength", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MinLengthDiff }, true,
-		func(s *openapi3.Schema) { s.MinLength = 10 }},
-	{"max-items", "maxItems", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MaxItemsDiff }, false,
-		func(s *openapi3.Schema) { s.MaxItems = openapi3.Ptr[uint64](10) }},
-	{"min-items", "minItems", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MinItemsDiff }, true,
-		func(s *openapi3.Schema) { s.MinItems = 10 }},
-	{"max-properties", "maxProperties", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MaxPropsDiff }, false,
-		func(s *openapi3.Schema) { s.MaxProps = openapi3.Ptr[uint64](10) }},
-	{"min-properties", "minProperties", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MinPropsDiff }, true,
-		func(s *openapi3.Schema) { s.MinProps = 10 }},
-	{"min-contains", "minContains", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MinContainsDiff }, false,
-		func(s *openapi3.Schema) { s.MinContains = openapi3.Ptr[uint64](2) }},
-	{"max-contains", "maxContains", func(d *diff.SchemaDiff) *diff.ValueDiff { return d.MaxContainsDiff }, false,
-		func(s *openapi3.Schema) { s.MaxContains = openapi3.Ptr[uint64](10) }},
+	{"max", "maximum", func(s *openapi3.Schema) { s.Max = new(10.0) }},
+	{"min", "minimum", func(s *openapi3.Schema) { s.Min = new(10.0) }},
+	{"multiple-of", "multipleOf", func(s *openapi3.Schema) { s.MultipleOf = new(10.0) }},
+	{"max-length", "maxLength", func(s *openapi3.Schema) { s.MaxLength = openapi3.Ptr[uint64](10) }},
+	{"min-length", "minLength", func(s *openapi3.Schema) { s.MinLength = 10 }},
+	{"max-items", "maxItems", func(s *openapi3.Schema) { s.MaxItems = openapi3.Ptr[uint64](10) }},
+	{"min-items", "minItems", func(s *openapi3.Schema) { s.MinItems = 10 }},
+	{"max-properties", "maxProperties", func(s *openapi3.Schema) { s.MaxProps = openapi3.Ptr[uint64](10) }},
+	{"min-properties", "minProperties", func(s *openapi3.Schema) { s.MinProps = 10 }},
+	{"min-contains", "minContains", func(s *openapi3.Schema) { s.MinContains = openapi3.Ptr[uint64](2) }},
+	{"max-contains", "maxContains", func(s *openapi3.Schema) { s.MaxContains = openapi3.Ptr[uint64](10) }},
+}
+
+// schemaBound resolves a keyword to its diff.SchemaBound; a keyword the diff
+// does not list fails the behavioral gate, never emits silently.
+func schemaBound(keyword string) (diff.SchemaBound, bool) {
+	for _, bound := range diff.SchemaBounds {
+		if bound.Keyword == keyword {
+			return bound, true
+		}
+	}
+	return diff.SchemaBound{}, false
 }
 
 // keywordActions are the edits the generated rules cover. Setting a
@@ -115,7 +112,7 @@ func keywordRules() BackwardCompatibilityRules {
 							KindConstraints,
 							action.effect,
 							nil,
-							keywordClaim(direction, spec.claimName, action.action),
+							keywordClaim(direction, spec.keyword, action.action),
 						))
 					}
 				}
@@ -137,24 +134,15 @@ func generatedKeywordIds() map[string]bool {
 // value that appeared or disappeared. A change between two present values is
 // an increase or decrease, which the hand-written checks own.
 func classifySetUnset(spec keywordSpec, d *diff.SchemaDiff) (string, any, bool) {
-	vd := spec.fieldDiff(d)
-	if vd == nil {
+	bound, ok := schemaBound(spec.keyword)
+	if !ok {
 		return "", nil, false
 	}
-	if spec.zeroIsAbsent {
-		if uintBoundSet(vd) {
-			return "set", vd.To, true
-		}
-		if uintBoundUnset(vd) {
-			return "unset", vd.From, true
-		}
-		return "", nil, false
+	if value, ok := bound.Set(d); ok {
+		return "set", value, true
 	}
-	if vd.From == nil && vd.To != nil {
-		return "set", vd.To, true
-	}
-	if vd.From != nil && vd.To == nil {
-		return "unset", vd.From, true
+	if value, ok := bound.Unset(d); ok {
+		return "unset", value, true
 	}
 	return "", nil, false
 }
@@ -196,7 +184,7 @@ func keywordChanges(info mediaTypeInfo, direction Direction, operationsSources *
 		if !generatedKeywordIds()[id] {
 			continue
 		}
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, spec.claimName)
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, spec.keyword)
 		result = append(result, info.newChange(
 			id,
 			[]any{value},
@@ -218,7 +206,7 @@ func keywordChanges(info mediaTypeInfo, direction Direction, operationsSources *
 			if direction == DirectionResponse {
 				args = append(args, info.responseStatus)
 			}
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, spec.claimName)
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, spec.keyword)
 			result = append(result, p.newChange(
 				id,
 				args,
