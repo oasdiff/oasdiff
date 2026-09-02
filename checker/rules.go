@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"sync"
+
 	"fmt"
 
 	"github.com/oasdiff/oasdiff/checker/rules"
@@ -830,6 +832,25 @@ func GetAllRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyMultipleOfSpecializedId, INFO, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.multipleOf:increase,decrease"),
 		newBackwardCompatibilityRule(ResponsePropertyMultipleOfSpecializedId, INFO, ResponsePropertyMultipleOfUpdatedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.multipleOf:increase,decrease"),
 	}
+}
+
+// ruleById indexes the registered rules by id, computed once on first use.
+// A function wrapping a sync.Once rather than an initialized package var:
+// the rule handlers reach this lookup through the claim and guard paths, so
+// a var initializer calling GetAllRules would be an initialization cycle.
+var (
+	ruleByIdOnce sync.Once
+	ruleByIdMap  map[string]BackwardCompatibilityRule
+)
+
+func ruleById() map[string]BackwardCompatibilityRule {
+	ruleByIdOnce.Do(func() {
+		ruleByIdMap = make(map[string]BackwardCompatibilityRule, len(GetAllRules()))
+		for _, rule := range GetAllRules() {
+			ruleByIdMap[rule.Id] = rule
+		}
+	})
+	return ruleByIdMap
 }
 
 // GetCheckLevels gets levels for all backward compatibility checks

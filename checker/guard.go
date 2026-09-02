@@ -2,7 +2,6 @@ package checker
 
 import (
 	"slices"
-	"sync"
 
 	"github.com/oasdiff/oasdiff/checker/rules"
 	"github.com/oasdiff/oasdiff/diff"
@@ -78,11 +77,3 @@ func appliedGuards(apiChange ApiChange, config *Config) guardVerdict {
 		level:  rules.DeriveLevel(rule.Effect, rule.Direction, append(slices.Clone(rule.Guards), applied...)...),
 	}
 }
-
-var ruleById = sync.OnceValue(func() map[string]BackwardCompatibilityRule {
-	byId := make(map[string]BackwardCompatibilityRule)
-	for _, rule := range GetAllRules() {
-		byId[rule.Id] = rule
-	}
-	return byId
-})

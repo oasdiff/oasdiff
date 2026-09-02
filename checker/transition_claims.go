@@ -2,7 +2,6 @@ package checker
 
 import (
 	"slices"
-	"sync"
 
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -164,25 +163,6 @@ var transitions = []transition{
 	},
 }
 
-// ruleKinds indexes each registered rule's Kind so claimedByTransition can
-// derive a change's kind from its rule definition. A function rather than an
-// initialized package var: the rule handlers reference the claim path, so a
-// var initializer calling GetAllRules would be an initialization cycle.
-var (
-	ruleKindsOnce sync.Once
-	ruleKindsMap  map[string]Kind
-)
-
-func ruleKinds() map[string]Kind {
-	ruleKindsOnce.Do(func() {
-		ruleKindsMap = make(map[string]Kind, len(GetAllRules()))
-		for _, rule := range GetAllRules() {
-			ruleKindsMap[rule.Id] = rule.Kind
-		}
-	})
-	return ruleKindsMap
-}
-
 // claimedByTransition reports whether a change with the given rule id,
 // computed from the given schema node, is a raw reflection of a recognized
 // transition there and should be suppressed. Called by ApiChange.WithSchema.
@@ -198,12 +178,12 @@ func claimedByTransition(schemaDiff *diff.SchemaDiff, ruleId string) bool {
 	if schemaDiff == nil {
 		return false
 	}
-	kind, ok := ruleKinds()[ruleId]
+	rule, ok := ruleById()[ruleId]
 	if !ok {
 		return false
 	}
 	for _, t := range transitions {
-		if t.claims[kind] && t.present(schemaDiff) && !slices.Contains(t.reportedBy, ruleId) {
+		if t.claims[rule.Kind] && t.present(schemaDiff) && !slices.Contains(t.reportedBy, ruleId) {
 			return true
 		}
 	}
