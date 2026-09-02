@@ -24,56 +24,46 @@ func propertyGuards(d *diff.SchemaDiff) []Guard {
 // capByGuards lowers each change's level to what the severity law derives
 // with the guards observed at the change's location added to its rule's own:
 // narrowing a read-only property cannot invalidate a request, so the change
-// is reported at info rather than error. A level the caller set is not
-// lowered. Guards that do not change the rule's derived level are dropped,
-// so GetComment explains exactly the ones that did.
+// is reported at info rather than error. The guards that lowered the level
+// stay on the change and GetComment renders one explanatory sentence per
+// guard; guards that changed nothing are removed so no comment claims an
+// effect it did not have.
 func capByGuards(config *Config, changes Changes) Changes {
 	for i, change := range changes {
-		apiChange, ok := change.(ApiChange)
-		if !ok || len(apiChange.guards) == 0 {
-			continue
-		}
-
-		applied := appliedGuards(apiChange, config)
-		if !slices.Equal(applied.guards, apiChange.guards) || applied.level < apiChange.Level {
-			apiChange.guards = applied.guards
-			if applied.level < apiChange.Level {
-				apiChange.Level = applied.level
-				// the check's own comment explains the verdict the guard
-				// replaced, so the guard comment speaks alone
-				apiChange.Comment = ""
-			}
-			changes[i] = apiChange
+		if apiChange, ok := change.(ApiChange); ok && len(apiChange.guards) > 0 {
+			changes[i] = capByGuard(config, apiChange)
 		}
 	}
 	return changes
 }
 
-type guardVerdict struct {
-	guards []Guard
-	level  Level
-}
-
-// appliedGuards keeps the guards of the change that lower its rule's derived
-// level, and the level the law derives with them.
-func appliedGuards(apiChange ApiChange, config *Config) guardVerdict {
+// capByGuard applies each observed guard on its own and takes the lowest
+// level any of them derives; a guard is a fact about the document that is
+// sufficient by itself to nullify the effect, so guards combine as a
+// minimum. A level the caller set with --severity-levels is not touched.
+func capByGuard(config *Config, apiChange ApiChange) ApiChange {
 	rule, ok := ruleById()[apiChange.Id]
 	if !ok || config.overriddenLevels[apiChange.Id] {
-		return guardVerdict{guards: nil, level: apiChange.Level}
+		apiChange.guards = nil
+		return apiChange
 	}
 
 	base := rule.DerivedLevel()
+	level := base
 	var applied []Guard
 	for _, g := range apiChange.guards {
-		if rules.DeriveLevel(rule.Effect, rule.Direction, append(slices.Clone(rule.Guards), g)...) < base {
+		if derived := rules.DeriveLevel(rule.Effect, rule.Direction, append(slices.Clone(rule.Guards), g)...); derived < base {
 			applied = append(applied, g)
+			level = min(level, derived)
 		}
 	}
-	if len(applied) == 0 {
-		return guardVerdict{guards: nil, level: apiChange.Level}
+
+	apiChange.guards = applied
+	if level < apiChange.Level {
+		apiChange.Level = level
+		// the check's own comment explains the verdict the guard replaced,
+		// so the guard comment speaks alone
+		apiChange.Comment = ""
 	}
-	return guardVerdict{
-		guards: applied,
-		level:  rules.DeriveLevel(rule.Effect, rule.Direction, append(slices.Clone(rule.Guards), applied...)...),
-	}
+	return apiChange
 }
