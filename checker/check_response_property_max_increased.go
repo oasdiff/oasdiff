@@ -35,9 +35,6 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
 			if maxDiff := p.propertyDiff.MaxDiff; maxDiff != nil &&

@@ -42,9 +42,6 @@ func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 
 			if uniqueItemsDiff.To == true {
-				if p.propertyDiff.Revision.ReadOnly {
-					return
-				}
 				result = append(result, p.newChange(
 					RequestPropertyUniqueItemsSetId,
 					[]any{propName},

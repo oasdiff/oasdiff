@@ -50,9 +50,6 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 				}
 			}
 
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 			for _, enumVal := range deletedVals {
 				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, diff.XExtensibleEnumExtension, enumVal)
 				result = append(result, p.newChange(

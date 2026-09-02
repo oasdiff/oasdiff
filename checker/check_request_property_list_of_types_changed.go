@@ -28,7 +28,7 @@ func RequestPropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSou
 
 		// Property-level
 		info.walkProperties(func(p propertyInfo) {
-			if p.propertyDiff.Revision == nil || p.propertyDiff.Revision.ReadOnly {
+			if p.propertyDiff.Revision == nil {
 				return
 			}
 			result = append(result, checkPropertyListOfTypesChange(

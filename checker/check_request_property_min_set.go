@@ -37,9 +37,6 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
 			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&

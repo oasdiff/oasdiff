@@ -302,7 +302,8 @@ func TestRequestPropertyTypeChangedNoSchemaDiff(t *testing.T) {
 	require.Len(t, errs, 0)
 }
 
-// no changes when property is read-only
+// a type change on a read-only request property cannot invalidate a request:
+// the read-only guard reports it at info with a comment naming the reason.
 func TestRequestPropertyTypeChangedReadOnlyProperty(t *testing.T) {
 	s1, err := open("../data/checker/request_property_type_changed_base.yaml")
 	require.NoError(t, err)
@@ -316,8 +317,10 @@ func TestRequestPropertyTypeChangedReadOnlyProperty(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	errs := checker.RequestPropertyTypeChangedCheck(d, osm, &checker.Config{})
-	require.Len(t, errs, 0)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyTypeChangedCheck), d, osm, checker.INFO)
+	change := requireChange(t, errs, checker.RequestPropertyTypeChangedId)
+	require.Equal(t, checker.INFO, change.GetLevel())
+	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "read-only")
 }
 
 // setRequestBodyType sets the request body schema type on the /test POST.

@@ -28,9 +28,6 @@ func RequestPropertyMinPropertiesIncreasedCheck(diffReport *diff.Diff, operation
 			if minPropertiesDiff == nil || minPropertiesDiff.From == nil || minPropertiesDiff.To == nil {
 				return
 			}
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 			if !isIncreasedValue(minPropertiesDiff) {
 				return
 			}

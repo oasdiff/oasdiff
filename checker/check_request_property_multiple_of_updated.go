@@ -74,10 +74,6 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 			if multipleOfDiff == nil {
 				return
 			}
-			// narrowing a read-only property does not affect requests
-			if p.propertyDiff.Revision.ReadOnly && multipleOfDiff.To != nil {
-				return
-			}
 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "multipleOf")

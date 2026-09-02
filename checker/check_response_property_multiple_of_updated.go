@@ -46,9 +46,6 @@ func ResponsePropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSou
 			if multipleOfDiff == nil || multipleOfDiff.From == nil {
 				return
 			}
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "multipleOf")

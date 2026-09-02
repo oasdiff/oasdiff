@@ -28,9 +28,6 @@ func RequestPropertyMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *
 			if maxLengthDiff == nil || maxLengthDiff.From != nil || maxLengthDiff.To == nil {
 				return
 			}
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 
 			_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
 			result = append(result, p.newChange(
