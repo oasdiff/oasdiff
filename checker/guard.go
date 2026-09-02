@@ -22,12 +22,10 @@ func propertyGuards(d *diff.SchemaDiff) []Guard {
 }
 
 // capByGuards lowers each change's level to what the severity law derives
-// with the guards observed at the change's location added to its rule's own:
-// narrowing a read-only property cannot invalidate a request, so the change
-// is reported at info rather than error. The guards that lowered the level
-// stay on the change and GetComment renders one explanatory sentence per
-// guard; guards that changed nothing are removed so no comment claims an
-// effect it did not have.
+// with the guards observed at the change's location added to its rule's own.
+// The guards that lowered the level stay on the change and GetComment
+// renders one explanatory sentence per guard; guards that changed nothing
+// are removed so no comment claims an effect it did not have.
 func capByGuards(config *Config, changes Changes) Changes {
 	for i, change := range changes {
 		if apiChange, ok := change.(ApiChange); ok && len(apiChange.guards) > 0 {
