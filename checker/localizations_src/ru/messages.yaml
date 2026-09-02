@@ -1214,3 +1214,143 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
+request-body-max-contains-set: у тела запроса задано значение maxContains в %s
+request-body-max-contains-set-description: установлено значение maxContains тела запроса
+request-body-max-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-body-max-contains-unset: значение maxContains у тела запроса удалено, предыдущее значение - %s
+request-body-max-contains-unset-description: удалено значение maxContains тела запроса
+request-body-max-items-unset: значение maxItems у тела запроса удалено, предыдущее значение - %s
+request-body-max-items-unset-description: удалено значение maxItems тела запроса
+request-body-max-length-unset: значение maxLength у тела запроса удалено, предыдущее значение - %s
+request-body-max-length-unset-description: удалено значение maxLength тела запроса
+request-body-max-properties-unset: значение maxProperties у тела запроса удалено, предыдущее значение - %s
+request-body-max-properties-unset-description: удалено значение maxProperties тела запроса
+request-body-max-unset: значение max у тела запроса удалено, предыдущее значение - %s
+request-body-max-unset-description: удалено значение max тела запроса
+request-body-min-contains-set: у тела запроса задано значение minContains в %s
+request-body-min-contains-set-description: установлено значение minContains тела запроса
+request-body-min-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-body-min-contains-unset: значение minContains у тела запроса удалено, предыдущее значение - %s
+request-body-min-contains-unset-description: удалено значение minContains тела запроса
+request-body-min-items-unset: значение minItems у тела запроса удалено, предыдущее значение - %s
+request-body-min-items-unset-description: удалено значение minItems тела запроса
+request-body-min-length-set: у тела запроса задано значение minLength в %s
+request-body-min-length-set-description: установлено значение minLength тела запроса
+request-body-min-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-body-min-length-unset: значение minLength у тела запроса удалено, предыдущее значение - %s
+request-body-min-length-unset-description: удалено значение minLength тела запроса
+request-body-min-properties-set: у тела запроса задано значение minProperties в %s
+request-body-min-properties-set-description: установлено значение minProperties тела запроса
+request-body-min-properties-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-body-min-properties-unset: значение minProperties у тела запроса удалено, предыдущее значение - %s
+request-body-min-properties-unset-description: удалено значение minProperties тела запроса
+request-body-min-unset: значение min у тела запроса удалено, предыдущее значение - %s
+request-body-min-unset-description: удалено значение min тела запроса
+request-property-max-contains-set: у поля запроса %s задано значение maxContains в %s
+request-property-max-contains-set-description: установлено значение maxContains поля запроса
+request-property-max-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-max-contains-unset: значение maxContains у поля запроса %s удалено, предыдущее значение - %s
+request-property-max-contains-unset-description: удалено значение maxContains поля запроса
+request-property-max-items-unset: значение maxItems у поля запроса %s удалено, предыдущее значение - %s
+request-property-max-items-unset-description: удалено значение maxItems поля запроса
+request-property-max-length-unset: значение maxLength у поля запроса %s удалено, предыдущее значение - %s
+request-property-max-length-unset-description: удалено значение maxLength поля запроса
+request-property-max-properties-unset: значение maxProperties у поля запроса %s удалено, предыдущее значение - %s
+request-property-max-properties-unset-description: удалено значение maxProperties поля запроса
+request-property-max-unset: значение max у поля запроса %s удалено, предыдущее значение - %s
+request-property-max-unset-description: удалено значение max поля запроса
+request-property-min-contains-set: у поля запроса %s задано значение minContains в %s
+request-property-min-contains-set-description: установлено значение minContains поля запроса
+request-property-min-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-min-contains-unset: значение minContains у поля запроса %s удалено, предыдущее значение - %s
+request-property-min-contains-unset-description: удалено значение minContains поля запроса
+request-property-min-items-unset: значение minItems у поля запроса %s удалено, предыдущее значение - %s
+request-property-min-items-unset-description: удалено значение minItems поля запроса
+request-property-min-length-set: у поля запроса %s задано значение minLength в %s
+request-property-min-length-set-description: установлено значение minLength поля запроса
+request-property-min-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-min-length-unset: значение minLength у поля запроса %s удалено, предыдущее значение - %s
+request-property-min-length-unset-description: удалено значение minLength поля запроса
+request-property-min-properties-set: у поля запроса %s задано значение minProperties в %s
+request-property-min-properties-set-description: установлено значение minProperties поля запроса
+request-property-min-properties-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+request-property-min-properties-unset: значение minProperties у поля запроса %s удалено, предыдущее значение - %s
+request-property-min-properties-unset-description: удалено значение minProperties поля запроса
+request-property-min-unset: значение min у поля запроса %s удалено, предыдущее значение - %s
+request-property-min-unset-description: удалено значение min поля запроса
+response-body-max-contains-set: у тела ответа задано значение maxContains в %s
+response-body-max-contains-set-description: установлено значение maxContains тела ответа
+response-body-max-contains-unset: значение maxContains у тела ответа удалено, предыдущее значение - %s
+response-body-max-contains-unset-description: удалено значение maxContains тела ответа
+response-body-max-items-set: у тела ответа задано значение maxItems в %s
+response-body-max-items-set-description: установлено значение maxItems тела ответа
+response-body-max-items-unset: значение maxItems у тела ответа удалено, предыдущее значение - %s
+response-body-max-items-unset-description: удалено значение maxItems тела ответа
+response-body-max-length-set: у тела ответа задано значение maxLength в %s
+response-body-max-length-set-description: установлено значение maxLength тела ответа
+response-body-max-properties-set: у тела ответа задано значение maxProperties в %s
+response-body-max-properties-set-description: установлено значение maxProperties тела ответа
+response-body-max-properties-unset: значение maxProperties у тела ответа удалено, предыдущее значение - %s
+response-body-max-properties-unset-description: удалено значение maxProperties тела ответа
+response-body-max-set: у тела ответа задано значение max в %s
+response-body-max-set-description: установлено значение max тела ответа
+response-body-max-unset: значение max у тела ответа удалено, предыдущее значение - %s
+response-body-max-unset-description: удалено значение max тела ответа
+response-body-min-contains-set: у тела ответа задано значение minContains в %s
+response-body-min-contains-set-description: установлено значение minContains тела ответа
+response-body-min-contains-unset: значение minContains у тела ответа удалено, предыдущее значение - %s
+response-body-min-contains-unset-description: удалено значение minContains тела ответа
+response-body-min-items-set: у тела ответа задано значение minItems в %s
+response-body-min-items-set-description: установлено значение minItems тела ответа
+response-body-min-length-set: у тела ответа задано значение minLength в %s
+response-body-min-length-set-description: установлено значение minLength тела ответа
+response-body-min-length-unset: значение minLength у тела ответа удалено, предыдущее значение - %s
+response-body-min-length-unset-description: удалено значение minLength тела ответа
+response-body-min-properties-set: у тела ответа задано значение minProperties в %s
+response-body-min-properties-set-description: установлено значение minProperties тела ответа
+response-body-min-properties-unset: значение minProperties у тела ответа удалено, предыдущее значение - %s
+response-body-min-properties-unset-description: удалено значение minProperties тела ответа
+response-body-min-set: у тела ответа задано значение min в %s
+response-body-min-set-description: установлено значение min тела ответа
+response-body-min-unset: значение min у тела ответа удалено, предыдущее значение - %s
+response-body-min-unset-description: удалено значение min тела ответа
+response-body-multiple-of-set: у тела ответа задано значение multipleOf в %s
+response-body-multiple-of-set-description: установлено значение multipleOf тела ответа
+response-property-max-contains-set: у поля ответа %s задано значение maxContains в %s, для ответа со статусом %s
+response-property-max-contains-set-description: установлено значение maxContains поля ответа
+response-property-max-contains-unset: значение maxContains у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-max-contains-unset-description: удалено значение maxContains поля ответа
+response-property-max-items-set: у поля ответа %s задано значение maxItems в %s, для ответа со статусом %s
+response-property-max-items-set-description: установлено значение maxItems поля ответа
+response-property-max-items-unset: значение maxItems у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-max-items-unset-description: удалено значение maxItems поля ответа
+response-property-max-length-set: у поля ответа %s задано значение maxLength в %s, для ответа со статусом %s
+response-property-max-length-set-description: установлено значение maxLength поля ответа
+response-property-max-properties-set: у поля ответа %s задано значение maxProperties в %s, для ответа со статусом %s
+response-property-max-properties-set-description: установлено значение maxProperties поля ответа
+response-property-max-properties-unset: значение maxProperties у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-max-properties-unset-description: удалено значение maxProperties поля ответа
+response-property-max-set: у поля ответа %s задано значение max в %s, для ответа со статусом %s
+response-property-max-set-description: установлено значение max поля ответа
+response-property-max-unset: значение max у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-max-unset-description: удалено значение max поля ответа
+response-property-min-contains-set: у поля ответа %s задано значение minContains в %s, для ответа со статусом %s
+response-property-min-contains-set-description: установлено значение minContains поля ответа
+response-property-min-contains-unset: значение minContains у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-min-contains-unset-description: удалено значение minContains поля ответа
+response-property-min-items-set: у поля ответа %s задано значение minItems в %s, для ответа со статусом %s
+response-property-min-items-set-description: установлено значение minItems поля ответа
+response-property-min-length-set: у поля ответа %s задано значение minLength в %s, для ответа со статусом %s
+response-property-min-length-set-description: установлено значение minLength поля ответа
+response-property-min-length-unset: значение minLength у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-min-length-unset-description: удалено значение minLength поля ответа
+response-property-min-properties-set: у поля ответа %s задано значение minProperties в %s, для ответа со статусом %s
+response-property-min-properties-set-description: установлено значение minProperties поля ответа
+response-property-min-properties-unset: значение minProperties у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-min-properties-unset-description: удалено значение minProperties поля ответа
+response-property-min-set: у поля ответа %s задано значение min в %s, для ответа со статусом %s
+response-property-min-set-description: установлено значение min поля ответа
+response-property-min-unset: значение min у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
+response-property-min-unset-description: удалено значение min поля ответа
+response-property-multiple-of-set: у поля ответа %s задано значение multipleOf в %s, для ответа со статусом %s
+response-property-multiple-of-set-description: установлено значение multipleOf поля ответа

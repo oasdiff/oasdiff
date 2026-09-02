@@ -1222,3 +1222,143 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
+request-body-max-contains-set: the request's body maxContains was set to %s
+request-body-max-contains-set-description: request body maxContains set
+request-body-max-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-body-max-contains-unset: the request's body maxContains was unset from %s
+request-body-max-contains-unset-description: request body maxContains unset
+request-body-max-items-unset: the request's body maxItems was unset from %s
+request-body-max-items-unset-description: request body maxItems unset
+request-body-max-length-unset: the request's body maxLength was unset from %s
+request-body-max-length-unset-description: request body maxLength unset
+request-body-max-properties-unset: the request's body maxProperties was unset from %s
+request-body-max-properties-unset-description: request body maxProperties unset
+request-body-max-unset: the request's body max was unset from %s
+request-body-max-unset-description: request body max unset
+request-body-min-contains-set: the request's body minContains was set to %s
+request-body-min-contains-set-description: request body minContains set
+request-body-min-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-body-min-contains-unset: the request's body minContains was unset from %s
+request-body-min-contains-unset-description: request body minContains unset
+request-body-min-items-unset: the request's body minItems was unset from %s
+request-body-min-items-unset-description: request body minItems unset
+request-body-min-length-set: the request's body minLength was set to %s
+request-body-min-length-set-description: request body minLength set
+request-body-min-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-body-min-length-unset: the request's body minLength was unset from %s
+request-body-min-length-unset-description: request body minLength unset
+request-body-min-properties-set: the request's body minProperties was set to %s
+request-body-min-properties-set-description: request body minProperties set
+request-body-min-properties-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-body-min-properties-unset: the request's body minProperties was unset from %s
+request-body-min-properties-unset-description: request body minProperties unset
+request-body-min-unset: the request's body min was unset from %s
+request-body-min-unset-description: request body min unset
+request-property-max-contains-set: the %s request property's maxContains was set to %s
+request-property-max-contains-set-description: request property maxContains set
+request-property-max-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-max-contains-unset: the %s request property's maxContains was unset from %s
+request-property-max-contains-unset-description: request property maxContains unset
+request-property-max-items-unset: the %s request property's maxItems was unset from %s
+request-property-max-items-unset-description: request property maxItems unset
+request-property-max-length-unset: the %s request property's maxLength was unset from %s
+request-property-max-length-unset-description: request property maxLength unset
+request-property-max-properties-unset: the %s request property's maxProperties was unset from %s
+request-property-max-properties-unset-description: request property maxProperties unset
+request-property-max-unset: the %s request property's max was unset from %s
+request-property-max-unset-description: request property max unset
+request-property-min-contains-set: the %s request property's minContains was set to %s
+request-property-min-contains-set-description: request property minContains set
+request-property-min-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-min-contains-unset: the %s request property's minContains was unset from %s
+request-property-min-contains-unset-description: request property minContains unset
+request-property-min-items-unset: the %s request property's minItems was unset from %s
+request-property-min-items-unset-description: request property minItems unset
+request-property-min-length-set: the %s request property's minLength was set to %s
+request-property-min-length-set-description: request property minLength set
+request-property-min-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-min-length-unset: the %s request property's minLength was unset from %s
+request-property-min-length-unset-description: request property minLength unset
+request-property-min-properties-set: the %s request property's minProperties was set to %s
+request-property-min-properties-set-description: request property minProperties set
+request-property-min-properties-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+request-property-min-properties-unset: the %s request property's minProperties was unset from %s
+request-property-min-properties-unset-description: request property minProperties unset
+request-property-min-unset: the %s request property's min was unset from %s
+request-property-min-unset-description: request property min unset
+response-body-max-contains-set: the response's body maxContains was set to %s
+response-body-max-contains-set-description: response body maxContains set
+response-body-max-contains-unset: the response's body maxContains was unset from %s
+response-body-max-contains-unset-description: response body maxContains unset
+response-body-max-items-set: the response's body maxItems was set to %s
+response-body-max-items-set-description: response body maxItems set
+response-body-max-items-unset: the response's body maxItems was unset from %s
+response-body-max-items-unset-description: response body maxItems unset
+response-body-max-length-set: the response's body maxLength was set to %s
+response-body-max-length-set-description: response body maxLength set
+response-body-max-properties-set: the response's body maxProperties was set to %s
+response-body-max-properties-set-description: response body maxProperties set
+response-body-max-properties-unset: the response's body maxProperties was unset from %s
+response-body-max-properties-unset-description: response body maxProperties unset
+response-body-max-set: the response's body max was set to %s
+response-body-max-set-description: response body max set
+response-body-max-unset: the response's body max was unset from %s
+response-body-max-unset-description: response body max unset
+response-body-min-contains-set: the response's body minContains was set to %s
+response-body-min-contains-set-description: response body minContains set
+response-body-min-contains-unset: the response's body minContains was unset from %s
+response-body-min-contains-unset-description: response body minContains unset
+response-body-min-items-set: the response's body minItems was set to %s
+response-body-min-items-set-description: response body minItems set
+response-body-min-length-set: the response's body minLength was set to %s
+response-body-min-length-set-description: response body minLength set
+response-body-min-length-unset: the response's body minLength was unset from %s
+response-body-min-length-unset-description: response body minLength unset
+response-body-min-properties-set: the response's body minProperties was set to %s
+response-body-min-properties-set-description: response body minProperties set
+response-body-min-properties-unset: the response's body minProperties was unset from %s
+response-body-min-properties-unset-description: response body minProperties unset
+response-body-min-set: the response's body min was set to %s
+response-body-min-set-description: response body min set
+response-body-min-unset: the response's body min was unset from %s
+response-body-min-unset-description: response body min unset
+response-body-multiple-of-set: the response's body multipleOf was set to %s
+response-body-multiple-of-set-description: response body multipleOf set
+response-property-max-contains-set: the %s response property's maxContains was set to %s for the response status %s
+response-property-max-contains-set-description: response property maxContains set
+response-property-max-contains-unset: the %s response property's maxContains was unset from %s for the response status %s
+response-property-max-contains-unset-description: response property maxContains unset
+response-property-max-items-set: the %s response property's maxItems was set to %s for the response status %s
+response-property-max-items-set-description: response property maxItems set
+response-property-max-items-unset: the %s response property's maxItems was unset from %s for the response status %s
+response-property-max-items-unset-description: response property maxItems unset
+response-property-max-length-set: the %s response property's maxLength was set to %s for the response status %s
+response-property-max-length-set-description: response property maxLength set
+response-property-max-properties-set: the %s response property's maxProperties was set to %s for the response status %s
+response-property-max-properties-set-description: response property maxProperties set
+response-property-max-properties-unset: the %s response property's maxProperties was unset from %s for the response status %s
+response-property-max-properties-unset-description: response property maxProperties unset
+response-property-max-set: the %s response property's max was set to %s for the response status %s
+response-property-max-set-description: response property max set
+response-property-max-unset: the %s response property's max was unset from %s for the response status %s
+response-property-max-unset-description: response property max unset
+response-property-min-contains-set: the %s response property's minContains was set to %s for the response status %s
+response-property-min-contains-set-description: response property minContains set
+response-property-min-contains-unset: the %s response property's minContains was unset from %s for the response status %s
+response-property-min-contains-unset-description: response property minContains unset
+response-property-min-items-set: the %s response property's minItems was set to %s for the response status %s
+response-property-min-items-set-description: response property minItems set
+response-property-min-length-set: the %s response property's minLength was set to %s for the response status %s
+response-property-min-length-set-description: response property minLength set
+response-property-min-length-unset: the %s response property's minLength was unset from %s for the response status %s
+response-property-min-length-unset-description: response property minLength unset
+response-property-min-properties-set: the %s response property's minProperties was set to %s for the response status %s
+response-property-min-properties-set-description: response property minProperties set
+response-property-min-properties-unset: the %s response property's minProperties was unset from %s for the response status %s
+response-property-min-properties-unset-description: response property minProperties unset
+response-property-min-set: the %s response property's min was set to %s for the response status %s
+response-property-min-set-description: response property min set
+response-property-min-unset: the %s response property's min was unset from %s for the response status %s
+response-property-min-unset-description: response property min unset
+response-property-multiple-of-set: the %s response property's multipleOf was set to %s for the response status %s
+response-property-multiple-of-set-description: response property multipleOf set

@@ -72,8 +72,6 @@ var Waivers = []Waiver{
 	{CategoryOpen, "**.schema.minItems", "remaining directions are unchecked; the breaking directions have rules (tracked in #1159)"},
 	{CategoryOpen, "**.schema.exclusiveMaximum", "remaining directions are unchecked; the breaking directions have rules (tracked in #1159)"},
 	{CategoryOpen, "**.schema.exclusiveMinimum", "remaining directions are unchecked; the breaking directions have rules (tracked in #1159)"},
-	{CategoryOpen, "**.schema.minContains:set,unset", "minContains presence changes are unchecked; increase/decrease have rules (tracked in #1159)"},
-	{CategoryOpen, "**.schema.maxContains:set,unset", "maxContains presence changes are unchecked; increase/decrease have rules (tracked in #1159)"},
 	{CategoryOpen, "**.schema.unevaluatedItems:change", "switching unevaluatedItems between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 	{CategoryOpen, "**.schema.unevaluatedProperties:change", "switching unevaluatedProperties between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 }

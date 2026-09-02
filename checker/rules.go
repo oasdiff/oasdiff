@@ -106,7 +106,13 @@ func (bcRules BackwardCompatibilityRules) Metadata() []rules.Rule {
 	return metadata
 }
 
+// GetAllRules returns the hand-written rules plus the rules generated from
+// the keyword table (see keywordRules).
 func GetAllRules() BackwardCompatibilityRules {
+	return append(handWrittenRules(), keywordRules()...)
+}
+
+func handWrittenRules() BackwardCompatibilityRules {
 	return BackwardCompatibilityRules{
 		// Request property deprecation checks
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.requestBody.content.*.schema.deprecated:set"),
