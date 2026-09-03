@@ -1,20 +1,38 @@
 package checker
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/internal/populatetest"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
+// setBoundSample populates the schema field whose json tag is the keyword,
+// deriving the sample from the field's type; the keyword string is the only
+// input, so a table row cannot need a hand-written sample.
+func setBoundSample(t *testing.T, s *openapi3.Schema, keyword string) {
+	t.Helper()
+	typ := reflect.TypeFor[openapi3.Schema]()
+	for i := range typ.NumField() {
+		if name, _, _ := strings.Cut(typ.Field(i).Tag.Get("json"), ","); name == keyword {
+			require.True(t, populatetest.NonZero(reflect.ValueOf(s).Elem().Field(i), keyword), keyword)
+			return
+		}
+	}
+	t.Fatalf("no openapi3.Schema field with json tag %q", keyword)
+}
+
 // keywordDoc builds a spec whose request or response schema carries the
 // keyword sample when withKeyword is true, at body or property level.
-func keywordDoc(direction Direction, scope string, spec keywordSpec, withKeyword bool) *load.SpecInfo {
+func keywordDoc(t *testing.T, direction Direction, scope string, spec keywordSpec, withKeyword bool) *load.SpecInfo {
 	node := &openapi3.Schema{}
 	if withKeyword {
-		spec.setSample(node)
+		setBoundSample(t, node, spec.keyword)
 	}
 	carrier := node
 	if scope == "property" {
@@ -88,8 +106,8 @@ func TestKeywordRulesFire(t *testing.T) {
 						continue
 					}
 
-					absent := keywordDoc(direction, scope, spec, false)
-					present := keywordDoc(direction, scope, spec, true)
+					absent := keywordDoc(t, direction, scope, spec, false)
+					present := keywordDoc(t, direction, scope, spec, true)
 					base, revision := absent, present
 					if action.action == "unset" {
 						base, revision = present, absent

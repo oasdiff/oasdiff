@@ -3,7 +3,6 @@ package checker
 import (
 	"sync"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/rules"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -17,23 +16,20 @@ import (
 type keywordSpec struct {
 	idName  string // id segment, e.g. "max-length"
 	keyword string // schema field name in claims and messages, e.g. "maxLength"
-	// setSample sets a sample value on a schema; it powers the behavioral
-	// gate that proves every generated rule fires (keyword_rules_test.go).
-	setSample func(*openapi3.Schema)
 }
 
 var keywordSpecs = []keywordSpec{
-	{"max", "maximum", func(s *openapi3.Schema) { s.Max = new(10.0) }},
-	{"min", "minimum", func(s *openapi3.Schema) { s.Min = new(10.0) }},
-	{"multiple-of", "multipleOf", func(s *openapi3.Schema) { s.MultipleOf = new(10.0) }},
-	{"max-length", "maxLength", func(s *openapi3.Schema) { s.MaxLength = openapi3.Ptr[uint64](10) }},
-	{"min-length", "minLength", func(s *openapi3.Schema) { s.MinLength = 10 }},
-	{"max-items", "maxItems", func(s *openapi3.Schema) { s.MaxItems = openapi3.Ptr[uint64](10) }},
-	{"min-items", "minItems", func(s *openapi3.Schema) { s.MinItems = 10 }},
-	{"max-properties", "maxProperties", func(s *openapi3.Schema) { s.MaxProps = openapi3.Ptr[uint64](10) }},
-	{"min-properties", "minProperties", func(s *openapi3.Schema) { s.MinProps = 10 }},
-	{"min-contains", "minContains", func(s *openapi3.Schema) { s.MinContains = openapi3.Ptr[uint64](2) }},
-	{"max-contains", "maxContains", func(s *openapi3.Schema) { s.MaxContains = openapi3.Ptr[uint64](10) }},
+	{"max", "maximum"},
+	{"min", "minimum"},
+	{"multiple-of", "multipleOf"},
+	{"max-length", "maxLength"},
+	{"min-length", "minLength"},
+	{"max-items", "maxItems"},
+	{"min-items", "minItems"},
+	{"max-properties", "maxProperties"},
+	{"min-properties", "minProperties"},
+	{"min-contains", "minContains"},
+	{"max-contains", "maxContains"},
 }
 
 // schemaBound resolves a keyword to its diff.SchemaBound; a keyword the diff

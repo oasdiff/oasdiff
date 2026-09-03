@@ -1,35 +1,48 @@
 package diff
 
 import (
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/stretchr/testify/require"
 )
 
-// boundSetters applies a value for each bound keyword, so the test can build
-// present/absent schema pairs against the real getters.
-var boundSetters = map[string]func(*openapi3.Schema, uint64){
-	"maximum":       func(s *openapi3.Schema, v uint64) { s.Max = new(float64(v)) },
-	"minimum":       func(s *openapi3.Schema, v uint64) { s.Min = new(float64(v)) },
-	"multipleOf":    func(s *openapi3.Schema, v uint64) { s.MultipleOf = new(float64(v)) },
-	"maxLength":     func(s *openapi3.Schema, v uint64) { s.MaxLength = &v },
-	"minLength":     func(s *openapi3.Schema, v uint64) { s.MinLength = v },
-	"maxItems":      func(s *openapi3.Schema, v uint64) { s.MaxItems = &v },
-	"minItems":      func(s *openapi3.Schema, v uint64) { s.MinItems = v },
-	"maxProperties": func(s *openapi3.Schema, v uint64) { s.MaxProps = &v },
-	"minProperties": func(s *openapi3.Schema, v uint64) { s.MinProps = v },
-	"minContains":   func(s *openapi3.Schema, v uint64) { s.MinContains = &v },
-	"maxContains":   func(s *openapi3.Schema, v uint64) { s.MaxContains = &v },
+// setBound sets the schema field whose json tag is the keyword to v. Every
+// bound is numeric (a plain uint64 or a pointer to a number), so the value
+// is applied by the field's kind and no per-keyword setter is needed.
+func setBound(t *testing.T, s *openapi3.Schema, keyword string, v uint64) {
+	t.Helper()
+	typ := reflect.TypeFor[openapi3.Schema]()
+	for i := range typ.NumField() {
+		if name, _, _ := strings.Cut(typ.Field(i).Tag.Get("json"), ","); name != keyword {
+			continue
+		}
+		fv := reflect.ValueOf(s).Elem().Field(i)
+		if fv.Kind() == reflect.Pointer {
+			p := reflect.New(fv.Type().Elem())
+			fv.Set(p)
+			fv = p.Elem()
+		}
+		switch fv.Kind() {
+		case reflect.Uint64:
+			fv.SetUint(v)
+		case reflect.Float64:
+			fv.SetFloat(float64(v))
+		default:
+			t.Fatalf("%s: unexpected kind %s", keyword, fv.Kind())
+		}
+		return
+	}
+	t.Fatalf("no openapi3.Schema field with json tag %q", keyword)
 }
 
 func boundSchema(t *testing.T, keyword string, value uint64) *openapi3.SchemaRef {
 	t.Helper()
 	s := &openapi3.Schema{}
 	if value != 0 {
-		setter, ok := boundSetters[keyword]
-		require.True(t, ok, "no setter for %s; extend boundSetters", keyword)
-		setter(s, value)
+		setBound(t, s, keyword, value)
 	}
 	return &openapi3.SchemaRef{Value: s}
 }
