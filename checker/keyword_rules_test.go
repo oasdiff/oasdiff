@@ -71,12 +71,19 @@ func keywordDoc(t *testing.T, direction Direction, scope string, spec keywordSpe
 // with the generated id at the rule's registered level, and the message and
 // comment render as text rather than as their keys. The table that generates
 // the rules also drives this gate, so a row cannot be registered untested.
-// Every keywordSpecs row resolves to a diff.SchemaBound; the keyword string
-// is the join between the checker table and the diff's bound registry.
-func TestKeywordSpecsResolve(t *testing.T) {
+// keywordSpecs and diff.SchemaBounds list the same keywords: every spec
+// resolves to a bound, and every bound has a spec, so a keyword added to
+// either side without the other fails instead of silently generating
+// nothing.
+func TestKeywordSpecsMatchSchemaBounds(t *testing.T) {
+	specs := map[string]bool{}
 	for _, spec := range keywordSpecs {
+		specs[spec.keyword] = true
 		_, ok := schemaBound(spec.keyword)
 		require.True(t, ok, "%s does not resolve to a diff.SchemaBound", spec.keyword)
+	}
+	for _, bound := range diff.SchemaBounds {
+		require.True(t, specs[bound.Keyword], "diff.SchemaBounds lists %s but keywordSpecs does not; no rules are generated for it", bound.Keyword)
 	}
 }
 

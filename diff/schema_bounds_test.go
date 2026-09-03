@@ -2,6 +2,7 @@ package diff
 
 import (
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 
@@ -80,5 +81,52 @@ func TestSchemaBounds(t *testing.T) {
 		require.False(t, ok, "%s: value to value is not Set", bound.Keyword)
 		_, ok = bound.Unset(changed)
 		require.False(t, ok, "%s: value to value is not Unset", bound.Keyword)
+	}
+}
+
+// Fields whose type marks them as bounds but which SchemaBounds deliberately
+// omits, with the reason.
+var schemaBoundsWaived = map[string]string{
+	"exclusiveMinimum": "boolean in OpenAPI 3.0 and number in 3.1; needs its own value kind",
+	"exclusiveMaximum": "boolean in OpenAPI 3.0 and number in 3.1; needs its own value kind",
+}
+
+// Every openapi3.Schema field of a bound-like type (uint64, *uint64,
+// *float64, ExclusiveBound) is either a SchemaBounds row or waived above
+// with a reason, so a bound kin adds fails here instead of going unlisted.
+func TestSchemaBoundsComplete(t *testing.T) {
+	listed := map[string]bool{}
+	for _, bound := range SchemaBounds {
+		listed[bound.Keyword] = true
+	}
+	boundTypes := []reflect.Type{
+		reflect.TypeFor[uint64](),
+		reflect.TypeFor[*uint64](),
+		reflect.TypeFor[*float64](),
+		reflect.TypeFor[openapi3.ExclusiveBound](),
+	}
+
+	typ := reflect.TypeFor[openapi3.Schema]()
+	for field := range typ.Fields() {
+		if !slices.Contains(boundTypes, field.Type) {
+			continue
+		}
+		keyword, _, _ := strings.Cut(field.Tag.Get("json"), ",")
+		if listed[keyword] && schemaBoundsWaived[keyword] != "" {
+			t.Errorf("stale waiver: %q is listed in SchemaBounds; remove the entry", keyword)
+			continue
+		}
+		if !listed[keyword] && schemaBoundsWaived[keyword] == "" {
+			t.Errorf("openapi3.Schema.%s (%s) is a bound the diff does not list\n  add it to SchemaBounds or waive it with a reason", field.Name, keyword)
+		}
+	}
+	for keyword := range schemaBoundsWaived {
+		if _, ok := typ.FieldByNameFunc(func(name string) bool {
+			f, _ := typ.FieldByName(name)
+			tag, _, _ := strings.Cut(f.Tag.Get("json"), ",")
+			return tag == keyword
+		}); !ok {
+			t.Errorf("stale waiver: no openapi3.Schema field with json tag %q; remove the entry", keyword)
+		}
 	}
 }
