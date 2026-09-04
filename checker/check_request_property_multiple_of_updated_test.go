@@ -25,7 +25,7 @@ func TestRequestBodyMultipleOfSet(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMultipleOfSetId,
 		Args:        []any{5.0},
-		Comment:     checker.RequestBodyMultipleOfSetId + "-comment",
+		Comment:     "bound-set-comment",
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
@@ -49,7 +49,7 @@ func TestRequestPropertyMultipleOfSet(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMultipleOfSetId,
 		Args:        []any{"amount", 5.0},
-		Comment:     checker.RequestPropertyMultipleOfSetId + "-comment",
+		Comment:     "bound-set-comment",
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",

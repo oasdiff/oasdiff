@@ -22,7 +22,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 			result = append(result, info.newChange(
 				RequestBodyMinSetId,
 				[]any{minDiff.To},
-				commentId(RequestBodyMinSetId),
+				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
 		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
@@ -32,7 +32,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMinSetId,
 				[]any{exMinDiff.To},
-				commentId(RequestBodyExclusiveMinSetId),
+				boundSetComment,
 			).WithSources(nil, exRevisionSource))
 		}
 
@@ -49,7 +49,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				result = append(result, p.newChange(
 					RequestPropertyMinSetId,
 					[]any{propName, minDiff.To},
-					commentId(RequestPropertyMinSetId),
+					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}
 
@@ -60,7 +60,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMinSetId,
 					[]any{propName, exMinDiff.To},
-					commentId(RequestPropertyExclusiveMinSetId),
+					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}
 		})

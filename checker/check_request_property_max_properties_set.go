@@ -19,7 +19,7 @@ func RequestPropertyMaxPropertiesSetCheck(diffReport *diff.Diff, operationsSourc
 			result = append(result, info.newChange(
 				RequestBodyMaxPropertiesSetId,
 				[]any{maxPropertiesDiff.To},
-				commentId(RequestBodyMaxPropertiesSetId),
+				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
 
@@ -36,7 +36,7 @@ func RequestPropertyMaxPropertiesSetCheck(diffReport *diff.Diff, operationsSourc
 			result = append(result, p.newChange(
 				RequestPropertyMaxPropertiesSetId,
 				[]any{propertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.To},
-				commentId(RequestPropertyMaxPropertiesSetId),
+				boundSetComment,
 			).WithSources(nil, propRevisionSource))
 		})
 	})

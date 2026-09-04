@@ -18,7 +18,7 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 			result = append(result, info.newChange(
 				RequestBodyMinItemsSetId,
 				[]any{minItemsDiff.To},
-				commentId(RequestBodyMinItemsSetId),
+				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
 
@@ -35,7 +35,7 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 			result = append(result, p.newChange(
 				RequestPropertyMinItemsSetId,
 				[]any{propertyFullName(p.propertyPath, p.propertyName), minItemsDiff.To},
-				commentId(RequestPropertyMinItemsSetId),
+				boundSetComment,
 			).WithSources(nil, propRevisionSource))
 		})
 	})

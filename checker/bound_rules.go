@@ -49,8 +49,12 @@ type boundAction struct {
 	comment string
 }
 
+// boundSetComment explains the conservative verdict of setting a bound; the
+// generated and hand-written set checks share it.
+var boundSetComment = commentId("bound-set")
+
 var (
-	boundSet   = boundAction{"set", rules.EffectNarrows, commentId("bound-set")}
+	boundSet   = boundAction{"set", rules.EffectNarrows, boundSetComment}
 	boundUnset = boundAction{"unset", rules.EffectWidens, ""}
 )
 
