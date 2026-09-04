@@ -41,13 +41,25 @@ func schemaBound(keyword string) (diff.SchemaBound, bool) {
 // increase and decrease stay with the hand-written checks. An action with
 // comment carries the shared explanatory comment on the cells where its
 // verdict is breaking.
-var boundActions = []struct {
+type boundAction struct {
 	action  string
 	effect  Effect
 	comment bool
-}{
+}
+
+var boundActions = []boundAction{
 	{"set", rules.EffectNarrows, true},
 	{"unset", rules.EffectWidens, false},
+}
+
+// boundRuleComment returns the comment id for a generated rule: the shared
+// explanatory comment where the action declares one and the derived verdict
+// is breaking, empty otherwise, and the message speaks alone.
+func boundRuleComment(id string, action boundAction, level Level) string {
+	if action.comment && level == ERR {
+		return commentId(id)
+	}
+	return ""
 }
 
 func directionName(direction Direction) string {
@@ -93,10 +105,7 @@ func boundRules() BackwardCompatibilityRules {
 							continue
 						}
 						level := rules.DeriveLevel(action.effect, direction)
-						boundRuleComments[id] = ""
-						if action.comment && level == ERR {
-							boundRuleComments[id] = commentId(id)
-						}
+						boundRuleComments[id] = boundRuleComment(id, action, level)
 						boundRulesList = append(boundRulesList, newBackwardCompatibilityRule(
 							id,
 							level,
