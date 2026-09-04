@@ -7,12 +7,6 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// boundSpec names one ordered-constraint keyword: its id segment and the
-// schema field name used in claims and messages. The keyword resolves to a
-// diff.SchemaBound, which owns where the diff lives and how absence is
-// encoded; the set/unset rules for every keyword are generated from this
-// table (see boundRules), so a new ordered keyword is a row here, not a
-// hand-written check per direction and scope.
 type boundSpec struct {
 	idName  string // id segment, e.g. "max-length"
 	keyword string // schema field name in claims and messages, e.g. "maxLength"
@@ -45,13 +39,16 @@ func schemaBound(keyword string) (diff.SchemaBound, bool) {
 
 // boundActions are the edits the generated rules cover. Setting a
 // constraint narrows what the schema accepts and unsetting it widens;
-// increase and decrease stay with the hand-written checks.
+// increase and decrease stay with the hand-written checks. An action with
+// comment carries the shared explanatory comment on the cells where its
+// verdict is breaking.
 var boundActions = []struct {
-	action string
-	effect Effect
+	action  string
+	effect  Effect
+	comment bool
 }{
-	{"set", rules.EffectNarrows},
-	{"unset", rules.EffectWidens},
+	{"set", rules.EffectNarrows, true},
+	{"unset", rules.EffectWidens, false},
 }
 
 func directionName(direction Direction) string {
@@ -72,24 +69,22 @@ func boundClaim(direction Direction, claimName, action string) string {
 	return "paths.*.*.requestBody.content.*.schema." + claimName + ":" + action
 }
 
-// boundRules generates the set/unset rules for every keyword in
-// boundSpecs, one per direction, scope, and action, skipping the cells a
-// hand-written rule already covers. Each rule's level is derived with the
-// severity law, its id follows the id grammar, and its handler is the shared
-// BoundSetUnsetCheck.
 var (
 	boundRulesOnce   sync.Once
 	boundRulesList   BackwardCompatibilityRules
-	boundRuleIdsOnce map[string]bool
+	boundRuleIdsOnce map[string]string
 )
 
+// boundRules generates the set/unset rules for every keyword in
+// boundSpecs, one per direction, scope, and action, skipping the cells a
+// hand-written rule already covers.
 func boundRules() BackwardCompatibilityRules {
 	boundRulesOnce.Do(func() {
 		handWritten := map[string]bool{}
 		for _, rule := range handWrittenRules() {
 			handWritten[rule.Id] = true
 		}
-		boundRuleIdsOnce = map[string]bool{}
+		boundRuleIdsOnce = map[string]string{}
 		for _, spec := range boundSpecs {
 			for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 				for _, scope := range []string{"body", "property"} {
@@ -98,10 +93,14 @@ func boundRules() BackwardCompatibilityRules {
 						if handWritten[id] {
 							continue
 						}
-						boundRuleIdsOnce[id] = true
+						level := rules.DeriveLevel(action.effect, direction)
+						boundRuleIdsOnce[id] = ""
+						if action.comment && level == ERR {
+							boundRuleIdsOnce[id] = commentId(id)
+						}
 						boundRulesList = append(boundRulesList, newBackwardCompatibilityRule(
 							id,
-							rules.DeriveLevel(action.effect, direction),
+							level,
 							BoundSetUnsetCheck,
 							direction,
 							AreaSchema,
@@ -118,17 +117,15 @@ func boundRules() BackwardCompatibilityRules {
 	return boundRulesList
 }
 
-// generatedBoundIds reports the ids boundRules generated;
-// BoundSetUnsetCheck emits only these, leaving the hand-written cells to
-// their own checks.
-func generatedBoundIds() map[string]bool {
+// generatedBoundIds maps each id boundRules generated to its comment id,
+// empty when the message speaks alone
+func generatedBoundIds() map[string]string {
 	boundRules()
 	return boundRuleIdsOnce
 }
 
 // classifySetUnset reports whether the keyword was set or unset, and the
-// value that appeared or disappeared. A change between two present values is
-// an increase or decrease, which the hand-written checks own.
+// value that appeared or disappeared
 func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (string, any, bool) {
 	bound, ok := schemaBound(spec.keyword)
 	if !ok {
@@ -141,16 +138,6 @@ func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (string, any, bool) {
 		return "unset", value, true
 	}
 	return "", nil, false
-}
-
-// boundComment mirrors the hand-written convention: a request-side set is
-// the conservative error verdict, so it carries the shared explanatory
-// comment; the other cells speak through the message alone.
-func boundComment(direction Direction, action, id string) string {
-	if direction == DirectionRequest && action == "set" {
-		return commentId(id)
-	}
-	return ""
 }
 
 // BoundSetUnsetCheck reports the set and unset changes for every keyword in
@@ -177,14 +164,15 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 			continue
 		}
 		id := boundRuleId(direction, "body", spec.idName, action)
-		if !generatedBoundIds()[id] {
+		comment, generated := generatedBoundIds()[id]
+		if !generated {
 			continue
 		}
 		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, spec.keyword)
 		result = append(result, info.newChange(
 			id,
 			[]any{value},
-			boundComment(direction, action, id),
+			comment,
 		).WithSources(baseSource, revisionSource))
 	}
 
@@ -195,7 +183,8 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 				continue
 			}
 			id := boundRuleId(direction, "property", spec.idName, action)
-			if !generatedBoundIds()[id] {
+			comment, generated := generatedBoundIds()[id]
+			if !generated {
 				continue
 			}
 			args := []any{propertyFullName(p.propertyPath, p.propertyName), value}
@@ -206,7 +195,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 			result = append(result, p.newChange(
 				id,
 				args,
-				boundComment(direction, action, id),
+				comment,
 			).WithSources(baseSource, revisionSource))
 		}
 	})
