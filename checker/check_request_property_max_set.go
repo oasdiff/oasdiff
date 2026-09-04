@@ -15,10 +15,10 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
 		if maxDiff := info.schemaDiff.MaxDiff; maxDiff != nil &&
 			maxDiff.From == nil &&
 			maxDiff.To != nil {
+			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
 			result = append(result, info.newChange(
 				RequestBodyMaxSetId,
 				[]any{maxDiff.To},

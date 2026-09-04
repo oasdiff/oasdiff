@@ -35,7 +35,7 @@ func RequestPropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSource
 			}
 		}
 
-		if d := info.schemaDiff.MinContainsDiff; d != nil {
+		if d := info.schemaDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
 			if isIncreasedValue(d) {
 				result = append(result, info.newChange(RequestBodyMinContainsIncreasedId, []any{d.From, d.To}, "").
@@ -47,7 +47,7 @@ func RequestPropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSource
 			}
 		}
 
-		if d := info.schemaDiff.MaxContainsDiff; d != nil {
+		if d := info.schemaDiff.MaxContainsDiff; d != nil && d.From != nil && d.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxContains")
 			if isIncreasedValue(d) {
 				result = append(result, info.newChange(RequestBodyMaxContainsIncreasedId, []any{d.From, d.To}, "").
@@ -74,7 +74,7 @@ func RequestPropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSource
 				}
 			}
 
-			if d := p.propertyDiff.MinContainsDiff; d != nil {
+			if d := p.propertyDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
 				if isIncreasedValue(d) {
 					result = append(result, p.newChange(RequestPropertyMinContainsIncreasedId, []any{propName, d.From, d.To}, "").
@@ -86,7 +86,7 @@ func RequestPropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSource
 				}
 			}
 
-			if d := p.propertyDiff.MaxContainsDiff; d != nil {
+			if d := p.propertyDiff.MaxContainsDiff; d != nil && d.From != nil && d.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxContains")
 				if isIncreasedValue(d) {
 					result = append(result, p.newChange(RequestPropertyMaxContainsIncreasedId, []any{propName, d.From, d.To}, "").

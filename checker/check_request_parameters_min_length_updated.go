@@ -15,7 +15,6 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minLength")
 		minLengthDiff := p.paramDiff.SchemaDiff.MinLengthDiff
 		if minLengthDiff == nil {
 			return
@@ -24,6 +23,8 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 			minLengthDiff.To == nil {
 			return
 		}
+
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minLength")
 
 		id := RequestParameterMinLengthIncreasedId
 		if isDecreasedValue(minLengthDiff) {

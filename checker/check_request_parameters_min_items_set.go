@@ -14,7 +14,6 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
-		_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
 		minItemsDiff := p.paramDiff.SchemaDiff.MinItemsDiff
 		if minItemsDiff == nil {
 			return
@@ -23,6 +22,7 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 			return
 		}
 
+		_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
 		result = append(result, p.opInfo.NewApiChange(
 			RequestParameterMinItemsSetId,
 			[]any{p.location, p.name, minItemsDiff.To},

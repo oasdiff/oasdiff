@@ -136,8 +136,9 @@ func TestBoundRulesFire(t *testing.T) {
 	require.Len(t, byId, 66)
 
 	localizer := NewDefaultLocalizer()
+	// every check runs, so a hand-written check reporting a generated cell
+	// under another id would surface here as a second change
 	config := NewConfig(GetAllChecks(),
-		WithSingleCheck(BoundSetUnsetCheck),
 		WithSeverityLevels(map[string]Level{
 			APIVersionNotBumpedId:      NONE,
 			APIVersionDecreasedId:      NONE,
@@ -165,7 +166,7 @@ func TestBoundRulesFire(t *testing.T) {
 					require.NoError(t, err, id)
 					changes := CheckBackwardCompatibilityUntilLevel(config, d, osm, INFO)
 
-					require.Len(t, changes, 1, id)
+					require.Len(t, changes, 1, "%s: the edit must be reported exactly once", id)
 					change := changes[0]
 					require.Equal(t, id, change.GetId())
 					require.Equal(t, rule.Level, change.GetLevel(), id)
