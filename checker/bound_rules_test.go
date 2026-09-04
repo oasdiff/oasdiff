@@ -27,9 +27,9 @@ func setBoundSample(t *testing.T, s *openapi3.Schema, keyword string) {
 	t.Fatalf("no openapi3.Schema field with json tag %q", keyword)
 }
 
-// keywordDoc builds a spec whose request or response schema carries the
+// boundDoc builds a spec whose request or response schema carries the
 // keyword sample when withKeyword is true, at body or property level.
-func keywordDoc(t *testing.T, direction Direction, scope string, spec keywordSpec, withKeyword bool) *load.SpecInfo {
+func boundDoc(t *testing.T, direction Direction, scope string, spec boundSpec, withKeyword bool) *load.SpecInfo {
 	node := &openapi3.Schema{}
 	if withKeyword {
 		setBoundSample(t, node, spec.keyword)
@@ -66,19 +66,19 @@ func keywordDoc(t *testing.T, direction Direction, scope string, spec keywordSpe
 	}}
 }
 
-// keywordSpecs and diff.SchemaBounds list the same keywords: every spec
+// boundSpecs and diff.SchemaBounds list the same keywords: every spec
 // resolves to a bound, and every bound has a spec, so a keyword added to
 // either side without the other fails instead of silently generating
 // nothing.
-func TestKeywordSpecsMatchSchemaBounds(t *testing.T) {
+func TestBoundSpecsMatchSchemaBounds(t *testing.T) {
 	specs := map[string]bool{}
-	for _, spec := range keywordSpecs {
+	for _, spec := range boundSpecs {
 		specs[spec.keyword] = true
 		_, ok := schemaBound(spec.keyword)
 		require.True(t, ok, "%s does not resolve to a diff.SchemaBound", spec.keyword)
 	}
 	for _, bound := range diff.SchemaBounds {
-		require.True(t, specs[bound.Keyword], "diff.SchemaBounds lists %s but keywordSpecs does not; no rules are generated for it", bound.Keyword)
+		require.True(t, specs[bound.Keyword], "diff.SchemaBounds lists %s but boundSpecs does not; no rules are generated for it", bound.Keyword)
 	}
 }
 
@@ -87,34 +87,34 @@ func TestKeywordSpecsMatchSchemaBounds(t *testing.T) {
 // with the generated id at the rule's registered level, and the message and
 // comment render as text rather than as their keys. The table that generates
 // the rules also drives this gate, so a row cannot be registered untested.
-func TestKeywordRulesFire(t *testing.T) {
+func TestBoundRulesFire(t *testing.T) {
 	byId := map[string]BackwardCompatibilityRule{}
-	for _, rule := range keywordRules() {
+	for _, rule := range boundRules() {
 		byId[rule.Id] = rule
 	}
 	require.Len(t, byId, 66)
 
 	localizer := NewDefaultLocalizer()
 	config := NewConfig(GetAllChecks(),
-		WithSingleCheck(KeywordSetUnsetCheck),
+		WithSingleCheck(BoundSetUnsetCheck),
 		WithSeverityLevels(map[string]Level{
 			APIVersionNotBumpedId:      NONE,
 			APIVersionDecreasedId:      NONE,
 			APIMajorVersionNotBumpedId: NONE,
 		}))
 
-	for _, spec := range keywordSpecs {
+	for _, spec := range boundSpecs {
 		for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 			for _, scope := range []string{"body", "property"} {
-				for _, action := range keywordActions {
-					id := keywordRuleId(direction, scope, spec.idName, action.action)
+				for _, action := range boundActions {
+					id := boundRuleId(direction, scope, spec.idName, action.action)
 					rule, generated := byId[id]
 					if !generated {
 						continue
 					}
 
-					absent := keywordDoc(t, direction, scope, spec, false)
-					present := keywordDoc(t, direction, scope, spec, true)
+					absent := boundDoc(t, direction, scope, spec, false)
+					present := boundDoc(t, direction, scope, spec, true)
 					base, revision := absent, present
 					if action.action == "unset" {
 						base, revision = present, absent

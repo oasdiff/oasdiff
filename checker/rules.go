@@ -107,9 +107,9 @@ func (bcRules BackwardCompatibilityRules) Metadata() []rules.Rule {
 }
 
 // GetAllRules returns the hand-written rules plus the rules generated from
-// the keyword table (see keywordRules).
+// the bound table (see boundRules).
 func GetAllRules() BackwardCompatibilityRules {
-	return append(handWrittenRules(), keywordRules()...)
+	return append(handWrittenRules(), boundRules()...)
 }
 
 func handWrittenRules() BackwardCompatibilityRules {

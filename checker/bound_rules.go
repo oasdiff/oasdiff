@@ -7,18 +7,18 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// keywordSpec names one ordered-constraint keyword: its id segment and the
+// boundSpec names one ordered-constraint keyword: its id segment and the
 // schema field name used in claims and messages. The keyword resolves to a
 // diff.SchemaBound, which owns where the diff lives and how absence is
 // encoded; the set/unset rules for every keyword are generated from this
-// table (see keywordRules), so a new ordered keyword is a row here, not a
+// table (see boundRules), so a new ordered keyword is a row here, not a
 // hand-written check per direction and scope.
-type keywordSpec struct {
+type boundSpec struct {
 	idName  string // id segment, e.g. "max-length"
 	keyword string // schema field name in claims and messages, e.g. "maxLength"
 }
 
-var keywordSpecs = []keywordSpec{
+var boundSpecs = []boundSpec{
 	{"max", "maximum"},
 	{"min", "minimum"},
 	{"multiple-of", "multipleOf"},
@@ -43,10 +43,10 @@ func schemaBound(keyword string) (diff.SchemaBound, bool) {
 	return diff.SchemaBound{}, false
 }
 
-// keywordActions are the edits the generated rules cover. Setting a
+// boundActions are the edits the generated rules cover. Setting a
 // constraint narrows what the schema accepts and unsetting it widens;
 // increase and decrease stay with the hand-written checks.
-var keywordActions = []struct {
+var boundActions = []struct {
 	action string
 	effect Effect
 }{
@@ -61,75 +61,75 @@ func directionName(direction Direction) string {
 	return "request"
 }
 
-func keywordRuleId(direction Direction, scope, idName, action string) string {
+func boundRuleId(direction Direction, scope, idName, action string) string {
 	return directionName(direction) + "-" + scope + "-" + idName + "-" + action
 }
 
-func keywordClaim(direction Direction, claimName, action string) string {
+func boundClaim(direction Direction, claimName, action string) string {
 	if direction == DirectionResponse {
 		return "paths.*.*.responses.*.content.*.schema." + claimName + ":" + action
 	}
 	return "paths.*.*.requestBody.content.*.schema." + claimName + ":" + action
 }
 
-// keywordRules generates the set/unset rules for every keyword in
-// keywordSpecs, one per direction, scope, and action, skipping the cells a
+// boundRules generates the set/unset rules for every keyword in
+// boundSpecs, one per direction, scope, and action, skipping the cells a
 // hand-written rule already covers. Each rule's level is derived with the
 // severity law, its id follows the id grammar, and its handler is the shared
-// KeywordSetUnsetCheck.
+// BoundSetUnsetCheck.
 var (
-	keywordRulesOnce   sync.Once
-	keywordRulesList   BackwardCompatibilityRules
-	keywordRuleIdsOnce map[string]bool
+	boundRulesOnce   sync.Once
+	boundRulesList   BackwardCompatibilityRules
+	boundRuleIdsOnce map[string]bool
 )
 
-func keywordRules() BackwardCompatibilityRules {
-	keywordRulesOnce.Do(func() {
+func boundRules() BackwardCompatibilityRules {
+	boundRulesOnce.Do(func() {
 		handWritten := map[string]bool{}
 		for _, rule := range handWrittenRules() {
 			handWritten[rule.Id] = true
 		}
-		keywordRuleIdsOnce = map[string]bool{}
-		for _, spec := range keywordSpecs {
+		boundRuleIdsOnce = map[string]bool{}
+		for _, spec := range boundSpecs {
 			for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 				for _, scope := range []string{"body", "property"} {
-					for _, action := range keywordActions {
-						id := keywordRuleId(direction, scope, spec.idName, action.action)
+					for _, action := range boundActions {
+						id := boundRuleId(direction, scope, spec.idName, action.action)
 						if handWritten[id] {
 							continue
 						}
-						keywordRuleIdsOnce[id] = true
-						keywordRulesList = append(keywordRulesList, newBackwardCompatibilityRule(
+						boundRuleIdsOnce[id] = true
+						boundRulesList = append(boundRulesList, newBackwardCompatibilityRule(
 							id,
 							rules.DeriveLevel(action.effect, direction),
-							KeywordSetUnsetCheck,
+							BoundSetUnsetCheck,
 							direction,
 							AreaSchema,
 							KindConstraints,
 							action.effect,
 							nil,
-							keywordClaim(direction, spec.keyword, action.action),
+							boundClaim(direction, spec.keyword, action.action),
 						))
 					}
 				}
 			}
 		}
 	})
-	return keywordRulesList
+	return boundRulesList
 }
 
-// generatedKeywordIds reports the ids keywordRules generated;
-// KeywordSetUnsetCheck emits only these, leaving the hand-written cells to
+// generatedBoundIds reports the ids boundRules generated;
+// BoundSetUnsetCheck emits only these, leaving the hand-written cells to
 // their own checks.
-func generatedKeywordIds() map[string]bool {
-	keywordRules()
-	return keywordRuleIdsOnce
+func generatedBoundIds() map[string]bool {
+	boundRules()
+	return boundRuleIdsOnce
 }
 
 // classifySetUnset reports whether the keyword was set or unset, and the
 // value that appeared or disappeared. A change between two present values is
 // an increase or decrease, which the hand-written checks own.
-func classifySetUnset(spec keywordSpec, d *diff.SchemaDiff) (string, any, bool) {
+func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (string, any, bool) {
 	bound, ok := schemaBound(spec.keyword)
 	if !ok {
 		return "", nil, false
@@ -143,59 +143,59 @@ func classifySetUnset(spec keywordSpec, d *diff.SchemaDiff) (string, any, bool) 
 	return "", nil, false
 }
 
-// keywordComment mirrors the hand-written convention: a request-side set is
+// boundComment mirrors the hand-written convention: a request-side set is
 // the conservative error verdict, so it carries the shared explanatory
 // comment; the other cells speak through the message alone.
-func keywordComment(direction Direction, action, id string) string {
+func boundComment(direction Direction, action, id string) string {
 	if direction == DirectionRequest && action == "set" {
 		return commentId(id)
 	}
 	return ""
 }
 
-// KeywordSetUnsetCheck reports the set and unset changes for every keyword in
-// keywordSpecs, at body and property level, on both sides of the wire.
-func KeywordSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+// BoundSetUnsetCheck reports the set and unset changes for every keyword in
+// boundSpecs, at body and property level, on both sides of the wire.
+func BoundSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, keywordChanges(info, DirectionRequest, operationsSources)...)
+		result = append(result, boundChanges(info, DirectionRequest, operationsSources)...)
 	})
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, keywordChanges(info, DirectionResponse, operationsSources)...)
+		result = append(result, boundChanges(info, DirectionResponse, operationsSources)...)
 	})
 
 	return result
 }
 
-func keywordChanges(info mediaTypeInfo, direction Direction, operationsSources *diff.OperationsSourcesMap) Changes {
+func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *diff.OperationsSourcesMap) Changes {
 	result := make(Changes, 0)
 
-	for _, spec := range keywordSpecs {
+	for _, spec := range boundSpecs {
 		action, value, ok := classifySetUnset(spec, info.schemaDiff)
 		if !ok {
 			continue
 		}
-		id := keywordRuleId(direction, "body", spec.idName, action)
-		if !generatedKeywordIds()[id] {
+		id := boundRuleId(direction, "body", spec.idName, action)
+		if !generatedBoundIds()[id] {
 			continue
 		}
 		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, spec.keyword)
 		result = append(result, info.newChange(
 			id,
 			[]any{value},
-			keywordComment(direction, action, id),
+			boundComment(direction, action, id),
 		).WithSources(baseSource, revisionSource))
 	}
 
 	info.walkProperties(func(p propertyInfo) {
-		for _, spec := range keywordSpecs {
+		for _, spec := range boundSpecs {
 			action, value, ok := classifySetUnset(spec, p.propertyDiff)
 			if !ok {
 				continue
 			}
-			id := keywordRuleId(direction, "property", spec.idName, action)
-			if !generatedKeywordIds()[id] {
+			id := boundRuleId(direction, "property", spec.idName, action)
+			if !generatedBoundIds()[id] {
 				continue
 			}
 			args := []any{propertyFullName(p.propertyPath, p.propertyName), value}
@@ -206,7 +206,7 @@ func keywordChanges(info mediaTypeInfo, direction Direction, operationsSources *
 			result = append(result, p.newChange(
 				id,
 				args,
-				keywordComment(direction, action, id),
+				boundComment(direction, action, id),
 			).WithSources(baseSource, revisionSource))
 		}
 	})
