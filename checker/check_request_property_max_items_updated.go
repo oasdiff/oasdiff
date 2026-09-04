@@ -16,10 +16,10 @@ func RequestPropertyMaxItemsUpdatedCheck(diffReport *diff.Diff, operationsSource
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxItems")
 		if maxItemsDiff := info.schemaDiff.MaxItemsDiff; maxItemsDiff != nil &&
 			maxItemsDiff.From != nil &&
 			maxItemsDiff.To != nil {
+			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxItems")
 			if isDecreasedValue(maxItemsDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMaxItemsDecreasedId,
