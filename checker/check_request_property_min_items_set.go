@@ -27,9 +27,6 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 			if !uintBoundSet(minItemsDiff) {
 				return
 			}
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 
 			_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
 			result = append(result, p.newChange(

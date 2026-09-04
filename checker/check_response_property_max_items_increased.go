@@ -38,10 +38,6 @@ func ResponsePropertyMaxItemsIncreasedCheck(diffReport *diff.Diff, operationsSou
 				return
 			}
 
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
-
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxItems")
 			result = append(result, p.newChange(
 				ResponsePropertyMaxItemsIncreasedId,

@@ -31,9 +31,6 @@ func ResponsePropertyMinPropertiesDecreasedCheck(diffReport *diff.Diff, operatio
 			if !isDecreasedValue(minPropertiesDiff) {
 				return
 			}
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
 
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minProperties")
 			result = append(result, p.newChange(

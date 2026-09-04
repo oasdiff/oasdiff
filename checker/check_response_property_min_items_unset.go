@@ -27,9 +27,6 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 			if !uintBoundUnset(minItemsDiff) {
 				return
 			}
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
 
 			propBaseSource, _ := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
 			result = append(result, p.newChange(

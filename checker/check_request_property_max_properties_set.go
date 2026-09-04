@@ -28,9 +28,6 @@ func RequestPropertyMaxPropertiesSetCheck(diffReport *diff.Diff, operationsSourc
 			if maxPropertiesDiff == nil || maxPropertiesDiff.From != nil || maxPropertiesDiff.To == nil {
 				return
 			}
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 
 			_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
 			result = append(result, p.newChange(

@@ -28,9 +28,6 @@ func ResponsePropertyUniqueItemsUnsetCheck(diffReport *diff.Diff, operationsSour
 			if uniqueItemsDiff == nil || uniqueItemsDiff.To != false {
 				return
 			}
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
 
 			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 			result = append(result, p.newChange(

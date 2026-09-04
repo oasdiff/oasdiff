@@ -55,9 +55,6 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 			if p.propertyDiff.Revision == nil {
 				return
 			}
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 
 			propSchemaDiff := p.propertyDiff
 			propTypeDiff := propSchemaDiff.TypeDiff

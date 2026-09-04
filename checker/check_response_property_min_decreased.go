@@ -35,9 +35,6 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			if p.propertyDiff.Revision.WriteOnly {
-				return
-			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
 			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&

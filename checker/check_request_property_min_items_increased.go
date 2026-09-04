@@ -28,9 +28,6 @@ func RequestPropertyMinItemsIncreasedCheck(diffReport *diff.Diff, operationsSour
 			if minItemsDiff == nil || uintBoundSet(minItemsDiff) {
 				return
 			}
-			if p.propertyDiff.Revision.ReadOnly {
-				return
-			}
 			if !isIncreasedValue(minItemsDiff) {
 				return
 			}
