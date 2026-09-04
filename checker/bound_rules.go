@@ -47,10 +47,12 @@ type boundAction struct {
 	comment bool
 }
 
-var boundActions = []boundAction{
-	{"set", rules.EffectNarrows, true},
-	{"unset", rules.EffectWidens, false},
-}
+var (
+	boundSet   = boundAction{"set", rules.EffectNarrows, true}
+	boundUnset = boundAction{"unset", rules.EffectWidens, false}
+)
+
+var boundActions = []boundAction{boundSet, boundUnset}
 
 // boundRuleComment returns the comment id for a generated rule: the shared
 // explanatory comment where the action declares one and the derived verdict
@@ -81,9 +83,9 @@ func boundClaim(direction Direction, claimName, action string) string {
 }
 
 var (
-	boundRulesOnce    sync.Once
-	boundRulesList    BackwardCompatibilityRules
-	boundRuleComments map[string]string
+	boundRulesOnce  sync.Once
+	boundRulesList  BackwardCompatibilityRules
+	handWrittenById map[string]bool
 )
 
 // boundRules generates the set/unset rules for every keyword in
@@ -91,24 +93,21 @@ var (
 // hand-written rule already covers.
 func boundRules() BackwardCompatibilityRules {
 	boundRulesOnce.Do(func() {
-		handWritten := map[string]bool{}
+		handWrittenById = map[string]bool{}
 		for _, rule := range handWrittenRules() {
-			handWritten[rule.Id] = true
+			handWrittenById[rule.Id] = true
 		}
-		boundRuleComments = map[string]string{}
 		for _, spec := range boundSpecs {
 			for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 				for _, scope := range []string{"body", "property"} {
 					for _, action := range boundActions {
 						id := boundRuleId(direction, scope, spec.idName, action.action)
-						if handWritten[id] {
+						if handWrittenById[id] {
 							continue
 						}
-						level := rules.DeriveLevel(action.effect, direction)
-						boundRuleComments[id] = boundRuleComment(id, action, level)
 						boundRulesList = append(boundRulesList, newBackwardCompatibilityRule(
 							id,
-							level,
+							rules.DeriveLevel(action.effect, direction),
 							BoundSetUnsetCheck,
 							direction,
 							AreaSchema,
@@ -125,28 +124,27 @@ func boundRules() BackwardCompatibilityRules {
 	return boundRulesList
 }
 
-// generatedBoundComments maps each id boundRules generated to its comment
-// id, empty when the message speaks alone; an id outside the map is not a
-// generated rule
-func generatedBoundComments() map[string]string {
+// handWrittenIds reports the ids registered by hand-written rules, whose
+// cells the generated check leaves to their own checks
+func handWrittenIds() map[string]bool {
 	boundRules()
-	return boundRuleComments
+	return handWrittenById
 }
 
 // classifySetUnset reports whether the keyword was set or unset, and the
 // value that appeared or disappeared
-func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (string, any, bool) {
+func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (boundAction, any, bool) {
 	bound, ok := schemaBound(spec.keyword)
 	if !ok {
-		return "", nil, false
+		return boundAction{}, nil, false
 	}
 	if value, ok := bound.Set(d); ok {
-		return "set", value, true
+		return boundSet, value, true
 	}
 	if value, ok := bound.Unset(d); ok {
-		return "unset", value, true
+		return boundUnset, value, true
 	}
-	return "", nil, false
+	return boundAction{}, nil, false
 }
 
 // BoundSetUnsetCheck reports the set and unset changes for every keyword in
@@ -172,16 +170,15 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 		if !ok {
 			continue
 		}
-		id := boundRuleId(direction, "body", spec.idName, action)
-		comment, generated := generatedBoundComments()[id]
-		if !generated {
+		id := boundRuleId(direction, "body", spec.idName, action.action)
+		if handWrittenIds()[id] {
 			continue
 		}
 		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, spec.keyword)
 		result = append(result, info.newChange(
 			id,
 			[]any{value},
-			comment,
+			boundRuleComment(id, action, rules.DeriveLevel(action.effect, direction)),
 		).WithSources(baseSource, revisionSource))
 	}
 
@@ -191,9 +188,8 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 			if !ok {
 				continue
 			}
-			id := boundRuleId(direction, "property", spec.idName, action)
-			comment, generated := generatedBoundComments()[id]
-			if !generated {
+			id := boundRuleId(direction, "property", spec.idName, action.action)
+			if handWrittenIds()[id] {
 				continue
 			}
 			args := []any{propertyFullName(p.propertyPath, p.propertyName), value}
@@ -204,7 +200,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 			result = append(result, p.newChange(
 				id,
 				args,
-				comment,
+				boundRuleComment(id, action, rules.DeriveLevel(action.effect, direction)),
 			).WithSources(baseSource, revisionSource))
 		}
 	})
