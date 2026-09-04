@@ -43,20 +43,31 @@ func boundDoc(t *testing.T, direction Direction, scope string, spec boundSpec, w
 	}
 
 	plain := func() *openapi3.SchemaRef { return &openapi3.SchemaRef{Value: &openapi3.Schema{}} }
-	requestSchema, responseSchema := plain(), plain()
-	if direction == DirectionResponse {
+	requestSchema, responseSchema, parameterSchema, headerSchema := plain(), plain(), plain(), plain()
+	switch {
+	case scope == "parameter":
+		parameterSchema = &openapi3.SchemaRef{Value: carrier}
+	case scope == "header":
+		headerSchema = &openapi3.SchemaRef{Value: carrier}
+	case direction == DirectionResponse:
 		responseSchema = &openapi3.SchemaRef{Value: carrier}
-	} else {
+	default:
 		requestSchema = &openapi3.SchemaRef{Value: carrier}
 	}
 
 	op := &openapi3.Operation{
+		Parameters: openapi3.Parameters{&openapi3.ParameterRef{Value: &openapi3.Parameter{
+			Name: "p", In: "query", Schema: parameterSchema,
+		}}},
 		RequestBody: &openapi3.RequestBodyRef{Value: &openapi3.RequestBody{
 			Content: openapi3.Content{"application/json": &openapi3.MediaType{Schema: requestSchema}},
 		}},
 		Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{Value: &openapi3.Response{
 			Description: new("ok"),
 			Content:     openapi3.Content{"application/json": &openapi3.MediaType{Schema: responseSchema}},
+			Headers: openapi3.Headers{"X-Rate-Limit": &openapi3.HeaderRef{Value: &openapi3.Header{
+				Parameter: openapi3.Parameter{Schema: headerSchema},
+			}}},
 		}})),
 	}
 
@@ -92,12 +103,12 @@ func TestHandWrittenBoundIdsMatchTheGrammar(t *testing.T) {
 	var cells []metaschema.Edit
 	for _, spec := range boundSpecs {
 		for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
-			for _, action := range boundActions {
-				cells = append(cells, metaschema.Edit{
-					Location: boundLocation(direction, spec.keyword),
-					Action:   metaschema.Action(action.action),
-				})
-				for _, scope := range []string{"body", "property"} {
+			for _, scope := range boundScopes(direction) {
+				for _, action := range boundActions {
+					cells = append(cells, metaschema.Edit{
+						Location: boundLocation(direction, scope, spec.keyword),
+						Action:   metaschema.Action(action.action),
+					})
 					grammar[boundRuleId(direction, scope, spec.idName, action.action)] = true
 				}
 			}
@@ -133,7 +144,7 @@ func TestBoundRulesFire(t *testing.T) {
 	for _, rule := range boundRules() {
 		byId[rule.Id] = rule
 	}
-	require.Len(t, byId, 66)
+	require.Len(t, byId, 106)
 
 	localizer := NewDefaultLocalizer()
 	// every check runs, so a hand-written check reporting a generated cell
@@ -147,7 +158,7 @@ func TestBoundRulesFire(t *testing.T) {
 
 	for _, spec := range boundSpecs {
 		for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
-			for _, scope := range []string{"body", "property"} {
+			for _, scope := range boundScopes(direction) {
 				for _, action := range boundActions {
 					id := boundRuleId(direction, scope, spec.idName, action.action)
 					rule, generated := byId[id]

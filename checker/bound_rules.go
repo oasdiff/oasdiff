@@ -80,15 +80,31 @@ func boundRuleId(direction Direction, scope, idName, action string) string {
 	return directionName(direction) + "-" + scope + "-" + idName + "-" + action
 }
 
-func boundLocation(direction Direction, keyword string) string {
+// boundScopes are the schema roots the generated rules cover on each side:
+// parameters exist on requests only, headers on responses only, and body and
+// property share the media-type schema location.
+func boundScopes(direction Direction) []string {
+	if direction == DirectionResponse {
+		return []string{"body", "property", "header"}
+	}
+	return []string{"body", "property", "parameter"}
+}
+
+func boundLocation(direction Direction, scope, keyword string) string {
+	switch scope {
+	case "parameter":
+		return "paths.*.*.parameters.*.schema." + keyword
+	case "header":
+		return "paths.*.*.responses.*.headers.*.schema." + keyword
+	}
 	if direction == DirectionResponse {
 		return "paths.*.*.responses.*.content.*.schema." + keyword
 	}
 	return "paths.*.*.requestBody.content.*.schema." + keyword
 }
 
-func boundClaim(direction Direction, keyword, action string) string {
-	return boundLocation(direction, keyword) + ":" + action
+func boundClaim(direction Direction, scope, keyword, action string) string {
+	return boundLocation(direction, scope, keyword) + ":" + action
 }
 
 var (
@@ -108,7 +124,7 @@ func boundRules() BackwardCompatibilityRules {
 		}
 		for _, spec := range boundSpecs {
 			for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
-				for _, scope := range []string{"body", "property"} {
+				for _, scope := range boundScopes(direction) {
 					for _, action := range boundActions {
 						id := boundRuleId(direction, scope, spec.idName, action.action)
 						if handWrittenById[id] {
@@ -123,7 +139,7 @@ func boundRules() BackwardCompatibilityRules {
 							KindConstraints,
 							action.effect,
 							nil,
-							boundClaim(direction, spec.keyword, action.action),
+							boundClaim(direction, scope, spec.keyword, action.action),
 						))
 					}
 				}
@@ -157,7 +173,7 @@ func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (boundAction, any, boo
 }
 
 // BoundSetUnsetCheck reports the set and unset changes for every keyword in
-// boundSpecs, at body and property level, on both sides of the wire.
+// boundSpecs, at body, property, parameter, and response-header level.
 func BoundSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
@@ -167,7 +183,66 @@ func BoundSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		result = append(result, boundChanges(info, DirectionResponse, operationsSources)...)
 	})
+	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
+		result = append(result, parameterBoundChanges(p, operationsSources)...)
+	})
+	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
+		result = append(result, headerBoundChanges(h, operationsSources)...)
+	})
 
+	return result
+}
+
+// parameterBoundChanges reports set and unset on a parameter's root schema.
+// No guards attach: readOnly and writeOnly are property-scoped, so on a
+// parameter root schema they declare nothing.
+func parameterBoundChanges(p paramInfo, operationsSources *diff.OperationsSourcesMap) Changes {
+	result := make(Changes, 0)
+	if p.paramDiff.SchemaDiff == nil {
+		return result
+	}
+	for _, spec := range boundSpecs {
+		action, value, ok := classifySetUnset(spec, p.paramDiff.SchemaDiff)
+		if !ok {
+			continue
+		}
+		id := boundRuleId(DirectionRequest, "parameter", spec.idName, action.action)
+		if handWrittenIds()[id] {
+			continue
+		}
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, spec.keyword)
+		result = append(result, p.opInfo.NewApiChange(
+			id,
+			[]any{p.location, p.name, value},
+			boundRuleComment(action, rules.DeriveLevel(action.effect, DirectionRequest)),
+		).WithSources(baseSource, revisionSource))
+	}
+	return result
+}
+
+// headerBoundChanges mirrors parameterBoundChanges for a response header's
+// root schema.
+func headerBoundChanges(h headerInfo, operationsSources *diff.OperationsSourcesMap) Changes {
+	result := make(Changes, 0)
+	if h.headerDiff.SchemaDiff == nil {
+		return result
+	}
+	for _, spec := range boundSpecs {
+		action, value, ok := classifySetUnset(spec, h.headerDiff.SchemaDiff)
+		if !ok {
+			continue
+		}
+		id := boundRuleId(DirectionResponse, "header", spec.idName, action.action)
+		if handWrittenIds()[id] {
+			continue
+		}
+		baseSource, revisionSource := SchemaFieldSources(operationsSources, h.opInfo.methodDiff, h.headerDiff.SchemaDiff, spec.keyword)
+		result = append(result, h.opInfo.NewApiChange(
+			id,
+			[]any{h.name, value, h.responseStatus},
+			boundRuleComment(action, rules.DeriveLevel(action.effect, DirectionResponse)),
+		).WithSources(baseSource, revisionSource))
+	}
 	return result
 }
 
