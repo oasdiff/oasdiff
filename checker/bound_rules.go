@@ -69,9 +69,9 @@ func boundClaim(direction Direction, claimName, action string) string {
 }
 
 var (
-	boundRulesOnce   sync.Once
-	boundRulesList   BackwardCompatibilityRules
-	boundRuleIdsOnce map[string]string
+	boundRulesOnce    sync.Once
+	boundRulesList    BackwardCompatibilityRules
+	boundRuleComments map[string]string
 )
 
 // boundRules generates the set/unset rules for every keyword in
@@ -83,7 +83,7 @@ func boundRules() BackwardCompatibilityRules {
 		for _, rule := range handWrittenRules() {
 			handWritten[rule.Id] = true
 		}
-		boundRuleIdsOnce = map[string]string{}
+		boundRuleComments = map[string]string{}
 		for _, spec := range boundSpecs {
 			for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 				for _, scope := range []string{"body", "property"} {
@@ -93,9 +93,9 @@ func boundRules() BackwardCompatibilityRules {
 							continue
 						}
 						level := rules.DeriveLevel(action.effect, direction)
-						boundRuleIdsOnce[id] = ""
+						boundRuleComments[id] = ""
 						if action.comment && level == ERR {
-							boundRuleIdsOnce[id] = commentId(id)
+							boundRuleComments[id] = commentId(id)
 						}
 						boundRulesList = append(boundRulesList, newBackwardCompatibilityRule(
 							id,
@@ -116,11 +116,12 @@ func boundRules() BackwardCompatibilityRules {
 	return boundRulesList
 }
 
-// generatedBoundIds maps each id boundRules generated to its comment id,
-// empty when the message speaks alone
-func generatedBoundIds() map[string]string {
+// generatedBoundComments maps each id boundRules generated to its comment
+// id, empty when the message speaks alone; an id outside the map is not a
+// generated rule
+func generatedBoundComments() map[string]string {
 	boundRules()
-	return boundRuleIdsOnce
+	return boundRuleComments
 }
 
 // classifySetUnset reports whether the keyword was set or unset, and the
@@ -163,7 +164,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 			continue
 		}
 		id := boundRuleId(direction, "body", spec.idName, action)
-		comment, generated := generatedBoundIds()[id]
+		comment, generated := generatedBoundComments()[id]
 		if !generated {
 			continue
 		}
@@ -182,7 +183,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 				continue
 			}
 			id := boundRuleId(direction, "property", spec.idName, action)
-			comment, generated := generatedBoundIds()[id]
+			comment, generated := generatedBoundComments()[id]
 			if !generated {
 				continue
 			}
