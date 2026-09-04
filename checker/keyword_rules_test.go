@@ -66,11 +66,6 @@ func keywordDoc(t *testing.T, direction Direction, scope string, spec keywordSpe
 	}}
 }
 
-// Every generated rule fires: for each keyword, direction, scope, and
-// action, a spec pair built from the table's own sample produces a change
-// with the generated id at the rule's registered level, and the message and
-// comment render as text rather than as their keys. The table that generates
-// the rules also drives this gate, so a row cannot be registered untested.
 // keywordSpecs and diff.SchemaBounds list the same keywords: every spec
 // resolves to a bound, and every bound has a spec, so a keyword added to
 // either side without the other fails instead of silently generating
@@ -87,6 +82,11 @@ func TestKeywordSpecsMatchSchemaBounds(t *testing.T) {
 	}
 }
 
+// Every generated rule fires: for each keyword, direction, scope, and
+// action, a spec pair built from the table's own sample produces a change
+// with the generated id at the rule's registered level, and the message and
+// comment render as text rather than as their keys. The table that generates
+// the rules also drives this gate, so a row cannot be registered untested.
 func TestKeywordRulesFire(t *testing.T) {
 	byId := map[string]BackwardCompatibilityRule{}
 	for _, rule := range keywordRules() {
