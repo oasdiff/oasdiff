@@ -42,24 +42,25 @@ func schemaBound(keyword string) (diff.SchemaBound, bool) {
 // comment carries the shared explanatory comment on the cells where its
 // verdict is breaking.
 type boundAction struct {
-	action  string
-	effect  Effect
-	comment bool
+	action string
+	effect Effect
+	// comment is the id of the shared comment explaining the action's verdict
+	// where it is breaking; empty when the message speaks alone
+	comment string
 }
 
 var (
-	boundSet   = boundAction{"set", rules.EffectNarrows, true}
-	boundUnset = boundAction{"unset", rules.EffectWidens, false}
+	boundSet   = boundAction{"set", rules.EffectNarrows, commentId("bound-set")}
+	boundUnset = boundAction{"unset", rules.EffectWidens, ""}
 )
 
 var boundActions = []boundAction{boundSet, boundUnset}
 
-// boundRuleComment returns the comment id for a generated rule: the shared
-// explanatory comment where the action declares one and the derived verdict
-// is breaking, empty otherwise, and the message speaks alone.
-func boundRuleComment(id string, action boundAction, level Level) string {
-	if action.comment && level == ERR {
-		return commentId(id)
+// boundRuleComment returns the action's comment where the derived verdict is
+// breaking, empty otherwise.
+func boundRuleComment(action boundAction, level Level) string {
+	if level == ERR {
+		return action.comment
 	}
 	return ""
 }
@@ -178,7 +179,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 		result = append(result, info.newChange(
 			id,
 			[]any{value},
-			boundRuleComment(id, action, rules.DeriveLevel(action.effect, direction)),
+			boundRuleComment(action, rules.DeriveLevel(action.effect, direction)),
 		).WithSources(baseSource, revisionSource))
 	}
 
@@ -200,7 +201,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 			result = append(result, p.newChange(
 				id,
 				args,
-				boundRuleComment(id, action, rules.DeriveLevel(action.effect, direction)),
+				boundRuleComment(action, rules.DeriveLevel(action.effect, direction)),
 			).WithSources(baseSource, revisionSource))
 		}
 	})

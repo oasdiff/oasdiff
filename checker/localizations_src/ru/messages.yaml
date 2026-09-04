@@ -1216,7 +1216,6 @@ response-header-schema-became-false-description: "response header schema became 
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
 request-body-max-contains-set: у тела запроса задано значение maxContains в %s
 request-body-max-contains-set-description: установлено значение maxContains тела запроса
-request-body-max-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-max-contains-unset: значение maxContains у тела запроса удалено, предыдущее значение - %s
 request-body-max-contains-unset-description: удалено значение maxContains тела запроса
 request-body-max-items-unset: значение maxItems у тела запроса удалено, предыдущее значение - %s
@@ -1229,26 +1228,22 @@ request-body-max-unset: значение max у тела запроса удал
 request-body-max-unset-description: удалено значение max тела запроса
 request-body-min-contains-set: у тела запроса задано значение minContains в %s
 request-body-min-contains-set-description: установлено значение minContains тела запроса
-request-body-min-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-min-contains-unset: значение minContains у тела запроса удалено, предыдущее значение - %s
 request-body-min-contains-unset-description: удалено значение minContains тела запроса
 request-body-min-items-unset: значение minItems у тела запроса удалено, предыдущее значение - %s
 request-body-min-items-unset-description: удалено значение minItems тела запроса
 request-body-min-length-set: у тела запроса задано значение minLength в %s
 request-body-min-length-set-description: установлено значение minLength тела запроса
-request-body-min-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-min-length-unset: значение minLength у тела запроса удалено, предыдущее значение - %s
 request-body-min-length-unset-description: удалено значение minLength тела запроса
 request-body-min-properties-set: у тела запроса задано значение minProperties в %s
 request-body-min-properties-set-description: установлено значение minProperties тела запроса
-request-body-min-properties-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-body-min-properties-unset: значение minProperties у тела запроса удалено, предыдущее значение - %s
 request-body-min-properties-unset-description: удалено значение minProperties тела запроса
 request-body-min-unset: значение min у тела запроса удалено, предыдущее значение - %s
 request-body-min-unset-description: удалено значение min тела запроса
 request-property-max-contains-set: у поля запроса %s задано значение maxContains в %s
 request-property-max-contains-set-description: установлено значение maxContains поля запроса
-request-property-max-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-max-contains-unset: значение maxContains у поля запроса %s удалено, предыдущее значение - %s
 request-property-max-contains-unset-description: удалено значение maxContains поля запроса
 request-property-max-items-unset: значение maxItems у поля запроса %s удалено, предыдущее значение - %s
@@ -1261,19 +1256,16 @@ request-property-max-unset: значение max у поля запроса %s �
 request-property-max-unset-description: удалено значение max поля запроса
 request-property-min-contains-set: у поля запроса %s задано значение minContains в %s
 request-property-min-contains-set-description: установлено значение minContains поля запроса
-request-property-min-contains-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-min-contains-unset: значение minContains у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-contains-unset-description: удалено значение minContains поля запроса
 request-property-min-items-unset: значение minItems у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-items-unset-description: удалено значение minItems поля запроса
 request-property-min-length-set: у поля запроса %s задано значение minLength в %s
 request-property-min-length-set-description: установлено значение minLength поля запроса
-request-property-min-length-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-min-length-unset: значение minLength у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-length-unset-description: удалено значение minLength поля запроса
 request-property-min-properties-set: у поля запроса %s задано значение minProperties в %s
 request-property-min-properties-set-description: установлено значение minProperties поля запроса
-request-property-min-properties-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
 request-property-min-properties-unset: значение minProperties у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-properties-unset-description: удалено значение minProperties поля запроса
 request-property-min-unset: значение min у поля запроса %s удалено, предыдущее значение - %s
@@ -1354,3 +1346,4 @@ response-property-min-unset: значение min у поля ответа %s у
 response-property-min-unset-description: удалено значение min поля ответа
 response-property-multiple-of-set: у поля ответа %s задано значение multipleOf в %s, для ответа со статусом %s
 response-property-multiple-of-set-description: установлено значение multipleOf поля ответа
+bound-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.

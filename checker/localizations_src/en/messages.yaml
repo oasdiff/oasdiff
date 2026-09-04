@@ -1224,7 +1224,6 @@ response-header-schema-became-false-description: "response header schema became 
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
 request-body-max-contains-set: the request's body maxContains was set to %s
 request-body-max-contains-set-description: request body maxContains set
-request-body-max-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-max-contains-unset: the request's body maxContains was unset from %s
 request-body-max-contains-unset-description: request body maxContains unset
 request-body-max-items-unset: the request's body maxItems was unset from %s
@@ -1237,26 +1236,22 @@ request-body-max-unset: the request's body max was unset from %s
 request-body-max-unset-description: request body max unset
 request-body-min-contains-set: the request's body minContains was set to %s
 request-body-min-contains-set-description: request body minContains set
-request-body-min-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-min-contains-unset: the request's body minContains was unset from %s
 request-body-min-contains-unset-description: request body minContains unset
 request-body-min-items-unset: the request's body minItems was unset from %s
 request-body-min-items-unset-description: request body minItems unset
 request-body-min-length-set: the request's body minLength was set to %s
 request-body-min-length-set-description: request body minLength set
-request-body-min-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-min-length-unset: the request's body minLength was unset from %s
 request-body-min-length-unset-description: request body minLength unset
 request-body-min-properties-set: the request's body minProperties was set to %s
 request-body-min-properties-set-description: request body minProperties set
-request-body-min-properties-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-body-min-properties-unset: the request's body minProperties was unset from %s
 request-body-min-properties-unset-description: request body minProperties unset
 request-body-min-unset: the request's body min was unset from %s
 request-body-min-unset-description: request body min unset
 request-property-max-contains-set: the %s request property's maxContains was set to %s
 request-property-max-contains-set-description: request property maxContains set
-request-property-max-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-max-contains-unset: the %s request property's maxContains was unset from %s
 request-property-max-contains-unset-description: request property maxContains unset
 request-property-max-items-unset: the %s request property's maxItems was unset from %s
@@ -1269,19 +1264,16 @@ request-property-max-unset: the %s request property's max was unset from %s
 request-property-max-unset-description: request property max unset
 request-property-min-contains-set: the %s request property's minContains was set to %s
 request-property-min-contains-set-description: request property minContains set
-request-property-min-contains-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-min-contains-unset: the %s request property's minContains was unset from %s
 request-property-min-contains-unset-description: request property minContains unset
 request-property-min-items-unset: the %s request property's minItems was unset from %s
 request-property-min-items-unset-description: request property minItems unset
 request-property-min-length-set: the %s request property's minLength was set to %s
 request-property-min-length-set-description: request property minLength set
-request-property-min-length-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-min-length-unset: the %s request property's minLength was unset from %s
 request-property-min-length-unset-description: request property minLength unset
 request-property-min-properties-set: the %s request property's minProperties was set to %s
 request-property-min-properties-set-description: request property minProperties set
-request-property-min-properties-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 request-property-min-properties-unset: the %s request property's minProperties was unset from %s
 request-property-min-properties-unset-description: request property minProperties unset
 request-property-min-unset: the %s request property's min was unset from %s
@@ -1362,3 +1354,4 @@ response-property-min-unset: the %s response property's min was unset from %s fo
 response-property-min-unset-description: response property min unset
 response-property-multiple-of-set: the %s response property's multipleOf was set to %s for the response status %s
 response-property-multiple-of-set-description: response property multipleOf set
+bound-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
