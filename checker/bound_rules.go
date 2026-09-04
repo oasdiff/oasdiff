@@ -143,10 +143,10 @@ func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (boundAction, any, boo
 	if !ok {
 		return boundAction{}, nil, false
 	}
-	if value, ok := bound.Set(d); ok {
+	if value, ok := bound.WasSet(d); ok {
 		return boundSet, value, true
 	}
-	if value, ok := bound.Unset(d); ok {
+	if value, ok := bound.WasUnset(d); ok {
 		return boundUnset, value, true
 	}
 	return boundAction{}, nil, false

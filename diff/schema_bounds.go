@@ -10,9 +10,9 @@ type SchemaBound struct {
 	zeroIsAbsent bool
 }
 
-// Set returns the value the keyword was set to, when it went from absent to
+// WasSet returns the value the keyword was set to, when it went from absent to
 // present.
-func (b SchemaBound) Set(d *SchemaDiff) (any, bool) {
+func (b SchemaBound) WasSet(d *SchemaDiff) (any, bool) {
 	vd := b.Diff(d)
 	if vd == nil {
 		return nil, false
@@ -29,9 +29,9 @@ func (b SchemaBound) Set(d *SchemaDiff) (any, bool) {
 	return nil, false
 }
 
-// Unset returns the value the keyword was unset from, when it went from
+// WasUnset returns the value the keyword was unset from, when it went from
 // present to absent.
-func (b SchemaBound) Unset(d *SchemaDiff) (any, bool) {
+func (b SchemaBound) WasUnset(d *SchemaDiff) (any, bool) {
 	vd := b.Diff(d)
 	if vd == nil {
 		return nil, false

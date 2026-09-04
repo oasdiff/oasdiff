@@ -49,7 +49,7 @@ func boundSchema(t *testing.T, keyword string, value uint64) *openapi3.SchemaRef
 }
 
 // Each SchemaBounds row matches its getter's absence encoding: going from
-// absent to a value classifies as Set, the reverse as Unset, and a change
+// absent to a value classifies as WasSet, the reverse as WasUnset, and a change
 // between two values as neither. A getter that changes how it encodes
 // absence fails here.
 func TestSchemaBounds(t *testing.T) {
@@ -61,26 +61,26 @@ func TestSchemaBounds(t *testing.T) {
 
 		set, err := getSchemaDiff(cfg, newState(), absent, low)
 		require.NoError(t, err)
-		value, ok := bound.Set(set)
-		require.True(t, ok, "%s: absent to value must classify as Set", bound.Keyword)
+		value, ok := bound.WasSet(set)
+		require.True(t, ok, "%s: absent to value must classify as WasSet", bound.Keyword)
 		require.NotNil(t, value, bound.Keyword)
-		_, ok = bound.Unset(set)
+		_, ok = bound.WasUnset(set)
 		require.False(t, ok, bound.Keyword)
 
 		unset, err := getSchemaDiff(cfg, newState(), low, absent)
 		require.NoError(t, err)
-		value, ok = bound.Unset(unset)
-		require.True(t, ok, "%s: value to absent must classify as Unset", bound.Keyword)
+		value, ok = bound.WasUnset(unset)
+		require.True(t, ok, "%s: value to absent must classify as WasUnset", bound.Keyword)
 		require.NotNil(t, value, bound.Keyword)
-		_, ok = bound.Set(unset)
+		_, ok = bound.WasSet(unset)
 		require.False(t, ok, bound.Keyword)
 
 		changed, err := getSchemaDiff(cfg, newState(), low, high)
 		require.NoError(t, err)
-		_, ok = bound.Set(changed)
-		require.False(t, ok, "%s: value to value is not Set", bound.Keyword)
-		_, ok = bound.Unset(changed)
-		require.False(t, ok, "%s: value to value is not Unset", bound.Keyword)
+		_, ok = bound.WasSet(changed)
+		require.False(t, ok, "%s: value to value is not WasSet", bound.Keyword)
+		_, ok = bound.WasUnset(changed)
+		require.False(t, ok, "%s: value to value is not WasUnset", bound.Keyword)
 	}
 }
 
