@@ -86,7 +86,7 @@ func TestBoundSpecsMatchSchemaBounds(t *testing.T) {
 // action, a spec pair built from the table's own sample produces a change
 // with the generated id at the rule's registered level, and the message and
 // comment render as text rather than as their keys. The table that generates
-// the rules also drives this gate, so a row cannot be registered untested.
+// the rules also drives this test, so a row cannot be registered untested.
 func TestBoundRulesFire(t *testing.T) {
 	byId := map[string]BackwardCompatibilityRule{}
 	for _, rule := range boundRules() {

@@ -26,8 +26,7 @@ var boundSpecs = []boundSpec{
 	{"max-contains", "maxContains"},
 }
 
-// schemaBound resolves a keyword to its diff.SchemaBound; a keyword the diff
-// does not list fails TestBoundSpecsMatchSchemaBounds, never emits silently.
+// schemaBound resolves a keyword to its diff.SchemaBound
 func schemaBound(keyword string) (diff.SchemaBound, bool) {
 	for _, bound := range diff.SchemaBounds {
 		if bound.Keyword == keyword {
