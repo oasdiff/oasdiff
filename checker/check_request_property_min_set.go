@@ -15,10 +15,10 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
 			minDiff.From == nil &&
 			minDiff.To != nil {
+			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			result = append(result, info.newChange(
 				RequestBodyMinSetId,
 				[]any{minDiff.To},

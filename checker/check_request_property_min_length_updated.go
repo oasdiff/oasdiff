@@ -16,7 +16,7 @@ func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minLengthDiff := info.schemaDiff.MinLengthDiff; minLengthDiff != nil &&
-			minLengthDiff.From != nil && minLengthDiff.To != nil {
+			!uintBoundSet(minLengthDiff) && !uintBoundUnset(minLengthDiff) {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
 			id := RequestBodyMinLengthDecreasedId
 			if isIncreasedValue(minLengthDiff) {
@@ -31,7 +31,7 @@ func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 		info.walkProperties(func(p propertyInfo) {
 			minLengthDiff := p.propertyDiff.MinLengthDiff
-			if minLengthDiff == nil || minLengthDiff.From == nil || minLengthDiff.To == nil {
+			if minLengthDiff == nil || uintBoundSet(minLengthDiff) || uintBoundUnset(minLengthDiff) {
 				return
 			}
 

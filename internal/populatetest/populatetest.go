@@ -56,10 +56,19 @@ func NonZero(v reflect.Value, tag string) bool {
 		v.Set(m)
 		return true
 	case reflect.Pointer:
-		// Allocated, not filled: Schema points at itself through SchemaRef,
-		// so descending would not terminate, and a non-nil pointer to a zero
+		// Scalar pointees are filled; struct pointees are allocated but left
+		// zero, because Schema points at itself through SchemaRef, so
+		// descending would not terminate, and a non-nil pointer to a zero
 		// value already differs from the absent one.
-		v.Set(reflect.New(v.Type().Elem()))
+		p := reflect.New(v.Type().Elem())
+		switch v.Type().Elem().Kind() {
+		case reflect.String, reflect.Bool,
+			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Float64:
+			NonZero(p.Elem(), tag)
+		}
+		v.Set(p)
 		return true
 	case reflect.Interface:
 		v.Set(reflect.ValueOf("v-" + tag))

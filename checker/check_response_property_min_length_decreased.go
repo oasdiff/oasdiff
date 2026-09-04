@@ -14,7 +14,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minLengthDiff := info.schemaDiff.MinLengthDiff; minLengthDiff != nil &&
-			minLengthDiff.From != nil && minLengthDiff.To != nil && isDecreasedValue(minLengthDiff) {
+			!uintBoundUnset(minLengthDiff) && isDecreasedValue(minLengthDiff) {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
 			result = append(result, info.newChange(
 				ResponseBodyMinLengthDecreasedId,
@@ -25,7 +25,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 
 		info.walkProperties(func(p propertyInfo) {
 			minLengthDiff := p.propertyDiff.MinLengthDiff
-			if minLengthDiff == nil || minLengthDiff.To == nil || minLengthDiff.From == nil {
+			if minLengthDiff == nil || uintBoundUnset(minLengthDiff) {
 				return
 			}
 			if !isDecreasedValue(minLengthDiff) {

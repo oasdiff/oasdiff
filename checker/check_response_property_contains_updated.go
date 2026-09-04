@@ -35,7 +35,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 		}
 
-		if d := info.schemaDiff.MinContainsDiff; d != nil {
+		if d := info.schemaDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
 			if isIncreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMinContainsIncreasedId, []any{d.From, d.To, info.responseStatus}, "").
@@ -47,7 +47,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 		}
 
-		if d := info.schemaDiff.MaxContainsDiff; d != nil {
+		if d := info.schemaDiff.MaxContainsDiff; d != nil && d.From != nil && d.To != nil {
 			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxContains")
 			if isIncreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMaxContainsIncreasedId, []any{d.From, d.To, info.responseStatus}, "").
@@ -74,7 +74,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				}
 			}
 
-			if d := p.propertyDiff.MinContainsDiff; d != nil {
+			if d := p.propertyDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
 				if isIncreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMinContainsIncreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
@@ -86,7 +86,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				}
 			}
 
-			if d := p.propertyDiff.MaxContainsDiff; d != nil {
+			if d := p.propertyDiff.MaxContainsDiff; d != nil && d.From != nil && d.To != nil {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxContains")
 				if isIncreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMaxContainsIncreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
