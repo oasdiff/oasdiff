@@ -76,11 +76,15 @@ func boundRuleId(direction Direction, scope, idName, action string) string {
 	return directionName(direction) + "-" + scope + "-" + idName + "-" + action
 }
 
-func boundClaim(direction Direction, claimName, action string) string {
+func boundLocation(direction Direction, keyword string) string {
 	if direction == DirectionResponse {
-		return "paths.*.*.responses.*.content.*.schema." + claimName + ":" + action
+		return "paths.*.*.responses.*.content.*.schema." + keyword
 	}
-	return "paths.*.*.requestBody.content.*.schema." + claimName + ":" + action
+	return "paths.*.*.requestBody.content.*.schema." + keyword
+}
+
+func boundClaim(direction Direction, keyword, action string) string {
+	return boundLocation(direction, keyword) + ":" + action
 }
 
 var (
