@@ -45,6 +45,11 @@ lint: modernize ## Run linter
 modernize: ## Report code that could use newer Go constructs
 	go run golang.org/x/tools/go/analysis/passes/modernize/cmd/modernize@v0.48.0 -test -omitzero=false $$(go list ./... | grep -v checker/localizations)
 	
+.PHONY: bound-messages
+bound-messages: ## Regenerate the bound-rule message entries from their templates, then recompile
+	go test ./checker -run TestBoundMessages -update-bound-messages
+	$(MAKE) localize
+
 .PHONY: localize
 localize: ## Compile localized changelog messages
 	@echo "==> Compiling localized changelog messages..."
