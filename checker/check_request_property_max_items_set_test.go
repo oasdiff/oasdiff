@@ -25,7 +25,7 @@ func TestRequestBodyMaxItemsSet(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestBodyMaxItemsSetId,
 		Args:        []any{uint64(10)},
-		Comment:     checker.RequestBodyMaxItemsSetId + "-comment",
+		Comment:     "bound-set-comment",
 		Operation:   "PUT",
 		OperationId: "setTags",
 		Path:        "/tags",
@@ -49,7 +49,7 @@ func TestRequestPropertyMaxItemsSet(t *testing.T) {
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyMaxItemsSetId,
 		Args:        []any{"tags", uint64(10)},
-		Comment:     checker.RequestPropertyMaxItemsSetId + "-comment",
+		Comment:     "bound-set-comment",
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",

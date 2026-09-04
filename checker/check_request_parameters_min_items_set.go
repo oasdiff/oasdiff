@@ -26,7 +26,7 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 		result = append(result, p.opInfo.NewApiChange(
 			RequestParameterMinItemsSetId,
 			[]any{p.location, p.name, minItemsDiff.To},
-			commentId(RequestParameterMinItemsSetId),
+			boundSetComment,
 		).WithSources(nil, revisionSource))
 	})
 	return result

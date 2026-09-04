@@ -46,7 +46,7 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 				result = append(result, info.newChange(
 					RequestBodyMultipleOfSetId,
 					[]any{multipleOfDiff.To},
-					commentId(RequestBodyMultipleOfSetId),
+					boundSetComment,
 				).WithSources(nil, revisionSource))
 			case multipleOfDiff.To == nil:
 				result = append(result, info.newChange(
@@ -82,7 +82,7 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 				result = append(result, p.newChange(
 					RequestPropertyMultipleOfSetId,
 					[]any{propName, multipleOfDiff.To},
-					commentId(RequestPropertyMultipleOfSetId),
+					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			case multipleOfDiff.To == nil:
 				result = append(result, p.newChange(

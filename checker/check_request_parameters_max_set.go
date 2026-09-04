@@ -30,7 +30,7 @@ func RequestParameterMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.
 			result = append(result, p.opInfo.NewApiChange(
 				entry.id,
 				[]any{p.location, p.name, entry.diff.To},
-				commentId(entry.id),
+				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
 	})

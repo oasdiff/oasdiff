@@ -22,7 +22,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 			result = append(result, info.newChange(
 				RequestBodyMaxSetId,
 				[]any{maxDiff.To},
-				commentId(RequestBodyMaxSetId),
+				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
 		if exMaxDiff := info.schemaDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
@@ -32,7 +32,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMaxSetId,
 				[]any{exMaxDiff.To},
-				commentId(RequestBodyExclusiveMaxSetId),
+				boundSetComment,
 			).WithSources(nil, exRevisionSource))
 		}
 
@@ -46,7 +46,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				result = append(result, p.newChange(
 					RequestPropertyMaxSetId,
 					[]any{propName, maxDiff.To},
-					commentId(RequestPropertyMaxSetId),
+					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}
 
@@ -57,7 +57,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMaxSetId,
 					[]any{propName, exMaxDiff.To},
-					commentId(RequestPropertyExclusiveMaxSetId),
+					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}
 		})
