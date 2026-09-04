@@ -27,7 +27,7 @@ var boundSpecs = []boundSpec{
 }
 
 // schemaBound resolves a keyword to its diff.SchemaBound; a keyword the diff
-// does not list fails the behavioral gate, never emits silently.
+// does not list fails TestBoundSpecsMatchSchemaBounds, never emits silently.
 func schemaBound(keyword string) (diff.SchemaBound, bool) {
 	for _, bound := range diff.SchemaBounds {
 		if bound.Keyword == keyword {
