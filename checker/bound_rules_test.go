@@ -28,8 +28,8 @@ func setBoundSample(t *testing.T, s *openapi3.Schema, keyword string) {
 	t.Fatalf("no openapi3.Schema field with json tag %q", keyword)
 }
 
-// boundDoc builds a spec whose request or response schema carries the
-// keyword sample when withKeyword is true, at body or property level.
+// boundDoc builds a spec that carries the keyword sample, when withKeyword
+// is true, at the given scope's schema node.
 func boundDoc(t *testing.T, direction Direction, scope string, spec boundSpec, withKeyword bool) *load.SpecInfo {
 	node := &openapi3.Schema{}
 	if withKeyword {
@@ -44,15 +44,19 @@ func boundDoc(t *testing.T, direction Direction, scope string, spec boundSpec, w
 
 	plain := func() *openapi3.SchemaRef { return &openapi3.SchemaRef{Value: &openapi3.Schema{}} }
 	requestSchema, responseSchema, parameterSchema, headerSchema := plain(), plain(), plain(), plain()
-	switch {
-	case scope == "parameter":
+	switch scope {
+	case "parameter":
 		parameterSchema = &openapi3.SchemaRef{Value: carrier}
-	case scope == "header":
+	case "header":
 		headerSchema = &openapi3.SchemaRef{Value: carrier}
-	case direction == DirectionResponse:
-		responseSchema = &openapi3.SchemaRef{Value: carrier}
+	case "body", "property":
+		if direction == DirectionResponse {
+			responseSchema = &openapi3.SchemaRef{Value: carrier}
+		} else {
+			requestSchema = &openapi3.SchemaRef{Value: carrier}
+		}
 	default:
-		requestSchema = &openapi3.SchemaRef{Value: carrier}
+		t.Fatalf("unknown bound scope: %s", scope)
 	}
 
 	op := &openapi3.Operation{
