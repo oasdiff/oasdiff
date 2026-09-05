@@ -1198,6 +1198,9 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
+bound-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+
+# generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-max-contains-set: the request's body maxContains was set to %s
 request-body-max-contains-set-description: request body maxContains set
 request-body-max-contains-unset: the request's body maxContains was unset from %s
@@ -1226,6 +1229,42 @@ request-body-min-properties-unset: the request's body minProperties was unset fr
 request-body-min-properties-unset-description: request body minProperties unset
 request-body-min-unset: the request's body min was unset from %s
 request-body-min-unset-description: request body min unset
+request-parameter-max-contains-set: for the %s request parameter %s, the maxContains was set to %s
+request-parameter-max-contains-set-description: request parameter maxContains set
+request-parameter-max-contains-unset: for the %s request parameter %s, the maxContains was unset from %s
+request-parameter-max-contains-unset-description: request parameter maxContains unset
+request-parameter-max-items-set: for the %s request parameter %s, the maxItems was set to %s
+request-parameter-max-items-set-description: request parameter maxItems set
+request-parameter-max-items-unset: for the %s request parameter %s, the maxItems was unset from %s
+request-parameter-max-items-unset-description: request parameter maxItems unset
+request-parameter-max-length-unset: for the %s request parameter %s, the maxLength was unset from %s
+request-parameter-max-length-unset-description: request parameter maxLength unset
+request-parameter-max-properties-set: for the %s request parameter %s, the maxProperties was set to %s
+request-parameter-max-properties-set-description: request parameter maxProperties set
+request-parameter-max-properties-unset: for the %s request parameter %s, the maxProperties was unset from %s
+request-parameter-max-properties-unset-description: request parameter maxProperties unset
+request-parameter-max-unset: for the %s request parameter %s, the max was unset from %s
+request-parameter-max-unset-description: request parameter max unset
+request-parameter-min-contains-set: for the %s request parameter %s, the minContains was set to %s
+request-parameter-min-contains-set-description: request parameter minContains set
+request-parameter-min-contains-unset: for the %s request parameter %s, the minContains was unset from %s
+request-parameter-min-contains-unset-description: request parameter minContains unset
+request-parameter-min-items-unset: for the %s request parameter %s, the minItems was unset from %s
+request-parameter-min-items-unset-description: request parameter minItems unset
+request-parameter-min-length-set: for the %s request parameter %s, the minLength was set to %s
+request-parameter-min-length-set-description: request parameter minLength set
+request-parameter-min-length-unset: for the %s request parameter %s, the minLength was unset from %s
+request-parameter-min-length-unset-description: request parameter minLength unset
+request-parameter-min-properties-set: for the %s request parameter %s, the minProperties was set to %s
+request-parameter-min-properties-set-description: request parameter minProperties set
+request-parameter-min-properties-unset: for the %s request parameter %s, the minProperties was unset from %s
+request-parameter-min-properties-unset-description: request parameter minProperties unset
+request-parameter-min-unset: for the %s request parameter %s, the min was unset from %s
+request-parameter-min-unset-description: request parameter min unset
+request-parameter-multiple-of-set: for the %s request parameter %s, the multipleOf was set to %s
+request-parameter-multiple-of-set-description: request parameter multipleOf set
+request-parameter-multiple-of-unset: for the %s request parameter %s, the multipleOf was unset from %s
+request-parameter-multiple-of-unset-description: request parameter multipleOf unset
 request-property-max-contains-set: the %s request property's maxContains was set to %s
 request-property-max-contains-set-description: request property maxContains set
 request-property-max-contains-unset: the %s request property's maxContains was unset from %s
@@ -1292,6 +1331,50 @@ response-body-min-unset: the response's body min was unset from %s
 response-body-min-unset-description: response body min unset
 response-body-multiple-of-set: the response's body multipleOf was set to %s
 response-body-multiple-of-set-description: response body multipleOf set
+response-header-max-contains-set: the %s response header's maxContains was set to %s for the status %s
+response-header-max-contains-set-description: response header maxContains set
+response-header-max-contains-unset: the %s response header's maxContains was unset from %s for the status %s
+response-header-max-contains-unset-description: response header maxContains unset
+response-header-max-items-set: the %s response header's maxItems was set to %s for the status %s
+response-header-max-items-set-description: response header maxItems set
+response-header-max-items-unset: the %s response header's maxItems was unset from %s for the status %s
+response-header-max-items-unset-description: response header maxItems unset
+response-header-max-length-set: the %s response header's maxLength was set to %s for the status %s
+response-header-max-length-set-description: response header maxLength set
+response-header-max-length-unset: the %s response header's maxLength was unset from %s for the status %s
+response-header-max-length-unset-description: response header maxLength unset
+response-header-max-properties-set: the %s response header's maxProperties was set to %s for the status %s
+response-header-max-properties-set-description: response header maxProperties set
+response-header-max-properties-unset: the %s response header's maxProperties was unset from %s for the status %s
+response-header-max-properties-unset-description: response header maxProperties unset
+response-header-max-set: the %s response header's max was set to %s for the status %s
+response-header-max-set-description: response header max set
+response-header-max-unset: the %s response header's max was unset from %s for the status %s
+response-header-max-unset-description: response header max unset
+response-header-min-contains-set: the %s response header's minContains was set to %s for the status %s
+response-header-min-contains-set-description: response header minContains set
+response-header-min-contains-unset: the %s response header's minContains was unset from %s for the status %s
+response-header-min-contains-unset-description: response header minContains unset
+response-header-min-items-set: the %s response header's minItems was set to %s for the status %s
+response-header-min-items-set-description: response header minItems set
+response-header-min-items-unset: the %s response header's minItems was unset from %s for the status %s
+response-header-min-items-unset-description: response header minItems unset
+response-header-min-length-set: the %s response header's minLength was set to %s for the status %s
+response-header-min-length-set-description: response header minLength set
+response-header-min-length-unset: the %s response header's minLength was unset from %s for the status %s
+response-header-min-length-unset-description: response header minLength unset
+response-header-min-properties-set: the %s response header's minProperties was set to %s for the status %s
+response-header-min-properties-set-description: response header minProperties set
+response-header-min-properties-unset: the %s response header's minProperties was unset from %s for the status %s
+response-header-min-properties-unset-description: response header minProperties unset
+response-header-min-set: the %s response header's min was set to %s for the status %s
+response-header-min-set-description: response header min set
+response-header-min-unset: the %s response header's min was unset from %s for the status %s
+response-header-min-unset-description: response header min unset
+response-header-multiple-of-set: the %s response header's multipleOf was set to %s for the status %s
+response-header-multiple-of-set-description: response header multipleOf set
+response-header-multiple-of-unset: the %s response header's multipleOf was unset from %s for the status %s
+response-header-multiple-of-unset-description: response header multipleOf unset
 response-property-max-contains-set: the %s response property's maxContains was set to %s for the response status %s
 response-property-max-contains-set-description: response property maxContains set
 response-property-max-contains-unset: the %s response property's maxContains was unset from %s for the response status %s
@@ -1330,4 +1413,3 @@ response-property-min-unset: the %s response property's min was unset from %s fo
 response-property-min-unset-description: response property min unset
 response-property-multiple-of-set: the %s response property's multipleOf was set to %s for the response status %s
 response-property-multiple-of-set-description: response property multipleOf set
-bound-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.

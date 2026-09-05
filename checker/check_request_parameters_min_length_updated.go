@@ -19,8 +19,7 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 		if minLengthDiff == nil {
 			return
 		}
-		if minLengthDiff.From == nil ||
-			minLengthDiff.To == nil {
+		if uintBoundSet(minLengthDiff) || uintBoundUnset(minLengthDiff) {
 			return
 		}
 
