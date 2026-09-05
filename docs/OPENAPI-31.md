@@ -39,7 +39,7 @@ Changes are detected for all 3.1-specific fields:
 - **exclusiveMinimum/exclusiveMaximum**: increased/decreased/set for request body/properties/parameters and response body/properties
 - **prefixItems**: added/removed for request and response
 - **if/then/else**: added/removed for request and response
-- **contains/minContains/maxContains**: added/removed/increased/decreased
+- **contains/minContains/maxContains**: added/removed/increased/decreased, and set/unset for the bounds, at body, property, parameter, and response-header level
 - **dependentRequired**: added/removed/changed
 - **dependentSchemas**: added/removed
 - **patternProperties**: added/removed
