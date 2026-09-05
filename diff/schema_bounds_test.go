@@ -21,6 +21,11 @@ func setBound(t *testing.T, s *openapi3.Schema, keyword string, v uint64) {
 			continue
 		}
 		fv := reflect.ValueOf(s).Elem().Field(i)
+		if fv.Type() == reflect.TypeFor[openapi3.ExclusiveBound]() {
+			f := float64(v)
+			fv.Set(reflect.ValueOf(openapi3.ExclusiveBound{Value: &f}))
+			return
+		}
 		if fv.Kind() == reflect.Pointer {
 			p := reflect.New(fv.Type().Elem())
 			fv.Set(p)
@@ -86,10 +91,7 @@ func TestSchemaBounds(t *testing.T) {
 
 // Fields whose type marks them as bounds but which SchemaBounds deliberately
 // omits, with the reason.
-var schemaBoundsWaived = map[string]string{
-	"exclusiveMinimum": "boolean in OpenAPI 3.0 and number in 3.1; needs its own value kind",
-	"exclusiveMaximum": "boolean in OpenAPI 3.0 and number in 3.1; needs its own value kind",
-}
+var schemaBoundsWaived = map[string]string{}
 
 // Every openapi3.Schema field of a bound-like type (uint64, *uint64,
 // *float64, ExclusiveBound) is either a SchemaBounds row or waived above
@@ -129,4 +131,43 @@ func TestSchemaBoundsComplete(t *testing.T) {
 			t.Errorf("stale waiver: no openapi3.Schema field with json tag %q; remove the entry", keyword)
 		}
 	}
+}
+
+// The OpenAPI 3.0 boolean form of an exclusive bound: false declares the
+// bound not exclusive, the same contract as leaving the keyword out, so
+// false is the absent value. Setting false is not a set, removing false is
+// not an unset, and false to true is the set it always was in effect.
+func TestSchemaBounds_ExclusiveBooleanForm(t *testing.T) {
+	cfg := NewConfig()
+	bound, found := SchemaBound{}, false
+	for _, b := range SchemaBounds {
+		if b.Keyword == "exclusiveMaximum" {
+			bound, found = b, true
+		}
+	}
+	require.True(t, found)
+
+	boolSchema := func(set bool) *openapi3.SchemaRef {
+		return &openapi3.SchemaRef{Value: &openapi3.Schema{ExclusiveMax: openapi3.ExclusiveBound{Bool: &set}}}
+	}
+	plain := &openapi3.SchemaRef{Value: &openapi3.Schema{}}
+
+	falseToTrue, err := getSchemaDiff(cfg, newState(), boolSchema(false), boolSchema(true))
+	require.NoError(t, err)
+	value, ok := bound.WasSet(falseToTrue)
+	require.True(t, ok, "false to true is a set")
+	require.Equal(t, true, value)
+	_, ok = bound.WasUnset(falseToTrue)
+	require.False(t, ok)
+
+	nilToFalse, err := getSchemaDiff(cfg, newState(), plain, boolSchema(false))
+	require.NoError(t, err)
+	_, ok = bound.WasSet(nilToFalse)
+	require.False(t, ok, "false means not exclusive; setting it changes nothing")
+
+	trueToNil, err := getSchemaDiff(cfg, newState(), boolSchema(true), plain)
+	require.NoError(t, err)
+	value, ok = bound.WasUnset(trueToNil)
+	require.True(t, ok, "removing an exclusive true widens")
+	require.Equal(t, true, value)
 }

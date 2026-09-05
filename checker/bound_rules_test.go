@@ -148,7 +148,7 @@ func TestBoundRulesFire(t *testing.T) {
 	for _, rule := range boundRules() {
 		byId[rule.Id] = rule
 	}
-	require.Len(t, byId, 106)
+	require.Len(t, byId, 124)
 
 	localizer := NewDefaultLocalizer()
 	// every check runs, so a hand-written check reporting a generated cell

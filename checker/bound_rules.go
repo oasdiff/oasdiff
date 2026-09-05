@@ -24,6 +24,8 @@ var boundSpecs = []boundSpec{
 	{"min-properties", "minProperties"},
 	{"min-contains", "minContains"},
 	{"max-contains", "maxContains"},
+	{"exclusive-min", "exclusiveMinimum"},
+	{"exclusive-max", "exclusiveMaximum"},
 }
 
 // schemaBound resolves a keyword to its diff.SchemaBound
@@ -34,6 +36,17 @@ func schemaBound(keyword string) (diff.SchemaBound, bool) {
 		}
 	}
 	return diff.SchemaBound{}, false
+}
+
+// mustSchemaBound returns the bound for a keyword boundSpecs lists; a
+// missing keyword is a programming error, caught by
+// TestBoundSpecsMatchSchemaBounds before any check runs.
+func mustSchemaBound(keyword string) diff.SchemaBound {
+	bound, ok := schemaBound(keyword)
+	if !ok {
+		panic("no schema bound for " + keyword)
+	}
+	return bound
 }
 
 // boundActions are the edits the generated rules cover. Setting a

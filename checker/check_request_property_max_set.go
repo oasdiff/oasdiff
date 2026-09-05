@@ -15,23 +15,19 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if maxDiff := info.schemaDiff.MaxDiff; maxDiff != nil &&
-			maxDiff.From == nil &&
-			maxDiff.To != nil {
+		if value, ok := mustSchemaBound("maximum").WasSet(info.schemaDiff); ok {
 			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
 			result = append(result, info.newChange(
 				RequestBodyMaxSetId,
-				[]any{maxDiff.To},
+				[]any{value},
 				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
-		if exMaxDiff := info.schemaDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
-			exMaxDiff.From == nil &&
-			exMaxDiff.To != nil {
+		if value, ok := mustSchemaBound("exclusiveMaximum").WasSet(info.schemaDiff); ok {
 			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMaxSetId,
-				[]any{exMaxDiff.To},
+				[]any{value},
 				boundSetComment,
 			).WithSources(nil, exRevisionSource))
 		}
@@ -39,24 +35,20 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 		info.walkProperties(func(p propertyInfo) {
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-			if maxDiff := p.propertyDiff.MaxDiff; maxDiff != nil &&
-				maxDiff.From == nil &&
-				maxDiff.To != nil {
+			if value, ok := mustSchemaBound("maximum").WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
 				result = append(result, p.newChange(
 					RequestPropertyMaxSetId,
-					[]any{propName, maxDiff.To},
+					[]any{propName, value},
 					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}
 
-			if exMaxDiff := p.propertyDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
-				exMaxDiff.From == nil &&
-				exMaxDiff.To != nil {
+			if value, ok := mustSchemaBound("exclusiveMaximum").WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMaxSetId,
-					[]any{propName, exMaxDiff.To},
+					[]any{propName, value},
 					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}

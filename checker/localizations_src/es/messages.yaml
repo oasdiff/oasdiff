@@ -1190,6 +1190,10 @@ response-header-schema-became-not-false-description: "response header schema is 
 bound-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
+request-body-exclusive-max-unset: el valor exclusiveMaximum del cuerpo de solicitud fue removido de %s
+request-body-exclusive-max-unset-description: valor exclusiveMaximum del cuerpo de solicitud removido
+request-body-exclusive-min-unset: el valor exclusiveMinimum del cuerpo de solicitud fue removido de %s
+request-body-exclusive-min-unset-description: valor exclusiveMinimum del cuerpo de solicitud removido
 request-body-max-contains-set: el valor maxContains del cuerpo de solicitud fue establecido en %s
 request-body-max-contains-set-description: valor maxContains del cuerpo de solicitud establecido
 request-body-max-contains-unset: el valor maxContains del cuerpo de solicitud fue removido de %s
@@ -1218,6 +1222,10 @@ request-body-min-properties-unset: el valor minProperties del cuerpo de solicitu
 request-body-min-properties-unset-description: valor minProperties del cuerpo de solicitud removido
 request-body-min-unset: el valor min del cuerpo de solicitud fue removido de %s
 request-body-min-unset-description: valor min del cuerpo de solicitud removido
+request-parameter-exclusive-max-unset: para el parámetro %s de solicitud %s, el valor exclusiveMaximum fue removido de %s
+request-parameter-exclusive-max-unset-description: valor exclusiveMaximum del parámetro de solicitud removido
+request-parameter-exclusive-min-unset: para el parámetro %s de solicitud %s, el valor exclusiveMinimum fue removido de %s
+request-parameter-exclusive-min-unset-description: valor exclusiveMinimum del parámetro de solicitud removido
 request-parameter-max-contains-set: para el parámetro %s de solicitud %s, el valor maxContains fue establecido en %s
 request-parameter-max-contains-set-description: valor maxContains del parámetro de solicitud establecido
 request-parameter-max-contains-unset: para el parámetro %s de solicitud %s, el valor maxContains fue removido de %s
@@ -1254,6 +1262,10 @@ request-parameter-multiple-of-set: para el parámetro %s de solicitud %s, el val
 request-parameter-multiple-of-set-description: valor multipleOf del parámetro de solicitud establecido
 request-parameter-multiple-of-unset: para el parámetro %s de solicitud %s, el valor multipleOf fue removido de %s
 request-parameter-multiple-of-unset-description: valor multipleOf del parámetro de solicitud removido
+request-property-exclusive-max-unset: el valor exclusiveMaximum de la propiedad de solicitud %s fue removido de %s
+request-property-exclusive-max-unset-description: valor exclusiveMaximum de la propiedad de solicitud removido
+request-property-exclusive-min-unset: el valor exclusiveMinimum de la propiedad de solicitud %s fue removido de %s
+request-property-exclusive-min-unset-description: valor exclusiveMinimum de la propiedad de solicitud removido
 request-property-max-contains-set: el valor maxContains de la propiedad de solicitud %s fue establecido en %s
 request-property-max-contains-set-description: valor maxContains de la propiedad de solicitud establecido
 request-property-max-contains-unset: el valor maxContains de la propiedad de solicitud %s fue removido de %s
@@ -1282,6 +1294,14 @@ request-property-min-properties-unset: el valor minProperties de la propiedad de
 request-property-min-properties-unset-description: valor minProperties de la propiedad de solicitud removido
 request-property-min-unset: el valor min de la propiedad de solicitud %s fue removido de %s
 request-property-min-unset-description: valor min de la propiedad de solicitud removido
+response-body-exclusive-max-set: el valor exclusiveMaximum del cuerpo de respuesta fue establecido en %s
+response-body-exclusive-max-set-description: valor exclusiveMaximum del cuerpo de respuesta establecido
+response-body-exclusive-max-unset: el valor exclusiveMaximum del cuerpo de respuesta fue removido de %s
+response-body-exclusive-max-unset-description: valor exclusiveMaximum del cuerpo de respuesta removido
+response-body-exclusive-min-set: el valor exclusiveMinimum del cuerpo de respuesta fue establecido en %s
+response-body-exclusive-min-set-description: valor exclusiveMinimum del cuerpo de respuesta establecido
+response-body-exclusive-min-unset: el valor exclusiveMinimum del cuerpo de respuesta fue removido de %s
+response-body-exclusive-min-unset-description: valor exclusiveMinimum del cuerpo de respuesta removido
 response-body-max-contains-set: el valor maxContains del cuerpo de respuesta fue establecido en %s
 response-body-max-contains-set-description: valor maxContains del cuerpo de respuesta establecido
 response-body-max-contains-unset: el valor maxContains del cuerpo de respuesta fue removido de %s
@@ -1320,6 +1340,14 @@ response-body-min-unset: el valor min del cuerpo de respuesta fue removido de %s
 response-body-min-unset-description: valor min del cuerpo de respuesta removido
 response-body-multiple-of-set: el valor multipleOf del cuerpo de respuesta fue establecido en %s
 response-body-multiple-of-set-description: valor multipleOf del cuerpo de respuesta establecido
+response-header-exclusive-max-set: el valor exclusiveMaximum del encabezado de respuesta %s fue establecido en %s para el estado %s
+response-header-exclusive-max-set-description: valor exclusiveMaximum del encabezado de respuesta establecido
+response-header-exclusive-max-unset: el valor exclusiveMaximum del encabezado de respuesta %s fue removido de %s para el estado %s
+response-header-exclusive-max-unset-description: valor exclusiveMaximum del encabezado de respuesta removido
+response-header-exclusive-min-set: el valor exclusiveMinimum del encabezado de respuesta %s fue establecido en %s para el estado %s
+response-header-exclusive-min-set-description: valor exclusiveMinimum del encabezado de respuesta establecido
+response-header-exclusive-min-unset: el valor exclusiveMinimum del encabezado de respuesta %s fue removido de %s para el estado %s
+response-header-exclusive-min-unset-description: valor exclusiveMinimum del encabezado de respuesta removido
 response-header-max-contains-set: el valor maxContains del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-max-contains-set-description: valor maxContains del encabezado de respuesta establecido
 response-header-max-contains-unset: el valor maxContains del encabezado de respuesta %s fue removido de %s para el estado %s
@@ -1364,6 +1392,14 @@ response-header-multiple-of-set: el valor multipleOf del encabezado de respuesta
 response-header-multiple-of-set-description: valor multipleOf del encabezado de respuesta establecido
 response-header-multiple-of-unset: el valor multipleOf del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-multiple-of-unset-description: valor multipleOf del encabezado de respuesta removido
+response-property-exclusive-max-set: el valor exclusiveMaximum de la propiedad de respuesta %s fue establecido en %s para el estado %s
+response-property-exclusive-max-set-description: valor exclusiveMaximum de la propiedad de respuesta establecido
+response-property-exclusive-max-unset: el valor exclusiveMaximum de la propiedad de respuesta %s fue removido de %s para el estado %s
+response-property-exclusive-max-unset-description: valor exclusiveMaximum de la propiedad de respuesta removido
+response-property-exclusive-min-set: el valor exclusiveMinimum de la propiedad de respuesta %s fue establecido en %s para el estado %s
+response-property-exclusive-min-set-description: valor exclusiveMinimum de la propiedad de respuesta establecido
+response-property-exclusive-min-unset: el valor exclusiveMinimum de la propiedad de respuesta %s fue removido de %s para el estado %s
+response-property-exclusive-min-unset-description: valor exclusiveMinimum de la propiedad de respuesta removido
 response-property-max-contains-set: el valor maxContains de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-max-contains-set-description: valor maxContains de la propiedad de respuesta establecido
 response-property-max-contains-unset: el valor maxContains de la propiedad de respuesta %s fue removido de %s para el estado %s

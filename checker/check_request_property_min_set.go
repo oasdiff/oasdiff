@@ -15,23 +15,19 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
-			minDiff.From == nil &&
-			minDiff.To != nil {
+		if value, ok := mustSchemaBound("minimum").WasSet(info.schemaDiff); ok {
 			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			result = append(result, info.newChange(
 				RequestBodyMinSetId,
-				[]any{minDiff.To},
+				[]any{value},
 				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
-		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
-			exMinDiff.From == nil &&
-			exMinDiff.To != nil {
+		if value, ok := mustSchemaBound("exclusiveMinimum").WasSet(info.schemaDiff); ok {
 			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMinSetId,
-				[]any{exMinDiff.To},
+				[]any{value},
 				boundSetComment,
 			).WithSources(nil, exRevisionSource))
 		}
@@ -39,24 +35,20 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 		info.walkProperties(func(p propertyInfo) {
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
-				minDiff.From == nil &&
-				minDiff.To != nil {
+			if value, ok := mustSchemaBound("minimum").WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
 				result = append(result, p.newChange(
 					RequestPropertyMinSetId,
-					[]any{propName, minDiff.To},
+					[]any{propName, value},
 					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}
 
-			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
-				exMinDiff.From == nil &&
-				exMinDiff.To != nil {
+			if value, ok := mustSchemaBound("exclusiveMinimum").WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMinSetId,
-					[]any{propName, exMinDiff.To},
+					[]any{propName, value},
 					boundSetComment,
 				).WithSources(nil, propRevisionSource))
 			}

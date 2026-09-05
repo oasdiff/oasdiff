@@ -1191,6 +1191,10 @@ response-header-schema-became-not-false-description: "response header schema is 
 bound-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
+request-body-exclusive-max-unset: o valor exclusiveMaximum do corpo da requisição foi removido de %s
+request-body-exclusive-max-unset-description: valor exclusiveMaximum do corpo da requisição removido
+request-body-exclusive-min-unset: o valor exclusiveMinimum do corpo da requisição foi removido de %s
+request-body-exclusive-min-unset-description: valor exclusiveMinimum do corpo da requisição removido
 request-body-max-contains-set: o valor maxContains do corpo da requisição foi definido como %s
 request-body-max-contains-set-description: valor maxContains do corpo da requisição definido
 request-body-max-contains-unset: o valor maxContains do corpo da requisição foi removido de %s
@@ -1219,6 +1223,10 @@ request-body-min-properties-unset: o valor minProperties do corpo da requisiçã
 request-body-min-properties-unset-description: valor minProperties do corpo da requisição removido
 request-body-min-unset: o valor min do corpo da requisição foi removido de %s
 request-body-min-unset-description: valor min do corpo da requisição removido
+request-parameter-exclusive-max-unset: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMaximum foi removido de %s
+request-parameter-exclusive-max-unset-description: valor exclusiveMaximum do parâmetro da requisição removido
+request-parameter-exclusive-min-unset: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi removido de %s
+request-parameter-exclusive-min-unset-description: valor exclusiveMinimum do parâmetro da requisição removido
 request-parameter-max-contains-set: no parâmetro de requisição do tipo %s e nome %s, o valor maxContains foi definido como %s
 request-parameter-max-contains-set-description: valor maxContains do parâmetro da requisição definido
 request-parameter-max-contains-unset: no parâmetro de requisição do tipo %s e nome %s, o valor maxContains foi removido de %s
@@ -1255,6 +1263,10 @@ request-parameter-multiple-of-set: no parâmetro de requisição do tipo %s e no
 request-parameter-multiple-of-set-description: valor multipleOf do parâmetro da requisição definido
 request-parameter-multiple-of-unset: no parâmetro de requisição do tipo %s e nome %s, o valor multipleOf foi removido de %s
 request-parameter-multiple-of-unset-description: valor multipleOf do parâmetro da requisição removido
+request-property-exclusive-max-unset: o valor exclusiveMaximum da propriedade de requisição %s foi removido de %s
+request-property-exclusive-max-unset-description: valor exclusiveMaximum da propriedade de requisição removido
+request-property-exclusive-min-unset: o valor exclusiveMinimum da propriedade de requisição %s foi removido de %s
+request-property-exclusive-min-unset-description: valor exclusiveMinimum da propriedade de requisição removido
 request-property-max-contains-set: o valor maxContains da propriedade de requisição %s foi definido como %s
 request-property-max-contains-set-description: valor maxContains da propriedade de requisição definido
 request-property-max-contains-unset: o valor maxContains da propriedade de requisição %s foi removido de %s
@@ -1283,6 +1295,14 @@ request-property-min-properties-unset: o valor minProperties da propriedade de r
 request-property-min-properties-unset-description: valor minProperties da propriedade de requisição removido
 request-property-min-unset: o valor min da propriedade de requisição %s foi removido de %s
 request-property-min-unset-description: valor min da propriedade de requisição removido
+response-body-exclusive-max-set: o valor exclusiveMaximum do corpo da resposta foi definido como %s
+response-body-exclusive-max-set-description: valor exclusiveMaximum do corpo da resposta definido
+response-body-exclusive-max-unset: o valor exclusiveMaximum do corpo da resposta foi removido de %s
+response-body-exclusive-max-unset-description: valor exclusiveMaximum do corpo da resposta removido
+response-body-exclusive-min-set: o valor exclusiveMinimum do corpo da resposta foi definido como %s
+response-body-exclusive-min-set-description: valor exclusiveMinimum do corpo da resposta definido
+response-body-exclusive-min-unset: o valor exclusiveMinimum do corpo da resposta foi removido de %s
+response-body-exclusive-min-unset-description: valor exclusiveMinimum do corpo da resposta removido
 response-body-max-contains-set: o valor maxContains do corpo da resposta foi definido como %s
 response-body-max-contains-set-description: valor maxContains do corpo da resposta definido
 response-body-max-contains-unset: o valor maxContains do corpo da resposta foi removido de %s
@@ -1321,6 +1341,14 @@ response-body-min-unset: o valor min do corpo da resposta foi removido de %s
 response-body-min-unset-description: valor min do corpo da resposta removido
 response-body-multiple-of-set: o valor multipleOf do corpo da resposta foi definido como %s
 response-body-multiple-of-set-description: valor multipleOf do corpo da resposta definido
+response-header-exclusive-max-set: o valor exclusiveMaximum do cabeçalho de resposta %s foi definido como %s para o status %s
+response-header-exclusive-max-set-description: valor exclusiveMaximum do cabeçalho de resposta definido
+response-header-exclusive-max-unset: o valor exclusiveMaximum do cabeçalho de resposta %s foi removido de %s para o status %s
+response-header-exclusive-max-unset-description: valor exclusiveMaximum do cabeçalho de resposta removido
+response-header-exclusive-min-set: o valor exclusiveMinimum do cabeçalho de resposta %s foi definido como %s para o status %s
+response-header-exclusive-min-set-description: valor exclusiveMinimum do cabeçalho de resposta definido
+response-header-exclusive-min-unset: o valor exclusiveMinimum do cabeçalho de resposta %s foi removido de %s para o status %s
+response-header-exclusive-min-unset-description: valor exclusiveMinimum do cabeçalho de resposta removido
 response-header-max-contains-set: o valor maxContains do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-max-contains-set-description: valor maxContains do cabeçalho de resposta definido
 response-header-max-contains-unset: o valor maxContains do cabeçalho de resposta %s foi removido de %s para o status %s
@@ -1365,6 +1393,14 @@ response-header-multiple-of-set: o valor multipleOf do cabeçalho de resposta %s
 response-header-multiple-of-set-description: valor multipleOf do cabeçalho de resposta definido
 response-header-multiple-of-unset: o valor multipleOf do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-multiple-of-unset-description: valor multipleOf do cabeçalho de resposta removido
+response-property-exclusive-max-set: o valor exclusiveMaximum da propriedade de resposta %s foi definido como %s para o status %s
+response-property-exclusive-max-set-description: valor exclusiveMaximum da propriedade de resposta definido
+response-property-exclusive-max-unset: o valor exclusiveMaximum da propriedade de resposta %s foi removido de %s para o status %s
+response-property-exclusive-max-unset-description: valor exclusiveMaximum da propriedade de resposta removido
+response-property-exclusive-min-set: o valor exclusiveMinimum da propriedade de resposta %s foi definido como %s para o status %s
+response-property-exclusive-min-set-description: valor exclusiveMinimum da propriedade de resposta definido
+response-property-exclusive-min-unset: o valor exclusiveMinimum da propriedade de resposta %s foi removido de %s para o status %s
+response-property-exclusive-min-unset-description: valor exclusiveMinimum da propriedade de resposta removido
 response-property-max-contains-set: o valor maxContains da propriedade de resposta %s foi definido como %s para o status %s
 response-property-max-contains-set-description: valor maxContains da propriedade de resposta definido
 response-property-max-contains-unset: o valor maxContains da propriedade de resposta %s foi removido de %s para o status %s

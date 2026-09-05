@@ -1201,6 +1201,10 @@ response-header-schema-became-not-false-description: "response header schema is 
 bound-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
+request-body-exclusive-max-unset: the request's body exclusiveMaximum was unset from %s
+request-body-exclusive-max-unset-description: request body exclusiveMaximum unset
+request-body-exclusive-min-unset: the request's body exclusiveMinimum was unset from %s
+request-body-exclusive-min-unset-description: request body exclusiveMinimum unset
 request-body-max-contains-set: the request's body maxContains was set to %s
 request-body-max-contains-set-description: request body maxContains set
 request-body-max-contains-unset: the request's body maxContains was unset from %s
@@ -1229,6 +1233,10 @@ request-body-min-properties-unset: the request's body minProperties was unset fr
 request-body-min-properties-unset-description: request body minProperties unset
 request-body-min-unset: the request's body min was unset from %s
 request-body-min-unset-description: request body min unset
+request-parameter-exclusive-max-unset: for the %s request parameter %s, the exclusiveMaximum was unset from %s
+request-parameter-exclusive-max-unset-description: request parameter exclusiveMaximum unset
+request-parameter-exclusive-min-unset: for the %s request parameter %s, the exclusiveMinimum was unset from %s
+request-parameter-exclusive-min-unset-description: request parameter exclusiveMinimum unset
 request-parameter-max-contains-set: for the %s request parameter %s, the maxContains was set to %s
 request-parameter-max-contains-set-description: request parameter maxContains set
 request-parameter-max-contains-unset: for the %s request parameter %s, the maxContains was unset from %s
@@ -1265,6 +1273,10 @@ request-parameter-multiple-of-set: for the %s request parameter %s, the multiple
 request-parameter-multiple-of-set-description: request parameter multipleOf set
 request-parameter-multiple-of-unset: for the %s request parameter %s, the multipleOf was unset from %s
 request-parameter-multiple-of-unset-description: request parameter multipleOf unset
+request-property-exclusive-max-unset: the %s request property's exclusiveMaximum was unset from %s
+request-property-exclusive-max-unset-description: request property exclusiveMaximum unset
+request-property-exclusive-min-unset: the %s request property's exclusiveMinimum was unset from %s
+request-property-exclusive-min-unset-description: request property exclusiveMinimum unset
 request-property-max-contains-set: the %s request property's maxContains was set to %s
 request-property-max-contains-set-description: request property maxContains set
 request-property-max-contains-unset: the %s request property's maxContains was unset from %s
@@ -1293,6 +1305,14 @@ request-property-min-properties-unset: the %s request property's minProperties w
 request-property-min-properties-unset-description: request property minProperties unset
 request-property-min-unset: the %s request property's min was unset from %s
 request-property-min-unset-description: request property min unset
+response-body-exclusive-max-set: the response's body exclusiveMaximum was set to %s
+response-body-exclusive-max-set-description: response body exclusiveMaximum set
+response-body-exclusive-max-unset: the response's body exclusiveMaximum was unset from %s
+response-body-exclusive-max-unset-description: response body exclusiveMaximum unset
+response-body-exclusive-min-set: the response's body exclusiveMinimum was set to %s
+response-body-exclusive-min-set-description: response body exclusiveMinimum set
+response-body-exclusive-min-unset: the response's body exclusiveMinimum was unset from %s
+response-body-exclusive-min-unset-description: response body exclusiveMinimum unset
 response-body-max-contains-set: the response's body maxContains was set to %s
 response-body-max-contains-set-description: response body maxContains set
 response-body-max-contains-unset: the response's body maxContains was unset from %s
@@ -1331,6 +1351,14 @@ response-body-min-unset: the response's body min was unset from %s
 response-body-min-unset-description: response body min unset
 response-body-multiple-of-set: the response's body multipleOf was set to %s
 response-body-multiple-of-set-description: response body multipleOf set
+response-header-exclusive-max-set: the %s response header's exclusiveMaximum was set to %s for the status %s
+response-header-exclusive-max-set-description: response header exclusiveMaximum set
+response-header-exclusive-max-unset: the %s response header's exclusiveMaximum was unset from %s for the status %s
+response-header-exclusive-max-unset-description: response header exclusiveMaximum unset
+response-header-exclusive-min-set: the %s response header's exclusiveMinimum was set to %s for the status %s
+response-header-exclusive-min-set-description: response header exclusiveMinimum set
+response-header-exclusive-min-unset: the %s response header's exclusiveMinimum was unset from %s for the status %s
+response-header-exclusive-min-unset-description: response header exclusiveMinimum unset
 response-header-max-contains-set: the %s response header's maxContains was set to %s for the status %s
 response-header-max-contains-set-description: response header maxContains set
 response-header-max-contains-unset: the %s response header's maxContains was unset from %s for the status %s
@@ -1375,6 +1403,14 @@ response-header-multiple-of-set: the %s response header's multipleOf was set to 
 response-header-multiple-of-set-description: response header multipleOf set
 response-header-multiple-of-unset: the %s response header's multipleOf was unset from %s for the status %s
 response-header-multiple-of-unset-description: response header multipleOf unset
+response-property-exclusive-max-set: the %s response property's exclusiveMaximum was set to %s for the response status %s
+response-property-exclusive-max-set-description: response property exclusiveMaximum set
+response-property-exclusive-max-unset: the %s response property's exclusiveMaximum was unset from %s for the response status %s
+response-property-exclusive-max-unset-description: response property exclusiveMaximum unset
+response-property-exclusive-min-set: the %s response property's exclusiveMinimum was set to %s for the response status %s
+response-property-exclusive-min-set-description: response property exclusiveMinimum set
+response-property-exclusive-min-unset: the %s response property's exclusiveMinimum was unset from %s for the response status %s
+response-property-exclusive-min-unset-description: response property exclusiveMinimum unset
 response-property-max-contains-set: the %s response property's maxContains was set to %s for the response status %s
 response-property-max-contains-set-description: response property maxContains set
 response-property-max-contains-unset: the %s response property's maxContains was unset from %s for the response status %s
