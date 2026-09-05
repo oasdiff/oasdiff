@@ -2,6 +2,7 @@ package checker
 
 import (
 	"slices"
+	"strings"
 
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -29,6 +30,11 @@ import (
 // consults this table (see claimedByTransition), so checkers contain no
 // suppression logic.
 type transition struct {
+	// name identifies the transition in the published change model.
+	name string
+	// description says, for a reader of the model, what document shape the
+	// transition recognizes.
+	description string
 	// present reports whether the transition occurred at this schema node.
 	present func(*diff.SchemaDiff) bool
 	// claims is the transition's suppression scope: the kinds of raw
@@ -70,7 +76,9 @@ var transitions = []transition{
 	// became-(not-)nullable at every level: body, property, parameter, and
 	// parameter property.
 	{
-		present: func(d *diff.SchemaDiff) bool { return !d.NullableWrappingDiff.Empty() },
+		name:        "nullable-wrapping",
+		description: "a schema X became oneOf: [{type: \"null\"}, X], the OpenAPI 3.1 idiom for making a referenced schema nullable, or the wrapper was removed",
+		present:     func(d *diff.SchemaDiff) bool { return !d.NullableWrappingDiff.Empty() },
 		claims: map[Kind]bool{
 			KindType: true, KindValues: true, KindConstraints: true,
 			KindStructure: true, KindExistence: true, KindRequiredness: true,
@@ -96,6 +104,8 @@ var transitions = []transition{
 	// claims nothing: `true` accepts what the empty schema accepts, so the
 	// keyword-level findings describe it correctly.
 	{
+		name:        "boolean-false-schema",
+		description: "the schema at a node was replaced by the JSON Schema boolean false, which accepts no instance, or the reverse",
 		present: func(d *diff.SchemaDiff) bool {
 			return d.AlwaysDiff != nil && (d.AlwaysDiff.From == false || d.AlwaysDiff.To == false)
 		},
@@ -121,8 +131,10 @@ var transitions = []transition{
 	// property one-of-added finding is the reporter (upgrading it to a
 	// dedicated finding is a reportedBy swap here).
 	{
-		present: func(d *diff.SchemaDiff) bool { return !d.OneOfWrappingDiff.Empty() },
-		claims:  map[Kind]bool{KindType: true, KindStructure: true},
+		name:        "oneof-wrapping",
+		description: "a concrete object schema became a oneOf of object alternatives",
+		present:     func(d *diff.SchemaDiff) bool { return !d.OneOfWrappingDiff.Empty() },
+		claims:      map[Kind]bool{KindType: true, KindStructure: true},
 		reportedBy: []string{
 			RequestBodyWrappedInOneOfId, ResponseBodyWrappedInOneOfId,
 			RequestBodyWrappedInOneOfOriginalPreservedId, ResponseBodyWrappedInOneOfOriginalPreservedId,
@@ -134,8 +146,10 @@ var transitions = []transition{
 	// oneOf/anyOf membership changes. Reported as list-of-types
 	// widened/narrowed at every level.
 	{
-		present: func(d *diff.SchemaDiff) bool { return !d.ListOfTypesDiff.Empty() },
-		claims:  map[Kind]bool{KindType: true, KindStructure: true},
+		name:        "list-of-types",
+		description: "a single type became a oneOf or anyOf of scalar types, or the reverse",
+		present:     func(d *diff.SchemaDiff) bool { return !d.ListOfTypesDiff.Empty() },
+		claims:      map[Kind]bool{KindType: true, KindStructure: true},
 		reportedBy: []string{
 			RequestBodyListOfTypesWidenedId, RequestBodyListOfTypesNarrowedId,
 			RequestPropertyListOfTypesWidenedId, RequestPropertyListOfTypesNarrowedId,
@@ -150,8 +164,10 @@ var transitions = []transition{
 	// type: [string, "null"] form). Claims the raw type change. Reported as
 	// became-(not-)nullable.
 	{
-		present: func(d *diff.SchemaDiff) bool { return isNullTypeChange(d.TypeDiff) && d.FormatDiff.Empty() },
-		claims:  map[Kind]bool{KindType: true},
+		name:        "null-only-type-change",
+		description: "null was added to or removed from the type set with no other type or format change, the OpenAPI 3.1 type: [string, \"null\"] form",
+		present:     func(d *diff.SchemaDiff) bool { return isNullTypeChange(d.TypeDiff) && d.FormatDiff.Empty() },
+		claims:      map[Kind]bool{KindType: true},
 		reportedBy: []string{
 			RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId,
 			RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId,
@@ -188,4 +204,34 @@ func claimedByTransition(schemaDiff *diff.SchemaDiff, ruleId string) bool {
 		}
 	}
 	return false
+}
+
+// Transition is the published metadata of one recognized schema transition:
+// a multi-edit document shape reported as a single change. The recognition
+// itself stays in this package; the model carries what it recognizes, which
+// kinds of raw findings it claims, and which changes report it.
+type Transition struct {
+	Name        string
+	Description string
+	Claims      []Kind
+	ReportedBy  []string
+}
+
+// GetTransitions returns the metadata of every recognized transition.
+func GetTransitions() []Transition {
+	result := make([]Transition, 0, len(transitions))
+	for _, t := range transitions {
+		claims := make([]Kind, 0, len(t.claims))
+		for kind := range t.claims {
+			claims = append(claims, kind)
+		}
+		slices.SortFunc(claims, func(a, b Kind) int { return strings.Compare(a.String(), b.String()) })
+		result = append(result, Transition{
+			Name:        t.name,
+			Description: t.description,
+			Claims:      claims,
+			ReportedBy:  slices.Clone(t.reportedBy),
+		})
+	}
+	return result
 }
