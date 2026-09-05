@@ -96,11 +96,13 @@ func boundLocation(direction Direction, scope, keyword string) string {
 		return "paths.*.*.parameters.*.schema." + keyword
 	case "header":
 		return "paths.*.*.responses.*.headers.*.schema." + keyword
+	case "body", "property":
+		if direction == DirectionResponse {
+			return "paths.*.*.responses.*.content.*.schema." + keyword
+		}
+		return "paths.*.*.requestBody.content.*.schema." + keyword
 	}
-	if direction == DirectionResponse {
-		return "paths.*.*.responses.*.content.*.schema." + keyword
-	}
-	return "paths.*.*.requestBody.content.*.schema." + keyword
+	panic("unknown bound scope: " + scope)
 }
 
 func boundClaim(direction Direction, scope, keyword, action string) string {
