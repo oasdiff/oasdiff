@@ -15,7 +15,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if value, ok := mustSchemaBound("minimum").WasSet(info.schemaDiff); ok {
+		if value, ok := minimumBound.WasSet(info.schemaDiff); ok {
 			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			result = append(result, info.newChange(
 				RequestBodyMinSetId,
@@ -23,7 +23,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
-		if value, ok := mustSchemaBound("exclusiveMinimum").WasSet(info.schemaDiff); ok {
+		if value, ok := exclusiveMinimumBound.WasSet(info.schemaDiff); ok {
 			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMinSetId,
@@ -35,7 +35,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 		info.walkProperties(func(p propertyInfo) {
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-			if value, ok := mustSchemaBound("minimum").WasSet(p.propertyDiff); ok {
+			if value, ok := minimumBound.WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
 				result = append(result, p.newChange(
 					RequestPropertyMinSetId,
@@ -44,7 +44,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				).WithSources(nil, propRevisionSource))
 			}
 
-			if value, ok := mustSchemaBound("exclusiveMinimum").WasSet(p.propertyDiff); ok {
+			if value, ok := exclusiveMinimumBound.WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMinSetId,

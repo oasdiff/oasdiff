@@ -18,11 +18,12 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 		for _, entry := range []struct {
 			id    string
 			field string
+			bound diff.SchemaBound
 		}{
-			{RequestParameterMinSetId, "minimum"},
-			{RequestParameterExclusiveMinSetId, "exclusiveMinimum"},
+			{RequestParameterMinSetId, "minimum", minimumBound},
+			{RequestParameterExclusiveMinSetId, "exclusiveMinimum", exclusiveMinimumBound},
 		} {
-			value, ok := mustSchemaBound(entry.field).WasSet(p.paramDiff.SchemaDiff)
+			value, ok := entry.bound.WasSet(p.paramDiff.SchemaDiff)
 			if !ok {
 				continue
 			}

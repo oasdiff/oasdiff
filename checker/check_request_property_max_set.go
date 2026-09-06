@@ -15,7 +15,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if value, ok := mustSchemaBound("maximum").WasSet(info.schemaDiff); ok {
+		if value, ok := maximumBound.WasSet(info.schemaDiff); ok {
 			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
 			result = append(result, info.newChange(
 				RequestBodyMaxSetId,
@@ -23,7 +23,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}
-		if value, ok := mustSchemaBound("exclusiveMaximum").WasSet(info.schemaDiff); ok {
+		if value, ok := exclusiveMaximumBound.WasSet(info.schemaDiff); ok {
 			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMaxSetId,
@@ -35,7 +35,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 		info.walkProperties(func(p propertyInfo) {
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
-			if value, ok := mustSchemaBound("maximum").WasSet(p.propertyDiff); ok {
+			if value, ok := maximumBound.WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
 				result = append(result, p.newChange(
 					RequestPropertyMaxSetId,
@@ -44,7 +44,7 @@ func RequestPropertyMaxSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 				).WithSources(nil, propRevisionSource))
 			}
 
-			if value, ok := mustSchemaBound("exclusiveMaximum").WasSet(p.propertyDiff); ok {
+			if value, ok := exclusiveMaximumBound.WasSet(p.propertyDiff); ok {
 				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMaxSetId,

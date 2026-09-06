@@ -38,16 +38,15 @@ func schemaBound(keyword string) (diff.SchemaBound, bool) {
 	return diff.SchemaBound{}, false
 }
 
-// mustSchemaBound returns the bound for a keyword boundSpecs lists; a
-// missing keyword is a programming error, caught by
-// TestBoundSpecsMatchSchemaBounds before any check runs.
-func mustSchemaBound(keyword string) diff.SchemaBound {
-	bound, ok := schemaBound(keyword)
-	if !ok {
-		panic("no schema bound for " + keyword)
-	}
-	return bound
-}
+// Bounds the hand-written set checks classify through. A wrong keyword here
+// leaves the bound zero and its check silent; the checks' fixture tests and
+// TestBoundSpecsMatchSchemaBounds keep that loud.
+var (
+	maximumBound, _          = schemaBound("maximum")
+	minimumBound, _          = schemaBound("minimum")
+	exclusiveMaximumBound, _ = schemaBound("exclusiveMaximum")
+	exclusiveMinimumBound, _ = schemaBound("exclusiveMinimum")
+)
 
 // boundActions are the edits the generated rules cover. Setting a
 // constraint narrows what the schema accepts and unsetting it widens;
@@ -115,7 +114,9 @@ func boundLocation(direction Direction, scope, keyword string) string {
 		}
 		return "paths.*.*.requestBody.content.*.schema." + keyword
 	}
-	panic("unknown bound scope: " + scope)
+	// an unknown scope yields an empty location, and the claims audit
+	// rejects the malformed claim built from it
+	return ""
 }
 
 func boundClaim(direction Direction, scope, keyword, action string) string {

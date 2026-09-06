@@ -36,6 +36,9 @@ func (b SchemaBound) absent(v any) bool {
 // WasSet returns the value the keyword was set to, when it went from absent to
 // present.
 func (b SchemaBound) WasSet(d *SchemaDiff) (any, bool) {
+	if b.Diff == nil {
+		return nil, false
+	}
 	vd := b.Diff(d)
 	if vd == nil || !b.absent(vd.From) || b.absent(vd.To) {
 		return nil, false
@@ -46,6 +49,9 @@ func (b SchemaBound) WasSet(d *SchemaDiff) (any, bool) {
 // WasUnset returns the value the keyword was unset from, when it went from
 // present to absent.
 func (b SchemaBound) WasUnset(d *SchemaDiff) (any, bool) {
+	if b.Diff == nil {
+		return nil, false
+	}
 	vd := b.Diff(d)
 	if vd == nil || b.absent(vd.From) || !b.absent(vd.To) {
 		return nil, false
