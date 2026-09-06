@@ -51,6 +51,7 @@ func Validate(spec *openapi3.T, source string) formatters.Findings {
 	findings = append(findings, lintRequiredWithDefault(spec, source)...)
 	findings = append(findings, lintTypeFormatMismatch(spec, source)...)
 	findings = append(findings, lintSchemaConstraints(spec, source)...)
+	findings = append(findings, lintMutabilityReachability(spec, source)...)
 	return findings
 }
 

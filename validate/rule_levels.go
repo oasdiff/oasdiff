@@ -27,6 +27,12 @@ var ruleLevels = map[string]checker.Level{
 	// A default, unlike an example, is consumed at runtime by some tooling, so
 	// a mismatch there is a real risk.
 	"default-violates-schema": checker.WARN,
+	// A wrong readOnly/writeOnly flag is probably a mistake, and since the
+	// changelog derives verdicts from these flags, a wrong one silently
+	// mutes breaking-change detection for the property. Warning, not error:
+	// a schema can legitimately be request-only today and shared tomorrow.
+	"read-only-property-only-in-requests":   checker.WARN,
+	"write-only-property-only-in-responses": checker.WARN,
 	// Fields alongside a $ref are silently ignored in 3.0 rather than breaking
 	// the spec; the author's intent is lost, not the document.
 	"extra-sibling-fields": checker.WARN,

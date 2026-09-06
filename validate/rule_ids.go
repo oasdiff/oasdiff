@@ -90,6 +90,7 @@ var ruleIDs = []string{
 	"prefix-items-field-for-3-1-plus",
 	"property-names-field-for-3-1-plus",
 	"query-field-for-3-2-plus",
+	"read-only-property-only-in-requests",
 	"read-only-write-only-mutually-exclusive",
 	"request-body-content-required",
 	"required-with-default",
@@ -122,6 +123,7 @@ var ruleIDs = []string{
 	"value-or-external-value-required",
 	"webhook-nil",
 	"webhooks-field-for-3-1-plus",
+	"write-only-property-only-in-responses",
 }
 
 // nativeRuleIDs are the ids validate emits that do not come from kin: the
@@ -141,6 +143,8 @@ var nativeRuleIDs = []string{
 	MinContainsExceedsMaxContainsID,
 	EnumEmptyID,
 	ConstNotInEnumID,
+	ReadOnlyOnlyInRequestsID,
+	WriteOnlyOnlyInResponsesID,
 	unknownValidationID,
 }
 
