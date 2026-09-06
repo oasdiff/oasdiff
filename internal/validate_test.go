@@ -542,3 +542,32 @@ func Test_ValidateCmd_InvalidSecuritySchemes(t *testing.T) {
 	require.Contains(t, out, "[security-scheme-http-scheme-invalid]")
 	require.Contains(t, out, "[security-scheme-apikey-in-invalid]")
 }
+
+// The fixture's `readOnly: true` is on line 16; the finding pins the flag
+// itself, not the property or the schema.
+func Test_ValidateCmd_ReadOnlyOnlyInRequests(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml --fail-on INFO ../data/validate/read-only-only-in-requests.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "read-only-property-only-in-requests", findings[0]["id"])
+	src := findings[0]["source"].(map[string]any)
+	require.Equal(t, 16, src["line"], "should pin the readOnly flag line")
+	require.Equal(t, 19, src["column"])
+}
+
+// The mirror: `writeOnly: true` on line 18 of the response-only fixture.
+func Test_ValidateCmd_WriteOnlyOnlyInResponses(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f yaml --fail-on INFO ../data/validate/write-only-only-in-responses.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "write-only-property-only-in-responses", findings[0]["id"])
+	src := findings[0]["source"].(map[string]any)
+	require.Equal(t, 18, src["line"], "should pin the writeOnly flag line")
+	require.Equal(t, 21, src["column"])
+}
