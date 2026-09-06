@@ -13,15 +13,13 @@ type Claim struct {
 	Actions []Action
 }
 
-var validActions = map[Action]bool{
-	ActionAdd:      true,
-	ActionRemove:   true,
-	ActionSet:      true,
-	ActionUnset:    true,
-	ActionChange:   true,
-	ActionIncrease: true,
-	ActionDecrease: true,
-}
+var validActions = func() map[Action]bool {
+	m := make(map[Action]bool, len(Actions))
+	for _, a := range Actions {
+		m[a] = true
+	}
+	return m
+}()
 
 // ParseClaim parses "pattern:action[,action...]", e.g.
 // "paths.*.*.requestBody.content.*.schema.maxLength:decrease,unset".

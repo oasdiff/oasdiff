@@ -38,3 +38,6 @@ const (
 	// not, the reverse of plain response polarity.
 	GuardNegotiated Guard = "negotiated"
 )
+
+// Guards lists every guard, in declaration order.
+var Guards = []Guard{GuardReadOnly, GuardWriteOnly, GuardSanctioned, GuardNonSuccess, GuardHasDefault, GuardNegotiated}
