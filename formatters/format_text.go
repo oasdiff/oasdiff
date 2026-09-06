@@ -91,9 +91,9 @@ func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 	result := bytes.NewBuffer(nil)
 
 	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
-	_, _ = fmt.Fprintln(w, "ID\tDESCRIPTION\tLEVEL")
+	_, _ = fmt.Fprintln(w, "ID\tDESCRIPTION\tLEVEL\tGUARDS")
 	for _, check := range checks {
-		_, _ = fmt.Fprintln(w, check.Id+"\t"+f.Localizer(check.Description)+"\t"+check.Level)
+		_, _ = fmt.Fprintln(w, check.Id+"\t"+f.Localizer(check.Description)+"\t"+check.Level+"\t"+strings.Join(check.Guards, ","))
 	}
 	_ = w.Flush()
 

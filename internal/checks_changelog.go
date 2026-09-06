@@ -92,6 +92,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 			Kind:        rule.Kind.String(),
 			Actions:     actionStrings(rule.Actions()),
 			Effect:      rule.Effect.String(),
+			Guards:      guardStrings(rule.Guards),
 			Locations:   rule.Locations,
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,
@@ -151,6 +152,12 @@ var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 			return value == rule.Kind.String()
 		},
 	},
+	{
+		values: []string{"read-only", "write-only", "sanctioned", "non-success", "has-default", "negotiated"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return slices.Contains(rule.Guards, checker.Guard(value))
+		},
+	},
 }
 
 func GetChangelogTags() []string {
@@ -159,6 +166,14 @@ func GetChangelogTags() []string {
 
 func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
 	return matchTagDimensions(tags, changelogTagDimensions, rule)
+}
+
+func guardStrings(guards []checker.Guard) []string {
+	strs := make([]string, len(guards))
+	for i, g := range guards {
+		strs[i] = string(g)
+	}
+	return strs
 }
 
 func actionStrings(actions []metaschema.Action) []string {

@@ -18,6 +18,7 @@ type Check struct {
 	Kind        string   `json:"kind,omitempty" yaml:"kind,omitempty"`
 	Actions     []string `json:"actions,omitempty" yaml:"actions,omitempty"`
 	Effect      string   `json:"effect,omitempty" yaml:"effect,omitempty"`
+	Guards      []string `json:"guards,omitempty" yaml:"guards,omitempty"`
 	Locations   []string `json:"locations,omitempty" yaml:"locations,omitempty"`
 	Description string   `json:"description,omitempty" yaml:"description,omitempty"`
 	Mitigation  string   `json:"mitigation,omitempty" yaml:"mitigation,omitempty"`
