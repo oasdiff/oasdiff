@@ -193,3 +193,62 @@ func TestBoundRulesFire(t *testing.T) {
 		}
 	}
 }
+
+// exclusiveBoolDoc builds a spec whose request body has a property with the
+// OpenAPI 3.0 boolean form of exclusiveMaximum, or none.
+func exclusiveBoolDoc(set *bool) *load.SpecInfo {
+	prop := &openapi3.Schema{Type: &openapi3.Types{"integer"}}
+	if set != nil {
+		prop.ExclusiveMax = openapi3.ExclusiveBound{Bool: set}
+	}
+	carrier := &openapi3.Schema{Properties: openapi3.Schemas{"p": &openapi3.SchemaRef{Value: prop}}}
+	op := &openapi3.Operation{
+		RequestBody: &openapi3.RequestBodyRef{Value: &openapi3.RequestBody{
+			Content: openapi3.Content{"application/json": &openapi3.MediaType{Schema: &openapi3.SchemaRef{Value: carrier}}},
+		}},
+		Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{Value: &openapi3.Response{
+			Description: new("ok"),
+		}})),
+	}
+	return &load.SpecInfo{Spec: &openapi3.T{
+		OpenAPI: "3.0.0",
+		Info:    &openapi3.Info{Title: "t", Version: "1.0.0"},
+		Paths:   openapi3.NewPaths(openapi3.WithPath("/t", &openapi3.PathItem{Post: op})),
+	}}
+}
+
+func exclusiveBoolChanges(t *testing.T, base, revision *bool) Changes {
+	t.Helper()
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), exclusiveBoolDoc(base), exclusiveBoolDoc(revision))
+	require.NoError(t, err)
+	config := NewConfig(GetAllChecks(),
+		WithSeverityLevels(map[string]Level{
+			APIVersionNotBumpedId:      NONE,
+			APIVersionDecreasedId:      NONE,
+			APIMajorVersionNotBumpedId: NONE,
+		}))
+	return CheckBackwardCompatibilityUntilLevel(config, d, osm, INFO)
+}
+
+// The OpenAPI 3.0 boolean form through the checks. exclusiveMaximum: false
+// declares the bound not exclusive, the same contract as leaving it out, so
+// false to true is the set it always was in effect, adding false reports
+// nothing, and removing true is the generated unset. The first two pin the
+// bugs the bound classification fixed: false to true reported nothing, and
+// adding false reported a breaking set.
+func TestBound_ExclusiveBooleanForm(t *testing.T) {
+	boolPtr := func(v bool) *bool { return &v }
+
+	falseToTrue := exclusiveBoolChanges(t, boolPtr(false), boolPtr(true))
+	require.Len(t, falseToTrue, 1)
+	require.Equal(t, RequestPropertyExclusiveMaxSetId, falseToTrue[0].GetId())
+	require.Equal(t, ERR, falseToTrue[0].GetLevel())
+
+	require.Empty(t, exclusiveBoolChanges(t, nil, boolPtr(false)),
+		"adding exclusiveMaximum: false changes nothing")
+
+	trueToNil := exclusiveBoolChanges(t, boolPtr(true), nil)
+	require.Len(t, trueToNil, 1)
+	require.Equal(t, "request-property-exclusive-max-unset", trueToNil[0].GetId())
+	require.Equal(t, INFO, trueToNil[0].GetLevel())
+}
