@@ -109,3 +109,6 @@ func (k Kind) String() string {
 		return "none"
 	}
 }
+
+// Kinds lists every kind, in declaration order.
+var Kinds = []Kind{KindExistence, KindRequiredness, KindMutability, KindType, KindConstraints, KindValues, KindStructure, KindLifecycle}

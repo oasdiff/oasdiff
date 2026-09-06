@@ -14,3 +14,6 @@ const (
 	ActionIncrease Action = "increase" // an ordered value grows
 	ActionDecrease Action = "decrease" // an ordered value shrinks
 )
+
+// Actions lists every action, in declaration order.
+var Actions = []Action{ActionAdd, ActionRemove, ActionSet, ActionUnset, ActionChange, ActionIncrease, ActionDecrease}

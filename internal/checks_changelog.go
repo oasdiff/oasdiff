@@ -8,6 +8,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/checker/metaschema"
+	"github.com/oasdiff/oasdiff/checker/rules"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/spf13/cobra"
 )
@@ -92,6 +93,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 			Kind:        rule.Kind.String(),
 			Actions:     actionStrings(rule.Actions()),
 			Effect:      rule.Effect.String(),
+			Guards:      guardStrings(rule.Guards),
 			Locations:   rule.Locations,
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,
@@ -116,41 +118,65 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 // effect (the rule's verdict), area, and kind.
 var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 	{
-		values: []string{"request", "response"},
+		// the two wire directions; DirectionNone is deliberately not offered,
+		// since its rules are selected by their kind (lifecycle) or area
+		values: []string{checker.DirectionRequest.String(), checker.DirectionResponse.String()},
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
 			return value == rule.Direction.String()
 		},
 	},
 	{
-		values: []string{"add", "remove", "change", "increase", "decrease", "set", "unset"},
+		values: actionStrings(metaschema.Actions),
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
 			return slices.Contains(rule.Actions(), metaschema.Action(value))
 		},
 	},
 	{
-		values: []string{"widens", "narrows"},
+		// only the two ordered effects; the others (incomparable, unknown,
+		// none, violation) would collide with other dimensions' vocabulary or
+		// add little as filters
+		values: []string{checker.EffectWidens.String(), checker.EffectNarrows.String()},
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
-			switch value {
-			case "widens":
-				return rule.Effect == checker.EffectWidens
-			case "narrows":
-				return rule.Effect == checker.EffectNarrows
-			}
-			return false
+			return value == rule.Effect.String()
 		},
 	},
 	{
-		values: []string{"schema", "parameters", "requestBody", "responses", "paths", "headers", "security", "tags", "components"},
+		// the areas with rules; AreaInfo, AreaServers and AreaNone are
+		// deliberately not offered
+		values: areaStrings(rules.AreaSchema, rules.AreaParameters, rules.AreaRequestBody, rules.AreaResponses,
+			rules.AreaPaths, rules.AreaHeaders, rules.AreaSecurity, rules.AreaTags, rules.AreaComponents),
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
 			return value == rule.Area.String()
 		},
 	},
 	{
-		values: []string{"existence", "requiredness", "mutability", "type", "constraints", "values", "structure", "lifecycle"},
+		values: kindStrings(rules.Kinds),
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
 			return value == rule.Kind.String()
 		},
 	},
+	{
+		values: guardStrings(rules.Guards),
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return slices.Contains(rule.Guards, checker.Guard(value))
+		},
+	},
+}
+
+func areaStrings(areas ...rules.Area) []string {
+	strs := make([]string, len(areas))
+	for i, a := range areas {
+		strs[i] = a.String()
+	}
+	return strs
+}
+
+func kindStrings(kinds []rules.Kind) []string {
+	strs := make([]string, len(kinds))
+	for i, k := range kinds {
+		strs[i] = k.String()
+	}
+	return strs
 }
 
 func GetChangelogTags() []string {
@@ -159,6 +185,14 @@ func GetChangelogTags() []string {
 
 func matchChangelogTags(tags []string, rule checker.BackwardCompatibilityRule) bool {
 	return matchTagDimensions(tags, changelogTagDimensions, rule)
+}
+
+func guardStrings(guards []checker.Guard) []string {
+	strs := make([]string, len(guards))
+	for i, g := range guards {
+		strs[i] = string(g)
+	}
+	return strs
 }
 
 func actionStrings(actions []metaschema.Action) []string {

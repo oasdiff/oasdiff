@@ -76,3 +76,26 @@ func TestTags_OrWithinDimension(t *testing.T) {
 	require.True(t, sawRequest, "OR within the direction dimension must include request rows")
 	require.True(t, sawResponse, "OR within the direction dimension must include response rows")
 }
+
+// Guards are output and queryable: --tags read-only selects exactly the rules
+// declaring the guard, each row carries its guards, and the id naming
+// convention stops being load-bearing for the audit.
+func Test_ChecksChangelogGuards(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --format json --tags read-only"), &stdout, io.Discard))
+
+	var checks []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &checks))
+	require.NotEmpty(t, checks)
+	for _, check := range checks {
+		require.Contains(t, check["guards"], "read-only", check["id"])
+	}
+}
+
+// The text format renders the guards column.
+func Test_ChecksChangelogGuardsTextColumn(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --tags sanctioned"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "GUARDS")
+	require.Contains(t, stdout.String(), "sanctioned")
+}
