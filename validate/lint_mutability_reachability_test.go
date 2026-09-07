@@ -155,3 +155,88 @@ paths:
 	require.Len(t, findings, 1)
 	require.Equal(t, ReadOnlyOnlyInRequestsID, findings[0].Id)
 }
+
+// Reachability crosses component indirections: the operation references a
+// components.requestBodies entry, whose schema references one component
+// schema, which nests another holding the readOnly property. All resolved
+// refs share schema identity, so the marking reaches the leaf and the
+// finding reports at its definition.
+func TestLint_ReadOnlyThroughComponentChain(t *testing.T) {
+	spec := mustLoad(t, `
+openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /items:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/CreateItem'
+      responses: { "200": { description: ok } }
+components:
+  requestBodies:
+    CreateItem:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Item'
+  schemas:
+    Item:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Meta:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+`)
+	findings := lintMutabilityReachability(spec, "spec.yaml")
+	require.Len(t, findings, 1)
+	require.Equal(t, ReadOnlyOnlyInRequestsID, findings[0].Id)
+	require.Contains(t, findings[0].Text, `"id"`)
+}
+
+// The same chain with the leaf also referenced from a components.responses
+// entry that an operation uses: the shared definition clears everywhere.
+func TestLint_ComponentChainSharedWithResponse(t *testing.T) {
+	spec := mustLoad(t, `
+openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /items:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/CreateItem'
+      responses:
+        "200":
+          $ref: '#/components/responses/ItemResponse'
+components:
+  requestBodies:
+    CreateItem:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Item'
+  responses:
+    ItemResponse:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Meta'
+  schemas:
+    Item:
+      type: object
+      properties:
+        meta:
+          $ref: '#/components/schemas/Meta'
+    Meta:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+`)
+	require.Empty(t, lintMutabilityReachability(spec, "spec.yaml"))
+}
