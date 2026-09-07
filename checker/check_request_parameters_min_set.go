@@ -16,20 +16,21 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 			return
 		}
 		for _, entry := range []struct {
-			diff  *diff.ValueDiff
 			id    string
 			field string
+			bound diff.SchemaBound
 		}{
-			{p.paramDiff.SchemaDiff.MinDiff, RequestParameterMinSetId, "minimum"},
-			{p.paramDiff.SchemaDiff.ExclusiveMinDiff, RequestParameterExclusiveMinSetId, "exclusiveMinimum"},
+			{RequestParameterMinSetId, "minimum", minimumBound},
+			{RequestParameterExclusiveMinSetId, "exclusiveMinimum", exclusiveMinimumBound},
 		} {
-			if entry.diff == nil || entry.diff.From != nil || entry.diff.To == nil {
+			value, ok := entry.bound.WasSet(p.paramDiff.SchemaDiff)
+			if !ok {
 				continue
 			}
 			_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
 			result = append(result, p.opInfo.NewApiChange(
 				entry.id,
-				[]any{p.location, p.name, entry.diff.To},
+				[]any{p.location, p.name, value},
 				boundSetComment,
 			).WithSources(nil, revisionSource))
 		}

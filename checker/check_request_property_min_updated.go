@@ -39,7 +39,8 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 			}
 		}
 		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
-			exMinDiff.From != nil && exMinDiff.To != nil {
+			exMinDiff.From != nil && exMinDiff.To != nil &&
+			(isIncreasedValue(exMinDiff) || isDecreasedValue(exMinDiff)) {
 			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			if isIncreasedValue(exMinDiff) {
 				result = append(result, info.newChange(
@@ -82,7 +83,8 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 			}
 
 			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
-				exMinDiff.From != nil && exMinDiff.To != nil {
+				exMinDiff.From != nil && exMinDiff.To != nil &&
+				(isIncreasedValue(exMinDiff) || isDecreasedValue(exMinDiff)) {
 				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				if isIncreasedValue(exMinDiff) {
 					id := RequestPropertyExclusiveMinIncreasedId

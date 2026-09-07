@@ -70,8 +70,8 @@ var Waivers = []Waiver{
 	{CategoryOpen, "**.schema.maxLength", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
 	{CategoryOpen, "**.schema.minLength", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
 	{CategoryOpen, "**.schema.minItems", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.exclusiveMaximum", "the version-split boolean/number representation needs its own bound classification before set/unset can be generated; the breaking change directions have rules (tracked in #1222)"},
-	{CategoryOpen, "**.schema.exclusiveMinimum", "the version-split boolean/number representation needs its own bound classification before set/unset can be generated; the breaking change directions have rules (tracked in #1222)"},
+	{CategoryOpen, "**.schema.exclusiveMaximum", "the boolean-to-number change form and increase/decrease at header scope are unchecked; set/unset and the body/property/parameter change directions have rules (tracked in #1117, #1162)"},
+	{CategoryOpen, "**.schema.exclusiveMinimum", "the boolean-to-number change form and increase/decrease at header scope are unchecked; set/unset and the body/property/parameter change directions have rules (tracked in #1117, #1162)"},
 	{CategoryOpen, "**.schema.unevaluatedItems:change", "switching unevaluatedItems between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 	{CategoryOpen, "**.schema.unevaluatedProperties:change", "switching unevaluatedProperties between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 }
