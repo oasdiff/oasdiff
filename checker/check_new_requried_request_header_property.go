@@ -20,7 +20,7 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 		baseSource, revisionSource := ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
 		checkAddedPropertiesDiff(
 			p.paramDiff.SchemaDiff,
-			func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff) {
+			func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if newProperty.ReadOnly {
 					return
 				}
@@ -32,7 +32,7 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 					NewRequiredRequestHeaderPropertyId,
 					[]any{p.name, propertyFullName(propertyPath, newPropertyName)},
 					"",
-				).WithSources(baseSource, revisionSource))
+				).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, revisionSource))
 			})
 	})
 	return result
