@@ -21,7 +21,7 @@ type boundCell struct {
 	id        string
 	direction string // "request" | "response"
 	scope     string // "body" | "property" | "parameter" | "header"
-	keyword   string
+	keyword   string // the bound keyword, e.g. "maximum"
 	action    string // "set" | "unset"
 	level     checker.Level
 }
@@ -43,45 +43,59 @@ func boundCells(t *testing.T) []boundCell {
 	var cells []boundCell
 	for _, rule := range checker.GetAllRules() {
 		for _, loc := range rule.Locations {
-			m := boundClaimRe.FindStringSubmatch(loc)
-			if m == nil || !keywords[m[2]] {
-				continue
-			}
-			var direction, scope string
-			switch m[1] {
-			case "parameters.*":
-				direction, scope = "request", "parameter"
-			case "responses.*.headers.*":
-				direction, scope = "response", "header"
-			case "requestBody.content.*":
-				direction = "request"
-			case "responses.*.content.*":
-				direction = "response"
-			}
-			if scope == "" {
-				switch {
-				case strings.Contains(rule.Id, "-body-"):
-					scope = "body"
-				case strings.Contains(rule.Id, "-property-"):
-					scope = "property"
-				default:
-					t.Fatalf("%s claims a bound edit but its id names neither body nor property", rule.Id)
-				}
-			}
-			for action := range strings.SplitSeq(m[3], ",") {
-				if action != "set" && action != "unset" {
-					continue
-				}
-				cells = append(cells, boundCell{
-					id:        rule.Id,
-					direction: direction,
-					scope:     scope,
-					keyword:   m[2],
-					action:    action,
-					level:     rule.Level,
-				})
-			}
+			cells = append(cells, boundClaimCells(t, rule, loc, keywords)...)
 		}
+	}
+	return cells
+}
+
+// boundClaimCells reads one claim as set/unset bound cells: the direction
+// and schema root from the location (body and property share a location, so
+// the rule's id disambiguates them), the keyword, and one cell per claimed
+// set or unset action. A claim not about a bound keyword yields none.
+func boundClaimCells(t *testing.T, rule checker.BackwardCompatibilityRule, claim string, keywords map[string]bool) []boundCell {
+	t.Helper()
+
+	m := boundClaimRe.FindStringSubmatch(claim)
+	if m == nil || !keywords[m[2]] {
+		return nil
+	}
+
+	var direction, scope string
+	switch m[1] {
+	case "parameters.*":
+		direction, scope = "request", "parameter"
+	case "responses.*.headers.*":
+		direction, scope = "response", "header"
+	case "requestBody.content.*":
+		direction = "request"
+	case "responses.*.content.*":
+		direction = "response"
+	}
+	if scope == "" {
+		switch {
+		case strings.Contains(rule.Id, "-body-"):
+			scope = "body"
+		case strings.Contains(rule.Id, "-property-"):
+			scope = "property"
+		default:
+			t.Fatalf("%s claims a bound edit but its id names neither body nor property", rule.Id)
+		}
+	}
+
+	var cells []boundCell
+	for action := range strings.SplitSeq(m[3], ",") {
+		if action != "set" && action != "unset" {
+			continue
+		}
+		cells = append(cells, boundCell{
+			id:        rule.Id,
+			direction: direction,
+			scope:     scope,
+			keyword:   m[2],
+			action:    action,
+			level:     rule.Level,
+		})
 	}
 	return cells
 }
