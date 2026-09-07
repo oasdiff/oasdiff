@@ -86,7 +86,9 @@ var ruleDescriptions = map[string]string{
 	"const-not-in-enum":                     "const is not one of the enum values, so no value can validate",
 	"duplicate-enum-value":                  "enum lists the same value more than once",
 	"type-format-mismatch":                  "format belongs to a different type and is ignored",
+	"read-only-property-only-in-requests":   "a readOnly property is only reachable from the request side, where it never appears",
 	"required-with-default":                 "a required parameter or property also has a default, which is never used",
+	"write-only-property-only-in-responses": "a writeOnly property is only reachable from the response side, where it never appears",
 	"ambiguous-parameter-serialization":     "parameter type mixes a structured type with a scalar, so its serialization is ambiguous",
 
 	// Examples and links
