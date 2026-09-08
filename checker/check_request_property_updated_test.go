@@ -226,3 +226,23 @@ func TestRequestProperty_AllOfBranchExistenceCarriesDisclaimer(t *testing.T) {
 		require.Contains(t, change.GetComment(localizer), "--flatten-allof", id)
 	}
 }
+
+// A keyword change beside an unchanged allOf is as doubtful as one inside a
+// changed branch: the node's effective schema is still the unflattened
+// merge, so an unchanged branch may already guarantee what the keyword
+// seems to narrow. The disclaimer keys on the allOf's presence in the
+// schemas, not on the allOf having changed.
+func TestRequestProperty_UnchangedAllOfSiblingCarriesDisclaimer(t *testing.T) {
+	s1, err := open("../data/checker/allof_unchanged_sibling_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/allof_unchanged_sibling_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	change := requireChange(t, changes, checker.RequestPropertyMaxLengthDecreasedId)
+	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
+}
