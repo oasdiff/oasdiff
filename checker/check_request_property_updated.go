@@ -56,7 +56,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 		// which delegates to checkModifiedPropertiesDiff. Used directly here.
 		checkDeletedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if propertyItem.ReadOnly {
 					return
 				}
@@ -74,12 +74,12 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					RequestPropertyRemovedId,
 					[]any{propertyFullName(propertyPath, propertyName)},
 					"",
-				).WithSchema(parent).WithSources(baseSource, nil))
+				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
 		checkAddedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if propertyItem.ReadOnly {
 					return
 				}
@@ -93,20 +93,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 							NewRequiredRequestPropertyId,
 							[]any{propName},
 							"",
-						).WithSchema(parent).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							RequiredRequestPropertyWithDefaultCommentId,
-						).WithSchema(parent).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
 						"",
-					).WithSchema(parent).WithSources(nil, revisionSource))
+					).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 				}
 			})
 	})

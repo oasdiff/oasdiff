@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -41,17 +43,22 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff))
 }
 
-// allOfDisclaimers reports the conditions that hold for a change at this
-// location. An allOf surviving into the diff is itself the evidence: had the
-// branches been flattened, there would be none left to compare.
+// allOfDisclaimers determines whether a change is under an allOf branch or has an allOf itself, and returns the appropriate disclaimers.
+// Two ways underAllOf is true:
+//  1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
+//  2. The schema itself has an allOf
 func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer {
-	if schemaDiff != nil && schemaDiff.AllOfDiff != nil {
+	if schemaDiff != nil && (schemaHasAllOf(schemaDiff.Base) || schemaHasAllOf(schemaDiff.Revision)) {
 		underAllOf = true
 	}
 	if !underAllOf {
 		return nil
 	}
 	return []Disclaimer{DisclaimerAllOfNotFlattened}
+}
+
+func schemaHasAllOf(schema *openapi3.Schema) bool {
+	return schema != nil && len(schema.AllOf) > 0
 }
 
 // walkProperties invokes processor for every modified property under

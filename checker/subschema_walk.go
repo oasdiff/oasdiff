@@ -15,7 +15,7 @@ type subschemaWalk struct {
 	enter func(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool)
 	// properties is called for a node's own properties, after its name is
 	// appended, so the path already names the node they belong to.
-	properties func(propertyPath string, schemaDiff *diff.SchemaDiff)
+	properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool)
 }
 
 func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool) {
@@ -51,7 +51,7 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 
 	if schemaDiff.PropertiesDiff != nil {
 		if w.properties != nil {
-			w.properties(propertyPath, schemaDiff)
+			w.properties(propertyPath, schemaDiff, underAllOf)
 		}
 		for name, v := range schemaDiff.PropertiesDiff.Modified {
 			w.walk(propertyPath, name, v, schemaDiff, underAllOf)
@@ -128,26 +128,26 @@ func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(pro
 	}}.walk("", "", schemaDiff, nil, false)
 }
 
-func checkAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
+func checkAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool)) {
 	if schemaDiff == nil {
 		return
 	}
 
-	subschemaWalk{properties: func(propertyPath string, sd *diff.SchemaDiff) {
+	subschemaWalk{properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool) {
 		for _, name := range sd.PropertiesDiff.Added {
-			processor(propertyPath, name, sd.Revision.Properties[name].Value, sd)
+			processor(propertyPath, name, sd.Revision.Properties[name].Value, sd, underAllOf)
 		}
 	}}.walk("", "", schemaDiff, nil, false)
 }
 
-func checkDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff)) {
+func checkDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool)) {
 	if schemaDiff == nil {
 		return
 	}
 
-	subschemaWalk{properties: func(propertyPath string, sd *diff.SchemaDiff) {
+	subschemaWalk{properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool) {
 		for _, name := range sd.PropertiesDiff.Deleted {
-			processor(propertyPath, name, sd.Base.Properties[name].Value, sd)
+			processor(propertyPath, name, sd.Base.Properties[name].Value, sd, underAllOf)
 		}
 	}}.walk("", "", schemaDiff, nil, false)
 }

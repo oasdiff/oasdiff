@@ -200,3 +200,49 @@ func TestRequestPropertyOneOfWrappedOriginalPreserved(t *testing.T) {
 	require.Equal(t, checker.WARN, change.GetLevel())
 	require.NotEmpty(t, change.GetComment(checker.NewDefaultLocalizer()))
 }
+
+// A property added or deleted inside an unflattened allOf branch is as
+// doubtful as a modified one: another branch may still guarantee what this
+// one dropped. All three now carry the all-of-not-flattened disclaimer and
+// cap to warning, where previously only the modified property did (#1152).
+func TestRequestProperty_AllOfBranchExistenceCarriesDisclaimer(t *testing.T) {
+	s1, err := open("../data/checker/allof_property_existence_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/allof_property_existence_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	localizer := checker.NewDefaultLocalizer()
+	for _, id := range []string{
+		checker.NewRequiredRequestPropertyId,
+		checker.RequestPropertyRemovedId,
+		checker.RequestPropertyTypeChangedId,
+	} {
+		change := requireChange(t, changes, id)
+		require.Equal(t, checker.WARN, change.GetLevel(), id)
+		require.Contains(t, change.GetComment(localizer), "--flatten-allof", id)
+	}
+}
+
+// A keyword change beside an unchanged allOf is as doubtful as one inside a
+// changed branch: the node's effective schema is still the unflattened
+// merge, so an unchanged branch may already guarantee what the keyword
+// seems to narrow. The disclaimer keys on the allOf's presence in the
+// schemas, not on the allOf having changed.
+func TestRequestProperty_UnchangedAllOfSiblingCarriesDisclaimer(t *testing.T) {
+	s1, err := open("../data/checker/allof_unchanged_sibling_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/allof_unchanged_sibling_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	change := requireChange(t, changes, checker.RequestPropertyMaxLengthDecreasedId)
+	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
+}
