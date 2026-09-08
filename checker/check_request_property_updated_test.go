@@ -219,7 +219,7 @@ func TestRequestProperty_AllOfBranchExistenceCarriesDisclaimer(t *testing.T) {
 	for _, id := range []string{
 		checker.NewRequiredRequestPropertyId,
 		checker.RequestPropertyRemovedId,
-		"request-property-type-changed",
+		checker.RequestPropertyTypeChangedId,
 	} {
 		change := requireChange(t, changes, id)
 		require.Equal(t, checker.WARN, change.GetLevel(), id)
