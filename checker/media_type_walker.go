@@ -41,12 +41,10 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff))
 }
 
-// allOfDisclaimers reports the conditions that hold for a change at this
-// location, doubtful in either of two ways: the node sits inside an allOf
-// branch (underAllOf, tracked by the walk), or the node's own allOf changed
-// (schemaDiff), since its effective schema is the unmerged combination. An
-// allOf surviving into the diff is itself the evidence: had the branches
-// been flattened, there would be none left to compare.
+// allOfDisclaimers determines whether a change is under an allOf branch or has an allOf itself, and returns the appropriate disclaimers.
+// Two ways underAllOf is true:
+// 1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
+// 2. The schemaDiff has an AllOfDiff, meaning the schema itself has an allOf that changed.
 func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer {
 	if schemaDiff != nil && schemaDiff.AllOfDiff != nil {
 		underAllOf = true
