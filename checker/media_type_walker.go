@@ -42,8 +42,11 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 }
 
 // allOfDisclaimers reports the conditions that hold for a change at this
-// location. An allOf surviving into the diff is itself the evidence: had the
-// branches been flattened, there would be none left to compare.
+// location, doubtful in either of two ways: the node sits inside an allOf
+// branch (underAllOf, tracked by the walk), or the node's own allOf changed
+// (schemaDiff), since its effective schema is the unmerged combination. An
+// allOf surviving into the diff is itself the evidence: had the branches
+// been flattened, there would be none left to compare.
 func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer {
 	if schemaDiff != nil && schemaDiff.AllOfDiff != nil {
 		underAllOf = true
