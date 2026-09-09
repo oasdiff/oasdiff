@@ -8,24 +8,37 @@ import (
 )
 
 type boundSpec struct {
-	idName  string // id segment, e.g. "max-length"
-	keyword string // schema field name in claims and messages, e.g. "maxLength"
+	idName   string // id segment, e.g. "max-length"
+	keyword  string // schema field name in claims and messages, e.g. "maxLength"
+	polarity boundPolarity
 }
 
+// boundPolarity is which side of the value range a bound constrains, and so
+// which of increasing or decreasing it narrows the accepted values.
+type boundPolarity int
+
+const (
+	lowerBound boundPolarity = iota // increasing narrows
+	upperBound                      // decreasing narrows
+	// numeric order does not decide the effect (multipleOf narrows by
+	// divisibility): no increase or decrease cells are generated
+	unordered
+)
+
 var boundSpecs = []boundSpec{
-	{"max", "maximum"},
-	{"min", "minimum"},
-	{"multiple-of", "multipleOf"},
-	{"max-length", "maxLength"},
-	{"min-length", "minLength"},
-	{"max-items", "maxItems"},
-	{"min-items", "minItems"},
-	{"max-properties", "maxProperties"},
-	{"min-properties", "minProperties"},
-	{"min-contains", "minContains"},
-	{"max-contains", "maxContains"},
-	{"exclusive-min", "exclusiveMinimum"},
-	{"exclusive-max", "exclusiveMaximum"},
+	{"max", "maximum", upperBound},
+	{"min", "minimum", lowerBound},
+	{"multiple-of", "multipleOf", unordered},
+	{"max-length", "maxLength", upperBound},
+	{"min-length", "minLength", lowerBound},
+	{"max-items", "maxItems", upperBound},
+	{"min-items", "minItems", lowerBound},
+	{"max-properties", "maxProperties", upperBound},
+	{"min-properties", "minProperties", lowerBound},
+	{"min-contains", "minContains", lowerBound},
+	{"max-contains", "maxContains", upperBound},
+	{"exclusive-min", "exclusiveMinimum", lowerBound},
+	{"exclusive-max", "exclusiveMaximum", upperBound},
 }
 
 // schemaBound resolves a keyword to its diff.SchemaBound
@@ -48,14 +61,12 @@ var (
 	exclusiveMinimumBound, _ = schemaBound("exclusiveMinimum")
 )
 
-// boundActions are the edits the generated rules cover. Setting a
-// constraint narrows what the schema accepts and unsetting it widens;
-// increase and decrease stay with the hand-written checks. An action with
+// boundActions are the edits the generated rules cover. An action with
 // comment carries the shared explanatory comment on the cells where its
 // verdict is breaking.
 type boundAction struct {
-	action string
-	effect Effect
+	verb  string // id segment and message key, e.g. "increased"
+	claim string // metaschema action in claims, e.g. "increase"
 	// comment is the id of the shared comment explaining the action's verdict
 	// where it is breaking; empty when the message speaks alone
 	comment string
@@ -66,11 +77,33 @@ type boundAction struct {
 var boundSetComment = commentId("bound-set")
 
 var (
-	boundSet   = boundAction{"set", rules.EffectNarrows, boundSetComment}
-	boundUnset = boundAction{"unset", rules.EffectWidens, ""}
+	boundSet       = boundAction{"set", "set", boundSetComment}
+	boundUnset     = boundAction{"unset", "unset", ""}
+	boundIncreased = boundAction{"increased", "increase", ""}
+	boundDecreased = boundAction{"decreased", "decrease", ""}
 )
 
-var boundActions = []boundAction{boundSet, boundUnset}
+var boundActions = []boundAction{boundSet, boundUnset, boundIncreased, boundDecreased}
+
+// boundEffect derives what the action does to the accepted values. Setting a
+// bound narrows and unsetting it widens, whichever bound it is; increasing
+// and decreasing depend on the bound's polarity, and have no cells on a
+// keyword whose effect numeric order does not decide.
+func boundEffect(polarity boundPolarity, action boundAction) (Effect, bool) {
+	switch action {
+	case boundSet:
+		return rules.EffectNarrows, true
+	case boundUnset:
+		return rules.EffectWidens, true
+	}
+	if polarity == unordered {
+		return rules.EffectNone, false
+	}
+	if (action == boundIncreased) == (polarity == lowerBound) {
+		return rules.EffectNarrows, true
+	}
+	return rules.EffectWidens, true
+}
 
 // boundRuleComment returns the action's comment where the derived verdict is
 // breaking, empty otherwise.
@@ -129,9 +162,9 @@ var (
 	handWrittenById map[string]bool
 )
 
-// boundRules generates the set/unset rules for every keyword in
-// boundSpecs, one per direction, scope, and action, skipping the cells a
-// hand-written rule already covers.
+// boundRules generates the set, unset, increased, and decreased rules for
+// every keyword in boundSpecs, one per direction, scope, and action, skipping
+// the cells a hand-written rule already covers.
 func boundRules() BackwardCompatibilityRules {
 	boundRulesOnce.Do(func() {
 		handWrittenById = map[string]bool{}
@@ -142,20 +175,24 @@ func boundRules() BackwardCompatibilityRules {
 			for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 				for _, scope := range boundScopes(direction) {
 					for _, action := range boundActions {
-						id := boundRuleId(direction, scope, spec.idName, action.action)
+						effect, ok := boundEffect(spec.polarity, action)
+						if !ok {
+							continue
+						}
+						id := boundRuleId(direction, scope, spec.idName, action.verb)
 						if handWrittenById[id] {
 							continue
 						}
 						boundRulesList = append(boundRulesList, newBackwardCompatibilityRule(
 							id,
-							rules.DeriveLevel(action.effect, direction),
-							BoundSetUnsetCheck,
+							rules.DeriveLevel(effect, direction),
+							BoundCheck,
 							direction,
 							AreaSchema,
 							KindConstraints,
-							action.effect,
+							effect,
 							nil,
-							boundClaim(direction, scope, spec.keyword, action.action),
+							boundClaim(direction, scope, spec.keyword, action.claim),
 						))
 					}
 				}
@@ -172,27 +209,39 @@ func handWrittenIds() map[string]bool {
 	return handWrittenById
 }
 
-// classifySetUnset reports whether the keyword was set or unset, and the
-// value that appeared or disappeared
-func classifySetUnset(spec boundSpec, d *diff.SchemaDiff) (boundAction, any, bool) {
+// classifyBound reports which bound action the keyword's diff is, with the
+// message values: the appearing or disappearing value for set and unset, the
+// from and to values for increased and decreased. Increase and decrease are
+// only classified where numeric order decides the effect, mirroring the rule
+// generation.
+func classifyBound(spec boundSpec, d *diff.SchemaDiff) (boundAction, []any, bool) {
 	bound, ok := schemaBound(spec.keyword)
 	if !ok {
 		return boundAction{}, nil, false
 	}
 	if value, ok := bound.WasSet(d); ok {
-		return boundSet, value, true
+		return boundSet, []any{value}, true
 	}
 	if value, ok := bound.WasUnset(d); ok {
-		return boundUnset, value, true
+		return boundUnset, []any{value}, true
+	}
+	if spec.polarity == unordered {
+		return boundAction{}, nil, false
+	}
+	if from, to, ok := bound.WasIncreased(d); ok {
+		return boundIncreased, []any{from, to}, true
+	}
+	if from, to, ok := bound.WasDecreased(d); ok {
+		return boundDecreased, []any{from, to}, true
 	}
 	return boundAction{}, nil, false
 }
 
-// BoundSetUnsetCheck reports the set and unset changes for every keyword in
-// boundSpecs, at body, property, parameter, and response-header level.
-// Parameter and header root schemas attach no guards: readOnly and writeOnly
-// are property-scoped, so there they declare nothing.
-func BoundSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+// BoundCheck reports the set, unset, increased, and decreased changes for
+// every keyword in boundSpecs, at body, property, parameter, and
+// response-header level. Parameter and header root schemas attach no guards:
+// readOnly and writeOnly are property-scoped, so there they declare nothing.
+func BoundCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -203,12 +252,12 @@ func BoundSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 	})
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		result = append(result, boundSchemaChanges(p.paramDiff.SchemaDiff, DirectionRequest, "parameter", operationsSources, p.opInfo.methodDiff,
-			func(value any) []any { return []any{p.location, p.name, value} },
+			func(values []any) []any { return append([]any{p.location, p.name}, values...) },
 			p.opInfo.NewApiChange)...)
 	})
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
 		result = append(result, boundSchemaChanges(h.headerDiff.SchemaDiff, DirectionResponse, "header", operationsSources, h.opInfo.methodDiff,
-			func(value any) []any { return []any{h.name, value, h.responseStatus} },
+			func(values []any) []any { return append(append([]any{h.name}, values...), h.responseStatus) },
 			h.opInfo.NewApiChange)...)
 	})
 
@@ -220,13 +269,13 @@ func BoundSetUnsetCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 // guards attach as for every property check.
 func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *diff.OperationsSourcesMap) Changes {
 	result := boundSchemaChanges(info.schemaDiff, direction, "body", operationsSources, info.operationItem,
-		func(value any) []any { return []any{value} },
+		func(values []any) []any { return values },
 		info.newChange)
 
 	info.walkProperties(func(p propertyInfo) {
 		result = append(result, boundSchemaChanges(p.propertyDiff, direction, "property", operationsSources, info.operationItem,
-			func(value any) []any {
-				args := []any{propertyFullName(p.propertyPath, p.propertyName), value}
+			func(values []any) []any {
+				args := append([]any{propertyFullName(p.propertyPath, p.propertyName)}, values...)
 				if direction == DirectionResponse {
 					args = append(args, info.responseStatus)
 				}
@@ -238,7 +287,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 	return result
 }
 
-// boundSchemaChanges reports the set and unset changes of one schema node:
+// boundSchemaChanges reports the bound changes of one schema node:
 // classify each keyword, skip the cells a hand-written check owns, and emit
 // through the caller's change constructor with the caller's argument shape.
 func boundSchemaChanges(
@@ -247,7 +296,7 @@ func boundSchemaChanges(
 	scope string,
 	operationsSources *diff.OperationsSourcesMap,
 	methodDiff *diff.MethodDiff,
-	args func(value any) []any,
+	args func(values []any) []any,
 	newChange func(id string, args []any, comment string) ApiChange,
 ) Changes {
 	result := make(Changes, 0)
@@ -255,19 +304,20 @@ func boundSchemaChanges(
 		return result
 	}
 	for _, spec := range boundSpecs {
-		action, value, ok := classifySetUnset(spec, schemaDiff)
+		action, values, ok := classifyBound(spec, schemaDiff)
 		if !ok {
 			continue
 		}
-		id := boundRuleId(direction, scope, spec.idName, action.action)
+		id := boundRuleId(direction, scope, spec.idName, action.verb)
 		if handWrittenIds()[id] {
 			continue
 		}
+		effect, _ := boundEffect(spec.polarity, action)
 		baseSource, revisionSource := SchemaFieldSources(operationsSources, methodDiff, schemaDiff, spec.keyword)
 		result = append(result, newChange(
 			id,
-			args(value),
-			boundRuleComment(action, rules.DeriveLevel(action.effect, direction)),
+			args(values),
+			boundRuleComment(action, rules.DeriveLevel(effect, direction)),
 		).WithSources(baseSource, revisionSource))
 	}
 	return result

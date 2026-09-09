@@ -59,6 +59,44 @@ func (b SchemaBound) WasUnset(d *SchemaDiff) (any, bool) {
 	return vd.From, true
 }
 
+// WasIncreased returns the from and to values when the keyword was present on
+// both sides and its value increased.
+func (b SchemaBound) WasIncreased(d *SchemaDiff) (any, any, bool) {
+	return b.ordered(d, lessValue)
+}
+
+// WasDecreased returns the from and to values when the keyword was present on
+// both sides and its value decreased.
+func (b SchemaBound) WasDecreased(d *SchemaDiff) (any, any, bool) {
+	return b.ordered(d, func(a, b any) bool { return lessValue(b, a) })
+}
+
+func (b SchemaBound) ordered(d *SchemaDiff, less func(a, b any) bool) (any, any, bool) {
+	if b.Diff == nil {
+		return nil, nil, false
+	}
+	vd := b.Diff(d)
+	if vd == nil || b.absent(vd.From) || b.absent(vd.To) || !less(vd.From, vd.To) {
+		return nil, nil, false
+	}
+	return vd.From, vd.To, true
+}
+
+// lessValue reports whether a and b are ordered values of the same type with
+// a < b. The exclusive bounds mix types (a bool form against a numeric form);
+// such a pair is not ordered.
+func lessValue(a, b any) bool {
+	if au, ok := a.(uint64); ok {
+		bu, ok := b.(uint64)
+		return ok && au < bu
+	}
+	if af, ok := a.(float64); ok {
+		bf, ok := b.(float64)
+		return ok && af < bf
+	}
+	return false
+}
+
 // SchemaBounds lists every ordered validation keyword the schema diff
 // compares. TestSchemaBounds pins each row to its getter's absence encoding.
 var SchemaBounds = []SchemaBound{
