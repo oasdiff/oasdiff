@@ -70,5 +70,9 @@ func GetSeverityLevels(source io.Reader) (map[string]Level, error) {
 		result[id] = level
 	}
 
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
 	return result, nil
 }
