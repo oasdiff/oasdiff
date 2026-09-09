@@ -37,9 +37,6 @@ func newResponsesDiff() *ResponsesDiff {
 
 func getResponsesDiff(config *Config, state *state, responses1, responses2 *openapi3.Responses) (*ResponsesDiff, error) {
 
-	defer state.setDirection(state.direction)
-	state.setDirection(directionResponse)
-
 	diff, err := getResponsesDiffInternal(config, state, responses1, responses2)
 	if err != nil {
 		return nil, err

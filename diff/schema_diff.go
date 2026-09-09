@@ -102,7 +102,7 @@ func (diff *SchemaDiff) Empty() bool {
 
 func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 
-	if diff, ok := state.cache.get(state.direction, schema1, schema2); ok {
+	if diff, ok := state.cache[schemaPair{schema1, schema2}]; ok {
 		return diff, nil
 	}
 
@@ -111,7 +111,7 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 	// for inline schemas — e.g. when --flatten-allof merges a recursive $ref
 	// into a ref-less self-referencing schema. Cut the cycle the same way the
 	// circular-ref guard does: report no diff at the re-entry point.
-	pair := inFlightPair{state.direction, schemaPair{schema1, schema2}}
+	pair := schemaPair{schema1, schema2}
 	if _, ok := state.inFlight[pair]; ok {
 		return nil, nil
 	}
@@ -127,7 +127,7 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 		diff = nil
 	}
 
-	state.cache.add(state.direction, schema1, schema2, diff)
+	state.cache[schemaPair{schema1, schema2}] = diff
 	return diff, nil
 }
 
