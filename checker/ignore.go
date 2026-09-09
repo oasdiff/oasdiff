@@ -49,6 +49,9 @@ func ProcessIgnoredBackwardCompatibilityErrors(level Level, errs Changes, ignore
 			}
 		}
 	}
+	if err := ignoreScanner.Err(); err != nil {
+		return nil, err
+	}
 
 	for errIndex, err := range errs {
 		if !ignoredErrs[errIndex] {

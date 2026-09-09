@@ -1,8 +1,10 @@
 package checker_test
 
 import (
+	"errors"
 	"strings"
 	"testing"
+	"testing/iotest"
 
 	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
@@ -62,4 +64,10 @@ func TestGetSeverityLevels_Duplicate(t *testing.T) {
 	m, err := checker.GetSeverityLevels(strings.NewReader("request-parameter-enum-value-added info\nrequest-parameter-enum-value-added warn"))
 	require.Equal(t, map[string]checker.Level{"request-parameter-enum-value-added": checker.WARN}, m)
 	require.NoError(t, err)
+}
+
+func TestGetSeverityLevels_ReadError(t *testing.T) {
+	m, err := checker.GetSeverityLevels(iotest.ErrReader(errors.New("read failed")))
+	require.Nil(t, m)
+	require.EqualError(t, err, "read failed")
 }

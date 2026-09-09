@@ -1,6 +1,10 @@
 package checker_test
 
 import (
+	"bufio"
+	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -66,4 +70,15 @@ func TestIgnoreComponent(t *testing.T) {
 	ignored, err := checker.ProcessIgnoredBackwardCompatibilityErrors(checker.INFO, errs, "../data/ignore-err-example.txt", checker.NewDefaultLocalizer())
 	require.NoError(t, err)
 	require.Equal(t, len(errs)-2, len(ignored))
+}
+
+// A line longer than the scanner's token limit makes the read fail after
+// Scan returns; the failure must surface, not silently drop ignore lines.
+func TestIgnore_ReadError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "ignore.txt")
+	require.NoError(t, os.WriteFile(path, bytes.Repeat([]byte("x"), bufio.MaxScanTokenSize+1), 0o644))
+
+	errs, err := checker.ProcessIgnoredBackwardCompatibilityErrors(checker.ERR, checker.Changes{}, path, checker.NewDefaultLocalizer())
+	require.Nil(t, errs)
+	require.ErrorIs(t, err, bufio.ErrTooLong)
 }
