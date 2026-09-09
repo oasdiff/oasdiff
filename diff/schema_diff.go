@@ -106,6 +106,18 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 		return diff, nil
 	}
 
+	// A pair that is already being diffed further up the stack forms a cycle
+	// that the circular-ref guard can't see: it keys on Ref, which is empty
+	// for inline schemas — e.g. when --flatten-allof merges a recursive $ref
+	// into a ref-less self-referencing schema. Cut the cycle the same way the
+	// circular-ref guard does: report no diff at the re-entry point.
+	pair := inFlightPair{state.direction, schemaPair{schema1, schema2}}
+	if _, ok := state.inFlight[pair]; ok {
+		return nil, nil
+	}
+	state.inFlight[pair] = struct{}{}
+	defer delete(state.inFlight, pair)
+
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err != nil {
 		return nil, err
