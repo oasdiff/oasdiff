@@ -47,11 +47,9 @@ func refLessCyclicDoc(description string) *openapi3.T {
 }
 
 // The circular-ref guard keys on Ref strings, so a ref-less cycle is
-// invisible to it: getSchemaDiff recursed until the stack overflowed
-// (fatal error, exit 2). The in-flight schema-pair guard cuts the cycle
-// instead, and real changes must still be detected.
+// invisible to it; the in-flight schema-pair guard cuts the cycle, and
+// real changes must still be detected.
 func TestRefLessCircularSchema(t *testing.T) {
-	// used to fatal: stack overflow
 	d, err := diff.Get(diff.NewConfig(), refLessCyclicDoc("recursive filter tree"), refLessCyclicDoc("recursive filter tree, modified"))
 	require.NoError(t, err)
 
