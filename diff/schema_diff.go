@@ -113,11 +113,13 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 	// circular-ref guard does: report no diff at the re-entry point.
 	pair := schemaPair{schema1, schema2}
 	if _, ok := state.inFlight[pair]; ok {
+		state.cuts++
 		return nil, nil
 	}
 	state.inFlight[pair] = struct{}{}
 	defer delete(state.inFlight, pair)
 
+	cutsBefore := state.cuts
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err != nil {
 		return nil, err
@@ -127,7 +129,9 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 		diff = nil
 	}
 
-	state.cache[schemaPair{schema1, schema2}] = diff
+	if state.cuts == cutsBefore {
+		state.cache[pair] = diff
+	}
 	return diff, nil
 }
 
@@ -157,6 +161,7 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 
 	if status := getCircularRefsDiff(state.visitedSchemasBase, state.visitedSchemasRevision, schema1, schema2); status != circularRefStatusNone {
+		state.cuts++
 		switch status {
 		case circularRefStatusDiff:
 			result.CircularRefDiff = true

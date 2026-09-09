@@ -737,11 +737,23 @@ func TestCircularSchema_Diff(t *testing.T) {
 	s2, err := loader.LoadFromFile("../data/circular2.yaml")
 	require.NoError(t, err)
 
-	_, err = diff.Get(diff.NewConfig(), s1, s2)
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	// TODO: fix circular checks and re-enable this test
-	// require.True(t, dd.SchemasDiff.Modified["circular1"].PropertiesDiff.Modified["children"].ItemsDiff.CircularRefDiff)
+	// entered through its $ref, the walk is already inside circular1, so
+	// the revision's items $ref cycles where the base's inline items does
+	// not: a reported difference
+	respItems := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["POST"].
+		ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].
+		SchemaDiff.PropertiesDiff.Modified["children"].ItemsDiff
+	require.True(t, respItems.CircularRefDiff)
+
+	// entered ref-less from components, no ancestor is comparing circular1
+	// yet, so the same pair unrolls one level instead
+	compItems := dd.ComponentsDiff.SchemasDiff.Modified["circular1"].
+		PropertiesDiff.Modified["children"].ItemsDiff
+	require.False(t, compItems.CircularRefDiff)
+	require.Contains(t, compItems.PropertiesDiff.Added, "children")
 }
 
 func TestCircularSchemaRefs(t *testing.T) {

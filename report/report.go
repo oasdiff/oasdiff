@@ -390,7 +390,7 @@ func (r *report) printSchema(d *diff.SchemaDiff) {
 
 	r.printConditional(d.SchemaAdded, "Schema added")
 	r.printConditional(d.SchemaDeleted, "Schema deleted")
-	r.printConditional(d.CircularRefDiff, "Schema circular referecnce changed")
+	r.printConditional(d.CircularRefDiff, "Schema circular reference changed")
 
 	if !d.ExtensionsDiff.Empty() {
 		r.print("Extensions changed")
