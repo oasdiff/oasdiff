@@ -109,3 +109,22 @@ func TestMergeSpec_SchemaReachedThroughRef(t *testing.T) {
 	require.Contains(t, used.Properties, "id")
 	require.Contains(t, used.Properties, "name")
 }
+
+// Merging `allOf: [$ref Node, <inline overlay whose items is $ref Node>]`,
+// where Node is recursive, used to point the merged items at the merged
+// allOf node itself with no $ref, a cycle the marshaler follows forever:
+// `oasdiff flatten` crashed with a stack overflow. Both branches' items
+// merge to the same schema, so the merge must reuse it, $ref intact.
+func Test_MergeSpec_RecursiveOverlaySerializes(t *testing.T) {
+	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/circular-overlay.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	merged := spec.Spec.Paths.Value("/x").Post.RequestBody.Value.Content["application/json"].
+		Schema.Value.Properties["filters"].Value.Items.Value
+	require.Empty(t, merged.AllOf)
+	require.Equal(t, "#/components/schemas/Node",
+		merged.Properties["filters"].Value.Items.Ref)
+
+	_, err = spec.Spec.MarshalJSON()
+	require.NoError(t, err)
+}

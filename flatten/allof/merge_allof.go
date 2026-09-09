@@ -701,28 +701,39 @@ func resolveNumberRange(schema *openapi3.Schema, collection *SchemaCollection) *
 	return schema
 }
 
-func resolveItems(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
-
-	items := openapi3.SchemaRefs{}
-	for _, sref := range collection.Items {
+// mergeSubschemas merges sibling subschemas into one: nil entries are
+// dropped, duplicates of one schema merge to that schema with its $ref
+// intact, and only a genuinely mixed set is flattened into a fresh schema.
+// Reusing the lone schema keeps a recursive $ref serializable, where a
+// fresh ref-less node whose value the in-flight guard points at an
+// ancestor is a cycle the marshaler cannot terminate.
+func mergeSubschemas(state *state, refs openapi3.SchemaRefs) (*openapi3.SchemaRef, error) {
+	subschemas := openapi3.SchemaRefs{}
+	for _, sref := range refs {
 		if sref != nil {
-			items = append(items, sref)
+			subschemas = append(subschemas, sref)
 		}
 	}
-	if len(items) == 0 {
-		schema.Items = nil
-		return schema, nil
+	subschemas = dedupSchemaRefsByValue(subschemas)
+	if len(subschemas) == 0 {
+		return nil, nil
 	}
-	if len(items) == 1 {
-		schema.Items = items[0]
-		return schema, nil
+	if len(subschemas) == 1 {
+		return subschemas[0], nil
 	}
 	result := openapi3.NewSchemaRef("", openapi3.NewSchema())
-	err := flattenSchemas(state, result, items)
+	if err := flattenSchemas(state, result, subschemas); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func resolveItems(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
+	items, err := mergeSubschemas(state, collection.Items)
 	if err != nil {
 		return nil, err
 	}
-	schema.Items = result
+	schema.Items = items
 	return schema, nil
 }
 
@@ -738,26 +749,11 @@ func resolveItems(state *state, schema *openapi3.Schema, collection *SchemaColle
 // Documented in docs/ALLOF.md.
 func resolveContains(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
 
-	contains := openapi3.SchemaRefs{}
-	for _, sref := range collection.Contains {
-		if sref != nil {
-			contains = append(contains, sref)
-		}
-	}
-	if len(contains) == 0 {
-		schema.Contains = nil
-		return schema, nil
-	}
-	if len(contains) == 1 {
-		schema.Contains = contains[0]
-		return schema, nil
-	}
-	result := openapi3.NewSchemaRef("", openapi3.NewSchema())
-	err := flattenSchemas(state, result, contains)
+	merged, err := mergeSubschemas(state, collection.Contains)
 	if err != nil {
 		return nil, err
 	}
-	schema.Contains = result
+	schema.Contains = merged
 	return schema, nil
 }
 
@@ -772,26 +768,11 @@ func resolveContains(state *state, schema *openapi3.Schema, collection *SchemaCo
 // faithful.
 func resolvePropertyNames(state *state, schema *openapi3.Schema, collection *SchemaCollection) (*openapi3.Schema, error) {
 
-	names := openapi3.SchemaRefs{}
-	for _, sref := range collection.PropertyNames {
-		if sref != nil {
-			names = append(names, sref)
-		}
-	}
-	if len(names) == 0 {
-		schema.PropertyNames = nil
-		return schema, nil
-	}
-	if len(names) == 1 {
-		schema.PropertyNames = names[0]
-		return schema, nil
-	}
-	result := openapi3.NewSchemaRef("", openapi3.NewSchema())
-	err := flattenSchemas(state, result, names)
+	merged, err := mergeSubschemas(state, collection.PropertyNames)
 	if err != nil {
 		return nil, err
 	}
-	schema.PropertyNames = result
+	schema.PropertyNames = merged
 	return schema, nil
 }
 
@@ -892,16 +873,9 @@ func resolveNonFalseAdditionalProps(state *state, schema *openapi3.Schema, colle
 		}
 	}
 
-	var schemaRef *openapi3.SchemaRef
-	if len(additionalSchemas) == 1 {
-		schemaRef = additionalSchemas[0]
-	} else if len(additionalSchemas) > 1 {
-		result := openapi3.NewSchemaRef("", openapi3.NewSchema())
-		err := flattenSchemas(state, result, additionalSchemas)
-		if err != nil {
-			return nil, err
-		}
-		schemaRef = result
+	schemaRef, err := mergeSubschemas(state, additionalSchemas)
+	if err != nil {
+		return nil, err
 	}
 	schema.AdditionalProperties.Has = nil
 	schema.AdditionalProperties.Schema = schemaRef
@@ -979,12 +953,11 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 
 	result := make(openapi3.Schemas)
 	for prop, schemas := range propsToSchemasMap {
-		flattened := openapi3.NewSchemaRef("", openapi3.NewSchema())
-		err := flattenSchemas(state, flattened, schemas)
+		merged, err := mergeSubschemas(state, schemas)
 		if err != nil {
 			return nil, err
 		}
-		result[prop] = flattened
+		result[prop] = merged
 	}
 
 	if len(result) == 0 {
