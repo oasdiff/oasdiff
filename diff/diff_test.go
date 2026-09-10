@@ -776,6 +776,57 @@ func TestCircularSchemaRefs(t *testing.T) {
 	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular6")
 }
 
+// namedCyclicDoc builds a spec whose request body is a $ref to a schema
+// whose child property refers back to it through the same $ref.
+func namedCyclicDoc(name string) *openapi3.T {
+	ref := "#/components/schemas/" + name
+	node := &openapi3.Schema{Type: &openapi3.Types{"object"}}
+	node.Properties = openapi3.Schemas{
+		"child": &openapi3.SchemaRef{Ref: ref, Value: node},
+	}
+	return &openapi3.T{
+		OpenAPI: "3.0.3",
+		Info:    &openapi3.Info{Title: "t", Version: "1"},
+		Paths: openapi3.NewPaths(openapi3.WithPath("/x", &openapi3.PathItem{
+			Post: &openapi3.Operation{
+				RequestBody: &openapi3.RequestBodyRef{Value: &openapi3.RequestBody{
+					Content: openapi3.Content{"application/json": &openapi3.MediaType{
+						Schema: &openapi3.SchemaRef{Ref: ref, Value: node},
+					}},
+				}},
+				Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
+					Value: &openapi3.Response{Description: new("ok")},
+				})),
+			},
+		})),
+	}
+}
+
+// Both sides cycle, through different ref names: the cycles are not known
+// to be the same schema, so the mismatch is a reported difference.
+func TestCircularSchema_RenamedCycle(t *testing.T) {
+	d, err := diff.Get(diff.NewConfig(), namedCyclicDoc("NodeA"), namedCyclicDoc("NodeB"))
+	require.NoError(t, err)
+
+	child := d.PathsDiff.Modified["/x"].OperationsDiff.Modified["POST"].
+		RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].
+		SchemaDiff.PropertiesDiff.Modified["child"]
+	require.True(t, child.CircularRefDiff)
+}
+
+// Both sides cycle through the same ref name: the cut adds nothing beyond
+// the comparison already underway, so identical specs diff to empty.
+func TestCircularSchema_SameCycleNoDiff(t *testing.T) {
+	s1, err := openapi3.NewLoader().LoadFromFile("../data/circular-two-edges1.yaml")
+	require.NoError(t, err)
+	s2, err := openapi3.NewLoader().LoadFromFile("../data/circular-two-edges1.yaml")
+	require.NoError(t, err)
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.True(t, d.Empty())
+}
+
 func TestCallbacks(t *testing.T) {
 	loader := openapi3.NewLoader()
 
