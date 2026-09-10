@@ -12,6 +12,12 @@ const (
 	circularRefStatusNoDiff
 )
 
+// getCircularRefsDiff compares how the two sides cycle when a $ref already
+// being compared higher up the walk is reached again: one side cycling where
+// the other does not, or cycling through a different name, is a reported
+// difference (CircularRefDiff); the same name on both sides adds nothing
+// beyond the comparison already underway. The verdict depends on the visited
+// sets, so callers must not reuse a diff computed under it for another path.
 func getCircularRefsDiff(visited1, visited2 map[string]struct{}, schema1, schema2 *openapi3.SchemaRef) circularRefStatus {
 
 	if schema1 == nil || schema2 == nil ||

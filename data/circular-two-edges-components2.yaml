@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: Recursive schema demo
+  version: 1.0.0
+components:
+  schemas:
+    Token:
+      type: object
+      properties:
+        name:
+          type: string
+        index:
+          type: integer
+        parent:
+          $ref: '#/components/schemas/Token'
+        sub_tokens:
+          description: Collection of child tokens, ordered by index
+          type: array
+          items:
+            $ref: '#/components/schemas/Token'

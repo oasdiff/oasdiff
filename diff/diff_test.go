@@ -737,11 +737,23 @@ func TestCircularSchema_Diff(t *testing.T) {
 	s2, err := loader.LoadFromFile("../data/circular2.yaml")
 	require.NoError(t, err)
 
-	_, err = diff.Get(diff.NewConfig(), s1, s2)
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	// TODO: fix circular checks and re-enable this test
-	// require.True(t, dd.SchemasDiff.Modified["circular1"].PropertiesDiff.Modified["children"].ItemsDiff.CircularRefDiff)
+	// entered through its $ref, the walk is already inside circular1, so
+	// the revision's items $ref cycles where the base's inline items does
+	// not: a reported difference
+	respItems := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["POST"].
+		ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].
+		SchemaDiff.PropertiesDiff.Modified["children"].ItemsDiff
+	require.True(t, respItems.CircularRefDiff)
+
+	// entered ref-less from components, no ancestor is comparing circular1
+	// yet, so the same pair unrolls one level instead
+	compItems := dd.ComponentsDiff.SchemasDiff.Modified["circular1"].
+		PropertiesDiff.Modified["children"].ItemsDiff
+	require.False(t, compItems.CircularRefDiff)
+	require.Contains(t, compItems.PropertiesDiff.Added, "children")
 }
 
 func TestCircularSchemaRefs(t *testing.T) {
@@ -762,6 +774,57 @@ func TestCircularSchemaRefs(t *testing.T) {
 	require.NotContains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular4")
 	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular5")
 	require.Contains(t, dd.ComponentsDiff.SchemasDiff.Modified, "circular6")
+}
+
+// namedCyclicDoc builds a spec whose request body is a $ref to a schema
+// whose child property refers back to it through the same $ref.
+func namedCyclicDoc(name string) *openapi3.T {
+	ref := "#/components/schemas/" + name
+	node := &openapi3.Schema{Type: &openapi3.Types{"object"}}
+	node.Properties = openapi3.Schemas{
+		"child": &openapi3.SchemaRef{Ref: ref, Value: node},
+	}
+	return &openapi3.T{
+		OpenAPI: "3.0.3",
+		Info:    &openapi3.Info{Title: "t", Version: "1"},
+		Paths: openapi3.NewPaths(openapi3.WithPath("/x", &openapi3.PathItem{
+			Post: &openapi3.Operation{
+				RequestBody: &openapi3.RequestBodyRef{Value: &openapi3.RequestBody{
+					Content: openapi3.Content{"application/json": &openapi3.MediaType{
+						Schema: &openapi3.SchemaRef{Ref: ref, Value: node},
+					}},
+				}},
+				Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{
+					Value: &openapi3.Response{Description: new("ok")},
+				})),
+			},
+		})),
+	}
+}
+
+// Both sides cycle, through different ref names: the cycles are not known
+// to be the same schema, so the mismatch is a reported difference.
+func TestCircularSchema_RenamedCycle(t *testing.T) {
+	d, err := diff.Get(diff.NewConfig(), namedCyclicDoc("NodeA"), namedCyclicDoc("NodeB"))
+	require.NoError(t, err)
+
+	child := d.PathsDiff.Modified["/x"].OperationsDiff.Modified["POST"].
+		RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].
+		SchemaDiff.PropertiesDiff.Modified["child"]
+	require.True(t, child.CircularRefDiff)
+}
+
+// Both sides cycle through the same ref name: the cut adds nothing beyond
+// the comparison already underway, so identical specs diff to empty.
+func TestCircularSchema_SameCycleNoDiff(t *testing.T) {
+	s1, err := openapi3.NewLoader().LoadFromFile("../data/circular-two-edges1.yaml")
+	require.NoError(t, err)
+	s2, err := openapi3.NewLoader().LoadFromFile("../data/circular-two-edges1.yaml")
+	require.NoError(t, err)
+
+	d, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.True(t, d.Empty())
 }
 
 func TestCallbacks(t *testing.T) {

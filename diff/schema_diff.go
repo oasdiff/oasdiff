@@ -113,11 +113,19 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 	// circular-ref guard does: report no diff at the re-entry point.
 	pair := schemaPair{schema1, schema2}
 	if _, ok := state.inFlight[pair]; ok {
+		// the no-diff answer stands in for the pair's computation already in
+		// progress; count the cut: a diff whose computation includes it is
+		// not cached
+		state.cuts++
 		return nil, nil
 	}
 	state.inFlight[pair] = struct{}{}
 	defer delete(state.inFlight, pair)
 
+	// a diff whose computation includes a cut depends on the path that led
+	// here, not on the pair alone; comparing the count detects a cut at any
+	// depth
+	cutsBefore := state.cuts
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err != nil {
 		return nil, err
@@ -127,7 +135,11 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 		diff = nil
 	}
 
-	state.cache[schemaPair{schema1, schema2}] = diff
+	// no cut fired: the diff is a function of the pair alone and can be
+	// reused on any path
+	if state.cuts == cutsBefore {
+		state.cache[pair] = diff
+	}
 	return diff, nil
 }
 
@@ -157,6 +169,10 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 
 	if status := getCircularRefsDiff(state.visitedSchemasBase, state.visitedSchemasRevision, schema1, schema2); status != circularRefStatusNone {
+		// the verdict reads the visited sets, so it holds only for the path
+		// that led here; count the cut: a diff whose computation includes it
+		// is not cached
+		state.cuts++
 		switch status {
 		case circularRefStatusDiff:
 			result.CircularRefDiff = true
