@@ -1,7 +1,9 @@
 package allof
 
 import (
+	"fmt"
 	"reflect"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -11,11 +13,13 @@ import (
 // cycle tracking), so the walk hands it each attachment point once and skips
 // descent.
 func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
+	var anchored []*openapi3.SchemaRef
 	err := spec.WalkSchemas(func(_ string, s *openapi3.SchemaRef) error {
-		m, err := Merge(*s)
+		m, edges, err := mergeWithAnchors(*s)
 		if err != nil {
 			return err
 		}
+		anchored = append(anchored, edges...)
 		// Every $ref to this schema shares one Value, so writing the merge
 		// into it updates every use. Assigning s.Value would update only
 		// this reference and leave the rest unmerged.
@@ -28,7 +32,65 @@ func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 		redirectSchemaRefs(reflect.ValueOf(s.Value), m, s.Value, map[*openapi3.Schema]bool{})
 		return openapi3.SkipSubtree
 	})
-	return spec, err
+	if err != nil {
+		return spec, err
+	}
+	nameAnchoredCycles(spec, anchored)
+	return spec, nil
+}
+
+// nameAnchoredCycles gives every anchored back-edge a $ref. The edge's value
+// is right (a cycle in the input is a cycle in the merged output), but the
+// edge carries no $ref, and a ref-less cycle has no serialized form. A target
+// that is a named component gets that name; an anonymous target is hoisted
+// into components.schemas under a generated name. Names are assigned in the
+// document's walk order, which is deterministic, so identical inputs name
+// identical targets.
+func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef) {
+	if len(anchored) == 0 {
+		return
+	}
+
+	nameByValue := map[*openapi3.Schema]string{}
+	if spec.Components != nil {
+		for name, ref := range spec.Components.Schemas {
+			if ref != nil && ref.Value != nil {
+				nameByValue[ref.Value] = name
+			}
+		}
+	}
+
+	walkOrder := map[*openapi3.Schema]int{}
+	_ = spec.WalkSchemas(func(_ string, s *openapi3.SchemaRef) error {
+		walkOrder[s.Value] = len(walkOrder)
+		return nil
+	})
+	slices.SortStableFunc(anchored, func(a, b *openapi3.SchemaRef) int {
+		return walkOrder[a.Value] - walkOrder[b.Value]
+	})
+
+	next := 1
+	for _, edge := range anchored {
+		name, ok := nameByValue[edge.Value]
+		if !ok {
+			for {
+				name = fmt.Sprintf("AllOfMerged%d", next)
+				next++
+				if spec.Components == nil || spec.Components.Schemas[name] == nil {
+					break
+				}
+			}
+			if spec.Components == nil {
+				spec.Components = &openapi3.Components{}
+			}
+			if spec.Components.Schemas == nil {
+				spec.Components.Schemas = openapi3.Schemas{}
+			}
+			spec.Components.Schemas[name] = openapi3.NewSchemaRef("", edge.Value)
+			nameByValue[edge.Value] = name
+		}
+		edge.Ref = "#/components/schemas/" + name
+	}
 }
 
 // redirectSchemaRefs walks every SchemaRef reachable from v and points those

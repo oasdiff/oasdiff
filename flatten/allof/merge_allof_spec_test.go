@@ -127,3 +127,32 @@ func Test_MergeSpec_RecursiveOverlaySerializes(t *testing.T) {
 	_, err = spec.Spec.MarshalJSON()
 	require.NoError(t, err)
 }
+
+// An allOf over two distinct recursive components merges to a node whose
+// recursion the in-flight guard anchored without a $ref; the anchor's value
+// is right but a ref-less cycle has no serialized form. MergeSpec names the
+// anchored target, hoisting it into components, so the merged spec marshals
+// and the name is stable across runs.
+func Test_MergeSpec_TwoRecursiveBranchesSerializes(t *testing.T) {
+	loadMerged := func() *openapi3.T {
+		spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/two-recursive-branches.yaml"), load.WithFlattenAllOf())
+		require.NoError(t, err)
+		return spec.Spec
+	}
+	merged := loadMerged()
+
+	tree := merged.Paths.Value("/x").Post.RequestBody.Value.Content["application/json"].
+		Schema.Value.Properties["tree"]
+	require.Empty(t, tree.Value.AllOf)
+
+	child := tree.Value.Properties["child"]
+	require.Equal(t, "#/components/schemas/AllOfMerged1", child.Ref)
+	require.Same(t, tree.Value, child.Value)
+	require.Same(t, tree.Value, merged.Components.Schemas["AllOfMerged1"].Value)
+
+	first, err := merged.MarshalJSON()
+	require.NoError(t, err)
+	second, err := loadMerged().MarshalJSON()
+	require.NoError(t, err)
+	require.Equal(t, string(first), string(second))
+}
