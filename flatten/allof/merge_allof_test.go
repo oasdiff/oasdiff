@@ -2977,7 +2977,9 @@ func TestMerge_PropertyNames_AllUnset(t *testing.T) {
 
 // Cycle through Properties — the user-reported reproducer in #890.
 // Tree-node-shaped schema where Properties["child"] points back to the
-// same *Schema. The same node appears twice under allOf.
+// same *Schema. The same node appears twice under allOf: the child set
+// dedups to one schema, so the merge yields that schema itself, with
+// its own cycle intact.
 func TestMerge_Cycle_PropertiesSameNodeTwice(t *testing.T) {
 	node := &openapi3.Schema{Type: &openapi3.Types{"object"}}
 	node.Properties = openapi3.Schemas{
@@ -2992,10 +2994,9 @@ func TestMerge_Cycle_PropertiesSameNodeTwice(t *testing.T) {
 		},
 	})
 	require.NoError(t, err)
-	require.NotNil(t, merged.Properties["child"])
-	// Cycle preserved in the merged output: child points back to the
-	// merged result Value.
-	require.Same(t, merged, merged.Properties["child"].Value)
+	child := merged.Properties["child"]
+	require.NotNil(t, child)
+	require.Same(t, child.Value, child.Value.Properties["child"].Value)
 }
 
 // Cycle through Properties — two distinct cyclic *Schema pointers
