@@ -57,6 +57,44 @@ Every field above except `$defs` is taken from the outer schema, so a schema wit
 
 The merger is defensive about spec violations — values that would crash the merge or produce nonsense are silently skipped rather than reported. For example, `multipleOf` values that are zero or negative (disallowed by the OpenAPI / JSON Schema spec) are dropped from the merged result. To surface invalid values in your spec rather than rely on the merger swallowing them, validate the spec separately.
 
+## Recursive schemas
+
+A schema can only express recursion through a `$ref`, so flattening keeps every cycle expressible:
+
+- A recursive component merged with additional constraints keeps its recursion as a `$ref`. When the merged result has no name of its own (an inline `allOf` over recursive components), oasdiff adds it to `components.schemas` under a name built from the merged component names (`AllOfMerged_NodeA_NodeB`) and points the recursive reference at it. The name depends only on what was merged, so the same schema keeps the same name in every revision of your API.
+- When a recursive reference is combined with further constraints at the same spot, the flattened output keeps them together as an `allOf` of the named reference and the merged constraints. That one spot stays unflattened, but nothing is lost.
+
+For example, `NodeA` is recursive (`child` refers back to `NodeA`) and an overlay adds a constraint on `child` (`Plain` is `{type: object, properties: {leaf: {type: string}}}`):
+
+```yaml
+tree:
+  allOf:
+    - $ref: '#/components/schemas/NodeA'
+    - type: object
+      properties:
+        child:
+          $ref: '#/components/schemas/Plain'
+```
+
+After flattening, `tree`'s own fields are merged, and `child` requires both the recursion and the overlay's constraint:
+
+```yaml
+tree:
+  type: object
+  properties:
+    child:
+      allOf:
+        - $ref: '#/components/schemas/AllOfMerged_NodeA'
+        - type: object
+          properties:
+            leaf:
+              type: string
+```
+
+The `allOf` stays because `child` genuinely means both things at once, and folding the constraint into the shared recursive component would change it everywhere else it is used.
+
+So a flattened document may contain components you did not declare and residual `allOf` entries around recursion points; both are how recursion survives flattening.
+
 ## `contains` is over-constrained when subschemas differ (OpenAPI 3.1)
 
 The strict `allOf` semantics for `contains` are *"≥1 array item matches X AND ≥1 item matches Y"* — the two matching items can be different. We can't express that as a single subschema, so when multiple `allOf` siblings each set `contains`, oasdiff merges the subschemas recursively (as if wrapped in `allOf`) and emits a single `contains: Merge(X, Y)`. That is *stricter* than the original: it requires one item to satisfy both X and Y. Arrays the original spec accepts (where X and Y are matched by distinct items) may be rejected after flattening; arrays the original rejects are never accepted. In practice this rarely matters because most specs have at most one `contains` per `allOf` chain.
