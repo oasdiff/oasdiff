@@ -1,0 +1,3 @@
+# install.sh targets linux and darwin, where every /bin/sh (dash, ash, bash)
+# supports local.
+disable=SC3043
