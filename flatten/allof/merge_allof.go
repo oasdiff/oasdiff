@@ -1469,9 +1469,9 @@ func filterEmptySchemaRefs(groups []openapi3.SchemaRefs) []openapi3.SchemaRefs {
 // dedupSchemaRefsByValue returns schemas with duplicate Value pointers
 // removed (first occurrence kept). Refs with nil or nil Value flow
 // through unchanged so callers see the same nil-handling shape.
-// componentNames joins the component names of the referenced schemas in
-// input order, for naming the merge of the set: "NodeA_NodeB". Schemas
-// without a $ref contribute nothing; an all-inline set yields "".
+// componentNames joins the last segment of each schema's $ref, in input
+// order and without repeats: "NodeA_NodeB". Schemas without a $ref
+// contribute nothing; an all-inline set yields "".
 func componentNames(schemas openapi3.SchemaRefs) string {
 	var names []string
 	for _, s := range schemas {
