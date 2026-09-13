@@ -61,7 +61,7 @@ The merger is defensive about spec violations — values that would crash the me
 
 A schema can only express recursion through a `$ref`, so flattening keeps every cycle expressible:
 
-- A recursive component merged with additional constraints keeps its recursion as a `$ref`. When the merged result has no name of its own (an inline `allOf` over recursive components), oasdiff adds it to `components.schemas` under a generated name (`AllOfMerged1`, `AllOfMerged2`, ...) and points the recursive reference at it. The names are assigned in document order, so the same input always produces the same output.
+- A recursive component merged with additional constraints keeps its recursion as a `$ref`. When the merged result has no name of its own (an inline `allOf` over recursive components), oasdiff adds it to `components.schemas` under a name built from the merged component names (`AllOfMerged_NodeA_NodeB`) and points the recursive reference at it. The name depends only on what was merged, so the same schema keeps the same name in every revision of your API.
 - When a recursive reference is combined with further constraints at the same spot, the flattened output keeps them together as an `allOf` of the named reference and the merged constraints. That one spot stays unflattened, but nothing is lost.
 
 So a flattened document may contain components you did not declare and residual `allOf` entries around recursion points; both are how recursion survives flattening.

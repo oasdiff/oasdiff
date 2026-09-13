@@ -34,8 +34,9 @@ A document can only express recursion through a $ref, so the merged output
 maintains one invariant: every cycle-closing edge carries a $ref. A cycle
 through a named component keeps its name. A cycle through the anonymous
 result of merging recursive branches is hoisted into components.schemas
-under a generated AllOfMergedN name, assigned in the document's walk order
-so identical inputs produce identical output. A node that combines such a
+under a name built from the merged component names
+(AllOfMerged_NodeA_NodeB), so the same cycle keeps its name in every
+revision and flatten produces the same output standalone and inside diff. A node that combines such a
 cycle with further constraints keeps them as a residual allOf of the named
 cycle and the merged rest: complete, just not flattened at that one node.
 
