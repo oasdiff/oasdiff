@@ -156,3 +156,23 @@ func Test_MergeSpec_TwoRecursiveBranchesSerializes(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, string(first), string(second))
 }
+
+// A child set mixing an in-flight cyclic branch with another schema keeps
+// the other schema's constraints: the node becomes a residual allOf of the
+// named anchor and the merge of the rest, unflattened there but complete.
+func Test_MergeSpec_MixedCycleBranchKeepsSiblingConstraints(t *testing.T) {
+	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/mixed-cycle-branch.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	tree := spec.Spec.Paths.Value("/x").Post.RequestBody.Value.Content["application/json"].
+		Schema.Value.Properties["tree"]
+	child := tree.Value.Properties["child"]
+	require.Len(t, child.Value.AllOf, 2)
+	require.Equal(t, "#/components/schemas/AllOfMerged1", child.Value.AllOf[0].Ref)
+	require.Same(t, tree.Value, child.Value.AllOf[0].Value)
+	require.True(t, child.Value.AllOf[1].Value.Properties["leaf"].Value.Type.Is("string"),
+		"the non-cyclic sibling's constraint must survive")
+
+	_, err = spec.Spec.MarshalJSON()
+	require.NoError(t, err)
+}

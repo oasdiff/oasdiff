@@ -441,20 +441,49 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	// trims work the cycle guard would otherwise have to do.
 	schemas = dedupSchemaRefsByValue(schemas)
 
-	// Tier 2: cycle guard. If any input schema is already being
-	// flattened higher in the call stack, point our result Value at
-	// that in-flight Value and return — the cyclic Properties / Items
-	// / Contains / PropertyNames link in the input is preserved as a
-	// cyclic link in the merged output, without infinite recursion.
+	// Tier 2: cycle guard. An input schema that is already being flattened
+	// higher in the call stack stands for that in-flight result — the cyclic
+	// Properties / Items / Contains / PropertyNames link in the input is
+	// preserved as a cyclic link in the merged output, without infinite
+	// recursion. When the whole set is one such schema, the result is that
+	// in-flight value; a set that also carries other schemas keeps their
+	// constraints as a residual allOf of the anchors and the merge of the
+	// rest, unflattened at this node but complete (#1242).
+	var anchors []*openapi3.Schema
+	rest := make(openapi3.SchemaRefs, 0, len(schemas))
 	for _, s := range schemas {
 		if s == nil || s.Value == nil {
 			continue
 		}
 		if inFlight, ok := state.flattening[s.Value]; ok {
-			result.Value = inFlight
-			state.anchored = append(state.anchored, result)
-			return nil
+			if !slices.Contains(anchors, inFlight) {
+				anchors = append(anchors, inFlight)
+			}
+		} else {
+			rest = append(rest, s)
 		}
+	}
+	if len(anchors) == 1 && len(rest) == 0 {
+		result.Value = anchors[0]
+		state.anchored = append(state.anchored, result)
+		return nil
+	}
+	if len(anchors) > 0 {
+		residual := make(openapi3.SchemaRefs, 0, len(anchors)+1)
+		for _, anchor := range anchors {
+			ref := openapi3.NewSchemaRef("", anchor)
+			state.anchored = append(state.anchored, ref)
+			residual = append(residual, ref)
+		}
+		if len(rest) > 0 {
+			merged := openapi3.NewSchemaRef("", openapi3.NewSchema())
+			if err := flattenSchemas(state, merged, rest); err != nil {
+				return err
+			}
+			residual = append(residual, merged)
+		}
+		result.Value.AllOf = residual
+		return nil
 	}
 
 	// Mark each non-nil input schema as in-flight, mapped to the
