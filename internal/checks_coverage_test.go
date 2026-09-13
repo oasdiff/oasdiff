@@ -98,3 +98,41 @@ func TestChecksCoverage_PatternsAndTagsRejected(t *testing.T) {
 	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --patterns --tags covered"), &stdout, &stderr))
 	require.Contains(t, stderr.String(), "--tags cannot be used with --patterns")
 }
+
+func TestChecksCoverage_PatternsAndLocationRejected(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --patterns --location schema"), &stdout, &stderr))
+	require.Contains(t, stderr.String(), "--location cannot be used with --patterns")
+}
+
+// --location keeps only the edits at locations containing the string.
+func TestChecksCoverage_LocationFilter(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --format json --location paths.*.*.parameters.*.style"), &stdout, io.Discard))
+
+	var rows []coverage.Edit
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
+	require.NotEmpty(t, rows)
+	for _, row := range rows {
+		require.Contains(t, row.Location, "paths.*.*.parameters.*.style")
+	}
+}
+
+// --id keeps only the edits the named check claims.
+func TestChecksCoverage_IdFilter(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --format json --id request-body-max-set"), &stdout, io.Discard))
+
+	var rows []coverage.Edit
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &rows))
+	require.NotEmpty(t, rows)
+	for _, row := range rows {
+		require.Contains(t, row.Checks, "request-body-max-set")
+	}
+}
+
+func TestChecksCoverage_UnknownIdRejected(t *testing.T) {
+	var stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog coverage --id no-such-check"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), `unknown check id "no-such-check"`)
+}

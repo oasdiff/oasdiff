@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"slices"
+	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
@@ -46,6 +47,35 @@ func addChecksChangelogFlags(cmd *cobra.Command) {
 	addChecksSeverityFlag(cmd)
 	enumWithOptions(cmd, newEnumSliceValue(GetChangelogTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
+	addCheckIdFlag(cmd, "display only the check with this id")
+	cmd.PersistentFlags().String("location", "", "include only checks with a location containing this string")
+}
+
+// addCheckIdFlag registers an --id flag that completes to the changelog
+// check ids.
+func addCheckIdFlag(cmd *cobra.Command, usage string) {
+	cmd.PersistentFlags().String("id", "", usage)
+	_ = cmd.RegisterFlagCompletionFunc("id", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		rules := checker.GetAllRules()
+		ids := make([]string, len(rules))
+		for i, rule := range rules {
+			ids[i] = rule.Id
+		}
+		return ids, cobra.ShellCompDirectiveNoFileComp
+	})
+}
+
+// checkKnownId rejects an --id that names no changelog check.
+func checkKnownId(id string) *ReturnError {
+	if id == "" {
+		return nil
+	}
+	if !slices.ContainsFunc(checker.GetAllRules(), func(rule checker.BackwardCompatibilityRule) bool {
+		return rule.Id == id
+	}) {
+		return getErrInvalidFlags(fmt.Errorf("unknown check id %q", id))
+	}
+	return nil
 }
 
 func runChecksChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
@@ -66,10 +96,26 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 
 	localizer := checker.NewLocalizer(flags.getLang())
 
+	id := flags.getId()
+	if returnErr := checkKnownId(id); returnErr != nil {
+		return returnErr
+	}
+
 	// filter rules
 	severity := flags.getSeverity()
+	location := flags.getLocation()
 	checks := make(formatters.Checks, 0, len(rules))
 	for _, rule := range rules {
+		if id != "" && rule.Id != id {
+			continue
+		}
+
+		if location != "" && !slices.ContainsFunc(rule.Locations, func(loc string) bool {
+			return strings.Contains(loc, location)
+		}) {
+			continue
+		}
+
 		if !matchSeverity(severity, rule.Level) {
 			continue
 		}
@@ -95,6 +141,7 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 			Effect:      rule.Effect.String(),
 			Guards:      guardStrings(rule.Guards),
 			Locations:   rule.Locations,
+			Generated:   rule.Generated,
 			Description: localizer(rule.Description),
 			Mitigation:  mitigation,
 		})
@@ -159,6 +206,12 @@ var changelogTagDimensions = []tagDimension[checker.BackwardCompatibilityRule]{
 		values: guardStrings(rules.Guards),
 		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
 			return slices.Contains(rule.Guards, checker.Guard(value))
+		},
+	},
+	{
+		values: []string{"generated", "hand-written"},
+		match: func(value string, rule checker.BackwardCompatibilityRule) bool {
+			return (value == "generated") == rule.Generated
 		},
 	},
 }
