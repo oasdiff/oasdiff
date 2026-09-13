@@ -54,8 +54,8 @@ paths.*.*.requestBody.content.*.schema.maximum unset    covered request-body-max
 
 ```
 $ oasdiff checks changelog --id request-body-max-set
-ID                   DESCRIPTION          LEVEL GUARDS GENERATED
-request-body-max-set request body max set error
+ID                   LEVEL GUARDS GENERATED DESCRIPTION
+request-body-max-set error                  request body max set
 ```
 
 The structured formats show the check's full classification, including the claim that ties it back to the coverage row you started from:
@@ -81,8 +81,8 @@ The empty GENERATED column says this check is written by hand, so its implementa
 
 ```
 $ oasdiff checks changelog --id request-body-max-unset
-ID                     DESCRIPTION            LEVEL GUARDS GENERATED
-request-body-max-unset request body max unset info         yes
+ID                     LEVEL GUARDS GENERATED DESCRIPTION
+request-body-max-unset info         yes       request body max unset
 ```
 
 `yes` means the id resolves to a row in a generating table rather than a function; the next section explains how to extend those.
