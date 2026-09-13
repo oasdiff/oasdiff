@@ -1,17 +1,26 @@
 # How to Add Breaking-Changes Checks
 
-## First: Is the Check Generated?
+## First: Ask the Coverage Map
 
-Checks for setting, unsetting, increasing, and decreasing the ordered constraint keywords (`maximum`, `minimum`, `maxLength`, `minLength`, `maxItems`, `minItems`, `maxProperties`, `minProperties`, `minContains`, `maxContains`, `exclusiveMinimum`, `exclusiveMaximum`, and `multipleOf` for set/unset) are **generated from a table**, not written as functions: one row in `boundSpecs` in [checker/bound_rules.go](../checker/bound_rules.go) produces the rules for every direction (request/response), scope (body, property, parameter, response header), and action, with levels derived from the severity law and messages derived from per-locale templates.
+Before writing anything, ask the audit what it already knows about the edit you want to check:
 
-To cover a new constraint keyword:
+```
+oasdiff checks changelog coverage
+```
 
-1. Add a row to `diff.SchemaBounds` in [diff/schema_bounds.go](../diff/schema_bounds.go) so the diff exposes the keyword with its absence encoding (nil, zero, or false as absent).
-2. Add a row to `boundSpecs` with the id segment, the keyword, and its polarity (`lowerBound`: increasing narrows; `upperBound`: decreasing narrows; `unordered`: no increase/decrease rules).
-3. Run `make bound-messages` (message templates fill in the keyword per locale) and `make localize`.
-4. Update the pinned counts the tests name when they fail: the rule count in [checker/bound_rules_test.go](../checker/bound_rules_test.go), the cell count in [checker/bound_fire_test.go](../checker/bound_fire_test.go), and `numOfIds` in [checker/config_test.go](../checker/config_test.go).
+One row per possible edit of an OpenAPI document (filter with `--tags`, see [CHECKS.md](CHECKS.md#coverage-map)):
 
-Every generated cell is exercised by `TestBoundCellsFire`, which builds a spec pair per cell and requires exactly one change with the right id and level. If you hand-write a check whose id covers a cell the generator would produce, it must use the generated id format so the generator skips that cell; `TestHandWrittenBoundIdsMatchTheGrammar` fails otherwise.
+- `covered`: checks already claim this edit; nothing to add.
+- `waived`: no check yet, and the reason why. An `open` waiver is an invitation: it carries a suggested id in the house grammar, and its reason in [checker/coverage/waivers.go](../checker/coverage/waivers.go) often points at the tracking issue.
+- `non-contract`: the edit cannot change which payloads are valid; no check is expected.
+
+## Second: Is the Check Generated?
+
+Some check families are **generated from tables**, not written as functions, and the set grows over time. A check whose id a generator produces must not be written by hand: extend the generating table instead, and the generated rules pick up every direction, scope, and action at once, with levels derived from the severity law and messages from per-locale templates.
+
+Currently generated: setting, unsetting, increasing, and decreasing the ordered constraint keywords (`boundSpecs` in [checker/bound_rules.go](../checker/bound_rules.go)). To cover a new constraint keyword: add a row to `diff.SchemaBounds` in [diff/schema_bounds.go](../diff/schema_bounds.go) (the keyword with its absence encoding), add a `boundSpecs` row (id segment, keyword, polarity: `lowerBound` narrows on increase, `upperBound` on decrease, `unordered` gets no increase/decrease rules), run `make bound-messages` and `make localize`, and update the pinned counts the failing tests name.
+
+The gates enforce the boundary in both directions: `TestBoundCellsFire` builds a spec pair for every generated cell and requires exactly one change at the registered level, and `TestHandWrittenBoundIdsMatchTheGrammar` fails a hand-written check whose id covers a generated cell under a different format.
 
 Everything else, checks that need a judgment call, stays hand-written as follows.
 
