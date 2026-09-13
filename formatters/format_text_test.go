@@ -46,7 +46,7 @@ func TestTextFormatter_RenderChecks(t *testing.T) {
 
 	out, err := textFormatter.RenderChecks(checks, formatters.NewRenderOpts())
 	require.NoError(t, err)
-	require.Equal(t, string(out), "ID        DESCRIPTION                LEVEL GUARDS    GENERATED\nchange_id This is a breaking change. info  read-only yes\n")
+	require.Equal(t, string(out), "ID        LEVEL GUARDS    GENERATED DESCRIPTION\nchange_id info  read-only yes       This is a breaking change.\n")
 }
 
 func TestTextFormatter_RenderChangelog_EmptyChangesDifferentSpecs(t *testing.T) {
