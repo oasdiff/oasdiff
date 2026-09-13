@@ -151,8 +151,6 @@ request-body-min-items-increased: o número mínimo de itens do corpo da requisi
 request-property-min-items-increased: o número mínimo de itens da propriedade de requisição %s foi aumentado para %s
 request-body-min-decreased: o valor mínimo do corpo da requisição foi reduzido de %s para %s
 request-property-min-decreased: o valor mínimo da propriedade de requisição %s foi reduzido de %s para %s
-request-body-min-items-decreased: o número mínimo de itens do corpo da requisição foi reduzido de %s para %s
-request-property-min-items-decreased: o número mínimo de itens da propriedade de requisição %s foi reduzido de %s para %s
 request-body-min-items-set: o número mínimo de itens do corpo da requisição foi definido como %s
 request-property-min-items-set: o número mínimo de itens da propriedade de requisição %s foi definido como %s
 request-body-min-set: o valor mínimo do corpo da requisição foi definido como %s
@@ -1211,12 +1209,16 @@ request-body-min-contains-set: o valor minContains do corpo da requisição foi 
 request-body-min-contains-set-description: valor minContains do corpo da requisição definido
 request-body-min-contains-unset: o valor minContains do corpo da requisição foi removido de %s
 request-body-min-contains-unset-description: valor minContains do corpo da requisição removido
+request-body-min-items-decreased: o valor minItems do corpo da requisição foi reduzido de %s para %s
+request-body-min-items-decreased-description: valor minItems do corpo da requisição reduzido
 request-body-min-items-unset: o valor minItems do corpo da requisição foi removido de %s
 request-body-min-items-unset-description: valor minItems do corpo da requisição removido
 request-body-min-length-set: o valor minLength do corpo da requisição foi definido como %s
 request-body-min-length-set-description: valor minLength do corpo da requisição definido
 request-body-min-length-unset: o valor minLength do corpo da requisição foi removido de %s
 request-body-min-length-unset-description: valor minLength do corpo da requisição removido
+request-body-min-properties-decreased: o valor minProperties do corpo da requisição foi reduzido de %s para %s
+request-body-min-properties-decreased-description: valor minProperties do corpo da requisição reduzido
 request-body-min-properties-set: o valor minProperties do corpo da requisição foi definido como %s
 request-body-min-properties-set-description: valor minProperties do corpo da requisição definido
 request-body-min-properties-unset: o valor minProperties do corpo da requisição foi removido de %s
@@ -1227,6 +1229,10 @@ request-parameter-exclusive-max-unset: no parâmetro de requisição do tipo %s 
 request-parameter-exclusive-max-unset-description: valor exclusiveMaximum do parâmetro da requisição removido
 request-parameter-exclusive-min-unset: no parâmetro de requisição do tipo %s e nome %s, o valor exclusiveMinimum foi removido de %s
 request-parameter-exclusive-min-unset-description: valor exclusiveMinimum do parâmetro da requisição removido
+request-parameter-max-contains-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor maxContains foi reduzido de %s para %s
+request-parameter-max-contains-decreased-description: valor maxContains do parâmetro da requisição reduzido
+request-parameter-max-contains-increased: no parâmetro de requisição do tipo %s e nome %s, o valor maxContains foi aumentado de %s para %s
+request-parameter-max-contains-increased-description: valor maxContains do parâmetro da requisição aumentado
 request-parameter-max-contains-set: no parâmetro de requisição do tipo %s e nome %s, o valor maxContains foi definido como %s
 request-parameter-max-contains-set-description: valor maxContains do parâmetro da requisição definido
 request-parameter-max-contains-unset: no parâmetro de requisição do tipo %s e nome %s, o valor maxContains foi removido de %s
@@ -1237,12 +1243,20 @@ request-parameter-max-items-unset: no parâmetro de requisição do tipo %s e no
 request-parameter-max-items-unset-description: valor maxItems do parâmetro da requisição removido
 request-parameter-max-length-unset: no parâmetro de requisição do tipo %s e nome %s, o valor maxLength foi removido de %s
 request-parameter-max-length-unset-description: valor maxLength do parâmetro da requisição removido
+request-parameter-max-properties-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor maxProperties foi reduzido de %s para %s
+request-parameter-max-properties-decreased-description: valor maxProperties do parâmetro da requisição reduzido
+request-parameter-max-properties-increased: no parâmetro de requisição do tipo %s e nome %s, o valor maxProperties foi aumentado de %s para %s
+request-parameter-max-properties-increased-description: valor maxProperties do parâmetro da requisição aumentado
 request-parameter-max-properties-set: no parâmetro de requisição do tipo %s e nome %s, o valor maxProperties foi definido como %s
 request-parameter-max-properties-set-description: valor maxProperties do parâmetro da requisição definido
 request-parameter-max-properties-unset: no parâmetro de requisição do tipo %s e nome %s, o valor maxProperties foi removido de %s
 request-parameter-max-properties-unset-description: valor maxProperties do parâmetro da requisição removido
 request-parameter-max-unset: no parâmetro de requisição do tipo %s e nome %s, o valor max foi removido de %s
 request-parameter-max-unset-description: valor max do parâmetro da requisição removido
+request-parameter-min-contains-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor minContains foi reduzido de %s para %s
+request-parameter-min-contains-decreased-description: valor minContains do parâmetro da requisição reduzido
+request-parameter-min-contains-increased: no parâmetro de requisição do tipo %s e nome %s, o valor minContains foi aumentado de %s para %s
+request-parameter-min-contains-increased-description: valor minContains do parâmetro da requisição aumentado
 request-parameter-min-contains-set: no parâmetro de requisição do tipo %s e nome %s, o valor minContains foi definido como %s
 request-parameter-min-contains-set-description: valor minContains do parâmetro da requisição definido
 request-parameter-min-contains-unset: no parâmetro de requisição do tipo %s e nome %s, o valor minContains foi removido de %s
@@ -1253,6 +1267,10 @@ request-parameter-min-length-set: no parâmetro de requisição do tipo %s e nom
 request-parameter-min-length-set-description: valor minLength do parâmetro da requisição definido
 request-parameter-min-length-unset: no parâmetro de requisição do tipo %s e nome %s, o valor minLength foi removido de %s
 request-parameter-min-length-unset-description: valor minLength do parâmetro da requisição removido
+request-parameter-min-properties-decreased: no parâmetro de requisição do tipo %s e nome %s, o valor minProperties foi reduzido de %s para %s
+request-parameter-min-properties-decreased-description: valor minProperties do parâmetro da requisição reduzido
+request-parameter-min-properties-increased: no parâmetro de requisição do tipo %s e nome %s, o valor minProperties foi aumentado de %s para %s
+request-parameter-min-properties-increased-description: valor minProperties do parâmetro da requisição aumentado
 request-parameter-min-properties-set: no parâmetro de requisição do tipo %s e nome %s, o valor minProperties foi definido como %s
 request-parameter-min-properties-set-description: valor minProperties do parâmetro da requisição definido
 request-parameter-min-properties-unset: no parâmetro de requisição do tipo %s e nome %s, o valor minProperties foi removido de %s
@@ -1283,22 +1301,30 @@ request-property-min-contains-set: o valor minContains da propriedade de requisi
 request-property-min-contains-set-description: valor minContains da propriedade de requisição definido
 request-property-min-contains-unset: o valor minContains da propriedade de requisição %s foi removido de %s
 request-property-min-contains-unset-description: valor minContains da propriedade de requisição removido
+request-property-min-items-decreased: o valor minItems da propriedade de requisição %s foi reduzido de %s para %s
+request-property-min-items-decreased-description: valor minItems da propriedade de requisição reduzido
 request-property-min-items-unset: o valor minItems da propriedade de requisição %s foi removido de %s
 request-property-min-items-unset-description: valor minItems da propriedade de requisição removido
 request-property-min-length-set: o valor minLength da propriedade de requisição %s foi definido como %s
 request-property-min-length-set-description: valor minLength da propriedade de requisição definido
 request-property-min-length-unset: o valor minLength da propriedade de requisição %s foi removido de %s
 request-property-min-length-unset-description: valor minLength da propriedade de requisição removido
+request-property-min-properties-decreased: o valor minProperties da propriedade de requisição %s foi reduzido de %s para %s
+request-property-min-properties-decreased-description: valor minProperties da propriedade de requisição reduzido
 request-property-min-properties-set: o valor minProperties da propriedade de requisição %s foi definido como %s
 request-property-min-properties-set-description: valor minProperties da propriedade de requisição definido
 request-property-min-properties-unset: o valor minProperties da propriedade de requisição %s foi removido de %s
 request-property-min-properties-unset-description: valor minProperties da propriedade de requisição removido
 request-property-min-unset: o valor min da propriedade de requisição %s foi removido de %s
 request-property-min-unset-description: valor min da propriedade de requisição removido
+response-body-exclusive-max-decreased: o valor exclusiveMaximum do corpo da resposta foi reduzido de %s para %s
+response-body-exclusive-max-decreased-description: valor exclusiveMaximum do corpo da resposta reduzido
 response-body-exclusive-max-set: o valor exclusiveMaximum do corpo da resposta foi definido como %s
 response-body-exclusive-max-set-description: valor exclusiveMaximum do corpo da resposta definido
 response-body-exclusive-max-unset: o valor exclusiveMaximum do corpo da resposta foi removido de %s
 response-body-exclusive-max-unset-description: valor exclusiveMaximum do corpo da resposta removido
+response-body-exclusive-min-increased: o valor exclusiveMinimum do corpo da resposta foi aumentado de %s para %s
+response-body-exclusive-min-increased-description: valor exclusiveMinimum do corpo da resposta aumentado
 response-body-exclusive-min-set: o valor exclusiveMinimum do corpo da resposta foi definido como %s
 response-body-exclusive-min-set-description: valor exclusiveMinimum do corpo da resposta definido
 response-body-exclusive-min-unset: o valor exclusiveMinimum do corpo da resposta foi removido de %s
@@ -1307,12 +1333,20 @@ response-body-max-contains-set: o valor maxContains do corpo da resposta foi def
 response-body-max-contains-set-description: valor maxContains do corpo da resposta definido
 response-body-max-contains-unset: o valor maxContains do corpo da resposta foi removido de %s
 response-body-max-contains-unset-description: valor maxContains do corpo da resposta removido
+response-body-max-decreased: o valor max do corpo da resposta foi reduzido de %s para %s
+response-body-max-decreased-description: valor max do corpo da resposta reduzido
+response-body-max-items-decreased: o valor maxItems do corpo da resposta foi reduzido de %s para %s
+response-body-max-items-decreased-description: valor maxItems do corpo da resposta reduzido
 response-body-max-items-set: o valor maxItems do corpo da resposta foi definido como %s
 response-body-max-items-set-description: valor maxItems do corpo da resposta definido
 response-body-max-items-unset: o valor maxItems do corpo da resposta foi removido de %s
 response-body-max-items-unset-description: valor maxItems do corpo da resposta removido
+response-body-max-length-decreased: o valor maxLength do corpo da resposta foi reduzido de %s para %s
+response-body-max-length-decreased-description: valor maxLength do corpo da resposta reduzido
 response-body-max-length-set: o valor maxLength do corpo da resposta foi definido como %s
 response-body-max-length-set-description: valor maxLength do corpo da resposta definido
+response-body-max-properties-decreased: o valor maxProperties do corpo da resposta foi reduzido de %s para %s
+response-body-max-properties-decreased-description: valor maxProperties do corpo da resposta reduzido
 response-body-max-properties-set: o valor maxProperties do corpo da resposta foi definido como %s
 response-body-max-properties-set-description: valor maxProperties do corpo da resposta definido
 response-body-max-properties-unset: o valor maxProperties do corpo da resposta foi removido de %s
@@ -1325,12 +1359,20 @@ response-body-min-contains-set: o valor minContains do corpo da resposta foi def
 response-body-min-contains-set-description: valor minContains do corpo da resposta definido
 response-body-min-contains-unset: o valor minContains do corpo da resposta foi removido de %s
 response-body-min-contains-unset-description: valor minContains do corpo da resposta removido
+response-body-min-increased: o valor min do corpo da resposta foi aumentado de %s para %s
+response-body-min-increased-description: valor min do corpo da resposta aumentado
+response-body-min-items-increased: o valor minItems do corpo da resposta foi aumentado de %s para %s
+response-body-min-items-increased-description: valor minItems do corpo da resposta aumentado
 response-body-min-items-set: o valor minItems do corpo da resposta foi definido como %s
 response-body-min-items-set-description: valor minItems do corpo da resposta definido
+response-body-min-length-increased: o valor minLength do corpo da resposta foi aumentado de %s para %s
+response-body-min-length-increased-description: valor minLength do corpo da resposta aumentado
 response-body-min-length-set: o valor minLength do corpo da resposta foi definido como %s
 response-body-min-length-set-description: valor minLength do corpo da resposta definido
 response-body-min-length-unset: o valor minLength do corpo da resposta foi removido de %s
 response-body-min-length-unset-description: valor minLength do corpo da resposta removido
+response-body-min-properties-increased: o valor minProperties do corpo da resposta foi aumentado de %s para %s
+response-body-min-properties-increased-description: valor minProperties do corpo da resposta aumentado
 response-body-min-properties-set: o valor minProperties do corpo da resposta foi definido como %s
 response-body-min-properties-set-description: valor minProperties do corpo da resposta definido
 response-body-min-properties-unset: o valor minProperties do corpo da resposta foi removido de %s
@@ -1341,26 +1383,54 @@ response-body-min-unset: o valor min do corpo da resposta foi removido de %s
 response-body-min-unset-description: valor min do corpo da resposta removido
 response-body-multiple-of-set: o valor multipleOf do corpo da resposta foi definido como %s
 response-body-multiple-of-set-description: valor multipleOf do corpo da resposta definido
+response-header-exclusive-max-decreased: o valor exclusiveMaximum do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-exclusive-max-decreased-description: valor exclusiveMaximum do cabeçalho de resposta reduzido
+response-header-exclusive-max-increased: o valor exclusiveMaximum do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-exclusive-max-increased-description: valor exclusiveMaximum do cabeçalho de resposta aumentado
 response-header-exclusive-max-set: o valor exclusiveMaximum do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-exclusive-max-set-description: valor exclusiveMaximum do cabeçalho de resposta definido
 response-header-exclusive-max-unset: o valor exclusiveMaximum do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-exclusive-max-unset-description: valor exclusiveMaximum do cabeçalho de resposta removido
+response-header-exclusive-min-decreased: o valor exclusiveMinimum do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-exclusive-min-decreased-description: valor exclusiveMinimum do cabeçalho de resposta reduzido
+response-header-exclusive-min-increased: o valor exclusiveMinimum do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-exclusive-min-increased-description: valor exclusiveMinimum do cabeçalho de resposta aumentado
 response-header-exclusive-min-set: o valor exclusiveMinimum do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-exclusive-min-set-description: valor exclusiveMinimum do cabeçalho de resposta definido
 response-header-exclusive-min-unset: o valor exclusiveMinimum do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-exclusive-min-unset-description: valor exclusiveMinimum do cabeçalho de resposta removido
+response-header-max-contains-decreased: o valor maxContains do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-max-contains-decreased-description: valor maxContains do cabeçalho de resposta reduzido
+response-header-max-contains-increased: o valor maxContains do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-max-contains-increased-description: valor maxContains do cabeçalho de resposta aumentado
 response-header-max-contains-set: o valor maxContains do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-max-contains-set-description: valor maxContains do cabeçalho de resposta definido
 response-header-max-contains-unset: o valor maxContains do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-max-contains-unset-description: valor maxContains do cabeçalho de resposta removido
+response-header-max-decreased: o valor max do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-max-decreased-description: valor max do cabeçalho de resposta reduzido
+response-header-max-increased: o valor max do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-max-increased-description: valor max do cabeçalho de resposta aumentado
+response-header-max-items-decreased: o valor maxItems do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-max-items-decreased-description: valor maxItems do cabeçalho de resposta reduzido
+response-header-max-items-increased: o valor maxItems do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-max-items-increased-description: valor maxItems do cabeçalho de resposta aumentado
 response-header-max-items-set: o valor maxItems do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-max-items-set-description: valor maxItems do cabeçalho de resposta definido
 response-header-max-items-unset: o valor maxItems do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-max-items-unset-description: valor maxItems do cabeçalho de resposta removido
+response-header-max-length-decreased: o valor maxLength do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-max-length-decreased-description: valor maxLength do cabeçalho de resposta reduzido
+response-header-max-length-increased: o valor maxLength do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-max-length-increased-description: valor maxLength do cabeçalho de resposta aumentado
 response-header-max-length-set: o valor maxLength do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-max-length-set-description: valor maxLength do cabeçalho de resposta definido
 response-header-max-length-unset: o valor maxLength do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-max-length-unset-description: valor maxLength do cabeçalho de resposta removido
+response-header-max-properties-decreased: o valor maxProperties do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-max-properties-decreased-description: valor maxProperties do cabeçalho de resposta reduzido
+response-header-max-properties-increased: o valor maxProperties do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-max-properties-increased-description: valor maxProperties do cabeçalho de resposta aumentado
 response-header-max-properties-set: o valor maxProperties do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-max-properties-set-description: valor maxProperties do cabeçalho de resposta definido
 response-header-max-properties-unset: o valor maxProperties do cabeçalho de resposta %s foi removido de %s para o status %s
@@ -1369,18 +1439,38 @@ response-header-max-set: o valor max do cabeçalho de resposta %s foi definido c
 response-header-max-set-description: valor max do cabeçalho de resposta definido
 response-header-max-unset: o valor max do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-max-unset-description: valor max do cabeçalho de resposta removido
+response-header-min-contains-decreased: o valor minContains do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-min-contains-decreased-description: valor minContains do cabeçalho de resposta reduzido
+response-header-min-contains-increased: o valor minContains do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-min-contains-increased-description: valor minContains do cabeçalho de resposta aumentado
 response-header-min-contains-set: o valor minContains do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-min-contains-set-description: valor minContains do cabeçalho de resposta definido
 response-header-min-contains-unset: o valor minContains do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-min-contains-unset-description: valor minContains do cabeçalho de resposta removido
+response-header-min-decreased: o valor min do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-min-decreased-description: valor min do cabeçalho de resposta reduzido
+response-header-min-increased: o valor min do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-min-increased-description: valor min do cabeçalho de resposta aumentado
+response-header-min-items-decreased: o valor minItems do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-min-items-decreased-description: valor minItems do cabeçalho de resposta reduzido
+response-header-min-items-increased: o valor minItems do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-min-items-increased-description: valor minItems do cabeçalho de resposta aumentado
 response-header-min-items-set: o valor minItems do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-min-items-set-description: valor minItems do cabeçalho de resposta definido
 response-header-min-items-unset: o valor minItems do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-min-items-unset-description: valor minItems do cabeçalho de resposta removido
+response-header-min-length-decreased: o valor minLength do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-min-length-decreased-description: valor minLength do cabeçalho de resposta reduzido
+response-header-min-length-increased: o valor minLength do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-min-length-increased-description: valor minLength do cabeçalho de resposta aumentado
 response-header-min-length-set: o valor minLength do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-min-length-set-description: valor minLength do cabeçalho de resposta definido
 response-header-min-length-unset: o valor minLength do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-min-length-unset-description: valor minLength do cabeçalho de resposta removido
+response-header-min-properties-decreased: o valor minProperties do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s
+response-header-min-properties-decreased-description: valor minProperties do cabeçalho de resposta reduzido
+response-header-min-properties-increased: o valor minProperties do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s
+response-header-min-properties-increased-description: valor minProperties do cabeçalho de resposta aumentado
 response-header-min-properties-set: o valor minProperties do cabeçalho de resposta %s foi definido como %s para o status %s
 response-header-min-properties-set-description: valor minProperties do cabeçalho de resposta definido
 response-header-min-properties-unset: o valor minProperties do cabeçalho de resposta %s foi removido de %s para o status %s
@@ -1393,10 +1483,14 @@ response-header-multiple-of-set: o valor multipleOf do cabeçalho de resposta %s
 response-header-multiple-of-set-description: valor multipleOf do cabeçalho de resposta definido
 response-header-multiple-of-unset: o valor multipleOf do cabeçalho de resposta %s foi removido de %s para o status %s
 response-header-multiple-of-unset-description: valor multipleOf do cabeçalho de resposta removido
+response-property-exclusive-max-decreased: o valor exclusiveMaximum da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+response-property-exclusive-max-decreased-description: valor exclusiveMaximum da propriedade de resposta reduzido
 response-property-exclusive-max-set: o valor exclusiveMaximum da propriedade de resposta %s foi definido como %s para o status %s
 response-property-exclusive-max-set-description: valor exclusiveMaximum da propriedade de resposta definido
 response-property-exclusive-max-unset: o valor exclusiveMaximum da propriedade de resposta %s foi removido de %s para o status %s
 response-property-exclusive-max-unset-description: valor exclusiveMaximum da propriedade de resposta removido
+response-property-exclusive-min-increased: o valor exclusiveMinimum da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+response-property-exclusive-min-increased-description: valor exclusiveMinimum da propriedade de resposta aumentado
 response-property-exclusive-min-set: o valor exclusiveMinimum da propriedade de resposta %s foi definido como %s para o status %s
 response-property-exclusive-min-set-description: valor exclusiveMinimum da propriedade de resposta definido
 response-property-exclusive-min-unset: o valor exclusiveMinimum da propriedade de resposta %s foi removido de %s para o status %s
@@ -1405,12 +1499,20 @@ response-property-max-contains-set: o valor maxContains da propriedade de respos
 response-property-max-contains-set-description: valor maxContains da propriedade de resposta definido
 response-property-max-contains-unset: o valor maxContains da propriedade de resposta %s foi removido de %s para o status %s
 response-property-max-contains-unset-description: valor maxContains da propriedade de resposta removido
+response-property-max-decreased: o valor max da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+response-property-max-decreased-description: valor max da propriedade de resposta reduzido
+response-property-max-items-decreased: o valor maxItems da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+response-property-max-items-decreased-description: valor maxItems da propriedade de resposta reduzido
 response-property-max-items-set: o valor maxItems da propriedade de resposta %s foi definido como %s para o status %s
 response-property-max-items-set-description: valor maxItems da propriedade de resposta definido
 response-property-max-items-unset: o valor maxItems da propriedade de resposta %s foi removido de %s para o status %s
 response-property-max-items-unset-description: valor maxItems da propriedade de resposta removido
+response-property-max-length-decreased: o valor maxLength da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+response-property-max-length-decreased-description: valor maxLength da propriedade de resposta reduzido
 response-property-max-length-set: o valor maxLength da propriedade de resposta %s foi definido como %s para o status %s
 response-property-max-length-set-description: valor maxLength da propriedade de resposta definido
+response-property-max-properties-decreased: o valor maxProperties da propriedade de resposta %s foi reduzido de %s para %s para o status %s
+response-property-max-properties-decreased-description: valor maxProperties da propriedade de resposta reduzido
 response-property-max-properties-set: o valor maxProperties da propriedade de resposta %s foi definido como %s para o status %s
 response-property-max-properties-set-description: valor maxProperties da propriedade de resposta definido
 response-property-max-properties-unset: o valor maxProperties da propriedade de resposta %s foi removido de %s para o status %s
@@ -1423,12 +1525,20 @@ response-property-min-contains-set: o valor minContains da propriedade de respos
 response-property-min-contains-set-description: valor minContains da propriedade de resposta definido
 response-property-min-contains-unset: o valor minContains da propriedade de resposta %s foi removido de %s para o status %s
 response-property-min-contains-unset-description: valor minContains da propriedade de resposta removido
+response-property-min-increased: o valor min da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+response-property-min-increased-description: valor min da propriedade de resposta aumentado
+response-property-min-items-increased: o valor minItems da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+response-property-min-items-increased-description: valor minItems da propriedade de resposta aumentado
 response-property-min-items-set: o valor minItems da propriedade de resposta %s foi definido como %s para o status %s
 response-property-min-items-set-description: valor minItems da propriedade de resposta definido
+response-property-min-length-increased: o valor minLength da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+response-property-min-length-increased-description: valor minLength da propriedade de resposta aumentado
 response-property-min-length-set: o valor minLength da propriedade de resposta %s foi definido como %s para o status %s
 response-property-min-length-set-description: valor minLength da propriedade de resposta definido
 response-property-min-length-unset: o valor minLength da propriedade de resposta %s foi removido de %s para o status %s
 response-property-min-length-unset-description: valor minLength da propriedade de resposta removido
+response-property-min-properties-increased: o valor minProperties da propriedade de resposta %s foi aumentado de %s para %s para o status %s
+response-property-min-properties-increased-description: valor minProperties da propriedade de resposta aumentado
 response-property-min-properties-set: o valor minProperties da propriedade de resposta %s foi definido como %s para o status %s
 response-property-min-properties-set-description: valor minProperties da propriedade de resposta definido
 response-property-min-properties-unset: o valor minProperties da propriedade de resposta %s foi removido de %s para o status %s

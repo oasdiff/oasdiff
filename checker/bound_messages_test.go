@@ -31,18 +31,30 @@ type boundTemplates struct {
 var boundMessageTemplates = map[string]boundTemplates{
 	localizations.LangEn: {
 		message: map[[2]string]string{
-			{"body", "set"}:        "the request's body {kw} was set to %s",
-			{"body", "unset"}:      "the request's body {kw} was unset from %s",
-			{"property", "set"}:    "the %s request property's {kw} was set to %s",
-			{"property", "unset"}:  "the %s request property's {kw} was unset from %s",
-			{"parameter", "set"}:   "for the %s request parameter %s, the {kw} was set to %s",
-			{"parameter", "unset"}: "for the %s request parameter %s, the {kw} was unset from %s",
-			{"rbody", "set"}:       "the response's body {kw} was set to %s",
-			{"rbody", "unset"}:     "the response's body {kw} was unset from %s",
-			{"rproperty", "set"}:   "the %s response property's {kw} was set to %s for the response status %s",
-			{"rproperty", "unset"}: "the %s response property's {kw} was unset from %s for the response status %s",
-			{"header", "set"}:      "the %s response header's {kw} was set to %s for the status %s",
-			{"header", "unset"}:    "the %s response header's {kw} was unset from %s for the status %s",
+			{"body", "set"}:            "the request's body {kw} was set to %s",
+			{"body", "unset"}:          "the request's body {kw} was unset from %s",
+			{"property", "set"}:        "the %s request property's {kw} was set to %s",
+			{"property", "unset"}:      "the %s request property's {kw} was unset from %s",
+			{"parameter", "set"}:       "for the %s request parameter %s, the {kw} was set to %s",
+			{"parameter", "unset"}:     "for the %s request parameter %s, the {kw} was unset from %s",
+			{"rbody", "set"}:           "the response's body {kw} was set to %s",
+			{"rbody", "unset"}:         "the response's body {kw} was unset from %s",
+			{"rproperty", "set"}:       "the %s response property's {kw} was set to %s for the response status %s",
+			{"rproperty", "unset"}:     "the %s response property's {kw} was unset from %s for the response status %s",
+			{"header", "set"}:          "the %s response header's {kw} was set to %s for the status %s",
+			{"header", "unset"}:        "the %s response header's {kw} was unset from %s for the status %s",
+			{"body", "increased"}:      "the request's body {kw} was increased from %s to %s",
+			{"body", "decreased"}:      "the request's body {kw} was decreased from %s to %s",
+			{"property", "increased"}:  "the %s request property's {kw} was increased from %s to %s",
+			{"property", "decreased"}:  "the %s request property's {kw} was decreased from %s to %s",
+			{"parameter", "increased"}: "for the %s request parameter %s, the {kw} was increased from %s to %s",
+			{"parameter", "decreased"}: "for the %s request parameter %s, the {kw} was decreased from %s to %s",
+			{"rbody", "increased"}:     "the response's body {kw} was increased from %s to %s",
+			{"rbody", "decreased"}:     "the response's body {kw} was decreased from %s to %s",
+			{"rproperty", "increased"}: "the %s response property's {kw} was increased from %s to %s for the response status %s",
+			{"rproperty", "decreased"}: "the %s response property's {kw} was decreased from %s to %s for the response status %s",
+			{"header", "increased"}:    "the %s response header's {kw} was increased from %s to %s for the status %s",
+			{"header", "decreased"}:    "the %s response header's {kw} was decreased from %s to %s for the status %s",
 		},
 		description: map[[2]string]string{
 			{"body", ""}:      "request body {kw} {action}",
@@ -55,18 +67,30 @@ var boundMessageTemplates = map[string]boundTemplates{
 	},
 	localizations.LangEs: {
 		message: map[[2]string]string{
-			{"body", "set"}:        "el valor {kw} del cuerpo de solicitud fue establecido en %s",
-			{"body", "unset"}:      "el valor {kw} del cuerpo de solicitud fue removido de %s",
-			{"property", "set"}:    "el valor {kw} de la propiedad de solicitud %s fue establecido en %s",
-			{"property", "unset"}:  "el valor {kw} de la propiedad de solicitud %s fue removido de %s",
-			{"parameter", "set"}:   "para el parámetro %s de solicitud %s, el valor {kw} fue establecido en %s",
-			{"parameter", "unset"}: "para el parámetro %s de solicitud %s, el valor {kw} fue removido de %s",
-			{"rbody", "set"}:       "el valor {kw} del cuerpo de respuesta fue establecido en %s",
-			{"rbody", "unset"}:     "el valor {kw} del cuerpo de respuesta fue removido de %s",
-			{"rproperty", "set"}:   "el valor {kw} de la propiedad de respuesta %s fue establecido en %s para el estado %s",
-			{"rproperty", "unset"}: "el valor {kw} de la propiedad de respuesta %s fue removido de %s para el estado %s",
-			{"header", "set"}:      "el valor {kw} del encabezado de respuesta %s fue establecido en %s para el estado %s",
-			{"header", "unset"}:    "el valor {kw} del encabezado de respuesta %s fue removido de %s para el estado %s",
+			{"body", "set"}:            "el valor {kw} del cuerpo de solicitud fue establecido en %s",
+			{"body", "unset"}:          "el valor {kw} del cuerpo de solicitud fue removido de %s",
+			{"property", "set"}:        "el valor {kw} de la propiedad de solicitud %s fue establecido en %s",
+			{"property", "unset"}:      "el valor {kw} de la propiedad de solicitud %s fue removido de %s",
+			{"parameter", "set"}:       "para el parámetro %s de solicitud %s, el valor {kw} fue establecido en %s",
+			{"parameter", "unset"}:     "para el parámetro %s de solicitud %s, el valor {kw} fue removido de %s",
+			{"rbody", "set"}:           "el valor {kw} del cuerpo de respuesta fue establecido en %s",
+			{"rbody", "unset"}:         "el valor {kw} del cuerpo de respuesta fue removido de %s",
+			{"rproperty", "set"}:       "el valor {kw} de la propiedad de respuesta %s fue establecido en %s para el estado %s",
+			{"rproperty", "unset"}:     "el valor {kw} de la propiedad de respuesta %s fue removido de %s para el estado %s",
+			{"header", "set"}:          "el valor {kw} del encabezado de respuesta %s fue establecido en %s para el estado %s",
+			{"header", "unset"}:        "el valor {kw} del encabezado de respuesta %s fue removido de %s para el estado %s",
+			{"body", "increased"}:      "el valor {kw} del cuerpo de solicitud fue incrementado de %s a %s",
+			{"body", "decreased"}:      "el valor {kw} del cuerpo de solicitud fue reducido de %s a %s",
+			{"property", "increased"}:  "el valor {kw} de la propiedad de solicitud %s fue incrementado de %s a %s",
+			{"property", "decreased"}:  "el valor {kw} de la propiedad de solicitud %s fue reducido de %s a %s",
+			{"parameter", "increased"}: "para el parámetro %s de solicitud %s, el valor {kw} fue incrementado de %s a %s",
+			{"parameter", "decreased"}: "para el parámetro %s de solicitud %s, el valor {kw} fue reducido de %s a %s",
+			{"rbody", "increased"}:     "el valor {kw} del cuerpo de respuesta fue incrementado de %s a %s",
+			{"rbody", "decreased"}:     "el valor {kw} del cuerpo de respuesta fue reducido de %s a %s",
+			{"rproperty", "increased"}: "el valor {kw} de la propiedad de respuesta %s fue incrementado de %s a %s para el estado %s",
+			{"rproperty", "decreased"}: "el valor {kw} de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s",
+			{"header", "increased"}:    "el valor {kw} del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s",
+			{"header", "decreased"}:    "el valor {kw} del encabezado de respuesta %s fue reducido de %s a %s para el estado %s",
 		},
 		description: map[[2]string]string{
 			{"body", ""}:      "valor {kw} del cuerpo de solicitud {action}",
@@ -79,18 +103,30 @@ var boundMessageTemplates = map[string]boundTemplates{
 	},
 	localizations.LangPtBr: {
 		message: map[[2]string]string{
-			{"body", "set"}:        "o valor {kw} do corpo da requisição foi definido como %s",
-			{"body", "unset"}:      "o valor {kw} do corpo da requisição foi removido de %s",
-			{"property", "set"}:    "o valor {kw} da propriedade de requisição %s foi definido como %s",
-			{"property", "unset"}:  "o valor {kw} da propriedade de requisição %s foi removido de %s",
-			{"parameter", "set"}:   "no parâmetro de requisição do tipo %s e nome %s, o valor {kw} foi definido como %s",
-			{"parameter", "unset"}: "no parâmetro de requisição do tipo %s e nome %s, o valor {kw} foi removido de %s",
-			{"rbody", "set"}:       "o valor {kw} do corpo da resposta foi definido como %s",
-			{"rbody", "unset"}:     "o valor {kw} do corpo da resposta foi removido de %s",
-			{"rproperty", "set"}:   "o valor {kw} da propriedade de resposta %s foi definido como %s para o status %s",
-			{"rproperty", "unset"}: "o valor {kw} da propriedade de resposta %s foi removido de %s para o status %s",
-			{"header", "set"}:      "o valor {kw} do cabeçalho de resposta %s foi definido como %s para o status %s",
-			{"header", "unset"}:    "o valor {kw} do cabeçalho de resposta %s foi removido de %s para o status %s",
+			{"body", "set"}:            "o valor {kw} do corpo da requisição foi definido como %s",
+			{"body", "unset"}:          "o valor {kw} do corpo da requisição foi removido de %s",
+			{"property", "set"}:        "o valor {kw} da propriedade de requisição %s foi definido como %s",
+			{"property", "unset"}:      "o valor {kw} da propriedade de requisição %s foi removido de %s",
+			{"parameter", "set"}:       "no parâmetro de requisição do tipo %s e nome %s, o valor {kw} foi definido como %s",
+			{"parameter", "unset"}:     "no parâmetro de requisição do tipo %s e nome %s, o valor {kw} foi removido de %s",
+			{"rbody", "set"}:           "o valor {kw} do corpo da resposta foi definido como %s",
+			{"rbody", "unset"}:         "o valor {kw} do corpo da resposta foi removido de %s",
+			{"rproperty", "set"}:       "o valor {kw} da propriedade de resposta %s foi definido como %s para o status %s",
+			{"rproperty", "unset"}:     "o valor {kw} da propriedade de resposta %s foi removido de %s para o status %s",
+			{"header", "set"}:          "o valor {kw} do cabeçalho de resposta %s foi definido como %s para o status %s",
+			{"header", "unset"}:        "o valor {kw} do cabeçalho de resposta %s foi removido de %s para o status %s",
+			{"body", "increased"}:      "o valor {kw} do corpo da requisição foi aumentado de %s para %s",
+			{"body", "decreased"}:      "o valor {kw} do corpo da requisição foi reduzido de %s para %s",
+			{"property", "increased"}:  "o valor {kw} da propriedade de requisição %s foi aumentado de %s para %s",
+			{"property", "decreased"}:  "o valor {kw} da propriedade de requisição %s foi reduzido de %s para %s",
+			{"parameter", "increased"}: "no parâmetro de requisição do tipo %s e nome %s, o valor {kw} foi aumentado de %s para %s",
+			{"parameter", "decreased"}: "no parâmetro de requisição do tipo %s e nome %s, o valor {kw} foi reduzido de %s para %s",
+			{"rbody", "increased"}:     "o valor {kw} do corpo da resposta foi aumentado de %s para %s",
+			{"rbody", "decreased"}:     "o valor {kw} do corpo da resposta foi reduzido de %s para %s",
+			{"rproperty", "increased"}: "o valor {kw} da propriedade de resposta %s foi aumentado de %s para %s para o status %s",
+			{"rproperty", "decreased"}: "o valor {kw} da propriedade de resposta %s foi reduzido de %s para %s para o status %s",
+			{"header", "increased"}:    "o valor {kw} do cabeçalho de resposta %s foi aumentado de %s para %s para o status %s",
+			{"header", "decreased"}:    "o valor {kw} do cabeçalho de resposta %s foi reduzido de %s para %s para o status %s",
 		},
 		description: map[[2]string]string{
 			{"body", ""}:      "valor {kw} do corpo da requisição {action}",
@@ -103,18 +139,30 @@ var boundMessageTemplates = map[string]boundTemplates{
 	},
 	localizations.LangRu: {
 		message: map[[2]string]string{
-			{"body", "set"}:        "у тела запроса задано значение {kw} в %s",
-			{"body", "unset"}:      "значение {kw} у тела запроса удалено, предыдущее значение - %s",
-			{"property", "set"}:    "у поля запроса %s задано значение {kw} в %s",
-			{"property", "unset"}:  "значение {kw} у поля запроса %s удалено, предыдущее значение - %s",
-			{"parameter", "set"}:   "в %s параметре запроса %s задано значение {kw} в %s",
-			{"parameter", "unset"}: "значение {kw} в %s параметре запроса %s удалено, предыдущее значение - %s",
-			{"rbody", "set"}:       "у тела ответа задано значение {kw} в %s",
-			{"rbody", "unset"}:     "значение {kw} у тела ответа удалено, предыдущее значение - %s",
-			{"rproperty", "set"}:   "у поля ответа %s задано значение {kw} в %s, для ответа со статусом %s",
-			{"rproperty", "unset"}: "значение {kw} у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s",
-			{"header", "set"}:      "у заголовка ответа %s задано значение {kw} в %s для статуса %s",
-			{"header", "unset"}:    "значение {kw} у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s",
+			{"body", "set"}:            "у тела запроса задано значение {kw} в %s",
+			{"body", "unset"}:          "значение {kw} у тела запроса удалено, предыдущее значение - %s",
+			{"property", "set"}:        "у поля запроса %s задано значение {kw} в %s",
+			{"property", "unset"}:      "значение {kw} у поля запроса %s удалено, предыдущее значение - %s",
+			{"parameter", "set"}:       "в %s параметре запроса %s задано значение {kw} в %s",
+			{"parameter", "unset"}:     "значение {kw} в %s параметре запроса %s удалено, предыдущее значение - %s",
+			{"rbody", "set"}:           "у тела ответа задано значение {kw} в %s",
+			{"rbody", "unset"}:         "значение {kw} у тела ответа удалено, предыдущее значение - %s",
+			{"rproperty", "set"}:       "у поля ответа %s задано значение {kw} в %s, для ответа со статусом %s",
+			{"rproperty", "unset"}:     "значение {kw} у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s",
+			{"header", "set"}:          "у заголовка ответа %s задано значение {kw} в %s для статуса %s",
+			{"header", "unset"}:        "значение {kw} у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s",
+			{"body", "increased"}:      "значение {kw} у тела запроса увеличено с %s до %s",
+			{"body", "decreased"}:      "значение {kw} у тела запроса уменьшено с %s до %s",
+			{"property", "increased"}:  "значение {kw} у поля запроса %s увеличено с %s до %s",
+			{"property", "decreased"}:  "значение {kw} у поля запроса %s уменьшено с %s до %s",
+			{"parameter", "increased"}: "значение {kw} в %s параметре запроса %s увеличено с %s до %s",
+			{"parameter", "decreased"}: "значение {kw} в %s параметре запроса %s уменьшено с %s до %s",
+			{"rbody", "increased"}:     "значение {kw} у тела ответа увеличено с %s до %s",
+			{"rbody", "decreased"}:     "значение {kw} у тела ответа уменьшено с %s до %s",
+			{"rproperty", "increased"}: "значение {kw} у поля ответа %s увеличено с %s до %s, для ответа со статусом %s",
+			{"rproperty", "decreased"}: "значение {kw} у поля ответа %s уменьшено с %s до %s, для ответа со статусом %s",
+			{"header", "increased"}:    "значение {kw} у заголовка ответа %s увеличено с %s до %s для статуса %s",
+			{"header", "decreased"}:    "значение {kw} у заголовка ответа %s уменьшено с %s до %s для статуса %s",
 		},
 		description: map[[2]string]string{
 			{"body", ""}:      "{action} значение {kw} тела запроса",
@@ -129,10 +177,10 @@ var boundMessageTemplates = map[string]boundTemplates{
 
 // action words for the description templates, per locale
 var boundActionWords = map[string]map[string]string{
-	localizations.LangEn:   {"set": "set", "unset": "unset"},
-	localizations.LangEs:   {"set": "establecido", "unset": "removido"},
-	localizations.LangPtBr: {"set": "definido", "unset": "removido"},
-	localizations.LangRu:   {"set": "установлено", "unset": "удалено"},
+	localizations.LangEn:   {"set": "set", "unset": "unset", "increased": "increased", "decreased": "decreased"},
+	localizations.LangEs:   {"set": "establecido", "unset": "removido", "increased": "incrementado", "decreased": "reducido"},
+	localizations.LangPtBr: {"set": "definido", "unset": "removido", "increased": "aumentado", "decreased": "reduzido"},
+	localizations.LangRu:   {"set": "установлено", "unset": "удалено", "increased": "увеличено", "decreased": "уменьшено"},
 }
 
 // templateScope maps a rule's direction and scope to the template key:
@@ -173,16 +221,19 @@ func boundMessages(locale string) []boundMessage {
 		for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 			for _, scope := range boundScopes(direction) {
 				for _, action := range boundActions {
-					id := boundRuleId(direction, scope, spec.idName, action.action)
+					if _, ok := boundEffect(spec.polarity, action); !ok {
+						continue
+					}
+					id := boundRuleId(direction, scope, spec.idName, action.verb)
 					if handWrittenIds()[id] {
 						continue
 					}
 					ts := templateScope(direction, scope)
 					kw := displayKeyword(spec.keyword)
-					message := strings.ReplaceAll(templates.message[[2]string{ts, action.action}], "{kw}", kw)
+					message := strings.ReplaceAll(templates.message[[2]string{ts, action.verb}], "{kw}", kw)
 					description := templates.description[[2]string{ts, ""}]
 					description = strings.ReplaceAll(description, "{kw}", kw)
-					description = strings.ReplaceAll(description, "{action}", words[action.action])
+					description = strings.ReplaceAll(description, "{action}", words[action.verb])
 					entries = append(entries, boundMessage{id, message}, boundMessage{id + "-description", description})
 				}
 			}

@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// boundCell is one set/unset cell of a bound keyword, read from a rule's
+// boundCell is one action cell of a bound keyword, read from a rule's
 // public claims and id: which side, which schema root, which keyword, and
 // the registered level.
 type boundCell struct {
@@ -22,16 +22,35 @@ type boundCell struct {
 	direction string // "request" | "response"
 	scope     string // "body" | "property" | "parameter" | "header"
 	keyword   string // the bound keyword, e.g. "maximum"
-	action    string // "set" | "unset"
+	action    string // "set" | "unset" | "increased" | "decreased"
 	level     checker.Level
+}
+
+// boundCellVerbs maps a claim's action to the id verb of its cell. multipleOf
+// increase and decrease claims map to no cell: numeric order does not decide
+// their effect, so their rules (multiple-of-changed and friends) are not
+// bound cells.
+func boundCellVerbs(keyword, claimAction string) (string, bool) {
+	if keyword == "multipleOf" && claimAction != "set" && claimAction != "unset" {
+		return "", false
+	}
+	verb, ok := map[string]string{
+		"set":      "set",
+		"unset":    "unset",
+		"increase": "increased",
+		"decrease": "decreased",
+	}[claimAction]
+	return verb, ok
 }
 
 var boundClaimRe = regexp.MustCompile(`^paths\.\*\.\*\.(requestBody\.content\.\*|responses\.\*\.content\.\*|parameters\.\*|responses\.\*\.headers\.\*)\.schema\.(\w+):(.+)$`)
 
-// boundCells enumerates every set/unset cell of every bound keyword from
+// boundCells enumerates every action cell of every bound keyword from
 // public data alone: diff.SchemaBounds names the keywords and each rule's
 // claims and id say which cells it covers. Hand-written and generated rules
-// are indistinguishable here, deliberately: the gate holds for both.
+// are indistinguishable here, deliberately: the gate holds for both. Guarded
+// rules are skipped: they are variants of a cell fired only under their
+// guard, and the fire docs carry no guard.
 func boundCells(t *testing.T) []boundCell {
 	t.Helper()
 
@@ -42,6 +61,9 @@ func boundCells(t *testing.T) []boundCell {
 
 	var cells []boundCell
 	for _, rule := range checker.GetAllRules() {
+		if len(rule.Guards) > 0 {
+			continue
+		}
 		for _, loc := range rule.Locations {
 			cells = append(cells, boundClaimCells(t, rule, loc, keywords)...)
 		}
@@ -85,7 +107,8 @@ func boundClaimCells(t *testing.T, rule checker.BackwardCompatibilityRule, claim
 
 	var cells []boundCell
 	for action := range strings.SplitSeq(m[3], ",") {
-		if action != "set" && action != "unset" {
+		verb, ok := boundCellVerbs(m[2], action)
+		if !ok {
 			continue
 		}
 		cells = append(cells, boundCell{
@@ -93,7 +116,7 @@ func boundClaimCells(t *testing.T, rule checker.BackwardCompatibilityRule, claim
 			direction: direction,
 			scope:     scope,
 			keyword:   m[2],
-			action:    action,
+			action:    verb,
 			level:     rule.Level,
 		})
 	}
@@ -101,26 +124,27 @@ func boundClaimCells(t *testing.T, rule checker.BackwardCompatibilityRule, claim
 }
 
 // setBoundSample populates the schema field whose json tag is the keyword,
-// deriving the sample from the field's type.
-func setBoundSample(t *testing.T, s *openapi3.Schema, keyword string) {
+// deriving the sample from the field's type; a larger magnitude yields a
+// larger value.
+func setBoundSample(t *testing.T, s *openapi3.Schema, keyword string, magnitude uint64) {
 	t.Helper()
 	typ := reflect.TypeFor[openapi3.Schema]()
 	for field := range typ.Fields() {
 		if name, _, _ := strings.Cut(field.Tag.Get("json"), ","); name == keyword {
-			require.True(t, populatetest.NonZero(reflect.ValueOf(s).Elem().FieldByName(field.Name), keyword), keyword)
+			require.True(t, populatetest.NonZeroScale(reflect.ValueOf(s).Elem().FieldByName(field.Name), keyword, magnitude), keyword)
 			return
 		}
 	}
 	t.Fatalf("no openapi3.Schema field with json tag %q", keyword)
 }
 
-// boundCellDoc builds a spec that carries the keyword sample, when
-// withKeyword is true, at the cell's schema root.
-func boundCellDoc(t *testing.T, cell boundCell, withKeyword bool) *load.SpecInfo {
+// boundCellDoc builds a spec that carries the keyword sample at the cell's
+// schema root; magnitude 0 leaves the keyword absent.
+func boundCellDoc(t *testing.T, cell boundCell, magnitude uint64) *load.SpecInfo {
 	t.Helper()
 	node := &openapi3.Schema{}
-	if withKeyword {
-		setBoundSample(t, node, cell.keyword)
+	if magnitude > 0 {
+		setBoundSample(t, node, cell.keyword, magnitude)
 	}
 	carrier := node
 	if cell.scope == "property" {
@@ -167,25 +191,28 @@ func boundCellDoc(t *testing.T, cell boundCell, withKeyword bool) *load.SpecInfo
 	}}
 }
 
-// Every set/unset cell of every bound keyword fires: for each cell read
+// Every action cell of every bound keyword fires: for each cell read
 // from the public rule claims, a spec pair built from the keyword's sample
 // produces exactly one change, with the cell's id at its registered level
 // and a message that renders rather than echoing its key. All checks run,
 // so a second check covering the same cell under another id fails here.
 func TestBoundCellsFire(t *testing.T) {
 	cells := boundCells(t)
-	require.Len(t, cells, 156)
+	require.Len(t, cells, 300)
 
 	localizer := checker.NewDefaultLocalizer()
 	config := allChecksConfig()
 
+	magnitudes := map[string][2]uint64{
+		"set":       {0, 1},
+		"unset":     {1, 0},
+		"increased": {1, 2},
+		"decreased": {2, 1},
+	}
 	for _, cell := range cells {
-		absent := boundCellDoc(t, cell, false)
-		present := boundCellDoc(t, cell, true)
-		base, revision := absent, present
-		if cell.action == "unset" {
-			base, revision = present, absent
-		}
+		pair := magnitudes[cell.action]
+		base := boundCellDoc(t, cell, pair[0])
+		revision := boundCellDoc(t, cell, pair[1])
 
 		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
 		require.NoError(t, err, cell.id)
@@ -199,6 +226,31 @@ func TestBoundCellsFire(t *testing.T) {
 		require.NotContains(t, text, cell.id, "message must render, not echo its key: %s", text)
 		require.NotContains(t, change.GetComment(localizer), "-comment", cell.id)
 	}
+}
+
+// The registered level of a sample of generated cells, stated as the
+// contract judgment rather than re-derived: raising a lower bound or
+// lowering an upper bound rejects request payloads the old contract
+// accepted, and widening a response bound sends values old clients never
+// had to handle. The fire test checks each change against its rule's level,
+// so a wrong polarity row would stay self-consistent; these anchors break
+// that symmetry.
+func TestBoundLevelAnchors(t *testing.T) {
+	expected := map[string]checker.Level{
+		"request-parameter-min-properties-increased": checker.ERR,
+		"request-body-min-items-decreased":           checker.INFO,
+		"response-body-max-decreased":                checker.INFO,
+		"response-property-min-increased":            checker.INFO,
+		"response-header-max-increased":              checker.ERR,
+		"response-header-max-length-decreased":       checker.INFO,
+	}
+	for _, rule := range checker.GetAllRules() {
+		if level, ok := expected[rule.Id]; ok {
+			require.Equal(t, level, rule.Level, rule.Id)
+			delete(expected, rule.Id)
+		}
+	}
+	require.Empty(t, expected, "anchored ids missing from GetAllRules")
 }
 
 // exclusiveBoolDoc builds a spec whose request body has a property with the
