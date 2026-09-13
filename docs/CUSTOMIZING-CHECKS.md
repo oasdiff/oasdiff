@@ -19,7 +19,7 @@ One row per possible edit of an OpenAPI document (filter with `--tags`, see [CHE
 Say you want to know whether changing a query parameter's `style` is checked. Every edit is a location in the OpenAPI document plus an action, so grep the map for the location:
 
 ```
-$ oasdiff checks changelog coverage | grep 'paths.*.parameters.*.style'
+$ oasdiff checks changelog coverage | grep -F 'paths.*.*.parameters.*.style'
 paths.*.*.parameters.*.style    change   waived   request-parameter-style-changed
 paths.*.*.parameters.*.style    set      waived   request-parameter-style-set
 paths.*.*.parameters.*.style    unset    waived   request-parameter-style-unset
@@ -44,8 +44,11 @@ $ oasdiff checks changelog coverage --format json | \
 So: not implemented, deliberately recorded as a gap, tracked in #1164, and the id to use is already chosen. Compare an edit that is implemented:
 
 ```
-$ oasdiff checks changelog coverage | grep 'requestBody.content.*.schema.maximum '
-paths.*.*.requestBody.content.*.schema.maximum   set   covered   request-body-max-set,request-property-max-set
+$ oasdiff checks changelog coverage | grep -F 'paths.*.*.requestBody.content.*.schema.maximum'
+paths.*.*.requestBody.content.*.schema.maximum   decrease   covered   request-body-max-decreased,request-property-max-decreased,request-read-only-property-max-decreased
+paths.*.*.requestBody.content.*.schema.maximum   increase   covered   request-body-max-increased,request-property-max-increased
+paths.*.*.requestBody.content.*.schema.maximum   set        covered   request-body-max-set,request-property-max-set
+paths.*.*.requestBody.content.*.schema.maximum   unset      covered   request-body-max-unset,request-property-max-unset
 ```
 
 `covered` names the checks that claim the edit; run `oasdiff checks changelog` and look them up, or grep the [checker](../checker) package for the id, to see how they behave.
