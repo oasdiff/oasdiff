@@ -9,9 +9,10 @@ import (
 )
 
 // MergeSpec merges all instances of allOf in place, across every schema in
-// the document. Merge handles each schema's whole subtree (including its own
-// cycle tracking), so the walk hands it each attachment point once and skips
-// descent.
+// the document, and gives every cycle the merge anchors a $ref
+// (nameAnchoredCycles), so the merged document always serializes. Merge
+// handles each schema's whole subtree (including its own cycle tracking), so
+// the walk hands it each attachment point once and skips descent.
 func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 	var anchored []*openapi3.SchemaRef
 	err := spec.WalkSchemas(func(_ string, s *openapi3.SchemaRef) error {
