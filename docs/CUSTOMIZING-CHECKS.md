@@ -51,7 +51,32 @@ paths.*.*.requestBody.content.*.schema.maximum   set        covered   request-bo
 paths.*.*.requestBody.content.*.schema.maximum   unset      covered   request-body-max-unset,request-property-max-unset
 ```
 
-`covered` names the checks that claim the edit; run `oasdiff checks changelog` and look them up, or grep the [checker](../checker) package for the id, to see how they behave.
+`covered` names the checks that claim the edit. Look one up in the catalog to see how it behaves:
+
+```
+$ oasdiff checks changelog | grep -F 'request-body-max-set '
+request-body-max-set    request body max set    error
+```
+
+The `json` format shows the check's full classification, including the claim that ties it back to the coverage row you started from:
+
+```
+$ oasdiff checks changelog --format json | \
+    jq '.[] | select(.id == "request-body-max-set")'
+{
+  "id": "request-body-max-set",
+  "level": "error",
+  "direction": "request",
+  "area": "schema",
+  "kind": "constraints",
+  "actions": ["set"],
+  "effect": "narrows",
+  "locations": ["paths.*.*.requestBody.content.*.schema.maximum:set"],
+  "description": "request body max set"
+}
+```
+
+`locations` is the claim: this check owns exactly the `maximum:set` edit at the request-body location, which is why the coverage row lists it. `effect: narrows` on a `request` explains the `error` level: setting a bound rejects request payloads the old contract accepted. To see the check's implementation, grep the [checker](../checker) package for the id (for this one, a generated rule, the id resolves to a `boundSpecs` row rather than a function; see the next section).
 
 ## Second: Is the Check Generated?
 
