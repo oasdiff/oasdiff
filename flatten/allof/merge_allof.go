@@ -100,6 +100,10 @@ func newState() *state {
 	}
 }
 
+// Merge flattens the allOf chains of a single schema and its subtree. A
+// recursive input whose cycle has no name merges to an in-memory cycle with
+// no $ref, which does not marshal; MergeSpec, which flattens a whole
+// document, additionally names such cycles.
 func Merge(schema openapi3.SchemaRef) (*openapi3.Schema, error) {
 	merged, _, err := mergeWithAnchors(schema)
 	return merged, err
