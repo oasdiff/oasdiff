@@ -1,0 +1,29 @@
+openapi: 3.0.3
+info: {title: two distinct recursive branches, version: "1"}
+paths:
+  /x:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tree:
+                  allOf:
+                    - $ref: "#/components/schemas/NodeA"
+                    - $ref: "#/components/schemas/NodeB"
+      responses:
+        "200": {description: ok}
+components:
+  schemas:
+    NodeA:
+      type: object
+      properties:
+        child:
+          $ref: "#/components/schemas/NodeA"
+    NodeB:
+      type: object
+      properties:
+        child:
+          $ref: "#/components/schemas/NodeB"

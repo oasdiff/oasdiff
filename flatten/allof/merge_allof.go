@@ -83,6 +83,12 @@ type state struct {
 	// to that result Value, which breaks recursion through cyclic
 	// Properties / Items / Contains / PropertyNames sub-schemas (#890).
 	flattening map[*openapi3.Schema]*openapi3.Schema
+
+	// anchored records the SchemaRefs the in-flight guard pointed at a
+	// result being populated further up. Such an edge carries no $ref, so a
+	// cycle through it has no serialized form until the target is named;
+	// MergeSpec names the targets (nameAnchoredCycles).
+	anchored []*openapi3.SchemaRef
 }
 
 func newState() *state {
@@ -94,25 +100,32 @@ func newState() *state {
 	}
 }
 
+// Merge flattens the allOf chains of a single schema and its subtree. A
+// recursive input whose cycle has no name merges to an in-memory cycle with
+// no $ref, which does not marshal; MergeSpec, which flattens a whole
+// document, additionally names such cycles.
 func Merge(schema openapi3.SchemaRef) (*openapi3.Schema, error) {
+	merged, _, err := mergeWithAnchors(schema)
+	return merged, err
+}
+
+// mergeWithAnchors is Merge, also reporting the ref-less back-edges the
+// in-flight guard created, so a spec-level caller can name their targets.
+func mergeWithAnchors(schema openapi3.SchemaRef) (*openapi3.Schema, []*openapi3.SchemaRef, error) {
 	state := newState()
 	result, err := mergeInternal(state, &schema)
 	if err != nil {
-		return nil, err
-	}
-
-	if len(state.circularAllOf) == 0 {
-		return result.Value, nil
+		return nil, nil, err
 	}
 
 	for _, schema := range state.circularAllOf {
 		err := mergeCircularAllOf(state, schema)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
-	return result.Value, nil
+	return result.Value, state.anchored, nil
 }
 
 func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
@@ -439,6 +452,7 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 		}
 		if inFlight, ok := state.flattening[s.Value]; ok {
 			result.Value = inFlight
+			state.anchored = append(state.anchored, result)
 			return nil
 		}
 	}
