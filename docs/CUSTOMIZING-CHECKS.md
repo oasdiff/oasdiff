@@ -1,5 +1,20 @@
 # How to Add Breaking-Changes Checks
 
+## First: Is the Check Generated?
+
+Checks for setting, unsetting, increasing, and decreasing the ordered constraint keywords (`maximum`, `minimum`, `maxLength`, `minLength`, `maxItems`, `minItems`, `maxProperties`, `minProperties`, `minContains`, `maxContains`, `exclusiveMinimum`, `exclusiveMaximum`, and `multipleOf` for set/unset) are **generated from a table**, not written as functions: one row in `boundSpecs` in [checker/bound_rules.go](../checker/bound_rules.go) produces the rules for every direction (request/response), scope (body, property, parameter, response header), and action, with levels derived from the severity law and messages derived from per-locale templates.
+
+To cover a new constraint keyword:
+
+1. Add a row to `diff.SchemaBounds` in [diff/schema_bounds.go](../diff/schema_bounds.go) so the diff exposes the keyword with its absence encoding (nil, zero, or false as absent).
+2. Add a row to `boundSpecs` with the id segment, the keyword, and its polarity (`lowerBound`: increasing narrows; `upperBound`: decreasing narrows; `unordered`: no increase/decrease rules).
+3. Run `make bound-messages` (message templates fill in the keyword per locale) and `make localize`.
+4. Update the pinned counts the tests name when they fail: the rule count in [checker/bound_rules_test.go](../checker/bound_rules_test.go), the cell count in [checker/bound_fire_test.go](../checker/bound_fire_test.go), and `numOfIds` in [checker/config_test.go](../checker/config_test.go).
+
+Every generated cell is exercised by `TestBoundCellsFire`, which builds a spec pair per cell and requires exactly one change with the right id and level. If you hand-write a check whose id covers a cell the generator would produce, it must use the generated id format so the generator skips that cell; `TestHandWrittenBoundIdsMatchTheGrammar` fails otherwise.
+
+Everything else, checks that need a judgment call, stays hand-written as follows.
+
 ## Write the Check Function
 1. Create a new go file under [checker](../checker), named after the use case, for example `check_request_property_became_nullable.go`.
 2. Define the check ids as constants at the top of the file. Each id is a unique kebab-case string, for example `request-property-became-nullable`. Related ids (request/response, body/property, added/removed) live in the same file.
