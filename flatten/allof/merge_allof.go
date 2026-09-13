@@ -431,6 +431,65 @@ func mergeSchemaRefs(state *state, srefs openapi3.SchemaRefs) (openapi3.SchemaRe
 	return result, nil
 }
 
+// splitInFlight partitions the schemas into the in-flight results that inputs
+// already being flattened higher in the call stack stand for, and the rest.
+func splitInFlight(state *state, schemas openapi3.SchemaRefs) ([]*openapi3.Schema, openapi3.SchemaRefs) {
+	var anchors []*openapi3.Schema
+	rest := make(openapi3.SchemaRefs, 0, len(schemas))
+	for _, s := range schemas {
+		if s == nil || s.Value == nil {
+			continue
+		}
+		if inFlight, ok := state.flattening[s.Value]; ok {
+			if !slices.Contains(anchors, inFlight) {
+				anchors = append(anchors, inFlight)
+			}
+		} else {
+			rest = append(rest, s)
+		}
+	}
+	return anchors, rest
+}
+
+// anchorInFlight cuts the cycles in a set containing schemas that are already
+// being flattened higher in the call stack, and reports whether it produced
+// the result. Such a schema stands for its in-flight result: a cyclic
+// Properties / Items / Contains / PropertyNames link in the input is
+// preserved as a cyclic link in the merged output, without infinite
+// recursion. A set that is one such schema merges to that in-flight value; a
+// set that also carries other schemas keeps their constraints as a residual
+// allOf of the anchors and the merge of the rest, unflattened at this node
+// but complete (#1242). Every anchor edge joins state.anchored so
+// nameAnchoredCycles can give it a $ref.
+func anchorInFlight(state *state, result *openapi3.SchemaRef, schemas openapi3.SchemaRefs) (bool, error) {
+	anchors, rest := splitInFlight(state, schemas)
+	if len(anchors) == 0 {
+		return false, nil
+	}
+
+	if len(anchors) == 1 && len(rest) == 0 {
+		result.Value = anchors[0]
+		state.anchored = append(state.anchored, result)
+		return true, nil
+	}
+
+	residual := make(openapi3.SchemaRefs, 0, len(anchors)+1)
+	for _, anchor := range anchors {
+		ref := openapi3.NewSchemaRef("", anchor)
+		state.anchored = append(state.anchored, ref)
+		residual = append(residual, ref)
+	}
+	if len(rest) > 0 {
+		merged := openapi3.NewSchemaRef("", openapi3.NewSchema())
+		if err := flattenSchemas(state, merged, rest); err != nil {
+			return true, err
+		}
+		residual = append(residual, merged)
+	}
+	result.Value.AllOf = residual
+	return true, nil
+}
+
 // Given a list of schemas that are free of AllOf or nested AllOf components as input,
 // the function produces a single equivalent schema in the resultRef parameter.
 func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi3.SchemaRef) error {
@@ -441,20 +500,9 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 	// trims work the cycle guard would otherwise have to do.
 	schemas = dedupSchemaRefsByValue(schemas)
 
-	// Tier 2: cycle guard. If any input schema is already being
-	// flattened higher in the call stack, point our result Value at
-	// that in-flight Value and return — the cyclic Properties / Items
-	// / Contains / PropertyNames link in the input is preserved as a
-	// cyclic link in the merged output, without infinite recursion.
-	for _, s := range schemas {
-		if s == nil || s.Value == nil {
-			continue
-		}
-		if inFlight, ok := state.flattening[s.Value]; ok {
-			result.Value = inFlight
-			state.anchored = append(state.anchored, result)
-			return nil
-		}
+	// Tier 2: cycle guard.
+	if done, err := anchorInFlight(state, result, schemas); done || err != nil {
+		return err
 	}
 
 	// Mark each non-nil input schema as in-flight, mapped to the
