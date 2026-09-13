@@ -62,13 +62,13 @@ func (b SchemaBound) WasUnset(d *SchemaDiff) (any, bool) {
 // WasIncreased returns the from and to values when the keyword was present on
 // both sides and its value increased.
 func (b SchemaBound) WasIncreased(d *SchemaDiff) (any, any, bool) {
-	return b.ordered(d, lessValue)
+	return b.ordered(d, isLessValue)
 }
 
 // WasDecreased returns the from and to values when the keyword was present on
 // both sides and its value decreased.
 func (b SchemaBound) WasDecreased(d *SchemaDiff) (any, any, bool) {
-	return b.ordered(d, func(a, b any) bool { return lessValue(b, a) })
+	return b.ordered(d, func(a, b any) bool { return isLessValue(b, a) })
 }
 
 func (b SchemaBound) ordered(d *SchemaDiff, less func(a, b any) bool) (any, any, bool) {
@@ -82,10 +82,10 @@ func (b SchemaBound) ordered(d *SchemaDiff, less func(a, b any) bool) (any, any,
 	return vd.From, vd.To, true
 }
 
-// lessValue reports whether a and b are ordered values of the same type with
+// isLessValue reports whether a and b are ordered values of the same type with
 // a < b. The exclusive bounds mix types (a bool form against a numeric form);
 // such a pair is not ordered.
-func lessValue(a, b any) bool {
+func isLessValue(a, b any) bool {
 	if au, ok := a.(uint64); ok {
 		bu, ok := b.(uint64)
 		return ok && au < bu
