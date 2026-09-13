@@ -43,6 +43,7 @@ Every check is categorized along independent axes, emitted as fields in the `jso
 - `actions` — the syntactic edits the check covers, derived from its position in the OpenAPI object model: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`.
 - `effect` — the check's verdict about the set of payloads the contract accepts: `widens`, `narrows`, `incomparable` (the change both rejects payloads that were valid and accepts payloads that were not), `unknown` (the check cannot tell), `violation` (breaks the deprecation/stability contract rather than the wire contract), or `none` (metadata with no effect on accepted payloads). Together with `direction`, the effect determines the default severity: narrowing requests and widening responses break clients.
 - `direction` — `request`, `response`, or `none`.
+- `guards` — named document conditions under which the check's usual verdict does not apply, shown in the GUARDS column of the text output: `read-only` / `write-only` (the property cannot appear on this side, so a restriction cannot break it and the change reports at `info` with a comment), `sanctioned` (the removed element was deprecated and its sunset was honored), `non-success` (a non-success response status, which the responses map does not promise exhaustively), `has-default` (the element declares a default value), and `negotiated` (the element is one the client selects, such as a media type or response status, so severity derives as if it were on the request side). See [when oasdiff reports a change below its check's level](BREAKING-CHANGES.md#when-oasdiff-reports-a-change-below-its-checks-level).
 
 ## Filtering by Tag
 Use `--tags` to show only checks in a specific area, kind, action, effect, or direction:
@@ -58,6 +59,7 @@ Available tags, by dimension:
 - effect: `widens`, `narrows`
 - area: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`
 - kind: `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`
+- guard: `read-only`, `write-only`, `sanctioned`, `non-success`, `has-default`, `negotiated`
 
 Values of the same dimension are combined with OR, different dimensions with AND: `--tags request,response,add` selects checks that are (request or response) and add.
 
