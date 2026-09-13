@@ -514,7 +514,7 @@ func flattenSchemas(state *state, result *openapi3.SchemaRef, schemas []*openapi
 		return err
 	}
 
-	state.hints[result.Value] = componentNames(schemas)
+	state.hints[result.Value] = namingHint(schemas)
 
 	// Mark each non-nil input schema as in-flight, mapped to the
 	// result Value being populated for this call. Cleared on return so
@@ -1466,10 +1466,10 @@ func filterEmptySchemaRefs(groups []openapi3.SchemaRefs) []openapi3.SchemaRefs {
 	return result
 }
 
-// componentNames joins the last segment of each schema's $ref, in input
+// namingHint joins the last segment of each schema's $ref, in input
 // order and without repeats: "NodeA_NodeB". Schemas without a $ref
 // contribute nothing; an all-inline set yields "".
-func componentNames(schemas openapi3.SchemaRefs) string {
+func namingHint(schemas openapi3.SchemaRefs) string {
 	var names []string
 	for _, s := range schemas {
 		if s == nil || s.Ref == "" {
