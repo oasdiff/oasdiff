@@ -14,6 +14,42 @@ One row per possible edit of an OpenAPI document (filter with `--tags`, see [CHE
 - `waived`: no check yet, and the reason why. An `open` waiver is an invitation: it carries a suggested id in the house grammar, and its reason in [checker/coverage/waivers.go](../checker/coverage/waivers.go) often points at the tracking issue.
 - `non-contract`: the edit cannot change which payloads are valid; no check is expected.
 
+### Example: locating a specific edit
+
+Say you want to know whether changing a query parameter's `style` is checked. Every edit is a location in the OpenAPI document plus an action, so grep the map for the location:
+
+```
+$ oasdiff checks changelog coverage | grep 'paths.*.parameters.*.style'
+paths.*.*.parameters.*.style    change   waived   request-parameter-style-changed
+paths.*.*.parameters.*.style    set      waived   request-parameter-style-set
+paths.*.*.parameters.*.style    unset    waived   request-parameter-style-unset
+```
+
+`waived` means not implemented, and the last column is the suggested id for whoever implements it. The `json` format adds the reason:
+
+```
+$ oasdiff checks changelog coverage --format json | \
+    jq '.[] | select(.location == "paths.*.*.parameters.*.style" and .action == "change")'
+{
+  "location": "paths.*.*.parameters.*.style",
+  "action": "change",
+  "polarity": "request",
+  "status": "waived",
+  "category": "open",
+  "reason": "parameter serialization style changes the wire format but is unchecked (tracked in #1164)",
+  "suggestedId": "request-parameter-style-changed"
+}
+```
+
+So: not implemented, deliberately recorded as a gap, tracked in #1164, and the id to use is already chosen. Compare an edit that is implemented:
+
+```
+$ oasdiff checks changelog coverage | grep 'requestBody.content.*.schema.maximum '
+paths.*.*.requestBody.content.*.schema.maximum   set   covered   request-body-max-set,request-property-max-set
+```
+
+`covered` names the checks that claim the edit; run `oasdiff checks changelog` and look them up, or grep the [checker](../checker) package for the id, to see how they behave.
+
 ## Second: Is the Check Generated?
 
 Some check families are **generated from tables**, not written as functions, and the set grows over time. A check whose id a generator produces must not be written by hand: extend the generating table instead, and the generated rules pick up every direction, scope, and action at once, with levels derived from the severity law and messages from per-locale templates.
