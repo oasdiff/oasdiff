@@ -54,7 +54,7 @@ paths.*.*.requestBody.content.*.schema.maximum   unset      covered   request-bo
 `covered` names the checks that claim the edit. Look one up in the catalog to see how it behaves:
 
 ```
-$ oasdiff checks changelog | grep -F 'request-body-max-set '
+$ oasdiff checks changelog | grep -F 'request-body-max-set'
 request-body-max-set    request body max set    error
 ```
 
