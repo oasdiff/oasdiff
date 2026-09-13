@@ -2,6 +2,7 @@ package allof
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"slices"
 
@@ -14,12 +15,14 @@ import (
 // descent.
 func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 	var anchored []*openapi3.SchemaRef
+	hints := map[*openapi3.Schema]string{}
 	err := spec.WalkSchemas(func(_ string, s *openapi3.SchemaRef) error {
-		m, edges, err := mergeWithAnchors(*s)
+		m, edges, mergeHints, err := mergeWithAnchors(*s)
 		if err != nil {
 			return err
 		}
 		anchored = append(anchored, edges...)
+		maps.Copy(hints, mergeHints)
 		// Every $ref to this schema shares one Value, so writing the merge
 		// into it updates every use. Assigning s.Value would update only
 		// this reference and leave the rest unmerged.
@@ -30,12 +33,17 @@ func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 		// attachment points then see two distinct originals for one schema,
 		// which the merge cache cannot unify.
 		redirectSchemaRefs(reflect.ValueOf(s.Value), m, s.Value, map[*openapi3.Schema]bool{})
+		// the copy also detaches m from its hint; the written-back object is
+		// the one the anchored edges now point at
+		if hint, ok := hints[m]; ok {
+			hints[s.Value] = hint
+		}
 		return openapi3.SkipSubtree
 	})
 	if err != nil {
 		return spec, err
 	}
-	nameAnchoredCycles(spec, anchored)
+	nameAnchoredCycles(spec, anchored, hints)
 	return spec, nil
 }
 
@@ -43,10 +51,13 @@ func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 // is right (a cycle in the input is a cycle in the merged output), but the
 // edge carries no $ref, and a ref-less cycle has no serialized form. A target
 // that is a named component gets that name; an anonymous target is hoisted
-// into components.schemas under a generated name. Names are assigned in the
-// document's walk order, which is deterministic, so identical inputs name
-// identical targets.
-func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef) {
+// into components.schemas under a name built from the component names it
+// merges (AllOfMerged_NodeA_NodeB), so the flattened output is identical
+// whether flatten runs standalone or inside diff, and the same logical cycle
+// keeps its name when unrelated parts of the document change. Collisions and
+// hintless targets fall back to a numeric suffix, assigned in the document's
+// walk order, which is deterministic.
+func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef, hints map[*openapi3.Schema]string) {
 	if len(anchored) == 0 {
 		return
 	}
@@ -69,17 +80,11 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef) {
 		return walkOrder[a.Value] - walkOrder[b.Value]
 	})
 
-	next := 1
+	namer := componentNamer{spec: spec, next: 1}
 	for _, edge := range anchored {
 		name, ok := nameByValue[edge.Value]
 		if !ok {
-			for {
-				name = fmt.Sprintf("AllOfMerged%d", next)
-				next++
-				if spec.Components == nil || spec.Components.Schemas[name] == nil {
-					break
-				}
-			}
+			name = namer.name(hints[edge.Value])
 			if spec.Components == nil {
 				spec.Components = &openapi3.Components{}
 			}
@@ -91,6 +96,38 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef) {
 		}
 		edge.Ref = "#/components/schemas/" + name
 	}
+}
+
+// componentNamer builds names for hoisted cycle components that are free in
+// the spec's components section.
+type componentNamer struct {
+	spec *openapi3.T
+	next int
+}
+
+// name returns AllOfMerged_<hint>, numerically suffixed past collisions, or
+// the next free numeric AllOfMergedN when there is no hint. Hint-derived
+// names depend only on what was merged, so they are stable across revisions;
+// the numeric forms depend on the caller's naming order.
+func (n *componentNamer) name(hint string) string {
+	if hint != "" {
+		name := "AllOfMerged_" + hint
+		for suffix := 2; n.taken(name); suffix++ {
+			name = fmt.Sprintf("AllOfMerged_%s_%d", hint, suffix)
+		}
+		return name
+	}
+	for {
+		name := fmt.Sprintf("AllOfMerged%d", n.next)
+		n.next++
+		if !n.taken(name) {
+			return name
+		}
+	}
+}
+
+func (n *componentNamer) taken(name string) bool {
+	return n.spec.Components != nil && n.spec.Components.Schemas[name] != nil
 }
 
 // redirectSchemaRefs walks every SchemaRef reachable from v and points those
