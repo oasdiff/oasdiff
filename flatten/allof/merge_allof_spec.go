@@ -80,24 +80,11 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef, hints 
 		return walkOrder[a.Value] - walkOrder[b.Value]
 	})
 
-	next := 1
+	namer := componentNamer{spec: spec, next: 1}
 	for _, edge := range anchored {
 		name, ok := nameByValue[edge.Value]
 		if !ok {
-			base := "AllOfMerged"
-			if hint := hints[edge.Value]; hint != "" {
-				base = "AllOfMerged_" + hint
-				name = base
-			}
-			for suffix := 2; name == "" || (spec.Components != nil && spec.Components.Schemas[name] != nil); {
-				if base == "AllOfMerged" {
-					name = fmt.Sprintf("%s%d", base, next)
-					next++
-				} else {
-					name = fmt.Sprintf("%s_%d", base, suffix)
-					suffix++
-				}
-			}
+			name = namer.name(hints[edge.Value])
 			if spec.Components == nil {
 				spec.Components = &openapi3.Components{}
 			}
@@ -109,6 +96,38 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef, hints 
 		}
 		edge.Ref = "#/components/schemas/" + name
 	}
+}
+
+// componentNamer builds names for hoisted cycle components that are free in
+// the spec's components section.
+type componentNamer struct {
+	spec *openapi3.T
+	next int
+}
+
+// name returns AllOfMerged_<hint>, numerically suffixed past collisions, or
+// the next free numeric AllOfMergedN when there is no hint. Hint-derived
+// names depend only on what was merged, so they are stable across revisions;
+// the numeric forms depend on the caller's naming order.
+func (n *componentNamer) name(hint string) string {
+	if hint != "" {
+		name := "AllOfMerged_" + hint
+		for suffix := 2; n.taken(name); suffix++ {
+			name = fmt.Sprintf("AllOfMerged_%s_%d", hint, suffix)
+		}
+		return name
+	}
+	for {
+		name := fmt.Sprintf("AllOfMerged%d", n.next)
+		n.next++
+		if !n.taken(name) {
+			return name
+		}
+	}
+}
+
+func (n *componentNamer) taken(name string) bool {
+	return n.spec.Components != nil && n.spec.Components.Schemas[name] != nil
 }
 
 // redirectSchemaRefs walks every SchemaRef reachable from v and points those
