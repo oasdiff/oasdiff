@@ -24,7 +24,8 @@ get_asset_name() {
 }
 
 get_download_url() {
-  local asset_name=$(get_asset_name $1 $2 $3)
+  local asset_name
+  asset_name=$(get_asset_name "$1" "$2" "$3")
   echo "https://github.com/oasdiff/oasdiff/releases/download/v$1/${asset_name}"
 }
 
@@ -57,18 +58,18 @@ get_machine() {
 }
 
 get_tmp_dir() {
-  echo $(mktemp -d)
+  mktemp -d
 }
 
 do_checksum() {
   echo "Validating checksum"
-  checksum_url=$(get_checksum_url $version)
-  expected_checksum=$(curl -sL $checksum_url | grep $asset_name | awk '{print $1}')
+  checksum_url=$(get_checksum_url "$version")
+  expected_checksum=$(curl -sL "$checksum_url" | grep "$asset_name" | awk '{print $1}')
 
   if command_exists sha256sum; then
-    checksum=$(sha256sum $asset_name | awk '{print $1}')
+    checksum=$(sha256sum "$asset_name" | awk '{print $1}')
   elif command_exists shasum; then
-    checksum=$(shasum -a 256 $asset_name | awk '{print $1}')
+    checksum=$(shasum -a 256 "$asset_name" | awk '{print $1}')
   else
     echo "Could not find a checksum program. Install shasum or sha256sum to validate checksum."
     return 0
@@ -81,8 +82,8 @@ do_checksum() {
 }
 
 do_install() {
-  asset_name=$(get_asset_name $version $os $machine)
-  download_url=$(get_download_url $version $os $machine)
+  asset_name=$(get_asset_name "$version" "$os" "$machine")
+  download_url=$(get_download_url "$version" "$os" "$machine")
 
   command_exists curl || {
     echo "curl is not installed"
@@ -94,33 +95,32 @@ do_install() {
     exit 1
   }
 
-  local tmp_dir=$(get_tmp_dir)
+  local tmp_dir
+  tmp_dir=$(get_tmp_dir)
   echo "Temporary directory is $tmp_dir"
 
   echo "Downloading $download_url"
-  (cd $tmp_dir && curl -sL -O "$download_url")
+  (cd "$tmp_dir" && curl -sL -O "$download_url")
 
-  (cd $tmp_dir && do_checksum)
+  (cd "$tmp_dir" && do_checksum)
 
   echo "Extracting tar file"
-  (cd $tmp_dir && tar -xzf "$asset_name")
+  (cd "$tmp_dir" && tar -xzf "$asset_name")
 
   echo "Installing $BINARY_NAME into $tmp_dir"
-  mv "$tmp_dir/$BINARY_NAME" $INSTALL_DIR
+  mv "$tmp_dir/$BINARY_NAME" "$INSTALL_DIR"
 
-  chmod +x $INSTALL_DIR/$BINARY_NAME
+  chmod +x "$INSTALL_DIR/$BINARY_NAME"
   echo "Installed oasdiff to $INSTALL_DIR"
 
   echo "Removing temporary directory"
-  rm -rf $tmp_dir
+  rm -rf "$tmp_dir"
 }
 
 main() {
-  if [ -n "$version" ]; then
-    version="$version"
-  else
-    latest_tag=$(get_latest_release $REPO_NAME)
-    version=$(echo $latest_tag | sed 's/v//')
+  if [ -z "$version" ]; then
+    latest_tag=$(get_latest_release "$REPO_NAME")
+    version=$(echo "$latest_tag" | sed 's/v//')
   fi
 
   if test -z "$version"; then
@@ -153,9 +153,9 @@ main() {
     echo "Please create an issue so we can add support. $ISSUE_URL"
     exit 1
   fi
-  
+
   do_install
-  
+
   echo "oasdiff is now installed! type 'oasdiff -h' to see a list of commands"
 }
 
