@@ -157,8 +157,6 @@ request-body-min-items-increased: the request's body minItems was increased to %
 request-property-min-items-increased: the %s request property's minItems was increased to %s
 request-body-min-decreased: the request's body min was decreased to from %s to %s
 request-property-min-decreased: the %s request property's min was decreased from %s to %s
-request-body-min-items-decreased: the request's body minItems was decreased from %s to %s
-request-property-min-items-decreased: the %s request property's minItems was decreased from %s to %s
 request-body-min-items-set: the request's body minItems was set to %s
 request-property-min-items-set: the %s request property's minItems was set to %s
 request-body-min-set: the request's body min was set to %s
@@ -1221,12 +1219,16 @@ request-body-min-contains-set: the request's body minContains was set to %s
 request-body-min-contains-set-description: request body minContains set
 request-body-min-contains-unset: the request's body minContains was unset from %s
 request-body-min-contains-unset-description: request body minContains unset
+request-body-min-items-decreased: the request's body minItems was decreased from %s to %s
+request-body-min-items-decreased-description: request body minItems decreased
 request-body-min-items-unset: the request's body minItems was unset from %s
 request-body-min-items-unset-description: request body minItems unset
 request-body-min-length-set: the request's body minLength was set to %s
 request-body-min-length-set-description: request body minLength set
 request-body-min-length-unset: the request's body minLength was unset from %s
 request-body-min-length-unset-description: request body minLength unset
+request-body-min-properties-decreased: the request's body minProperties was decreased from %s to %s
+request-body-min-properties-decreased-description: request body minProperties decreased
 request-body-min-properties-set: the request's body minProperties was set to %s
 request-body-min-properties-set-description: request body minProperties set
 request-body-min-properties-unset: the request's body minProperties was unset from %s
@@ -1237,6 +1239,10 @@ request-parameter-exclusive-max-unset: for the %s request parameter %s, the excl
 request-parameter-exclusive-max-unset-description: request parameter exclusiveMaximum unset
 request-parameter-exclusive-min-unset: for the %s request parameter %s, the exclusiveMinimum was unset from %s
 request-parameter-exclusive-min-unset-description: request parameter exclusiveMinimum unset
+request-parameter-max-contains-decreased: for the %s request parameter %s, the maxContains was decreased from %s to %s
+request-parameter-max-contains-decreased-description: request parameter maxContains decreased
+request-parameter-max-contains-increased: for the %s request parameter %s, the maxContains was increased from %s to %s
+request-parameter-max-contains-increased-description: request parameter maxContains increased
 request-parameter-max-contains-set: for the %s request parameter %s, the maxContains was set to %s
 request-parameter-max-contains-set-description: request parameter maxContains set
 request-parameter-max-contains-unset: for the %s request parameter %s, the maxContains was unset from %s
@@ -1247,12 +1253,20 @@ request-parameter-max-items-unset: for the %s request parameter %s, the maxItems
 request-parameter-max-items-unset-description: request parameter maxItems unset
 request-parameter-max-length-unset: for the %s request parameter %s, the maxLength was unset from %s
 request-parameter-max-length-unset-description: request parameter maxLength unset
+request-parameter-max-properties-decreased: for the %s request parameter %s, the maxProperties was decreased from %s to %s
+request-parameter-max-properties-decreased-description: request parameter maxProperties decreased
+request-parameter-max-properties-increased: for the %s request parameter %s, the maxProperties was increased from %s to %s
+request-parameter-max-properties-increased-description: request parameter maxProperties increased
 request-parameter-max-properties-set: for the %s request parameter %s, the maxProperties was set to %s
 request-parameter-max-properties-set-description: request parameter maxProperties set
 request-parameter-max-properties-unset: for the %s request parameter %s, the maxProperties was unset from %s
 request-parameter-max-properties-unset-description: request parameter maxProperties unset
 request-parameter-max-unset: for the %s request parameter %s, the max was unset from %s
 request-parameter-max-unset-description: request parameter max unset
+request-parameter-min-contains-decreased: for the %s request parameter %s, the minContains was decreased from %s to %s
+request-parameter-min-contains-decreased-description: request parameter minContains decreased
+request-parameter-min-contains-increased: for the %s request parameter %s, the minContains was increased from %s to %s
+request-parameter-min-contains-increased-description: request parameter minContains increased
 request-parameter-min-contains-set: for the %s request parameter %s, the minContains was set to %s
 request-parameter-min-contains-set-description: request parameter minContains set
 request-parameter-min-contains-unset: for the %s request parameter %s, the minContains was unset from %s
@@ -1263,6 +1277,10 @@ request-parameter-min-length-set: for the %s request parameter %s, the minLength
 request-parameter-min-length-set-description: request parameter minLength set
 request-parameter-min-length-unset: for the %s request parameter %s, the minLength was unset from %s
 request-parameter-min-length-unset-description: request parameter minLength unset
+request-parameter-min-properties-decreased: for the %s request parameter %s, the minProperties was decreased from %s to %s
+request-parameter-min-properties-decreased-description: request parameter minProperties decreased
+request-parameter-min-properties-increased: for the %s request parameter %s, the minProperties was increased from %s to %s
+request-parameter-min-properties-increased-description: request parameter minProperties increased
 request-parameter-min-properties-set: for the %s request parameter %s, the minProperties was set to %s
 request-parameter-min-properties-set-description: request parameter minProperties set
 request-parameter-min-properties-unset: for the %s request parameter %s, the minProperties was unset from %s
@@ -1293,22 +1311,30 @@ request-property-min-contains-set: the %s request property's minContains was set
 request-property-min-contains-set-description: request property minContains set
 request-property-min-contains-unset: the %s request property's minContains was unset from %s
 request-property-min-contains-unset-description: request property minContains unset
+request-property-min-items-decreased: the %s request property's minItems was decreased from %s to %s
+request-property-min-items-decreased-description: request property minItems decreased
 request-property-min-items-unset: the %s request property's minItems was unset from %s
 request-property-min-items-unset-description: request property minItems unset
 request-property-min-length-set: the %s request property's minLength was set to %s
 request-property-min-length-set-description: request property minLength set
 request-property-min-length-unset: the %s request property's minLength was unset from %s
 request-property-min-length-unset-description: request property minLength unset
+request-property-min-properties-decreased: the %s request property's minProperties was decreased from %s to %s
+request-property-min-properties-decreased-description: request property minProperties decreased
 request-property-min-properties-set: the %s request property's minProperties was set to %s
 request-property-min-properties-set-description: request property minProperties set
 request-property-min-properties-unset: the %s request property's minProperties was unset from %s
 request-property-min-properties-unset-description: request property minProperties unset
 request-property-min-unset: the %s request property's min was unset from %s
 request-property-min-unset-description: request property min unset
+response-body-exclusive-max-decreased: the response's body exclusiveMaximum was decreased from %s to %s
+response-body-exclusive-max-decreased-description: response body exclusiveMaximum decreased
 response-body-exclusive-max-set: the response's body exclusiveMaximum was set to %s
 response-body-exclusive-max-set-description: response body exclusiveMaximum set
 response-body-exclusive-max-unset: the response's body exclusiveMaximum was unset from %s
 response-body-exclusive-max-unset-description: response body exclusiveMaximum unset
+response-body-exclusive-min-increased: the response's body exclusiveMinimum was increased from %s to %s
+response-body-exclusive-min-increased-description: response body exclusiveMinimum increased
 response-body-exclusive-min-set: the response's body exclusiveMinimum was set to %s
 response-body-exclusive-min-set-description: response body exclusiveMinimum set
 response-body-exclusive-min-unset: the response's body exclusiveMinimum was unset from %s
@@ -1317,12 +1343,20 @@ response-body-max-contains-set: the response's body maxContains was set to %s
 response-body-max-contains-set-description: response body maxContains set
 response-body-max-contains-unset: the response's body maxContains was unset from %s
 response-body-max-contains-unset-description: response body maxContains unset
+response-body-max-decreased: the response's body max was decreased from %s to %s
+response-body-max-decreased-description: response body max decreased
+response-body-max-items-decreased: the response's body maxItems was decreased from %s to %s
+response-body-max-items-decreased-description: response body maxItems decreased
 response-body-max-items-set: the response's body maxItems was set to %s
 response-body-max-items-set-description: response body maxItems set
 response-body-max-items-unset: the response's body maxItems was unset from %s
 response-body-max-items-unset-description: response body maxItems unset
+response-body-max-length-decreased: the response's body maxLength was decreased from %s to %s
+response-body-max-length-decreased-description: response body maxLength decreased
 response-body-max-length-set: the response's body maxLength was set to %s
 response-body-max-length-set-description: response body maxLength set
+response-body-max-properties-decreased: the response's body maxProperties was decreased from %s to %s
+response-body-max-properties-decreased-description: response body maxProperties decreased
 response-body-max-properties-set: the response's body maxProperties was set to %s
 response-body-max-properties-set-description: response body maxProperties set
 response-body-max-properties-unset: the response's body maxProperties was unset from %s
@@ -1335,12 +1369,20 @@ response-body-min-contains-set: the response's body minContains was set to %s
 response-body-min-contains-set-description: response body minContains set
 response-body-min-contains-unset: the response's body minContains was unset from %s
 response-body-min-contains-unset-description: response body minContains unset
+response-body-min-increased: the response's body min was increased from %s to %s
+response-body-min-increased-description: response body min increased
+response-body-min-items-increased: the response's body minItems was increased from %s to %s
+response-body-min-items-increased-description: response body minItems increased
 response-body-min-items-set: the response's body minItems was set to %s
 response-body-min-items-set-description: response body minItems set
+response-body-min-length-increased: the response's body minLength was increased from %s to %s
+response-body-min-length-increased-description: response body minLength increased
 response-body-min-length-set: the response's body minLength was set to %s
 response-body-min-length-set-description: response body minLength set
 response-body-min-length-unset: the response's body minLength was unset from %s
 response-body-min-length-unset-description: response body minLength unset
+response-body-min-properties-increased: the response's body minProperties was increased from %s to %s
+response-body-min-properties-increased-description: response body minProperties increased
 response-body-min-properties-set: the response's body minProperties was set to %s
 response-body-min-properties-set-description: response body minProperties set
 response-body-min-properties-unset: the response's body minProperties was unset from %s
@@ -1351,26 +1393,54 @@ response-body-min-unset: the response's body min was unset from %s
 response-body-min-unset-description: response body min unset
 response-body-multiple-of-set: the response's body multipleOf was set to %s
 response-body-multiple-of-set-description: response body multipleOf set
+response-header-exclusive-max-decreased: the %s response header's exclusiveMaximum was decreased from %s to %s for the status %s
+response-header-exclusive-max-decreased-description: response header exclusiveMaximum decreased
+response-header-exclusive-max-increased: the %s response header's exclusiveMaximum was increased from %s to %s for the status %s
+response-header-exclusive-max-increased-description: response header exclusiveMaximum increased
 response-header-exclusive-max-set: the %s response header's exclusiveMaximum was set to %s for the status %s
 response-header-exclusive-max-set-description: response header exclusiveMaximum set
 response-header-exclusive-max-unset: the %s response header's exclusiveMaximum was unset from %s for the status %s
 response-header-exclusive-max-unset-description: response header exclusiveMaximum unset
+response-header-exclusive-min-decreased: the %s response header's exclusiveMinimum was decreased from %s to %s for the status %s
+response-header-exclusive-min-decreased-description: response header exclusiveMinimum decreased
+response-header-exclusive-min-increased: the %s response header's exclusiveMinimum was increased from %s to %s for the status %s
+response-header-exclusive-min-increased-description: response header exclusiveMinimum increased
 response-header-exclusive-min-set: the %s response header's exclusiveMinimum was set to %s for the status %s
 response-header-exclusive-min-set-description: response header exclusiveMinimum set
 response-header-exclusive-min-unset: the %s response header's exclusiveMinimum was unset from %s for the status %s
 response-header-exclusive-min-unset-description: response header exclusiveMinimum unset
+response-header-max-contains-decreased: the %s response header's maxContains was decreased from %s to %s for the status %s
+response-header-max-contains-decreased-description: response header maxContains decreased
+response-header-max-contains-increased: the %s response header's maxContains was increased from %s to %s for the status %s
+response-header-max-contains-increased-description: response header maxContains increased
 response-header-max-contains-set: the %s response header's maxContains was set to %s for the status %s
 response-header-max-contains-set-description: response header maxContains set
 response-header-max-contains-unset: the %s response header's maxContains was unset from %s for the status %s
 response-header-max-contains-unset-description: response header maxContains unset
+response-header-max-decreased: the %s response header's max was decreased from %s to %s for the status %s
+response-header-max-decreased-description: response header max decreased
+response-header-max-increased: the %s response header's max was increased from %s to %s for the status %s
+response-header-max-increased-description: response header max increased
+response-header-max-items-decreased: the %s response header's maxItems was decreased from %s to %s for the status %s
+response-header-max-items-decreased-description: response header maxItems decreased
+response-header-max-items-increased: the %s response header's maxItems was increased from %s to %s for the status %s
+response-header-max-items-increased-description: response header maxItems increased
 response-header-max-items-set: the %s response header's maxItems was set to %s for the status %s
 response-header-max-items-set-description: response header maxItems set
 response-header-max-items-unset: the %s response header's maxItems was unset from %s for the status %s
 response-header-max-items-unset-description: response header maxItems unset
+response-header-max-length-decreased: the %s response header's maxLength was decreased from %s to %s for the status %s
+response-header-max-length-decreased-description: response header maxLength decreased
+response-header-max-length-increased: the %s response header's maxLength was increased from %s to %s for the status %s
+response-header-max-length-increased-description: response header maxLength increased
 response-header-max-length-set: the %s response header's maxLength was set to %s for the status %s
 response-header-max-length-set-description: response header maxLength set
 response-header-max-length-unset: the %s response header's maxLength was unset from %s for the status %s
 response-header-max-length-unset-description: response header maxLength unset
+response-header-max-properties-decreased: the %s response header's maxProperties was decreased from %s to %s for the status %s
+response-header-max-properties-decreased-description: response header maxProperties decreased
+response-header-max-properties-increased: the %s response header's maxProperties was increased from %s to %s for the status %s
+response-header-max-properties-increased-description: response header maxProperties increased
 response-header-max-properties-set: the %s response header's maxProperties was set to %s for the status %s
 response-header-max-properties-set-description: response header maxProperties set
 response-header-max-properties-unset: the %s response header's maxProperties was unset from %s for the status %s
@@ -1379,18 +1449,38 @@ response-header-max-set: the %s response header's max was set to %s for the stat
 response-header-max-set-description: response header max set
 response-header-max-unset: the %s response header's max was unset from %s for the status %s
 response-header-max-unset-description: response header max unset
+response-header-min-contains-decreased: the %s response header's minContains was decreased from %s to %s for the status %s
+response-header-min-contains-decreased-description: response header minContains decreased
+response-header-min-contains-increased: the %s response header's minContains was increased from %s to %s for the status %s
+response-header-min-contains-increased-description: response header minContains increased
 response-header-min-contains-set: the %s response header's minContains was set to %s for the status %s
 response-header-min-contains-set-description: response header minContains set
 response-header-min-contains-unset: the %s response header's minContains was unset from %s for the status %s
 response-header-min-contains-unset-description: response header minContains unset
+response-header-min-decreased: the %s response header's min was decreased from %s to %s for the status %s
+response-header-min-decreased-description: response header min decreased
+response-header-min-increased: the %s response header's min was increased from %s to %s for the status %s
+response-header-min-increased-description: response header min increased
+response-header-min-items-decreased: the %s response header's minItems was decreased from %s to %s for the status %s
+response-header-min-items-decreased-description: response header minItems decreased
+response-header-min-items-increased: the %s response header's minItems was increased from %s to %s for the status %s
+response-header-min-items-increased-description: response header minItems increased
 response-header-min-items-set: the %s response header's minItems was set to %s for the status %s
 response-header-min-items-set-description: response header minItems set
 response-header-min-items-unset: the %s response header's minItems was unset from %s for the status %s
 response-header-min-items-unset-description: response header minItems unset
+response-header-min-length-decreased: the %s response header's minLength was decreased from %s to %s for the status %s
+response-header-min-length-decreased-description: response header minLength decreased
+response-header-min-length-increased: the %s response header's minLength was increased from %s to %s for the status %s
+response-header-min-length-increased-description: response header minLength increased
 response-header-min-length-set: the %s response header's minLength was set to %s for the status %s
 response-header-min-length-set-description: response header minLength set
 response-header-min-length-unset: the %s response header's minLength was unset from %s for the status %s
 response-header-min-length-unset-description: response header minLength unset
+response-header-min-properties-decreased: the %s response header's minProperties was decreased from %s to %s for the status %s
+response-header-min-properties-decreased-description: response header minProperties decreased
+response-header-min-properties-increased: the %s response header's minProperties was increased from %s to %s for the status %s
+response-header-min-properties-increased-description: response header minProperties increased
 response-header-min-properties-set: the %s response header's minProperties was set to %s for the status %s
 response-header-min-properties-set-description: response header minProperties set
 response-header-min-properties-unset: the %s response header's minProperties was unset from %s for the status %s
@@ -1403,10 +1493,14 @@ response-header-multiple-of-set: the %s response header's multipleOf was set to 
 response-header-multiple-of-set-description: response header multipleOf set
 response-header-multiple-of-unset: the %s response header's multipleOf was unset from %s for the status %s
 response-header-multiple-of-unset-description: response header multipleOf unset
+response-property-exclusive-max-decreased: the %s response property's exclusiveMaximum was decreased from %s to %s for the response status %s
+response-property-exclusive-max-decreased-description: response property exclusiveMaximum decreased
 response-property-exclusive-max-set: the %s response property's exclusiveMaximum was set to %s for the response status %s
 response-property-exclusive-max-set-description: response property exclusiveMaximum set
 response-property-exclusive-max-unset: the %s response property's exclusiveMaximum was unset from %s for the response status %s
 response-property-exclusive-max-unset-description: response property exclusiveMaximum unset
+response-property-exclusive-min-increased: the %s response property's exclusiveMinimum was increased from %s to %s for the response status %s
+response-property-exclusive-min-increased-description: response property exclusiveMinimum increased
 response-property-exclusive-min-set: the %s response property's exclusiveMinimum was set to %s for the response status %s
 response-property-exclusive-min-set-description: response property exclusiveMinimum set
 response-property-exclusive-min-unset: the %s response property's exclusiveMinimum was unset from %s for the response status %s
@@ -1415,12 +1509,20 @@ response-property-max-contains-set: the %s response property's maxContains was s
 response-property-max-contains-set-description: response property maxContains set
 response-property-max-contains-unset: the %s response property's maxContains was unset from %s for the response status %s
 response-property-max-contains-unset-description: response property maxContains unset
+response-property-max-decreased: the %s response property's max was decreased from %s to %s for the response status %s
+response-property-max-decreased-description: response property max decreased
+response-property-max-items-decreased: the %s response property's maxItems was decreased from %s to %s for the response status %s
+response-property-max-items-decreased-description: response property maxItems decreased
 response-property-max-items-set: the %s response property's maxItems was set to %s for the response status %s
 response-property-max-items-set-description: response property maxItems set
 response-property-max-items-unset: the %s response property's maxItems was unset from %s for the response status %s
 response-property-max-items-unset-description: response property maxItems unset
+response-property-max-length-decreased: the %s response property's maxLength was decreased from %s to %s for the response status %s
+response-property-max-length-decreased-description: response property maxLength decreased
 response-property-max-length-set: the %s response property's maxLength was set to %s for the response status %s
 response-property-max-length-set-description: response property maxLength set
+response-property-max-properties-decreased: the %s response property's maxProperties was decreased from %s to %s for the response status %s
+response-property-max-properties-decreased-description: response property maxProperties decreased
 response-property-max-properties-set: the %s response property's maxProperties was set to %s for the response status %s
 response-property-max-properties-set-description: response property maxProperties set
 response-property-max-properties-unset: the %s response property's maxProperties was unset from %s for the response status %s
@@ -1433,12 +1535,20 @@ response-property-min-contains-set: the %s response property's minContains was s
 response-property-min-contains-set-description: response property minContains set
 response-property-min-contains-unset: the %s response property's minContains was unset from %s for the response status %s
 response-property-min-contains-unset-description: response property minContains unset
+response-property-min-increased: the %s response property's min was increased from %s to %s for the response status %s
+response-property-min-increased-description: response property min increased
+response-property-min-items-increased: the %s response property's minItems was increased from %s to %s for the response status %s
+response-property-min-items-increased-description: response property minItems increased
 response-property-min-items-set: the %s response property's minItems was set to %s for the response status %s
 response-property-min-items-set-description: response property minItems set
+response-property-min-length-increased: the %s response property's minLength was increased from %s to %s for the response status %s
+response-property-min-length-increased-description: response property minLength increased
 response-property-min-length-set: the %s response property's minLength was set to %s for the response status %s
 response-property-min-length-set-description: response property minLength set
 response-property-min-length-unset: the %s response property's minLength was unset from %s for the response status %s
 response-property-min-length-unset-description: response property minLength unset
+response-property-min-properties-increased: the %s response property's minProperties was increased from %s to %s for the response status %s
+response-property-min-properties-increased-description: response property minProperties increased
 response-property-min-properties-set: the %s response property's minProperties was set to %s for the response status %s
 response-property-min-properties-set-description: response property minProperties set
 response-property-min-properties-unset: the %s response property's minProperties was unset from %s for the response status %s
