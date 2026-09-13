@@ -2,6 +2,7 @@ package allof
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"slices"
 
@@ -14,12 +15,14 @@ import (
 // descent.
 func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 	var anchored []*openapi3.SchemaRef
+	hints := map[*openapi3.Schema]string{}
 	err := spec.WalkSchemas(func(_ string, s *openapi3.SchemaRef) error {
-		m, edges, err := mergeWithAnchors(*s)
+		m, edges, mergeHints, err := mergeWithAnchors(*s)
 		if err != nil {
 			return err
 		}
 		anchored = append(anchored, edges...)
+		maps.Copy(hints, mergeHints)
 		// Every $ref to this schema shares one Value, so writing the merge
 		// into it updates every use. Assigning s.Value would update only
 		// this reference and leave the rest unmerged.
@@ -30,12 +33,17 @@ func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 		// attachment points then see two distinct originals for one schema,
 		// which the merge cache cannot unify.
 		redirectSchemaRefs(reflect.ValueOf(s.Value), m, s.Value, map[*openapi3.Schema]bool{})
+		// the copy also detaches m from its hint; the written-back object is
+		// the one the anchored edges now point at
+		if hint, ok := hints[m]; ok {
+			hints[s.Value] = hint
+		}
 		return openapi3.SkipSubtree
 	})
 	if err != nil {
 		return spec, err
 	}
-	nameAnchoredCycles(spec, anchored)
+	nameAnchoredCycles(spec, anchored, hints)
 	return spec, nil
 }
 
@@ -43,10 +51,13 @@ func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
 // is right (a cycle in the input is a cycle in the merged output), but the
 // edge carries no $ref, and a ref-less cycle has no serialized form. A target
 // that is a named component gets that name; an anonymous target is hoisted
-// into components.schemas under a generated name. Names are assigned in the
-// document's walk order, which is deterministic, so identical inputs name
-// identical targets.
-func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef) {
+// into components.schemas under a name built from the component names it
+// merges (AllOfMerged_NodeA_NodeB), so the flattened output is identical
+// whether flatten runs standalone or inside diff, and the same logical cycle
+// keeps its name when unrelated parts of the document change. Collisions and
+// hintless targets fall back to a numeric suffix, assigned in the document's
+// walk order, which is deterministic.
+func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef, hints map[*openapi3.Schema]string) {
 	if len(anchored) == 0 {
 		return
 	}
@@ -73,11 +84,18 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef) {
 	for _, edge := range anchored {
 		name, ok := nameByValue[edge.Value]
 		if !ok {
-			for {
-				name = fmt.Sprintf("AllOfMerged%d", next)
-				next++
-				if spec.Components == nil || spec.Components.Schemas[name] == nil {
-					break
+			base := "AllOfMerged"
+			if hint := hints[edge.Value]; hint != "" {
+				base = "AllOfMerged_" + hint
+				name = base
+			}
+			for suffix := 2; name == "" || (spec.Components != nil && spec.Components.Schemas[name] != nil); {
+				if base == "AllOfMerged" {
+					name = fmt.Sprintf("%s%d", base, next)
+					next++
+				} else {
+					name = fmt.Sprintf("%s_%d", base, suffix)
+					suffix++
 				}
 			}
 			if spec.Components == nil {

@@ -146,9 +146,9 @@ func Test_MergeSpec_TwoRecursiveBranchesSerializes(t *testing.T) {
 	require.Empty(t, tree.Value.AllOf)
 
 	child := tree.Value.Properties["child"]
-	require.Equal(t, "#/components/schemas/AllOfMerged1", child.Ref)
+	require.Equal(t, "#/components/schemas/AllOfMerged_NodeA_NodeB", child.Ref)
 	require.Same(t, tree.Value, child.Value)
-	require.Same(t, tree.Value, merged.Components.Schemas["AllOfMerged1"].Value)
+	require.Same(t, tree.Value, merged.Components.Schemas["AllOfMerged_NodeA_NodeB"].Value)
 
 	first, err := merged.MarshalJSON()
 	require.NoError(t, err)
@@ -168,11 +168,30 @@ func Test_MergeSpec_MixedCycleBranchKeepsSiblingConstraints(t *testing.T) {
 		Schema.Value.Properties["tree"]
 	child := tree.Value.Properties["child"]
 	require.Len(t, child.Value.AllOf, 2)
-	require.Equal(t, "#/components/schemas/AllOfMerged1", child.Value.AllOf[0].Ref)
+	require.Equal(t, "#/components/schemas/AllOfMerged_NodeA", child.Value.AllOf[0].Ref)
 	require.Same(t, tree.Value, child.Value.AllOf[0].Value)
 	require.True(t, child.Value.AllOf[1].Value.Properties["leaf"].Value.Type.Is("string"),
 		"the non-cyclic sibling's constraint must survive")
 
 	_, err = spec.Spec.MarshalJSON()
 	require.NoError(t, err)
+}
+
+// A hoisted cycle's name is built from the component names it merges, not
+// from a position counter, so it does not move when unrelated parts of the
+// document change: flatten produces the same name standalone and inside a
+// diff of any two revisions.
+func Test_MergeSpec_HoistedNameIsStable(t *testing.T) {
+	name := func(file string) string {
+		t.Helper()
+		spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(file), load.WithFlattenAllOf())
+		require.NoError(t, err)
+		return spec.Spec.Paths.Value("/x").Post.RequestBody.Value.Content["application/json"].
+			Schema.Value.Properties["tree"].Value.Properties["child"].Ref
+	}
+
+	base := name("../../data/allof/two-recursive-branches.yaml")
+	shifted := name("../../data/allof/two-recursive-branches-shifted.yaml")
+	require.Equal(t, "#/components/schemas/AllOfMerged_NodeA_NodeB", base)
+	require.Equal(t, base, shifted, "an unrelated earlier cycle must not move the name")
 }
