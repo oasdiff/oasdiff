@@ -107,6 +107,45 @@ func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 	return result.Bytes(), nil
 }
 
+// RenderExplain lays the explanation out as short labeled blocks: the id and
+// level, what the check reports, the severity with its derivation, and where
+// in the document the check applies.
+func (f TEXTFormatter) RenderExplain(e Explanation, opts RenderOpts) ([]byte, error) {
+	result := bytes.NewBuffer(nil)
+
+	_, _ = fmt.Fprintf(result, "%s  %s\n", e.Id, e.Level)
+	if e.Description != "" {
+		_, _ = fmt.Fprintf(result, "\nReports: %s.\n", e.Description)
+	}
+	if e.Mitigation != "" {
+		_, _ = fmt.Fprintf(result, "\nNote: %s\n", e.Mitigation)
+	}
+
+	if e.Derived {
+		_, _ = fmt.Fprintf(result, "\nSeverity: %s, derived.\n", e.Level)
+	} else {
+		_, _ = fmt.Fprintf(result, "\nSeverity: %s, set by the rule.\n", e.Level)
+	}
+	for _, step := range e.Reasoning {
+		_, _ = fmt.Fprintf(result, "  %s\n", step)
+	}
+
+	if e.Direction != "" || e.Area != "" || e.Kind != "" {
+		_, _ = fmt.Fprintf(result, "\nScope: %s / %s / %s.\n", e.Direction, e.Area, e.Kind)
+	}
+	if e.Generated {
+		_, _ = fmt.Fprint(result, "Generated: yes (produced by a rule generator, not written by hand).\n")
+	}
+	if len(e.Locations) > 0 {
+		_, _ = fmt.Fprintf(result, "Locations: %s\n", strings.Join(e.Locations, "\n           "))
+	}
+	if e.Override != "" {
+		_, _ = fmt.Fprintf(result, "Override: %s\n", e.Override)
+	}
+
+	return result.Bytes(), nil
+}
+
 // RenderValidate emits a summary line ("N findings: ...") followed by one
 // changelog-style block per finding. Each block is:
 //
@@ -165,5 +204,5 @@ func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 }
 
 func (f TEXTFormatter) SupportedOutputs() []Output {
-	return []Output{OutputDiff, OutputChangelog, OutputChecks, OutputValidate}
+	return []Output{OutputDiff, OutputChangelog, OutputChecks, OutputExplain, OutputValidate}
 }
