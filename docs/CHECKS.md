@@ -43,6 +43,14 @@ Every check is categorized along independent axes, emitted as fields in the `jso
 - `actions` — the syntactic edits the check covers, derived from its position in the OpenAPI object model: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`.
 - `effect` — the check's verdict about the set of payloads the contract accepts: `widens`, `narrows`, `incomparable` (the change both rejects payloads that were valid and accepts payloads that were not), `unknown` (the check cannot tell), `violation` (breaks the deprecation/stability contract rather than the wire contract), or `none` (metadata with no effect on accepted payloads). Together with `direction`, the effect determines the default severity: narrowing requests and widening responses break clients.
 - `direction` — `request`, `response`, or `none`.
+- `guards` — named document conditions under which the check's usual verdict does not apply, shown in the GUARDS column of the text output: `read-only` / `write-only` (the property cannot appear on this side, so a restriction cannot break it and the change reports at `info` with a comment), `sanctioned` (the removed element was deprecated and its sunset was honored), `non-success` (a non-success response status, which the responses map does not promise exhaustively), `has-default` (the element declares a default value), and `negotiated` (the element is one the client selects, such as a media type or response status, so severity derives as if it were on the request side). See [when oasdiff reports a change below its check's level](BREAKING-CHANGES.md#when-oasdiff-reports-a-change-below-its-checks-level).
+- `generated` — the check comes from a rule generator rather than a hand-written function, shown in the GENERATED column of the text output. See [CUSTOMIZING-CHECKS.md](CUSTOMIZING-CHECKS.md#second-is-the-check-generated).
+
+`--id` displays a single check by id, and `--location` keeps only the checks claiming a location that contains the given string:
+```
+oasdiff checks changelog --id request-body-max-set
+oasdiff checks changelog --location requestBody.content.*.schema.maximum
+```
 
 ## Filtering by Tag
 Use `--tags` to show only checks in a specific area, kind, action, effect, or direction:
@@ -58,6 +66,8 @@ Available tags, by dimension:
 - effect: `widens`, `narrows`
 - area: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`
 - kind: `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`
+- guard: `read-only`, `write-only`, `sanctioned`, `non-success`, `has-default`, `negotiated`
+- provenance: `generated`, `hand-written` — every check is one or the other, so the two tags split the catalog
 
 Values of the same dimension are combined with OR, different dimensions with AND: `--tags request,response,add` selects checks that are (request or response) and add.
 
@@ -75,11 +85,13 @@ Available tags, by dimension:
 - polarity: `request`, `response`, `document` (neither wire direction), `shared` (a component, whose direction depends on the referencing site)
 - action: `add`, `remove`, `change`, `increase`, `decrease`, `set`, `unset`
 
-Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. `--format text|json|yaml` picks the output.
+Values of the same dimension are combined with OR, different dimensions with AND, as in the changelog listing. `--location` keeps only the edits at locations containing the given string, and `--id` keeps only the edits the named check claims. `--format text|json|yaml` picks the output.
 
 ```
 oasdiff checks changelog coverage --tags waived,request
 oasdiff checks changelog coverage --tags covered,add,remove
+oasdiff checks changelog coverage --location paths.*.*.parameters.*.style
+oasdiff checks changelog coverage --id request-body-max-set
 ```
 
 `--patterns` summarizes the same accounting instead of listing it: one row per waiver or non-contract entry, with the number of edits it accounts for, which answers which reasons the unchecked edits fall under without reading thousands of rows. It takes no `--tags`, having no edits to filter.

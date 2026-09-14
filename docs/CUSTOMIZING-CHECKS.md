@@ -1,5 +1,104 @@
 # How to Add Breaking-Changes Checks
 
+## First: Ask the Coverage Map
+
+Before writing anything, ask the audit what it already knows about the edit you want to check:
+
+```
+oasdiff checks changelog coverage
+```
+
+One row per possible edit of an OpenAPI document (filter with `--tags`, see [CHECKS.md](CHECKS.md#coverage-map)):
+
+- `covered`: checks already claim this edit; nothing to add.
+- `waived`: no check yet, and the reason why. An `open` waiver is an invitation: it carries a suggested id in the house grammar, and its reason in [checker/coverage/waivers.go](../checker/coverage/waivers.go) often points at the tracking issue.
+- `non-contract`: the edit cannot change which payloads are valid; no check is expected.
+
+### Example: locating a specific edit
+
+Say you want to know whether changing a query parameter's `style` is checked. Every edit is a location in the OpenAPI document plus an action, so filter the map by location:
+
+```
+$ oasdiff checks changelog coverage --location 'paths.*.*.parameters.*.style'
+LOCATION                     ACTION STATUS CHECKS OR SUGGESTION
+paths.*.*.parameters.*.style change waived request-parameter-style-changed
+paths.*.*.parameters.*.style set    waived request-parameter-style-set
+paths.*.*.parameters.*.style unset  waived request-parameter-style-unset
+```
+
+`waived` means not implemented, and the last column is the suggested id for whoever implements it. The structured formats add the reason:
+
+```
+$ oasdiff checks changelog coverage --location 'paths.*.*.parameters.*.style' --tags change --format yaml
+- location: paths.*.*.parameters.*.style
+  action: change
+  polarity: request
+  status: waived
+  category: open
+  reason: 'parameter serialization style changes the wire format but is unchecked (tracked in #1164)'
+  suggestedId: request-parameter-style-changed
+```
+
+So: not implemented, deliberately recorded as a gap, tracked in #1164, and the id to use is already chosen. Compare an edit that is implemented:
+
+```
+$ oasdiff checks changelog coverage --location 'paths.*.*.requestBody.content.*.schema.maximum'
+LOCATION                                       ACTION   STATUS  CHECKS OR SUGGESTION
+paths.*.*.requestBody.content.*.schema.maximum decrease covered request-body-max-decreased,request-property-max-decreased,request-read-only-property-max-decreased
+paths.*.*.requestBody.content.*.schema.maximum increase covered request-body-max-increased,request-property-max-increased
+paths.*.*.requestBody.content.*.schema.maximum set      covered request-body-max-set,request-property-max-set
+paths.*.*.requestBody.content.*.schema.maximum unset    covered request-body-max-unset,request-property-max-unset
+```
+
+`covered` names the checks that claim the edit. Look one up in the catalog to see how it behaves:
+
+```
+$ oasdiff checks changelog --id request-body-max-set
+ID                   LEVEL GUARDS GENERATED DESCRIPTION
+request-body-max-set error                  request body max set
+```
+
+The structured formats show the check's full classification, including the claim that ties it back to the coverage row you started from:
+
+```
+$ oasdiff checks changelog --id request-body-max-set --format yaml
+- id: request-body-max-set
+  level: error
+  direction: request
+  area: schema
+  kind: constraints
+  actions:
+    - set
+  effect: narrows
+  locations:
+    - paths.*.*.requestBody.content.*.schema.maximum:set
+  description: request body max set
+```
+
+`locations` is the claim: this check owns exactly the `maximum:set` edit at the request-body location, which is why the coverage row lists it. `effect: narrows` on a `request` explains the `error` level: setting a bound rejects request payloads the old contract accepted. (`--id` also works in the other direction: `oasdiff checks changelog coverage --id request-body-max-set` lists the edits the check claims.)
+
+The empty GENERATED column says this check is written by hand, so its implementation is a function: grep the [checker](../checker) package for the id. Its `unset` sibling from the same coverage row is generated:
+
+```
+$ oasdiff checks changelog --id request-body-max-unset
+ID                     LEVEL GUARDS GENERATED DESCRIPTION
+request-body-max-unset info         yes       request body max unset
+```
+
+`yes` means the id resolves to a row in a generating table rather than a function; the next section explains how to extend those.
+
+## Second: Is the Check Generated?
+
+Some check families are **generated from tables**, not written as functions, and the set grows over time. A check whose id a generator produces must not be written by hand: extend the generating table instead, and the generated rules pick up every direction, scope, and action at once, with levels derived from the severity law and messages from per-locale templates.
+
+The catalog marks them: the GENERATED column in the text output (as in the example above), `generated: true` in json and yaml, and `--tags generated` / `--tags hand-written` to list either side.
+
+Currently generated: setting, unsetting, increasing, and decreasing the ordered constraint keywords (`boundSpecs` in [checker/bound_rules.go](../checker/bound_rules.go)). To cover a new constraint keyword: add a row to `diff.SchemaBounds` in [diff/schema_bounds.go](../diff/schema_bounds.go) (the keyword with its absence encoding), add a `boundSpecs` row (id segment, keyword, polarity: `lowerBound` narrows on increase, `upperBound` on decrease, `unordered` gets no increase/decrease rules), run `make bound-messages` and `make localize`, and update the pinned counts the failing tests name.
+
+The gates enforce the boundary in both directions: `TestBoundCellsFire` builds a spec pair for every generated cell and requires exactly one change at the registered level, and `TestHandWrittenBoundIdsMatchTheGrammar` fails a hand-written check whose id covers a generated cell under a different format.
+
+Everything else, checks that need a judgment call, stays hand-written as follows.
+
 ## Write the Check Function
 1. Create a new go file under [checker](../checker), named after the use case, for example `check_request_property_became_nullable.go`.
 2. Define the check ids as constants at the top of the file. Each id is a unique kebab-case string, for example `request-property-became-nullable`. Related ids (request/response, body/property, added/removed) live in the same file.
