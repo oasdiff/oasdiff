@@ -30,18 +30,21 @@ func getChecksCoverageCmd() *cobra.Command {
 
 	addChecksFormatFlags(&cmd)
 	enumWithOptions(&cmd, newEnumSliceValue(GetCoverageTags(), nil), "tags", "t", "include only edits matching the tags: values of the same dimension are ORed, dimensions are ANDed")
-	addCheckIdFlag(&cmd, "include only edits covered by the check with this id")
+	cmd.PersistentFlags().String("id", "", "include only edits covered by the check with this id")
 	cmd.PersistentFlags().String("location", "", "include only edits whose location contains this string")
 	cmd.PersistentFlags().Bool("patterns", false, "list the waiver and non-contract patterns instead of the edits")
 
 	return &cmd
 }
 
-// getChecksCoverageArgs rejects arguments and the flag combination the
-// command cannot honour.
+// getChecksCoverageArgs rejects arguments, an --id naming no check, and the
+// flag combination the command cannot honour.
 func getChecksCoverageArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := cobra.NoArgs(cmd, args); err != nil {
+			return err
+		}
+		if err := checkKnownId(cmd); err != nil {
 			return err
 		}
 		return checkPatternsWithoutEditFilters(cmd)
@@ -73,9 +76,6 @@ func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 	}
 
 	id := flags.getId()
-	if returnErr := checkKnownId(id); returnErr != nil {
-		return false, returnErr
-	}
 
 	var bytes []byte
 	if flags.getViper().GetBool("patterns") {

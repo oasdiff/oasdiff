@@ -24,7 +24,7 @@ func getChecksChangelogCmd() *cobra.Command {
 		Use:               "changelog",
 		Short:             "Display changelog and breaking-change checks",
 		Long:              `Display a list of all supported changelog and breaking-change checks.`,
-		Args:              cobra.NoArgs,
+		Args:              getChecksChangelogArgs(),
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE:              getRun(runChecksChangelog),
 	}
@@ -47,33 +47,30 @@ func addChecksChangelogFlags(cmd *cobra.Command) {
 	addChecksSeverityFlag(cmd)
 	enumWithOptions(cmd, newEnumSliceValue(GetChangelogTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
-	addCheckIdFlag(cmd, "display only the check with this id")
+	cmd.PersistentFlags().String("id", "", "display only the check with this id")
 	cmd.PersistentFlags().String("location", "", "include only checks with a location containing this string")
 }
 
-// addCheckIdFlag registers an --id flag that completes to the changelog
-// check ids.
-func addCheckIdFlag(cmd *cobra.Command, usage string) {
-	cmd.PersistentFlags().String("id", "", usage)
-	_ = cmd.RegisterFlagCompletionFunc("id", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		rules := checker.GetAllRules()
-		ids := make([]string, len(rules))
-		for i, rule := range rules {
-			ids[i] = rule.Id
+// getChecksChangelogArgs rejects arguments and an --id naming no check.
+func getChecksChangelogArgs() cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if err := cobra.NoArgs(cmd, args); err != nil {
+			return err
 		}
-		return ids, cobra.ShellCompDirectiveNoFileComp
-	})
+		return checkKnownId(cmd)
+	}
 }
 
 // checkKnownId rejects an --id that names no changelog check.
-func checkKnownId(id string) *ReturnError {
-	if id == "" {
+func checkKnownId(cmd *cobra.Command) error {
+	id, err := cmd.Flags().GetString("id")
+	if err != nil || id == "" {
 		return nil
 	}
 	if !slices.ContainsFunc(checker.GetAllRules(), func(rule checker.BackwardCompatibilityRule) bool {
 		return rule.Id == id
 	}) {
-		return getErrInvalidFlags(fmt.Errorf("unknown check id %q", id))
+		return fmt.Errorf("unknown check id %q", id)
 	}
 	return nil
 }
@@ -96,12 +93,8 @@ func outputChangelogRules(stdout io.Writer, flags *Flags, rules []checker.Backwa
 
 	localizer := checker.NewLocalizer(flags.getLang())
 
-	id := flags.getId()
-	if returnErr := checkKnownId(id); returnErr != nil {
-		return returnErr
-	}
-
 	// filter rules
+	id := flags.getId()
 	severity := flags.getSeverity()
 	location := flags.getLocation()
 	checks := make(formatters.Checks, 0, len(rules))
