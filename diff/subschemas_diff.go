@@ -131,7 +131,7 @@ func getSubschemasDiffInternal(config *Config, state *state, schemaRefs1, schema
 		return nil, err
 	}
 
-	return reconcileInlineRefRefactors(config, combined, schemaRefs1, schemaRefs2), nil
+	return reconcileInlineRefRefactors(config, state, combined, schemaRefs1, schemaRefs2), nil
 }
 
 // reconcileInlineRefRefactors pairs unmatched Added and Deleted entries that
@@ -141,7 +141,7 @@ func getSubschemasDiffInternal(config *Config, state *state, schemaRefs1, schema
 // happens to duplicate an existing still-present branch is preserved.
 //
 // Gated on config.MatchInlineRefs; default true.
-func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
+func reconcileInlineRefRefactors(config *Config, state *state, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
 	if !config.MatchInlineRefs {
 		return combined
 	}
@@ -179,7 +179,7 @@ func reconcileInlineRefRefactors(config *Config, combined *SubschemasDiff, schem
 			if !isInlineRefactorBoundary(deletedRef, addedRef) {
 				continue
 			}
-			if !SchemaRefsValidationEquivalent(config, deletedRef, addedRef) {
+			if !schemaRefsValidationEquivalentWithin(config, state, deletedRef, addedRef) {
 				continue
 			}
 

@@ -8,15 +8,37 @@ import "github.com/getkin/kin-openapi/openapi3"
 // comments are ignored; checker-significant metadata such as deprecated is
 // treated as a contract change.
 func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
-	// Use a fresh diff state (cycle-detection sets + schema-diff cache)
-	// rather than the caller's, so a call made from inside another diff
-	// traversal is not affected by what that traversal has already visited.
-	schemaDiff, err := getSchemaDiff(config, newState(), trueSchemaAsEmpty(schemaRef1), trueSchemaAsEmpty(schemaRef2))
+	return schemaRefsValidationEquivalentWithin(config, newState(), schemaRef1, schemaRef2)
+}
+
+// schemaRefsValidationEquivalentWithin is the form for callers inside a diff
+// traversal. The comparison runs in a diff state of its own, so it is not
+// affected by what the caller's traversal has already visited, but it shares
+// the caller's equivalence re-entry set: a comparison of a value pair whose
+// comparison is already in progress further up declines, which errs toward
+// reporting a difference, instead of recursing forever through a cyclic
+// schema.
+func schemaRefsValidationEquivalentWithin(config *Config, state *state, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
+	pair := valuePair{schemaValueOf(schemaRef1), schemaValueOf(schemaRef2)}
+	if _, ok := state.equivalenceInFlight[pair]; ok {
+		return false
+	}
+	state.equivalenceInFlight[pair] = struct{}{}
+	defer delete(state.equivalenceInFlight, pair)
+
+	schemaDiff, err := getSchemaDiff(config, newNestedState(state), trueSchemaAsEmpty(schemaRef1), trueSchemaAsEmpty(schemaRef2))
 	if err != nil {
 		return false
 	}
 
 	return !schemaDiffHasValidationChanges(schemaDiff)
+}
+
+func schemaValueOf(ref *openapi3.SchemaRef) *openapi3.Schema {
+	if ref == nil {
+		return nil
+	}
+	return ref.Value
 }
 
 // trueSchemaAsEmpty maps a schema written as the boolean `true` to the empty

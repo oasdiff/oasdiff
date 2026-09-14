@@ -41,14 +41,14 @@ func (diff *NullableWrappingDiff) Empty() bool {
 // direction (the revision wraps a schema equivalent to the base, or the base
 // was the wrapper and the revision is its non-null branch) and returns nil
 // when neither applies.
-func getNullableWrappingDiff(config *Config, base, revision *openapi3.Schema) *NullableWrappingDiff {
+func getNullableWrappingDiff(config *Config, state *state, base, revision *openapi3.Schema) *NullableWrappingDiff {
 	if base == nil || revision == nil {
 		return nil
 	}
-	if isNullableWrap(config, base, revision) {
+	if isNullableWrap(config, state, base, revision) {
 		return &NullableWrappingDiff{NullabilityAdded: true}
 	}
-	if isNullableWrap(config, revision, base) {
+	if isNullableWrap(config, state, revision, base) {
 		return &NullableWrappingDiff{NullabilityRemoved: true}
 	}
 	return nil
@@ -56,7 +56,7 @@ func getNullableWrappingDiff(config *Config, base, revision *openapi3.Schema) *N
 
 // isNullableWrap reports whether wrapped is exactly plain made nullable:
 // oneOf: [{type: "null"}, plain'] with plain' validation-equivalent to plain.
-func isNullableWrap(config *Config, plain, wrapped *openapi3.Schema) bool {
+func isNullableWrap(config *Config, state *state, plain, wrapped *openapi3.Schema) bool {
 	// The plain side must itself be free of compositions (so the equivalence
 	// below is meaningful) and must reject null: wrapping an already-nullable
 	// schema changes acceptance under oneOf's exactly-one rule (null would
@@ -69,13 +69,13 @@ func isNullableWrap(config *Config, plain, wrapped *openapi3.Schema) bool {
 	}
 	// The wrapped side must be a bare wrapper: exactly a two-branch oneOf,
 	// nothing constraining at the top level.
-	if len(wrapped.OneOf) != 2 || !constrainsNothingBeyondOneOf(config, wrapped) {
+	if len(wrapped.OneOf) != 2 || !constrainsNothingBeyondOneOf(config, state, wrapped) {
 		return false
 	}
 	var payload *openapi3.SchemaRef
 	nullBranches := 0
 	for _, ref := range wrapped.OneOf {
-		if isBareNullSchema(config, schemaValue(ref)) {
+		if isBareNullSchema(config, state, schemaValue(ref)) {
 			nullBranches++
 			continue
 		}
@@ -84,7 +84,7 @@ func isNullableWrap(config *Config, plain, wrapped *openapi3.Schema) bool {
 	if nullBranches != 1 || payload == nil {
 		return false
 	}
-	return SchemaRefsValidationEquivalent(config, &openapi3.SchemaRef{Value: plain}, payload)
+	return schemaRefsValidationEquivalentWithin(config, state, &openapi3.SchemaRef{Value: plain}, payload)
 }
 
 // schemaAcceptsNull reports whether the schema accepts a null value via the
@@ -101,16 +101,16 @@ func schemaAcceptsNull(schema *openapi3.Schema) bool {
 // everything). Checking by equivalence rather than by a hand-maintained field
 // list means a validation keyword this package doesn't anticipate makes the
 // recognition decline (safe) instead of silently passing (unsound).
-func constrainsNothingBeyondOneOf(config *Config, schema *openapi3.Schema) bool {
+func constrainsNothingBeyondOneOf(config *Config, state *state, schema *openapi3.Schema) bool {
 	bare := *schema
 	bare.OneOf = nil
-	return SchemaRefsValidationEquivalent(config, &openapi3.SchemaRef{Value: &bare}, emptySchemaRef())
+	return schemaRefsValidationEquivalentWithin(config, state, &openapi3.SchemaRef{Value: &bare}, emptySchemaRef())
 }
 
 // isBareNullSchema reports whether the schema accepts exactly null and nothing
 // else: type ["null"], with everything beyond the type validation-equivalent
 // to the empty schema (same rationale as constrainsNothingBeyondOneOf).
-func isBareNullSchema(config *Config, schema *openapi3.Schema) bool {
+func isBareNullSchema(config *Config, state *state, schema *openapi3.Schema) bool {
 	if schema == nil {
 		return false
 	}
@@ -120,7 +120,7 @@ func isBareNullSchema(config *Config, schema *openapi3.Schema) bool {
 	}
 	bare := *schema
 	bare.Type = nil
-	return SchemaRefsValidationEquivalent(config, &openapi3.SchemaRef{Value: &bare}, emptySchemaRef())
+	return schemaRefsValidationEquivalentWithin(config, state, &openapi3.SchemaRef{Value: &bare}, emptySchemaRef())
 }
 
 func emptySchemaRef() *openapi3.SchemaRef {
