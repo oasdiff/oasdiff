@@ -67,7 +67,7 @@ Available tags, by dimension:
 - area: `schema`, `parameters`, `requestBody`, `responses`, `paths`, `headers`, `security`, `tags`, `components`
 - kind: `existence`, `requiredness`, `mutability`, `type`, `constraints`, `values`, `structure`, `lifecycle`
 - guard: `read-only`, `write-only`, `sanctioned`, `non-success`, `has-default`, `negotiated`
-- provenance: `generated`, `hand-written`
+- provenance: `generated`, `hand-written` — every check is one or the other, so the two tags split the catalog
 
 Values of the same dimension are combined with OR, different dimensions with AND: `--tags request,response,add` selects checks that are (request or response) and add.
 
