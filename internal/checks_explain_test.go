@@ -67,7 +67,11 @@ func Test_ChecksExplainRequiresExactlyOneId(t *testing.T) {
 
 // Every check in both listings can be explained: the id resolves and the
 // explanation carries a level, so no id a user can encounter is unexplained.
+// The same sweep asserts the two listings share no id: explain resolves both
+// rule sets in one namespace, so a changelog id would silently shadow a
+// validate id with the same name.
 func Test_ChecksExplainCoversEveryId(t *testing.T) {
+	seen := map[string]string{}
 	for _, listing := range []string{"oasdiff checks changelog --format json", "oasdiff checks validate --format json"} {
 		var stdout bytes.Buffer
 		require.Zero(t, internal.Run(cmdToArgs(listing), &stdout, io.Discard))
@@ -75,6 +79,8 @@ func Test_ChecksExplainCoversEveryId(t *testing.T) {
 		require.NoError(t, json.Unmarshal(stdout.Bytes(), &checks))
 		for _, check := range checks {
 			id := check["id"].(string)
+			require.NotContains(t, seen, id, "id %q appears in both %q and %q: rename it, or `checks explain` cannot keep a single id namespace", id, seen[id], listing)
+			seen[id] = listing
 			out := explainOut(t, "oasdiff checks explain --format json "+id)
 			var e map[string]any
 			require.NoError(t, json.Unmarshal([]byte(out), &e), id)
