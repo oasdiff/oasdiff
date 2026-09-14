@@ -61,7 +61,7 @@ func TestChecks_AllRuleFieldsPopulated(t *testing.T) {
 func TestChecks_FullCheckRendersAllFields(t *testing.T) {
 	checks := formatters.Checks{{
 		Id: "some-rule", Level: "error", Direction: "request", Area: "schema",
-		Kind: "type", Actions: []string{"change"}, Effect: "widens", Description: "d", Mitigation: "m",
+		Kind: "type", Actions: []string{"change"}, Effect: "widens", Generated: true, Description: "d", Mitigation: "m",
 	}}
 
 	out, err := formatters.JSONFormatter{}.RenderChecks(checks, formatters.NewRenderOpts())
@@ -70,7 +70,7 @@ func TestChecks_FullCheckRendersAllFields(t *testing.T) {
 	var got []map[string]any
 	require.NoError(t, json.Unmarshal(out, &got))
 	require.Len(t, got, 1)
-	for _, field := range []string{"id", "level", "direction", "area", "kind", "actions", "effect", "description", "mitigation"} {
+	for _, field := range []string{"id", "level", "direction", "area", "kind", "actions", "effect", "generated", "description", "mitigation"} {
 		require.Contains(t, got[0], field, "field %s must survive omitempty when populated", field)
 	}
 }

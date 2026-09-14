@@ -193,7 +193,7 @@ func boundRules() BackwardCompatibilityRules {
 							effect,
 							nil,
 							boundClaim(direction, scope, spec.keyword, action.claim),
-						))
+						).withGenerated())
 					}
 				}
 			}

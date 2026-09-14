@@ -3,6 +3,7 @@ package internal_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"testing"
 
@@ -98,4 +99,52 @@ func Test_ChecksChangelogGuardsTextColumn(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --tags sanctioned"), &stdout, io.Discard))
 	require.Contains(t, stdout.String(), "GUARDS")
 	require.Contains(t, stdout.String(), "sanctioned")
+}
+
+// --id displays exactly the named check, with its full record in json.
+func Test_ChecksChangelogIdFilter(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --format json --id api-removed-without-deprecation"), &stdout, io.Discard))
+
+	var checks []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &checks))
+	require.Len(t, checks, 1)
+	require.Equal(t, "api-removed-without-deprecation", checks[0]["id"])
+	require.NotEmpty(t, checks[0]["locations"])
+}
+
+func Test_ChecksChangelogUnknownIdRejected(t *testing.T) {
+	var stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog --id no-such-check"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), `unknown check id "no-such-check"`)
+}
+
+// --location keeps only checks claiming a location containing the string.
+func Test_ChecksChangelogLocationFilter(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --format json --location requestBody.content.*.schema.maximum"), &stdout, io.Discard))
+
+	var checks []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &checks))
+	require.NotEmpty(t, checks)
+	for _, check := range checks {
+		require.Contains(t, fmt.Sprint(check["locations"]), "requestBody.content.*.schema.maximum", check["id"])
+	}
+}
+
+// The generated and hand-written tags partition the catalog, and the json
+// generated field agrees with the tag that selected the check.
+func Test_ChecksChangelogGeneratedPartition(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --format json --tags generated"), &stdout, io.Discard))
+	var generated []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &generated))
+	require.NotEmpty(t, generated)
+	for _, check := range generated {
+		require.Equal(t, true, check["generated"], check["id"])
+	}
+
+	handWritten := countRows(t, "oasdiff checks changelog --format json --tags hand-written")
+	require.Positive(t, handWritten)
+	require.Equal(t, countRows(t, "oasdiff checks changelog --format json"), len(generated)+handWritten)
 }

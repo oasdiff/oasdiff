@@ -94,6 +94,11 @@ func newBackwardCompatibilityRule(id string, level Level, handler BackwardCompat
 	}
 }
 
+func (rule BackwardCompatibilityRule) withGenerated() BackwardCompatibilityRule {
+	rule.Generated = true
+	return rule
+}
+
 type BackwardCompatibilityRules []BackwardCompatibilityRule
 
 // Metadata returns the rules without their handlers, for callers that audit
