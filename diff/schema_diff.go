@@ -2,7 +2,7 @@ package diff
 
 import (
 	"errors"
-	"slices"
+	"math"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -102,44 +102,31 @@ func (diff *SchemaDiff) Empty() bool {
 
 func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 
-	if diff, ok := state.cache[schemaPair{schema1, schema2}]; ok {
+	if schema1 == nil || schema2 == nil || schema1.Value == nil || schema2.Value == nil {
+		return getSchemaDiffInternal(config, state, schema1, schema2)
+	}
+
+	// Keyed by schema value, so every $ref to the same schema, and every
+	// in-memory link to it (e.g. after --flatten-allof), is the same pair.
+	pair := valuePair{schema1.Value, schema2.Value}
+	if diff, ok := state.cache[pair]; ok {
 		return diff, nil
 	}
 
 	// A pair that is already being diffed further up the stack forms a
-	// cycle, whether it cycles through $refs or through in-memory links
-	// (e.g. --flatten-allof merging a recursive $ref into a ref-less
-	// self-referencing schema). Cut the cycle by reporting no diff at the
-	// re-entry point: the computation in progress reports every difference
-	// of the pair.
-	pair := schemaPair{schema1, schema2}
+	// cycle. Cut it by reporting no diff at the re-entry point: the
+	// computation in progress reports every difference of the pair.
 	if depth, ok := state.inFlight[pair]; ok {
-		// the no-diff answer stands in for the pair's computation already in
-		// progress; record the depth the cut targets, which decides how far
-		// up the stack the result stays path-dependent
-		state.cutTargets = append(state.cutTargets, depth)
+		state.minCutTarget = min(state.minCutTarget, depth)
 		return nil, nil
 	}
 
 	depth := len(state.inFlight)
-	if entry, ok := state.scoped[pair]; ok {
-		if entry.maxDep < depth && state.frameSeq[entry.maxDep] == entry.maxDepSeq {
-			// the frames the entry depends on are still in flight, so its
-			// empty answer stands; the caller inherits the dependencies, as
-			// if the cuts had fired again
-			state.cutTargets = append(state.cutTargets, entry.deps...)
-			return nil, nil
-		}
-		delete(state.scoped, pair)
-	}
-
 	state.inFlight[pair] = depth
-	state.seq++
-	state.frameSeq = append(state.frameSeq[:depth], state.seq)
 	defer delete(state.inFlight, pair)
 
-	outerCutTargets := state.cutTargets
-	state.cutTargets = nil
+	outerMinCutTarget := state.minCutTarget
+	state.minCutTarget = math.MaxInt
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err != nil {
 		return nil, err
@@ -149,51 +136,15 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 		diff = nil
 	}
 
-	// A diff whose computation included a cut is shaped by where the cuts
-	// fell, so reusing it on another path would redistribute the reported
-	// changes by traversal order (#1230). The one exception is the empty
-	// diff: a recomputation can only cut more, and more cuts can only
-	// remove content, so empty stays empty on every path. Cuts into this
-	// frame itself stand in for this very computation and do not constrain
-	// the caller; only targets above survive as dependencies.
-	noCuts := len(state.cutTargets) == 0
-	deps := depsBelow(state.cutTargets, depth)
-
-	switch {
-	case len(deps) == 0 && (noCuts || diff == nil):
-		// a function of the pair alone: no ancestor was consulted, and the
-		// result is either cut-free or empty
+	// A cut into a frame above this one shapes the diff by the path that
+	// led here, so it is not reused (#1230). A cut into this frame itself
+	// falls at the same place on every path, so the diff is a function of
+	// the pair alone and is cached.
+	if state.minCutTarget >= depth {
 		state.cache[pair] = diff
-		state.cutTargets = outerCutTargets
-	case diff == nil:
-		// empty, but computed while ancestor computations were in progress:
-		// reusable only while they still are (scopedEntry), and the caller
-		// inherits the dependencies
-		maxDep := slices.Max(deps)
-		state.scoped[pair] = scopedEntry{deps: deps, maxDep: maxDep, maxDepSeq: state.frameSeq[maxDep]}
-		state.cutTargets = append(outerCutTargets, deps...)
-	default:
-		// a non-empty diff shaped by cuts holds for this path only
-		state.cutTargets = append(outerCutTargets, deps...)
 	}
-	if depth == 0 {
-		// the stack is empty again: every scoped entry depends on frames
-		// that are gone
-		clear(state.scoped)
-	}
+	state.minCutTarget = min(outerMinCutTarget, state.minCutTarget)
 	return diff, nil
-}
-
-// depsBelow returns the distinct cut targets strictly below depth, sorted.
-func depsBelow(targets []int, depth int) []int {
-	var deps []int
-	for _, d := range targets {
-		if d < depth {
-			deps = append(deps, d)
-		}
-	}
-	slices.Sort(deps)
-	return slices.Compact(deps)
 }
 
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {

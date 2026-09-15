@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: shared ref
+  version: "1"
+paths:
+  /a:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+  /b:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+components:
+  schemas:
+    Node:
+      type: object
+      properties:
+        next:
+          $ref: '#/components/schemas/Node'
+        leaf:
+          $ref: '#/components/schemas/Leaf'
+    Leaf:
+      type: string
