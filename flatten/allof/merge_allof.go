@@ -84,6 +84,11 @@ type state struct {
 	// Properties / Items / Contains / PropertyNames sub-schemas (#890).
 	flattening map[*openapi3.Schema]*openapi3.Schema
 
+	// replaced maps a result value the in-flight guard replaced
+	// (anchorInFlight) to its replacement, so the merge of an input can be
+	// found from the value first recorded for it (writeBack).
+	replaced map[*openapi3.Schema]*openapi3.Schema
+
 	// anchored records the SchemaRefs the in-flight guard pointed at a
 	// result being populated further up. Such an edge carries no $ref, so a
 	// cycle through it has no serialized form until the target is named;
@@ -104,6 +109,7 @@ func newState() *state {
 		refs:          map[string]bool{},
 		circularAllOf: openapi3.SchemaRefs{},
 		flattening:    map[*openapi3.Schema]*openapi3.Schema{},
+		replaced:      map[*openapi3.Schema]*openapi3.Schema{},
 		hints:         map[*openapi3.Schema]string{},
 	}
 }
@@ -113,28 +119,26 @@ func newState() *state {
 // no $ref, which does not marshal; MergeSpec, which flattens a whole
 // document, additionally names such cycles.
 func Merge(schema openapi3.SchemaRef) (*openapi3.Schema, error) {
-	merged, _, _, err := mergeWithAnchors(schema)
-	return merged, err
-}
-
-// mergeWithAnchors is Merge, also reporting the ref-less back-edges the
-// in-flight guard created and the naming hints for their targets, so a
-// spec-level caller can name them.
-func mergeWithAnchors(schema openapi3.SchemaRef) (*openapi3.Schema, []*openapi3.SchemaRef, map[*openapi3.Schema]string, error) {
 	state := newState()
 	result, err := mergeInternal(state, &schema)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
+	if err := mergeCircular(state); err != nil {
+		return nil, err
+	}
+	return result.Value, nil
+}
 
+// mergeCircular flattens the allOf sets mergeInternal deferred, in the order
+// it found them.
+func mergeCircular(state *state) error {
 	for _, schema := range state.circularAllOf {
-		err := mergeCircularAllOf(state, schema)
-		if err != nil {
-			return nil, nil, nil, err
+		if err := mergeCircularAllOf(state, schema); err != nil {
+			return err
 		}
 	}
-
-	return result.Value, state.anchored, state.hints, nil
+	return nil
 }
 
 func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
@@ -477,6 +481,7 @@ func anchorInFlight(state *state, result *openapi3.SchemaRef, schemas openapi3.S
 	}
 
 	if len(anchors) == 1 && len(rest) == 0 {
+		state.replaced[result.Value] = anchors[0]
 		result.Value = anchors[0]
 		state.anchored = append(state.anchored, result)
 		return true, nil

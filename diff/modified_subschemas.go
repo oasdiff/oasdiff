@@ -83,7 +83,34 @@ func (modifiedSchemas ModifiedSubschemas) addSchemaDiff(config *Config, state *s
 	if err != nil {
 		return nil, err
 	}
-	if !diff.Empty() {
+	if diff != nil {
+		modifiedSchemas = append(modifiedSchemas, &ModifiedSubschema{
+			Base: Subschema{
+				Index:     index1,
+				Component: getComponentName(schemaRef1),
+				Title:     schemaValue(schemaRef1).Title,
+			},
+			Revision: Subschema{
+				Index:     index2,
+				Component: getComponentName(schemaRef2),
+				Title:     schemaValue(schemaRef2).Title,
+			},
+			Diff: diff,
+		})
+	}
+
+	return modifiedSchemas, nil
+}
+
+// addUnrolled appends the pair's diff on the unroller's current path, when it
+// has one.
+func (modifiedSchemas ModifiedSubschemas) addUnrolled(u *unroller, schemaRef1, schemaRef2 *openapi3.SchemaRef, index1, index2 int) (ModifiedSubschemas, error) {
+
+	diff, err := u.diff(schemaRef1, schemaRef2)
+	if err != nil {
+		return nil, err
+	}
+	if diff != nil {
 		modifiedSchemas = append(modifiedSchemas, &ModifiedSubschema{
 			Base: Subschema{
 				Index:     index1,

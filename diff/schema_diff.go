@@ -10,7 +10,6 @@ import (
 type SchemaDiff struct {
 	SchemaAdded                     bool                    `json:"schemaAdded,omitempty" yaml:"schemaAdded,omitempty"`
 	SchemaDeleted                   bool                    `json:"schemaDeleted,omitempty" yaml:"schemaDeleted,omitempty"`
-	CircularRefDiff                 bool                    `json:"circularRef,omitempty" yaml:"circularRef,omitempty"`
 	ExtensionsDiff                  *ExtensionsDiff         `json:"extensions,omitempty" yaml:"extensions,omitempty"`
 	OneOfDiff                       *SubschemasDiff         `json:"oneOf,omitempty" yaml:"oneOf,omitempty"`
 	AnyOfDiff                       *SubschemasDiff         `json:"anyOf,omitempty" yaml:"anyOf,omitempty"`
@@ -100,37 +99,6 @@ func (diff *SchemaDiff) Empty() bool {
 	return diff == nil || *diff == SchemaDiff{Base: diff.Base, Revision: diff.Revision}
 }
 
-func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
-
-	if diff, ok := state.cache[schemaPair{schema1, schema2}]; ok {
-		return diff, nil
-	}
-
-	// A pair that is already being diffed further up the stack forms a cycle
-	// that the circular-ref guard can't see: it keys on Ref, which is empty
-	// for inline schemas — e.g. when --flatten-allof merges a recursive $ref
-	// into a ref-less self-referencing schema. Cut the cycle the same way the
-	// circular-ref guard does: report no diff at the re-entry point.
-	pair := schemaPair{schema1, schema2}
-	if _, ok := state.inFlight[pair]; ok {
-		return nil, nil
-	}
-	state.inFlight[pair] = struct{}{}
-	defer delete(state.inFlight, pair)
-
-	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
-	if err != nil {
-		return nil, err
-	}
-
-	if diff.Empty() {
-		diff = nil
-	}
-
-	state.cache[schemaPair{schema1, schema2}] = diff
-	return diff, nil
-}
-
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 
 	if schema1 == nil && schema2 == nil {
@@ -154,27 +122,6 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	result := SchemaDiff{
 		Base:     value1,
 		Revision: value2,
-	}
-
-	if status := getCircularRefsDiff(state.visitedSchemasBase, state.visitedSchemasRevision, schema1, schema2); status != circularRefStatusNone {
-		switch status {
-		case circularRefStatusDiff:
-			result.CircularRefDiff = true
-			return &result, nil
-		case circularRefStatusNoDiff:
-			return &result, nil
-		}
-	}
-
-	// mark visited schema references to avoid infinite loops
-	if schema1.Ref != "" {
-		state.visitedSchemasBase[schema1.Ref] = struct{}{}
-		defer delete(state.visitedSchemasBase, schema1.Ref)
-	}
-
-	if schema2.Ref != "" {
-		state.visitedSchemasRevision[schema2.Ref] = struct{}{}
-		defer delete(state.visitedSchemasRevision, schema2.Ref)
 	}
 
 	var err error
@@ -201,8 +148,6 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 	result.TypeDiff = getTypeDiff(value1.Type, value2.Type)
 	result.ListOfTypesDiff = getListOfTypesDiff(value1, value2)
-	result.OneOfWrappingDiff = getOneOfWrappingDiff(config, value1, value2)
-	result.NullableWrappingDiff = getNullableWrappingDiff(config, value1, value2)
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)

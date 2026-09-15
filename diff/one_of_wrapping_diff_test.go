@@ -29,26 +29,26 @@ func TestGetOneOfWrappingDiff_OriginalPreserved(t *testing.T) {
 	other := obj([]string{"ref"}, map[string]*openapi3.Schema{"ref": str()})
 
 	same := obj([]string{"foo"}, map[string]*openapi3.Schema{"foo": str(), "bar": str()})
-	require.True(t, getOneOfWrappingDiff(cfg, base, wrap(same, other)).OriginalPreserved,
+	require.True(t, getOneOfWrappingDiff(newUnroller(cfg, newState()), base, wrap(same, other)).OriginalPreserved,
 		"an alternative with the base's validation contract preserves the original")
-	require.True(t, getOneOfWrappingDiff(cfg, base, wrap(other, same)).OriginalPreserved,
+	require.True(t, getOneOfWrappingDiff(newUnroller(cfg, newState()), base, wrap(other, same)).OriginalPreserved,
 		"branch order does not matter")
 
 	relaxed := obj(nil, map[string]*openapi3.Schema{"foo": str(), "bar": str()})
-	require.False(t, getOneOfWrappingDiff(cfg, base, wrap(relaxed, other)).OriginalPreserved,
+	require.False(t, getOneOfWrappingDiff(newUnroller(cfg, newState()), base, wrap(relaxed, other)).OriginalPreserved,
 		"an alternative that drops a required property is not the original")
 
 	narrowed := obj([]string{"foo"}, map[string]*openapi3.Schema{
 		"foo": {Type: &openapi3.Types{"string"}, MinLength: 1},
 		"bar": str(),
 	})
-	require.False(t, getOneOfWrappingDiff(cfg, base, wrap(narrowed, other)).OriginalPreserved,
+	require.False(t, getOneOfWrappingDiff(newUnroller(cfg, newState()), base, wrap(narrowed, other)).OriginalPreserved,
 		"an alternative that constrains a property is not the original")
 
 	// Equivalence is by validation contract, so an annotation on an otherwise
 	// identical alternative still counts as the original.
 	annotated := obj([]string{"foo"}, map[string]*openapi3.Schema{"foo": str(), "bar": str()})
 	annotated.Description = "the original, documented"
-	require.True(t, getOneOfWrappingDiff(cfg, base, wrap(annotated, other)).OriginalPreserved,
+	require.True(t, getOneOfWrappingDiff(newUnroller(cfg, newState()), base, wrap(annotated, other)).OriginalPreserved,
 		"an annotation-only difference does not change the contract")
 }

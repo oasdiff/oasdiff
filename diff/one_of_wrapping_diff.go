@@ -49,7 +49,7 @@ func (diff *OneOfWrappingDiff) Empty() bool {
 // object schema, revision wraps equivalent alternatives in a oneOf) and returns
 // nil when it doesn't apply. The reverse (unwrapping a oneOf into a concrete
 // schema) is not detected here.
-func getOneOfWrappingDiff(config *Config, base, revision *openapi3.Schema) *OneOfWrappingDiff {
+func getOneOfWrappingDiff(u *unroller, base, revision *openapi3.Schema) *OneOfWrappingDiff {
 	if base == nil || revision == nil {
 		return nil
 	}
@@ -81,7 +81,7 @@ func getOneOfWrappingDiff(config *Config, base, revision *openapi3.Schema) *OneO
 	return &OneOfWrappingDiff{
 		NumAlternatives:   len(alts),
 		MovedProperties:   moved,
-		OriginalPreserved: anyAlternativeEquivalent(config, base, revision.OneOf),
+		OriginalPreserved: anyAlternativeEquivalent(u, base, revision.OneOf),
 	}
 }
 
@@ -90,10 +90,10 @@ func getOneOfWrappingDiff(config *Config, base, revision *openapi3.Schema) *OneO
 // comparing a hand-listed set of keywords, means a validation keyword this
 // function doesn't anticipate reads as a difference (so the wrapping is not
 // credited with preserving the base) instead of being silently ignored.
-func anyAlternativeEquivalent(config *Config, base *openapi3.Schema, alts openapi3.SchemaRefs) bool {
+func anyAlternativeEquivalent(u *unroller, base *openapi3.Schema, alts openapi3.SchemaRefs) bool {
 	baseRef := &openapi3.SchemaRef{Value: base}
 	for _, alt := range alts {
-		if SchemaRefsValidationEquivalent(config, baseRef, alt) {
+		if u.equivalent(baseRef, alt) {
 			return true
 		}
 	}
