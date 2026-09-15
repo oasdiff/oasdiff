@@ -148,9 +148,6 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 	result.TypeDiff = getTypeDiff(value1.Type, value2.Type)
 	result.ListOfTypesDiff = getListOfTypesDiff(value1, value2)
-	// OneOfWrappingDiff and NullableWrappingDiff are decided when the graph is
-	// unrolled (unroller.copy): recognizing a wrapping compares schema pairs
-	// that can cycle back to this one.
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)

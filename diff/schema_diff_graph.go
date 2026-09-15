@@ -359,6 +359,8 @@ func (u *unroller) copy(node *SchemaDiff) *SchemaDiff {
 			field.Set(reflect.ValueOf(u.subschemas(child)))
 		}
 	}
+	// recognizing a wrapping compares schema pairs that can cycle back to
+	// this node, so it is decided here, with the path known
 	unrolled.OneOfWrappingDiff = getOneOfWrappingDiff(u, node.Base, node.Revision)
 	unrolled.NullableWrappingDiff = getNullableWrappingDiff(u, node.Base, node.Revision)
 	if unrolled.Empty() {
