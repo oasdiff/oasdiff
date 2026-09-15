@@ -397,7 +397,7 @@ func findIndenticalSchema(config *Config, state *state, schemaRef1 *openapi3.Sch
 
 		if schemaDiff, err := getSchemaDiff(config, state, schemaRef1, schemaRef2); err != nil {
 			return false, 0, err
-		} else if schemaDiff.Empty() {
+		} else if state.unroll(schemaDiff) == nil {
 			return true, index2, nil
 		}
 	}

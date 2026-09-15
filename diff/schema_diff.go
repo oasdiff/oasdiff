@@ -2,7 +2,6 @@ package diff
 
 import (
 	"errors"
-	"math"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -106,45 +105,49 @@ func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.Sche
 		return getSchemaDiffInternal(config, state, schema1, schema2)
 	}
 
-	// Keyed by schema value, so every $ref to the same schema, and every
-	// in-memory link to it (e.g. after --flatten-allof), is the same pair.
-	pair := valuePair{schema1.Value, schema2.Value}
-	if diff, ok := state.cache[pair]; ok {
-		return diff, nil
+	if state.depth == 0 {
+		return getSchemaDiffTree(config, state, schema1, schema2)
 	}
+	return getSchemaDiffNode(config, state, schema1, schema2)
+}
 
-	// A pair that is already being diffed further up the stack forms a
-	// cycle. Cut it by reporting no diff at the re-entry point: the
-	// computation in progress reports every difference of the pair.
-	if depth, ok := state.inFlight[pair]; ok {
-		state.minCutTarget = min(state.minCutTarget, depth)
-		return nil, nil
-	}
-
-	depth := len(state.inFlight)
-	state.inFlight[pair] = depth
-	defer delete(state.inFlight, pair)
-
-	outerMinCutTarget := state.minCutTarget
-	state.minCutTarget = math.MaxInt
-	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
+// getSchemaDiffTree diffs a pair reached from outside the schema graph (a
+// media type, a parameter, a component entry): it builds the pair's node in
+// the graph and returns its unrolled tree, nil when nothing changed.
+func getSchemaDiffTree(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
+	node, err := getSchemaDiffNode(config, state, schema1, schema2)
 	if err != nil {
 		return nil, err
 	}
+	return state.unroll(node), nil
+}
 
-	if diff.Empty() {
-		diff = nil
+// getSchemaDiffNode returns the graph node of a pair of schema values. Each
+// pair is diffed once; a pair reached again while its own diff is still in
+// progress (a cycle) gets the node in progress, so the graph links back to
+// it the way the schemas do. Every child a node has is linked, changed or
+// not: whether anything changed below a node is decided when the graph is
+// unrolled, because inside a cycle it cannot be decided any earlier.
+func getSchemaDiffNode(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
+	pair := valuePair{schema1.Value, schema2.Value}
+	if node, ok := state.nodes[pair]; ok {
+		return node, nil
 	}
 
-	// A cut into a frame above this one shapes the diff by the path that
-	// led here, so it is not reused (#1230). A cut into this frame itself
-	// falls at the same place on every path, so the diff is a function of
-	// the pair alone and is cached.
-	if state.minCutTarget >= depth {
-		state.cache[pair] = diff
+	node := &SchemaDiff{Base: schema1.Value, Revision: schema2.Value}
+	state.nodes[pair] = node
+	state.inProgress[node] = struct{}{}
+	state.depth++
+	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
+	state.depth--
+	delete(state.inProgress, node)
+	if err != nil {
+		delete(state.nodes, pair)
+		return nil, err
 	}
-	state.minCutTarget = min(outerMinCutTarget, state.minCutTarget)
-	return diff, nil
+
+	*node = *diff
+	return node, nil
 }
 
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {

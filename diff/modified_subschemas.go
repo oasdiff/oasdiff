@@ -83,7 +83,7 @@ func (modifiedSchemas ModifiedSubschemas) addSchemaDiff(config *Config, state *s
 	if err != nil {
 		return nil, err
 	}
-	if !diff.Empty() {
+	if diff != nil {
 		modifiedSchemas = append(modifiedSchemas, &ModifiedSubschema{
 			Base: Subschema{
 				Index:     index1,

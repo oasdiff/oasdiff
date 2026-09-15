@@ -137,7 +137,7 @@ func (modifiedSchemas ModifiedSchemasMap) addSchemaDiff(config *Config, state *s
 	if err != nil {
 		return err
 	}
-	if !diff.Empty() {
+	if diff != nil {
 		modifiedSchemas[schemaName] = diff
 	}
 
