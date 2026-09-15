@@ -7,22 +7,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// reachesSchemaDiff reports whether a value of type t can hold a *SchemaDiff
-// somewhere below it.
-func reachesSchemaDiff(t reflect.Type, seen map[reflect.Type]bool) bool {
-	if t == reflect.TypeFor[*SchemaDiff]() {
-		return true
-	}
-	if seen[t] {
-		return false
-	}
-	seen[t] = true
+// holdsSchemaDiff is the test's own answer to whether a field type can hold
+// a schema diff, so it checks the source's rather than repeating it.
+func holdsSchemaDiff(t reflect.Type) bool {
 	switch t.Kind() {
 	case reflect.Pointer, reflect.Slice, reflect.Array, reflect.Map:
-		return reachesSchemaDiff(t.Elem(), seen)
+		return t.Elem() == reflect.TypeFor[SchemaDiff]() || holdsSchemaDiff(t.Elem())
 	case reflect.Struct:
+		if t == reflect.TypeFor[SchemaDiff]() {
+			return true
+		}
 		for field := range t.Fields() {
-			if reachesSchemaDiff(field.Type, seen) {
+			if holdsSchemaDiff(field.Type) {
 				return true
 			}
 		}
@@ -38,7 +34,7 @@ func TestUnroll_CutsEveryChildField(t *testing.T) {
 	schemaDiffType := reflect.TypeFor[SchemaDiff]()
 	for i := range schemaDiffType.NumField() {
 		field := schemaDiffType.Field(i)
-		if field.Name == "Base" || field.Name == "Revision" || !reachesSchemaDiff(field.Type, map[reflect.Type]bool{}) {
+		if field.Name == "Base" || field.Name == "Revision" || !holdsSchemaDiff(field.Type) {
 			continue
 		}
 		t.Run(field.Name, func(t *testing.T) {
@@ -56,8 +52,7 @@ func TestUnroll_CutsEveryChildField(t *testing.T) {
 			}
 			reflect.ValueOf(node).Elem().Field(i).Set(link)
 
-			graph := newSchemaGraph()
-			unrolled := graph.unroll(node)
+			unrolled := newUnroller(NewConfig(), newState()).unroll(node)
 			require.NotNil(t, unrolled, "the node's own change must be kept")
 			require.True(t, reflect.ValueOf(unrolled).Elem().Field(i).IsNil(), "the cycle through %s must be cut", field.Name)
 			require.Equal(t, "b", unrolled.DescriptionDiff.To)
@@ -71,7 +66,6 @@ func TestUnroll_SharesCutFreeNodes(t *testing.T) {
 	leaf := &SchemaDiff{DescriptionDiff: &ValueDiff{From: "a", To: "b"}}
 	root := &SchemaDiff{PropertiesDiff: &SchemasDiff{Modified: ModifiedSchemasMap{"x": leaf, "y": leaf}}}
 
-	graph := newSchemaGraph()
-	unrolled := graph.unroll(root)
+	unrolled := newUnroller(NewConfig(), newState()).unroll(root)
 	require.Same(t, unrolled.PropertiesDiff.Modified["x"], unrolled.PropertiesDiff.Modified["y"])
 }

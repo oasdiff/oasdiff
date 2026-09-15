@@ -33,6 +33,12 @@ type SubschemasDiff struct {
 	Added    Subschemas         `json:"added,omitempty" yaml:"added,omitempty"`
 	Deleted  Subschemas         `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSubschemas `json:"modified,omitempty" yaml:"modified,omitempty"`
+
+	// In a node of the schema diff graph, passes 2 and 3 are still pending
+	// (unroller.subschemas runs them, since they compare pairs whose diff can
+	// depend on the path) and base and revision are the lists they compare.
+	pending        bool
+	base, revision openapi3.SchemaRefs
 }
 
 // NewSubschemasDiff creates a new SubschemasDiff
@@ -89,49 +95,28 @@ func (diff *SubschemasDiff) Empty() bool {
 }
 
 func getSubschemasDiff(config *Config, state *state, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) (*SubschemasDiff, error) {
-	diff, err := getSubschemasDiffInternal(config, state, schemaRefs1, schemaRefs2)
-	if err != nil {
-		return nil, err
-	}
-
-	if diff.Empty() {
-		return nil, nil
-	}
-
-	return diff, nil
-}
-
-func (diff SubschemasDiff) combine(other SubschemasDiff) (*SubschemasDiff, error) {
-
-	return &SubschemasDiff{
-		Added:    append(diff.Added, other.Added...),
-		Deleted:  append(diff.Deleted, other.Deleted...),
-		Modified: append(diff.Modified, other.Modified...),
-	}, nil
-}
-
-func getSubschemasDiffInternal(config *Config, state *state, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) (*SubschemasDiff, error) {
 
 	if len(schemaRefs1) == 0 && len(schemaRefs2) == 0 {
 		return nil, nil
 	}
 
-	diffRefs, err := getSubschemasRefDiff(config, state, schemaRefs1, schemaRefs2)
+	diff, err := getSubschemasRefDiff(config, state, schemaRefs1, schemaRefs2)
 	if err != nil {
 		return nil, err
 	}
+	diff.pending = true
+	diff.base = schemaRefs1
+	diff.revision = schemaRefs2
+	return diff, nil
+}
 
-	diffInline, err := getSubschemasInlineDiff(config, state, schemaRefs1, schemaRefs2)
-	if err != nil {
-		return nil, err
+func (diff *SubschemasDiff) combine(other SubschemasDiff) *SubschemasDiff {
+
+	return &SubschemasDiff{
+		Added:    append(diff.Added, other.Added...),
+		Deleted:  append(diff.Deleted, other.Deleted...),
+		Modified: append(diff.Modified, other.Modified...),
 	}
-
-	combined, err := diffRefs.combine(diffInline)
-	if err != nil {
-		return nil, err
-	}
-
-	return reconcileInlineRefRefactors(config, state, combined, schemaRefs1, schemaRefs2), nil
 }
 
 // reconcileInlineRefRefactors pairs unmatched Added and Deleted entries that
@@ -141,8 +126,8 @@ func getSubschemasDiffInternal(config *Config, state *state, schemaRefs1, schema
 // happens to duplicate an existing still-present branch is preserved.
 //
 // Gated on config.MatchInlineRefs; default true.
-func reconcileInlineRefRefactors(config *Config, state *state, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
-	if !config.MatchInlineRefs {
+func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
+	if !u.config.MatchInlineRefs {
 		return combined
 	}
 	if combined.Empty() {
@@ -179,7 +164,7 @@ func reconcileInlineRefRefactors(config *Config, state *state, combined *Subsche
 			if !isInlineRefactorBoundary(deletedRef, addedRef) {
 				continue
 			}
-			if !schemaRefsValidationEquivalentWithin(config, state, deletedRef, addedRef) {
+			if !u.equivalent(deletedRef, addedRef) {
 				continue
 			}
 
@@ -259,22 +244,22 @@ func getSubschemasRefDiff(config *Config, state *state, schemaRefs1, schemaRefs2
 }
 
 // getSubschemasInlineDiff compares inline subschemas
-func getSubschemasInlineDiff(config *Config, state *state, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) (SubschemasDiff, error) {
+func getSubschemasInlineDiff(u *unroller, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) (SubschemasDiff, error) {
 
 	// find schemas in revision that have no matching schema in the base
-	addedIdx, err := getNonContainedInlineSchemas(config, state, schemaRefs2, schemaRefs1)
+	addedIdx, err := getNonContainedInlineSchemas(u, schemaRefs2, schemaRefs1, true)
 	if err != nil {
 		return SubschemasDiff{}, err
 	}
 
 	// find schemas in base that have no matching schema in the revision
-	deletedIdx, err := getNonContainedInlineSchemas(config, state, schemaRefs1, schemaRefs2)
+	deletedIdx, err := getNonContainedInlineSchemas(u, schemaRefs1, schemaRefs2, false)
 	if err != nil {
 		return SubschemasDiff{}, err
 	}
 
 	// match schemas by title
-	addedIdx, deletedIdx, modifiedSchemas, err := compareByTitle(config, state, addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
+	addedIdx, deletedIdx, modifiedSchemas, err := compareByTitle(u, addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
 	if err != nil {
 		return SubschemasDiff{}, err
 	}
@@ -282,7 +267,7 @@ func getSubschemasInlineDiff(config *Config, state *state, schemaRefs1, schemaRe
 	// special case: single modified schema with no title
 	if isSingleModifiedCase(schemaRefs1, schemaRefs2, addedIdx, deletedIdx) {
 		var err error
-		modifiedSchemas, err = modifiedSchemas.addSchemaDiff(config, state, schemaRefs1[deletedIdx[0]], schemaRefs2[addedIdx[0]], deletedIdx[0], addedIdx[0])
+		modifiedSchemas, err = modifiedSchemas.addUnrolled(u, schemaRefs1[deletedIdx[0]], schemaRefs2[addedIdx[0]], deletedIdx[0], addedIdx[0])
 		if err != nil {
 			return SubschemasDiff{}, err
 		}
@@ -304,7 +289,7 @@ func isSingleModifiedCase(schemaRefs1, schemaRefs2 openapi3.SchemaRefs, addedIdx
 		schemaValue(schemaRefs2[addedIdx[0]]).Title == ""
 }
 
-func compareByTitle(config *Config, state *state, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, []int, ModifiedSubschemas, error) {
+func compareByTitle(u *unroller, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, []int, ModifiedSubschemas, error) {
 
 	addedMatched, deletedMatched := matchByTitle(addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
 
@@ -316,7 +301,7 @@ func compareByTitle(config *Config, state *state, addedIdx, deletedIdx []int, sc
 		}
 
 		var err error
-		modifiedSchemas, err = modifiedSchemas.addSchemaDiff(config, state, schemaRefs1[deletedId], schemaRefs2[addedId], deletedId, addedId)
+		modifiedSchemas, err = modifiedSchemas.addUnrolled(u, schemaRefs1[deletedId], schemaRefs2[addedId], deletedId, addedId)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -362,7 +347,11 @@ func matchByTitle(addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.
 	return addedMatched, deletedMatched
 }
 
-func getNonContainedInlineSchemas(config *Config, state *state, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, error) {
+// getNonContainedInlineSchemas returns the indexes of the inline schemas of
+// schemaRefs1 that have no identical schema in schemaRefs2. reversed says
+// that schemaRefs1 is the revision side, so that every pair is compared as
+// base against revision (see unroller.diff).
+func getNonContainedInlineSchemas(u *unroller, schemaRefs1, schemaRefs2 openapi3.SchemaRefs, reversed bool) ([]int, error) {
 
 	notContainedIdx := []int{}
 	matched := map[int]struct{}{}
@@ -372,7 +361,7 @@ func getNonContainedInlineSchemas(config *Config, state *state, schemaRefs1, sch
 			continue
 		}
 
-		if found, index2, err := findIndenticalSchema(config, state, schemaRef1, schemaRefs2, matched, isSchemaInline); err != nil {
+		if found, index2, err := findIndenticalSchema(u, schemaRef1, schemaRefs2, matched, isSchemaInline, reversed); err != nil {
 			return nil, err
 		} else if !found {
 			notContainedIdx = append(notContainedIdx, index1)
@@ -383,7 +372,7 @@ func getNonContainedInlineSchemas(config *Config, state *state, schemaRefs1, sch
 	return notContainedIdx, nil
 }
 
-func findIndenticalSchema(config *Config, state *state, schemaRef1 *openapi3.SchemaRef, schemasRefs2 openapi3.SchemaRefs, matched map[int]struct{}, filter schemaRefsFilter) (bool, int, error) {
+func findIndenticalSchema(u *unroller, schemaRef1 *openapi3.SchemaRef, schemasRefs2 openapi3.SchemaRefs, matched map[int]struct{}, filter schemaRefsFilter, reversed bool) (bool, int, error) {
 	for index2, schemaRef2 := range schemasRefs2 {
 		// Restrict candidates to those matching the filter. schemaRef1 is
 		// the caller's already-filtered source; only the candidate side
@@ -395,9 +384,13 @@ func findIndenticalSchema(config *Config, state *state, schemaRef1 *openapi3.Sch
 			continue
 		}
 
-		if schemaDiff, err := getSchemaDiff(config, state, schemaRef1, schemaRef2); err != nil {
+		base, revision := schemaRef1, schemaRef2
+		if reversed {
+			base, revision = schemaRef2, schemaRef1
+		}
+		if identical, err := u.identical(base, revision); err != nil {
 			return false, 0, err
-		} else if state.graph.unroll(schemaDiff) == nil {
+		} else if identical {
 			return true, index2, nil
 		}
 	}

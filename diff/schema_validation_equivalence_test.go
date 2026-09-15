@@ -94,11 +94,11 @@ func TestSchemaRefsValidationEquivalent_NilRefs(t *testing.T) {
 
 // Node.child is a $ref to Link in the base and Link's body inlined in the
 // revision, and Link.target points back at Node. Matching the two branches
-// compares them for equivalence, which is a schema diff of its own that
-// reaches Node.child again and asks the same question. The nested comparison
-// must decline rather than start another; declining reads as a difference,
-// so the refactor is reported instead of reconciled, and the diff finishes.
-// A regression overflows the stack.
+// compares them for equivalence, and that comparison reaches Node.child
+// again through the cycle. It is decided on the path from Node, where Node
+// itself is already being reported, so the branches compare as equivalent
+// and the refactor is reconciled, as it is without the cycle. A regression
+// overflows the stack.
 func TestSchemaRefsValidationEquivalent_CyclicInlineRefRefactorTerminates(t *testing.T) {
 	loader := openapi3.NewLoader()
 	base, err := loader.LoadFromFile("../data/circular-inline-ref1.yaml")
@@ -108,5 +108,5 @@ func TestSchemaRefsValidationEquivalent_CyclicInlineRefRefactorTerminates(t *tes
 
 	d, err := diff.Get(diff.NewConfig(), base, revision)
 	require.NoError(t, err)
-	require.Contains(t, d.ComponentsDiff.SchemasDiff.Modified, "Node")
+	require.True(t, d.Empty(), "the inline copy of Link is the same schema, so nothing changed")
 }

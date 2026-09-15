@@ -8,37 +8,7 @@ import "github.com/getkin/kin-openapi/openapi3"
 // comments are ignored; checker-significant metadata such as deprecated is
 // treated as a contract change.
 func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
-	return schemaRefsValidationEquivalentWithin(config, newState(), schemaRef1, schemaRef2)
-}
-
-// schemaRefsValidationEquivalentWithin is the form for callers inside a diff
-// traversal. The comparison runs in a diff state of its own, so it is not
-// affected by what the caller's traversal has already visited, but it shares
-// the caller's equivalence re-entry set: a comparison of a value pair whose
-// comparison is already in progress further up declines, which errs toward
-// reporting a difference, instead of recursing forever through a cyclic
-// schema.
-func schemaRefsValidationEquivalentWithin(config *Config, state *state, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
-	pair := valuePair{schemaValueOf(schemaRef1), schemaValueOf(schemaRef2)}
-	if _, ok := state.equivalenceInFlight[pair]; ok {
-		return false
-	}
-	state.equivalenceInFlight[pair] = struct{}{}
-	defer delete(state.equivalenceInFlight, pair)
-
-	schemaDiff, err := getSchemaDiff(config, newNestedState(state), trueSchemaAsEmpty(schemaRef1), trueSchemaAsEmpty(schemaRef2))
-	if err != nil {
-		return false
-	}
-
-	return !schemaDiffHasValidationChanges(schemaDiff)
-}
-
-func schemaValueOf(ref *openapi3.SchemaRef) *openapi3.Schema {
-	if ref == nil {
-		return nil
-	}
-	return ref.Value
+	return newUnroller(config, newState()).equivalent(schemaRef1, schemaRef2)
 }
 
 // trueSchemaAsEmpty maps a schema written as the boolean `true` to the empty
@@ -51,8 +21,12 @@ func trueSchemaAsEmpty(ref *openapi3.SchemaRef) *openapi3.SchemaRef {
 	if ref == nil || ref.Value == nil || ref.Value.Always == nil || !*ref.Value.Always {
 		return ref
 	}
-	return &openapi3.SchemaRef{Value: &openapi3.Schema{}}
+	return emptySchemaForTrue
 }
+
+// emptySchemaForTrue stands in for every `true` schema, so that all of them
+// are one value in the schema diff graph.
+var emptySchemaForTrue = &openapi3.SchemaRef{Value: &openapi3.Schema{}}
 
 func schemaDiffHasValidationChanges(schemaDiff *SchemaDiff) bool {
 	validationDiff := schemaDiffWithoutAnnotationChanges(schemaDiff)

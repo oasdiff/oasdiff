@@ -148,17 +148,9 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 	result.TypeDiff = getTypeDiff(value1.Type, value2.Type)
 	result.ListOfTypesDiff = getListOfTypesDiff(value1, value2)
-	// The wrapping recognizers run equivalence comparisons that are schema
-	// diffs themselves, so a cyclic schema can reach this very pair again
-	// from inside one; recognition is skipped on re-entry, and the wrapping
-	// reads as an ordinary change there.
-	recognition := valuePair{value1, value2}
-	if _, ok := state.equivalenceInFlight[recognition]; !ok {
-		state.equivalenceInFlight[recognition] = struct{}{}
-		result.OneOfWrappingDiff = getOneOfWrappingDiff(config, state, value1, value2)
-		result.NullableWrappingDiff = getNullableWrappingDiff(config, state, value1, value2)
-		delete(state.equivalenceInFlight, recognition)
-	}
+	// OneOfWrappingDiff and NullableWrappingDiff are decided when the graph is
+	// unrolled (unroller.copy): recognizing a wrapping compares schema pairs
+	// that can cycle back to this one.
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)

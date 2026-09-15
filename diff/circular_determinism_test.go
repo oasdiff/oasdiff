@@ -49,3 +49,71 @@ func TestCircularTwoEdges_Deterministic(t *testing.T) {
 		}
 	}
 }
+
+// S has two inline anyOf branches, listed in the opposite order in the
+// revision, and one of them refers to T, whose property refers back to S.
+// Reordering the branches is not a change, at S's own component entry and
+// below T alike, in whichever order the components are walked.
+func TestCircularSchema_ReorderedInlineBranches(t *testing.T) {
+	doc := func() *openapi3.T {
+		s := &openapi3.Schema{Type: &openapi3.Types{"object"}}
+		tt := &openapi3.Schema{Type: &openapi3.Types{"object"}, Properties: openapi3.Schemas{
+			"s": &openapi3.SchemaRef{Ref: "#/components/schemas/S", Value: s},
+		}}
+		a := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}, Properties: openapi3.Schemas{
+			"t": &openapi3.SchemaRef{Ref: "#/components/schemas/T", Value: tt},
+		}}}
+		b := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
+		s.AnyOf = openapi3.SchemaRefs{a, b}
+		return &openapi3.T{
+			OpenAPI: "3.0.3",
+			Info:    &openapi3.Info{Title: "t", Version: "1"},
+			Paths:   openapi3.NewPaths(),
+			Components: &openapi3.Components{Schemas: openapi3.Schemas{
+				"S": &openapi3.SchemaRef{Value: s},
+				"T": &openapi3.SchemaRef{Value: tt},
+			}},
+		}
+	}
+	base, revision := doc(), doc()
+	s := revision.Components.Schemas["S"].Value
+	s.AnyOf = openapi3.SchemaRefs{s.AnyOf[1], s.AnyOf[0]}
+
+	for range 20 {
+		d, err := diff.Get(diff.NewConfig(), base, revision)
+		require.NoError(t, err)
+		require.True(t, d.Empty(), "reordering anyOf branches is not a change")
+	}
+}
+
+// Node's only anyOf branch is an inline array of Node, and the revision adds
+// a property to Node. The branch is the same on both sides, so the added
+// property is reported once, on Node, and the anyOf reports no branch added
+// or deleted: the branch is matched by comparing it base against revision,
+// where Node above it is cut, the same way as everything else on the path.
+func TestCircularSchema_InlineBranchBackToSelf(t *testing.T) {
+	doc := func(extra bool) *openapi3.T {
+		node := &openapi3.Schema{Type: &openapi3.Types{"object"}, Properties: openapi3.Schemas{
+			"p": &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}},
+		}}
+		if extra {
+			node.Properties["q"] = &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}}}
+		}
+		node.AnyOf = openapi3.SchemaRefs{{Value: &openapi3.Schema{
+			Type:  &openapi3.Types{"array"},
+			Items: &openapi3.SchemaRef{Ref: "#/components/schemas/Node", Value: node},
+		}}}
+		return &openapi3.T{
+			OpenAPI:    "3.0.3",
+			Info:       &openapi3.Info{Title: "t", Version: "1"},
+			Paths:      openapi3.NewPaths(),
+			Components: &openapi3.Components{Schemas: openapi3.Schemas{"Node": &openapi3.SchemaRef{Value: node}}},
+		}
+	}
+
+	d, err := diff.Get(diff.NewConfig(), doc(false), doc(true))
+	require.NoError(t, err)
+	node := d.ComponentsDiff.SchemasDiff.Modified["Node"]
+	require.Equal(t, []string{"q"}, node.PropertiesDiff.Added)
+	require.Nil(t, node.AnyOfDiff, "the inline branch is unchanged")
+}
