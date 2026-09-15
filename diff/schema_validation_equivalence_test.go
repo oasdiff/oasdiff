@@ -2,7 +2,6 @@ package diff_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
@@ -99,6 +98,7 @@ func TestSchemaRefsValidationEquivalent_NilRefs(t *testing.T) {
 // reaches Node.child again and asks the same question. The nested comparison
 // must decline rather than start another; declining reads as a difference,
 // so the refactor is reported instead of reconciled, and the diff finishes.
+// A regression overflows the stack.
 func TestSchemaRefsValidationEquivalent_CyclicInlineRefRefactorTerminates(t *testing.T) {
 	loader := openapi3.NewLoader()
 	base, err := loader.LoadFromFile("../data/circular-inline-ref1.yaml")
@@ -106,21 +106,7 @@ func TestSchemaRefsValidationEquivalent_CyclicInlineRefRefactorTerminates(t *tes
 	revision, err := loader.LoadFromFile("../data/circular-inline-ref2.yaml")
 	require.NoError(t, err)
 
-	type result struct {
-		d   *diff.Diff
-		err error
-	}
-	done := make(chan result, 1)
-	go func() {
-		d, err := diff.Get(diff.NewConfig(), base, revision)
-		done <- result{d, err}
-	}()
-
-	select {
-	case r := <-done:
-		require.NoError(t, r.err)
-		require.Contains(t, r.d.ComponentsDiff.SchemasDiff.Modified, "Node")
-	case <-time.After(30 * time.Second):
-		t.Fatal("the diff of the cyclic inline-ref refactor did not finish within 30s")
-	}
+	d, err := diff.Get(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	require.Contains(t, d.ComponentsDiff.SchemasDiff.Modified, "Node")
 }
