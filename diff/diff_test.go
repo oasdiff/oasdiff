@@ -740,16 +740,19 @@ func TestCircularSchema_Diff(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	// the base's inline items against the revision's cycling items unrolls
-	// one level and reports the concrete difference, the same at every
-	// entry point
+	// entered through its $ref, the walk is already inside circular1, so
+	// the revision's items $ref cycles where the base's inline items does
+	// not: a reported difference
 	respItems := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["POST"].
 		ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].
 		SchemaDiff.PropertiesDiff.Modified["children"].ItemsDiff
-	require.Contains(t, respItems.PropertiesDiff.Added, "children")
+	require.True(t, respItems.CircularRefDiff)
 
+	// entered ref-less from components, no ancestor is comparing circular1
+	// yet, so the same pair unrolls one level instead
 	compItems := dd.ComponentsDiff.SchemasDiff.Modified["circular1"].
 		PropertiesDiff.Modified["children"].ItemsDiff
+	require.False(t, compItems.CircularRefDiff)
 	require.Contains(t, compItems.PropertiesDiff.Added, "children")
 }
 
@@ -799,12 +802,16 @@ func namedCyclicDoc(name string) *openapi3.T {
 	}
 }
 
-// Both sides cycle, through different ref names but with identical bodies:
-// refs are transparent, cyclic or not, so a pure rename is not a change.
+// Both sides cycle, through different ref names: the cycles are not known
+// to be the same schema, so the mismatch is a reported difference.
 func TestCircularSchema_RenamedCycle(t *testing.T) {
 	d, err := diff.Get(diff.NewConfig(), namedCyclicDoc("NodeA"), namedCyclicDoc("NodeB"))
 	require.NoError(t, err)
-	require.True(t, d.Empty())
+
+	child := d.PathsDiff.Modified["/x"].OperationsDiff.Modified["POST"].
+		RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].
+		SchemaDiff.PropertiesDiff.Modified["child"]
+	require.True(t, child.CircularRefDiff)
 }
 
 // Both sides cycle through the same ref name: the cut adds nothing beyond
