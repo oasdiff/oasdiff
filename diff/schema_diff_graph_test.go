@@ -60,9 +60,9 @@ func TestUnroll_CutsEveryChildField(t *testing.T) {
 	}
 }
 
-// A node reached on two paths unrolls to one shared diff when nothing below
-// it cuts into a node above it.
-func TestUnroll_SharesCutFreeNodes(t *testing.T) {
+// A node outside any cycle reached on two paths has one diff, shared by both
+// positions, as the schema it stands for is shared by every $ref to it.
+func TestUnroll_SharesNodesOutsideCycles(t *testing.T) {
 	leaf := &SchemaDiff{DescriptionDiff: &ValueDiff{From: "a", To: "b"}}
 	root := &SchemaDiff{PropertiesDiff: &SchemasDiff{Modified: ModifiedSchemasMap{"x": leaf, "y": leaf}}}
 

@@ -3,6 +3,7 @@ package diff
 import (
 	"cmp"
 	"encoding/binary"
+	"maps"
 	"reflect"
 	"slices"
 
@@ -21,13 +22,20 @@ import (
 // path, decides those comparisons with the path known, and drops the nodes
 // with no change below them.
 //
-// What the walk produces below a node depends on which of the node's
-// ancestors it cuts, and those are the ancestors in the node's strongly
-// connected component: every other ancestor is not reachable from the node.
-// So an unrolled node is shared between two positions exactly when the
-// ancestors from its component are the same (cutKey), and a node unrolled
-// with none of them above and found unchanged is unchanged everywhere,
-// together with everything it reached.
+// What a walk produces below a node depends on which of the nodes being
+// expanded above it (the path) the node can reach, and those are the ones
+// in its strongly connected component (cutKey). A node that reaches none of
+// them has a diff of its own, computed once by a walk of its own and shared
+// wherever the node is reached, as a $ref'd schema is shared by everything
+// that refers to it. A node that does reach one is inside the component
+// being expanded: it is expanded once per walk, where it is first reached,
+// and contributes nothing where the same walk reaches it again, since the
+// changes below it are already reported. So a walk costs the size of what it
+// reaches, however many paths lead through it, and, being ordered, reports
+// each change at the same position on every run.
+//
+// A comparison made while unrolling (unroller.diff) is a walk of its own,
+// sharing the path; its answer is a function of the pair and the cut key.
 
 // valuePair identifies a comparison of two schema values, independent of the
 // SchemaRef wrappers it arrived through.
@@ -53,11 +61,9 @@ type schemaGraph struct {
 	component  map[*SchemaDiff]int
 	components int
 
-	// unrolled memoizes unrolled nodes by node and cut key.
+	// unrolled memoizes the diff of each node a walk started from, by cut
+	// key.
 	unrolled map[*SchemaDiff]map[string]*SchemaDiff
-
-	// unchanged holds the nodes with no change anywhere below them.
-	unchanged map[*SchemaDiff]struct{}
 }
 
 func newSchemaGraph() schemaGraph {
@@ -66,7 +72,6 @@ func newSchemaGraph() schemaGraph {
 		candidates: map[*SchemaDiff][]*SchemaDiff{},
 		component:  map[*SchemaDiff]int{},
 		unrolled:   map[*SchemaDiff]map[string]*SchemaDiff{},
-		unchanged:  map[*SchemaDiff]struct{}{},
 	}
 }
 
@@ -239,75 +244,79 @@ func (graph *schemaGraph) assignComponents() {
 	}
 }
 
-// unroller walks the graph from a node reached from outside the schema
-// graph and produces its diff. A node reached again on its own path is a
-// cycle and contributes nothing there: every change below it is already
-// reported where it was first reached.
+// unroller walks the graph from a node and produces its diff, expanding
+// each node once.
 type unroller struct {
 	config *Config
 	state  *state
 
-	// stack holds the nodes on the current unrolling path, and path their
-	// positions in it.
+	// stack holds the nodes being expanded, and path their positions in it.
+	// A comparison made during the walk shares them (diff).
 	stack []*SchemaDiff
 	path  map[*SchemaDiff]int
 
-	// visited lists the nodes unrolled so far as content of the node being
-	// unrolled (not as candidates of its comparisons), so that a node
-	// unrolled with no ancestor from its component and found unchanged can
-	// mark everything it reached as unchanged.
-	visited []*SchemaDiff
+	// visited holds the nodes this walk has expanded; empty before the walk
+	// starts.
+	visited map[*SchemaDiff]bool
 
 	// err is the first error a comparison made during the unroll returned.
 	err error
 }
 
 func newUnroller(config *Config, state *state) *unroller {
-	return &unroller{config: config, state: state, path: map[*SchemaDiff]int{}}
+	return &unroller{config: config, state: state, path: map[*SchemaDiff]int{}, visited: map[*SchemaDiff]bool{}}
 }
 
 func (u *unroller) unroll(node *SchemaDiff) *SchemaDiff {
 	if node == nil {
 		return nil
 	}
-	graph := &u.state.graph
-	if _, ok := graph.unchanged[node]; ok {
-		return nil
-	}
 	if _, ok := u.path[node]; ok {
 		return nil
 	}
 	key := u.cutKey(node)
+	if key != "" && len(u.visited) > 0 {
+		// inside the component this walk is expanding
+		if u.visited[node] {
+			return nil
+		}
+		return u.expand(node)
+	}
+	return u.walk(node, key)
+}
+
+// walk returns the diff of the node as a walk of its own, computed once per
+// cut key.
+func (u *unroller) walk(node *SchemaDiff, key string) *SchemaDiff {
+	graph := &u.state.graph
 	if unrolled, ok := graph.unrolled[node][key]; ok {
 		return unrolled
 	}
-
-	u.path[node] = len(u.stack)
-	u.stack = append(u.stack, node)
-	start := len(u.visited)
-	u.visited = append(u.visited, node)
-	unrolled := u.copy(node)
-	u.stack = u.stack[:len(u.stack)-1]
-	delete(u.path, node)
-
+	walk := &unroller{config: u.config, state: u.state, stack: u.stack, path: u.path, visited: map[*SchemaDiff]bool{}}
+	unrolled := walk.expand(node)
+	if walk.err != nil {
+		u.fail(walk.err)
+	}
 	if graph.unrolled[node] == nil {
 		graph.unrolled[node] = map[string]*SchemaDiff{}
 	}
 	graph.unrolled[node][key] = unrolled
-	if key == "" {
-		if unrolled == nil {
-			for _, visited := range u.visited[start:] {
-				graph.unchanged[visited] = struct{}{}
-			}
-		}
-		u.visited = u.visited[:start]
-	}
 	return unrolled
 }
 
-// cutKey identifies the ancestors on the path that the unroll of the node
-// cuts: those in the node's strongly connected component. Empty when there
-// are none.
+func (u *unroller) expand(node *SchemaDiff) *SchemaDiff {
+	u.visited[node] = true
+	u.path[node] = len(u.stack)
+	u.stack = append(u.stack, node)
+	unrolled := u.copy(node)
+	u.stack = u.stack[:len(u.stack)-1]
+	delete(u.path, node)
+	return unrolled
+}
+
+// cutKey identifies the nodes on the path that a walk from the node cuts:
+// those in the node's strongly connected component. Empty when there are
+// none, as for a node reached from outside the schema graph.
 func (u *unroller) cutKey(node *SchemaDiff) string {
 	graph := &u.state.graph
 	component, ok := graph.component[node]
@@ -381,8 +390,10 @@ func (u *unroller) schemas(diff *SchemasDiff) *SchemasDiff {
 	}
 	unrolled := *diff
 	unrolled.Modified = ModifiedSchemasMap{}
-	for name, node := range diff.Modified {
-		if child := u.unroll(node); child != nil {
+	// in name order, so that which position expands a node first is the same
+	// on every run
+	for _, name := range slices.Sorted(maps.Keys(diff.Modified)) {
+		if child := u.unroll(diff.Modified[name]); child != nil {
 			unrolled.Modified[name] = child
 		}
 	}
@@ -426,10 +437,11 @@ func (u *unroller) fail(err error) {
 	}
 }
 
-// diff returns the unrolled diff of a pair on the current path, building the
-// pair's node if the graph does not have it yet. schemaRef1 is from the base
-// and schemaRef2 from the revision, like every node: a pair the other way
-// round would be a node the path never holds, so nothing would cut it.
+// diff returns the diff of a pair as a walk of its own, cut where it reaches
+// a node this walk is still expanding, building the pair's node if the graph
+// does not have it yet. schemaRef1 is from the base and schemaRef2 from the
+// revision, like every node: a pair the other way round would be a node the
+// path never holds, so nothing would cut it.
 func (u *unroller) diff(schemaRef1, schemaRef2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 	if schemaRef1 == nil || schemaRef2 == nil || schemaRef1.Value == nil || schemaRef2.Value == nil {
 		return getSchemaDiffInternal(u.config, u.state, schemaRef1, schemaRef2)
@@ -438,13 +450,10 @@ func (u *unroller) diff(schemaRef1, schemaRef2 *openapi3.SchemaRef) (*SchemaDiff
 	if err != nil {
 		return nil, err
 	}
-	// a candidate is not content of the node being unrolled: two different
-	// branches compared and found different must not be marked unchanged
-	// along with it
-	visited := len(u.visited)
-	unrolled := u.unroll(node)
-	u.visited = u.visited[:visited]
-	return unrolled, nil
+	if _, ok := u.path[node]; ok {
+		return nil, nil
+	}
+	return u.walk(node, u.cutKey(node)), nil
 }
 
 // identical reports whether a pair diffs to nothing on the current path.
