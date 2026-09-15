@@ -32,8 +32,8 @@ func reachesSchemaDiff(t reflect.Type, seen map[reflect.Type]bool) bool {
 
 // Every field of SchemaDiff that can hold a schema diff is a place the graph
 // can cycle through, so the unroll must follow it and cut it. A node linked
-// to itself through such a field must unroll to a tree where that field is
-// empty, with the node's own change kept.
+// to itself through such a field must unroll with that field empty and the
+// node's own change kept.
 func TestUnroll_CutsEveryChildField(t *testing.T) {
 	schemaDiffType := reflect.TypeFor[SchemaDiff]()
 	for i := range schemaDiffType.NumField() {
@@ -56,21 +56,22 @@ func TestUnroll_CutsEveryChildField(t *testing.T) {
 			}
 			reflect.ValueOf(node).Elem().Field(i).Set(link)
 
-			tree := newState().unroll(node)
-			require.NotNil(t, tree, "the node's own change must be kept")
-			require.True(t, reflect.ValueOf(tree).Elem().Field(i).IsNil(), "the cycle through %s must be cut", field.Name)
-			require.Equal(t, "b", tree.DescriptionDiff.To)
+			graph := newSchemaGraph()
+			unrolled := graph.unroll(node)
+			require.NotNil(t, unrolled, "the node's own change must be kept")
+			require.True(t, reflect.ValueOf(unrolled).Elem().Field(i).IsNil(), "the cycle through %s must be cut", field.Name)
+			require.Equal(t, "b", unrolled.DescriptionDiff.To)
 		})
 	}
 }
 
-// Sub-schemas reached on two paths share one tree when nothing on their
-// path cuts into a node above them, and trees are recomputed only along
-// paths that do.
-func TestUnroll_SharesCutFreeSubtrees(t *testing.T) {
+// A node reached on two paths unrolls to one shared diff when nothing below
+// it cuts into a node above it.
+func TestUnroll_SharesCutFreeNodes(t *testing.T) {
 	leaf := &SchemaDiff{DescriptionDiff: &ValueDiff{From: "a", To: "b"}}
 	root := &SchemaDiff{PropertiesDiff: &SchemasDiff{Modified: ModifiedSchemasMap{"x": leaf, "y": leaf}}}
 
-	tree := newState().unroll(root)
-	require.Same(t, tree.PropertiesDiff.Modified["x"], tree.PropertiesDiff.Modified["y"])
+	graph := newSchemaGraph()
+	unrolled := graph.unroll(root)
+	require.Same(t, unrolled.PropertiesDiff.Modified["x"], unrolled.PropertiesDiff.Modified["y"])
 }
