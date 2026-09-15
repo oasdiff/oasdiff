@@ -54,29 +54,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 		return false, returnErr
 	}
 
-	severityLevels, returnErr := getCustomSeverityLevels(flags.getSeverityLevelsFile())
-	if returnErr != nil {
-		return false, returnErr
-	}
-
-	bcConfig := checker.NewConfig(
-		checker.GetAllChecks(),
-		checker.WithSeverityLevels(severityLevels),
-		checker.WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()),
-		checker.WithAttributes(flags.getAttributes()),
-		checker.WithStabilityLevel(flags.getStabilityLevel()),
-	)
-
-	errs, returnErr := filterIgnored(
-		checker.CheckBackwardCompatibilityUntilLevel(
-			bcConfig,
-			diffResult.diffReport,
-			diffResult.operationsSources,
-			level),
-		flags.getWarnIgnoreFile(),
-		flags.getErrIgnoreFile(),
-		checker.NewLocalizer(flags.getLang()))
-
+	errs, returnErr := computeChanges(flags, diffResult, level)
 	if returnErr != nil {
 		return false, returnErr
 	}
@@ -86,7 +64,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getOpen() {
-		if err := uploadAndOpen(flags, os.Stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty()); err != nil {
+		if err := openReview(flags, os.Stderr, errs, diffResult, level, isBreaking); err != nil {
 			// --open is additive: an upload error, unsupported source, or
 			// composed mode must not change the exit code or pre-empt --fail-on.
 			// Warn to stderr (not stdout, so it never corrupts piped --format
@@ -104,6 +82,53 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	return false, nil
+}
+
+// computeChanges runs the checks on a comparison and applies the ignore
+// files.
+func computeChanges(flags *Flags, diffResult *diffResult, level checker.Level) (checker.Changes, *ReturnError) {
+	severityLevels, returnErr := getCustomSeverityLevels(flags.getSeverityLevelsFile())
+	if returnErr != nil {
+		return nil, returnErr
+	}
+
+	bcConfig := checker.NewConfig(
+		checker.GetAllChecks(),
+		checker.WithSeverityLevels(severityLevels),
+		checker.WithDeprecation(flags.getDeprecationDaysBeta(), flags.getDeprecationDaysStable()),
+		checker.WithAttributes(flags.getAttributes()),
+		checker.WithStabilityLevel(flags.getStabilityLevel()),
+	)
+
+	return filterIgnored(
+		checker.CheckBackwardCompatibilityUntilLevel(
+			bcConfig,
+			diffResult.diffReport,
+			diffResult.operationsSources,
+			level),
+		flags.getWarnIgnoreFile(),
+		flags.getErrIgnoreFile(),
+		checker.NewLocalizer(flags.getLang()))
+}
+
+// openReview uploads the review bundle. A transformed comparison
+// (specsTransformed) is re-run on the rendered documents first, so the
+// bundle's spec text, blocks, and change locations all describe the compared
+// document rather than the source files; the console output above keeps the
+// first pass, whose locations point into the sources.
+func openReview(flags *Flags, stderr io.Writer, errs checker.Changes, diffResult *diffResult, level checker.Level, isBreaking bool) error {
+	if !flags.getComposed() && specsTransformed(flags) {
+		rendered, err := renderedDiffResult(flags, diffResult.baseSpecs[0], diffResult.revSpecs[0])
+		if err != nil {
+			return err
+		}
+		renderedErrs, returnErr := computeChanges(flags, rendered, level)
+		if returnErr != nil {
+			return returnErr
+		}
+		errs, diffResult = renderedErrs, rendered
+	}
+	return uploadAndOpen(flags, stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty())
 }
 
 func filterIgnored(errs checker.Changes, warnIgnoreFile string, errIgnoreFile string, l checker.Localizer) (checker.Changes, *ReturnError) {
