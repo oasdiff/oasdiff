@@ -37,4 +37,6 @@ OpenAPI 3.1 support is generally available, but the surface is large and edge ca
 | **Translations** | Add messages in your language under [`checker/localizations_src`](../checker/localizations_src) — run `make localize` to regenerate |
 | **Bug fixes & features** | Pick up an [open issue](https://github.com/oasdiff/oasdiff/issues) or propose your own |
 
+See the [codebase guide](CODEBASE.md) for where things live and how to add a check.
+
 For non-trivial changes, open an issue first to discuss the approach before writing code.

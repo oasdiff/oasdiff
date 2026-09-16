@@ -74,8 +74,11 @@ jobs:
     - if: runner.os == 'Linux'
       name: Check localized messages are up to date (excluding timestamp)
       run: |
-        # Compare from line 4 onwards (skipping the timestamp on line 3)
-        git diff --no-index <(tail -n +4 checker/localizations/localizations.go) <(git show HEAD:checker/localizations/localizations.go | tail -n +4) || exit 0
+        # line 3 of the generated file is a timestamp, so compare from line 4 on
+        if ! diff -u <(git show HEAD:checker/localizations/localizations.go | tail -n +4) <(tail -n +4 checker/localizations/localizations.go); then
+          echo "::error::checker/localizations/localizations.go is out of date: run 'make localize' and commit the result"
+          exit 1
+        fi
 
     - run: go fmt ./...
     - run: git --no-pager diff --exit-code -- ':!checker/localizations/localizations.go'
