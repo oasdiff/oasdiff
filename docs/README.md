@@ -147,7 +147,6 @@ Shape and enrich the report.
 - [Security: control external `$ref` loading to prevent SSRF](SECURITY.md)
 - [Usage examples](USAGE_EXAMPLES.md) — recipes for common scenarios
 - [Contributing](CONTRIB.md)
-- [Codebase guide](CODEBASE.md) — where things live and how to add a check
 
 ## Demo
 <img src="./demo.svg">
