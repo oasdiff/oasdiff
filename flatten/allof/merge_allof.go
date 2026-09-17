@@ -26,6 +26,11 @@ const (
 	FormatDouble = "double"
 )
 
+var (
+	errEnumConflict = errors.New("unable to resolve Enum conflict: intersection of values must be non-empty")
+	errTypeConflict = errors.New(TypeErrorMessage)
+)
+
 type SchemaCollection struct {
 	Not                  []*openapi3.SchemaRef
 	OneOf                []openapi3.SchemaRefs
@@ -1033,7 +1038,11 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	for prop, schemas := range propsToSchemasMap {
 		merged, err := mergeSubschemas(state, schemas)
 		if err != nil {
-			return nil, err
+			if !hasEnumConstraint(schemas) ||
+				(!errors.Is(err, errEnumConflict) && !errors.Is(err, errTypeConflict)) {
+				return nil, err
+			}
+			merged = openapi3.NewSchemaRef("", &openapi3.Schema{AllOf: schemas})
 		}
 		result[prop] = merged
 	}
@@ -1044,6 +1053,15 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 
 	schema.Properties = result
 	return schema, nil
+}
+
+func hasEnumConstraint(schemas openapi3.SchemaRefs) bool {
+	for _, schema := range schemas {
+		if schema != nil && schema.Value != nil && len(schema.Value.Enum) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func resolveEnum(values [][]any) ([]any, error) {
@@ -1059,7 +1077,7 @@ func resolveEnum(values [][]any) ([]any, error) {
 	}
 	intersection = findIntersectionOfArrays(nonEmptyEnum)
 	if len(intersection) == 0 {
-		return nil, errors.New("unable to resolve Enum conflict: intersection of values must be non-empty")
+		return nil, errEnumConflict
 	}
 	return intersection, nil
 }
@@ -1156,7 +1174,7 @@ func resolveType(schema *openapi3.Schema, collection *SchemaCollection) (*openap
 		types = intersectTypes(types, ts)
 	}
 	if len(types) == 0 {
-		return schema, errors.New(TypeErrorMessage)
+		return schema, errTypeConflict
 	}
 	schema.Type = &types
 	return schema, nil

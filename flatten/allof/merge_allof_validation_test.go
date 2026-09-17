@@ -106,6 +106,54 @@ paths:
 	validateConsistency(t, spec, tests)
 }
 
+func TestMerge_ConflictingEnumPropertiesPreserveAllOf(t *testing.T) {
+	const spec = `
+openapi: 3.0.0
+info:
+  title: nullable type intersection
+  version: '0.1'
+paths:
+  /sample:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      nullable: true
+                      enum: [null]
+                    enabled:
+                      type: boolean
+                      enum: [true]
+                - type: object
+                  properties:
+                    result:
+                      type: array
+                      nullable: true
+                      items: {}
+                    enabled:
+                      type: boolean
+                      enum: [false]
+      responses:
+        '200':
+          description: Ok
+`
+	tests := []Test{
+		{data: []byte(`{"result": null}`)},
+		{data: []byte(`{"result": {}}`), wantErr: true},
+		{data: []byte(`{"result": []}`), wantErr: true},
+		{data: []byte(`{"enabled": true}`), wantErr: true},
+		{data: []byte(`{"enabled": false}`), wantErr: true},
+	}
+
+	validateConsistency(t, spec, tests)
+}
+
 // Validation of conflicting numeric formats.
 func TestMerge_ConflictingFormat(t *testing.T) {
 	const spec = `
