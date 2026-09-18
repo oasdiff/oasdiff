@@ -99,50 +99,6 @@ func (diff *SchemaDiff) Empty() bool {
 	return diff == nil || *diff == SchemaDiff{Base: diff.Base, Revision: diff.Revision}
 }
 
-func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
-
-	if diff, ok := state.cache[schemaPair{schema1, schema2}]; ok {
-		return diff, nil
-	}
-
-	// A pair that is already being diffed further up the stack forms a
-	// cycle, whether it cycles through $refs or through in-memory links
-	// (e.g. --flatten-allof merging a recursive $ref into a ref-less
-	// self-referencing schema). Cut the cycle by reporting no diff at the
-	// re-entry point: the computation in progress reports every difference
-	// of the pair.
-	pair := schemaPair{schema1, schema2}
-	if _, ok := state.inFlight[pair]; ok {
-		// the no-diff answer stands in for the pair's computation already in
-		// progress; count the cut: a diff whose computation includes it is
-		// not cached
-		state.cuts++
-		return nil, nil
-	}
-	state.inFlight[pair] = struct{}{}
-	defer delete(state.inFlight, pair)
-
-	// a diff whose computation includes a cut depends on the path that led
-	// here, not on the pair alone; comparing the count detects a cut at any
-	// depth
-	cutsBefore := state.cuts
-	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
-	if err != nil {
-		return nil, err
-	}
-
-	if diff.Empty() {
-		diff = nil
-	}
-
-	// no cut fired: the diff is a function of the pair alone and can be
-	// reused on any path
-	if state.cuts == cutsBefore {
-		state.cache[pair] = diff
-	}
-	return diff, nil
-}
-
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 
 	if schema1 == nil && schema2 == nil {
@@ -192,8 +148,6 @@ func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *opena
 	}
 	result.TypeDiff = getTypeDiff(value1.Type, value2.Type)
 	result.ListOfTypesDiff = getListOfTypesDiff(value1, value2)
-	result.OneOfWrappingDiff = getOneOfWrappingDiff(config, value1, value2)
-	result.NullableWrappingDiff = getNullableWrappingDiff(config, value1, value2)
 	result.TitleDiff = getValueDiffConditional(config.IsExcludeTitle(), value1.Title, value2.Title)
 	result.FormatDiff = getValueDiff(value1.Format, value2.Format)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), value1.Description, value2.Description)
