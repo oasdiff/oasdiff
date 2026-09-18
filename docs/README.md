@@ -86,7 +86,7 @@ The top-level subcommands, grouped as in `oasdiff --help`.
 - [`checks changelog`](CHECKS.md) — list the rules `breaking` and `changelog` use to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
 - [`checks validate`](CHECKS.md#validate-checks) — list the rules `validate` reports
 - [`checks changelog coverage`](CHECKS.md#coverage-map) — list every possible edit of an OpenAPI document with the checks that cover it
-- [`checks explain`](CHECKS.md#explain-a-check) — explain one check: what it reports and why it has its severity
+- [`checks changelog explain`](CHECKS.md#explain-a-check) — explain one check: what it reports and why it has its severity
 - [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
 
 ### Inputs

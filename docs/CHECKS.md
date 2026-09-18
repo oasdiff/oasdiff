@@ -72,10 +72,10 @@ Available tags, by dimension:
 Values of the same dimension are combined with OR, different dimensions with AND: `--tags request,response,add` selects checks that are (request or response) and add.
 
 ## Explain a Check
-`oasdiff checks explain <check-id>` explains one check: what change it reports, and why that change has the severity it has. It resolves both the changelog and the validate ids.
+`oasdiff checks changelog explain <check-id>` explains one changelog check: what change it reports, and why that change has the severity it has.
 
 ```
-$ oasdiff checks explain request-read-only-property-max-decreased
+$ oasdiff checks changelog explain request-read-only-property-max-decreased
 request-read-only-property-max-decreased  info
 
 Reports: request read-only property max decreased.
@@ -89,7 +89,7 @@ Locations: paths.*.*.requestBody.content.*.schema.maximum:decrease
 Override: a --severity-levels file line "request-read-only-property-max-decreased warn" overrides the level
 ```
 
-The severity explanation is not written per check: it is the severity law's derivation rendered in words, computed from the same effect, direction, and guards that produce the level, so it cannot drift from the actual verdict. Validate checks carry no taxonomy, so their explanation is the id, level, and description, with the severity noted as set by the rule.
+The severity explanation is not written per check: it is the severity law's derivation rendered in words, computed from the same effect, direction, and guards that produce the level, so it cannot drift from the actual verdict.
 
 `--format json|yaml` emits the same explanation as a structured record, and `--lang` localizes the description.
 

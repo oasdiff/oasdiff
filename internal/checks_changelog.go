@@ -34,7 +34,7 @@ func getChecksChangelogCmd() *cobra.Command {
 	// never reach the config.
 	addChecksChangelogFlags(&cmd)
 
-	cmd.AddCommand(getChecksCoverageCmd())
+	cmd.AddCommand(getChecksCoverageCmd(), getChecksExplainCmd())
 
 	return &cmd
 }
@@ -67,9 +67,12 @@ func checkKnownId(cmd *cobra.Command) error {
 	if err != nil || id == "" {
 		return nil
 	}
-	if !slices.ContainsFunc(checker.GetAllRules(), func(rule checker.BackwardCompatibilityRule) bool {
-		return rule.Id == id
-	}) {
+	return checkChangelogId(id)
+}
+
+// checkChangelogId rejects an id naming no changelog check.
+func checkChangelogId(id string) error {
+	if findChangelogRule(id) == nil {
 		return fmt.Errorf("unknown check id %q", id)
 	}
 	return nil

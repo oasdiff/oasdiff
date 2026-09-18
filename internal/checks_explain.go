@@ -3,27 +3,24 @@ package internal
 import (
 	"fmt"
 	"io"
-	"slices"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/localizations"
 	"github.com/oasdiff/oasdiff/checker/rules"
 	"github.com/oasdiff/oasdiff/formatters"
-	"github.com/oasdiff/oasdiff/validate"
 	"github.com/spf13/cobra"
 )
 
-const checksExplainCmd = "checks explain"
+const checksExplainCmd = "checks changelog explain"
 
-// getChecksExplainCmd explains one check by id, resolving both the changelog
-// and the validate rule sets, so there is a single place to ask what an id
-// means wherever it was encountered.
+// getChecksExplainCmd explains one changelog check by id: what it reports and
+// the derivation that gives it its severity.
 func getChecksExplainCmd() *cobra.Command {
 
 	cmd := cobra.Command{
 		Use:               "explain check-id",
 		Short:             "Explain a check: what it reports and why it has its severity",
-		Long:              `Explain one changelog or validate check: what change it reports, and, for changelog checks, the derivation that gives it its severity.`,
+		Long:              `Explain one changelog check: what change it reports, and the derivation that gives it its severity.`,
 		Args:              getChecksExplainArgs(),
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE:              runChecksExplain,
@@ -35,18 +32,29 @@ func getChecksExplainCmd() *cobra.Command {
 	return &cmd
 }
 
-// getChecksExplainArgs requires exactly one argument naming a known check.
+// getChecksExplainArgs requires exactly one argument naming a changelog check,
+// and rejects the listing filters explain inherits from `checks changelog`.
 func getChecksExplainArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := cobra.ExactArgs(1)(cmd, args); err != nil {
 			return err
 		}
-		id := args[0]
-		if findChangelogRule(id) == nil && !slices.Contains(validate.RuleIDs(), id) {
-			return fmt.Errorf("unknown check id %q", id)
+		if err := checkNoListingFilters(cmd); err != nil {
+			return err
 		}
-		return nil
+		return checkChangelogId(args[0])
 	}
+}
+
+// checkNoListingFilters rejects the `checks changelog` filters: they select
+// rows of the listing, and explain is given its check as an argument.
+func checkNoListingFilters(cmd *cobra.Command) error {
+	for _, name := range []string{"id", "location", "tags", "severity"} {
+		if cmd.Flags().Changed(name) {
+			return fmt.Errorf("--%s cannot be used with explain: it filters the listing, and explain takes the check id as its argument", name)
+		}
+	}
+	return nil
 }
 
 func findChangelogRule(id string) *checker.BackwardCompatibilityRule {
@@ -89,12 +97,7 @@ func outputExplanation(stdout io.Writer, flags *Flags, id string) *ReturnError {
 		return getErrUnsupportedFormat(format, checksExplainCmd)
 	}
 
-	var explanation formatters.Explanation
-	if rule := findChangelogRule(id); rule != nil {
-		explanation = explainChangelogRule(*rule, checker.NewLocalizer(flags.getLang()))
-	} else {
-		explanation = explainValidateRule(id)
-	}
+	explanation := explainChangelogRule(*findChangelogRule(id), checker.NewLocalizer(flags.getLang()))
 
 	bytes, err := formatter.RenderExplain(explanation, formatters.NewRenderOpts())
 	if err != nil {
@@ -146,14 +149,4 @@ func overrideLevel(level checker.Level) string {
 		return "info"
 	}
 	return "warn"
-}
-
-// explainValidateRule explains a validate rule, which carries only an id,
-// level, and description: its severity is set by the rule, not derived.
-func explainValidateRule(id string) formatters.Explanation {
-	return formatters.Explanation{
-		Id:          id,
-		Level:       validate.RuleLevel(id).String(),
-		Description: validate.RuleDescription(id),
-	}
 }

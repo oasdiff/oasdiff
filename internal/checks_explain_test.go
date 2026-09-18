@@ -19,7 +19,7 @@ func explainOut(t *testing.T, cmd string) string {
 
 // A changelog check explains its severity as the law's derivation.
 func Test_ChecksExplainChangelogRule(t *testing.T) {
-	out := explainOut(t, "oasdiff checks explain api-removed-without-deprecation")
+	out := explainOut(t, "oasdiff checks changelog explain api-removed-without-deprecation")
 	require.Contains(t, out, "api-removed-without-deprecation  error")
 	require.Contains(t, out, "Severity: error, derived.")
 	require.Contains(t, out, "narrows")
@@ -29,21 +29,32 @@ func Test_ChecksExplainChangelogRule(t *testing.T) {
 
 // A guarded check's reasoning names what the guard did.
 func Test_ChecksExplainGuardReasoning(t *testing.T) {
-	out := explainOut(t, "oasdiff checks explain request-read-only-property-max-decreased")
+	out := explainOut(t, "oasdiff checks changelog explain request-read-only-property-max-decreased")
 	require.Contains(t, out, "Severity: info, derived.")
 	require.Contains(t, out, "read-only, so it never appears in requests")
 }
 
-// A validate rule has no taxonomy: its severity is set, not derived.
-func Test_ChecksExplainValidateRule(t *testing.T) {
-	out := explainOut(t, "oasdiff checks explain additional-operations-duplicate-method")
-	require.Contains(t, out, "Severity: error, set by the rule.")
-	require.NotContains(t, out, "Scope:")
+// explain is scoped to the changelog checks, like the listing it sits under,
+// so a validate id is unknown to it.
+func Test_ChecksExplainRejectsValidateId(t *testing.T) {
+	var stderr bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog explain additional-operations-duplicate-method"), io.Discard, &stderr))
+	require.Contains(t, stderr.String(), `unknown check id "additional-operations-duplicate-method"`)
+}
+
+// explain inherits the listing's filters from `checks changelog` and must not
+// accept them silently: --id in particular reads as a second check to explain.
+func Test_ChecksExplainRejectsListingFilters(t *testing.T) {
+	for _, flag := range []string{"--id api-removed-without-deprecation", "--location paths", "--tags request", "--severity error"} {
+		var stderr bytes.Buffer
+		require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog explain api-removed-without-deprecation "+flag), io.Discard, &stderr), flag)
+		require.Contains(t, stderr.String(), "cannot be used with explain", flag)
+	}
 }
 
 // The json record carries the derivation so tooling can embed it.
 func Test_ChecksExplainJson(t *testing.T) {
-	out := explainOut(t, "oasdiff checks explain request-body-max-set --format json")
+	out := explainOut(t, "oasdiff checks changelog explain request-body-max-set --format json")
 
 	var e map[string]any
 	require.NoError(t, json.Unmarshal([]byte(out), &e))
@@ -56,35 +67,27 @@ func Test_ChecksExplainJson(t *testing.T) {
 
 func Test_ChecksExplainUnknownIdRejected(t *testing.T) {
 	var stderr bytes.Buffer
-	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks explain no-such-check"), io.Discard, &stderr))
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog explain no-such-check"), io.Discard, &stderr))
 	require.Contains(t, stderr.String(), `unknown check id "no-such-check"`)
 }
 
 func Test_ChecksExplainRequiresExactlyOneId(t *testing.T) {
-	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks explain"), io.Discard, io.Discard))
-	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks explain a b"), io.Discard, io.Discard))
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog explain"), io.Discard, io.Discard))
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog explain a b"), io.Discard, io.Discard))
 }
 
-// Every check in both listings can be explained: the id resolves and the
-// explanation carries a level, so no id a user can encounter is unexplained.
-// The same sweep asserts the two listings share no id: explain resolves both
-// rule sets in one namespace, so a changelog id would silently shadow a
-// validate id with the same name.
+// Every changelog check can be explained: the id resolves and the explanation
+// carries the level the listing shows.
 func Test_ChecksExplainCoversEveryId(t *testing.T) {
-	seen := map[string]string{}
-	for _, listing := range []string{"oasdiff checks changelog --format json", "oasdiff checks validate --format json"} {
-		var stdout bytes.Buffer
-		require.Zero(t, internal.Run(cmdToArgs(listing), &stdout, io.Discard))
-		var checks []map[string]any
-		require.NoError(t, json.Unmarshal(stdout.Bytes(), &checks))
-		for _, check := range checks {
-			id := check["id"].(string)
-			require.NotContains(t, seen, id, "id %q appears in both %q and %q: rename it, or `checks explain` cannot keep a single id namespace", id, seen[id], listing)
-			seen[id] = listing
-			out := explainOut(t, "oasdiff checks explain --format json "+id)
-			var e map[string]any
-			require.NoError(t, json.Unmarshal([]byte(out), &e), id)
-			require.Equal(t, check["level"], e["level"], id)
-		}
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff checks changelog --format json"), &stdout, io.Discard))
+	var checks []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &checks))
+	for _, check := range checks {
+		id := check["id"].(string)
+		out := explainOut(t, "oasdiff checks changelog explain --format json "+id)
+		var e map[string]any
+		require.NoError(t, json.Unmarshal([]byte(out), &e), id)
+		require.Equal(t, check["level"], e["level"], id)
 	}
 }
