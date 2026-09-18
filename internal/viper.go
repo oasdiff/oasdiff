@@ -153,12 +153,15 @@ func explicitConfigPath(cmd *cobra.Command) string {
 	return os.Getenv(EnvConfigPath)
 }
 
+// bindFlags binds the flags the command declares itself, local and persistent,
+// to viper. Inherited flags are left out, so a flag reaches the config only on
+// the command that declares it.
 func bindFlags(cmd *cobra.Command, v IViper) error {
 	var result error
-	persitentFlags := cmd.PersistentFlags()
-	persitentFlags.VisitAll(func(flag *pflag.Flag) {
+	localFlags := cmd.LocalFlags()
+	localFlags.VisitAll(func(flag *pflag.Flag) {
 		name := flag.Name
-		if err := v.BindPFlag(name, persitentFlags.Lookup(name)); err != nil {
+		if err := v.BindPFlag(name, localFlags.Lookup(name)); err != nil {
 			result = fmt.Errorf("error binding flag %q to viper: %w", name, err)
 			return
 		}

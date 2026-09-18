@@ -32,29 +32,14 @@ func getChecksExplainCmd() *cobra.Command {
 	return &cmd
 }
 
-// getChecksExplainArgs requires exactly one argument naming a changelog check,
-// and rejects the listing filters explain inherits from `checks changelog`.
+// getChecksExplainArgs requires exactly one argument naming a changelog check.
 func getChecksExplainArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := cobra.ExactArgs(1)(cmd, args); err != nil {
 			return err
 		}
-		if err := checkNoListingFilters(cmd); err != nil {
-			return err
-		}
 		return checkChangelogId(args[0])
 	}
-}
-
-// checkNoListingFilters rejects the `checks changelog` filters: they select
-// rows of the listing, and explain is given its check as an argument.
-func checkNoListingFilters(cmd *cobra.Command) error {
-	for _, name := range []string{"id", "location", "tags", "severity"} {
-		if cmd.Flags().Changed(name) {
-			return fmt.Errorf("--%s cannot be used with explain: it filters the listing, and explain takes the check id as its argument", name)
-		}
-	}
-	return nil
 }
 
 func findChangelogRule(id string) *checker.BackwardCompatibilityRule {

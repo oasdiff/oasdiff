@@ -42,13 +42,21 @@ func Test_ChecksExplainRejectsValidateId(t *testing.T) {
 	require.Contains(t, stderr.String(), `unknown check id "additional-operations-duplicate-method"`)
 }
 
-// explain inherits the listing's filters from `checks changelog` and must not
-// accept them silently: --id in particular reads as a second check to explain.
-func Test_ChecksExplainRejectsListingFilters(t *testing.T) {
-	for _, flag := range []string{"--id api-removed-without-deprecation", "--location paths", "--tags request", "--severity error"} {
-		var stderr bytes.Buffer
-		require.NotZero(t, internal.Run(cmdToArgs("oasdiff checks changelog explain api-removed-without-deprecation "+flag), io.Discard, &stderr), flag)
-		require.Contains(t, stderr.String(), "cannot be used with explain", flag)
+// The listing's flags are local to `checks changelog`, so a subcommand that
+// does not declare one rejects it instead of parsing and ignoring it: on
+// explain, --id would read as a second check to explain.
+func Test_ChecksChangelogSubcommandsRejectListingFlags(t *testing.T) {
+	for cmd, flags := range map[string][]string{
+		// explain declares its own --format and --lang
+		"oasdiff checks changelog explain api-removed-without-deprecation": {"--id api-removed-without-deprecation", "--location paths", "--tags request", "--severity error"},
+		// coverage declares its own --format, --id, --location and --tags
+		"oasdiff checks changelog coverage": {"--severity error", "--lang es"},
+	} {
+		for _, flag := range flags {
+			var stderr bytes.Buffer
+			require.NotZero(t, internal.Run(cmdToArgs(cmd+" "+flag), io.Discard, &stderr), cmd+" "+flag)
+			require.Contains(t, stderr.String(), "unknown flag", cmd+" "+flag)
+		}
 	}
 }
 

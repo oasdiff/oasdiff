@@ -29,9 +29,8 @@ func getChecksChangelogCmd() *cobra.Command {
 		RunE:              getRun(runChecksChangelog),
 	}
 
-	// Registered per command rather than inherited: viper binds a command's own
-	// persistent flags (see bindFlags), so an inherited flag would parse but
-	// never reach the config.
+	// Local, so the subcommands (coverage, explain) do not inherit the
+	// listing's filters.
 	addChecksChangelogFlags(&cmd)
 
 	cmd.AddCommand(getChecksCoverageCmd(), getChecksExplainCmd())
@@ -45,10 +44,10 @@ func getChecksChangelogCmd() *cobra.Command {
 func addChecksChangelogFlags(cmd *cobra.Command) {
 	addChecksFormatFlags(cmd)
 	addChecksSeverityFlag(cmd)
-	enumWithOptions(cmd, newEnumSliceValue(GetChangelogTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
-	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
-	cmd.PersistentFlags().String("id", "", "display only the check with this id")
-	cmd.PersistentFlags().String("location", "", "include only checks with a location containing this string")
+	localEnumWithOptions(cmd, newEnumSliceValue(GetChangelogTags(), nil), "tags", "t", "include only checks matching the tags: values of the same dimension are ORed, dimensions are ANDed")
+	localEnumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
+	cmd.Flags().String("id", "", "display only the check with this id")
+	cmd.Flags().String("location", "", "include only checks with a location containing this string")
 }
 
 // getChecksChangelogArgs rejects arguments and an --id naming no check.
