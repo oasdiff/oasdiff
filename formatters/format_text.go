@@ -107,9 +107,6 @@ func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 	return result.Bytes(), nil
 }
 
-// RenderExplain lays the explanation out as short labeled blocks: the id and
-// level, what the check reports, the severity with its derivation, and where
-// in the document the check applies.
 func (f TEXTFormatter) RenderExplain(e Explanation, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 

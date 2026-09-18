@@ -58,9 +58,7 @@ func applyGuard(g Guard, effect Effect, direction Direction) (Effect, Direction,
 }
 
 // levelOf maps effect and direction to a level, with the sentence that
-// justifies it: narrowing breaks request consumers, widening breaks response
-// consumers, an incomparable change breaks both, and an unknown one is a
-// warning.
+// justifies it.
 func levelOf(effect Effect, direction Direction) (Level, string) {
 	switch effect {
 	case EffectViolation:

@@ -2,8 +2,6 @@ package formatters
 
 // Explanation is one check explained: what it reports, its severity with the
 // derivation that produced it, and where in the OpenAPI document it applies.
-// Validate rules carry only an id, level, and description; the other fields
-// are omitted rather than rendered as empty strings.
 type Explanation struct {
 	Id          string   `json:"id" yaml:"id"`
 	Level       string   `json:"level" yaml:"level"`

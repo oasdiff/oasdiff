@@ -13,8 +13,6 @@ import (
 
 const checksExplainCmd = "checks changelog explain"
 
-// getChecksExplainCmd explains one changelog check by id: what it reports and
-// the derivation that gives it its severity.
 func getChecksExplainCmd() *cobra.Command {
 
 	cmd := cobra.Command{
@@ -32,7 +30,6 @@ func getChecksExplainCmd() *cobra.Command {
 	return &cmd
 }
 
-// getChecksExplainArgs requires exactly one argument naming a changelog check.
 func getChecksExplainArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := cobra.ExactArgs(1)(cmd, args); err != nil {
@@ -98,9 +95,8 @@ func explainChangelogRule(rule checker.BackwardCompatibilityRule, localizer chec
 
 	derived, reasoning := rules.ExplainLevel(rule.Effect, rule.Direction, rule.Guards...)
 	if derived != rule.Level {
-		// cannot happen while the severity-deviations ledger is empty
-		// (TestSeverityLaw); if a deviation is ever recorded, its reason
-		// should be surfaced here
+		// unreachable while the severity-deviations ledger in TestSeverityLaw
+		// is empty
 		reasoning = []string{fmt.Sprintf("The stored level deviates from the severity law, which derives %s.", derived.String())}
 	}
 

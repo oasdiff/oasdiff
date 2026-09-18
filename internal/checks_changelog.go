@@ -29,8 +29,6 @@ func getChecksChangelogCmd() *cobra.Command {
 		RunE:              getRun(runChecksChangelog),
 	}
 
-	// Local, so the subcommands (coverage, explain) do not inherit the
-	// listing's filters.
 	addChecksChangelogFlags(&cmd)
 
 	cmd.AddCommand(getChecksCoverageCmd(), getChecksExplainCmd())
@@ -69,7 +67,6 @@ func checkKnownId(cmd *cobra.Command) error {
 	return checkChangelogId(id)
 }
 
-// checkChangelogId rejects an id naming no changelog check.
 func checkChangelogId(id string) error {
 	if findChangelogRule(id) == nil {
 		return fmt.Errorf("unknown check id %q", id)
