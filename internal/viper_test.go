@@ -57,6 +57,27 @@ func TestViper_BindPFlagErr(t *testing.T) {
 	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: error binding flag \"composed\" to viper: error")
 }
 
+// A persistent flag reaches viper on the subcommands that inherit it, not
+// only on the command that declares it.
+func TestViper_BindsInheritedFlags(t *testing.T) {
+	bound := map[string]bool{}
+	v := NewViperMock()
+	v.BindPFlagMock = func(key string, flag *pflag.Flag) error {
+		bound[key] = true
+		return nil
+	}
+
+	parent := cobra.Command{Use: "parent"}
+	parent.PersistentFlags().String("inherited", "", "")
+	child := cobra.Command{Use: "child"}
+	child.Flags().String("own", "", "")
+	parent.AddCommand(&child)
+
+	require.Nil(t, internal.RunViper(&child, v))
+	require.True(t, bound["own"])
+	require.True(t, bound["inherited"])
+}
+
 func TestViper_InvalidLang(t *testing.T) {
 	v := NewViperMock()
 	v.SetConfigFile("config.yaml")
