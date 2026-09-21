@@ -60,3 +60,33 @@ func TestDeriveLevelGuards(t *testing.T) {
 		require.Equal(t, tc.level, rules.DeriveLevel(tc.effect, tc.direction, tc.guard), tc.name)
 	}
 }
+
+// ExplainLevel is the same derivation with the words kept: over every cell
+// of the law, with and without guards, the level agrees with DeriveLevel,
+// and the reasoning ends with the sentence naming the resulting level.
+func TestExplainLevel_AgreesWithDeriveLevel(t *testing.T) {
+	effects := []rules.Effect{rules.EffectNarrows, rules.EffectWidens, rules.EffectIncomparable,
+		rules.EffectViolation, rules.EffectUnknown, rules.EffectNone}
+	directions := []rules.Direction{rules.DirectionRequest, rules.DirectionResponse, rules.DirectionNone}
+	guardSets := [][]rules.Guard{
+		nil,
+		{rules.GuardReadOnly},
+		{rules.GuardWriteOnly},
+		{rules.GuardSanctioned},
+		{rules.GuardNonSuccess},
+		{rules.GuardNegotiated},
+		{rules.GuardNegotiated, rules.GuardNonSuccess},
+	}
+	for _, effect := range effects {
+		for _, direction := range directions {
+			for _, guards := range guardSets {
+				level, steps := rules.ExplainLevel(effect, direction, guards...)
+				require.Equal(t, rules.DeriveLevel(effect, direction, guards...), level,
+					"effect=%s direction=%s guards=%v", effect, direction, guards)
+				require.NotEmpty(t, steps)
+				require.Contains(t, steps[len(steps)-1], level.String(),
+					"effect=%s direction=%s guards=%v", effect, direction, guards)
+			}
+		}
+	}
+}

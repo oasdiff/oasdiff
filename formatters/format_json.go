@@ -46,6 +46,10 @@ func (f JSONFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 	return printJSON(checks)
 }
 
+func (f JSONFormatter) RenderExplain(explanation Explanation, opts RenderOpts) ([]byte, error) {
+	return printJSON(&explanation)
+}
+
 func (f JSONFormatter) RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error) {
 	return printJSON(spec)
 }
@@ -55,7 +59,7 @@ func (f JSONFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 }
 
 func (f JSONFormatter) SupportedOutputs() []Output {
-	return []Output{OutputDiff, OutputSummary, OutputChangelog, OutputChecks, OutputFlatten, OutputValidate}
+	return []Output{OutputDiff, OutputSummary, OutputChangelog, OutputChecks, OutputExplain, OutputFlatten, OutputValidate}
 }
 
 func printJSON(output any) ([]byte, error) {
