@@ -49,6 +49,29 @@ func TestSubschemaTraversalIsComplete(t *testing.T) {
 	}
 }
 
+// Two properties at every level share the same child. A path-by-path walk
+// would invoke the callback 2^20 times for this small acyclic graph.
+func TestSubschemaWalkSharedDiamondVisitsEachContextOnce(t *testing.T) {
+	const depth = 20
+	child := &diff.SchemaDiff{}
+	for range depth {
+		child = &diff.SchemaDiff{
+			PropertiesDiff: &diff.SchemasDiff{
+				Modified: diff.ModifiedSchemasMap{
+					"left":  child,
+					"right": child,
+				},
+			},
+		}
+	}
+
+	visits := 0
+	subschemaWalk{enter: func(_ string, _ string, _ *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
+		visits++
+	}}.walk("", "", child, nil, false)
+	require.Equal(t, depth, visits)
+}
+
 // putSubschema sets the named SchemaDiff field to a value holding target, in
 // whichever shape that field uses to carry sub-schemas.
 func putSubschema(t *testing.T, schemaDiff *diff.SchemaDiff, field string, target *diff.SchemaDiff) {
