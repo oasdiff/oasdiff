@@ -93,11 +93,8 @@ type SchemaDiff struct {
 	Base     *openapi3.Schema `json:"-" yaml:"-"`
 	Revision *openapi3.Schema `json:"-" yaml:"-"`
 
-	// BaseComponent and RevisionComponent name the components.schemas entry
-	// each compared schema is, and are empty for a schema written inline. A
-	// checker reads them to attribute a change to the schema it is in, rather
-	// than to each property path that reaches it. Context like Base and
-	// Revision, so they stay out of the output and out of Empty.
+	// The components.schemas entry each compared schema is, empty for a
+	// schema written inline: a schema object does not carry its own name.
 	BaseComponent     string `json:"-" yaml:"-"`
 	RevisionComponent string `json:"-" yaml:"-"`
 }

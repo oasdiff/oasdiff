@@ -21,8 +21,8 @@ func componentNameDiff(t *testing.T, base, revision string) *diff.SchemaDiff {
 		ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff
 }
 
-// A schema reached through a property carries the name of the component it is,
-// on each side, and an inline schema carries none.
+// A schema reached through a property is named on each side; an inline schema
+// is not.
 func TestSchemaDiff_ComponentName(t *testing.T) {
 	schemaDiff := componentNameDiff(t, "../data/component-name1.yaml", "../data/component-name2.yaml")
 
@@ -43,9 +43,7 @@ func TestSchemaDiff_ComponentNameOfRenamedComponent(t *testing.T) {
 	require.Equal(t, "New", schemaDiff.RevisionComponent)
 }
 
-// The names are context, not a change: a component whose schema is identical
-// in both documents is not reported as modified, and identical documents
-// still diff to nothing.
+// The names are context, not a change.
 func TestSchemaDiff_ComponentNameIsNotAChange(t *testing.T) {
 	schemaDiff := componentNameDiff(t, "../data/component-name1.yaml", "../data/component-name2.yaml")
 	require.NotContains(t, schemaDiff.PropertiesDiff.Modified, "untouched")

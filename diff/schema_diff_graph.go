@@ -114,8 +114,7 @@ func getSchemaDiffNode(config *Config, state *state, schema1, schema2 *openapi3.
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err == nil {
 		*node = *diff
-		// after the result is copied in, which carries its own Base and
-		// Revision and would overwrite these
+		// after the copy above, which would overwrite them
 		node.BaseComponent = state.baseComponents[schema1.Value]
 		node.RevisionComponent = state.revisionComponents[schema2.Value]
 		graph.candidates[node], err = getCandidates(config, state, node)
