@@ -108,15 +108,16 @@ func getSchemaDiffNode(config *Config, state *state, schema1, schema2 *openapi3.
 		return node, nil
 	}
 
-	node := &SchemaDiff{Base: schema1.Value, Revision: schema2.Value}
+	node := &SchemaDiff{}
 	graph.nodes[pair] = node
 	graph.depth++
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err == nil {
 		*node = *diff
-		// after the copy above, which would overwrite them
-		node.BaseComponent = state.baseComponents[schema1.Value]
-		node.RevisionComponent = state.revisionComponents[schema2.Value]
+		// the copy carries the compared schemas; the names come from the
+		// documents, which the comparison itself does not see
+		node.BaseComponent = state.baseComponents[node.Base]
+		node.RevisionComponent = state.revisionComponents[node.Revision]
 		graph.candidates[node], err = getCandidates(config, state, node)
 	}
 	graph.depth--
