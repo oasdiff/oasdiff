@@ -92,11 +92,23 @@ type SchemaDiff struct {
 	// Base and Revision point to the compared schema objects for reference in checkers
 	Base     *openapi3.Schema `json:"-" yaml:"-"`
 	Revision *openapi3.Schema `json:"-" yaml:"-"`
+
+	// The components.schemas entry each compared schema is, empty for a
+	// schema written inline: a schema object does not carry its own name.
+	BaseComponent     string `json:"-" yaml:"-"`
+	RevisionComponent string `json:"-" yaml:"-"`
 }
 
-// Empty indicates whether a change was found in this element
+// Empty indicates whether a change was found in this element. The schema
+// objects and their names are context rather than a change, so they are
+// excluded from the comparison and a diff carrying nothing else is empty.
 func (diff *SchemaDiff) Empty() bool {
-	return diff == nil || *diff == SchemaDiff{Base: diff.Base, Revision: diff.Revision}
+	return diff == nil || *diff == SchemaDiff{
+		Base:              diff.Base,
+		Revision:          diff.Revision,
+		BaseComponent:     diff.BaseComponent,
+		RevisionComponent: diff.RevisionComponent,
+	}
 }
 
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
