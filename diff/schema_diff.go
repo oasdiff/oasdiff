@@ -92,11 +92,24 @@ type SchemaDiff struct {
 	// Base and Revision point to the compared schema objects for reference in checkers
 	Base     *openapi3.Schema `json:"-" yaml:"-"`
 	Revision *openapi3.Schema `json:"-" yaml:"-"`
+
+	// BaseComponent and RevisionComponent name the components.schemas entry
+	// each compared schema is, and are empty for a schema written inline. A
+	// checker reads them to attribute a change to the schema it is in, rather
+	// than to each property path that reaches it. Context like Base and
+	// Revision, so they stay out of the output and out of Empty.
+	BaseComponent     string `json:"-" yaml:"-"`
+	RevisionComponent string `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
 func (diff *SchemaDiff) Empty() bool {
-	return diff == nil || *diff == SchemaDiff{Base: diff.Base, Revision: diff.Revision}
+	return diff == nil || *diff == SchemaDiff{
+		Base:              diff.Base,
+		Revision:          diff.Revision,
+		BaseComponent:     diff.BaseComponent,
+		RevisionComponent: diff.RevisionComponent,
+	}
 }
 
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
