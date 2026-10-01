@@ -46,3 +46,55 @@ func TestResponseSharedSchemaUsesStableRepresentativePath(t *testing.T) {
 		require.Equal(t, "left/extra", change.Args[0])
 	}
 }
+
+// The change is reported once per schema, not once per parent: Shared is
+// reached through First and through Second, which are different parents.
+func TestResponseSharedSchemaUnderTwoParentsReportedOnce(t *testing.T) {
+	base, err := open("../data/checker/shared_schema_two_parents_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/shared_schema_two_parents_revision.yaml")
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck),
+		d, sources, checker.INFO,
+	)
+
+	require.Len(t, changes, 1)
+	require.Equal(t, "first/shared/extra", changes[0].(checker.ApiChange).Args[0])
+}
+
+// A change in a schema several properties reach says so, and a change in a
+// schema reached once does not.
+func TestSharedSchemaChangeCarriesTheComment(t *testing.T) {
+	sharedBase, err := open("../data/checker/shared_schema_base.yaml")
+	require.NoError(t, err)
+	sharedRevision, err := open("../data/checker/shared_schema_revision.yaml")
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), sharedBase, sharedRevision)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck),
+		d, sources, checker.INFO,
+	)
+	require.Len(t, changes, 1)
+	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
+	require.NotEmpty(t, changes[0].GetComment(checker.NewLocalizer("en")))
+
+	onceBase, err := open("../data/component-renamed1.yaml")
+	require.NoError(t, err)
+	onceRevision, err := open("../data/component-renamed2.yaml")
+	require.NoError(t, err)
+
+	d, sources, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), onceBase, onceRevision)
+	require.NoError(t, err)
+	changes = checker.CheckBackwardCompatibilityUntilLevel(
+		singleCheckConfig(checker.ResponseOptionalPropertyUpdatedCheck),
+		d, sources, checker.INFO,
+	)
+	require.Len(t, changes, 1)
+	require.Empty(t, changes[0].(checker.ApiChange).Comment)
+}

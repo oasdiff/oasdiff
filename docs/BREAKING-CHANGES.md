@@ -114,6 +114,18 @@ See [Version Bumps and Breaking Changes](VERSIONING.md).
 A schema can allow `null` in three equivalent ways, and whether a nullability change is breaking depends on whether it appears in a request or a response.
 See [Nullability Changes](NULLABILITY.md).
 
+## Schemas Used in Several Places
+
+A schema referenced from more than one property of the same payload is one schema, so a change in it is one change to the operation's contract. oasdiff reports it once, at one of the properties that reach it, and says so in the change's comment:
+
+```
+added the optional property `left/extra` to the response with the `200` status
+    A change in a schema that several properties of this payload reach is reported once, at one of those
+    properties: it is a single change to the contract, and it applies wherever the schema is used.
+```
+
+The property path it reports is stable: the same comparison names the same property every time. Each operation is a separate contract, so an operation that reaches the same changed schema reports it too.
+
 ## Ignoring Specific Breaking Changes
 Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  
 Oasdiff allows you define breaking changes that you want to ignore in a configuration file.  

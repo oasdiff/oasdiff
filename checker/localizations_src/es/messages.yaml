@@ -1548,3 +1548,4 @@ response-property-min-unset: el valor min de la propiedad de respuesta %s fue re
 response-property-min-unset-description: valor min de la propiedad de respuesta removido
 response-property-multiple-of-set: el valor multipleOf de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-multiple-of-set-description: valor multipleOf de la propiedad de respuesta establecido
+shared-schema-comment: "Un cambio en un esquema al que llegan varias propiedades de esta carga se reporta una sola vez, en una de esas propiedades: es un único cambio del contrato y se aplica en todos los lugares donde se usa el esquema."

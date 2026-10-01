@@ -24,7 +24,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		// directly inside the walker callback.
 		checkDeletedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared bool) {
 				if slices.Contains(parent.Base.Required, propertyName) {
 					// covered by response-required-property-removed
 					return
@@ -46,13 +46,13 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				result = append(result, info.newChange(
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
-					"",
+					sharedComment(shared),
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
 		checkAddedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared bool) {
 				if slices.Contains(parent.Revision.Required, propertyName) {
 					// covered by response-required-property-added
 					return
@@ -65,7 +65,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				result = append(result, info.newChange(
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
-					"",
+					sharedComment(shared),
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 			})
 	})

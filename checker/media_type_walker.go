@@ -68,6 +68,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	if info.schemaDiff == nil {
 		return
 	}
+	shared := sharedSchemas(info.schemaDiff, false)
 	subschemaWalk{enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
 		// A single-valued sub-schema present on one side only (items removed,
 		// say) has a nil Base or Revision. Every property check reads both and
@@ -79,6 +80,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 		processor(propertyInfo{
 			mediaTypeInfo: info,
 			underAllOf:    underAllOf,
+			shared:        shared[walkVisit{schemaDiff: propertyDiff, underAllOf: underAllOf}],
 			propertyPath:  propertyPath,
 			propertyName:  propertyName,
 			propertyDiff:  propertyDiff,
@@ -94,6 +96,9 @@ type propertyInfo struct {
 	propertyPath string
 	propertyName string
 	underAllOf   bool
+	// shared is set when more than one property path of this payload reaches
+	// the property's schema, so the change is reported here alone.
+	shared       bool
 	propertyDiff *diff.SchemaDiff
 	parent       *diff.SchemaDiff
 }
@@ -102,6 +107,9 @@ type propertyInfo struct {
 // made against the property's own schema diff (WithSchema recomputes claimed,
 // so the second call overrides the body-level decision).
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
+	if comment == "" && p.shared {
+		comment = SharedSchemaCommentId
+	}
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
 		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
 		WithGuards(propertyGuards(p.propertyDiff))
@@ -218,4 +226,17 @@ func walkModifiedResponseSchemas(
 			}
 		}
 	}
+}
+
+// SharedSchemaCommentId explains a change reported at one property path when
+// several reach the same schema.
+const SharedSchemaCommentId = "shared-schema-comment"
+
+// sharedComment is SharedSchemaCommentId when several property paths of the
+// payload reach the schema the change was found in.
+func sharedComment(shared bool) string {
+	if shared {
+		return SharedSchemaCommentId
+	}
+	return ""
 }
