@@ -100,9 +100,8 @@ type SchemaDiff struct {
 }
 
 // Empty indicates whether a change was found in this element. The schema
-// objects and their names are context rather than a change, so a diff
-// carrying nothing else is empty: the unroll and the validation-equivalence
-// comparison both decide emptiness on a copy that carries them.
+// objects and their names are context rather than a change, so they are
+// excluded from the comparison and a diff carrying nothing else is empty.
 func (diff *SchemaDiff) Empty() bool {
 	return diff == nil || *diff == SchemaDiff{
 		Base:              diff.Base,
