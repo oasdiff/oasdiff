@@ -2,6 +2,8 @@ package checker
 
 import (
 	"fmt"
+	"maps"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
@@ -16,9 +18,27 @@ type subschemaWalk struct {
 	// properties is called for a node's own properties, after its name is
 	// appended, so the path already names the node they belong to.
 	properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool)
+	// A shared $ref can reach the same diff through many property paths.
+	// Keep one representative path per parent and allOf context.
+	seen map[walkVisit]struct{}
+}
+
+type walkVisit struct {
+	schemaDiff *diff.SchemaDiff
+	parentDiff *diff.SchemaDiff
+	underAllOf bool
 }
 
 func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool) {
+	if w.seen == nil {
+		w.seen = make(map[walkVisit]struct{})
+	}
+	visit := walkVisit{schemaDiff: schemaDiff, parentDiff: parentDiff, underAllOf: underAllOf}
+	if _, ok := w.seen[visit]; ok {
+		return
+	}
+	w.seen[visit] = struct{}{}
+
 	if w.enter != nil && (propertyName != "" || propertyPath != "") {
 		w.enter(propertyPath, propertyName, schemaDiff, parentDiff, underAllOf)
 	}
@@ -53,7 +73,8 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 		if w.properties != nil {
 			w.properties(propertyPath, schemaDiff, underAllOf)
 		}
-		for name, v := range schemaDiff.PropertiesDiff.Modified {
+		for _, name := range slices.Sorted(maps.Keys(schemaDiff.PropertiesDiff.Modified)) {
+			v := schemaDiff.PropertiesDiff.Modified[name]
 			w.walk(propertyPath, name, v, schemaDiff, underAllOf)
 		}
 	}
@@ -106,13 +127,15 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 	}
 
 	if schemaDiff.PatternPropertiesDiff != nil {
-		for i, v := range schemaDiff.PatternPropertiesDiff.Modified {
+		for _, i := range slices.Sorted(maps.Keys(schemaDiff.PatternPropertiesDiff.Modified)) {
+			v := schemaDiff.PatternPropertiesDiff.Modified[i]
 			w.walk(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, schemaDiff, underAllOf)
 		}
 	}
 
 	if schemaDiff.DependentSchemasDiff != nil {
-		for i, v := range schemaDiff.DependentSchemasDiff.Modified {
+		for _, i := range slices.Sorted(maps.Keys(schemaDiff.DependentSchemasDiff.Modified)) {
+			v := schemaDiff.DependentSchemasDiff.Modified[i]
 			w.walk(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, schemaDiff, underAllOf)
 		}
 	}

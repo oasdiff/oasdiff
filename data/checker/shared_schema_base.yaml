@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  title: shared schema
+  version: 1.0.0
+paths:
+  /example:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Root'
+components:
+  schemas:
+    Root:
+      type: object
+      properties:
+        left:
+          $ref: '#/components/schemas/Shared'
+        right:
+          $ref: '#/components/schemas/Shared'
+    Shared:
+      type: object
+      properties:
+        id:
+          type: string
