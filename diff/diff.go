@@ -252,8 +252,6 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 		return nil, errors.New("spec is nil")
 	}
 
-	state.baseComponents, state.revisionComponents = componentNames(s1), componentNames(s2)
-
 	diff, err := getDiffInternal(config, state, s1, s2)
 	if err != nil {
 		return nil, err
@@ -269,6 +267,8 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 }
 
 func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
+
+	state.baseComponents, state.revisionComponents = componentNames(s1), componentNames(s2)
 
 	result := newDiff()
 	var err error
