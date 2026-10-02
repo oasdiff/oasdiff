@@ -116,17 +116,21 @@ See [Nullability Changes](NULLABILITY.md).
 
 ## Schemas Used in Several Places
 
-A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. oasdiff reports it once, at one of the properties that reach it. The change names the shared schema, and its comment says why the other properties are not listed:
+A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. Each check reports such a change once, at one of the properties that reach it. The change names the shared schema, and its comment says why the other properties are not listed:
 
 ```
 added the optional property `left/extra` to the response with the `200` status (shared schema: Shared)
-    A change in a schema that several properties of this payload reach is reported once, at one of those
-    properties: it is a single change to the contract, and it applies wherever the schema is used.
+    A change in a schema that several properties of this payload reach is reported once per check, at one of
+    those properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```
 
 So `Shared` is where to look, and `left` is one of the places it is used. A change deeper inside `Shared` names `Shared` too, since that is the schema whose other uses are not listed. The property path is stable: the same comparison names the same property every time. A schema that is not an entry under `components.schemas` has no name to report, and the comment appears on its own.
 
-Each operation is a separate contract, so an operation that reaches the same changed schema reports it too.
+Three things stay separate, and each still gets its own line:
+
+- **Each check.** Every check walks the payload itself, so a shared schema that both added a property and gained a `pattern` produces one `response-optional-property-added` and one `response-property-pattern-added`.
+- **Each change.** Two properties added to the same shared schema are two changes, both reported at the same property path.
+- **Each operation.** An operation is a separate contract, so an operation that reaches the same changed schema reports it too.
 
 ## Ignoring Specific Breaking Changes
 Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  

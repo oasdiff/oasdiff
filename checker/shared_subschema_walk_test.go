@@ -77,6 +77,33 @@ func TestResponseSharedSchemaUnderTwoParentsReportedOnce(t *testing.T) {
 	require.Contains(t, inShared[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
 }
 
+// Every check walks the payload itself, so the deduplication is per check:
+// Shared both gains a property and gains a pattern on an existing one, and
+// each check reports its own change, both at the same property path.
+func TestSharedSchemaIsReportedOncePerCheck(t *testing.T) {
+	base, err := open("../data/checker/shared_schema_two_parents_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/shared_schema_two_parents_revision.yaml")
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, sources, checker.INFO)
+
+	ids := []string{}
+	for _, change := range changes {
+		if change.(checker.ApiChange).Comment == checker.SharedSchemaCommentId {
+			ids = append(ids, change.GetId())
+			require.Contains(t, change.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+		}
+	}
+
+	require.ElementsMatch(t, []string{
+		checker.ResponseOptionalPropertyAddedId,
+		checker.ResponsePropertyPatternAddedId,
+	}, ids)
+}
+
 // The pattern is added to Shared's own id property, so the change is below the
 // schema several paths reach rather than in it, and names Shared all the same.
 func TestChangeBelowASharedSchemaNamesIt(t *testing.T) {
