@@ -30,7 +30,7 @@ func TestSubschemaTraversalIsComplete(t *testing.T) {
 			putSubschema(t, root, name, target)
 
 			reached := false
-			subschemaWalk{enter: func(_ string, _ string, schemaDiff *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
+			subschemaWalk{enter: func(_ string, _ string, schemaDiff *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool, _ *diff.SchemaDiff) {
 				if schemaDiff == target {
 					reached = true
 				}
@@ -66,7 +66,7 @@ func TestSubschemaWalkSharedDiamondVisitsEachContextOnce(t *testing.T) {
 	}
 
 	visits := 0
-	subschemaWalk{enter: func(_ string, _ string, _ *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
+	subschemaWalk{enter: func(_ string, _ string, _ *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool, _ *diff.SchemaDiff) {
 		visits++
 	}}.walk("", "", child, nil, false)
 	require.Equal(t, depth, visits)

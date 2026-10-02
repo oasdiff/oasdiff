@@ -68,25 +68,26 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	if info.schemaDiff == nil {
 		return
 	}
-	shared := sharedSchemas(info.schemaDiff, false)
-	subschemaWalk{enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
-		// A single-valued sub-schema present on one side only (items removed,
-		// say) has a nil Base or Revision. Every property check reads both and
-		// has nothing to say about a side that does not exist, so guard here
-		// rather than in each of them.
-		if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
-			return
-		}
-		processor(propertyInfo{
-			mediaTypeInfo: info,
-			underAllOf:    underAllOf,
-			shared:        shared[walkVisit{schemaDiff: propertyDiff, underAllOf: underAllOf}],
-			propertyPath:  propertyPath,
-			propertyName:  propertyName,
-			propertyDiff:  propertyDiff,
-			parent:        parent,
-		})
-	}}.walk("", "", info.schemaDiff, nil, false)
+	subschemaWalk{
+		shared: sharedSchemas(info.schemaDiff, false),
+		enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
+			// A single-valued sub-schema present on one side only (items removed,
+			// say) has a nil Base or Revision. Every property check reads both and
+			// has nothing to say about a side that does not exist, so guard here
+			// rather than in each of them.
+			if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
+				return
+			}
+			processor(propertyInfo{
+				mediaTypeInfo: info,
+				underAllOf:    underAllOf,
+				shared:        shared,
+				propertyPath:  propertyPath,
+				propertyName:  propertyName,
+				propertyDiff:  propertyDiff,
+				parent:        parent,
+			})
+		}}.walk("", "", info.schemaDiff, nil, false)
 }
 
 // propertyInfo is what walkProperties hands its processor. It embeds
@@ -96,9 +97,11 @@ type propertyInfo struct {
 	propertyPath string
 	propertyName string
 	underAllOf   bool
-	// shared is set when more than one property path of this payload reaches
-	// the property's schema, so the change is reported here alone.
-	shared       bool
+	// shared is the innermost schema at or above the property that more than
+	// one of the payload's property paths reaches, so a change here is
+	// reported at this path alone. Nil when every path to the property is
+	// the only one.
+	shared       *diff.SchemaDiff
 	propertyDiff *diff.SchemaDiff
 	parent       *diff.SchemaDiff
 }
@@ -107,10 +110,8 @@ type propertyInfo struct {
 // made against the property's own schema diff (WithSchema recomputes claimed,
 // so the second call overrides the body-level decision).
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
-	if comment == "" && p.shared {
-		comment = SharedSchemaCommentId
-	}
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
+		WithSharedSchema(p.shared).
 		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
 		WithGuards(propertyGuards(p.propertyDiff))
 }
@@ -226,17 +227,4 @@ func walkModifiedResponseSchemas(
 			}
 		}
 	}
-}
-
-// SharedSchemaCommentId explains a change reported at one property path when
-// several reach the same schema.
-const SharedSchemaCommentId = "shared-schema-comment"
-
-// sharedComment is SharedSchemaCommentId when several property paths of the
-// payload reach the schema the change was found in.
-func sharedComment(shared bool) string {
-	if shared {
-		return SharedSchemaCommentId
-	}
-	return ""
 }

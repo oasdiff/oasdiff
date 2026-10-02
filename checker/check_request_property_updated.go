@@ -56,7 +56,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 		// which delegates to checkModifiedPropertiesDiff. Used directly here.
 		checkDeletedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared bool) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
 				if propertyItem.ReadOnly {
 					return
 				}
@@ -73,13 +73,13 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 				result = append(result, info.newChange(
 					RequestPropertyRemovedId,
 					[]any{propertyFullName(propertyPath, propertyName)},
-					sharedComment(shared),
-				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+					"",
+				).WithSchema(parent).WithSharedSchema(shared).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
 		checkAddedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared bool) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
 				if propertyItem.ReadOnly {
 					return
 				}
@@ -92,21 +92,21 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyId,
 							[]any{propName},
-							sharedComment(shared),
-						).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+							"",
+						).WithSchema(parent).WithSharedSchema(shared).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							RequiredRequestPropertyWithDefaultCommentId,
-						).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(parent).WithSharedSchema(shared).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
-						sharedComment(shared),
-					).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						"",
+					).WithSchema(parent).WithSharedSchema(shared).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 				}
 			})
 	})
