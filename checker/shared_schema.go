@@ -40,5 +40,5 @@ func schemaNameDetail(schemaDiff *diff.SchemaDiff) string {
 		return ""
 	}
 
-	return "(schema: " + name + ")"
+	return "(shared schema: " + name + ")"
 }

@@ -1,6 +1,7 @@
 package checker_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
@@ -48,7 +49,8 @@ func TestResponseSharedSchemaUsesStableRepresentativePath(t *testing.T) {
 }
 
 // The change is reported once per schema, not once per parent: Shared is
-// reached through First and through Second, which are different parents.
+// reached through First and through Second, which are different parents, and
+// each of those through two properties of the payload.
 func TestResponseSharedSchemaUnderTwoParentsReportedOnce(t *testing.T) {
 	base, err := open("../data/checker/shared_schema_two_parents_base.yaml")
 	require.NoError(t, err)
@@ -62,9 +64,37 @@ func TestResponseSharedSchemaUnderTwoParentsReportedOnce(t *testing.T) {
 		d, sources, checker.INFO,
 	)
 
+	// The payload also adds properties of its own, which are not in Shared.
+	inShared := checker.Changes{}
+	for _, change := range changes {
+		if strings.HasSuffix(change.(checker.ApiChange).Args[0].(string), "/shared/extra") {
+			inShared = append(inShared, change)
+		}
+	}
+
+	require.Len(t, inShared, 1)
+	require.Equal(t, "first/shared/extra", inShared[0].(checker.ApiChange).Args[0])
+	require.Contains(t, inShared[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+}
+
+// The pattern is added to Shared's own id property, so the change is below the
+// schema several paths reach rather than in it, and names Shared all the same.
+func TestChangeBelowASharedSchemaNamesIt(t *testing.T) {
+	base, err := open("../data/checker/shared_schema_two_parents_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/shared_schema_two_parents_revision.yaml")
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck),
+		d, sources, checker.INFO,
+	)
+
 	require.Len(t, changes, 1)
-	require.Equal(t, "first/shared/extra", changes[0].(checker.ApiChange).Args[0])
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(schema: Shared)")
+	require.Equal(t, "first/shared/id", changes[0].(checker.ApiChange).Args[0])
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
 }
 
 // A change below a shared schema is reported at one path too, so it names the
@@ -86,7 +116,7 @@ func TestChangeInsideASharedSchemaNamesTheSharedSchema(t *testing.T) {
 	require.Len(t, changes, 1)
 	require.Equal(t, "left/id", changes[0].(checker.ApiChange).Args[0])
 	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(schema: Shared)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
 }
 
 // A schema reached through a JSON pointer into another schema has no
@@ -106,7 +136,7 @@ func TestSharedSchemaWithoutAComponentNameIsStillReportedOnce(t *testing.T) {
 
 	require.Len(t, changes, 1)
 	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
-	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(schema:")
+	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema:")
 }
 
 // A change in a schema several properties reach says so, and a change in a
@@ -126,7 +156,7 @@ func TestSharedSchemaChangeCarriesTheComment(t *testing.T) {
 	require.Len(t, changes, 1)
 	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
 	require.NotEmpty(t, changes[0].GetComment(checker.NewLocalizer("en")))
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(schema: Shared)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
 
 	onceBase, err := open("../data/component-renamed1.yaml")
 	require.NoError(t, err)
@@ -141,5 +171,5 @@ func TestSharedSchemaChangeCarriesTheComment(t *testing.T) {
 	)
 	require.Len(t, changes, 1)
 	require.Empty(t, changes[0].(checker.ApiChange).Comment)
-	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(schema:")
+	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema:")
 }

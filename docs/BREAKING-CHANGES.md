@@ -119,7 +119,7 @@ See [Nullability Changes](NULLABILITY.md).
 A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. oasdiff reports it once, at one of the properties that reach it. The change names the shared schema, and its comment says why the other properties are not listed:
 
 ```
-added the optional property `left/extra` to the response with the `200` status (schema: Shared)
+added the optional property `left/extra` to the response with the `200` status (shared schema: Shared)
     A change in a schema that several properties of this payload reach is reported once, at one of those
     properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```
