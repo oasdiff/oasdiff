@@ -234,3 +234,24 @@ func TestSharedSchemaListsTheOtherProperties(t *testing.T) {
 	require.Equal(t, &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "ownerId", "userId"}}, accounts.GetSharedSchema())
 	require.Contains(t, accounts.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Id, also at `ownerId` and 1 more)")
 }
+
+// A description beside each $ref to Address makes the parser copy Address
+// once per property. The copies share their children, so zip is what both
+// properties reach. zip is written inline and is named after Address, the
+// schema it belongs to.
+func TestSharedSchemaWrittenInlineIsNamedAfterItsComponent(t *testing.T) {
+	base, err := open("../data/checker/shared_schema_override_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/shared_schema_override_revision.yaml")
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck),
+		d, sources, checker.INFO,
+	)
+
+	require.Len(t, changes, 1)
+	require.Equal(t, &checker.SharedSchema{Name: "Address", Properties: []string{"billing/zip", "shipping/zip"}}, changes[0].(checker.ApiChange).GetSharedSchema())
+}

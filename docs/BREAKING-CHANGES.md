@@ -135,7 +135,7 @@ So `Id` is where to look, and the pattern applies to both `customerId` and `user
 
 The list has one entry per reference to the schema. Say `Shared` is referenced from `First.shared` and `Second.shared`, and `First` is itself used by two properties of the payload. A change in `Shared` lists two properties, `first/shared/...` and `second/shared/...`, rather than one per path through `First`. A change in `First` lists `First`'s own uses. Counting references rather than paths keeps the list short: in a deeply nested spec, the number of paths can run to millions.
 
-A change deeper inside a shared schema names that schema too, and lists the same property paths with the rest of the change's path appended. A schema that is not an entry under `components.schemas` has no name, and the change lists the other properties on their own.
+A change deeper inside a shared schema names that schema too, and lists the same property paths with the rest of the change's path appended. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
 
 The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
 

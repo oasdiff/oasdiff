@@ -32,6 +32,12 @@ type subschemaWalk struct {
 	// walked that several references reach. The hooks receive it: a change
 	// there or below it is reported at one path out of several.
 	sharedAncestor *sharedReach
+	// namedAncestor is the innermost components.schemas entry at or above the
+	// node being walked. It names a shared schema written inline, which is
+	// shared because the entry it belongs to was copied, as the parser does
+	// for a $ref with a description beside it, and the copies keep its
+	// children.
+	namedAncestor string
 }
 
 type walkVisit struct {
@@ -74,10 +80,13 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 	}
 	w.seen[visit] = struct{}{}
 
-	// Assigning to the value receiver scopes this to the subtree: every
-	// recursive call below inherits it, siblings do not.
+	// Assigning to the value receiver scopes these to the subtree: every
+	// recursive call below inherits them, siblings do not.
+	if name := componentName(schemaDiff); name != "" {
+		w.namedAncestor = name
+	}
 	if paths, ok := w.shared[visit]; ok {
-		w.sharedAncestor = &sharedReach{name: componentName(schemaDiff), path: nodePath, paths: paths}
+		w.sharedAncestor = &sharedReach{name: w.namedAncestor, path: nodePath, paths: paths}
 	}
 
 	if w.enter != nil && (propertyName != "" || propertyPath != "") {
