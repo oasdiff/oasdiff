@@ -14,25 +14,24 @@ import (
 type subschemaWalk struct {
 	// enter is called for the node itself, before its name is appended to the
 	// path, so a caller receives the two separately.
-	enter func(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff)
+	enter func(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool, shared *sharedReach)
 	// properties is called for a node's own properties, after its name is
 	// appended, so the path already names the node they belong to.
-	properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff)
+	properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool, shared *sharedReach)
 	// A schema reached through several property paths is walked once: a
 	// change in it is one change to the operation's contract, however many
 	// paths lead to it.
 	seen map[walkVisit]struct{}
-	// counts, when set, records how many paths reach each schema instead of
-	// reporting anything (sharedSchemas).
-	counts map[walkVisit]int
-	// shared holds the schemas more than one property path reaches, from a
-	// counting pass over the same diff (sharedSchemas).
-	shared map[walkVisit]bool
+	// reaches, when set, records the path of every reference to each schema
+	// instead of reporting anything (sharedSchemas).
+	reaches map[walkVisit][]string
+	// shared holds the paths to each schema more than one reference reaches,
+	// from a pass over the same diff (sharedSchemas).
+	shared map[walkVisit][]string
 	// sharedAncestor is the innermost schema at or above the node being
-	// walked that several property paths reach. The hooks receive it: a
-	// change there or below it is reported at one path out of several, so it
-	// is this schema, rather than the path, that identifies the change.
-	sharedAncestor *diff.SchemaDiff
+	// walked that several references reach. The hooks receive it: a change
+	// there or below it is reported at one path out of several.
+	sharedAncestor *sharedReach
 }
 
 type walkVisit struct {
@@ -40,16 +39,18 @@ type walkVisit struct {
 	underAllOf bool
 }
 
-// sharedSchemas reports which schemas below schemaDiff more than one property
-// path reaches, which is what the walk itself then reports only once.
-func sharedSchemas(schemaDiff *diff.SchemaDiff, underAllOf bool) map[walkVisit]bool {
-	counts := map[walkVisit]int{}
-	subschemaWalk{counts: counts}.walk("", "", schemaDiff, nil, underAllOf)
+// sharedSchemas returns the paths to each schema below schemaDiff that more
+// than one reference reaches, which is what the walk itself then reports only
+// once. A reference is recorded at the path the walk takes to it, so the
+// count is of references rather than of every chain that leads to one.
+func sharedSchemas(schemaDiff *diff.SchemaDiff, underAllOf bool) map[walkVisit][]string {
+	reaches := map[walkVisit][]string{}
+	subschemaWalk{reaches: reaches}.walk("", "", schemaDiff, nil, underAllOf)
 
-	shared := map[walkVisit]bool{}
-	for visit, count := range counts {
-		if count > 1 {
-			shared[visit] = true
+	shared := map[walkVisit][]string{}
+	for visit, paths := range reaches {
+		if len(paths) > 1 {
+			shared[visit] = paths
 		}
 	}
 	return shared
@@ -59,9 +60,14 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 	if w.seen == nil {
 		w.seen = make(map[walkVisit]struct{})
 	}
+	nodePath := propertyPath
+	if propertyName != "" {
+		nodePath = propertyFullName(propertyPath, propertyName)
+	}
+
 	visit := walkVisit{schemaDiff: schemaDiff, underAllOf: underAllOf}
-	if w.counts != nil {
-		w.counts[visit]++
+	if w.reaches != nil {
+		w.reaches[visit] = append(w.reaches[visit], nodePath)
 	}
 	if _, ok := w.seen[visit]; ok {
 		return
@@ -70,17 +76,15 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 
 	// Assigning to the value receiver scopes this to the subtree: every
 	// recursive call below inherits it, siblings do not.
-	if w.shared[visit] {
-		w.sharedAncestor = schemaDiff
+	if paths, ok := w.shared[visit]; ok {
+		w.sharedAncestor = &sharedReach{name: componentName(schemaDiff), path: nodePath, paths: paths}
 	}
 
 	if w.enter != nil && (propertyName != "" || propertyPath != "") {
 		w.enter(propertyPath, propertyName, schemaDiff, parentDiff, underAllOf, w.sharedAncestor)
 	}
 
-	if propertyName != "" {
-		propertyPath = propertyFullName(propertyPath, propertyName)
-	}
+	propertyPath = nodePath
 
 	if schemaDiff.AllOfDiff != nil {
 		for _, v := range schemaDiff.AllOfDiff.Modified {
@@ -181,35 +185,35 @@ func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(pro
 		return
 	}
 
-	subschemaWalk{enter: func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool, _ *diff.SchemaDiff) {
+	subschemaWalk{enter: func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool, _ *sharedReach) {
 		processor(propertyPath, propertyName, propertyItem, propertyParentItem)
 	}}.walk("", "", schemaDiff, nil, false)
 }
 
-func checkAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff)) {
+func checkAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool, shared *SharedSchema)) {
 	if schemaDiff == nil {
 		return
 	}
 
 	subschemaWalk{
 		shared: sharedSchemas(schemaDiff, false),
-		properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
+		properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool, shared *sharedReach) {
 			for _, name := range sd.PropertiesDiff.Added {
-				processor(propertyPath, name, sd.Revision.Properties[name].Value, sd, underAllOf, shared)
+				processor(propertyPath, name, sd.Revision.Properties[name].Value, sd, underAllOf, shared.at(propertyFullName(propertyPath, name)))
 			}
 		}}.walk("", "", schemaDiff, nil, false)
 }
 
-func checkDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff)) {
+func checkDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool, shared *SharedSchema)) {
 	if schemaDiff == nil {
 		return
 	}
 
 	subschemaWalk{
 		shared: sharedSchemas(schemaDiff, false),
-		properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
+		properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool, shared *sharedReach) {
 			for _, name := range sd.PropertiesDiff.Deleted {
-				processor(propertyPath, name, sd.Base.Properties[name].Value, sd, underAllOf, shared)
+				processor(propertyPath, name, sd.Base.Properties[name].Value, sd, underAllOf, shared.at(propertyFullName(propertyPath, name)))
 			}
 		}}.walk("", "", schemaDiff, nil, false)
 }

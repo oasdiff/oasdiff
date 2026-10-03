@@ -70,7 +70,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	}
 	subschemaWalk{
 		shared: sharedSchemas(info.schemaDiff, false),
-		enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
+		enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool, shared *sharedReach) {
 			// A single-valued sub-schema present on one side only (items removed,
 			// say) has a nil Base or Revision. Every property check reads both and
 			// has nothing to say about a side that does not exist, so guard here
@@ -81,7 +81,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 			processor(propertyInfo{
 				mediaTypeInfo: info,
 				underAllOf:    underAllOf,
-				shared:        shared,
+				shared:        shared.at(propertyFullName(propertyPath, propertyName)),
 				propertyPath:  propertyPath,
 				propertyName:  propertyName,
 				propertyDiff:  propertyDiff,
@@ -97,11 +97,9 @@ type propertyInfo struct {
 	propertyPath string
 	propertyName string
 	underAllOf   bool
-	// shared is the innermost schema at or above the property that more than
-	// one of the payload's property paths reaches, so a change here is
-	// reported at this path alone. Nil when every path to the property is
-	// the only one.
-	shared       *diff.SchemaDiff
+	// shared is nil unless several of the payload's references reach the
+	// property, through the innermost schema at or above it they share.
+	shared       *SharedSchema
 	propertyDiff *diff.SchemaDiff
 	parent       *diff.SchemaDiff
 }

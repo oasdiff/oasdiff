@@ -31,11 +31,9 @@ type ApiChange struct {
 	// transition's own finding. Set by WithSchema.
 	claimed bool
 
-	// sharedSchemaName names the schema at or above the change that several
-	// of the payload's property paths reach (see WithSharedSchema). It is
-	// rendered after Details rather than stored there, so a check that sets
-	// its own details does not drop it.
-	sharedSchemaName string
+	// sharedSchema is rendered after Details rather than stored there, so a
+	// check that sets its own details does not drop it.
+	sharedSchema *SharedSchema
 
 	// guards holds the document states observed at the change's location
 	// (a readOnly or writeOnly property). capByGuards derives the level
@@ -175,7 +173,7 @@ func (c ApiChange) GetComment(l Localizer) string {
 }
 
 func (c ApiChange) getDetailsSuffix() string {
-	details := combineDetails(c.Details, c.sharedSchemaName)
+	details := combineDetails(c.Details, c.sharedSchema.detail())
 	if details == "" {
 		return ""
 	}

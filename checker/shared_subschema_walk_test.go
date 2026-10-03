@@ -74,7 +74,7 @@ func TestResponseSharedSchemaUnderTwoParentsReportedOnce(t *testing.T) {
 
 	require.Len(t, inShared, 1)
 	require.Equal(t, "first/shared/extra", inShared[0].(checker.ApiChange).Args[0])
-	require.Contains(t, inShared[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+	require.Equal(t, &checker.SharedSchema{Name: "Shared", Properties: []string{"first/shared/extra", "second/shared/extra"}}, inShared[0].(checker.ApiChange).GetSharedSchema())
 }
 
 // Every check walks the payload itself, so the deduplication is per check:
@@ -94,7 +94,7 @@ func TestSharedSchemaIsReportedOncePerCheck(t *testing.T) {
 	for _, change := range changes {
 		if change.(checker.ApiChange).Comment == checker.SharedSchemaCommentId {
 			ids = append(ids, change.GetId())
-			require.Contains(t, change.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+			require.Contains(t, change.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared, also at `second/shared/")
 		}
 	}
 
@@ -121,7 +121,7 @@ func TestChangeBelowASharedSchemaNamesIt(t *testing.T) {
 
 	require.Len(t, changes, 1)
 	require.Equal(t, "first/shared/id", changes[0].(checker.ApiChange).Args[0])
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared, also at `second/shared/id`)")
 }
 
 // A change below a shared schema is reported at one path too, so it names the
@@ -143,11 +143,12 @@ func TestChangeInsideASharedSchemaNamesTheSharedSchema(t *testing.T) {
 	require.Len(t, changes, 1)
 	require.Equal(t, "left/id", changes[0].(checker.ApiChange).Args[0])
 	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared, also at `right/id`)")
 }
 
 // A schema reached through a JSON pointer into another schema has no
-// components.schemas name, so the change is reported with the comment alone.
+// components.schemas name, so the change lists the other properties without
+// one.
 func TestSharedSchemaWithoutAComponentNameIsStillReportedOnce(t *testing.T) {
 	base, err := open("../data/checker/shared_schema_unnamed_base.yaml")
 	require.NoError(t, err)
@@ -163,7 +164,8 @@ func TestSharedSchemaWithoutAComponentNameIsStillReportedOnce(t *testing.T) {
 
 	require.Len(t, changes, 1)
 	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
-	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema:")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(also at `right/extra`)")
+	require.Empty(t, changes[0].(checker.ApiChange).GetSharedSchema().Name)
 }
 
 // A change in a schema several properties reach says so, and a change in a
@@ -183,7 +185,7 @@ func TestSharedSchemaChangeCarriesTheComment(t *testing.T) {
 	require.Len(t, changes, 1)
 	require.Equal(t, checker.SharedSchemaCommentId, changes[0].(checker.ApiChange).Comment)
 	require.NotEmpty(t, changes[0].GetComment(checker.NewLocalizer("en")))
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared, also at `right/extra`)")
 
 	onceBase, err := open("../data/component-renamed1.yaml")
 	require.NoError(t, err)
@@ -198,5 +200,37 @@ func TestSharedSchemaChangeCarriesTheComment(t *testing.T) {
 	)
 	require.Len(t, changes, 1)
 	require.Empty(t, changes[0].(checker.ApiChange).Comment)
-	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema:")
+	require.Nil(t, changes[0].(checker.ApiChange).GetSharedSchema())
+	require.NotContains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "also at")
+}
+
+// userId and customerId mean different things but share Id, so a pattern added
+// to Id changes both. The change is reported once, at the property that sorts
+// first, and names the other so a reviewer looking for userId finds it.
+func TestSharedSchemaListsTheOtherProperties(t *testing.T) {
+	base, err := open("../data/checker/shared_schema_two_properties_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/shared_schema_two_properties_revision.yaml")
+	require.NoError(t, err)
+
+	d, sources, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(
+		singleCheckConfig(checker.ResponsePatternAddedOrChangedCheck),
+		d, sources, checker.INFO,
+	)
+	require.Len(t, changes, 2)
+
+	byPath := map[string]checker.ApiChange{}
+	for _, change := range changes {
+		byPath[change.GetPath()] = change.(checker.ApiChange)
+	}
+
+	orders := byPath["/orders"]
+	require.Equal(t, &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "userId"}}, orders.GetSharedSchema())
+	require.Contains(t, orders.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Id, also at `userId`)")
+
+	accounts := byPath["/accounts"]
+	require.Equal(t, &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "ownerId", "userId"}}, accounts.GetSharedSchema())
+	require.Contains(t, accounts.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Id, also at `ownerId` and 1 more)")
 }

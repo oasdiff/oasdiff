@@ -116,15 +116,28 @@ See [Nullability Changes](NULLABILITY.md).
 
 ## Schemas Used in Several Places
 
-A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. Each check reports such a change once, at one of the properties that reach it. The change names the shared schema, and its comment says why the other properties are not listed:
+A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. Each check reports such a change once, at one of the properties that reach it, names the shared schema, and lists the other properties the change is at:
 
 ```
-added the optional property `left/extra` to the response with the `200` status (shared schema: Shared)
+the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: Id, also at `userId`)
     A change in a schema that several properties of this payload reach is reported once per check, at one of
     those properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```
 
-So `Shared` is where to look, and `left` is one of the places it is used. A change deeper inside `Shared` names `Shared` too, since that is the schema whose other uses are not listed. The property path is stable: the same comparison names the same property every time. A schema that is not an entry under `components.schemas` has no name to report, and the comment appears on its own.
+So `Id` is where to look, and the pattern applies to both `customerId` and `userId`. The change is reported at the first property oasdiff reaches, taking properties in alphabetical order, so the same comparison always reports the same one. When there are more, the text names one and counts the rest, as in `and 1 more`, and JSON and YAML output list every one:
+
+```json
+"sharedSchema": {
+  "name": "Id",
+  "properties": ["customerId", "ownerId", "userId"]
+}
+```
+
+The list has one entry per reference to the schema. Say `Shared` is referenced from `First.shared` and `Second.shared`, and `First` is itself used by two properties of the payload. A change in `Shared` lists two properties, `first/shared/...` and `second/shared/...`, rather than one per path through `First`. A change in `First` lists `First`'s own uses. Counting references rather than paths keeps the list short: in a deeply nested spec, the number of paths can run to millions.
+
+A change deeper inside a shared schema names that schema too, and lists the same property paths with the rest of the change's path appended. A schema that is not an entry under `components.schemas` has no name, and the change lists the other properties on their own.
+
+The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
 
 Three things stay separate, and each still gets its own line:
 

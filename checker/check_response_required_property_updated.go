@@ -44,7 +44,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		// delegates to checkModifiedPropertiesDiff. Used directly here.
 		checkDeletedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared *SharedSchema) {
 				id := ResponseRequiredPropertyRemovedId
 				if propertyItem.WriteOnly {
 					id = ResponseRequiredWriteOnlyPropertyRemovedId
@@ -72,7 +72,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			})
 		checkAddedPropertiesDiff(
 			info.schemaDiff,
-			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared *diff.SchemaDiff) {
+			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool, shared *SharedSchema) {
 				id := ResponseRequiredPropertyAddedId
 				if propertyItem.WriteOnly {
 					id = ResponseRequiredWriteOnlyPropertyAddedId
