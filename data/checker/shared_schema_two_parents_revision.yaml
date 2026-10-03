@@ -1,0 +1,48 @@
+openapi: 3.1.0
+info:
+  title: shared schema under two parents
+  version: 1.0.0
+paths:
+  /example:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  first:
+                    $ref: '#/components/schemas/First'
+                  second:
+                    $ref: '#/components/schemas/Second'
+                  third:
+                    $ref: '#/components/schemas/First'
+                  forth:
+                    $ref: '#/components/schemas/Second'
+components:
+  schemas:
+    First:
+      type: object
+      properties:
+        shared:
+          $ref: '#/components/schemas/Shared'
+    Second:
+      type: object
+      properties:
+        shared:
+          $ref: '#/components/schemas/Shared'
+    Shared:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9]+$'
+        extra:
+          type: string
+    Shared1:
+      type: object
+      properties:
+        id:
+          type: string

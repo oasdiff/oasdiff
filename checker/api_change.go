@@ -31,6 +31,10 @@ type ApiChange struct {
 	// transition's own finding. Set by WithSchema.
 	claimed bool
 
+	// sharedSchema is rendered after Details rather than stored there, so a
+	// check that sets its own details does not drop it.
+	sharedSchema *SharedSchema
+
 	// guards holds the document states observed at the change's location
 	// (a readOnly or writeOnly property). capByGuards derives the level
 	// from them and keeps only the ones that changed it, which GetComment
@@ -169,10 +173,11 @@ func (c ApiChange) GetComment(l Localizer) string {
 }
 
 func (c ApiChange) getDetailsSuffix() string {
-	if c.Details == "" {
+	details := combineDetails(c.Details, c.sharedSchema.detail())
+	if details == "" {
 		return ""
 	}
-	return " " + c.Details
+	return " " + details
 }
 
 func (c ApiChange) GetLevel() Level {

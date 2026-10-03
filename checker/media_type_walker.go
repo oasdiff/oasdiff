@@ -68,23 +68,26 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	if info.schemaDiff == nil {
 		return
 	}
-	subschemaWalk{enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
-		// A single-valued sub-schema present on one side only (items removed,
-		// say) has a nil Base or Revision. Every property check reads both and
-		// has nothing to say about a side that does not exist, so guard here
-		// rather than in each of them.
-		if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
-			return
-		}
-		processor(propertyInfo{
-			mediaTypeInfo: info,
-			underAllOf:    underAllOf,
-			propertyPath:  propertyPath,
-			propertyName:  propertyName,
-			propertyDiff:  propertyDiff,
-			parent:        parent,
-		})
-	}}.walk("", "", info.schemaDiff, nil, false)
+	subschemaWalk{
+		shared: sharedSchemas(info.schemaDiff, false),
+		enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool, shared *sharedReach) {
+			// A single-valued sub-schema present on one side only (items removed,
+			// say) has a nil Base or Revision. Every property check reads both and
+			// has nothing to say about a side that does not exist, so guard here
+			// rather than in each of them.
+			if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
+				return
+			}
+			processor(propertyInfo{
+				mediaTypeInfo: info,
+				underAllOf:    underAllOf,
+				shared:        shared.at(propertyFullName(propertyPath, propertyName)),
+				propertyPath:  propertyPath,
+				propertyName:  propertyName,
+				propertyDiff:  propertyDiff,
+				parent:        parent,
+			})
+		}}.walk("", "", info.schemaDiff, nil, false)
 }
 
 // propertyInfo is what walkProperties hands its processor. It embeds
@@ -94,6 +97,9 @@ type propertyInfo struct {
 	propertyPath string
 	propertyName string
 	underAllOf   bool
+	// shared is nil unless several of the payload's references reach the
+	// property, through the innermost schema at or above it they share.
+	shared       *SharedSchema
 	propertyDiff *diff.SchemaDiff
 	parent       *diff.SchemaDiff
 }
@@ -103,6 +109,7 @@ type propertyInfo struct {
 // so the second call overrides the body-level decision).
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
+		WithSharedSchema(p.shared).
 		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
 		WithGuards(propertyGuards(p.propertyDiff))
 }
