@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -24,7 +25,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 					id = ResponseWriteOnlyPropertyBecameOptionalId
 				}
 
-				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "required", changedRequiredPropertyName)
+				baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "required", changedRequiredPropertyName)
 				result = append(result, info.newChange(
 					id,
 					[]any{changedRequiredPropertyName, info.responseStatus},
@@ -55,7 +56,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 					id = ResponseWriteOnlyPropertyBecameOptionalId
 				}
 
-				propBaseSource, propRevisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "required", changedRequiredPropertyName)
+				propBaseSource, propRevisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "required", changedRequiredPropertyName)
 				result = append(result, p.newChange(
 					id,
 					[]any{propertyFullName(p.propertyPath, propertyFullName(p.propertyName, changedRequiredPropertyName)), info.responseStatus},

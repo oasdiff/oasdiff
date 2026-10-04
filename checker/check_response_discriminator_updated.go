@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -23,7 +24,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "discriminator")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "discriminator")
 		appendResultItem := func(messageId string, a ...any) {
 			result = append(result, info.newChange(messageId, a, "").
 				WithSources(baseSource, revisionSource))
@@ -36,7 +37,7 @@ func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources 
 			appendResultItem)
 
 		info.walkProperties(func(p propertyInfo) {
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "discriminator")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "discriminator")
 			propAppendResultItem := func(messageId string, a ...any) {
 				result = append(result, p.newChange(messageId, a, "").
 					WithSources(propBaseSource, propRevisionSource))

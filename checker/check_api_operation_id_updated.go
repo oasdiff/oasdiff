@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -25,7 +26,7 @@ func APIOperationIdUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.O
 				continue
 			}
 
-			baseSource, revisionSource := operationFieldSources(operationsSources, operationItem, "operationId")
+			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationItem, "operationId")
 
 			op := pathItem.Base.GetOperation(operation)
 			id := APIOperationIdRemovedId

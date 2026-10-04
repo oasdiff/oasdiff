@@ -5,6 +5,7 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -22,7 +23,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 		if p.paramDiff.DeprecatedDiff == nil {
 			return
 		}
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "deprecated")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "deprecated")
 
 		param := p.paramDiff.Revision
 

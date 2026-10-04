@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -98,7 +99,7 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	for _, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Added {
 		var revisionSource *Source
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Revision[updatedSecurity]; ref != nil && ref.Value != nil {
-			revisionSource = sourceFromOrigin(ref.Value.Origin)
+			revisionSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        APIComponentsSecurityAddedId,
@@ -111,7 +112,7 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	for _, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Deleted {
 		var baseSource *Source
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurity]; ref != nil && ref.Value != nil {
-			baseSource = sourceFromOrigin(ref.Value.Origin)
+			baseSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        APIComponentsSecurityRemovedId,
@@ -124,10 +125,10 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	for updatedSecurityName, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Modified {
 		var baseSource, revisionSource *Source
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurityName]; ref != nil && ref.Value != nil {
-			baseSource = sourceFromOrigin(ref.Value.Origin)
+			baseSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Revision[updatedSecurityName]; ref != nil && ref.Value != nil {
-			revisionSource = sourceFromOrigin(ref.Value.Origin)
+			revisionSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 
 		result = append(result, checkOAuthUpdates(updatedSecurity, updatedSecurityName, baseSource, revisionSource)...)

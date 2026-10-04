@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,7 +17,7 @@ func RequestPropertyPropertyNamesUpdatedCheck(diffReport *diff.Diff, operationsS
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.PropertyNamesDiff != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "propertyNames")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "propertyNames")
 			if info.schemaDiff.PropertyNamesDiff.SchemaAdded {
 				result = append(result, info.newChange(RequestBodyPropertyNamesAddedId, nil, "").
 					WithSources(nil, revisionSource))
@@ -32,7 +33,7 @@ func RequestPropertyPropertyNamesUpdatedCheck(diffReport *diff.Diff, operationsS
 				return
 			}
 			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "propertyNames")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "propertyNames")
 			if p.propertyDiff.PropertyNamesDiff.SchemaAdded {
 				result = append(result, p.newChange(RequestPropertyPropertyNamesAddedId, []any{propName}, "").
 					WithSources(nil, propRevisionSource))

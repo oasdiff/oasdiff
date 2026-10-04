@@ -3,6 +3,7 @@ package checker
 import (
 	"sync"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/rules"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -313,7 +314,7 @@ func boundSchemaChanges(
 			continue
 		}
 		effect, _ := boundEffect(spec.polarity, action)
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, methodDiff, schemaDiff, spec.keyword)
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, methodDiff, schemaDiff, spec.keyword)
 		result = append(result, newChange(
 			id,
 			args(values),

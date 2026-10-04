@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +16,7 @@ func RequestPropertyMinPropertiesIncreasedCheck(diffReport *diff.Diff, operation
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minPropertiesDiff := info.schemaDiff.MinPropsDiff; minPropertiesDiff != nil &&
 			!uintBoundSet(minPropertiesDiff) && isIncreasedValue(minPropertiesDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minProperties")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minProperties")
 			result = append(result, info.newChange(
 				RequestBodyMinPropertiesIncreasedId,
 				[]any{minPropertiesDiff.To},
@@ -32,7 +33,7 @@ func RequestPropertyMinPropertiesIncreasedCheck(diffReport *diff.Diff, operation
 				return
 			}
 
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minProperties")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minProperties")
 			result = append(result, p.newChange(
 				RequestPropertyMinPropertiesIncreasedId,
 				[]any{propertyFullName(p.propertyPath, p.propertyName), minPropertiesDiff.To},

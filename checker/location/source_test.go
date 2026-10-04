@@ -1,61 +1,13 @@
-package checker_test
+package location_test
 
 import (
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
-
-func TestApiChange_SourceFile(t *testing.T) {
-	apiChangeSourceFile := apiChange
-	apiChangeSourceFile.SourceFile = ""
-	apiChangeSourceFile.Source = load.NewSource("spec.yaml")
-
-	require.Equal(t, "spec.yaml", apiChangeSourceFile.GetSourceFile())
-}
-
-func TestApiChange_SourceUrl(t *testing.T) {
-	apiChangeSourceFile := apiChange
-	apiChangeSourceFile.SourceFile = ""
-	apiChangeSourceFile.Source = load.NewSource("http://google.com/spec.yaml")
-
-	require.Equal(t, "", apiChangeSourceFile.GetSourceFile())
-}
-
-func TestApiChangeWithSources_DirectConstruction(t *testing.T) {
-	// Test direct construction of ApiChange with BaseSource and RevisionSource
-	baseSource := checker.NewSource("base.yaml", 10, 5)
-	revisionSource := checker.NewSource("revision.yaml", 12, 7)
-
-	change := checker.ApiChange{
-		Id:        "test-id",
-		Args:      []any{"arg1"},
-		Comment:   "test comment",
-		Level:     checker.INFO,
-		Operation: "GET",
-		Path:      "/test",
-		CommonChange: checker.CommonChange{
-			BaseSource:     baseSource,
-			RevisionSource: revisionSource,
-		},
-	}
-
-	// Test that the new fields are set correctly
-	require.Equal(t, baseSource, change.GetBaseSource())
-	require.Equal(t, revisionSource, change.GetRevisionSource())
-	require.NotEmpty(t, change.GetBaseSource())
-	require.NotEmpty(t, change.GetRevisionSource())
-	require.Equal(t, "base.yaml", change.GetBaseSource().File)
-	require.Equal(t, 10, change.GetBaseSource().Line)
-	require.Equal(t, 5, change.GetBaseSource().Column)
-	require.Equal(t, "revision.yaml", change.GetRevisionSource().File)
-	require.Equal(t, 12, change.GetRevisionSource().Line)
-	require.Equal(t, 7, change.GetRevisionSource().Column)
-}
 
 func TestSchemaSources(t *testing.T) {
 	baseOp := &openapi3.Operation{}
@@ -80,7 +32,7 @@ func TestSchemaSources(t *testing.T) {
 
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
-	baseSource, revisionSource := checker.SchemaSources(&sources, operationItem, schemaDiff)
+	baseSource, revisionSource := location.SchemaSources(&sources, operationItem, schemaDiff)
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 10, baseSource.Line)
 	require.Equal(t, 5, baseSource.Column)
@@ -106,7 +58,7 @@ func TestSchemaSources_NoOrigin_FallsBackToOperation(t *testing.T) {
 	// Schema without origin data
 	schemaDiff := &diff.SchemaDiff{Base: &openapi3.Schema{}, Revision: &openapi3.Schema{}}
 
-	baseSource, revisionSource := checker.SchemaSources(&sources, operationItem, schemaDiff)
+	baseSource, revisionSource := location.SchemaSources(&sources, operationItem, schemaDiff)
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 3, baseSource.Line)
 	require.Equal(t, "revision.yaml", revisionSource.File)
@@ -127,7 +79,7 @@ func TestSchemaSources_NilDiff_FallsBackToOperation(t *testing.T) {
 	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
-	baseSource, revisionSource := checker.SchemaSources(&sources, operationItem, nil)
+	baseSource, revisionSource := location.SchemaSources(&sources, operationItem, nil)
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 3, baseSource.Line)
 	require.Equal(t, "revision.yaml", revisionSource.File)
@@ -157,7 +109,7 @@ func TestParameterSources(t *testing.T) {
 
 	paramDiff := &diff.ParameterDiff{Base: baseParam, Revision: revisionParam}
 
-	baseSource, revisionSource := checker.ParameterSources(&sources, operationItem, paramDiff)
+	baseSource, revisionSource := location.ParameterSources(&sources, operationItem, paramDiff)
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 20, baseSource.Line)
 	require.Equal(t, 9, baseSource.Column)
@@ -188,7 +140,7 @@ func TestResponseSources(t *testing.T) {
 
 	respDiff := &diff.ResponseDiff{Base: baseResp, Revision: revisionResp}
 
-	baseSource, revisionSource := checker.ResponseSources(&sources, operationItem, respDiff)
+	baseSource, revisionSource := location.ResponseSources(&sources, operationItem, respDiff)
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 30, baseSource.Line)
 	require.Equal(t, 7, baseSource.Column)
@@ -222,7 +174,7 @@ func TestSchemaFieldSources(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Field-level precision
-	baseSource, revisionSource := checker.SchemaFieldSources(&sources, operationItem, schemaDiff, "type")
+	baseSource, revisionSource := location.SchemaFieldSources(&sources, operationItem, schemaDiff, "type")
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 11, baseSource.Line)
 	require.Equal(t, 7, baseSource.Column)
@@ -231,7 +183,7 @@ func TestSchemaFieldSources(t *testing.T) {
 	require.Equal(t, 7, revisionSource.Column)
 
 	// Missing field returns nil (field doesn't exist in YAML)
-	baseSource, revisionSource = checker.SchemaFieldSources(&sources, operationItem, schemaDiff, "format")
+	baseSource, revisionSource = location.SchemaFieldSources(&sources, operationItem, schemaDiff, "format")
 	require.Nil(t, baseSource)
 	require.Nil(t, revisionSource)
 }
@@ -243,7 +195,7 @@ func TestNewSourceFromOrigin_StripsGitRevisionPrefix(t *testing.T) {
 		Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 10, Column: 5},
 	}
 
-	source := checker.NewSourceFromOrigin(&sources, op, origin)
+	source := location.NewSourceFromOrigin(&sources, op, origin)
 	require.Equal(t, "openapi.yaml", source.File)
 	require.Equal(t, 10, source.Line)
 	require.Equal(t, 5, source.Column)
@@ -259,7 +211,7 @@ func TestNewSourceFromField_StripsGitRevisionPrefix(t *testing.T) {
 		},
 	}
 
-	source := checker.NewSourceFromField(&sources, op, origin, "pattern")
+	source := location.NewSourceFromField(&sources, op, origin, "pattern")
 	require.Equal(t, "openapi.yaml", source.File)
 	require.Equal(t, 15, source.Line)
 	require.Equal(t, 14, source.Column)
@@ -274,7 +226,7 @@ func TestNewSourceFromSequenceItem_StripsGitRevisionPrefix(t *testing.T) {
 		},
 	}
 
-	source := checker.NewSourceFromSequenceItem(&sources, op, origin, "type", "string")
+	source := location.NewSourceFromSequenceItem(&sources, op, origin, "type", "string")
 	require.Equal(t, "openapi.yaml", source.File)
 	require.Equal(t, 4, source.Line)
 	require.Equal(t, 11, source.Column)
@@ -312,7 +264,7 @@ func TestSubschemaSources_AllOf_Added_Inline(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Added inline subschema at revision index 2 (baseIndex=-1)
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 2)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 2)
 	require.Nil(t, baseSource)
 	require.NotNil(t, revisionSource)
 	require.Equal(t, "revision.yaml", revisionSource.File)
@@ -373,7 +325,7 @@ func TestSubschemaSources_AllOf_Added_Ref(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Added $ref subschema at revision index 2: should point to line 17 ($ref line), NOT line 66 (component def)
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 2)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 2)
 	require.Nil(t, baseSource)
 	require.NotNil(t, revisionSource)
 	require.Equal(t, "revision.yaml", revisionSource.File)
@@ -413,7 +365,7 @@ func TestSubschemaSources_OneOf_Deleted(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Deleted subschema at base index 2 (revisionIndex=-1)
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "oneOf", 2, -1)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, schemaDiff, "oneOf", 2, -1)
 	require.NotNil(t, baseSource)
 	require.Nil(t, revisionSource)
 	require.Equal(t, "base.yaml", baseSource.File)
@@ -451,7 +403,7 @@ func TestSubschemaSources_AnyOf_NoOrigin_FallsBack(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Subschema has no origin → falls back to field-level source
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "anyOf", -1, 1)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, schemaDiff, "anyOf", -1, 1)
 	// Fallback to field-level: both base and revision should have anyOf field source
 	require.NotNil(t, baseSource)
 	require.Equal(t, 10, baseSource.Line) // anyOf field line, not schema key line
@@ -470,7 +422,7 @@ func TestSubschemaSources_NilSchemaDiff(t *testing.T) {
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// Nil schemaDiff falls back to operation sources
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, nil, "allOf", -1, 0)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, nil, "allOf", -1, 0)
 	require.Equal(t, "base.yaml", baseSource.File)
 	require.Equal(t, 3, baseSource.Line)
 	require.Equal(t, "revision.yaml", revisionSource.File)
@@ -500,7 +452,7 @@ func TestSubschemaSources_InvalidField(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Invalid field name returns nil from subschemaSource, falls back to field-level (also nil for invalid field)
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "invalid", -1, 0)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, schemaDiff, "invalid", -1, 0)
 	require.Nil(t, baseSource)
 	require.Nil(t, revisionSource)
 }
@@ -530,7 +482,7 @@ func TestSubschemaSources_IndexOutOfRange(t *testing.T) {
 	schemaDiff := &diff.SchemaDiff{Base: baseSchema, Revision: revisionSchema}
 
 	// Index 99 is out of range → falls back to field-level source
-	baseSource, revisionSource := checker.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 99)
+	baseSource, revisionSource := location.SubschemaSources(&sources, operationItem, schemaDiff, "allOf", -1, 99)
 	require.NotNil(t, baseSource)
 	require.Equal(t, 14, baseSource.Line)
 	require.NotNil(t, revisionSource)
@@ -552,24 +504,24 @@ func TestNewSourceFromSequenceItem(t *testing.T) {
 	}
 
 	// Lookup existing item
-	source := checker.NewSourceFromSequenceItem(&sources, op, origin, "type", "null")
+	source := location.NewSourceFromSequenceItem(&sources, op, origin, "type", "null")
 	require.Equal(t, "spec.yaml", source.File)
 	require.Equal(t, 5, source.Line)
 	require.Equal(t, 11, source.Column)
 
 	// Lookup first item
-	source = checker.NewSourceFromSequenceItem(&sources, op, origin, "type", "string")
+	source = location.NewSourceFromSequenceItem(&sources, op, origin, "type", "string")
 	require.Equal(t, 4, source.Line)
 
 	// Lookup missing item returns nil
-	source = checker.NewSourceFromSequenceItem(&sources, op, origin, "type", "boolean")
+	source = location.NewSourceFromSequenceItem(&sources, op, origin, "type", "boolean")
 	require.Nil(t, source)
 
 	// Lookup missing field returns nil
-	source = checker.NewSourceFromSequenceItem(&sources, op, origin, "enum", "foo")
+	source = location.NewSourceFromSequenceItem(&sources, op, origin, "enum", "foo")
 	require.Nil(t, source)
 
 	// Nil origin returns nil
-	source = checker.NewSourceFromSequenceItem(&sources, op, nil, "type", "string")
+	source = location.NewSourceFromSequenceItem(&sources, op, nil, "type", "string")
 	require.Nil(t, source)
 }

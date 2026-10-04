@@ -1,5 +1,11 @@
 package checker
 
+import "github.com/oasdiff/oasdiff/checker/location"
+
+// Source is where a change is in a spec. It is defined with the functions
+// that find it, and named here because the change types hold it.
+type Source = location.Source
+
 type Change interface {
 	GetSection() string
 	IsBreaking() bool

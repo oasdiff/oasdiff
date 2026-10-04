@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -20,7 +21,7 @@ func ResponsePatternAddedOrChangedCheck(diffReport *diff.Diff, operationsSources
 				return
 			}
 
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "pattern")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "pattern")
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
 			id := ResponsePropertyPatternChangedId

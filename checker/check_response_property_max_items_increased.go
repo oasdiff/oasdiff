@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +18,7 @@ func ResponsePropertyMaxItemsIncreasedCheck(diffReport *diff.Diff, operationsSou
 			maxItemsDiff.From != nil &&
 			maxItemsDiff.To != nil &&
 			isIncreasedValue(maxItemsDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxItems")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxItems")
 			result = append(result, info.newChange(
 				ResponseBodyMaxItemsIncreasedId,
 				[]any{maxItemsDiff.From, maxItemsDiff.To},
@@ -38,7 +39,7 @@ func ResponsePropertyMaxItemsIncreasedCheck(diffReport *diff.Diff, operationsSou
 				return
 			}
 
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxItems")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxItems")
 			result = append(result, p.newChange(
 				ResponsePropertyMaxItemsIncreasedId,
 				[]any{propertyFullName(p.propertyPath, p.propertyName), maxItemsDiff.From, maxItemsDiff.To, info.responseStatus},

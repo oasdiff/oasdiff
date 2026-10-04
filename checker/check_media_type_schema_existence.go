@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -74,14 +75,14 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 							}
 							result = append(result, opInfo.NewApiChange(
 								id, mediaTypeSchemaArgs(id, mediaType, ""), "",
-							).WithSources(nil, requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)))
+							).WithSources(nil, location.RequestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)))
 						} else if removed {
 							if regular && classifyOneSidedSchema(requestMediaTypeSchema(operationItem.Base, mediaType)) == oneSidedSchemaNoContract {
 								continue
 							}
 							result = append(result, opInfo.NewApiChange(
 								schema.removedId, []any{mediaType}, "",
-							).WithSources(requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType), nil))
+							).WithSources(location.RequestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType), nil))
 						}
 					}
 				}
@@ -95,8 +96,8 @@ func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *dif
 					continue
 				}
 				for mediaType, mediaTypeDiff := range responseDiff.ContentDiff.MediaTypeModified {
-					addedSource := mediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, mediaType)
-					removedSource := mediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, mediaType)
+					addedSource := location.MediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, mediaType)
+					removedSource := location.MediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, mediaType)
 
 					// Regular schema
 					if added, removed := schemaSideAddedRemoved(mediaTypeDiff.SchemaDiff); added {

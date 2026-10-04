@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -28,7 +29,7 @@ func ResponsePropertyBecameRequiredCheck(diffReport *diff.Diff, operationsSource
 					id = ResponseWriteOnlyPropertyBecameRequiredId
 				}
 
-				baseSource, revisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, info.schemaDiff, "required", changedRequiredPropertyName)
+				baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, info.schemaDiff, "required", changedRequiredPropertyName)
 				result = append(result, info.newChange(
 					id,
 					[]any{propertyFullName("", changedRequiredPropertyName), info.responseStatus},
@@ -56,7 +57,7 @@ func ResponsePropertyBecameRequiredCheck(diffReport *diff.Diff, operationsSource
 					id = ResponseWriteOnlyPropertyBecameRequiredId
 				}
 
-				propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "required", changedRequiredPropertyName)
+				propBaseSource, propRevisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "required", changedRequiredPropertyName)
 				result = append(result, p.newChange(
 					id,
 					[]any{propertyFullName(p.propertyPath, propertyFullName(p.propertyName, changedRequiredPropertyName)), info.responseStatus},

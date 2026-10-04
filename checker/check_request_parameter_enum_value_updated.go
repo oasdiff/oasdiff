@@ -3,6 +3,7 @@ package checker
 import (
 	"fmt"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -60,7 +61,7 @@ func checkParameterEnumDiff(
 	}
 
 	for _, enumVal := range enumDiff.Deleted {
-		baseSource, revisionSource := SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		baseSource, revisionSource := location.SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, opInfo.NewApiChange(
 			removedId,
 			makeArgs(enumVal),
@@ -69,7 +70,7 @@ func checkParameterEnumDiff(
 	}
 
 	for _, enumVal := range enumDiff.Added {
-		baseSource, revisionSource := SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		baseSource, revisionSource := location.SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, opInfo.NewApiChange(
 			addedId,
 			makeArgs(enumVal),

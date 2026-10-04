@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -51,7 +52,7 @@ func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *di
 		id, comment := responseTypeChangeId(typeDiff, formatDiff, false, ResponseHeaderTypeCompatibleCommentId, schemaDiff,
 			ResponseHeaderTypeSpecializedId, ResponseHeaderTypeCompatibleId, ResponseHeaderTypeGeneralizedId, ResponseHeaderTypeChangedId)
 
-		baseSource, revisionSource := headerSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+		baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
 		result = append(result, h.opInfo.NewApiChange(
 			id,
 			[]any{h.name, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), h.responseStatus},

@@ -3,6 +3,7 @@ package checker
 import (
 	"slices"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -51,7 +52,7 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 			}
 
 			for _, enumVal := range deletedVals {
-				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, diff.XExtensibleEnumExtension, enumVal)
+				baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, diff.XExtensibleEnumExtension, enumVal)
 				result = append(result, p.newChange(
 					RequestPropertyXExtensibleEnumValueRemovedId,
 					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName)},

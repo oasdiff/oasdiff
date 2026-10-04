@@ -3,6 +3,7 @@ package checker
 import (
 	"fmt"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -31,7 +32,7 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 			}
 
 			for _, enumVal := range enumDiff.Added {
-				baseSource, revisionSource := SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
+				baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 				result = append(result, p.newChange(
 					id,
 					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},

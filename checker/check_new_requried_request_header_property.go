@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +18,7 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 		if p.location != "header" {
 			return
 		}
-		baseSource, revisionSource := ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
+		baseSource, revisionSource := location.ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
 		checkAddedPropertiesDiff(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {

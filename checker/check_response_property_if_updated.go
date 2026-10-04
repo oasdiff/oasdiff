@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -37,7 +38,7 @@ func ResponsePropertyIfUpdatedCheck(diffReport *diff.Diff, operationsSources *di
 			if entry.schemaDiff == nil {
 				continue
 			}
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, entry.field)
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, entry.field)
 			if entry.schemaDiff.SchemaAdded {
 				result = append(result, info.newChange(entry.addedId, []any{info.responseStatus}, "").
 					WithSources(nil, revisionSource))
@@ -64,7 +65,7 @@ func ResponsePropertyIfUpdatedCheck(diffReport *diff.Diff, operationsSources *di
 				if entry.schemaDiff == nil {
 					continue
 				}
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, entry.field)
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, entry.field)
 				if entry.schemaDiff.SchemaAdded {
 					result = append(result, p.newChange(entry.addedId, []any{propName, info.responseStatus}, "").
 						WithSources(nil, propRevisionSource))

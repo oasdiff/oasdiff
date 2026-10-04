@@ -1,6 +1,9 @@
 package checker
 
-import "github.com/oasdiff/oasdiff/diff"
+import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/diff"
+)
 
 const (
 	RequestBodyAnyOfAddedId       = "request-body-any-of-added"
@@ -15,12 +18,12 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.AnyOfDiff != nil {
 			if added := info.schemaDiff.AnyOfDiff.Added; len(added) > 0 {
-				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "anyOf", -1, added[0].Index)
+				baseSource, revisionSource := location.SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "anyOf", -1, added[0].Index)
 				result = append(result, info.newChange(RequestBodyAnyOfAddedId, []any{added.String()}, "").
 					WithSources(baseSource, revisionSource))
 			}
 			if deleted := info.schemaDiff.AnyOfDiff.Deleted; len(deleted) > 0 {
-				baseSource, revisionSource := SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "anyOf", deleted[0].Index, -1)
+				baseSource, revisionSource := location.SubschemaSources(operationsSources, info.operationItem, info.schemaDiff, "anyOf", deleted[0].Index, -1)
 				result = append(result, info.newChange(RequestBodyAnyOfRemovedId, []any{deleted.String()}, "").
 					WithSources(baseSource, revisionSource))
 			}
@@ -33,12 +36,12 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 			propName := propertyFullName(p.propertyPath, p.propertyName)
 
 			if added := p.propertyDiff.AnyOfDiff.Added; len(added) > 0 {
-				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "anyOf", -1, added[0].Index)
+				propBaseSource, propRevisionSource := location.SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "anyOf", -1, added[0].Index)
 				result = append(result, p.newChange(RequestPropertyAnyOfAddedId, []any{added.String(), propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
 			if deleted := p.propertyDiff.AnyOfDiff.Deleted; len(deleted) > 0 {
-				propBaseSource, propRevisionSource := SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "anyOf", deleted[0].Index, -1)
+				propBaseSource, propRevisionSource := location.SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "anyOf", deleted[0].Index, -1)
 				result = append(result, p.newChange(RequestPropertyAnyOfRemovedId, []any{deleted.String(), propName}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
