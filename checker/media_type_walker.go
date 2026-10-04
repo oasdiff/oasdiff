@@ -3,6 +3,7 @@ package checker
 import (
 	"github.com/getkin/kin-openapi/openapi3"
 
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -62,13 +63,12 @@ func schemaHasAllOf(schema *openapi3.Schema) bool {
 }
 
 // walkProperties invokes processor for every modified property under
-// info.schemaDiff. The recursion is checkModifiedPropertiesDiff's, so sub-schema
-// coverage stays whatever that primitive does.
+// info.schemaDiff that schemawalk.Walker reaches.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	if info.schemaDiff == nil {
 		return
 	}
-	subschemaWalk{enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
+	schemawalk.Walker{Enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
 		// A single-valued sub-schema present on one side only (items removed,
 		// say) has a nil Base or Revision. Every property check reads both and
 		// has nothing to say about a side that does not exist, so guard here
@@ -84,7 +84,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 			propertyDiff:  propertyDiff,
 			parent:        parent,
 		})
-	}}.walk("", "", info.schemaDiff, nil, false)
+	}}.Walk(info.schemaDiff)
 }
 
 // propertyInfo is what walkProperties hands its processor. It embeds

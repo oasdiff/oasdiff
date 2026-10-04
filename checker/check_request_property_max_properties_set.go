@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -33,7 +34,7 @@ func RequestPropertyMaxPropertiesSetCheck(diffReport *diff.Diff, operationsSourc
 			_, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
 			result = append(result, p.newChange(
 				RequestPropertyMaxPropertiesSetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.To},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.To},
 				boundSetComment,
 			).WithSources(nil, propRevisionSource))
 		})

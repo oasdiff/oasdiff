@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,11 +20,9 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the
-		// added/removed property sides; info.walkProperties only delegates
-		// to checkModifiedPropertiesDiff so the primitives are called
-		// directly inside the walker callback.
-		checkDeletedPropertiesDiff(
+		// info.walkProperties reports modified properties only, so the added
+		// and removed ones are walked here.
+		schemawalk.DeletedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if slices.Contains(parent.Base.Required, propertyName) {
@@ -46,12 +45,12 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
-		checkAddedPropertiesDiff(
+		schemawalk.AddedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if slices.Contains(parent.Revision.Required, propertyName) {
@@ -65,7 +64,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 			})

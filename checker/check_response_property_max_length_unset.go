@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -33,7 +34,7 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 			propBaseSource, _ := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
 			result = append(result, p.newChange(
 				ResponsePropertyMaxLengthUnsetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), maxLengthDiff.From, info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), maxLengthDiff.From, info.responseStatus},
 				"",
 			).WithSources(propBaseSource, nil))
 		})

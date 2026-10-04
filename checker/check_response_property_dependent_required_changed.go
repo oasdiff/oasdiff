@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -51,7 +52,7 @@ func ResponsePropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operat
 				return
 			}
 			depReqDiff := p.propertyDiff.DependentRequiredDiff
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "dependentRequired")
 			for key, values := range depReqDiff.Added {
 				result = append(result, p.newChange(
