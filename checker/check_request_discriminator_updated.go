@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -43,7 +44,7 @@ func RequestDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *
 			}
 			processDiscriminatorDiffForRequest(
 				p.propertyDiff.DiscriminatorDiff,
-				propertyFullName(p.propertyPath, p.propertyName),
+				schemawalk.PropertyFullName(p.propertyPath, p.propertyName),
 				appendPropResultItem)
 		})
 	})

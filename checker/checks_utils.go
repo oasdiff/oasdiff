@@ -16,14 +16,6 @@ func descriptionId(id string) string {
 	return id + "-description"
 }
 
-func propertyFullName(propertyPath string, propertyNames ...string) string {
-	propertyFullName := strings.Join(propertyNames, "/")
-	if propertyPath != "" {
-		propertyFullName = propertyPath + "/" + propertyFullName
-	}
-	return propertyFullName
-}
-
 func interfaceToString(arg any) string {
 	if arg == nil {
 		return "undefined"

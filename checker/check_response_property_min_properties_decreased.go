@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -36,7 +37,7 @@ func ResponsePropertyMinPropertiesDecreasedCheck(diffReport *diff.Diff, operatio
 			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minProperties")
 			result = append(result, p.newChange(
 				ResponsePropertyMinPropertiesDecreasedId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), minPropertiesDiff.From, minPropertiesDiff.To, info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), minPropertiesDiff.From, minPropertiesDiff.To, info.responseStatus},
 				"",
 			).WithSources(propBaseSource, propRevisionSource))
 		})

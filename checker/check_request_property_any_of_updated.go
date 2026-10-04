@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -33,7 +34,7 @@ func RequestPropertyAnyOfUpdatedCheck(diffReport *diff.Diff, operationsSources *
 			if p.propertyDiff.AnyOfDiff == nil {
 				return
 			}
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if added := p.propertyDiff.AnyOfDiff.Added; len(added) > 0 {
 				propBaseSource, propRevisionSource := location.SubschemaSources(operationsSources, info.operationItem, p.propertyDiff, "anyOf", -1, added[0].Index)
