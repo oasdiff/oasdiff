@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -34,7 +35,7 @@ func ResponsePropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operati
 			if p.propertyDiff.DependentSchemasDiff == nil {
 				return
 			}
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			depSchemasDiff := p.propertyDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
 				revisionSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)

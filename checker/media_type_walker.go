@@ -3,6 +3,7 @@ package checker
 import (
 	"github.com/getkin/kin-openapi/openapi3"
 
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -62,13 +63,12 @@ func schemaHasAllOf(schema *openapi3.Schema) bool {
 }
 
 // walkProperties invokes processor for every modified property under
-// info.schemaDiff. The recursion is checkModifiedPropertiesDiff's, so sub-schema
-// coverage stays whatever that primitive does.
+// info.schemaDiff that schemawalk.Walker reaches.
 func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 	if info.schemaDiff == nil {
 		return
 	}
-	subschemaWalk{enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
+	schemawalk.Walker{Enter: func(propertyPath, propertyName string, propertyDiff, parent *diff.SchemaDiff, underAllOf bool) {
 		// A single-valued sub-schema present on one side only (items removed,
 		// say) has a nil Base or Revision. Every property check reads both and
 		// has nothing to say about a side that does not exist, so guard here
@@ -84,7 +84,7 @@ func (info mediaTypeInfo) walkProperties(processor func(p propertyInfo)) {
 			propertyDiff:  propertyDiff,
 			parent:        parent,
 		})
-	}}.walk("", "", info.schemaDiff, nil, false)
+	}}.Walk(info.schemaDiff)
 }
 
 // propertyInfo is what walkProperties hands its processor. It embeds
@@ -98,9 +98,9 @@ type propertyInfo struct {
 	parent       *diff.SchemaDiff
 }
 
-// newChange shadows the promoted body-level helper so the claim decision is
-// made against the property's own schema diff (WithSchema recomputes claimed,
-// so the second call overrides the body-level decision).
+// newChange shadows the promoted body-level helper so the change records the
+// property's own schema diff rather than the body's: the second WithSchema
+// call replaces the first.
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
 		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).

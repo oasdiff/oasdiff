@@ -4,6 +4,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -101,7 +102,7 @@ func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSour
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName)},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -109,7 +110,7 @@ func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSour
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName, "items")},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName, "items")},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -140,7 +141,7 @@ func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					falseSchemaComment(id),
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -148,7 +149,7 @@ func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName, "items"), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName, "items"), info.responseStatus},
 					falseSchemaComment(id),
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -175,14 +176,14 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				if id := falseSchemaChangeId(propertyDiff, RequestParameterPropertySchemaBecameFalseId, RequestParameterPropertySchemaBecameNotFalseId); id != "" {
 					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
-						[]any{propertyFullName(propertyPath, propertyName), p.location, p.name},
+						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 						"",
 					).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
 				}

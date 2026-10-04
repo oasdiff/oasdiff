@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -52,10 +53,9 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 			result = append(result, info.newChange(id, nil, comment).WithSources(nil, nil))
 		}
 
-		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the
-		// added/removed property sides — different from info.walkProperties,
-		// which delegates to checkModifiedPropertiesDiff. Used directly here.
-		checkDeletedPropertiesDiff(
+		// info.walkProperties reports modified properties only, so the added
+		// and removed ones are walked here.
+		schemawalk.DeletedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if propertyItem.ReadOnly {
@@ -73,19 +73,19 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					RequestPropertyRemovedId,
-					[]any{propertyFullName(propertyPath, propertyName)},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName)},
 					"",
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
-		checkAddedPropertiesDiff(
+		schemawalk.AddedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if propertyItem.ReadOnly {
 					return
 				}
 
-				propName := propertyFullName(propertyPath, propertyName)
+				propName := schemawalk.PropertyFullName(propertyPath, propertyName)
 				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 
 				if slices.Contains(parent.Revision.Required, propertyName) {

@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -59,7 +60,7 @@ func ResponsePropertyBecameOptionalCheck(diffReport *diff.Diff, operationsSource
 				propBaseSource, propRevisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "required", changedRequiredPropertyName)
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, propertyFullName(p.propertyName, changedRequiredPropertyName)), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, schemawalk.PropertyFullName(p.propertyName, changedRequiredPropertyName)), info.responseStatus},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
