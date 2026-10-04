@@ -7,10 +7,10 @@ Each changelog entry reported by oasdiff includes a `fingerprint` — a short, s
 A fingerprint is a 12-character hex string computed as:
 
 ```
-SHA256("{id}:{operation}:{path}:{text}")[:12]
+SHA256("{id}:{operation}:{path}:{args}")[:12]
 ```
 
-Where `id` is the rule ID (e.g. `response-success-status-removed`), `operation` is the HTTP method, `path` is the API path, and `text` is the human-readable change description.
+Where `id` is the rule ID (e.g. `response-success-status-removed`), `operation` is the HTTP method, `path` is the API path, and `args` are the values the change's message is built from, joined by `;`. The rendered text is not an input, so a change keeps its fingerprint when its message is reworded or translated.
 
 ## Why it's useful
 
