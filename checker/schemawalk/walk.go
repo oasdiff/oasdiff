@@ -1,23 +1,24 @@
-package checker
+package schemawalk
 
 import (
 	"fmt"
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// subschemaWalk recurses over a schema diff's sub-schemas once, so that a walk
+// Walker recurses over a schema diff's sub-schemas once, so that a walk
 // using it supplies only the part that differs: what it emits, and where.
-type subschemaWalk struct {
-	// enter is called for the node itself, before its name is appended to the
+type Walker struct {
+	// Enter is called for the node itself, before its name is appended to the
 	// path, so a caller receives the two separately.
-	enter func(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool)
-	// properties is called for a node's own properties, after its name is
+	Enter func(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool)
+	// Properties is called for a node's own properties, after its name is
 	// appended, so the path already names the node they belong to.
-	properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool)
+	Properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool)
 	// A shared $ref can reach the same diff through many property paths.
 	// Keep one representative path per parent and allOf context.
 	seen map[walkVisit]struct{}
@@ -29,7 +30,12 @@ type walkVisit struct {
 	underAllOf bool
 }
 
-func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool) {
+// Walk visits the sub-schemas of schemaDiff, starting from the schema itself.
+func (w Walker) Walk(schemaDiff *diff.SchemaDiff) {
+	w.walk("", "", schemaDiff, nil, false)
+}
+
+func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool) {
 	if w.seen == nil {
 		w.seen = make(map[walkVisit]struct{})
 	}
@@ -39,39 +45,39 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 	}
 	w.seen[visit] = struct{}{}
 
-	if w.enter != nil && (propertyName != "" || propertyPath != "") {
-		w.enter(propertyPath, propertyName, schemaDiff, parentDiff, underAllOf)
+	if w.Enter != nil && (propertyName != "" || propertyPath != "") {
+		w.Enter(propertyPath, propertyName, schemaDiff, parentDiff, underAllOf)
 	}
 
 	if propertyName != "" {
-		propertyPath = propertyFullName(propertyPath, propertyName)
+		propertyPath = PropertyFullName(propertyPath, propertyName)
 	}
 
 	if schemaDiff.AllOfDiff != nil {
 		for _, v := range schemaDiff.AllOfDiff.Modified {
-			w.walk(propertyFullName(propertyPath, fmt.Sprintf("allOf[%s]", v)), "", v.Diff, schemaDiff, true)
+			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("allOf[%s]", v)), "", v.Diff, schemaDiff, true)
 		}
 	}
 
 	if schemaDiff.AnyOfDiff != nil {
 		for _, v := range schemaDiff.AnyOfDiff.Modified {
-			w.walk(propertyFullName(propertyPath, fmt.Sprintf("anyOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf)
+			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("anyOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf)
 		}
 	}
 
 	if schemaDiff.OneOfDiff != nil {
 		for _, v := range schemaDiff.OneOfDiff.Modified {
-			w.walk(propertyFullName(propertyPath, fmt.Sprintf("oneOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf)
+			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("oneOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf)
 		}
 	}
 
 	if schemaDiff.ItemsDiff != nil {
-		w.walk(propertyFullName(propertyPath, "items"), "", schemaDiff.ItemsDiff, schemaDiff, underAllOf)
+		w.walk(PropertyFullName(propertyPath, "items"), "", schemaDiff.ItemsDiff, schemaDiff, underAllOf)
 	}
 
 	if schemaDiff.PropertiesDiff != nil {
-		if w.properties != nil {
-			w.properties(propertyPath, schemaDiff, underAllOf)
+		if w.Properties != nil {
+			w.Properties(propertyPath, schemaDiff, underAllOf)
 		}
 		for _, name := range slices.Sorted(maps.Keys(schemaDiff.PropertiesDiff.Modified)) {
 			v := schemaDiff.PropertiesDiff.Modified[name]
@@ -80,7 +86,7 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 	}
 
 	if schemaDiff.AdditionalPropertiesDiff != nil {
-		w.walk(propertyFullName(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, underAllOf)
+		w.walk(PropertyFullName(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, underAllOf)
 	}
 
 	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
@@ -141,36 +147,47 @@ func (w subschemaWalk) walk(propertyPath string, propertyName string, schemaDiff
 	}
 }
 
-func checkModifiedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff)) {
+func ModifiedProperties(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff)) {
 	if schemaDiff == nil {
 		return
 	}
 
-	subschemaWalk{enter: func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool) {
+	Walker{Enter: func(propertyPath string, propertyName string, propertyItem *diff.SchemaDiff, propertyParentItem *diff.SchemaDiff, _ bool) {
 		processor(propertyPath, propertyName, propertyItem, propertyParentItem)
-	}}.walk("", "", schemaDiff, nil, false)
+	}}.Walk(schemaDiff)
 }
 
-func checkAddedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool)) {
+func AddedProperties(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool)) {
 	if schemaDiff == nil {
 		return
 	}
 
-	subschemaWalk{properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool) {
+	Walker{Properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool) {
 		for _, name := range sd.PropertiesDiff.Added {
 			processor(propertyPath, name, sd.Revision.Properties[name].Value, sd, underAllOf)
 		}
-	}}.walk("", "", schemaDiff, nil, false)
+	}}.Walk(schemaDiff)
 }
 
-func checkDeletedPropertiesDiff(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool)) {
+func DeletedProperties(schemaDiff *diff.SchemaDiff, processor func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, propertyParentDiff *diff.SchemaDiff, underAllOf bool)) {
 	if schemaDiff == nil {
 		return
 	}
 
-	subschemaWalk{properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool) {
+	Walker{Properties: func(propertyPath string, sd *diff.SchemaDiff, underAllOf bool) {
 		for _, name := range sd.PropertiesDiff.Deleted {
 			processor(propertyPath, name, sd.Base.Properties[name].Value, sd, underAllOf)
 		}
-	}}.walk("", "", schemaDiff, nil, false)
+	}}.Walk(schemaDiff)
+}
+
+// PropertyFullName appends property names to a path, separated by "/". It is
+// how the walk names a sub-schema, so a check that names one in a message
+// uses it too.
+func PropertyFullName(propertyPath string, propertyNames ...string) string {
+	fullName := strings.Join(propertyNames, "/")
+	if propertyPath != "" {
+		fullName = propertyPath + "/" + fullName
+	}
+	return fullName
 }

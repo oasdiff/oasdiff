@@ -1,10 +1,11 @@
-package checker
+package schemawalk_test
 
 import (
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +17,7 @@ var notTraversed = map[string]string{
 	"DefsDiff": "$defs is a namespace of schemas reached through $ref, so a change to one is reported where it is used; walking it as well would report the change twice",
 }
 
-// A sub-schema field added to SchemaDiff has to be added to subschemaWalk, or
+// A sub-schema field added to SchemaDiff has to be added to the walk, or
 // every check built on the walk silently stops seeing changes under it. That is
 // a quiet failure: the checks keep passing, on less of the document.
 //
@@ -30,11 +31,11 @@ func TestSubschemaTraversalIsComplete(t *testing.T) {
 			putSubschema(t, root, name, target)
 
 			reached := false
-			subschemaWalk{enter: func(_ string, _ string, schemaDiff *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
+			schemawalk.Walker{Enter: func(_ string, _ string, schemaDiff *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
 				if schemaDiff == target {
 					reached = true
 				}
-			}}.walk("", "", root, nil, false)
+			}}.Walk(root)
 
 			if reason, ok := notTraversed[name]; ok {
 				require.Falsef(t, reached,
@@ -42,7 +43,7 @@ func TestSubschemaTraversalIsComplete(t *testing.T) {
 				return
 			}
 			require.Truef(t, reached,
-				"subschemaWalk does not descend into SchemaDiff.%s\n"+
+				"the walk does not descend into SchemaDiff.%s\n"+
 					"  every check built on the walk will miss changes under it\n"+
 					"  add it to the walk, or to notTraversed with a reason", name)
 		})
@@ -66,9 +67,9 @@ func TestSubschemaWalkSharedDiamondVisitsEachContextOnce(t *testing.T) {
 	}
 
 	visits := 0
-	subschemaWalk{enter: func(_ string, _ string, _ *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
+	schemawalk.Walker{Enter: func(_ string, _ string, _ *diff.SchemaDiff, _ *diff.SchemaDiff, _ bool) {
 		visits++
-	}}.walk("", "", child, nil, false)
+	}}.Walk(child)
 	require.Equal(t, depth, visits)
 }
 

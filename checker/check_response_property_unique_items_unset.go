@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -33,7 +34,7 @@ func ResponsePropertyUniqueItemsUnsetCheck(diffReport *diff.Diff, operationsSour
 			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 			result = append(result, p.newChange(
 				ResponsePropertyUniqueItemsUnsetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 				"",
 			).WithSources(propBaseSource, propRevisionSource))
 		})

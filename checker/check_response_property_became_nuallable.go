@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -27,7 +28,7 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}

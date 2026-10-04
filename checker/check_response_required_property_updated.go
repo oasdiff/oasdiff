@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -39,11 +40,9 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			result = append(result, info.newChange(id, nil, comment).WithSources(nil, nil))
 		}
 
-		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff walk
-		// properties that were dropped or introduced entirely, not just
-		// modified ones — different from info.walkProperties, which
-		// delegates to checkModifiedPropertiesDiff. Used directly here.
-		checkDeletedPropertiesDiff(
+		// info.walkProperties reports modified properties only, so the added
+		// and removed ones are walked here.
+		schemawalk.DeletedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				id := ResponseRequiredPropertyRemovedId
@@ -67,11 +66,11 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
-		checkAddedPropertiesDiff(
+		schemawalk.AddedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				id := ResponseRequiredPropertyAddedId
@@ -86,7 +85,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
 				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 			})

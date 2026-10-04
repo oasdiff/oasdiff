@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -23,7 +24,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			for _, enumVal := range enumDiff.Deleted {
 				baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))

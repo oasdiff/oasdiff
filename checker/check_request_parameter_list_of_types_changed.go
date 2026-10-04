@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -29,7 +30,7 @@ func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 
 		// Check parameter properties
 		if p.paramDiff.SchemaDiff != nil {
-			checkModifiedPropertiesDiff(
+			schemawalk.ModifiedProperties(
 				p.paramDiff.SchemaDiff,
 				func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 					changes := checkParameterPropertyListOfTypesChange(

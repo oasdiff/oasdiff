@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -93,7 +94,7 @@ func checkPropertyStabilityChange(p propertyInfo, decreasedId string, increasedI
 
 	*result = append(*result, p.newChange(
 		changeId,
-		[]any{propertyFullName(p.propertyPath, p.propertyName), baseLabel, revisionLabel},
+		[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), baseLabel, revisionLabel},
 		"",
 	).WithSources(baseSource, revisionSource))
 }
