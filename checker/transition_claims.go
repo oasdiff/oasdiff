@@ -26,9 +26,9 @@ import (
 //     transition never drops its own reporters, so its finding always
 //     survives.
 //
-// The decision is made when a change is created: ApiChange.WithSchema
-// consults this table (see claimedByTransition), so checkers contain no
-// suppression logic.
+// Each change records the schema node it was computed from
+// (ApiChange.WithSchema), and claimedByTransition decides from that node, so
+// checkers contain no suppression logic.
 type transition struct {
 	// name identifies the transition in the published change model.
 	name string
@@ -179,9 +179,30 @@ var transitions = []transition{
 	},
 }
 
+// dropClaimed removes the changes a recognized transition explains, which the
+// transition reports instead. The rest no longer need the schema node they
+// kept for the decision, so it is cleared and the changes returned do not
+// hold on to the diff.
+func dropClaimed(changes Changes) Changes {
+	result := make(Changes, 0, len(changes))
+	for _, change := range changes {
+		apiChange, ok := change.(ApiChange)
+		if !ok {
+			result = append(result, change)
+			continue
+		}
+		if claimedByTransition(apiChange.schema, apiChange.Id) {
+			continue
+		}
+		apiChange.schema = nil
+		result = append(result, apiChange)
+	}
+	return result
+}
+
 // claimedByTransition reports whether a change with the given rule id,
 // computed from the given schema node, is a raw reflection of a recognized
-// transition there and should be suppressed. Called by ApiChange.WithSchema.
+// transition there and should be suppressed.
 //
 // Kind matching: the caller does not state the change's kind; it is looked up
 // from the rule's registry entry (rules.go), so the pairing between a
