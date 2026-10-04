@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/consolidate"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/spf13/cobra"
@@ -67,12 +68,16 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 		checker.WithStabilityLevel(flags.getStabilityLevel()),
 	)
 
+	// Consolidated before the ignore files apply, so an ignore line matches a
+	// finding as it is printed.
 	errs, returnErr := filterIgnored(
-		checker.CheckBackwardCompatibilityUntilLevel(
-			bcConfig,
-			diffResult.diffReport,
-			diffResult.operationsSources,
-			level),
+		consolidate.Changes(
+			checker.CheckBackwardCompatibilityUntilLevel(
+				bcConfig,
+				diffResult.diffReport,
+				diffResult.operationsSources,
+				level),
+			consolidate.SharedSchema),
 		flags.getWarnIgnoreFile(),
 		flags.getErrIgnoreFile(),
 		checker.NewLocalizer(flags.getLang()))

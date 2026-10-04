@@ -42,7 +42,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 					RequestHeaderPropertyBecameEnumId,
 					[]any{p.name, schemawalk.PropertyFullName(propertyPath, propertyName)},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, nil, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(propBaseSource, propRevisionSource))
 			})
 	})
 	return result

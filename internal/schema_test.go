@@ -34,6 +34,11 @@ var schemaSamples = []struct {
 		"a change under an unflattened allOf",
 		"oasdiff changelog ../data/checker/disclaimer_allof_base.yaml ../data/checker/disclaimer_allof_revision.yaml --format json",
 	},
+	{
+		// the only source of "sharedSchema"
+		"a schema several properties reach",
+		"oasdiff changelog ../data/checker/shared_schema_two_properties_base.yaml ../data/checker/shared_schema_two_properties_revision.yaml --format json",
+	},
 }
 
 // The schema printed by "oasdiff schema" must accept the real "--format json"

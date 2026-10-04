@@ -62,7 +62,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 						RequestHeaderPropertyBecameRequiredId,
 						[]any{p.name, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))},
 						"",
-					).WithSources(propBaseSource, propRevisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, nil, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))).WithSources(propBaseSource, propRevisionSource))
 				}
 			})
 	})

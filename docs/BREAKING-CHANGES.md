@@ -114,6 +114,45 @@ See [Version Bumps and Breaking Changes](VERSIONING.md).
 A schema can allow `null` in three equivalent ways, and whether a nullability change is breaking depends on whether it appears in a request or a response.
 See [Nullability Changes](NULLABILITY.md).
 
+## Schemas Used in Several Places
+
+A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. oasdiff reports such a change once per check, at one of the properties that reach it, names the shared schema, and lists the other properties the change is at:
+
+```
+the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: Id, also at `userId`)
+    A change in a schema that several properties of this payload reach is reported once per check, at one of
+    those properties: it is a single change to the contract, and it applies wherever the schema is used.
+```
+
+So `Id` is where to look, and the pattern applies to both `customerId` and `userId`. The change is reported at the property first in alphabetical order, so the same comparison always reports the same one. When there are more, the text names one and counts the rest, as in `and 1 more`, and JSON and YAML output list every one:
+
+```json
+"sharedSchema": {
+  "name": "Id",
+  "properties": ["customerId", "ownerId", "userId"]
+}
+```
+
+The list has one entry per reference to the schema. Say `Shared` is referenced from `First.shared` and `Second.shared`, and `First` is itself used by two properties of the payload. A change in `Shared` lists two properties, `first/shared/...` and `second/shared/...`, rather than one per path through `First`. A change in `First` lists `First`'s own uses. Counting references rather than paths keeps the list short: in a deeply nested spec, the number of paths can run to millions.
+
+A change deeper inside a shared schema names that schema too, and lists the same property paths with the rest of the change's path appended. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
+
+The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
+
+Three things stay separate, and each still gets its own line:
+
+- **Each check.** Every check reports on its own, so a shared schema that both added a property and gained a `pattern` produces one `response-optional-property-added` and one `response-property-pattern-added`.
+- **Each change.** Two properties added to the same shared schema are two changes, both reported at the same property.
+- **Each operation.** An operation is a separate contract, so an operation that reaches the same changed schema reports it too.
+
+### In Go
+
+`checker.CheckBackwardCompatibility` reports the change at every property, each finding carrying the same `SharedSchema`. The `consolidate` package merges them the way the command line does:
+
+```go
+changes := consolidate.Changes(checker.CheckBackwardCompatibility(config, diffReport, operationsSources), consolidate.SharedSchema)
+```
+
 ## Ignoring Specific Breaking Changes
 Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  
 Oasdiff allows you define breaking changes that you want to ignore in a configuration file.  

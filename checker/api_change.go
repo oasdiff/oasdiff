@@ -30,6 +30,16 @@ type ApiChange struct {
 	// recognized transition there can claim the change (see
 	// transition_claims.go).
 	schema *diff.SchemaDiff
+	// root is the payload or parameter schema the walk started from, and
+	// propertyPath the path from it the change is reported at, kept so that a
+	// change below a schema several references reach is reported at each of
+	// them (see expandSharedSchemas).
+	root         *diff.SchemaDiff
+	propertyPath string
+
+	// sharedSchema is rendered after Details rather than stored there, so a
+	// check that sets its own details does not drop it.
+	sharedSchema *SharedSchema
 
 	// guards holds the document states observed at the change's location
 	// (a readOnly or writeOnly property). capByGuards derives the level
@@ -62,10 +72,12 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 	}
 }
 
-// WithSchema returns a copy of the ApiChange that records the schema node the
-// change was computed from. A later call replaces it.
-func (a ApiChange) WithSchema(schemaDiff *diff.SchemaDiff) ApiChange {
-	a.schema = schemaDiff
+// WithSchema returns a copy of the ApiChange that records where it was
+// computed: the schema node, the payload or parameter schema the walk started
+// from, and the property path the change is reported at, empty for a change to
+// the root itself. A later call replaces all three.
+func (a ApiChange) WithSchema(root *diff.SchemaDiff, schemaDiff *diff.SchemaDiff, propertyPath string) ApiChange {
+	a.root, a.schema, a.propertyPath = root, schemaDiff, propertyPath
 	return a
 }
 
@@ -167,10 +179,11 @@ func (c ApiChange) GetComment(l Localizer) string {
 }
 
 func (c ApiChange) getDetailsSuffix() string {
-	if c.Details == "" {
+	details := combineDetails(c.Details, c.sharedSchema.detail())
+	if details == "" {
 		return ""
 	}
-	return " " + c.Details
+	return " " + details
 }
 
 func (c ApiChange) GetLevel() Level {
