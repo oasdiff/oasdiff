@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,7 +20,7 @@ func RequestPropertyMaxPropertiesUpdatedCheck(diffReport *diff.Diff, operationsS
 		if maxPropertiesDiff := info.schemaDiff.MaxPropsDiff; maxPropertiesDiff != nil &&
 			maxPropertiesDiff.From != nil &&
 			maxPropertiesDiff.To != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxProperties")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxProperties")
 			if isDecreasedValue(maxPropertiesDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMaxPropertiesDecreasedId,
@@ -46,7 +47,7 @@ func RequestPropertyMaxPropertiesUpdatedCheck(diffReport *diff.Diff, operationsS
 			}
 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
 
 			if isDecreasedValue(maxPropertiesDiff) {
 

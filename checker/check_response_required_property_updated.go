@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -63,7 +64,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					return
 				}
 
-				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
@@ -82,7 +83,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					return
 				}
 
-				revisionSource := propertySource(operationsSources, info.operationItem.Revision, propertyItem)
+				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 				result = append(result, info.newChange(
 					id,
 					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},

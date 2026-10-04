@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,7 +17,7 @@ func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if uniqueItemsDiff := info.schemaDiff.UniqueItemsDiff; uniqueItemsDiff != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "uniqueItems")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "uniqueItems")
 			if uniqueItemsDiff.To == true {
 				result = append(result, info.newChange(
 					RequestBodyUniqueItemsSetId,
@@ -39,7 +40,7 @@ func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 			}
 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 
 			if uniqueItemsDiff.To == true {
 				result = append(result, p.newChange(

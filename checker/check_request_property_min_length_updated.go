@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +18,7 @@ func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minLengthDiff := info.schemaDiff.MinLengthDiff; minLengthDiff != nil &&
 			!uintBoundSet(minLengthDiff) && !uintBoundUnset(minLengthDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
 			id := RequestBodyMinLengthDecreasedId
 			if isIncreasedValue(minLengthDiff) {
 				id = RequestBodyMinLengthIncreasedId
@@ -36,7 +37,7 @@ func RequestPropertyMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 
 			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minLength")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minLength")
 			id := RequestPropertyMinLengthIncreasedId
 			if isDecreasedValue(minLengthDiff) {
 				id = RequestPropertyMinLengthDecreasedId

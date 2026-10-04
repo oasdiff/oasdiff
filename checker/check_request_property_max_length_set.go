@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +16,7 @@ func RequestPropertyMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
 			maxLengthDiff.From == nil && maxLengthDiff.To != nil {
-			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
+			_, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
 			result = append(result, info.newChange(
 				RequestBodyMaxLengthSetId,
 				[]any{maxLengthDiff.To},
@@ -29,7 +30,7 @@ func RequestPropertyMaxLengthSetCheck(diffReport *diff.Diff, operationsSources *
 				return
 			}
 
-			_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
+			_, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
 			result = append(result, p.newChange(
 				RequestPropertyMaxLengthSetId,
 				[]any{propertyFullName(p.propertyPath, p.propertyName), maxLengthDiff.To},

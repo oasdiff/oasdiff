@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -30,7 +31,7 @@ func AddedRequestBodyCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 					id = AddedRequiredRequestBodyId
 				}
 
-				revisionSource := requestBodySource(operationsSources, operationItem.Revision)
+				revisionSource := location.RequestBodySource(operationsSources, operationItem.Revision)
 				result = append(result, opInfo.NewApiChange(
 					id,
 					nil,

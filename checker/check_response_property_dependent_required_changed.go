@@ -3,6 +3,7 @@ package checker
 import (
 	"strings"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -21,7 +22,7 @@ func ResponsePropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operat
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.DependentRequiredDiff != nil {
 			depReqDiff := info.schemaDiff.DependentRequiredDiff
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "dependentRequired")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "dependentRequired")
 			for key, values := range depReqDiff.Added {
 				result = append(result, info.newChange(
 					ResponseBodyDependentRequiredAddedId,
@@ -51,7 +52,7 @@ func ResponsePropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operat
 			}
 			depReqDiff := p.propertyDiff.DependentRequiredDiff
 			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "dependentRequired")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "dependentRequired")
 			for key, values := range depReqDiff.Added {
 				result = append(result, p.newChange(
 					ResponsePropertyDependentRequiredAddedId,

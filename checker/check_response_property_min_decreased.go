@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +18,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
 			minDiff.From != nil && minDiff.To != nil && isDecreasedValue(minDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			result = append(result, info.newChange(
 				ResponseBodyMinDecreasedId,
 				[]any{minDiff.From, minDiff.To},
@@ -26,7 +27,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 		}
 		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
 			exMinDiff.From != nil && exMinDiff.To != nil && isDecreasedValue(exMinDiff) {
-			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
+			exBaseSource, exRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			result = append(result, info.newChange(
 				ResponseBodyExclusiveMinDecreasedId,
 				[]any{exMinDiff.From, exMinDiff.To},
@@ -39,7 +40,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 
 			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
 				minDiff.To != nil && minDiff.From != nil && isDecreasedValue(minDiff) {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
 				result = append(result, p.newChange(
 					ResponsePropertyMinDecreasedId,
 					[]any{propName, minDiff.From, minDiff.To, info.responseStatus},
@@ -49,7 +50,7 @@ func ResponsePropertyMinDecreasedCheck(diffReport *diff.Diff, operationsSources 
 
 			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
 				exMinDiff.To != nil && exMinDiff.From != nil && isDecreasedValue(exMinDiff) {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				result = append(result, p.newChange(
 					ResponsePropertyExclusiveMinDecreasedId,
 					[]any{propName, exMinDiff.From, exMinDiff.To, info.responseStatus},

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -24,8 +25,8 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 	// The document-root "security" field location in each spec; nil when origin
 	// tracking is off. Added/scope-added are reported against the revision, the
 	// rest against the base, matching the add/remove source convention.
-	baseSource := sourceFromField(diffReport.SecurityDiff.BaseOrigin, "security")
-	revisionSource := sourceFromField(diffReport.SecurityDiff.RevisionOrigin, "security")
+	baseSource := location.SourceFromField(diffReport.SecurityDiff.BaseOrigin, "security")
+	revisionSource := location.SourceFromField(diffReport.SecurityDiff.RevisionOrigin, "security")
 
 	for _, addedSecurity := range diffReport.SecurityDiff.Added {
 		result = append(result, SecurityChange{
@@ -84,8 +85,8 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 				continue
 			}
 
-			baseSource := securitySource(operationsSources, operationItem.Base)
-			revisionSource := securitySource(operationsSources, operationItem.Revision)
+			baseSource := location.SecuritySource(operationsSources, operationItem.Base)
+			revisionSource := location.SecuritySource(operationsSources, operationItem.Revision)
 
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 

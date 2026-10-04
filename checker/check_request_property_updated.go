@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -69,7 +70,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					return
 				}
 
-				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					RequestPropertyRemovedId,
 					[]any{propertyFullName(propertyPath, propertyName)},
@@ -85,7 +86,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 				}
 
 				propName := propertyFullName(propertyPath, propertyName)
-				revisionSource := propertySource(operationsSources, info.operationItem.Revision, propertyItem)
+				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 
 				if slices.Contains(parent.Revision.Required, propertyName) {
 					if propertyItem.Default == nil {

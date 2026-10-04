@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -27,7 +28,7 @@ func RequestParameterMinSetCheck(diffReport *diff.Diff, operationsSources *diff.
 			if !ok {
 				continue
 			}
-			_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
+			_, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
 			result = append(result, p.opInfo.NewApiChange(
 				entry.id,
 				[]any{p.location, p.name, value},

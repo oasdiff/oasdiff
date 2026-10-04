@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -20,7 +21,7 @@ func WebhookUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 	for _, addedWebhook := range diffReport.WebhooksDiff.Added {
 		var revisionSource *Source
 		if pathItem := diffReport.WebhooksDiff.Revision[addedWebhook]; pathItem != nil {
-			revisionSource = sourceFromOrigin(pathItem.Origin)
+			revisionSource = location.SourceFromOrigin(pathItem.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        WebhookAddedId,
@@ -33,7 +34,7 @@ func WebhookUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 	for _, deletedWebhook := range diffReport.WebhooksDiff.Deleted {
 		var baseSource *Source
 		if pathItem := diffReport.WebhooksDiff.Base[deletedWebhook]; pathItem != nil {
-			baseSource = sourceFromOrigin(pathItem.Origin)
+			baseSource = location.SourceFromOrigin(pathItem.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        WebhookRemovedId,

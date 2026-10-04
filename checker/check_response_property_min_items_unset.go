@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -14,7 +15,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minItemsDiff := info.schemaDiff.MinItemsDiff; uintBoundUnset(minItemsDiff) {
-			baseSource, _ := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
+			baseSource, _ := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
 			result = append(result, info.newChange(
 				ResponseBodyMinItemsUnsetId,
 				[]any{minItemsDiff.From},
@@ -28,7 +29,7 @@ func ResponsePropertyMinItemsUnsetCheck(diffReport *diff.Diff, operationsSources
 				return
 			}
 
-			propBaseSource, _ := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
+			propBaseSource, _ := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
 			result = append(result, p.newChange(
 				ResponsePropertyMinItemsUnsetId,
 				[]any{propertyFullName(p.propertyPath, p.propertyName), minItemsDiff.From, info.responseStatus},

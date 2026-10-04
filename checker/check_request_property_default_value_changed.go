@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,7 +20,7 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.DefaultDiff != nil {
 			defaultValueDiff := info.schemaDiff.DefaultDiff
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "default")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "default")
 			append1 := func(messageId string, a ...any) {
 				result = append(result, info.newChange(messageId, a, "").WithSources(baseSource, revisionSource))
 			}
@@ -38,7 +39,7 @@ func RequestPropertyDefaultValueChangedCheck(diffReport *diff.Diff, operationsSo
 			}
 
 			defaultValueDiff := p.propertyDiff.DefaultDiff
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "default")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "default")
 			appendProp := func(messageId string, a ...any) {
 				result = append(result, p.newChange(messageId, a, "").WithSources(propBaseSource, propRevisionSource))
 			}

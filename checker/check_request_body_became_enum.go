@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +16,7 @@ func RequestBodyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.O
 		if info.schemaDiff.EnumDiff == nil || !info.schemaDiff.EnumDiff.EnumAdded {
 			return
 		}
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")
 		result = append(result, info.newChange(RequestBodyBecameEnumId, nil, "").
 			WithSources(baseSource, revisionSource))
 	})

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -14,7 +15,7 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
 
 		if enumDiff := p.paramDiff.SchemaDiff.EnumDiff; enumDiff == nil || !enumDiff.EnumAdded {
 			return

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -41,18 +42,18 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 		}
 		for operation, operationItem := range pathDiff.OperationsDiff.Modified {
 			if _, err := getStabilityLevel(pathDiff.Base.GetOperation(operation).Extensions); err != nil {
-				baseSource := stabilityFieldSource(operationsSources, operationItem.Base, operationItem.Base.Origin)
+				baseSource := location.StabilityFieldSource(operationsSources, operationItem.Base, operationItem.Base.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Base, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 			if _, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions); err != nil {
-				revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
+				revisionSource := location.StabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Revision, operationsSources, operation, path, err).WithSources(nil, revisionSource))
 			}
 		}
 		for _, operation := range pathDiff.OperationsDiff.Deleted {
 			operationItem := pathDiff.Base.GetOperation(operation)
 			if _, err := getStabilityLevel(operationItem.Extensions); err != nil {
-				baseSource := stabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
+				baseSource := location.StabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 		}
@@ -63,7 +64,7 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 		pathVal := diffReport.PathsDiff.Base.Value(path)
 		for operation, operationItem := range pathVal.Operations() {
 			if _, err := getStabilityLevel(pathVal.GetOperation(operation).Extensions); err != nil {
-				baseSource := stabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
+				baseSource := location.StabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 		}
@@ -115,8 +116,8 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 				changeId = APIStabilityDecreasedId
 			}
 
-			baseSource := stabilityFieldSource(operationsSources, pathDiff.Base.GetOperation(operation), pathDiff.Base.GetOperation(operation).Origin)
-			revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
+			baseSource := location.StabilityFieldSource(operationsSources, pathDiff.Base.GetOperation(operation), pathDiff.Base.GetOperation(operation).Origin)
+			revisionSource := location.StabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
 
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			result = append(result, opInfo.NewApiChange(

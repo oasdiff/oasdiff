@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -29,7 +30,7 @@ func RequestBodyMediaTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 			addedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeAdded
 			for _, mediaType := range addedMediaTypes {
-				revisionSource := requestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)
+				revisionSource := location.RequestBodyMediaTypeSource(operationsSources, operationItem.Revision, mediaType)
 				result = append(result, opInfo.NewApiChange(
 					RequestBodyMediaTypeAddedId,
 					[]any{mediaType},
@@ -39,7 +40,7 @@ func RequestBodyMediaTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 
 			removedMediaTypes := operationItem.RequestBodyDiff.ContentDiff.MediaTypeDeleted
 			for _, mediaType := range removedMediaTypes {
-				baseSource := requestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType)
+				baseSource := location.RequestBodyMediaTypeSource(operationsSources, operationItem.Base, mediaType)
 				result = append(result, opInfo.NewApiChange(
 					RequestBodyMediaTypeRemovedId,
 					[]any{mediaType},

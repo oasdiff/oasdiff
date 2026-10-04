@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,7 +20,7 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 		}
 
 		if id := nullabilityChangeId(p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "nullable")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "nullable")
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
@@ -34,7 +35,7 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 					return
 				}
 				if id := nullabilityChangeId(propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
+					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
 						[]any{propertyFullName(propertyPath, propertyName), p.location, p.name},

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -55,13 +56,13 @@ func checkPropertyStabilityChange(p propertyInfo, decreasedId string, increasedI
 	// property schemas, so there is no other backstop for it.
 	baseStability, err := getStabilityLevel(p.propertyDiff.Base.Extensions)
 	if err != nil {
-		baseSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Base.Origin)
+		baseSource := location.StabilityFieldSource(p.operationsSources, op, p.propertyDiff.Base.Origin)
 		*result = append(*result, getAPIInvalidStabilityLevel(p.config, op, p.operationsSources, p.method, p.path, err).WithSources(baseSource, nil))
 		return
 	}
 	revisionStability, err := getStabilityLevel(p.propertyDiff.Revision.Extensions)
 	if err != nil {
-		revisionSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Revision.Origin)
+		revisionSource := location.StabilityFieldSource(p.operationsSources, op, p.propertyDiff.Revision.Origin)
 		*result = append(*result, getAPIInvalidStabilityLevel(p.config, op, p.operationsSources, p.method, p.path, err).WithSources(nil, revisionSource))
 		return
 	}
@@ -87,8 +88,8 @@ func checkPropertyStabilityChange(p propertyInfo, decreasedId string, increasedI
 		changeId = decreasedId
 	}
 
-	baseSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Base.Origin)
-	revisionSource := stabilityFieldSource(p.operationsSources, op, p.propertyDiff.Revision.Origin)
+	baseSource := location.StabilityFieldSource(p.operationsSources, op, p.propertyDiff.Base.Origin)
+	revisionSource := location.StabilityFieldSource(p.operationsSources, op, p.propertyDiff.Revision.Origin)
 
 	*result = append(*result, p.newChange(
 		changeId,
