@@ -98,9 +98,9 @@ type propertyInfo struct {
 	parent       *diff.SchemaDiff
 }
 
-// newChange shadows the promoted body-level helper so the claim decision is
-// made against the property's own schema diff (WithSchema recomputes claimed,
-// so the second call overrides the body-level decision).
+// newChange shadows the promoted body-level helper so the change records the
+// property's own schema diff rather than the body's: the second WithSchema
+// call replaces the first.
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
 		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).

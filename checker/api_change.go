@@ -26,10 +26,10 @@ type ApiChange struct {
 	Path        string
 	Source      *load.Source
 
-	// claimed marks a change that a recognized schema transition explains
-	// (see transition_claims.go); claimed changes are dropped in favor of the
-	// transition's own finding. Set by WithSchema.
-	claimed bool
+	// schema is the node the change was computed from, kept so that a
+	// recognized transition there can claim the change (see
+	// transition_claims.go).
+	schema *diff.SchemaDiff
 
 	// guards holds the document states observed at the change's location
 	// (a readOnly or writeOnly property). capByGuards derives the level
@@ -62,12 +62,10 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 	}
 }
 
-// WithSchema returns a copy of the ApiChange with claimed set: the change is
-// claimed when a recognized transition at the given schema node (the node the
-// change was computed from) claims the change's rule (see
-// transition_claims.go). The node itself is not retained.
+// WithSchema returns a copy of the ApiChange that records the schema node the
+// change was computed from. A later call replaces it.
 func (a ApiChange) WithSchema(schemaDiff *diff.SchemaDiff) ApiChange {
-	a.claimed = claimedByTransition(schemaDiff, a.Id)
+	a.schema = schemaDiff
 	return a
 }
 
