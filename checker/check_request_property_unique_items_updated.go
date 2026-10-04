@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -39,7 +40,7 @@ func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 
 			if uniqueItemsDiff.To == true {

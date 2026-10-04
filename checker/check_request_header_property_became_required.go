@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -42,7 +43,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 			}
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				requiredDiff := propertyDiff.RequiredDiff
@@ -59,7 +60,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 					propBaseSource, propRevisionSource := location.SchemaAddedItemSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "required", changedRequiredPropertyName)
 					result = append(result, p.opInfo.NewApiChange(
 						RequestHeaderPropertyBecameRequiredId,
-						[]any{p.name, propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))},
+						[]any{p.name, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))},
 						"",
 					).WithSources(propBaseSource, propRevisionSource))
 				}

@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -25,7 +26,7 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 		info.walkProperties(func(p propertyInfo) {
 			if id := nullabilityChangeId(p.propertyDiff, RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId); id != "" {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
-				result = append(result, p.newChange(id, []any{propertyFullName(p.propertyPath, p.propertyName)}, "").
+				result = append(result, p.newChange(id, []any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, "").
 					WithSources(propBaseSource, propRevisionSource))
 			}
 		})

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -76,7 +77,7 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "multipleOf")
 			switch {
 			case multipleOfDiff.From == nil:

@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -28,7 +29,7 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
@@ -38,7 +39,7 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
-						[]any{propertyFullName(propertyPath, propertyName), p.location, p.name},
+						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 						"",
 					).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
 				}

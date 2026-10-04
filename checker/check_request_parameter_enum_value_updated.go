@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -30,7 +31,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 			func(enumVal any) []any { return []any{enumVal, p.location, p.name} },
 		)...)
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				result = append(result, checkParameterEnumDiff(
@@ -40,7 +41,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 					RequestParameterPropertyEnumValueRemovedId,
 					RequestParameterPropertyEnumValueAddedId,
 					func(enumVal any) []any {
-						return []any{enumVal, propertyFullName(propertyPath, propertyName), p.location, p.name}
+						return []any{enumVal, schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name}
 					},
 				)...)
 			})

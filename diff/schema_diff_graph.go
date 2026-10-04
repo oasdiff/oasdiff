@@ -116,8 +116,8 @@ func getSchemaDiffNode(config *Config, state *state, schema1, schema2 *openapi3.
 		*node = *diff
 		// the copy carries the compared schemas; the names come from the
 		// documents, which the comparison itself does not see
-		node.BaseComponent = state.baseComponents[node.Base]
-		node.RevisionComponent = state.revisionComponents[node.Revision]
+		node.BaseComponent = componentName(state.baseComponents, schema1)
+		node.RevisionComponent = componentName(state.revisionComponents, schema2)
 		graph.candidates[node], err = getCandidates(config, state, node)
 	}
 	graph.depth--
