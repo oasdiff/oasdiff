@@ -40,12 +40,8 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		result = append(result, errs...)
 	}
 
-	// A change a transition explains is reported by the transition instead, so
-	// it is dropped here and nothing downstream sees it.
-	result = slices.DeleteFunc(result, func(change Change) bool {
-		apiChange, ok := change.(ApiChange)
-		return ok && apiChange.claimed
-	})
+	// First, so a change a transition explains counts toward nothing below.
+	result = dropClaimed(result)
 
 	// Runs before anything that reads a change's level.
 	result = capByGuards(config, result)
