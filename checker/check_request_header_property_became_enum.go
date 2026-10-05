@@ -26,7 +26,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 				RequestHeaderPropertyBecameEnumId,
 				[]any{p.name},
 				"",
-			).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
 		}
 
 		schemawalk.ModifiedProperties(
@@ -42,7 +42,7 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 					RequestHeaderPropertyBecameEnumId,
 					[]any{p.name, schemawalk.PropertyFullName(propertyPath, propertyName)},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSchema(propertyDiff).WithSources(propBaseSource, propRevisionSource))
 			})
 	})
 	return result
