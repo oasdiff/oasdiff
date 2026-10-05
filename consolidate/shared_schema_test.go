@@ -45,11 +45,11 @@ func TestSharedSchema_MergesTheReferences(t *testing.T) {
 	require.Equal(t, &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "userId"}}, orders.GetSharedSchema())
 	require.Equal(t, checker.SharedSchemaCommentId, orders.Comment)
 	require.Contains(t, orders.GetComment(checker.NewLocalizer("en")), "reported once per check")
-	require.Contains(t, orders.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Id, also at `userId`)")
+	require.Contains(t, orders.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: `Id`, also at `userId`)")
 
 	accounts := byOperation["/accounts"]
 	require.Equal(t, []string{"customerId", "ownerId", "userId"}, accounts.GetSharedSchema().Properties)
-	require.Contains(t, accounts.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Id, also at `ownerId` and 1 more)")
+	require.Contains(t, accounts.GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: `Id`, also at `ownerId` and 1 more)")
 }
 
 // Each check merges its own findings: a property added to Shared and a

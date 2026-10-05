@@ -3,6 +3,7 @@ package checker_test
 import (
 	"testing"
 
+	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
@@ -43,7 +44,23 @@ func TestSharedSchemaChangeIsReportedAtEachReference(t *testing.T) {
 		"left/extra":  {Name: "Shared", Properties: []string{"left/extra", "right/extra"}},
 		"right/extra": {Name: "Shared", Properties: []string{"right/extra", "left/extra"}},
 	}, sharedAt(t, changes))
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: Shared, also at `right/extra`)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: `Shared`, also at `right/extra`)")
+}
+
+// In colored output, the values in the shared schema detail are formatted the
+// same way as the message arguments.
+func TestSharedSchemaDetailIsColoredLikeTheArguments(t *testing.T) {
+	changes := sharedSchemaChanges(t, "shared_schema", checker.ResponseOptionalPropertyUpdatedCheck)
+
+	text := changes[0].GetText(checker.NewLocalizer("en"))
+	require.Contains(t, text, color.InBold("'left/extra'"))
+	require.Contains(t, text, "(shared schema: "+color.InBold("'Shared'")+", also at "+color.InBold("'right/extra'")+")")
+}
+
+func TestSharedSchemaDetailIsLocalized(t *testing.T) {
+	changes := sharedSchemaChanges(t, "shared_schema", checker.ResponseOptionalPropertyUpdatedCheck)
+
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("es")), "(esquema compartido: `Shared`, también en `right/extra`)")
 }
 
 // The copies come out in the same order on every run.

@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
@@ -12,6 +11,12 @@ import (
 // SharedSchemaCommentId explains a change reported at one property when
 // several properties of the payload reach the schema it is in.
 const SharedSchemaCommentId = "shared-schema-comment"
+
+const (
+	SharedSchemaDetailNameId     = "shared-schema-detail-name"
+	SharedSchemaDetailAlsoId     = "shared-schema-detail-also"
+	SharedSchemaDetailAlsoMoreId = "shared-schema-detail-also-more"
+)
 
 // SharedSchema is the schema several properties of a payload reach, attached
 // to a change in it or below it.
@@ -41,21 +46,22 @@ func (c ApiChange) GetSharedSchema() *SharedSchema {
 // detail renders the shared schema as a message detail. It lists one other
 // property and counts the rest: the paths are long, and the full list is in
 // Properties.
-func (s *SharedSchema) detail() string {
+func (s *SharedSchema) detail(l Localizer, format func([]any) []any) string {
 	if s == nil {
 		return ""
 	}
 
 	parts := []string{}
 	if s.Name != "" {
-		parts = append(parts, "shared schema: "+s.Name)
+		parts = append(parts, l(SharedSchemaDetailNameId, format([]any{s.Name})...))
 	}
 	if others := s.Properties[1:]; len(others) > 0 {
-		also := "also at `" + others[0] + "`"
+		other := format([]any{others[0]})[0]
 		if more := len(others) - 1; more > 0 {
-			also += fmt.Sprintf(" and %d more", more)
+			parts = append(parts, l(SharedSchemaDetailAlsoMoreId, other, more))
+		} else {
+			parts = append(parts, l(SharedSchemaDetailAlsoId, other))
 		}
-		parts = append(parts, also)
 	}
 	if len(parts) == 0 {
 		return ""

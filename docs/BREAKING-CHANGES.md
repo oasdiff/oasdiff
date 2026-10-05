@@ -119,7 +119,7 @@ See [Nullability Changes](NULLABILITY.md).
 A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. oasdiff reports such a change once per check, at one of the properties that reach it, names the shared schema, and lists the other properties the change is at:
 
 ```
-the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: Id, also at `userId`)
+the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: `Id`, also at `userId`)
     A change in a schema that several properties of this payload reach is reported once per check, at one of
     those properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```

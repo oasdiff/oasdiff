@@ -1550,3 +1550,6 @@ response-property-min-unset-description: valor min da propriedade de resposta re
 response-property-multiple-of-set: o valor multipleOf da propriedade de resposta %s foi definido como %s para o status %s
 response-property-multiple-of-set-description: valor multipleOf da propriedade de resposta definido
 shared-schema-comment: "Uma alteração em um schema alcançado por várias propriedades desta carga é reportada uma única vez por verificação, em uma dessas propriedades: é uma única alteração do contrato e se aplica em todos os lugares onde o schema é usado."
+shared-schema-detail-also: "também em %s"
+shared-schema-detail-also-more: "também em %s e mais %d"
+shared-schema-detail-name: "schema compartilhado: %s"
