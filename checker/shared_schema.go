@@ -69,9 +69,6 @@ func (s *SharedSchema) detail() string {
 // reference, so a change inside it is found only there. This reports the
 // change once at each reference. Each copy names the schema and the other
 // properties.
-//
-// It sets schema, root and propertyPath to nil on every change it returns, so
-// the changes no longer keep the diff in memory.
 func expandSharedSchemas(changes Changes) Changes {
 	references := map[*diff.SchemaDiff]schemawalk.References{}
 	result := make(Changes, 0, len(changes))
@@ -82,7 +79,6 @@ func expandSharedSchemas(changes Changes) Changes {
 			continue
 		}
 		root, path := apiChange.root, apiChange.propertyPath
-		apiChange.root, apiChange.schema, apiChange.propertyPath = nil, nil, ""
 		if root == nil || path == "" {
 			result = append(result, apiChange)
 			continue

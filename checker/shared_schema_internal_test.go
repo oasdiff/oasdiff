@@ -39,20 +39,3 @@ func TestExpandSharedSchemas_MessageNamingNoProperty(t *testing.T) {
 	require.Len(t, result, 1)
 	require.Equal(t, &SharedSchema{Properties: []string{"a", "b"}}, result[0].(ApiChange).GetSharedSchema())
 }
-
-// The changes returned do not hold on to the diff, shared or not.
-func TestExpandSharedSchemas_ForgetsWhereChangesWereComputed(t *testing.T) {
-	root, shared := sharedRoot()
-
-	result := expandSharedSchemas(Changes{
-		ApiChange{Id: "change_id", Args: []any{"a"}}.WithSchema(root, shared, "a"),
-		ApiChange{Id: "change_id"}.WithSchema(root, root, ""),
-	})
-
-	for _, change := range result {
-		apiChange := change.(ApiChange)
-		require.Nil(t, apiChange.root)
-		require.Nil(t, apiChange.schema)
-		require.Empty(t, apiChange.propertyPath)
-	}
-}

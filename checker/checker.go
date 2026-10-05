@@ -42,8 +42,6 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	// First, so a change a transition explains counts toward nothing below.
 	result = dropClaimed(result)
-	// Must run after dropClaimed: dropClaimed reads ApiChange.schema, and this
-	// sets it to nil.
 	result = expandSharedSchemas(result)
 
 	// Runs before anything that reads a change's level.
