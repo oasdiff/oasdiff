@@ -76,48 +76,65 @@ func (s *SharedSchema) detail(l Localizer, format func([]any) []any) string {
 // change once at each reference. Each copy names the schema and the other
 // properties.
 func expandSharedSchemas(changes Changes) Changes {
-	references := map[*diff.SchemaDiff]schemawalk.References{}
+	references := referencesByRoot{}
 	result := make(Changes, 0, len(changes))
 	for _, change := range changes {
-		apiChange, ok := change.(ApiChange)
-		if !ok {
-			result = append(result, change)
-			continue
-		}
-		root, path := apiChange.root, apiChange.propertyPath
-		if root == nil || path == "" {
-			result = append(result, apiChange)
-			continue
-		}
-
-		rootReferences, ok := references[root]
-		if !ok {
-			rootReferences = schemawalk.NewReferences(root)
-			references[root] = rootReferences
-		}
-		name, paths, ok := rootReferences.At(path)
-		if !ok {
-			result = append(result, apiChange)
-			continue
-		}
-
-		// Each copy replaces the property path in the message arguments with
-		// its own path. If no argument is the property path, the copies would
-		// be identical, so the change is reported once with the list of
-		// properties.
-		argument := slices.IndexFunc(apiChange.Args, func(arg any) bool { return interfaceToString(arg) == path })
-		if argument < 0 {
-			apiChange.sharedSchema = &SharedSchema{Name: name, Properties: paths}
-			result = append(result, apiChange)
-			continue
-		}
-		for _, at := range paths {
-			copied := apiChange
-			copied.Args = slices.Clone(apiChange.Args)
-			copied.Args[argument] = at
-			copied.sharedSchema = &SharedSchema{Name: name, Properties: append([]string{at}, slices.DeleteFunc(slices.Clone(paths), func(p string) bool { return p == at })...)}
-			result = append(result, copied)
-		}
+		result = append(result, expandSharedSchema(change, references)...)
 	}
 	return result
+}
+
+// expandSharedSchema returns the change once per reference to the shared
+// schema it is in or below, or the change alone if it is in none.
+func expandSharedSchema(change Change, references referencesByRoot) Changes {
+	apiChange, ok := change.(ApiChange)
+	if !ok || apiChange.root == nil || apiChange.propertyPath == "" {
+		return Changes{change}
+	}
+
+	name, paths, ok := references.of(apiChange.root).At(apiChange.propertyPath)
+	if !ok {
+		return Changes{change}
+	}
+
+	argument := propertyArgument(apiChange)
+	if argument < 0 {
+		// Copies would be identical, so the change is reported once with the
+		// list of properties.
+		return Changes{apiChange.WithSharedSchema(&SharedSchema{Name: name, Properties: paths})}
+	}
+
+	result := make(Changes, 0, len(paths))
+	for _, at := range paths {
+		result = append(result, copyAt(apiChange, argument, name, paths, at))
+	}
+	return result
+}
+
+// referencesByRoot builds the references of each root once, however many
+// changes below it ask.
+type referencesByRoot map[*diff.SchemaDiff]schemawalk.References
+
+func (r referencesByRoot) of(root *diff.SchemaDiff) schemawalk.References {
+	references, ok := r[root]
+	if !ok {
+		references = schemawalk.NewReferences(root)
+		r[root] = references
+	}
+	return references
+}
+
+// propertyArgument is the index of the message argument that names the
+// change's property path, or -1 if no argument does.
+func propertyArgument(change ApiChange) int {
+	return slices.IndexFunc(change.Args, func(arg any) bool { return interfaceToString(arg) == change.propertyPath })
+}
+
+// copyAt returns the change reported at the property path at: the argument
+// that named the original path names at, and the shared schema lists at first.
+func copyAt(change ApiChange, argument int, name string, paths []string, at string) ApiChange {
+	change.Args = slices.Clone(change.Args)
+	change.Args[argument] = at
+	others := slices.DeleteFunc(slices.Clone(paths), func(p string) bool { return p == at })
+	return change.WithSharedSchema(&SharedSchema{Name: name, Properties: append([]string{at}, others...)})
 }
