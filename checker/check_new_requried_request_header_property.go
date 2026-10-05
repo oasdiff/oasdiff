@@ -34,7 +34,7 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 					NewRequiredRequestHeaderPropertyId,
 					[]any{p.name, schemawalk.PropertyFullName(propertyPath, newPropertyName)},
 					"",
-				).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, revisionSource))
+				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, revisionSource))
 			})
 	})
 	return result
