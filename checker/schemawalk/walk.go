@@ -23,8 +23,9 @@ type Walker struct {
 	// first: walking it once per reference would multiply at every level of a
 	// nested spec. NewReferences records the others.
 	seen map[walkVisit]struct{}
-	// arrive is called on every arrival at a schema, the ones the walk does
-	// not continue from included, with the path the arrival took.
+	// arrive is called every time the walk reaches a schema, with the path it
+	// took, including when the schema was already visited and the walk does
+	// not go into it again.
 	arrive func(path string, visit walkVisit)
 }
 

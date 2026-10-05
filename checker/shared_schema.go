@@ -64,14 +64,14 @@ func (s *SharedSchema) detail() string {
 	return "(" + strings.Join(parts, ", ") + ")"
 }
 
-// expandSharedSchemas reports a change in or below a schema several
-// references of its payload reach at each of those references. The walk
-// continued through the first reference only, so the change was found there,
-// and without this the others would be missing. Each copy names the schema
-// and the other properties.
+// expandSharedSchemas handles a schema that several properties of the same
+// payload reference. The walk goes into such a schema only through its first
+// reference, so a change inside it is found only there. This reports the
+// change once at each reference. Each copy names the schema and the other
+// properties.
 //
-// It is the last step to read where a change was computed, so the changes it
-// returns no longer hold on to the diff.
+// It sets schema, root and propertyPath to nil on every change it returns, so
+// the changes no longer keep the diff in memory.
 func expandSharedSchemas(changes Changes) Changes {
 	references := map[*diff.SchemaDiff]schemawalk.References{}
 	result := make(Changes, 0, len(changes))
@@ -99,9 +99,10 @@ func expandSharedSchemas(changes Changes) Changes {
 			continue
 		}
 
-		// The copy for another reference names its property in the argument
-		// that named this one. A message that names no property cannot be
-		// told apart from its copies, so it is reported once, listing them.
+		// Each copy replaces the property path in the message arguments with
+		// its own path. If no argument is the property path, the copies would
+		// be identical, so the change is reported once with the list of
+		// properties.
 		argument := slices.IndexFunc(apiChange.Args, func(arg any) bool { return interfaceToString(arg) == path })
 		if argument < 0 {
 			apiChange.sharedSchema = &SharedSchema{Name: name, Properties: paths}

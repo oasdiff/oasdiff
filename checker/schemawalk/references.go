@@ -7,9 +7,9 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// References are the schemas below a root that more than one reference
-// reaches. A walk continues through the first reference to a schema only, so
-// the others are known from here.
+// References records the schemas below a root that are referenced more than
+// once. The walk goes into such a schema only through its first reference, so
+// this is where the other references are kept.
 type References struct {
 	shared []sharedSchema
 }

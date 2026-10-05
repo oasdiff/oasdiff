@@ -9,11 +9,11 @@ import (
 )
 
 // SharedSchema merges the findings that one check reports, in one operation
-// and payload, for one change in a schema several properties of the payload
-// reference. The checker reports the change at each reference. The finding
-// at the property first in alphabetical order is kept, in the place of the
-// first of its group; it already lists the other properties, and a comment
-// says why they are not reported separately.
+// and payload, for one change in a schema that several properties of the
+// payload reference. The checker reports the change at each reference. This
+// keeps the finding whose property comes first alphabetically, at the position
+// of the group's first finding. That finding already lists the other
+// properties, and a comment explains why they are not reported separately.
 func SharedSchema(changes checker.Changes) checker.Changes {
 	kept := map[string]int{}
 	result := make(checker.Changes, 0, len(changes))

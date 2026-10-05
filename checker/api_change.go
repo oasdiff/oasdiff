@@ -72,10 +72,10 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 	}
 }
 
-// WithSchema returns a copy of the ApiChange that records where it was
-// computed: the schema node, the payload or parameter schema the walk started
-// from, and the property path the change is reported at, empty for a change to
-// the root itself. A later call replaces all three.
+// WithSchema returns a copy of the ApiChange that records the schema diff the
+// change was found in, the root schema the walk started from, and the property
+// path of the change (empty for a change to the root itself). A later call
+// replaces all three.
 func (a ApiChange) WithSchema(root *diff.SchemaDiff, schemaDiff *diff.SchemaDiff, propertyPath string) ApiChange {
 	a.root, a.schema, a.propertyPath = root, schemaDiff, propertyPath
 	return a
