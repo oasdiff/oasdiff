@@ -37,6 +37,12 @@ func enumWithOptions(cmd *cobra.Command, value enumVal, name, shorthand, usage s
 	cmd.PersistentFlags().VarP(value, name, shorthand, usage+": "+value.listOf())
 }
 
+// localEnumWithOptions is enumWithOptions for a flag the command's
+// subcommands must not inherit.
+func localEnumWithOptions(cmd *cobra.Command, value enumVal, name, shorthand, usage string) {
+	cmd.Flags().VarP(value, name, shorthand, usage+": "+value.listOf())
+}
+
 func runChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 
 	level, err := checker.NewLevel(flags.getLevel())

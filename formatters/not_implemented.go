@@ -35,6 +35,10 @@ func (f notImplementedFormatter) RenderChecks(Checks, RenderOpts) ([]byte, error
 	return notImplemented()
 }
 
+func (f notImplementedFormatter) RenderExplain(Explanation, RenderOpts) ([]byte, error) {
+	return notImplemented()
+}
+
 func (f notImplementedFormatter) RenderFlatten(*openapi3.T, RenderOpts) ([]byte, error) {
 	return notImplemented()
 }
