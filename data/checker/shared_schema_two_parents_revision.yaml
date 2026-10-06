@@ -19,7 +19,7 @@ paths:
                     $ref: '#/components/schemas/Second'
                   third:
                     $ref: '#/components/schemas/First'
-                  forth:
+                  fourth:
                     $ref: '#/components/schemas/Second'
 components:
   schemas:
@@ -40,9 +40,4 @@ components:
           type: string
           pattern: '^[0-9]+$'
         extra:
-          type: string
-    Shared1:
-      type: object
-      properties:
-        id:
           type: string

@@ -103,8 +103,8 @@ func TestSharedSchemaUnderTwoParentsIsReportedAtEachReference(t *testing.T) {
 		}
 	}
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"first/shared/extra":  {Name: "Shared", Properties: []string{"first/shared/extra", "second/shared/extra"}},
-		"second/shared/extra": {Name: "Shared", Properties: []string{"second/shared/extra", "first/shared/extra"}},
+		"first/shared/extra":  {Name: "Shared", Properties: []string{"first/shared/extra", "fourth/shared/extra"}},
+		"fourth/shared/extra": {Name: "Shared", Properties: []string{"fourth/shared/extra", "first/shared/extra"}},
 	}, sharedAt(t, inShared))
 }
 

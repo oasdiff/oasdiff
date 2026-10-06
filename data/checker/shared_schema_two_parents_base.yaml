@@ -17,6 +17,10 @@ paths:
                     $ref: '#/components/schemas/First'
                   second:
                     $ref: '#/components/schemas/Second'
+                  third:
+                    $ref: '#/components/schemas/First'
+                  fourth:
+                    $ref: '#/components/schemas/Second'
 components:
   schemas:
     First:
