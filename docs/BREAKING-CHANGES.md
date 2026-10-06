@@ -142,6 +142,8 @@ JSON and YAML output carry the same list and the full count:
 }
 ```
 
+Why one finding: the number of properties a change is at multiplies with each level of nesting. In one large public API description, a single schema is reached from 164,769 properties of one response. A finding per property would make the changelog impossible to read and the comparison slow, so oasdiff reports the change once and counts the rest.
+
 When shared schemas are nested, the finding names the one closest to the change: a change to `id` names `Inner`, and a property added to `Outer` names `Outer`.
 
 The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
