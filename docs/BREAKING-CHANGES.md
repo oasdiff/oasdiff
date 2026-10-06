@@ -142,7 +142,7 @@ JSON and YAML output carry the same list and the full count:
 }
 ```
 
-When shared schemas are nested, the finding names the one closest to the change: a change to `id` names `Inner`, and a property added to `Outer` names `Outer`. A shared schema with no name of its own is not named, and the finding only lists the properties.
+When shared schemas are nested, the finding names the one closest to the change: a change to `id` names `Inner`, and a property added to `Outer` names `Outer`. Some shared schemas have no name, for example one reached through a `$ref` into another schema's properties. The finding then only lists the properties.
 
 The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
 
