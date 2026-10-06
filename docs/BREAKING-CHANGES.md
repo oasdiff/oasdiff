@@ -142,7 +142,7 @@ JSON and YAML output carry the same list and the full count:
 }
 ```
 
-The schema named is the innermost shared schema the change is in or below. In the example above, the change to `id` names `Inner`, although `Outer` is shared too. A property added to `Outer` itself, next to `a` and `b`, names `Outer`, and is at two properties. A change further below a shared schema names the same schema, with the rest of its path appended to each property listed. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
+When shared schemas are nested, the finding names the one closest to the change: a change to `id` names `Inner`, and a property added to `Outer` names `Outer`. A shared schema with no name of its own is not named, and the finding only lists the properties.
 
 The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
 
