@@ -116,7 +116,7 @@ See [Nullability Changes](NULLABILITY.md).
 
 ## Schemas Used in Several Places
 
-A schema referenced from more than one property of the same payload is one schema, so a change in it, or anywhere below it, is one change to the operation's contract. oasdiff reports such a change once per check, at one of the properties that reach it, names the shared schema, and lists the other properties the change is at:
+A schema referenced from more than one property of the same payload is reported once per check, at one of the properties that reach it. The finding names the shared schema and lists the other properties the change is at:
 
 ```
 the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: `Id`, also at `userId`)
@@ -124,9 +124,15 @@ the `customerId` response's property pattern `^[0-9]+$` was added for the status
     those properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```
 
-So `Id` is where to look, and the pattern applies to both `customerId` and `userId`. The same comparison always reports the change at the same property.
+So the change is under `components/schemas/Id` and it affects both properties: `customerId` and `userId`. The same comparison always reports the change at the same property.
 
-The text lists up to three properties and counts the rest, as in `and 4 more`. When shared schemas are nested, the count includes every combination: a change in `Inner`, used twice by `Outer`, which is itself used by two properties of the payload, is at four properties. JSON and YAML output carry the same list and the full count:
+The text lists up to three properties and counts the rest. When shared schemas are nested, every combination counts. Say `Inner` has a property `id`, `Outer` references `Inner` from its properties `a` and `b`, and the payload references `Outer` from its properties `p` and `q`. A pattern added to `id` is at four properties, `p/a/id`, `q/a/id`, `p/b/id` and `q/b/id`:
+
+```
+the `p/a/id` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: `Inner`, also at `q/a/id`, `p/b/id` and 1 more)
+```
+
+JSON and YAML output carry the same list and the full count:
 
 ```json
 "sharedSchema": {
@@ -136,7 +142,7 @@ The text lists up to three properties and counts the rest, as in `and 4 more`. W
 }
 ```
 
-A change deeper inside a shared schema names that schema too, and lists the property paths with the rest of the change's path appended. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
+The schema named is the innermost shared schema the change is in or below. In the example above, the change to `id` names `Inner`, although `Outer` is shared too. A property added to `Outer` itself, next to `a` and `b`, names `Outer`, and is at two properties. A change further below a shared schema names the same schema, with the rest of its path appended to each property listed. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
 
 The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
 
