@@ -127,15 +127,15 @@ func TestChangeBelowASharedSchemaListsTheOtherProperty(t *testing.T) {
 	}, sharedAt(t, changes))
 }
 
-// A schema reached through a JSON pointer into another schema has no
-// components.schemas name, and the walk passes through none on the way to it.
-func TestSharedSchemaWithoutANameListsTheOtherProperty(t *testing.T) {
-	changes := sharedSchemaChanges(t, "shared_schema_unnamed", checker.ResponseOptionalPropertyUpdatedCheck)
+// left and right reference Holder's inner property, so the schema they share
+// is named after Holder, the component it is in.
+func TestSharedSchemaReachedThroughARefIntoAComponentIsNamedAfterIt(t *testing.T) {
+	changes := sharedSchemaChanges(t, "shared_schema_ref_into_component", checker.ResponseOptionalPropertyUpdatedCheck)
 
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"left/extra": {Properties: []string{"left/extra", "right/extra"}, Count: 2},
+		"left/extra": {Name: "Holder", Properties: []string{"left/extra", "right/extra"}, Count: 2},
 	}, sharedAt(t, changes))
-	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(also at `right/extra`)")
+	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: `Holder`, also at `right/extra`)")
 }
 
 // A description beside each $ref to Address makes the parser copy Address

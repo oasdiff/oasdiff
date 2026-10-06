@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: shared schema without a name
+  title: shared schema reached through a $ref into a component
   version: 1.0.0
 paths:
   /example:
