@@ -9,9 +9,9 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// References records the schemas below a root that are referenced more than
-// once. The walk goes into such a schema only through its first reference, so
-// this is where the other references are kept.
+// References records the schemas inside a payload or parameter schema that
+// are referenced more than once. The walk goes into such a schema only through
+// its first reference, so this is where the other references are kept.
 type References struct {
 	shared []sharedSchema
 	// byPath finds a shared schema by the path the walk reached it at first.
@@ -28,7 +28,8 @@ type sharedSchema struct {
 	paths []string
 }
 
-// NewReferences walks root and records the schemas several references reach.
+// NewReferences walks a payload or parameter schema and records the schemas
+// inside it that are referenced more than once.
 func NewReferences(root *diff.SchemaDiff) References {
 	reaches := map[walkVisit][]string{}
 	var order []walkVisit
