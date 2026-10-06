@@ -1550,5 +1550,6 @@ response-property-multiple-of-set: el valor multipleOf de la propiedad de respue
 response-property-multiple-of-set-description: valor multipleOf de la propiedad de respuesta establecido
 shared-schema-comment: "Un cambio en un esquema al que llegan varias propiedades de esta carga se reporta una sola vez por verificación, en una de esas propiedades: es un único cambio del contrato y se aplica en todos los lugares donde se usa el esquema."
 shared-schema-detail-also: "también en %s"
+shared-schema-detail-also-cyclic: "también en %s y más"
 shared-schema-detail-also-more: "también en %s y %d más"
 shared-schema-detail-name: "esquema compartido: %s"

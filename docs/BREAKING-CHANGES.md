@@ -124,18 +124,19 @@ the `customerId` response's property pattern `^[0-9]+$` was added for the status
     those properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```
 
-So `Id` is where to look, and the pattern applies to both `customerId` and `userId`. The change is reported at the property first in alphabetical order, so the same comparison always reports the same one. When there are more, the text names one and counts the rest, as in `and 1 more`, and JSON and YAML output list every one:
+So `Id` is where to look, and the pattern applies to both `customerId` and `userId`. The same comparison always reports the change at the same property.
+
+The text lists up to three properties and counts the rest, as in `and 4 more`. When shared schemas are nested, the count includes every combination: a change in `Inner`, used twice by `Outer`, which is itself used by two properties of the payload, is at four properties. JSON and YAML output carry the same list and the full count:
 
 ```json
 "sharedSchema": {
-  "name": "Id",
-  "properties": ["customerId", "ownerId", "userId"]
+  "name": "Inner",
+  "properties": ["p/a/id", "q/a/id", "p/b/id"],
+  "count": 4
 }
 ```
 
-The list has one entry per reference to the schema. Say `Shared` is referenced from `First.shared` and `Second.shared`, and `First` is itself used by two properties of the payload. A change in `Shared` lists two properties, `first/shared/...` and `second/shared/...`, rather than one per path through `First`. A change in `First` lists `First`'s own uses. Counting references rather than paths keeps the list short: in a deeply nested spec, the number of paths can run to millions.
-
-A change deeper inside a shared schema names that schema too, and lists the same property paths with the rest of the change's path appended. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
+A change deeper inside a shared schema names that schema too, and lists the property paths with the rest of the change's path appended. A shared schema written inline is named after the component it belongs to. Where the paths reach it through no component, as with a `$ref` to a schema inside a component, the change lists the other properties without a name.
 
 The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
 
@@ -144,14 +145,6 @@ Three things stay separate, and each still gets its own line:
 - **Each check.** Every check reports on its own, so a shared schema that both added a property and gained a `pattern` produces one `response-optional-property-added` and one `response-property-pattern-added`.
 - **Each change.** Two properties added to the same shared schema are two changes, both reported at the same property.
 - **Each operation.** An operation is a separate contract, so an operation that reaches the same changed schema reports it too.
-
-### In Go
-
-`checker.CheckBackwardCompatibility` reports the change at every property, each finding carrying the same `SharedSchema`. The `consolidate` package merges them the way the command line does:
-
-```go
-changes := consolidate.Changes(checker.CheckBackwardCompatibility(config, diffReport, operationsSources), consolidate.SharedSchema)
-```
 
 ## Ignoring Specific Breaking Changes
 Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  

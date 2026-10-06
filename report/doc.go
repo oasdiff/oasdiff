@@ -10,7 +10,7 @@ Note: This is a legacy package that predates the richer changelog functionality.
 For full changelog with breaking change detection, localization, and multiple output
 formats, use the checker package with formatters instead:
 
-	changes := consolidate.Changes(checker.CheckBackwardCompatibility(config, diffReport, operationsSources), consolidate.SharedSchema)
+	changes := checker.CheckBackwardCompatibility(config, diffReport, operationsSources)
 	formatter, _ := formatters.Lookup("text", formatters.FormatterOpts{})
 	output, _ := formatter.RenderChangelog(changes, formatters.RenderOpts{})
 

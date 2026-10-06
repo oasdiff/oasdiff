@@ -1561,5 +1561,6 @@ response-property-multiple-of-set: the %s response property's multipleOf was set
 response-property-multiple-of-set-description: response property multipleOf set
 shared-schema-comment: "A change in a schema that several properties of this payload reach is reported once per check, at one of those properties: it is a single change to the contract, and it applies wherever the schema is used."
 shared-schema-detail-also: "also at %s"
+shared-schema-detail-also-cyclic: "also at %s and more"
 shared-schema-detail-also-more: "also at %s and %d more"
 shared-schema-detail-name: "shared schema: %s"

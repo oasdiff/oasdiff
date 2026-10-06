@@ -32,8 +32,8 @@ type ApiChange struct {
 	schema *diff.SchemaDiff
 	// root is the payload or parameter schema the walk started from, and
 	// propertyPath the path from it the change is reported at, kept so that a
-	// change below a schema several references reach is reported at each of
-	// them (see expandSharedSchemas).
+	// change below a schema several properties reach can list the others (see
+	// attachSharedSchemas).
 	root         *diff.SchemaDiff
 	propertyPath string
 

@@ -30,19 +30,19 @@ func sharedAt(t *testing.T, changes checker.Changes) map[string]*checker.SharedS
 	for _, change := range changes {
 		apiChange := change.(checker.ApiChange)
 		require.NotNil(t, apiChange.GetSharedSchema(), "%s at %v has no shared schema", apiChange.Id, apiChange.Args)
+		require.NotContains(t, result, apiChange.GetSharedSchema().Properties[0])
 		result[apiChange.GetSharedSchema().Properties[0]] = apiChange.GetSharedSchema()
 	}
 	return result
 }
 
-// The walk reaches Shared through left only, and the change is reported at
-// right too, each naming the other.
-func TestSharedSchemaChangeIsReportedAtEachReference(t *testing.T) {
+// The walk reaches Shared through left only, so the change is reported at
+// left, naming right as well.
+func TestSharedSchemaChangeListsTheOtherProperty(t *testing.T) {
 	changes := sharedSchemaChanges(t, "shared_schema", checker.ResponseOptionalPropertyUpdatedCheck)
 
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"left/extra":  {Name: "Shared", Properties: []string{"left/extra", "right/extra"}},
-		"right/extra": {Name: "Shared", Properties: []string{"right/extra", "left/extra"}},
+		"left/extra": {Name: "Shared", Properties: []string{"left/extra", "right/extra"}, Count: 2},
 	}, sharedAt(t, changes))
 	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: `Shared`, also at `right/extra`)")
 }
@@ -63,7 +63,7 @@ func TestSharedSchemaDetailIsLocalized(t *testing.T) {
 	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("es")), "(esquema compartido: `Shared`, también en `right/extra`)")
 }
 
-// The copies come out in the same order on every run.
+// The properties come out in the same order on every run.
 func TestSharedSchemaChangeOrderIsStable(t *testing.T) {
 	first := sharedSchemaChanges(t, "shared_schema", checker.ResponseOptionalPropertyUpdatedCheck)
 	for range 30 {
@@ -72,28 +72,27 @@ func TestSharedSchemaChangeOrderIsStable(t *testing.T) {
 }
 
 // userId and customerId mean different things but share Id, so a pattern
-// added to Id is reported at both: one property of a schema referenced from
-// the same parent twice is not left out.
-func TestSharedSchemaChangeIsReportedAtEachPropertyOfOneParent(t *testing.T) {
+// added to Id names both: one property of a schema referenced from the same
+// parent twice is not left out. Each operation reports it once.
+func TestSharedSchemaChangeListsEachPropertyOfOneParent(t *testing.T) {
 	changes := sharedSchemaChanges(t, "shared_schema_two_properties", checker.ResponsePatternAddedOrChangedCheck)
 
-	operations := map[string][]string{}
+	operations := map[string]*checker.SharedSchema{}
 	for _, change := range changes {
-		shared := change.(checker.ApiChange).GetSharedSchema()
-		require.NotNil(t, shared)
-		operations[change.GetPath()] = append(operations[change.GetPath()], shared.Properties[0])
+		require.NotContains(t, operations, change.GetPath())
+		operations[change.GetPath()] = change.(checker.ApiChange).GetSharedSchema()
 	}
-	require.Equal(t, map[string][]string{
-		"/orders":   {"customerId", "userId"},
-		"/accounts": {"customerId", "ownerId", "userId"},
+	require.Equal(t, map[string]*checker.SharedSchema{
+		"/orders":   {Name: "Id", Properties: []string{"customerId", "userId"}, Count: 2},
+		"/accounts": {Name: "Id", Properties: []string{"customerId", "ownerId", "userId"}, Count: 3},
 	}, operations)
 }
 
 // Shared is reached through First and Second, which are different parents,
-// and each of those through two properties of the payload. The list has one
-// entry per reference to Shared, so the paths through the second use of
-// First and of Second are not repeated.
-func TestSharedSchemaUnderTwoParentsIsReportedAtEachReference(t *testing.T) {
+// and each of those through two properties of the payload, so the change is at
+// four properties. The first three are listed, and the count includes the
+// fourth.
+func TestSharedSchemaUnderTwoParentsCountsEveryProperty(t *testing.T) {
 	changes := sharedSchemaChanges(t, "shared_schema_two_parents", checker.ResponseOptionalPropertyUpdatedCheck)
 
 	inShared := checker.Changes{}
@@ -103,30 +102,38 @@ func TestSharedSchemaUnderTwoParentsIsReportedAtEachReference(t *testing.T) {
 		}
 	}
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"first/shared/extra":  {Name: "Shared", Properties: []string{"first/shared/extra", "fourth/shared/extra"}},
-		"fourth/shared/extra": {Name: "Shared", Properties: []string{"fourth/shared/extra", "first/shared/extra"}},
+		"first/shared/extra": {Name: "Shared", Properties: []string{"first/shared/extra", "third/shared/extra", "fourth/shared/extra"}, Count: 4},
 	}, sharedAt(t, inShared))
+	require.Contains(t, inShared[0].GetUncolorizedText(checker.NewLocalizer("en")), "(shared schema: `Shared`, also at `third/shared/extra`, `fourth/shared/extra` and 1 more)")
 }
 
-// A change below the shared schema, not in it, is reported at each reference
+// Inner is shared inside Outer, which is itself shared, so the change is at
+// every combination of the two: p/a, q/a, p/b and q/b.
+func TestNestedSharedSchemaCountsEveryProperty(t *testing.T) {
+	changes := sharedSchemaChanges(t, "shared_schema_nested", checker.ResponsePatternAddedOrChangedCheck)
+
+	require.Equal(t, map[string]*checker.SharedSchema{
+		"p/a/id": {Name: "Inner", Properties: []string{"p/a/id", "q/a/id", "p/b/id"}, Count: 4},
+	}, sharedAt(t, changes))
+}
+
+// A change below the shared schema, not in it, lists the other properties
 // too, with the rest of its path appended.
-func TestChangeBelowASharedSchemaIsReportedAtEachReference(t *testing.T) {
+func TestChangeBelowASharedSchemaListsTheOtherProperty(t *testing.T) {
 	changes := sharedSchemaChanges(t, "shared_schema_inner_change", checker.ResponsePropertyTypeChangedCheck)
 
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"left/id":  {Name: "Shared", Properties: []string{"left/id", "right/id"}},
-		"right/id": {Name: "Shared", Properties: []string{"right/id", "left/id"}},
+		"left/id": {Name: "Shared", Properties: []string{"left/id", "right/id"}, Count: 2},
 	}, sharedAt(t, changes))
 }
 
 // A schema reached through a JSON pointer into another schema has no
 // components.schemas name, and the walk passes through none on the way to it.
-func TestSharedSchemaWithoutANameIsReportedAtEachReference(t *testing.T) {
+func TestSharedSchemaWithoutANameListsTheOtherProperty(t *testing.T) {
 	changes := sharedSchemaChanges(t, "shared_schema_unnamed", checker.ResponseOptionalPropertyUpdatedCheck)
 
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"left/extra":  {Properties: []string{"left/extra", "right/extra"}},
-		"right/extra": {Properties: []string{"right/extra", "left/extra"}},
+		"left/extra": {Properties: []string{"left/extra", "right/extra"}, Count: 2},
 	}, sharedAt(t, changes))
 	require.Contains(t, changes[0].GetUncolorizedText(checker.NewLocalizer("en")), "(also at `right/extra`)")
 }
@@ -138,8 +145,7 @@ func TestSharedSchemaWrittenInlineIsNamedAfterItsComponent(t *testing.T) {
 	changes := sharedSchemaChanges(t, "shared_schema_override", checker.ResponsePatternAddedOrChangedCheck)
 
 	require.Equal(t, map[string]*checker.SharedSchema{
-		"billing/zip":  {Name: "Address", Properties: []string{"billing/zip", "shipping/zip"}},
-		"shipping/zip": {Name: "Address", Properties: []string{"shipping/zip", "billing/zip"}},
+		"billing/zip": {Name: "Address", Properties: []string{"billing/zip", "shipping/zip"}, Count: 2},
 	}, sharedAt(t, changes))
 }
 
