@@ -133,23 +133,33 @@ func (r References) enclosing(path string, strict bool) *sharedSchema {
 // cycle there is no end to them, so a caller stops when it has enough.
 func (r References) pathsAt(path string, strict bool) iter.Seq[string] {
 	return func(yield func(string) bool) {
-		s := r.enclosing(path, strict)
-		if s == nil {
-			yield(path)
-			return
-		}
-		below := strings.TrimPrefix(strings.TrimPrefix(path, s.paths[0]), "/")
-		for _, reference := range s.paths {
-			for at := range r.pathsAt(reference, true) {
-				if below != "" {
-					at = PropertyFullName(at, below)
-				}
-				if !yield(at) {
-					return
-				}
-			}
+		r.yieldPathsAt(path, strict, "", yield)
+	}
+}
+
+// yieldPathsAt yields every path that path stands for, followed by below. It
+// returns false once yield does. It passes yield down rather than ranging over
+// a nested iterator, so each path goes to the caller in one call however deep
+// the shared schemas nest.
+func (r References) yieldPathsAt(path string, strict bool, below string, yield func(string) bool) bool {
+	s := r.enclosing(path, strict)
+	if s == nil {
+		return yield(joinPath(path, below))
+	}
+	below = joinPath(strings.TrimPrefix(strings.TrimPrefix(path, s.paths[0]), "/"), below)
+	for _, reference := range s.paths {
+		if !r.yieldPathsAt(reference, true, below, yield) {
+			return false
 		}
 	}
+	return true
+}
+
+func joinPath(path, below string) string {
+	if below == "" {
+		return path
+	}
+	return PropertyFullName(path, below)
 }
 
 type counted struct {
