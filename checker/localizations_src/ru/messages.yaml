@@ -254,6 +254,11 @@ api-security-component-removed: компонент схемы безопасно
 api-security-component-oauth-scope-added: добавлено разрешение OAuth %s для компонента схемы безопасности %s
 api-security-component-oauth-scope-removed: удалено разрешение OAuth %s для компонента схемы безопасности %s
 api-security-component-oauth-scope-changed: разрешение OAuth %s для компонента схемы безопасности %s было обновлено с %s на %s
+api-security-component-api-key-name-changed: имя API-ключа компонента схемы безопасности %s было изменено с %s на %s
+api-security-component-api-key-in-changed: расположение API-ключа компонента схемы безопасности %s было изменено с %s на %s
+api-security-component-http-scheme-changed: http схема компонента схемы безопасности %s была изменена с %s на %s
+api-security-component-bearer-format-changed: формат bearer компонента схемы безопасности %s был изменен с %s на %s
+api-security-component-openid-connect-url-changed: URL OpenID Connect компонента схемы безопасности %s был изменен с %s на %s
 response-optional-property-added: добавлено необязательное свойство %s в ответе со статусом %s
 response-optional-write-only-property-added: добавлено необязательное свойство только для записи %s в ответе со статусом %s
 response-optional-write-only-property-removed: удалено необязательное свойство только для записи %s из ответа со статусом %s
@@ -382,11 +387,16 @@ api-removed-without-deprecation-description: эндпоинт удален бе�
 api-schema-removed-description: схема удалена из components/schemas
 api-security-added-description: требования безопасности добавлены к эндпоинту
 api-security-component-added-description: схема безопасности добавлена в components/securitySchemes
+api-security-component-api-key-in-changed-description: расположение (in) API-ключа изменено в components/securitySchemes
+api-security-component-api-key-name-changed-description: имя API-ключа изменено в components/securitySchemes
+api-security-component-bearer-format-changed-description: формат bearer изменен в components/securitySchemes
+api-security-component-http-scheme-changed-description: схема http-аутентификации изменена в components/securitySchemes
 api-security-component-oauth-scope-added-description: разрешение добавлено к OAuth потоку в components/securitySchemes
 api-security-component-oauth-scope-changed-description: разрешение изменено в OAuth потоке в components/securitySchemes
 api-security-component-oauth-scope-removed-description: разрешение удалено из OAuth потока в components/securitySchemes
 api-security-component-oauth-token-url-changed-description: URL токена изменен в OAuth потоке в components/securitySchemes
 api-security-component-oauth-url-changed-description: URL аутентификации изменен в OAuth потоке в components/securitySchemes
+api-security-component-openid-connect-url-changed-description: URL OpenID Connect изменен в components/securitySchemes
 api-security-component-removed-description: схема безопасности удалена в components/securitySchemes
 api-security-component-type-changed-description: тип схемы безопасности изменен в components/securitySchemes
 api-security-removed-description: требования безопасности удалены из эндпоинта

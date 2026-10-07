@@ -280,6 +280,11 @@ api-security-component-removed: el esquema de seguridad %s fue removido
 api-security-component-oauth-scope-added: el alcance OAuth %s fue agregado al esquema de seguridad %s
 api-security-component-oauth-scope-removed: el alcance OAuth %s fue removido del esquema de seguridad %s
 api-security-component-oauth-scope-changed: el alcance OAuth %s del esquema de seguridad %s fue actualizado de %s a %s
+api-security-component-api-key-name-changed: el nombre de la clave API del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-api-key-in-changed: la ubicación de la clave API del esquema de seguridad %s fue cambiada de %s a %s
+api-security-component-http-scheme-changed: el esquema http del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-bearer-format-changed: el formato bearer del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-openid-connect-url-changed: la URL de OpenID Connect del esquema de seguridad %s fue cambiada de %s a %s
 response-optional-property-added: agregada la propiedad opcional %s a la respuesta con estado %s
 response-optional-write-only-property-added: agregada la propiedad opcional de solo escritura %s a la respuesta con estado %s
 response-optional-write-only-property-removed: removida la propiedad opcional de solo escritura %s de la respuesta con estado %s
@@ -399,11 +404,16 @@ api-removed-without-deprecation-description: endpoint removido sin deprecación
 api-schema-removed-description: esquema removido de components/schemas
 api-security-added-description: requisitos de seguridad agregados al endpoint
 api-security-component-added-description: esquema de seguridad agregado en components/securitySchemes
+api-security-component-api-key-in-changed-description: ubicación (in) de la clave API modificada en components/securitySchemes
+api-security-component-api-key-name-changed-description: nombre de la clave API modificado en components/securitySchemes
+api-security-component-bearer-format-changed-description: formato bearer modificado en components/securitySchemes
+api-security-component-http-scheme-changed-description: esquema de autenticación http modificado en components/securitySchemes
 api-security-component-oauth-scope-added-description: alcance agregado al flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-changed-description: alcance modificado en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-removed-description: alcance removido del flujo OAuth en components/securitySchemes
 api-security-component-oauth-token-url-changed-description: url del token modificada en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-url-changed-description: url de autorización modificada en el flujo OAuth en components/securitySchemes
+api-security-component-openid-connect-url-changed-description: URL de OpenID Connect modificada en components/securitySchemes
 api-security-component-removed-description: esquema de seguridad removido en components/securitySchemes
 api-security-component-type-changed-description: tipo del esquema de seguridad modificado en components/securitySchemes
 api-security-removed-description: requisitos de seguridad removidos del endpoint
