@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info: {title: t, version: '1'}
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      parameters:
+        - name: status
+          in: query
+          schema: {type: string, enum: [available, sold]}
+        - name: filter
+          in: query
+          style: deepObject
+          explode: true
+          schema:
+            type: object
+            properties:
+              origin: {type: string, enum: [shelter, breeder]}
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: createPet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: {type: string, enum: [available, sold]}
+                kind: {type: string, readOnly: true, enum: [cat, dog]}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string, enum: [available, sold]}
+                  secret: {type: string, writeOnly: true, enum: [a, b]}
+  /mode:
+    put:
+      operationId: setMode
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema: {type: string, enum: [fast, slow]}
+      responses:
+        '200':
+          description: ok
+          content:
+            text/plain:
+              schema: {type: string, enum: [fast, slow]}

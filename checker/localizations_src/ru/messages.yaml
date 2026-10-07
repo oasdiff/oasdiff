@@ -58,7 +58,10 @@ request-body-became-required: тело запроса стало обязате�
 request-body-became-optional: тело запроса стало необязательным
 request-body-became-enum: тело запроса было ограничено списком значений перечисления
 request-body-enum-value-removed: значение перечисления тела запроса удалено %s
+request-body-enum-removed: удалено ограничение enum тела запроса
 response-mediatype-enum-value-removed: значение перечисления схемы ответа %s удалено %s
+response-mediatype-enum-removed: удалено ограничение enum схемы ответа %s для статуса ответа %s
+response-mediatype-enum-removed-comment: Сервер теперь может вернуть любое значение типа схемы, включая значения, которые исключал прежний enum, поэтому клиент, написанный по нему, может не обработать ответ.
 request-header-property-became-required: в заголовке запроса %s поле %s стало обязательным
 request-header-property-became-enum: свойство %s заголовка запроса %s было ограничено списком значений перечисления
 request-parameter-became-required: ранее необязательный %s параметр запроса %s стал обязательным
@@ -70,8 +73,10 @@ request-parameter-property-became-nullable: свойство %s параметр
 request-parameter-property-became-not-nullable: свойство %s параметра запроса %s %s стало необнуляемым
 request-parameter-enum-value-removed: удалено значение enum %s у %s параметра запроса %s
 request-parameter-enum-value-added: добавлено значение enum %s у %s параметра запроса %s
+request-parameter-enum-removed: удалено ограничение enum у %s параметра запроса %s
 request-parameter-property-enum-value-removed: удалено значение enum %s из свойства %s %s параметра запроса %s
 request-parameter-property-enum-value-added: добавлено значение enum %s в свойство %s %s параметра запроса %s
+request-parameter-property-enum-removed: удалено ограничение enum из свойства %s %s параметра запроса %s
 pattern-changed-warn-comment: Это предупреждение, потому что сложно автоматически проанализировать, является ли новый шаблон надмножеством предыдущего шаблона (например, изменен с '[0-9]+' на '[0-9]*').
 request-parameter-x-extensible-enum-value-removed: удалено из x-extensible-enum значение %s у %s параметра запроса %s
 pattern-added-error-comment: Это критическое изменение, потому что добавление ограничения шаблона к ранее неограниченному параметру отклонит значения, которые ранее принимались, сломав существующих клиентов
@@ -119,6 +124,7 @@ request-property-became-enum: свойство запроса %s было огр
 request-property-enum-value-removed: удалено enum значение %s у поля запроса %s
 request-read-only-property-enum-value-removed: удалено enum значение %s из поля запроса только для чтения %s
 request-property-enum-value-added: добавлено enum значение %s у поля запроса %s
+request-property-enum-removed: удалено ограничение enum у поля запроса %s
 request-body-min-length-increased: минимальная длина тела запроса была увеличена с %s до %s
 request-property-min-length-increased: минимальная длина свойства запроса %s была увеличена с %s до %s
 request-body-min-length-decreased: минимальная длина тела запроса была уменьшена с %s до %s
@@ -190,6 +196,9 @@ response-body-became-not-nullable: тело ответа стало необну
 response-property-enum-value-added: добавлено новое enum значение %s в поле ответа %s для ответа со статусом %s
 response-property-enum-value-added-comment: Сервер теперь может вернуть значение, которое исключал прежний контракт, поэтому клиент, написанный по нему, может не обработать ответ. Если набор значений предполагает расширение, объявите его через x-extensible-enum.
 response-property-enum-value-removed: удалено значение перечисления %s из свойства ответа %s для статуса ответа %s.
+response-property-enum-removed: удалено ограничение enum из свойства ответа %s для статуса ответа %s
+response-property-enum-removed-comment: Сервер теперь может вернуть любое значение типа свойства, включая значения, которые исключал прежний enum, поэтому клиент, написанный по нему, может не обработать ответ.
+response-property-became-enum: свойство ответа %s для статуса ответа %s было ограничено списком значений перечисления
 response-body-max-length-increased: у тела ответа maxLength увеличен с %s до %s
 response-property-max-length-increased: у поля ответа %s maxLength увеличен с %s до %s для ответа со статусом %s
 response-body-max-length-unset: у тела ответа maxLength был удалён, предыдущее значение - %s
@@ -440,6 +449,7 @@ request-body-discriminator-mapping-deleted-description: удалено сопо�
 request-body-discriminator-property-name-changed-description: изменено имя свойства дискриминатора тела запроса
 request-body-discriminator-removed-description: удален дискриминатор тела запроса
 request-body-enum-value-removed-description: удалено enum значение тела запроса
+request-body-enum-removed-description: удалено enum тела запроса
 request-body-max-decreased-description: уменьшено максимальное значение тела запроса
 request-body-max-increased-description: увеличено максимальное значение тела запроса
 request-body-max-length-decreased-description: уменьшена максимальная длина тела запроса
@@ -486,8 +496,10 @@ request-parameter-default-value-removed-description: удалено значен
 request-parameter-deprecated-sunset-missing: "%s параметр запроса %s объявлен устаревшим без даты прекращения действия"
 request-parameter-deprecated: "%s параметр запроса %s объявлен устаревшим"
 request-parameter-enum-value-added-description: добавлено enum значение параметра запроса
+request-parameter-enum-removed-description: удалено enum параметра запроса
 request-parameter-enum-value-removed-description: удалено enum значение параметра запроса
 request-parameter-property-enum-value-added-description: добавлено enum значение свойства параметра запроса
+request-parameter-property-enum-removed-description: удалено enum свойства параметра запроса
 request-parameter-property-enum-value-removed-description: удалено enum значение свойства параметра запроса
 request-parameter-max-decreased-description: уменьшено максимальное значение параметра запроса
 request-parameter-max-increased-description: увеличено максимальное значение параметра запроса
@@ -544,6 +556,7 @@ request-property-discriminator-mapping-deleted-description: удалено со�
 request-property-discriminator-property-name-changed-description: изменено имя свойства дискриминатора свойства запроса
 request-property-discriminator-removed-description: удален дискриминатор свойства запроса
 request-property-enum-value-added-description: добавлено enum значение свойства запроса
+request-property-enum-removed-description: удалено enum свойства запроса
 request-property-enum-value-removed-description: удалено enum значение свойства запроса
 request-property-max-decreased-description: уменьшено максимальное значение свойства запроса
 request-property-max-increased-description: увеличено максимальное значение свойства запроса
@@ -618,6 +631,7 @@ response-media-type-name-generalized: медиа-тип %s изменен на �
 response-media-type-name-specialized: медиа-тип %s изменен на более специфичный медиа-тип %s для ответа со статусом %s
 response-media-type-removed-description: удален медиа-тип ответа
 response-mediatype-enum-value-removed-description: удалено enum значение медиа-типа ответа
+response-mediatype-enum-removed-description: удалено enum медиа-типа ответа
 response-non-success-status-added-description: добавлен статус неуспешного ответа
 response-non-success-status-removed-description: удален статус неуспешного ответа
 response-optional-property-added-description: добавлено необязательное свойство ответа
@@ -646,6 +660,8 @@ response-property-discriminator-property-name-changed-description: измене�
 response-property-discriminator-removed-description: удален дискриминатор свойства ответа
 response-property-enum-value-added-description: добавлено enum значение свойства ответа
 response-property-enum-value-removed-description: удалено enum значение свойства ответа
+response-property-enum-removed-description: удалено enum свойства ответа
+response-property-became-enum-description: свойство ответа ограничено enum
 response-property-max-increased-description: увеличено максимальное значение свойства ответа
 response-property-max-length-increased-description: увеличена максимальная длина свойства ответа
 response-property-max-length-unset-description: удалена максимальная длина свойства ответа

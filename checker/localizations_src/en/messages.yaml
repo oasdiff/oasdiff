@@ -71,7 +71,10 @@ request-body-became-required: request body became required
 request-body-became-optional: request body became optional
 request-body-became-enum: request body was restricted to a list of enum values
 request-body-enum-value-removed: request body enum value removed %s
+request-body-enum-removed: removed the enum constraint from the request body
 response-mediatype-enum-value-removed: response schema %s enum value removed %s
+response-mediatype-enum-removed: removed the enum constraint from the response schema %s for the response status %s
+response-mediatype-enum-removed-comment: The server may now return any value of the schema's type, including values the previous enum excluded, so a client written against it may not handle the response.
 request-header-property-became-required: the %s request header's property %s became required
 request-header-property-became-enum: the %s request header's property %s was restricted to a list of enum values
 request-parameter-became-required: the %s request parameter %s became required
@@ -83,8 +86,10 @@ request-parameter-property-became-nullable: the %s property of the %s request pa
 request-parameter-property-became-not-nullable: the %s property of the %s request parameter %s became not nullable
 request-parameter-enum-value-removed: removed the enum value %s from the %s request parameter %s
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
+request-parameter-enum-removed: removed the enum constraint from the %s request parameter %s
 request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
 request-parameter-property-enum-value-added: added the enum value %s to the property %s of the %s request parameter %s
+request-parameter-property-enum-removed: removed the enum constraint from the property %s of the %s request parameter %s
 pattern-changed-warn-comment: "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')"
 pattern-added-error-comment: "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients"
 request-parameter-x-extensible-enum-value-removed: removed the x-extensible-enum value %s from the %s request parameter %s
@@ -132,6 +137,7 @@ request-property-became-enum: request property %s was restricted to a list of en
 request-property-enum-value-removed: removed the enum value %s of the request property %s
 request-read-only-property-enum-value-removed: removed the enum value %s of the request read-only property %s
 request-property-enum-value-added: added the new %s enum value to the request property %s
+request-property-enum-removed: removed the enum constraint from the request property %s
 request-body-max-decreased: the request's body max was decreased to %s
 request-property-max-decreased: the %s request property's max was decreased to %s
 request-read-only-property-max-decreased: the %s request read-only property's max was decreased to %s
@@ -207,6 +213,9 @@ response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
 response-property-enum-value-added-comment: The server may now return a value the previous contract excluded, so a client written against it may not handle the response. If the value set is meant to grow, declare it with x-extensible-enum.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
+response-property-enum-removed: removed the enum constraint from the %s response property for the response status %s
+response-property-enum-removed-comment: The server may now return any value of the property's type, including values the previous enum excluded, so a client written against it may not handle the response.
+response-property-became-enum: the %s response property for the response status %s was restricted to a list of enum values
 response-body-max-length-increased: the response's body maxLength was increased from %s to %s
 response-property-max-length-increased: the %s response property's maxLength was increased from %s to %s for the response status %s
 response-body-max-length-unset: the response's body maxLength was unset from %s
@@ -450,6 +459,7 @@ request-body-discriminator-mapping-deleted-description: request body discriminat
 request-body-discriminator-property-name-changed-description: request body discriminator property name changed
 request-body-discriminator-removed-description: request body discriminator deleted
 request-body-enum-value-removed-description: request body enum value deleted
+request-body-enum-removed-description: request body enum removed
 request-body-max-decreased-description: request body max decreased
 request-body-max-increased-description: request body max increased
 request-body-max-length-decreased-description: request body max length decreased
@@ -492,8 +502,10 @@ request-parameter-default-value-added-description: request parameter default val
 request-parameter-default-value-changed-description: request parameter default value changed
 request-parameter-default-value-removed-description:  request parameter default value unset
 request-parameter-enum-value-added-description: request parameter enum value added
+request-parameter-enum-removed-description: request parameter enum removed
 request-parameter-enum-value-removed-description: request parameter enum value deleted
 request-parameter-property-enum-value-added-description: request parameter property enum value added
+request-parameter-property-enum-removed-description: request parameter property enum removed
 request-parameter-property-enum-value-removed-description: request parameter property enum value removed
 request-parameter-max-decreased-description: request parameter max decreased
 request-parameter-max-increased-description: request parameter max increased
@@ -545,6 +557,7 @@ request-property-discriminator-mapping-deleted-description: request property dis
 request-property-discriminator-property-name-changed-description: request property discriminator property name changed
 request-property-discriminator-removed-description: request property discriminator removed
 request-property-enum-value-added-description: request property enum value added
+request-property-enum-removed-description: request property enum removed
 request-property-enum-value-removed-description: request property enum value removed
 request-read-only-property-enum-value-removed-description: request read-only property enum value removed
 request-property-max-decreased-description: request property max decreased
@@ -612,6 +625,7 @@ response-header-became-optional-description: response header became optional
 response-media-type-added-description: response media type added
 response-media-type-removed-description: response media type removed
 response-mediatype-enum-value-removed-description: response mediatype enum value removed
+response-mediatype-enum-removed-description: response mediatype enum removed
 response-non-success-status-added-description: response non-success status added
 response-non-success-status-removed-description: response non-success status removed
 response-optional-property-added-description: response optional property added
@@ -643,6 +657,8 @@ response-property-discriminator-property-name-changed-description: response prop
 response-property-discriminator-removed-description: response property discriminator removed
 response-property-enum-value-added-description: response property enum value added
 response-property-enum-value-removed-description: response property enum value removed
+response-property-enum-removed-description: response property enum removed
+response-property-became-enum-description: response property restricted to enum
 response-property-max-increased-description: response property max increased
 response-property-max-length-increased-description: response property max length increased
 response-property-max-length-unset-description: response property max length unset

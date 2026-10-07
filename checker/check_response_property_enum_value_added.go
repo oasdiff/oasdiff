@@ -19,7 +19,7 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
 			enumDiff := p.propertyDiff.EnumDiff
-			if enumDiff == nil || enumDiff.Added == nil {
+			if enumDiff == nil || enumDiff.Added == nil || enumAdded(p.propertyDiff) {
 				return
 			}
 

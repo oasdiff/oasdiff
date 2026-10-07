@@ -16,7 +16,7 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		enumDiff := info.schemaDiff.EnumDiff
-		if enumDiff == nil || enumDiff.Deleted == nil {
+		if enumDiff == nil || enumDiff.Deleted == nil || enumRemoved(info.schemaDiff) {
 			return
 		}
 		for _, enumVal := range enumDiff.Deleted {

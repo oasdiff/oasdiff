@@ -59,7 +59,10 @@ request-body-became-required: o corpo da requisição tornou-se obrigatório
 request-body-became-optional: o corpo da requisição tornou-se opcional
 request-body-became-enum: o corpo da requisição foi restrito a uma lista de valores enum
 request-body-enum-value-removed: valor %s do enum removido do corpo da requisição
+request-body-enum-removed: restrição enum removida do corpo da requisição
 response-mediatype-enum-value-removed: valor %s do enum removido do esquema de resposta %s
+response-mediatype-enum-removed: restrição enum removida do esquema de resposta %s para o status %s
+response-mediatype-enum-removed-comment: O servidor agora pode retornar qualquer valor do tipo do esquema, incluindo valores que o enum anterior excluía, portanto um cliente escrito com base nele pode não tratar a resposta.
 request-header-property-became-required: a propriedade %s do cabeçalho de requisição %s tornou-se obrigatória
 request-header-property-became-enum: a propriedade %s do cabeçalho de requisição %s foi restrita a uma lista de valores enum
 request-parameter-became-required: o parâmetro de requisição do tipo %s e nome %s tornou-se obrigatório
@@ -71,8 +74,10 @@ request-parameter-property-became-nullable: a propriedade %s do parâmetro de re
 request-parameter-property-became-not-nullable: a propriedade %s do parâmetro de requisição %s %s tornou-se não anulável
 request-parameter-enum-value-removed: valor %s do enum removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-enum-value-added: valor %s do enum adicionado ao parâmetro de requisição do tipo %s e nome %s
+request-parameter-enum-removed: restrição enum removida do parâmetro de requisição do tipo %s e nome %s
 request-parameter-property-enum-value-removed: valor %s do enum removido da propriedade %s do parâmetro de requisição do tipo %s e nome %s
 request-parameter-property-enum-value-added: valor %s do enum adicionado à propriedade %s do parâmetro de requisição do tipo %s e nome %s
+request-parameter-property-enum-removed: restrição enum removida da propriedade %s do parâmetro de requisição do tipo %s e nome %s
 pattern-changed-warn-comment: "Este é um aviso porque é difícil analisar automaticamente se o novo padrão é um superconjunto do padrão anterior (por exemplo, alterado de '[0-9]+' para '[0-9]*')"
 pattern-added-error-comment: "Esta é uma alteração crítica porque adicionar uma restrição de padrão a um parâmetro anteriormente irrestrito rejeitará valores que eram aceitos anteriormente, quebrando clientes existentes"
 request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição do tipo %s e nome %s
@@ -126,6 +131,7 @@ request-property-became-enum: a propriedade de requisição %s foi restrita a um
 request-property-enum-value-removed: valor %s do enum removido da propriedade de requisição %s
 request-read-only-property-enum-value-removed: valor %s do enum removido da propriedade de requisição somente leitura %s
 request-property-enum-value-added: valor %s do enum adicionado à propriedade de requisição %s
+request-property-enum-removed: restrição enum removida da propriedade de requisição %s
 request-body-max-decreased: o valor máximo do corpo da requisição foi reduzido para %s
 request-property-max-decreased: o valor máximo da propriedade de requisição %s foi reduzido para %s
 request-read-only-property-max-decreased: o valor máximo da propriedade de requisição somente leitura %s foi reduzido para %s
@@ -197,6 +203,9 @@ response-body-became-not-nullable: o corpo da resposta tornou-se não anulável
 response-property-enum-value-added: o novo valor %s do enum foi adicionado à propriedade de resposta %s para o status %s
 response-property-enum-value-added-comment: O servidor agora pode retornar um valor que o contrato anterior excluía, portanto um cliente escrito com base nele pode não tratar a resposta. Se o conjunto de valores deve crescer, declare-o com x-extensible-enum.
 response-property-enum-value-removed: o valor %s do enum foi removido da propriedade de resposta %s para o status %s
+response-property-enum-removed: restrição enum removida da propriedade de resposta %s para o status %s
+response-property-enum-removed-comment: O servidor agora pode retornar qualquer valor do tipo da propriedade, incluindo valores que o enum anterior excluía, portanto um cliente escrito com base nele pode não tratar a resposta.
+response-property-became-enum: a propriedade de resposta %s para o status %s foi restrita a uma lista de valores enum
 response-body-max-length-increased: o comprimento máximo do corpo da resposta foi aumentado de %s para %s
 response-property-max-length-increased: o comprimento máximo da propriedade de resposta %s foi aumentado de %s para %s para o status %s
 response-body-max-length-unset: o comprimento máximo do corpo da resposta foi desconfigurado de %s
@@ -435,6 +444,7 @@ request-body-discriminator-mapping-deleted-description: mapeamento do discrimina
 request-body-discriminator-property-name-changed-description: nome da propriedade do discriminador do corpo da requisição alterado
 request-body-discriminator-removed-description: discriminador do corpo da requisição removido
 request-body-enum-value-removed-description: valor do enum do corpo da requisição removido
+request-body-enum-removed-description: enum do corpo da requisição removido
 request-body-max-decreased-description: valor máximo do corpo da requisição reduzido
 request-body-max-increased-description: valor máximo do corpo da requisição aumentado
 request-body-max-length-decreased-description: comprimento máximo do corpo da requisição reduzido
@@ -477,8 +487,10 @@ request-parameter-default-value-added-description: valor padrão do parâmetro d
 request-parameter-default-value-changed-description: valor padrão do parâmetro da requisição alterado
 request-parameter-default-value-removed-description: valor padrão do parâmetro da requisição removido
 request-parameter-enum-value-added-description: valor do enum do parâmetro da requisição adicionado
+request-parameter-enum-removed-description: enum do parâmetro da requisição removido
 request-parameter-enum-value-removed-description: valor do enum do parâmetro da requisição removido
 request-parameter-property-enum-value-added-description: valor do enum da propriedade do parâmetro da requisição adicionado
+request-parameter-property-enum-removed-description: enum da propriedade do parâmetro da requisição removido
 request-parameter-property-enum-value-removed-description: valor do enum da propriedade do parâmetro da requisição removido
 request-parameter-max-decreased-description: valor máximo do parâmetro da requisição reduzido
 request-parameter-max-increased-description: valor máximo do parâmetro da requisição aumentado
@@ -527,6 +539,7 @@ request-property-discriminator-mapping-deleted-description: mapeamento do discri
 request-property-discriminator-property-name-changed-description: nome da propriedade do discriminador da requisição alterado
 request-property-discriminator-removed-description: discriminador da propriedade de requisição removido
 request-property-enum-value-added-description: valor do enum da propriedade de requisição adicionado
+request-property-enum-removed-description: enum da propriedade de requisição removido
 request-property-enum-value-removed-description: valor do enum da propriedade de requisição removido
 request-read-only-property-enum-value-removed-description: valor do enum da propriedade de requisição somente leitura removido
 request-property-max-decreased-description: valor máximo da propriedade de requisição reduzido
@@ -591,6 +604,7 @@ response-header-became-optional-description: cabeçalho de resposta tornou-se op
 response-media-type-added-description: tipo de mídia da resposta adicionado
 response-media-type-removed-description: tipo de mídia da resposta removido
 response-mediatype-enum-value-removed-description: valor do enum do tipo de mídia da resposta removido
+response-mediatype-enum-removed-description: enum do tipo de mídia da resposta removido
 response-non-success-status-added-description: status de não sucesso da resposta adicionado
 response-non-success-status-removed-description: status de não sucesso da resposta removido
 response-optional-property-added-description: propriedade opcional da resposta adicionada
@@ -619,6 +633,8 @@ response-property-discriminator-property-name-changed-description: nome da propr
 response-property-discriminator-removed-description: discriminador da propriedade de resposta removido
 response-property-enum-value-added-description: valor do enum da propriedade de resposta adicionado
 response-property-enum-value-removed-description: valor do enum da propriedade de resposta removido
+response-property-enum-removed-description: enum da propriedade de resposta removido
+response-property-became-enum-description: propriedade de resposta restrita a enum
 response-property-max-increased-description: valor máximo da propriedade de resposta aumentado
 response-property-max-length-increased-description: comprimento máximo da propriedade de resposta aumentado
 response-property-max-length-unset-description: comprimento máximo da propriedade de resposta desconfigurado

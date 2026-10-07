@@ -26,7 +26,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
-			for _, enumVal := range enumDiff.Deleted {
+			for _, enumVal := range deletedEnumValues(p.propertyDiff) {
 				baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 
 				id := RequestPropertyEnumValueRemovedId
@@ -41,7 +41,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				).WithSources(baseSource, revisionSource))
 			}
 
-			for _, enumVal := range enumDiff.Added {
+			for _, enumVal := range addedEnumValues(p.propertyDiff) {
 				baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 				result = append(result, p.newChange(
 					RequestPropertyEnumValueAddedId,

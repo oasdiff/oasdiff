@@ -16,7 +16,7 @@ func ResponseMediaTypeEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		enumDiff := info.schemaDiff.EnumDiff
-		if enumDiff == nil {
+		if enumDiff == nil || enumRemoved(info.schemaDiff) {
 			return
 		}
 		for _, enumVal := range enumDiff.Deleted {

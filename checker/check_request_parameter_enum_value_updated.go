@@ -28,6 +28,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 			p.paramDiff.SchemaDiff,
 			RequestParameterEnumValueRemovedId,
 			RequestParameterEnumValueAddedId,
+			true,
 			func(enumVal any) []any { return []any{enumVal, p.location, p.name} },
 		)...)
 
@@ -40,6 +41,7 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 					propertyDiff,
 					RequestParameterPropertyEnumValueRemovedId,
 					RequestParameterPropertyEnumValueAddedId,
+					false, // no became-enum rule covers query, path or cookie parameter properties
 					func(enumVal any) []any {
 						return []any{enumVal, schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name}
 					},
@@ -54,6 +56,7 @@ func checkParameterEnumDiff(
 	enumDiff *diff.EnumDiff,
 	schemaDiff *diff.SchemaDiff,
 	removedId, addedId string,
+	becameEnumReported bool,
 	makeArgs func(enumVal any) []any,
 ) Changes {
 	result := make(Changes, 0)
@@ -61,7 +64,7 @@ func checkParameterEnumDiff(
 		return result
 	}
 
-	for _, enumVal := range enumDiff.Deleted {
+	for _, enumVal := range deletedEnumValues(schemaDiff) {
 		baseSource, revisionSource := location.SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, opInfo.NewApiChange(
 			removedId,
@@ -70,7 +73,11 @@ func checkParameterEnumDiff(
 		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
 	}
 
-	for _, enumVal := range enumDiff.Added {
+	added := enumDiff.Added
+	if becameEnumReported {
+		added = addedEnumValues(schemaDiff)
+	}
+	for _, enumVal := range added {
 		baseSource, revisionSource := location.SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, opInfo.NewApiChange(
 			addedId,

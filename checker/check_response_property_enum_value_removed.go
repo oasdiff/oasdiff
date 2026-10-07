@@ -18,7 +18,7 @@ func ResponseParameterEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
 			enumDiff := p.propertyDiff.EnumDiff
-			if enumDiff == nil || enumDiff.Deleted == nil {
+			if enumDiff == nil || enumDiff.Deleted == nil || enumRemoved(p.propertyDiff) {
 				return
 			}
 
