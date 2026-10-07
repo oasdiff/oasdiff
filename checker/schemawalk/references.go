@@ -56,13 +56,7 @@ func NewReferences(root *diff.SchemaDiff) References {
 		if len(paths) < 2 {
 			continue
 		}
-		// A shared schema written inline has no name of its own. It is shared
-		// because the schema it belongs to was copied, as the parser does for a
-		// $ref with a description beside it, and the copies keep its children,
-		// so it takes the name of the innermost named schema the walk passed
-		// through on the way to it.
-		name := innermost(names, paths[0])
-		result.shared = append(result.shared, sharedSchema{name: name, paths: paths})
+		result.shared = append(result.shared, sharedSchema{name: sharedSchemaName(names, paths[0]), paths: paths})
 	}
 	for i := range result.shared {
 		if _, ok := result.byPath[result.shared[i].paths[0]]; !ok {
@@ -191,6 +185,16 @@ func (r References) countAt(path string, strict bool, visiting map[*sharedSchema
 	}
 	r.counted[s] = counted{count: count, bounded: bounded}
 	return count, bounded
+}
+
+// sharedSchemaName returns the name of the shared schema the walk first
+// reached at path. A shared schema written inline has no name of its own: it
+// is shared because the parser copied the schema it belongs to, as it does for
+// a $ref with a description beside it, and the copies keep their children. So
+// it takes the name of the closest named schema above it
+// (see TestSharedSchemaWrittenInlineIsNamedAfterItsComponent in checker).
+func sharedSchemaName(names map[string]string, path string) string {
+	return innermost(names, path)
 }
 
 // innermost returns the value at the longest of path and its prefixes that
