@@ -39,19 +39,6 @@ type SharedSchema struct {
 	Cyclic bool `json:"cyclic,omitempty" yaml:"cyclic,omitempty"`
 }
 
-// WithSharedSchema returns a copy of the ApiChange in a schema several
-// properties of its payload reach.
-func (c ApiChange) WithSharedSchema(shared *SharedSchema) ApiChange {
-	c.sharedSchema = shared
-	return c
-}
-
-// GetSharedSchema is nil unless several of the payload's properties reach the
-// schema the change is in or below.
-func (c ApiChange) GetSharedSchema() *SharedSchema {
-	return c.sharedSchema
-}
-
 // detail renders the shared schema as a message detail: the other properties
 // it lists, and how many more there are.
 func (s *SharedSchema) detail(l Localizer, format func([]any) []any) string {

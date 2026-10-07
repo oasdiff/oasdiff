@@ -115,6 +115,19 @@ func (c ApiChange) WithDetails(details string) ApiChange {
 	return c
 }
 
+// WithSharedSchema returns a copy of the ApiChange in a schema several
+// properties of its payload reach.
+func (c ApiChange) WithSharedSchema(shared *SharedSchema) ApiChange {
+	c.sharedSchema = shared
+	return c
+}
+
+// GetSharedSchema is nil unless several of the payload's properties reach the
+// schema the change is in or below.
+func (c ApiChange) GetSharedSchema() *SharedSchema {
+	return c.sharedSchema
+}
+
 func getAttributes(config *Config, operation *openapi3.Operation) map[string]any {
 	result := map[string]any{}
 	for _, tag := range config.Attributes {
