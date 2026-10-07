@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: an allOf of an allOf in a cycle through oneOf
+  version: '1'
+paths:
+  /items:
+    get:
+      operationId: listItems
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                required:
+                - pagination
+                - data
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Page'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Entry'
+components:
+  schemas:
+    Site:
+      allOf:
+      - properties:
+          zones:
+            type: array
+            items:
+              $ref: '#/components/schemas/Zone'
+          currentPeriod:
+            allOf:
+            - $ref: '#/components/schemas/Period'
+    ZoneBase:
+      type: object
+    Period:
+      allOf:
+      - oneOf:
+        - $ref: '#/components/schemas/PeriodZones'
+    Page:
+      type: object
+    PeriodZone:
+      allOf:
+      - $ref: '#/components/schemas/Zone'
+    PeriodZones:
+      properties:
+        zones:
+          type: array
+          items:
+            $ref: '#/components/schemas/PeriodZone'
+    Entry:
+      type: object
+      properties:
+        order:
+          allOf:
+          - $ref: '#/components/schemas/Order'
+    Zone:
+      allOf:
+      - $ref: '#/components/schemas/ZoneBase'
+      - properties:
+          periods:
+            type: array
+            items:
+              $ref: '#/components/schemas/Period'
+    Order:
+      allOf:
+      - properties:
+          site:
+            allOf:
+            - $ref: '#/components/schemas/Site'
