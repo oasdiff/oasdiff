@@ -1551,7 +1551,6 @@ response-property-min-unset: значение min у поля ответа %s у
 response-property-min-unset-description: удалено значение min поля ответа
 response-property-multiple-of-set: у поля ответа %s задано значение multipleOf в %s, для ответа со статусом %s
 response-property-multiple-of-set-description: установлено значение multipleOf поля ответа
-shared-schema-comment: "Изменение в схеме, к которой ведут несколько свойств этого тела, сообщается один раз на проверку, у одного из этих свойств: это одно изменение контракта, и оно действует везде, где используется схема."
 shared-schema-detail-also: "также в %s"
 shared-schema-detail-also-cyclic: "также в %s и других"
 shared-schema-detail-also-more: "также в %s и ещё %d"

@@ -120,8 +120,6 @@ A schema referenced from more than one property of the same payload is reported 
 
 ```
 the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: `Id`, also at `userId`)
-    A change in a schema that several properties of this payload reach is reported once per check, at one of
-    those properties: it is a single change to the contract, and it applies wherever the schema is used.
 ```
 
 So the change is under `components/schemas/Id` and it affects both properties: `customerId` and `userId`. The same comparison always reports the change at the same property.

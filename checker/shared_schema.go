@@ -7,10 +7,6 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// SharedSchemaCommentId explains a change reported at one property when
-// several properties of the payload reach the schema it is in.
-const SharedSchemaCommentId = "shared-schema-comment"
-
 const (
 	SharedSchemaDetailNameId       = "shared-schema-detail-name"
 	SharedSchemaDetailAlsoId       = "shared-schema-detail-also"
@@ -105,9 +101,6 @@ func attachSharedSchema(change Change, references referencesByRoot) Change {
 		return change
 	}
 
-	if apiChange.Comment == "" {
-		apiChange.Comment = SharedSchemaCommentId
-	}
 	return apiChange.WithSharedSchema(&SharedSchema{Name: shared.Name, Properties: shared.Paths, Count: shared.Count, Cyclic: shared.Cyclic})
 }
 

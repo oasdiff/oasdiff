@@ -25,17 +25,6 @@ func TestAttachSharedSchemas_OneChange(t *testing.T) {
 	require.Len(t, result, 1)
 	require.Equal(t, []any{"a", "200"}, result[0].GetArgs())
 	require.Equal(t, &SharedSchema{Properties: []string{"a", "b"}, Count: 2}, result[0].(ApiChange).GetSharedSchema())
-	require.Equal(t, SharedSchemaCommentId, result[0].(ApiChange).Comment)
-}
-
-// A check's own comment is kept.
-func TestAttachSharedSchemas_KeepsComment(t *testing.T) {
-	root, shared := sharedRoot()
-	change := ApiChange{Id: "change_id", Comment: "own-comment"}.WithSchema(root, shared, "a")
-
-	result := attachSharedSchemas(Changes{change})
-
-	require.Equal(t, "own-comment", result[0].(ApiChange).Comment)
 }
 
 // A change at the root, or with no schema, is in no shared schema.
