@@ -37,11 +37,18 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 				if writeOnlyDiff.To == true {
 					id = ResponseRequiredPropertyBecameWriteOnlyId
 				}
-				result = append(result, p.newChange(
+				change := p.newChange(
 					id,
 					[]any{propName, info.responseStatus},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSources(propBaseSource, propRevisionSource)
+				if id == ResponseRequiredPropertyBecameWriteOnlyId {
+					// The write-only guard lowers changes to a property that is
+					// not returned. This change is the one that stops returning
+					// it, so the guard does not apply.
+					change = change.withoutGuard(GuardWriteOnly)
+				}
+				result = append(result, change)
 			}
 
 			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {

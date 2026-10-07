@@ -86,6 +86,17 @@ func (c ApiChange) WithGuards(guards []Guard) ApiChange {
 	return c
 }
 
+func (c ApiChange) withoutGuard(guard Guard) ApiChange {
+	var guards []Guard
+	for _, g := range c.guards {
+		if g != guard {
+			guards = append(guards, g)
+		}
+	}
+	c.guards = guards
+	return c
+}
+
 // WithDisclaimers is additive and drops duplicates: a change can gather the
 // same condition from more than one place.
 func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {

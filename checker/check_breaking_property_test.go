@@ -523,7 +523,8 @@ func TestBreaking_WriteOnlyPropertyRequiredDisabled(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// changing an existing required property in response body to write-only is not breaking
+// changing an existing required property in response body to write-only is
+// breaking: the property is no longer returned
 func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
 	s1, err := open(requiredPropertyFile("write-only-changed-base.yaml"))
 	require.NoError(t, err)
@@ -534,7 +535,11 @@ func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Empty(t, errs)
+	require.Len(t, errs, 2)
+	for _, e := range errs {
+		require.Equal(t, checker.ResponseRequiredPropertyBecameWriteOnlyId, e.GetId())
+		require.Equal(t, checker.ERR, e.GetLevel())
+	}
 }
 
 // changing an existing required property in response body to not-write-only is

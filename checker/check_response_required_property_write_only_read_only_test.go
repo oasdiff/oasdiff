@@ -9,7 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// changing required response property to write-only
+// A required response property that becomes write-only is no longer returned,
+// which breaks clients that read it, as removing it would.
 func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 	s1, err := open("../data/checker/response_required_property_write_only_read_only_base.yaml")
 	require.NoError(t, err)
@@ -30,6 +31,7 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
 // changing required response property to not write-only
