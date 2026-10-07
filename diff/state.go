@@ -12,6 +12,8 @@ type state struct {
 	// The name of each document's components.schemas entries.
 	baseComponents     map[*openapi3.Schema]string
 	revisionComponents map[*openapi3.Schema]string
+
+	operationPairs []OperationPair
 }
 
 func newState() *state {

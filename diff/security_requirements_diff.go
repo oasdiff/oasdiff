@@ -34,6 +34,12 @@ type SecurityRequirementsDiff struct {
 	Deleted  SecurityAlternatives         `json:"deleted,omitempty" yaml:"deleted,omitempty"`
 	Modified ModifiedSecurityRequirements `json:"modified,omitempty" yaml:"modified,omitempty"`
 
+	// An operation's security list replaces the document-root one when
+	// declared, even when empty, so declaring or dropping an empty list is a
+	// change although no alternative changed. Never set on the root list.
+	ListAdded   bool `json:"listAdded,omitempty" yaml:"listAdded,omitempty"`
+	ListDeleted bool `json:"listDeleted,omitempty" yaml:"listDeleted,omitempty"`
+
 	// Origins of the documents whose root "security" field changed, used to
 	// report the source location of global security changes. Set only on the
 	// root-level diff (see diff.go), not the per-operation one, and kept out of
@@ -111,7 +117,9 @@ func (diff *SecurityRequirementsDiff) Empty() bool {
 
 	return len(diff.Added) == 0 &&
 		len(diff.Deleted) == 0 &&
-		len(diff.Modified) == 0
+		len(diff.Modified) == 0 &&
+		!diff.ListAdded &&
+		!diff.ListDeleted
 }
 
 func newSecurityRequirementsDiff() *SecurityRequirementsDiff {
@@ -135,6 +143,8 @@ func getSecurityRequirementsDiff(securityRequirements1, securityRequirements2 *o
 func getSecurityRequirementsDiffInternal(securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
 
 	result := newSecurityRequirementsDiff()
+	result.ListAdded = securityRequirements1 == nil && securityRequirements2 != nil
+	result.ListDeleted = securityRequirements1 != nil && securityRequirements2 == nil
 
 	// A security requirements list is an unordered set of OR-alternatives, and
 	// several alternatives may legitimately share a scheme while differing only
