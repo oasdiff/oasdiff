@@ -38,8 +38,13 @@ type Waiver struct {
 var Waivers = []Waiver{
 	// security schemes are consumed by name, never resolved through $ref
 	// into usage sites, so the resolved-at-usage reasoning below does not
-	// apply to them; this entry must precede components.**
-	{CategoryOpen, "components.securitySchemes.**", "scheme fields beyond type, flow URLs, and scopes (apiKey name and in, http scheme, bearerFormat, openIdConnectUrl) have no checks (tracked in #1175)"},
+	// apply to them; these entries must precede components.**, and they name
+	// each uncovered field so that a new scheme field is not absorbed silently
+	{CategoryOpen, "components.securitySchemes.*.type:set,unset", "type is required, so it is set or unset only where the scheme is invalid on one side; no check reports that"},
+	{CategoryOpen, "components.securitySchemes.*.flows:set,unset", "adding or removing the OAuth flows object has no check"},
+	{CategoryOpen, "components.securitySchemes.*.flows.*:set,unset", "adding or removing an OAuth flow has no check"},
+	{CategoryOpen, "components.securitySchemes.*.flows.*.refreshUrl", "OAuth refresh URL changes have no check"},
+	{CategoryCoveredAs, "components.securitySchemes.*.flows.*.scopes.*:set,unset", "a scope appearing or disappearing is the scope add/remove, which is claimed"},
 	{CategoryResolvedAtUsage, "components.**", "edits to component definitions surface as diffs at every referencing operation; only unused-component removal is reported directly (api-schemas-removed)"},
 	{CategoryOpen, "webhooks.**", "webhooks are diffed (WebhooksDiff) but checkers only report webhook add/remove; changes inside a webhook's operations have no checks yet (tracked in #1160)"},
 	{CategoryOpen, "paths.*.parameters.**", "path-level parameter additions are checked (new-request-*-default-parameter-to-existing-path); modifications and removals at path level have no checks yet (tracked in #1163)"},

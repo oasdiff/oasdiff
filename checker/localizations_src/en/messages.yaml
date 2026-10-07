@@ -280,6 +280,11 @@ api-security-component-removed: the component security scheme %s was removed
 api-security-component-oauth-scope-added: the component security scheme %s oauth scope %s was added
 api-security-component-oauth-scope-removed: the component security scheme %s oauth scope %s was removed
 api-security-component-oauth-scope-changed: the component security scheme %s oauth scope %s was updated from %s to %s
+api-security-component-api-key-name-changed: the component security scheme %s api key name changed from %s to %s
+api-security-component-api-key-in-changed: the component security scheme %s api key location changed from %s to %s
+api-security-component-http-scheme-changed: the component security scheme %s http scheme changed from %s to %s
+api-security-component-bearer-format-changed: the component security scheme %s bearer format changed from %s to %s
+api-security-component-openid-connect-url-changed: the component security scheme %s OpenID Connect url changed from %s to %s
 response-optional-property-added: added the optional property %s to the response with the %s status
 response-optional-write-only-property-added: added the optional write-only property %s to the response with the %s status
 response-optional-write-only-property-removed: removed the optional write-only property %s from the response with the %s status
@@ -400,11 +405,16 @@ api-removed-without-deprecation-description: endpoint deleted without deprecatio
 api-schema-removed-description: schema deleted from components/schemas
 api-security-added-description: security requirements added to endpoint
 api-security-component-added-description: security scheme added in components/securitySchemes
+api-security-component-api-key-in-changed-description: apiKey location (in) modified in components/securitySchemes
+api-security-component-api-key-name-changed-description: apiKey name modified in components/securitySchemes
+api-security-component-bearer-format-changed-description: bearer format modified in components/securitySchemes
+api-security-component-http-scheme-changed-description: http authentication scheme modified in components/securitySchemes
 api-security-component-oauth-scope-added-description: scope added to OAuth flow in components/securitySchemes
 api-security-component-oauth-scope-changed-description: scope modified in OAuth flow in components/securitySchemes
 api-security-component-oauth-scope-removed-description: scope deleted from OAuth flow in components/securitySchemes
 api-security-component-oauth-token-url-changed-description: token URL modified in OAuth flow in components/securitySchemes
 api-security-component-oauth-url-changed-description: auth URL modified in OAuth flow in components/securitySchemes
+api-security-component-openid-connect-url-changed-description: OpenID Connect url modified in components/securitySchemes
 api-security-component-removed-description: security scheme deleted in components/securitySchemes
 api-security-component-type-changed-description: security scheme type modified in components/securitySchemes
 api-security-removed-description: security requirements deleted from endpoint
