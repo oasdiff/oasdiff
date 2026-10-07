@@ -260,6 +260,10 @@ api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
 api-global-security-added: el esquema de seguridad %s fue agregado a la api
 api-global-security-removed: el esquema de seguridad %s fue removido de la api
 api-global-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad global %s
+api-security-anonymous-access-removed: el endpoint ya no permite acceso anónimo
+api-security-anonymous-access-added: el endpoint ahora permite acceso anónimo
+api-global-security-anonymous-access-removed: la api ya no permite acceso anónimo a los endpoints sin requisitos de seguridad propios
+api-global-security-anonymous-access-added: la api ahora permite acceso anónimo a los endpoints sin requisitos de seguridad propios
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
 api-version-not-bumped-description: se detectó un cambio incompatible pero la versión no fue incrementada
@@ -389,6 +393,10 @@ api-global-security-added-description: esquema de seguridad agregado en security
 api-global-security-removed-description: esquema de seguridad removido en security
 api-global-security-scope-added-description: alcance agregado a un esquema de seguridad en security
 api-global-security-scope-removed-description: alcance removido de un esquema de seguridad en security
+api-security-anonymous-access-removed-description: la seguridad del endpoint cambió y ahora rechaza solicitudes no autenticadas
+api-security-anonymous-access-added-description: la seguridad del endpoint cambió y ahora acepta solicitudes no autenticadas
+api-global-security-anonymous-access-removed-description: security cambió y los endpoints que la heredan rechazan solicitudes no autenticadas
+api-global-security-anonymous-access-added-description: security cambió y los endpoints que la heredan aceptan solicitudes no autenticadas
 api-operation-id-added-description: id de operación agregado a un endpoint
 api-operation-id-removed-description: id de operación removido de un endpoint
 api-path-removed-before-sunset-description: path y endpoint removidos antes de la fecha de expiración

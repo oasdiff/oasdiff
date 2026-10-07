@@ -153,14 +153,14 @@ Currently English, Russian and Brazilian Portuguese are supported.
 
 ## Customizing Severity Levels
 Oasdiff allows you to change the default severity levels according to your needs.  
-For example, the default severity level of the `api-security-removed` check is `INFO`. You can verify this by running `oasdiff checks changelog`.  
-To change the `api-security-removed` check's severity level to `ERR` use the following command:
+For example, the default severity level of the `api-security-scope-removed` check is `INFO`. You can verify this by running `oasdiff checks changelog`.  
+To change the `api-security-scope-removed` check's severity level to `ERR` use the following command:
 ```
-oasdiff changelog data/checker/api_security_added_revision.yaml data/checker/api_security_added_base.yaml --severity-levels oasdiff-levels.txt
+oasdiff changelog data/checker/api_security_updated_base.yaml data/checker/api_security_updated_revision.yaml --severity-levels oasdiff-levels.txt
 ```
 Where the file `oasdiff-levels.txt` contains a single line:
 ```
-api-security-removed    err
+api-security-scope-removed    err
 ```
 
 Checks can be customized with the following levels:

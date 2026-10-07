@@ -260,6 +260,10 @@ api-security-updated: the endpoint scheme security %s was updated from %s to %s
 api-global-security-added: the security scheme %s was added to the API
 api-global-security-removed: the security scheme %s was removed from the API
 api-global-security-scope-removed: the security scope %s was removed from the global security scheme %s
+api-security-anonymous-access-removed: the endpoint no longer allows anonymous access
+api-security-anonymous-access-added: the endpoint now allows anonymous access
+api-global-security-anonymous-access-removed: the API no longer allows anonymous access to endpoints without their own security requirements
+api-global-security-anonymous-access-added: the API now allows anonymous access to endpoints without their own security requirements
 api-global-security-scope-added: the security scope %s was added to the global security scheme %s
 api-security-scope-removed: the security scope %s was removed from the endpoint's security scheme %s
 api-version-not-bumped-description: a breaking change was detected but the version was not bumped
@@ -390,6 +394,10 @@ api-global-security-added-description: security scheme added in security
 api-global-security-removed-description: security scheme deleted in security
 api-global-security-scope-added-description: scope added to a security scheme in security
 api-global-security-scope-removed-description: scope deleted from a security scheme in security
+api-security-anonymous-access-removed-description: endpoint security changed so that unauthenticated requests are rejected
+api-security-anonymous-access-added-description: endpoint security changed so that unauthenticated requests are accepted
+api-global-security-anonymous-access-removed-description: security changed so that unauthenticated requests to endpoints inheriting it are rejected
+api-global-security-anonymous-access-added-description: security changed so that unauthenticated requests to endpoints inheriting it are accepted
 api-operation-id-added-description: operation ID added to an endpoint
 api-operation-id-removed-description: operation ID deleted from an endpoint
 api-path-removed-before-sunset-description: path and endpoint deleted before sunset date

@@ -47,6 +47,11 @@ type Diff struct {
 	// either. Excluded from output because they are context, not a change.
 	BaseInfo     *openapi3.Info `json:"-" yaml:"-"`
 	RevisionInfo *openapi3.Info `json:"-" yaml:"-"`
+
+	// SecurityContext is context for checkers too, under the same rules as
+	// BaseInfo. It is nil for GetPathsDiff, which compares paths without
+	// their documents' root security.
+	SecurityContext *SecurityContext `json:"-" yaml:"-"`
 }
 
 // OperationsSourcesMap maps OpenAPI operations to their source file paths
@@ -262,6 +267,11 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	}
 
 	diff.BaseInfo, diff.RevisionInfo = s1.Info, s2.Info
+	diff.SecurityContext = &SecurityContext{
+		Base:       s1.Security,
+		Revision:   s2.Security,
+		Operations: state.operationPairs,
+	}
 
 	return diff, nil
 }
