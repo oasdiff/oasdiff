@@ -1,0 +1,28 @@
+openapi: 3.1.0
+info:
+  title: a component referenced with description overrides
+  version: 1.0.0
+paths:
+  /orders:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  billing:
+                    $ref: '#/components/schemas/Address'
+                    description: where the invoice goes
+                  shipping:
+                    $ref: '#/components/schemas/Address'
+                    description: where the parcel goes
+components:
+  schemas:
+    Address:
+      type: object
+      properties:
+        zip:
+          type: string

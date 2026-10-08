@@ -12,7 +12,7 @@ import (
 // Core logic functions for ListOfTypes checking that can be reused by both full checkers and suppression functions
 
 // checkPropertyListOfTypesChange checks if a property change involves list-of-types patterns and returns breaking changes
-func checkPropertyListOfTypesChange(opInfo opInfo, propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
+func checkPropertyListOfTypesChange(opInfo opInfo, root *diff.SchemaDiff, propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
 	mediaType string, responseStatus string, isRequest bool) Changes {
 
 	result := make(Changes, 0)
@@ -52,7 +52,7 @@ func checkPropertyListOfTypesChange(opInfo opInfo, propertyPath string, property
 		messageId,
 		args,
 		"",
-	).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
+	).WithSchema(root, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -98,7 +98,7 @@ func checkBodyListOfTypesChange(opInfo opInfo, schemaDiff *diff.SchemaDiff, medi
 		messageId,
 		args,
 		"",
-	).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+	).WithSchema(schemaDiff, schemaDiff, "").WithSources(baseSource, revisionSource))
 
 	return result
 }
@@ -131,13 +131,13 @@ func checkParameterListOfTypesChange(opInfo opInfo, paramDiff *diff.ParameterDif
 		messageId,
 		args,
 		"",
-	).WithSchema(paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+	).WithSchema(paramDiff.SchemaDiff, paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 
 	return result
 }
 
 // checkParameterPropertyListOfTypesChange checks if a parameter property change involves list-of-types patterns and returns breaking changes
-func checkParameterPropertyListOfTypesChange(opInfo opInfo, propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
+func checkParameterPropertyListOfTypesChange(opInfo opInfo, root *diff.SchemaDiff, propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff,
 	param *openapi3.Parameter) Changes {
 
 	result := make(Changes, 0)
@@ -165,7 +165,7 @@ func checkParameterPropertyListOfTypesChange(opInfo opInfo, propertyPath string,
 		messageId,
 		args,
 		"",
-	).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
+	).WithSchema(root, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 
 	return result
 }

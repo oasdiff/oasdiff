@@ -19,14 +19,18 @@ type Walker struct {
 	// Properties is called for a node's own properties, after its name is
 	// appended, so the path already names the node they belong to.
 	Properties func(propertyPath string, schemaDiff *diff.SchemaDiff, underAllOf bool)
-	// A shared $ref can reach the same diff through many property paths.
-	// Keep one representative path per parent and allOf context.
+	// A schema that several references reach is walked once, through the
+	// first: walking it once per reference would multiply at every level of a
+	// nested spec. NewReferences records the others.
 	seen map[walkVisit]struct{}
+	// arrive is called every time the walk reaches a schema, with the path it
+	// took, including when the schema was already visited and the walk does
+	// not go into it again.
+	arrive func(path string, visit walkVisit)
 }
 
 type walkVisit struct {
 	schemaDiff *diff.SchemaDiff
-	parentDiff *diff.SchemaDiff
 	underAllOf bool
 }
 
@@ -39,7 +43,15 @@ func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.
 	if w.seen == nil {
 		w.seen = make(map[walkVisit]struct{})
 	}
-	visit := walkVisit{schemaDiff: schemaDiff, parentDiff: parentDiff, underAllOf: underAllOf}
+	nodePath := propertyPath
+	if propertyName != "" {
+		nodePath = PropertyFullName(propertyPath, propertyName)
+	}
+
+	visit := walkVisit{schemaDiff: schemaDiff, underAllOf: underAllOf}
+	if w.arrive != nil {
+		w.arrive(nodePath, visit)
+	}
 	if _, ok := w.seen[visit]; ok {
 		return
 	}
@@ -49,9 +61,7 @@ func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.
 		w.Enter(propertyPath, propertyName, schemaDiff, parentDiff, underAllOf)
 	}
 
-	if propertyName != "" {
-		propertyPath = PropertyFullName(propertyPath, propertyName)
-	}
+	propertyPath = nodePath
 
 	if schemaDiff.AllOfDiff != nil {
 		for _, v := range schemaDiff.AllOfDiff.Modified {

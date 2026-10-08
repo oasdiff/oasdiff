@@ -60,7 +60,8 @@ func TestSchemaDiff_ComponentNameIsNotAChange(t *testing.T) {
 
 // In OpenAPI 3.1 a description beside a $ref overrides the component's, which
 // the parser applies to a copy of the component, so the copy is named from
-// the $ref. A $ref to a schema inside a component is not named after it.
+// the $ref. A $ref to a schema inside a component is named after the
+// component.
 func TestSchemaDiff_ComponentNameOfRefWithOverride(t *testing.T) {
 	schemaDiff := componentNameDiff(t, "../data/component-ref-override1.yaml", "../data/component-ref-override2.yaml")
 
@@ -69,6 +70,6 @@ func TestSchemaDiff_ComponentNameOfRefWithOverride(t *testing.T) {
 	require.Equal(t, "Shared", left.RevisionComponent)
 
 	nested := schemaDiff.PropertiesDiff.Modified["nested"]
-	require.Empty(t, nested.BaseComponent)
-	require.Empty(t, nested.RevisionComponent)
+	require.Equal(t, "Holder", nested.BaseComponent)
+	require.Equal(t, "Holder", nested.RevisionComponent)
 }

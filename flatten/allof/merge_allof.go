@@ -77,6 +77,10 @@ type state struct {
 	// after mergeInternal is executed, circularAllOf contains all SchemaRefs which have circular allof.
 	circularAllOf openapi3.SchemaRefs
 
+	// pendingAllOf holds the results in circularAllOf whose allOf
+	// mergeCircular has not flattened yet.
+	pendingAllOf map[*openapi3.Schema]*openapi3.SchemaRef
+
 	// flattening tracks input schemas currently being processed by
 	// flattenSchemas, mapping each to the result Value being populated
 	// for that call. Re-entry with an in-flight schema short-circuits
@@ -108,6 +112,7 @@ func newState() *state {
 		mergedSchemas: map[*openapi3.Schema]*openapi3.Schema{},
 		refs:          map[string]bool{},
 		circularAllOf: openapi3.SchemaRefs{},
+		pendingAllOf:  map[*openapi3.Schema]*openapi3.SchemaRef{},
 		flattening:    map[*openapi3.Schema]*openapi3.Schema{},
 		replaced:      map[*openapi3.Schema]*openapi3.Schema{},
 		hints:         map[*openapi3.Schema]string{},
@@ -142,6 +147,23 @@ func mergeCircular(state *state) error {
 }
 
 func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
+	if _, ok := state.pendingAllOf[baseSchemaRef.Value]; !ok {
+		return nil
+	}
+	delete(state.pendingAllOf, baseSchemaRef.Value)
+
+	// flattenSchemas reads only the top-level keywords of its inputs, so a
+	// subschema whose own allOf is still pending is flattened first. Otherwise
+	// the result depends on the order the sets were found in, which follows
+	// the order of properties in a map.
+	for _, subschema := range baseSchemaRef.Value.AllOf {
+		if pending, ok := state.pendingAllOf[subschema.Value]; ok {
+			if err := mergeCircularAllOf(state, pending); err != nil {
+				return err
+			}
+		}
+	}
+
 	allOfCopy := make(openapi3.SchemaRefs, len(baseSchemaRef.Value.AllOf))
 	copy(allOfCopy, baseSchemaRef.Value.AllOf)
 
@@ -353,6 +375,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	updateRefs(state, base.Value.AllOf)
 	if isAllOfCircular(state, base.Value.AllOf) {
 		state.circularAllOf = append(state.circularAllOf, result)
+		state.pendingAllOf[result.Value] = result
 		result.Value.AllOf = allOf
 		return result, nil
 	}

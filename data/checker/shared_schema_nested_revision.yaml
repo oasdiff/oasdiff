@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: a shared schema inside another shared schema
+  version: 1.0.0
+paths:
+  /example:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  p:
+                    $ref: '#/components/schemas/Outer'
+                  q:
+                    $ref: '#/components/schemas/Outer'
+components:
+  schemas:
+    Outer:
+      type: object
+      properties:
+        a:
+          $ref: '#/components/schemas/Inner'
+        b:
+          $ref: '#/components/schemas/Inner'
+    Inner:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9]+$'
