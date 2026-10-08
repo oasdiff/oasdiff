@@ -59,8 +59,12 @@ request-body-became-required: el cuerpo de solicitud se volvió requerido
 request-body-became-optional: el cuerpo de solicitud se volvió opcional
 request-body-became-enum: el cuerpo de solicitud fue restringido a una lista de valores enum
 request-body-enum-value-removed: removido el valor enum %s del cuerpo de solicitud
+request-body-enum-value-added: "agregado el valor enum %s al cuerpo de solicitud"
 request-body-enum-removed: removida la restricción enum del cuerpo de solicitud
 response-mediatype-enum-value-removed: removido el valor enum %s del esquema de respuesta %s
+response-mediatype-became-enum: "el esquema de respuesta %s para el estado %s fue restringido a una lista de valores enum"
+response-mediatype-enum-value-added-comment: "El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum."
+response-mediatype-enum-value-added: "agregado el nuevo valor enum %s al esquema de respuesta %s para el estado %s"
 response-mediatype-enum-removed: removida la restricción enum del esquema de respuesta %s para el estado %s
 response-mediatype-enum-removed-comment: El servidor ahora puede devolver cualquier valor del tipo del esquema, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
 request-header-property-became-required: la propiedad %s del encabezado de solicitud %s se volvió requerida
@@ -455,6 +459,7 @@ request-body-discriminator-mapping-deleted-description: mapeo del discriminador 
 request-body-discriminator-property-name-changed-description: nombre de la propiedad del discriminador del cuerpo de solicitud cambiado
 request-body-discriminator-removed-description: discriminador del cuerpo de solicitud removido
 request-body-enum-value-removed-description: valor del enum del cuerpo de solicitud removido
+request-body-enum-value-added-description: "valor del enum del cuerpo de solicitud agregado"
 request-body-enum-removed-description: enum del cuerpo de solicitud removido
 request-body-max-decreased-description: valor máximo del cuerpo de solicitud reducido
 request-body-max-increased-description: valor máximo del cuerpo de solicitud aumentado
@@ -616,6 +621,8 @@ response-header-became-optional-description: encabezado de respuesta se volvió 
 response-media-type-added-description: tipo de media de respuesta agregado
 response-media-type-removed-description: tipo de media de respuesta removido
 response-mediatype-enum-value-removed-description: valor del enum del tipo de media de respuesta removido
+response-mediatype-became-enum-description: "tipo de media de respuesta restringido a enum"
+response-mediatype-enum-value-added-description: "valor del enum del tipo de media de respuesta agregado"
 response-mediatype-enum-removed-description: enum del tipo de media de respuesta removido
 response-non-success-status-added-description: estado de no éxito de respuesta agregado
 response-non-success-status-removed-description: estado de no éxito de respuesta removido

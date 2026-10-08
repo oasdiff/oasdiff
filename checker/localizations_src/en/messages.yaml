@@ -71,8 +71,12 @@ request-body-became-required: request body became required
 request-body-became-optional: request body became optional
 request-body-became-enum: request body was restricted to a list of enum values
 request-body-enum-value-removed: request body enum value removed %s
+request-body-enum-value-added: "request body enum value added %s"
 request-body-enum-removed: removed the enum constraint from the request body
 response-mediatype-enum-value-removed: response schema %s enum value removed %s
+response-mediatype-became-enum: "the response schema %s for the response status %s was restricted to a list of enum values"
+response-mediatype-enum-value-added-comment: "The server may now return a value the previous contract excluded, so a client written against it may not handle the response. If the value set is meant to grow, declare it with x-extensible-enum."
+response-mediatype-enum-value-added: "added the new %s enum value to the response schema %s for the response status %s"
 response-mediatype-enum-removed: removed the enum constraint from the response schema %s for the response status %s
 response-mediatype-enum-removed-comment: The server may now return any value of the schema's type, including values the previous enum excluded, so a client written against it may not handle the response.
 request-header-property-became-required: the %s request header's property %s became required
@@ -459,6 +463,7 @@ request-body-discriminator-mapping-deleted-description: request body discriminat
 request-body-discriminator-property-name-changed-description: request body discriminator property name changed
 request-body-discriminator-removed-description: request body discriminator deleted
 request-body-enum-value-removed-description: request body enum value deleted
+request-body-enum-value-added-description: "request body enum value added"
 request-body-enum-removed-description: request body enum removed
 request-body-max-decreased-description: request body max decreased
 request-body-max-increased-description: request body max increased
@@ -625,6 +630,8 @@ response-header-became-optional-description: response header became optional
 response-media-type-added-description: response media type added
 response-media-type-removed-description: response media type removed
 response-mediatype-enum-value-removed-description: response mediatype enum value removed
+response-mediatype-became-enum-description: "response mediatype restricted to enum"
+response-mediatype-enum-value-added-description: "response mediatype enum value added"
 response-mediatype-enum-removed-description: response mediatype enum removed
 response-non-success-status-added-description: response non-success status added
 response-non-success-status-removed-description: response non-success status removed

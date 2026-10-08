@@ -58,8 +58,12 @@ request-body-became-required: тело запроса стало обязате�
 request-body-became-optional: тело запроса стало необязательным
 request-body-became-enum: тело запроса было ограничено списком значений перечисления
 request-body-enum-value-removed: значение перечисления тела запроса удалено %s
+request-body-enum-value-added: "значение перечисления тела запроса добавлено %s"
 request-body-enum-removed: удалено ограничение enum тела запроса
 response-mediatype-enum-value-removed: значение перечисления схемы ответа %s удалено %s
+response-mediatype-became-enum: "схема ответа %s для статуса ответа %s была ограничена списком значений перечисления"
+response-mediatype-enum-value-added-comment: "Сервер теперь может вернуть значение, которое исключал прежний контракт, поэтому клиент, написанный по нему, может не обработать ответ. Если набор значений предполагает расширение, объявите его через x-extensible-enum."
+response-mediatype-enum-value-added: "добавлено новое enum значение %s в схему ответа %s для ответа со статусом %s"
 response-mediatype-enum-removed: удалено ограничение enum схемы ответа %s для статуса ответа %s
 response-mediatype-enum-removed-comment: Сервер теперь может вернуть любое значение типа схемы, включая значения, которые исключал прежний enum, поэтому клиент, написанный по нему, может не обработать ответ.
 request-header-property-became-required: в заголовке запроса %s поле %s стало обязательным
@@ -449,6 +453,7 @@ request-body-discriminator-mapping-deleted-description: удалено сопо�
 request-body-discriminator-property-name-changed-description: изменено имя свойства дискриминатора тела запроса
 request-body-discriminator-removed-description: удален дискриминатор тела запроса
 request-body-enum-value-removed-description: удалено enum значение тела запроса
+request-body-enum-value-added-description: "добавлено enum значение тела запроса"
 request-body-enum-removed-description: удалено enum тела запроса
 request-body-max-decreased-description: уменьшено максимальное значение тела запроса
 request-body-max-increased-description: увеличено максимальное значение тела запроса
@@ -631,6 +636,8 @@ response-media-type-name-generalized: медиа-тип %s изменен на �
 response-media-type-name-specialized: медиа-тип %s изменен на более специфичный медиа-тип %s для ответа со статусом %s
 response-media-type-removed-description: удален медиа-тип ответа
 response-mediatype-enum-value-removed-description: удалено enum значение медиа-типа ответа
+response-mediatype-became-enum-description: "медиа-тип ответа ограничен enum"
+response-mediatype-enum-value-added-description: "добавлено enum значение медиа-типа ответа"
 response-mediatype-enum-removed-description: удалено enum медиа-типа ответа
 response-non-success-status-added-description: добавлен статус неуспешного ответа
 response-non-success-status-removed-description: удален статус неуспешного ответа

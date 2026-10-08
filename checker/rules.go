@@ -636,12 +636,18 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
 		// ResponseMediaTypeEnumValueRemovedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
+		// ResponseMediaTypeEnumValueAddedCheck
+		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueAddedId, ERR, ResponseMediaTypeEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
+		// ResponseMediaTypeBecameEnumCheck
+		newBackwardCompatibilityRule(ResponseMediaTypeBecameEnumId, INFO, ResponseMediaTypeBecameEnumCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
 		// ResponseMediaTypeEnumRemovedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeEnumRemovedId, ERR, ResponseMediaTypeEnumRemovedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
 		// RequestBodyEnumValueRemovedCheck: removing a value from a request body
 		// enum rejects input a client used to send, so it is breaking, the same
 		// as its request-property and request-parameter siblings.
 		newBackwardCompatibilityRule(RequestBodyEnumValueRemovedId, ERR, RequestBodyEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.enum:remove"),
+		// RequestBodyEnumValueAddedCheck
+		newBackwardCompatibilityRule(RequestBodyEnumValueAddedId, INFO, RequestBodyEnumValueAddedCheck, DirectionRequest, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.enum:add"),
 		// RequestBodyEnumRemovedCheck
 		newBackwardCompatibilityRule(RequestBodyEnumRemovedId, INFO, RequestBodyEnumRemovedCheck, DirectionRequest, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.enum:remove"),
 		// RequestPropertyListOfTypesChangedCheck
