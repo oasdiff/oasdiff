@@ -200,10 +200,12 @@ func (graph *schemaGraph) children(node *SchemaDiff) []*SchemaDiff {
 }
 
 // assignComponents numbers the strongly connected components of the nodes
-// that have none yet (Tarjan). A node only ever links to nodes that exist
-// when it is built, so a node added later cannot join an existing component,
-// and the numbering of the existing nodes stands.
-func (graph *schemaGraph) assignComponents() {
+// reachable from root that have none yet (Tarjan). A node only ever links to
+// nodes that exist when it is built, so a node added later cannot join an
+// existing component, and the numbering of the existing nodes stands. It
+// visits only what root reaches, so its cost is the new nodes rather than the
+// whole graph.
+func (graph *schemaGraph) assignComponents(root *SchemaDiff) {
 	index := map[*SchemaDiff]int{}
 	lowLink := map[*SchemaDiff]int{}
 	onStack := map[*SchemaDiff]bool{}
@@ -241,11 +243,7 @@ func (graph *schemaGraph) assignComponents() {
 			}
 		}
 	}
-	for _, node := range graph.nodes {
-		if _, done := graph.component[node]; !done {
-			visit(node)
-		}
-	}
+	visit(root)
 }
 
 // unroller walks the graph from a node and produces its diff, expanding
@@ -325,10 +323,8 @@ func (u *unroller) cutKey(node *SchemaDiff) string {
 	graph := &u.state.graph
 	component, ok := graph.component[node]
 	if !ok {
-		graph.assignComponents()
-		if component, ok = graph.component[node]; !ok {
-			return ""
-		}
+		graph.assignComponents(node)
+		component = graph.component[node]
 	}
 	var cut []*SchemaDiff
 	for _, ancestor := range u.stack {
