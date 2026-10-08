@@ -5,8 +5,12 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/metaschema"
+	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
+	"github.com/stretchr/testify/require"
 )
 
 // This file audits the rule registry (GetAllRules) for broken symmetries: a
@@ -155,6 +159,154 @@ func TestRuleSymmetry(t *testing.T) {
 	for w := range symmetryWaivers {
 		if !absent[w] {
 			t.Errorf("stale symmetry waiver: %q\n  this asymmetry no longer exists; remove the waiver", w)
+		}
+	}
+}
+
+// The coordinates above do not say where in a payload a rule applies: a
+// check on a request body schema and one on a request property share
+// request/schema/values, so a keyword checked at one and not the other
+// passes TestRuleSymmetry. TestRulePositionSymmetry runs each schema edit at
+// every position a schema can sit and requires that an edit reported at one
+// position is reported at all of them, or is listed in positionWaivers.
+// Bound keywords (maximum, maxLength and the like) are left out: their rules
+// are generated for every position and TestBoundCellsFire covers each one.
+
+// positionWaivers records each position where a schema edit is reported
+// nowhere although another position reports it. Key: "<edit> <position>".
+var positionWaivers = map[string]string{
+	"pattern-added request-body":         "missing check, #1295",
+	"pattern-removed request-body":       "missing check, #1295",
+	"pattern-changed request-body":       "missing check, #1295",
+	"pattern-added response-body":        "missing check, #1295",
+	"pattern-removed response-body":      "missing check, #1295",
+	"pattern-changed response-body":      "missing check, #1295",
+	"pattern-added response-header":      "missing check, #1295",
+	"pattern-removed response-header":    "missing check, #1295",
+	"pattern-changed response-header":    "missing check, #1295",
+	"const-added request-parameter":      "missing check, #1295",
+	"const-removed request-parameter":    "missing check, #1295",
+	"const-changed request-parameter":    "missing check, #1295",
+	"const-added request-header":         "missing check, #1295",
+	"const-removed request-header":       "missing check, #1295",
+	"const-changed request-header":       "missing check, #1295",
+	"const-added response-header":        "missing check, #1295",
+	"const-removed response-header":      "missing check, #1295",
+	"const-changed response-header":      "missing check, #1295",
+	"enum-value-added response-header":   "missing check, #1295",
+	"enum-value-removed response-header": "missing check, #1295",
+	"enum-added response-header":         "missing check, #1295",
+	"enum-removed response-header":       "missing check, #1295",
+	"default-added response-header":      "missing check, #1295",
+	"default-removed response-header":    "missing check, #1295",
+	"default-changed response-header":    "missing check, #1295",
+}
+
+var schemaPositions = []string{
+	"request-body", "request-property", "request-parameter", "request-header",
+	"response-body", "response-property", "response-header",
+}
+
+// positionDoc builds a spec with schema at position and nothing else that
+// can change.
+func positionDoc(position string, schema *openapi3.Schema) *load.SpecInfo {
+	ref := &openapi3.SchemaRef{Value: schema}
+	content := func(s *openapi3.SchemaRef) openapi3.Content {
+		return openapi3.Content{"application/json": &openapi3.MediaType{Schema: s}}
+	}
+	object := &openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}, Properties: openapi3.Schemas{"p": ref}}}
+	response := &openapi3.Response{Description: new("ok")}
+	op := &openapi3.Operation{Responses: openapi3.NewResponses(openapi3.WithStatus(200, &openapi3.ResponseRef{Value: response}))}
+
+	switch position {
+	case "request-body":
+		op.RequestBody = &openapi3.RequestBodyRef{Value: &openapi3.RequestBody{Content: content(ref)}}
+	case "request-property":
+		op.RequestBody = &openapi3.RequestBodyRef{Value: &openapi3.RequestBody{Content: content(object)}}
+	case "request-parameter":
+		op.Parameters = openapi3.Parameters{&openapi3.ParameterRef{Value: &openapi3.Parameter{Name: "q", In: "query", Schema: ref}}}
+	case "request-header":
+		op.Parameters = openapi3.Parameters{&openapi3.ParameterRef{Value: &openapi3.Parameter{Name: "X-Q", In: "header", Schema: ref}}}
+	case "response-body":
+		response.Content = content(ref)
+	case "response-property":
+		response.Content = content(object)
+	case "response-header":
+		response.Headers = openapi3.Headers{"X-R": &openapi3.HeaderRef{Value: &openapi3.Header{Parameter: openapi3.Parameter{Schema: ref}}}}
+	}
+
+	return &load.SpecInfo{Spec: &openapi3.T{
+		OpenAPI: "3.1.0",
+		Info:    &openapi3.Info{Title: "t", Version: "1.0.0"},
+		Paths:   openapi3.NewPaths(openapi3.WithPath("/t", &openapi3.PathItem{Post: op})),
+	}}
+}
+
+func TestRulePositionSymmetry(t *testing.T) {
+	str := func(set func(*openapi3.Schema)) *openapi3.Schema {
+		s := &openapi3.Schema{Type: &openapi3.Types{"string"}}
+		set(s)
+		return s
+	}
+	plain := func(*openapi3.Schema) {}
+	edits := []struct {
+		name           string
+		base, revision func(*openapi3.Schema)
+	}{
+		{"enum-value-added", func(s *openapi3.Schema) { s.Enum = []any{"a", "b"} }, func(s *openapi3.Schema) { s.Enum = []any{"a", "b", "c"} }},
+		{"enum-value-removed", func(s *openapi3.Schema) { s.Enum = []any{"a", "b", "c"} }, func(s *openapi3.Schema) { s.Enum = []any{"a", "b"} }},
+		{"enum-added", plain, func(s *openapi3.Schema) { s.Enum = []any{"a", "b"} }},
+		{"enum-removed", func(s *openapi3.Schema) { s.Enum = []any{"a", "b"} }, plain},
+		{"pattern-added", plain, func(s *openapi3.Schema) { s.Pattern = "^a$" }},
+		{"pattern-removed", func(s *openapi3.Schema) { s.Pattern = "^a$" }, plain},
+		{"pattern-changed", func(s *openapi3.Schema) { s.Pattern = "^a$" }, func(s *openapi3.Schema) { s.Pattern = "^b$" }},
+		{"format-added", plain, func(s *openapi3.Schema) { s.Format = "uuid" }},
+		{"format-removed", func(s *openapi3.Schema) { s.Format = "uuid" }, plain},
+		{"format-changed", func(s *openapi3.Schema) { s.Format = "uuid" }, func(s *openapi3.Schema) { s.Format = "email" }},
+		{"const-added", plain, func(s *openapi3.Schema) { s.Const = "a" }},
+		{"const-removed", func(s *openapi3.Schema) { s.Const = "a" }, plain},
+		{"const-changed", func(s *openapi3.Schema) { s.Const = "a" }, func(s *openapi3.Schema) { s.Const = "b" }},
+		{"default-added", plain, func(s *openapi3.Schema) { s.Default = "a" }},
+		{"default-removed", func(s *openapi3.Schema) { s.Default = "a" }, plain},
+		{"default-changed", func(s *openapi3.Schema) { s.Default = "a" }, func(s *openapi3.Schema) { s.Default = "b" }},
+		{"type-changed", plain, func(s *openapi3.Schema) { s.Type = &openapi3.Types{"integer"} }},
+		{"type-widened", plain, func(s *openapi3.Schema) { s.Type = &openapi3.Types{"string", "integer"} }},
+		{"type-narrowed", func(s *openapi3.Schema) { s.Type = &openapi3.Types{"string", "integer"} }, plain},
+		{"null-added", plain, func(s *openapi3.Schema) { s.Type = &openapi3.Types{"string", "null"} }},
+		{"null-removed", func(s *openapi3.Schema) { s.Type = &openapi3.Types{"string", "null"} }, plain},
+	}
+
+	config := allChecksConfig()
+	unreported := map[string]bool{}
+	for _, edit := range edits {
+		reportedAnywhere := false
+		var silent []string
+		for _, position := range schemaPositions {
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), positionDoc(position, str(edit.base)), positionDoc(position, str(edit.revision)))
+			require.NoError(t, err)
+			if len(checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)) > 0 {
+				reportedAnywhere = true
+			} else {
+				silent = append(silent, position)
+			}
+		}
+		if !reportedAnywhere {
+			t.Errorf("%s is reported at no position; the probe no longer exercises a check", edit.name)
+			continue
+		}
+		for _, position := range silent {
+			unreported[edit.name+" "+position] = true
+		}
+	}
+
+	for key := range unreported {
+		if _, ok := positionWaivers[key]; !ok {
+			t.Errorf("unwaived position asymmetry: %q is reported at other positions but not here\n  fix it by adding the check, or document it in positionWaivers with a reason", key)
+		}
+	}
+	for key := range positionWaivers {
+		if !unreported[key] {
+			t.Errorf("stale position waiver: %q is reported now; remove the waiver", key)
 		}
 	}
 }

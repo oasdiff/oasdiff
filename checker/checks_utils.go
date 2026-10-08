@@ -145,3 +145,43 @@ func prefixItemsChangedContract(schemaDiff *diff.SchemaDiff) bool {
 	return schemaDiff.PrefixItemsDiff != nil &&
 		!diff.PrefixItemsValidationEquivalent(diff.NewConfig(), schemaDiff.Base, schemaDiff.Revision)
 }
+
+// enumRemoved reports whether the enum keyword was dropped with nothing left in
+// the revision that could still restrict the values, so every value accepted
+// before is still accepted. Removing only some values is not this change.
+func enumRemoved(schemaDiff *diff.SchemaDiff) bool {
+	return schemaDiff.EnumDiff != nil && schemaDiff.EnumDiff.EnumDeleted && !mayRestrictValues(schemaDiff.Revision)
+}
+
+// enumAdded is the mirror of enumRemoved: the enum keyword appeared on a
+// schema that had nothing else restricting its values.
+func enumAdded(schemaDiff *diff.SchemaDiff) bool {
+	return schemaDiff.EnumDiff != nil && schemaDiff.EnumDiff.EnumAdded && !mayRestrictValues(schemaDiff.Base)
+}
+
+// mayRestrictValues reports whether a schema has keywords that can limit its
+// values the way an enum does. When it does, the enum may have moved rather
+// than gone (for example into a oneOf branch), so a dropped enum cannot be
+// proven to widen.
+func mayRestrictValues(schema *openapi3.Schema) bool {
+	return schema != nil && (len(schema.OneOf) > 0 || len(schema.AnyOf) > 0 || len(schema.AllOf) > 0 ||
+		schema.Not != nil || schema.Const != nil || schema.If != nil || schema.Then != nil || schema.Else != nil)
+}
+
+// deletedEnumValues returns the values removed from an enum, or none when the
+// enum itself was removed, since the values are then still accepted.
+func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
+	if schemaDiff.EnumDiff == nil || enumRemoved(schemaDiff) {
+		return nil
+	}
+	return schemaDiff.EnumDiff.Deleted
+}
+
+// addedEnumValues returns the values added to an enum, or none when the enum
+// itself was added, since the schema is then narrowed to them, not widened by them.
+func addedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
+	if schemaDiff.EnumDiff == nil || enumAdded(schemaDiff) {
+		return nil
+	}
+	return schemaDiff.EnumDiff.Added
+}
