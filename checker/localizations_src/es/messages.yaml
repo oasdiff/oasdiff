@@ -74,6 +74,7 @@ request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetr
 request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
 request-parameter-property-enum-value-added: agregado el valor enum %s a la propiedad %s del parámetro %s de solicitud %s
 pattern-changed-warn-comment: "Esta es una advertencia porque agregar o cambiar un patrón puede restringir los valores aceptados y romper clientes existentes. Para cambios de patrón, es difícil analizar automáticamente si el nuevo patrón es un superconjunto del patrón anterior (ej. cambiado de '[0-9]+' a '[0-9]*')"
+request-property-became-read-only-comment: "Esta es una advertencia porque una propiedad de solo lectura no debería enviarse en una solicitud, y la especificación deja al servidor decidir si la ignora o rechaza la solicitud. Los clientes que la envían pueden ser rechazados, o descubrir que el valor que envían ya no se usa."
 request-parameter-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s del parámetro %s de solicitud %s
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
 request-parameter-max-decreased: para el parámetro %s de solicitud %s, el máximo fue disminuido de %s a %s

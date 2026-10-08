@@ -74,6 +74,7 @@ request-parameter-enum-value-added: valor %s do enum adicionado ao parâmetro de
 request-parameter-property-enum-value-removed: valor %s do enum removido da propriedade %s do parâmetro de requisição do tipo %s e nome %s
 request-parameter-property-enum-value-added: valor %s do enum adicionado à propriedade %s do parâmetro de requisição do tipo %s e nome %s
 pattern-changed-warn-comment: "Este é um aviso porque é difícil analisar automaticamente se o novo padrão é um superconjunto do padrão anterior (por exemplo, alterado de '[0-9]+' para '[0-9]*')"
+request-property-became-read-only-comment: "Este é um aviso porque uma propriedade somente leitura não deve ser enviada em uma requisição, e a especificação deixa ao servidor decidir se a ignora ou rejeita a requisição. Clientes que a enviam podem ser rejeitados, ou descobrir que o valor enviado não é mais usado."
 pattern-added-error-comment: "Esta é uma alteração crítica porque adicionar uma restrição de padrão a um parâmetro anteriormente irrestrito rejeitará valores que eram aceitos anteriormente, quebrando clientes existentes"
 request-parameter-x-extensible-enum-value-removed: valor x-extensible-enum %s removido do parâmetro de requisição do tipo %s e nome %s
 request-parameter-max-decreased: no parâmetro de requisição do tipo %s e nome %s teve seu valor máximo foi reduzido de %s para %s

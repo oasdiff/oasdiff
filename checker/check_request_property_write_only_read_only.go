@@ -17,6 +17,7 @@ const (
 	RequestRequiredPropertyBecameWriteOnlyCheckId    = "request-required-property-became-write-only"
 	RequestRequiredPropertyBecameReadOnlyCheckId     = "request-required-property-became-read-only"
 	RequestRequiredPropertyBecameNonReadOnlyCheckId  = "request-required-property-became-not-read-only"
+	RequestPropertyBecameReadOnlyCommentId           = "request-property-became-read-only-comment"
 )
 
 func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -28,7 +29,10 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				// removed properties processed by the RequestOptionalPropertyUpdatedCheck check
 				return
 			}
-			required := slices.Contains(p.parent.Base.Required, p.propertyName)
+			// required in both, so a flip that comes with a change to the
+			// required list is not reported as if the list were unchanged
+			required := slices.Contains(p.parent.Base.Required, p.propertyName) &&
+				slices.Contains(p.parent.Revision.Required, p.propertyName)
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
@@ -54,7 +58,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 
 			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
-				var id string
+				var id, comment string
 				if required {
 					id = RequestRequiredPropertyBecameNonReadOnlyCheckId
 					if readOnlyDiff.To == true {
@@ -66,11 +70,14 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 						id = RequestOptionalPropertyBecameReadOnlyCheckId
 					}
 				}
+				if readOnlyDiff.To == true {
+					comment = RequestPropertyBecameReadOnlyCommentId
+				}
 				result = append(result, p.newChange(
 					id,
 					[]any{propName},
-					"",
-				).WithSources(propBaseSource, propRevisionSource))
+					comment,
+				).withoutGuard(GuardReadOnly).WithSources(propBaseSource, propRevisionSource))
 			}
 		})
 	})
