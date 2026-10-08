@@ -127,6 +127,16 @@ func TestChangeBelowASharedSchemaListsTheOtherProperty(t *testing.T) {
 	}, sharedAt(t, changes))
 }
 
+// The required list is Shared's own, so the change is at the properties that
+// hold Shared, as in the response check.
+func TestRequestPropertyBecameRequiredInASharedSchemaListsTheOtherProperty(t *testing.T) {
+	changes := sharedSchemaChanges(t, "shared_schema_request_required", checker.RequestPropertyRequiredUpdatedCheck)
+
+	require.Equal(t, map[string]*checker.SharedSchema{
+		"left": {Name: "Shared", Properties: []string{"left", "right"}, Count: 2},
+	}, sharedAt(t, changes))
+}
+
 // left and right reference Holder's inner property, so the schema they share
 // is named after Holder, the component it is in.
 func TestSharedSchemaReachedThroughARefIntoAComponentIsNamedAfterIt(t *testing.T) {
