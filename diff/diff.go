@@ -147,23 +147,31 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSo
 	return result, &operationsSources, nil
 }
 
-func getPathItem(paths *openapi3.Paths, path string, includePathParams bool) *openapi3.PathItem {
+// pathKey returns the key under which mergedPaths matches path: the path
+// itself, or, when path parameter names are ignored, the path without them.
+func pathKey(path string, includePathParams bool) string {
 	if includePathParams {
-		return paths.Value(path)
+		return path
 	}
-
-	return paths.Find(path)
+	normalized, _, _ := normalizeTemplatedPath(path)
+	return normalized
 }
 
 func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, *OperationsSourcesMap, error) {
 	result := openapi3.NewPaths()
+	// Looking each path up in result with Paths.Find would scan every path
+	// added so far, which is quadratic in the number of paths.
+	byKey := map[string]*openapi3.PathItem{}
 	operationsSources := make(OperationsSourcesMap)
 	for _, s := range s1 {
 		for path, pathItem := range s.Spec.Paths.Map() {
 
-			p := getPathItem(result, path, includePathParams)
+			key := pathKey(path, includePathParams)
+			p := byKey[key]
 			if p == nil {
-				result.Set(path, copyPathItem(pathItem))
+				p = copyPathItem(pathItem)
+				result.Set(path, p)
+				byKey[key] = p
 				for _, opItem := range pathItem.Operations() {
 					operationsSources[opItem] = s.Url
 				}
