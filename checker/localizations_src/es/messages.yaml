@@ -344,6 +344,7 @@ response-body-all-of-removed: "%s fue removido de la lista `allOf` del cuerpo de
 all-of-not-flattened-comment: "Esto comparó las ramas de `allOf` una por una, así que otra rama todavía puede garantizar lo que esta perdió. Ejecute con --flatten-allof para fusionar las ramas y comparar lo que describen en conjunto."
 read-only-comment: "La propiedad es de solo lectura, por lo que nunca aparece en las solicitudes y este cambio no puede invalidar ninguna."
 write-only-comment: "La propiedad es de solo escritura, por lo que nunca aparece en las respuestas y este cambio no puede invalidar ninguna."
+required-in-requests-comment: "En OpenAPI 3.1 y posteriores, required se aplica también en las solicitudes a una propiedad de solo lectura, así que los clientes ya la envían y este cambio no puede invalidar una solicitud."
 response-property-all-of-added: "%s fue agregado a la lista `allOf` de la propiedad de respuesta %s para el estado %s"
 response-property-all-of-removed: "%s fue removido de la lista `allOf` de la propiedad de respuesta %s para el estado %s"
 response-body-discriminator-added: agregado discriminador de respuesta para el estado %s
@@ -372,6 +373,7 @@ request-body-discriminator-mapping-changed: el valor mapeado para la clave %s fu
 request-property-discriminator-mapping-changed: el valor mapeado para la clave del discriminador %s fue cambiado de %s a %s para la propiedad de solicitud %s
 request-required-property-became-read-only: la propiedad requerida de solicitud %s se volvió de solo lectura
 request-required-property-became-not-read-only: la propiedad requerida de solicitud %s dejó de ser de solo lectura
+request-required-property-became-not-read-only-in-openapi-31: la propiedad requerida de solicitud %s dejó de ser de solo lectura
 request-optional-property-became-write-only: la propiedad opcional de solicitud %s se volvió de solo escritura
 request-optional-property-became-read-only: la propiedad opcional de solicitud %s se volvió de solo lectura
 request-optional-property-became-not-write-only: la propiedad opcional de solicitud %s dejó de ser de solo escritura
@@ -570,6 +572,7 @@ request-property-type-generalized-description: tipo de la propiedad de solicitud
 request-property-type-compatible-description: tipo de la propiedad de solicitud cambiado pero retrocompatible
 request-property-x-extensible-enum-value-removed-description: valor x-extensible-enum de la propiedad de solicitud removido
 request-required-property-became-not-read-only-description: propiedad requerida de solicitud dejó de ser de solo lectura
+request-required-property-became-not-read-only-in-openapi-31-description: propiedad requerida de solicitud dejó de ser de solo lectura en OpenAPI 3.1 o posterior
 request-required-property-became-not-write-only-description: propiedad requerida de solicitud dejó de ser de solo escritura
 request-required-property-became-read-only-description: propiedad requerida de solicitud se volvió de solo lectura
 request-required-property-became-write-only-description: propiedad requerida de solicitud se volvió de solo escritura

@@ -317,6 +317,7 @@ response-body-all-of-removed: удалён %s из списка `allOf` тела
 all-of-not-flattened-comment: "Ветви `allOf` сравнивались по отдельности, поэтому другая ветвь может по-прежнему гарантировать то, что утрачено в этой. Запустите с --flatten-allof, чтобы объединить ветви и сравнить то, что они описывают вместе."
 read-only-comment: "Свойство доступно только для чтения, поэтому оно не встречается в запросах, и это изменение не может сделать запрос недействительным."
 write-only-comment: "Свойство доступно только для записи, поэтому оно не встречается в ответах, и это изменение не может сделать ответ недействительным."
+required-in-requests-comment: "В OpenAPI 3.1 и более поздних версиях required применяется к свойству только для чтения и в запросах, поэтому клиенты уже его отправляют, и это изменение не может сделать запрос недействительным."
 response-property-all-of-added: добавлено %s в список `allOf` свойства ответа %s для статуса ответа %s
 response-property-all-of-removed: удалён %s из списка `allOf` свойства ответа %s для статуса ответа %s
 response-body-discriminator-added: добавлен дискриминатор ответа для статуса ответа %s
@@ -345,6 +346,7 @@ request-body-discriminator-mapping-changed: значение для ключа %
 request-property-discriminator-mapping-changed: значение для ключа дискриминатора %s изменено с %s на %s для свойства запроса %s
 request-required-property-became-read-only: обязательное поле запроса %s стало только для чтения
 request-required-property-became-not-read-only: обязательное поле запроса %s перестало быть только для чтения
+request-required-property-became-not-read-only-in-openapi-31: обязательное поле запроса %s перестало быть только для чтения
 request-optional-property-became-write-only: необязательное поле запроса %s стало только для записи
 request-optional-property-became-read-only: необязательное поле запроса %s стало только для чтения
 request-optional-property-became-not-write-only: необязательное поле запроса %s перестало быть только для записи
@@ -575,6 +577,7 @@ request-read-only-property-max-decreased-description: уменьшено мак�
 request-read-only-property-max-length-decreased-description: уменьшена максимальная длина свойства запроса только для чтения
 request-read-only-property-min-increased-description: увеличено минимальное значение свойства запроса только для чтения
 request-required-property-became-not-read-only-description: обязательное свойство запроса перестало быть только для чтения
+request-required-property-became-not-read-only-in-openapi-31-description: обязательное свойство запроса перестало быть только для чтения в OpenAPI 3.1 или новее
 request-required-property-became-not-write-only-description: обязательное свойство запроса перестало быть только для записи
 request-required-property-became-read-only-description: обязательное свойство запроса стало только для чтения
 request-required-property-became-write-only-description: обязательное свойство запроса стало только для записи

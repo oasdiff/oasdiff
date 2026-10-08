@@ -56,12 +56,13 @@ const (
 	EffectUnknown      = rules.EffectUnknown
 	EffectViolation    = rules.EffectViolation
 
-	GuardReadOnly   = rules.GuardReadOnly
-	GuardWriteOnly  = rules.GuardWriteOnly
-	GuardSanctioned = rules.GuardSanctioned
-	GuardNonSuccess = rules.GuardNonSuccess
-	GuardHasDefault = rules.GuardHasDefault
-	GuardNegotiated = rules.GuardNegotiated
+	GuardReadOnly           = rules.GuardReadOnly
+	GuardWriteOnly          = rules.GuardWriteOnly
+	GuardSanctioned         = rules.GuardSanctioned
+	GuardNonSuccess         = rules.GuardNonSuccess
+	GuardHasDefault         = rules.GuardHasDefault
+	GuardNegotiated         = rules.GuardNegotiated
+	GuardRequiredInRequests = rules.GuardRequiredInRequests
 )
 
 // BackwardCompatibilityRule binds the rule metadata to the check function
@@ -451,6 +452,7 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestRequiredPropertyBecameWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.requestBody.content.*.schema.writeOnly:set"),
 		newBackwardCompatibilityRule(RequestRequiredPropertyBecameReadOnlyCheckId, WARN, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectUnknown, nil, "paths.*.*.requestBody.content.*.schema.readOnly:set"),
 		newBackwardCompatibilityRule(RequestRequiredPropertyBecameNonReadOnlyCheckId, ERR, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
+		newBackwardCompatibilityRule(RequestRequiredPropertyBecameNonReadOnly31Id, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNarrows, []Guard{GuardRequiredInRequests}, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
 		// RequestPropertyXExtensibleEnumValueRemovedCheck
 		newBackwardCompatibilityRule(RequestPropertyXExtensibleEnumValueRemovedId, ERR, RequestPropertyXExtensibleEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
 		// ResponseDiscriminatorUpdatedCheck

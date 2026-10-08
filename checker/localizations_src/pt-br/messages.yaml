@@ -333,6 +333,7 @@ response-body-all-of-removed: "%s foi removido da lista `allOf` do corpo da resp
 all-of-not-flattened-comment: "Isto comparou os ramos do `allOf` um a um, então outro ramo ainda pode garantir o que este perdeu. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
 read-only-comment: "A propriedade é somente leitura, portanto nunca aparece em requisições e esta mudança não pode invalidar nenhuma."
 write-only-comment: "A propriedade é somente escrita, portanto nunca aparece em respostas e esta mudança não pode invalidar nenhuma."
+required-in-requests-comment: "No OpenAPI 3.1 e posteriores, required também se aplica nas requisições a uma propriedade somente leitura, então os clientes já a enviam e esta mudança não pode invalidar uma requisição."
 response-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedade de resposta %s para o status %s"
 response-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de resposta %s para o status %s"
 response-body-discriminator-added: discriminador de resposta adicionado para o status %s
@@ -361,6 +362,7 @@ request-body-discriminator-mapping-changed: o valor mapeado para a chave %s foi 
 request-property-discriminator-mapping-changed: o valor mapeado para a chave do discriminador %s foi alterado de %s para %s para a propriedade de requisição %s
 request-required-property-became-read-only: a propriedade obrigatória de requisição %s tornou-se somente leitura
 request-required-property-became-not-read-only: a propriedade obrigatória de requisição %s deixou de ser somente leitura
+request-required-property-became-not-read-only-in-openapi-31: a propriedade obrigatória de requisição %s deixou de ser somente leitura
 request-optional-property-became-write-only: a propriedade opcional de requisição %s tornou-se somente escrita
 request-optional-property-became-read-only: a propriedade opcional de requisição %s tornou-se somente leitura
 request-optional-property-became-not-write-only: a propriedade opcional de requisição %s deixou de ser somente escrita
@@ -558,6 +560,7 @@ request-property-type-generalized-description: tipo da propriedade de requisiç�
 request-property-type-compatible-description: tipo da propriedade de requisição mudou mas é retrocompatível
 request-property-x-extensible-enum-value-removed-description: valor x-extensible-enum da propriedade de requisição removido
 request-required-property-became-not-read-only-description: propriedade obrigatória da requisição deixou de ser somente leitura
+request-required-property-became-not-read-only-in-openapi-31-description: propriedade obrigatória da requisição deixou de ser somente leitura no OpenAPI 3.1 ou posterior
 request-required-property-became-not-write-only-description: propriedade obrigatória da requisição deixou de ser somente escrita
 request-required-property-became-read-only-description: propriedade obrigatória da requisição tornou-se somente leitura
 request-required-property-became-write-only-description: propriedade obrigatória da requisição tornou-se somente escrita

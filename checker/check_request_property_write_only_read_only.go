@@ -3,6 +3,8 @@ package checker
 import (
 	"slices"
 
+	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -17,6 +19,8 @@ const (
 	RequestRequiredPropertyBecameWriteOnlyCheckId    = "request-required-property-became-write-only"
 	RequestRequiredPropertyBecameReadOnlyCheckId     = "request-required-property-became-read-only"
 	RequestRequiredPropertyBecameNonReadOnlyCheckId  = "request-required-property-became-not-read-only"
+	RequestRequiredPropertyBecameNonReadOnly31Id     = "request-required-property-became-not-read-only-in-openapi-31"
+	RequiredInRequestsCommentId                      = "required-in-requests-comment"
 	RequestPropertyBecameReadOnlyCommentId           = "request-property-became-read-only-comment"
 )
 
@@ -72,6 +76,9 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				}
 				if readOnlyDiff.To == true {
 					comment = RequestPropertyBecameReadOnlyCommentId
+				} else if required && openAPI31OrLater(diffReport.BaseOpenAPI) {
+					id = RequestRequiredPropertyBecameNonReadOnly31Id
+					comment = RequiredInRequestsCommentId
 				}
 				result = append(result, p.newChange(
 					id,
@@ -83,4 +90,8 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 	})
 
 	return result
+}
+
+func openAPI31OrLater(version string) bool {
+	return (&openapi3.T{OpenAPI: version}).IsOpenAPI31OrLater()
 }
