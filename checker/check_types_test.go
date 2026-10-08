@@ -204,3 +204,12 @@ func TestIsJsonMediaType(t *testing.T) {
 	require.False(t, isJsonMediaType("application/json-patch")) // Note: Differs from application/json-patch+json
 	require.False(t, isJsonMediaType(""))
 }
+
+// A date is not a valid date-time, and neither is a time: the value sets are
+// disjoint, so changing the format between them is breaking in either direction.
+func TestStringFormatToDateTimeBreaking(t *testing.T) {
+	for _, from := range []string{"date", "time"} {
+		formatDiff := &diff.ValueDiff{From: from, To: "date-time"}
+		breaking(t, nil, formatDiff, false, &openapi3.Types{"string"})
+	}
+}

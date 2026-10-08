@@ -30,6 +30,16 @@ type ApiChange struct {
 	// recognized transition there can claim the change (see
 	// transition_claims.go).
 	schema *diff.SchemaDiff
+	// root is the payload or parameter schema the walk started from, and
+	// propertyPath the path from it the change is reported at, kept so that a
+	// change below a schema several properties reach can list the others (see
+	// attachSharedSchemas).
+	root         *diff.SchemaDiff
+	propertyPath string
+
+	// sharedSchema is rendered after Details rather than stored there, so a
+	// check that sets its own details does not drop it.
+	sharedSchema *SharedSchema
 
 	// guards holds the document states observed at the change's location
 	// (a readOnly or writeOnly property). capByGuards derives the level
@@ -62,10 +72,12 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 	}
 }
 
-// WithSchema returns a copy of the ApiChange that records the schema node the
-// change was computed from. A later call replaces it.
-func (a ApiChange) WithSchema(schemaDiff *diff.SchemaDiff) ApiChange {
-	a.schema = schemaDiff
+// WithSchema returns a copy of the ApiChange that records the schema diff the
+// change was found in, the root schema the walk started from, and the property
+// path of the change (empty for a change to the root itself). A later call
+// replaces all three.
+func (a ApiChange) WithSchema(root *diff.SchemaDiff, schemaDiff *diff.SchemaDiff, propertyPath string) ApiChange {
+	a.root, a.schema, a.propertyPath = root, schemaDiff, propertyPath
 	return a
 }
 
@@ -114,6 +126,19 @@ func (c ApiChange) WithDetails(details string) ApiChange {
 	return c
 }
 
+// WithSharedSchema returns a copy of the ApiChange in a schema several
+// properties of its payload reach.
+func (c ApiChange) WithSharedSchema(shared *SharedSchema) ApiChange {
+	c.sharedSchema = shared
+	return c
+}
+
+// GetSharedSchema is nil unless several of the payload's properties reach the
+// schema the change is in or below.
+func (c ApiChange) GetSharedSchema() *SharedSchema {
+	return c.sharedSchema
+}
+
 func getAttributes(config *Config, operation *openapi3.Operation) map[string]any {
 	result := map[string]any{}
 	for _, tag := range config.Attributes {
@@ -152,7 +177,7 @@ func (c ApiChange) GetId() string {
 }
 
 func (c ApiChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...) + c.getDetailsSuffix()
+	return l(c.Id, colorizedValues(c.Args)...) + c.getDetailsSuffix(l, colorizedValues)
 }
 
 func (c ApiChange) GetArgs() []any {
@@ -160,7 +185,7 @@ func (c ApiChange) GetArgs() []any {
 }
 
 func (c ApiChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix()
+	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix(l, quotedValues)
 }
 
 func (c ApiChange) GetComment(l Localizer) string {
@@ -177,11 +202,14 @@ func (c ApiChange) GetComment(l Localizer) string {
 	return strings.Join(parts, " ")
 }
 
-func (c ApiChange) getDetailsSuffix() string {
-	if c.Details == "" {
+// getDetailsSuffix takes the formatter applied to the message arguments, so a
+// value in the details looks the same as one in the message.
+func (c ApiChange) getDetailsSuffix(l Localizer, format func([]any) []any) string {
+	details := combineDetails(c.Details, c.sharedSchema.detail(l, format))
+	if details == "" {
 		return ""
 	}
-	return " " + c.Details
+	return " " + details
 }
 
 func (c ApiChange) GetLevel() Level {
