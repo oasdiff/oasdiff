@@ -3,6 +3,8 @@ package checker
 import (
 	"slices"
 
+	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -17,6 +19,9 @@ const (
 	RequestRequiredPropertyBecameWriteOnlyCheckId    = "request-required-property-became-write-only"
 	RequestRequiredPropertyBecameReadOnlyCheckId     = "request-required-property-became-read-only"
 	RequestRequiredPropertyBecameNonReadOnlyCheckId  = "request-required-property-became-not-read-only"
+	RequestRequiredPropertyBecameNonReadOnly31Id     = "request-required-property-became-not-read-only-in-openapi-31"
+	RequiredInRequestsCommentId                      = "required-in-requests-comment"
+	RequestPropertyBecameReadOnlyCommentId           = "request-property-became-read-only-comment"
 )
 
 func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -28,7 +33,10 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				// removed properties processed by the RequestOptionalPropertyUpdatedCheck check
 				return
 			}
-			required := slices.Contains(p.parent.Base.Required, p.propertyName)
+			// required in both, so a flip that comes with a change to the
+			// required list is not reported as if the list were unchanged
+			required := slices.Contains(p.parent.Base.Required, p.propertyName) &&
+				slices.Contains(p.parent.Revision.Required, p.propertyName)
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
@@ -54,7 +62,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 
 			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
-				var id string
+				var id, comment string
 				if required {
 					id = RequestRequiredPropertyBecameNonReadOnlyCheckId
 					if readOnlyDiff.To == true {
@@ -66,14 +74,24 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 						id = RequestOptionalPropertyBecameReadOnlyCheckId
 					}
 				}
+				if readOnlyDiff.To == true {
+					comment = RequestPropertyBecameReadOnlyCommentId
+				} else if required && openAPI31OrLater(diffReport.BaseOpenAPI) {
+					id = RequestRequiredPropertyBecameNonReadOnly31Id
+					comment = RequiredInRequestsCommentId
+				}
 				result = append(result, p.newChange(
 					id,
 					[]any{propName},
-					"",
-				).WithSources(propBaseSource, propRevisionSource))
+					comment,
+				).withoutGuard(GuardReadOnly).WithSources(propBaseSource, propRevisionSource))
 			}
 		})
 	})
 
 	return result
+}
+
+func openAPI31OrLater(version string) bool {
+	return (&openapi3.T{OpenAPI: version}).IsOpenAPI31OrLater()
 }

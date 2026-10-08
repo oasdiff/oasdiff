@@ -30,6 +30,7 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }
 
 // changing required response property to not write-only

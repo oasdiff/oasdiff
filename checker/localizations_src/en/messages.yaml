@@ -86,6 +86,7 @@ request-parameter-enum-value-added: added the new enum value %s to the %s reques
 request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
 request-parameter-property-enum-value-added: added the enum value %s to the property %s of the %s request parameter %s
 pattern-changed-warn-comment: "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')"
+request-property-became-read-only-comment: "This is a warning because a read-only property should not be sent in a request, and the specification leaves it to the server whether to ignore it or reject the request. Clients that send it may be rejected, or find the value they send is no longer used."
 pattern-added-error-comment: "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients"
 request-parameter-x-extensible-enum-value-removed: removed the x-extensible-enum value %s from the %s request parameter %s
 request-parameter-max-decreased: for the %s request parameter %s, the max was decreased from %s to %s
@@ -344,6 +345,7 @@ response-body-all-of-removed: removed %s from the response body `allOf` list for
 all-of-not-flattened-comment: "This compared the `allOf` branches one at a time, so another branch may still guarantee what this one dropped. Run with --flatten-allof to merge the branches and compare what they describe together."
 read-only-comment: "The property is read-only, so it never appears in requests and this change cannot invalidate one."
 write-only-comment: "The property is write-only, so it never appears in responses and this change cannot invalidate one."
+required-in-requests-comment: "In OpenAPI 3.1 and later, required applies to a read-only property in requests too, so clients already send it and this change cannot invalidate a request."
 response-property-all-of-added: added %s to the %s response property `allOf` list for the response status %s
 response-property-all-of-removed: removed %s from the %s response property `allOf` list for the response status %s
 response-body-discriminator-added: added response discriminator for the response status %s
@@ -372,6 +374,7 @@ request-body-discriminator-mapping-changed: mapped value for key %s changed from
 request-property-discriminator-mapping-changed: mapped value for discriminator key %s changed from %s to %s for %s request property
 request-required-property-became-read-only: the request required property %s became read-only
 request-required-property-became-not-read-only: the request required property %s became not read-only
+request-required-property-became-not-read-only-in-openapi-31: the request required property %s became not read-only
 request-optional-property-became-write-only: the request optional property %s became write-only
 request-optional-property-became-read-only: the request optional property %s became read-only
 request-optional-property-became-not-write-only: the request optional property %s became not write-only
@@ -575,6 +578,7 @@ request-property-type-generalized-description: request property type generalized
 request-property-type-compatible-description: request property type changed but backward compatible
 request-property-x-extensible-enum-value-removed-description: request property x-extensible-enum value removed
 request-required-property-became-not-read-only-description: request required property became not read-only
+request-required-property-became-not-read-only-in-openapi-31-description: request required property became not read-only in OpenAPI 3.1 or later
 request-required-property-became-not-write-only-description: request required property became not write-only
 request-required-property-became-read-only-description: request required property became read-only
 request-required-property-became-write-only-description: request required property became write-only
