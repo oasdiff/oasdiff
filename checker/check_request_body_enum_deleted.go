@@ -15,11 +15,7 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		enumDiff := info.schemaDiff.EnumDiff
-		if enumDiff == nil || enumDiff.Deleted == nil || enumRemoved(info.schemaDiff) {
-			return
-		}
-		for _, enumVal := range enumDiff.Deleted {
+		for _, enumVal := range deletedEnumValues(info.schemaDiff) {
 			baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 			result = append(result, info.newChange(RequestBodyEnumValueRemovedId, []any{enumVal}, "").
 				WithSources(baseSource, revisionSource))

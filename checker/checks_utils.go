@@ -171,7 +171,7 @@ func mayRestrictValues(schema *openapi3.Schema) bool {
 // deletedEnumValues returns the values removed from an enum, or none when the
 // enum itself was removed, since the values are then still accepted.
 func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
-	if enumRemoved(schemaDiff) {
+	if schemaDiff.EnumDiff == nil || enumRemoved(schemaDiff) {
 		return nil
 	}
 	return schemaDiff.EnumDiff.Deleted
@@ -180,7 +180,7 @@ func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
 // addedEnumValues returns the values added to an enum, or none when the enum
 // itself was added, since the schema is then narrowed to them, not widened by them.
 func addedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
-	if enumAdded(schemaDiff) {
+	if schemaDiff.EnumDiff == nil || enumAdded(schemaDiff) {
 		return nil
 	}
 	return schemaDiff.EnumDiff.Added

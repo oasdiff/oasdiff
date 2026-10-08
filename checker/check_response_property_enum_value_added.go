@@ -18,11 +18,6 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
-			enumDiff := p.propertyDiff.EnumDiff
-			if enumDiff == nil || enumDiff.Added == nil || enumAdded(p.propertyDiff) {
-				return
-			}
-
 			id := ResponsePropertyEnumValueAddedId
 			comment := commentId(ResponsePropertyEnumValueAddedId)
 
@@ -32,7 +27,7 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 				comment = ""
 			}
 
-			for _, enumVal := range enumDiff.Added {
+			for _, enumVal := range addedEnumValues(p.propertyDiff) {
 				baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 				result = append(result, p.newChange(
 					id,

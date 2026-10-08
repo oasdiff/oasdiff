@@ -15,9 +15,6 @@ func ResponseMediaTypeEnumValueAddedCheck(diffReport *diff.Diff, operationsSourc
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if info.schemaDiff.EnumDiff == nil {
-			return
-		}
 		for _, enumVal := range addedEnumValues(info.schemaDiff) {
 			baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, info.schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 			result = append(result, info.newChange(ResponseMediaTypeEnumValueAddedId, []any{enumVal, info.mediaType, info.responseStatus}, commentId(ResponseMediaTypeEnumValueAddedId)).

@@ -19,11 +19,6 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
-			enumDiff := p.propertyDiff.EnumDiff
-			if enumDiff == nil {
-				return
-			}
-
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			for _, enumVal := range deletedEnumValues(p.propertyDiff) {
