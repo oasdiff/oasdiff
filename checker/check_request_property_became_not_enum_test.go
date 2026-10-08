@@ -9,11 +9,11 @@ import (
 )
 
 // removing the enum keyword from a request property accepts every value it accepted before
-func TestRequestPropertyEnumRemoved(t *testing.T) {
-	changes := checkChanges(t, checker.RequestPropertyEnumRemovedCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
+func TestRequestPropertyBecameNotEnum(t *testing.T) {
+	changes := checkChanges(t, checker.RequestPropertyBecameNotEnumCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
 	requireApiChanges(t, []checker.ApiChange{
 		{
-			Id:          checker.RequestPropertyEnumRemovedId,
+			Id:          checker.RequestPropertyBecameNotEnumId,
 			Args:        []any{"status"},
 			Operation:   "POST",
 			Path:        "/pets",
@@ -21,7 +21,7 @@ func TestRequestPropertyEnumRemoved(t *testing.T) {
 			OperationId: "createPet",
 		},
 		{
-			Id:          checker.RequestPropertyEnumRemovedId,
+			Id:          checker.RequestPropertyBecameNotEnumId,
 			Args:        []any{"kind"},
 			Operation:   "POST",
 			Path:        "/pets",
@@ -38,8 +38,8 @@ func TestRequestPropertyEnumRemoved(t *testing.T) {
 }
 
 // adding an enum keyword to a request property is reported by request-property-became-enum, not by this check
-func TestRequestPropertyEnumRemoved_EnumAdded(t *testing.T) {
-	require.Empty(t, checkChanges(t, checker.RequestPropertyEnumRemovedCheck, enumRemovedEntirelyRevision, enumRemovedEntirelyBase))
+func TestRequestPropertyBecameNotEnum_EnumAdded(t *testing.T) {
+	require.Empty(t, checkChanges(t, checker.RequestPropertyBecameNotEnumCheck, enumRemovedEntirelyRevision, enumRemovedEntirelyBase))
 }
 
 // removing the enum keyword is one change, not one removed value per enum entry
@@ -53,6 +53,6 @@ func TestRequestPropertyEnumValueUpdated_EnumAddedEntirely(t *testing.T) {
 }
 
 // an enum that moved into a oneOf branch may still restrict the values, so it is not reported as removed
-func TestRequestPropertyEnumRemoved_MovedIntoOneOf(t *testing.T) {
-	require.Empty(t, checkChanges(t, checker.RequestPropertyEnumRemovedCheck, "../data/checker/nullable_wrap_narrowed_base.yaml", "../data/checker/nullable_wrap_narrowed_revision.yaml"))
+func TestRequestPropertyBecameNotEnum_MovedIntoOneOf(t *testing.T) {
+	require.Empty(t, checkChanges(t, checker.RequestPropertyBecameNotEnumCheck, "../data/checker/nullable_wrap_narrowed_base.yaml", "../data/checker/nullable_wrap_narrowed_revision.yaml"))
 }

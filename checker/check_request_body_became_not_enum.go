@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	RequestBodyEnumRemovedId = "request-body-enum-removed"
+	RequestBodyBecameNotEnumId = "request-body-became-not-enum"
 )
 
-func RequestBodyEnumRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestBodyBecameNotEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -17,7 +17,7 @@ func RequestBodyEnumRemovedCheck(diffReport *diff.Diff, operationsSources *diff.
 			return
 		}
 		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")
-		result = append(result, info.newChange(RequestBodyEnumRemovedId, nil, "").
+		result = append(result, info.newChange(RequestBodyBecameNotEnumId, nil, "").
 			WithSources(baseSource, revisionSource))
 	})
 

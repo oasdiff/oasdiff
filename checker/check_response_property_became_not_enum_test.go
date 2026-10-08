@@ -9,8 +9,8 @@ import (
 )
 
 // removing the enum keyword from a response property lets the server return values a client does not expect
-func TestResponsePropertyEnumRemoved(t *testing.T) {
-	changes := checkChanges(t, checker.ResponsePropertyEnumRemovedCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
+func TestResponsePropertyBecameNotEnum(t *testing.T) {
+	changes := checkChanges(t, checker.ResponsePropertyBecameNotEnumCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
 	require.Len(t, changes, 2)
 
 	status := changes[0]
@@ -18,9 +18,9 @@ func TestResponsePropertyEnumRemoved(t *testing.T) {
 		status = changes[1]
 	}
 	requireApiChange(t, checker.ApiChange{
-		Id:          checker.ResponsePropertyEnumRemovedId,
+		Id:          checker.ResponsePropertyBecameNotEnumId,
 		Args:        []any{"status", "200"},
-		Comment:     checker.ResponsePropertyEnumRemovedId + "-comment",
+		Comment:     checker.ResponsePropertyBecameNotEnumId + "-comment",
 		Operation:   "POST",
 		Path:        "/pets",
 		Source:      load.NewSource(enumRemovedEntirelyRevision),
@@ -32,8 +32,8 @@ func TestResponsePropertyEnumRemoved(t *testing.T) {
 }
 
 // a write-only property never appears in responses, so removing its enum cannot break a client
-func TestResponseWriteOnlyPropertyEnumRemoved(t *testing.T) {
-	changes := checkChanges(t, checker.ResponsePropertyEnumRemovedCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
+func TestResponseWriteOnlyPropertyBecameNotEnum(t *testing.T) {
+	changes := checkChanges(t, checker.ResponsePropertyBecameNotEnumCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
 	for _, c := range changes {
 		if c.(checker.ApiChange).Args[0] == "secret" {
 			require.Equal(t, checker.INFO, c.GetLevel())

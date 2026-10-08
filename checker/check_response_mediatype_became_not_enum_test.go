@@ -9,12 +9,12 @@ import (
 )
 
 // removing the enum keyword from a response schema lets the server return values a client does not expect
-func TestResponseMediaTypeEnumRemoved(t *testing.T) {
-	changes := checkChanges(t, checker.ResponseMediaTypeEnumRemovedCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
+func TestResponseMediaTypeBecameNotEnum(t *testing.T) {
+	changes := checkChanges(t, checker.ResponseMediaTypeBecameNotEnumCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
 	requireSingleApiChange(t, checker.ApiChange{
-		Id:          checker.ResponseMediaTypeEnumRemovedId,
+		Id:          checker.ResponseMediaTypeBecameNotEnumId,
 		Args:        []any{"text/plain", "200"},
-		Comment:     checker.ResponseMediaTypeEnumRemovedId + "-comment",
+		Comment:     checker.ResponseMediaTypeBecameNotEnumId + "-comment",
 		Operation:   "PUT",
 		Path:        "/mode",
 		Source:      load.NewSource(enumRemovedEntirelyRevision),
@@ -24,8 +24,8 @@ func TestResponseMediaTypeEnumRemoved(t *testing.T) {
 	require.Equal(t, "removed the enum constraint from the response schema `text/plain` for the response status `200`", changes[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-func TestResponseMediaTypeEnumRemoved_EnumAdded(t *testing.T) {
-	require.Empty(t, checkChanges(t, checker.ResponseMediaTypeEnumRemovedCheck, enumRemovedEntirelyRevision, enumRemovedEntirelyBase))
+func TestResponseMediaTypeBecameNotEnum_EnumAdded(t *testing.T) {
+	require.Empty(t, checkChanges(t, checker.ResponseMediaTypeBecameNotEnumCheck, enumRemovedEntirelyRevision, enumRemovedEntirelyBase))
 }
 
 // removing the enum keyword is one change, not one removed value per enum entry

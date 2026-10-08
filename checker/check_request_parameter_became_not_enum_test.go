@@ -9,11 +9,11 @@ import (
 )
 
 // removing the enum keyword from a request parameter, or from a property of one, accepts every value accepted before
-func TestRequestParameterEnumRemoved(t *testing.T) {
-	changes := checkChanges(t, checker.RequestParameterEnumRemovedCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
+func TestRequestParameterBecameNotEnum(t *testing.T) {
+	changes := checkChanges(t, checker.RequestParameterBecameNotEnumCheck, enumRemovedEntirelyBase, enumRemovedEntirelyRevision)
 	requireApiChanges(t, []checker.ApiChange{
 		{
-			Id:          checker.RequestParameterEnumRemovedId,
+			Id:          checker.RequestParameterBecameNotEnumId,
 			Args:        []any{"query", "status"},
 			Operation:   "GET",
 			Path:        "/pets",
@@ -21,7 +21,7 @@ func TestRequestParameterEnumRemoved(t *testing.T) {
 			OperationId: "listPets",
 		},
 		{
-			Id:          checker.RequestParameterPropertyEnumRemovedId,
+			Id:          checker.RequestParameterPropertyBecameNotEnumId,
 			Args:        []any{"origin", "query", "filter"},
 			Operation:   "GET",
 			Path:        "/pets",
@@ -32,12 +32,12 @@ func TestRequestParameterEnumRemoved(t *testing.T) {
 	for _, c := range changes {
 		require.Equal(t, checker.INFO, c.GetLevel())
 	}
-	require.Equal(t, "removed the enum constraint from the `query` request parameter `status`", requireChange(t, changes, checker.RequestParameterEnumRemovedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "removed the enum constraint from the property `origin` of the `query` request parameter `filter`", requireChange(t, changes, checker.RequestParameterPropertyEnumRemovedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed the enum constraint from the `query` request parameter `status`", requireChange(t, changes, checker.RequestParameterBecameNotEnumId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed the enum constraint from the property `origin` of the `query` request parameter `filter`", requireChange(t, changes, checker.RequestParameterPropertyBecameNotEnumId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-func TestRequestParameterEnumRemoved_EnumAdded(t *testing.T) {
-	require.Empty(t, checkChanges(t, checker.RequestParameterEnumRemovedCheck, enumRemovedEntirelyRevision, enumRemovedEntirelyBase))
+func TestRequestParameterBecameNotEnum_EnumAdded(t *testing.T) {
+	require.Empty(t, checkChanges(t, checker.RequestParameterBecameNotEnumCheck, enumRemovedEntirelyRevision, enumRemovedEntirelyBase))
 }
 
 // removing the enum keyword is one change, not one removed value per enum entry

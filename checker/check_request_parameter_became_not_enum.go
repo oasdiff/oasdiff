@@ -7,11 +7,11 @@ import (
 )
 
 const (
-	RequestParameterEnumRemovedId         = "request-parameter-enum-removed"
-	RequestParameterPropertyEnumRemovedId = "request-parameter-property-enum-removed"
+	RequestParameterBecameNotEnumId         = "request-parameter-became-not-enum"
+	RequestParameterPropertyBecameNotEnumId = "request-parameter-property-became-not-enum"
 )
 
-func RequestParameterEnumRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		if p.paramDiff.SchemaDiff == nil {
@@ -21,7 +21,7 @@ func RequestParameterEnumRemovedCheck(diffReport *diff.Diff, operationsSources *
 		if enumRemoved(p.paramDiff.SchemaDiff) {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
 			result = append(result, p.opInfo.NewApiChange(
-				RequestParameterEnumRemovedId,
+				RequestParameterBecameNotEnumId,
 				[]any{p.location, p.name},
 				"",
 			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
@@ -35,7 +35,7 @@ func RequestParameterEnumRemovedCheck(diffReport *diff.Diff, operationsSources *
 				}
 				baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "enum")
 				result = append(result, p.opInfo.NewApiChange(
-					RequestParameterPropertyEnumRemovedId,
+					RequestParameterPropertyBecameNotEnumId,
 					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 					"",
 				).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))

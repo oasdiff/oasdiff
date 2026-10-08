@@ -130,7 +130,7 @@ func TestBreaking_ReqBodyBecameEnum(t *testing.T) {
 // adding an enum value to request body is not breaking. The -revision fixture
 // has the smaller enum, so it is the base here (the reverse direction adds a
 // value). Removing a value, the other direction, is breaking, see
-// TestBreaking_RequestBodyEnumRemoved.
+// TestBreaking_RequestBodyBecameNotEnum.
 func TestBreaking_ReqBodyEnumValueAdded(t *testing.T) {
 	s1, err := open("../data/enums/request-body-enum-revision.yaml")
 	require.NoError(t, err)

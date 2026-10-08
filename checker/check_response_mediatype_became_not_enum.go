@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	ResponseMediaTypeEnumRemovedId = "response-mediatype-enum-removed"
+	ResponseMediaTypeBecameNotEnumId = "response-mediatype-became-not-enum"
 )
 
-func ResponseMediaTypeEnumRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseMediaTypeBecameNotEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -17,7 +17,7 @@ func ResponseMediaTypeEnumRemovedCheck(diffReport *diff.Diff, operationsSources 
 			return
 		}
 		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")
-		result = append(result, info.newChange(ResponseMediaTypeEnumRemovedId, []any{info.mediaType, info.responseStatus}, commentId(ResponseMediaTypeEnumRemovedId)).
+		result = append(result, info.newChange(ResponseMediaTypeBecameNotEnumId, []any{info.mediaType, info.responseStatus}, commentId(ResponseMediaTypeBecameNotEnumId)).
 			WithSources(baseSource, revisionSource))
 	})
 

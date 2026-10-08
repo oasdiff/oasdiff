@@ -60,13 +60,13 @@ request-body-became-optional: el cuerpo de solicitud se volvió opcional
 request-body-became-enum: el cuerpo de solicitud fue restringido a una lista de valores enum
 request-body-enum-value-removed: removido el valor enum %s del cuerpo de solicitud
 request-body-enum-value-added: "agregado el valor enum %s al cuerpo de solicitud"
-request-body-enum-removed: removida la restricción enum del cuerpo de solicitud
+request-body-became-not-enum: removida la restricción enum del cuerpo de solicitud
 response-mediatype-enum-value-removed: removido el valor enum %s del esquema de respuesta %s
 response-mediatype-became-enum: "el esquema de respuesta %s para el estado %s fue restringido a una lista de valores enum"
 response-mediatype-enum-value-added-comment: "El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum."
 response-mediatype-enum-value-added: "agregado el nuevo valor enum %s al esquema de respuesta %s para el estado %s"
-response-mediatype-enum-removed: removida la restricción enum del esquema de respuesta %s para el estado %s
-response-mediatype-enum-removed-comment: El servidor ahora puede devolver cualquier valor del tipo del esquema, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
+response-mediatype-became-not-enum: removida la restricción enum del esquema de respuesta %s para el estado %s
+response-mediatype-became-not-enum-comment: El servidor ahora puede devolver cualquier valor del tipo del esquema, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
 request-header-property-became-required: la propiedad %s del encabezado de solicitud %s se volvió requerida
 request-header-property-became-enum: la propiedad %s del encabezado de solicitud %s fue restringida a una lista de valores enum
 request-parameter-became-required: el parámetro %s de solicitud %s se volvió requerido
@@ -78,10 +78,10 @@ request-parameter-property-became-nullable: la propiedad %s del parámetro de so
 request-parameter-property-became-not-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió no nulable
 request-parameter-enum-value-removed: removido el valor enum %s del parámetro %s de solicitud %s
 request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro %s de solicitud %s
-request-parameter-enum-removed: removida la restricción enum del parámetro %s de solicitud %s
+request-parameter-became-not-enum: removida la restricción enum del parámetro %s de solicitud %s
 request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
 request-parameter-property-enum-value-added: agregado el valor enum %s a la propiedad %s del parámetro %s de solicitud %s
-request-parameter-property-enum-removed: removida la restricción enum de la propiedad %s del parámetro %s de solicitud %s
+request-parameter-property-became-not-enum: removida la restricción enum de la propiedad %s del parámetro %s de solicitud %s
 pattern-changed-warn-comment: "Esta es una advertencia porque agregar o cambiar un patrón puede restringir los valores aceptados y romper clientes existentes. Para cambios de patrón, es difícil analizar automáticamente si el nuevo patrón es un superconjunto del patrón anterior (ej. cambiado de '[0-9]+' a '[0-9]*')"
 request-parameter-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s del parámetro %s de solicitud %s
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
@@ -135,7 +135,7 @@ request-property-became-enum: la propiedad de solicitud %s fue restringida a una
 request-property-enum-value-removed: removido el valor enum %s de la propiedad de solicitud %s
 request-read-only-property-enum-value-removed: removido el valor enum %s de la propiedad de solicitud de solo lectura %s
 request-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de solicitud %s
-request-property-enum-removed: removida la restricción enum de la propiedad de solicitud %s
+request-property-became-not-enum: removida la restricción enum de la propiedad de solicitud %s
 request-body-max-decreased: el valor máximo del cuerpo de solicitud fue disminuido a %s
 request-property-max-decreased: el valor máximo de la propiedad de solicitud %s fue disminuido a %s
 request-read-only-property-max-decreased: el valor máximo de la propiedad de solicitud de solo lectura %s fue disminuido a %s
@@ -217,8 +217,8 @@ response-body-became-not-nullable: el cuerpo de respuesta se volvió no nulable
 response-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de respuesta %s para el estado %s
 response-property-enum-value-added-comment: El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum.
 response-property-enum-value-removed: removido el valor enum %s de la propiedad de respuesta %s para el estado %s
-response-property-enum-removed: removida la restricción enum de la propiedad de respuesta %s para el estado %s
-response-property-enum-removed-comment: El servidor ahora puede devolver cualquier valor del tipo de la propiedad, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
+response-property-became-not-enum: removida la restricción enum de la propiedad de respuesta %s para el estado %s
+response-property-became-not-enum-comment: El servidor ahora puede devolver cualquier valor del tipo de la propiedad, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
 response-property-became-enum: la propiedad de respuesta %s para el estado %s fue restringida a una lista de valores enum
 response-body-max-length-increased: la longitud máxima del cuerpo de respuesta fue aumentada de %s a %s
 response-property-max-length-increased: la longitud máxima de la propiedad de respuesta %s fue aumentada de %s a %s para el estado %s
@@ -460,7 +460,7 @@ request-body-discriminator-property-name-changed-description: nombre de la propi
 request-body-discriminator-removed-description: discriminador del cuerpo de solicitud removido
 request-body-enum-value-removed-description: valor del enum del cuerpo de solicitud removido
 request-body-enum-value-added-description: "valor del enum del cuerpo de solicitud agregado"
-request-body-enum-removed-description: enum del cuerpo de solicitud removido
+request-body-became-not-enum-description: enum del cuerpo de solicitud removido
 request-body-max-decreased-description: valor máximo del cuerpo de solicitud reducido
 request-body-max-increased-description: valor máximo del cuerpo de solicitud aumentado
 request-body-max-length-decreased-description: longitud máxima del cuerpo de solicitud reducida
@@ -504,10 +504,10 @@ request-parameter-default-value-added-description: valor por defecto del paráme
 request-parameter-default-value-changed-description: valor por defecto del parámetro de solicitud cambiado
 request-parameter-default-value-removed-description: valor por defecto del parámetro de solicitud removido
 request-parameter-enum-value-added-description: valor del enum del parámetro de solicitud agregado
-request-parameter-enum-removed-description: enum del parámetro de solicitud removido
+request-parameter-became-not-enum-description: enum del parámetro de solicitud removido
 request-parameter-enum-value-removed-description: valor del enum del parámetro de solicitud removido
 request-parameter-property-enum-value-added-description: valor del enum de propiedad del parámetro de solicitud agregado
-request-parameter-property-enum-removed-description: enum de propiedad del parámetro de solicitud removido
+request-parameter-property-became-not-enum-description: enum de propiedad del parámetro de solicitud removido
 request-parameter-property-enum-value-removed-description: valor del enum de propiedad del parámetro de solicitud removido
 request-parameter-max-decreased-description: valor máximo del parámetro de solicitud reducido
 request-parameter-max-increased-description: valor máximo del parámetro de solicitud aumentado
@@ -556,7 +556,7 @@ request-property-discriminator-mapping-deleted-description: mapeo del discrimina
 request-property-discriminator-property-name-changed-description: nombre de la propiedad del discriminador de solicitud cambiado
 request-property-discriminator-removed-description: discriminador de la propiedad de solicitud removido
 request-property-enum-value-added-description: valor del enum de la propiedad de solicitud agregado
-request-property-enum-removed-description: enum de la propiedad de solicitud removido
+request-property-became-not-enum-description: enum de la propiedad de solicitud removido
 request-property-enum-value-removed-description: valor del enum de la propiedad de solicitud removido
 request-read-only-property-enum-value-removed-description: valor del enum de la propiedad de solicitud de solo lectura removido
 request-property-max-decreased-description: valor máximo de la propiedad de solicitud reducido
@@ -623,7 +623,7 @@ response-media-type-removed-description: tipo de media de respuesta removido
 response-mediatype-enum-value-removed-description: valor del enum del tipo de media de respuesta removido
 response-mediatype-became-enum-description: "tipo de media de respuesta restringido a enum"
 response-mediatype-enum-value-added-description: "valor del enum del tipo de media de respuesta agregado"
-response-mediatype-enum-removed-description: enum del tipo de media de respuesta removido
+response-mediatype-became-not-enum-description: enum del tipo de media de respuesta removido
 response-non-success-status-added-description: estado de no éxito de respuesta agregado
 response-non-success-status-removed-description: estado de no éxito de respuesta removido
 response-optional-property-added-description: propiedad opcional de respuesta agregada
@@ -652,7 +652,7 @@ response-property-discriminator-property-name-changed-description: nombre de la 
 response-property-discriminator-removed-description: discriminador de la propiedad de respuesta removido
 response-property-enum-value-added-description: valor del enum de la propiedad de respuesta agregado
 response-property-enum-value-removed-description: valor del enum de la propiedad de respuesta removido
-response-property-enum-removed-description: enum de la propiedad de respuesta removido
+response-property-became-not-enum-description: enum de la propiedad de respuesta removido
 response-property-became-enum-description: propiedad de respuesta restringida a enum
 response-property-max-increased-description: valor máximo de la propiedad de respuesta aumentado
 response-property-max-length-increased-description: longitud máxima de la propiedad de respuesta aumentada

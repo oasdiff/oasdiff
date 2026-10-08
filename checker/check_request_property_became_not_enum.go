@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	ResponsePropertyEnumRemovedId = "response-property-enum-removed"
+	RequestPropertyBecameNotEnumId = "request-property-became-not-enum"
 )
 
-func ResponsePropertyEnumRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyBecameNotEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
-	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
 			if !enumRemoved(p.propertyDiff) {
 				return
@@ -21,9 +21,9 @@ func ResponsePropertyEnumRemovedCheck(diffReport *diff.Diff, operationsSources *
 
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "enum")
 			result = append(result, p.newChange(
-				ResponsePropertyEnumRemovedId,
-				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
-				commentId(ResponsePropertyEnumRemovedId),
+				RequestPropertyBecameNotEnumId,
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)},
+				"",
 			).WithSources(baseSource, revisionSource))
 		})
 	})

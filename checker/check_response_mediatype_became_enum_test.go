@@ -18,10 +18,10 @@ func TestResponseMediaTypeBecameEnum(t *testing.T) {
 	require.Equal(t, "the response schema `application/json` for the response status `200` was restricted to a list of enum values", changes[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// the reverse is response-mediatype-enum-removed, an error
+// the reverse is response-mediatype-became-not-enum, an error
 func TestResponseMediaTypeBecameEnumReverse(t *testing.T) {
 	changes := positionChanges(t, "response-body", enumSchema("a", "b"), &openapi3.Schema{Type: &openapi3.Types{"string"}})
 	require.Len(t, changes, 1)
-	require.Equal(t, checker.ResponseMediaTypeEnumRemovedId, changes[0].GetId())
+	require.Equal(t, checker.ResponseMediaTypeBecameNotEnumId, changes[0].GetId())
 	require.Equal(t, checker.ERR, changes[0].GetLevel())
 }
