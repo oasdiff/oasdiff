@@ -1549,3 +1549,7 @@ response-property-min-unset: o valor min da propriedade de resposta %s foi remov
 response-property-min-unset-description: valor min da propriedade de resposta removido
 response-property-multiple-of-set: o valor multipleOf da propriedade de resposta %s foi definido como %s para o status %s
 response-property-multiple-of-set-description: valor multipleOf da propriedade de resposta definido
+shared-schema-detail-also: "também em %s"
+shared-schema-detail-also-cyclic: "também em %s e mais"
+shared-schema-detail-also-more: "também em %s e mais %d"
+shared-schema-detail-name: "schema compartilhado: %s"

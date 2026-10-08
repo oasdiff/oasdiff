@@ -31,13 +31,13 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 				RequestParameterPatternAddedId,
 				[]any{patternDiff.To, p.location, p.name},
 				PatternAddedCommentId,
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(nil, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(nil, revisionSource))
 		} else if patternDiff.To == "" {
 			result = append(result, p.opInfo.NewApiChange(
 				RequestParameterPatternRemovedId,
 				[]any{patternDiff.From, p.location, p.name},
 				"",
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, nil))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, nil))
 		} else {
 			id := RequestParameterPatternChangedId
 			comment := PatternChangedCommentId
@@ -51,7 +51,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 				id,
 				[]any{p.location, p.name, patternDiff.From, patternDiff.To},
 				comment,
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 	})
 	return result

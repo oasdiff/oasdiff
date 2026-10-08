@@ -40,7 +40,7 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.operationItem.Revision,
 		info.method,
 		info.path,
-	).WithSchema(info.schemaDiff).WithDetails(info.mediaTypeDetails).
+	).WithSchema(info.schemaDiff, info.schemaDiff, "").WithDetails(info.mediaTypeDetails).
 		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff))
 }
 
@@ -102,7 +102,7 @@ type propertyInfo struct {
 // property's own schema diff rather than the body's: the second WithSchema
 // call replaces the first.
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
-	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.propertyDiff).
+	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.schemaDiff, p.propertyDiff, schemawalk.PropertyFullName(p.propertyPath, p.propertyName)).
 		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
 		WithGuards(propertyGuards(p.propertyDiff))
 }

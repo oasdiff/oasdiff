@@ -1,0 +1,39 @@
+openapi: 3.1.0
+info:
+  title: properties with different meanings that share one schema
+  version: 1.0.0
+paths:
+  /orders:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    $ref: '#/components/schemas/Id'
+                  customerId:
+                    $ref: '#/components/schemas/Id'
+  /accounts:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    $ref: '#/components/schemas/Id'
+                  customerId:
+                    $ref: '#/components/schemas/Id'
+                  ownerId:
+                    $ref: '#/components/schemas/Id'
+components:
+  schemas:
+    Id:
+      type: string
