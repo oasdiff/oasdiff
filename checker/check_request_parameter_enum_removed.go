@@ -24,7 +24,7 @@ func RequestParameterEnumRemovedCheck(diffReport *diff.Diff, operationsSources *
 				RequestParameterEnumRemovedId,
 				[]any{p.location, p.name},
 				"",
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
 		schemawalk.ModifiedProperties(
@@ -38,7 +38,7 @@ func RequestParameterEnumRemovedCheck(diffReport *diff.Diff, operationsSources *
 					RequestParameterPropertyEnumRemovedId,
 					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 					"",
-				).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 			})
 	})
 	return result

@@ -183,7 +183,7 @@ func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checke
 // normalizeApiChange clears fields that are not part of a change's test identity.
 func normalizeApiChange(c checker.ApiChange) checker.ApiChange {
 	c.Level = 0 // derived from the id via the rule registry, not part of test identity
-	return c
+	return c.WithoutSchemaDiffs()
 }
 
 // singleChange compares the two specs and asserts they produce exactly the one

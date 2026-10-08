@@ -39,7 +39,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 					RequestHeaderPropertyBecameRequiredId,
 					[]any{p.name, changedRequiredPropertyName},
 					"",
-				).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 			}
 		}
 
@@ -62,7 +62,7 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 						RequestHeaderPropertyBecameRequiredId,
 						[]any{p.name, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))},
 						"",
-					).WithSchema(propertyDiff).WithSources(propBaseSource, propRevisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))).WithSources(propBaseSource, propRevisionSource))
 				}
 			})
 	})

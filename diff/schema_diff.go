@@ -93,8 +93,9 @@ type SchemaDiff struct {
 	Base     *openapi3.Schema `json:"-" yaml:"-"`
 	Revision *openapi3.Schema `json:"-" yaml:"-"`
 
-	// The components.schemas entry each compared schema is, empty for a
-	// schema written inline: a schema object does not carry its own name.
+	// The components.schemas entry each compared schema is, or that its $ref
+	// points into. Empty for a schema written inline: a schema object does not
+	// carry its own name.
 	BaseComponent     string `json:"-" yaml:"-"`
 	RevisionComponent string `json:"-" yaml:"-"`
 }

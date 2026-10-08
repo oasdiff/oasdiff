@@ -26,6 +26,8 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 			p.opInfo,
 			p.paramDiff.SchemaDiff.EnumDiff,
 			p.paramDiff.SchemaDiff,
+			p.paramDiff.SchemaDiff,
+			"",
 			RequestParameterEnumValueRemovedId,
 			RequestParameterEnumValueAddedId,
 			true,
@@ -38,7 +40,9 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 				result = append(result, checkParameterEnumDiff(
 					p.opInfo,
 					propertyDiff.EnumDiff,
+					p.paramDiff.SchemaDiff,
 					propertyDiff,
+					schemawalk.PropertyFullName(propertyPath, propertyName),
 					RequestParameterPropertyEnumValueRemovedId,
 					RequestParameterPropertyEnumValueAddedId,
 					false, // no became-enum rule covers query, path or cookie parameter properties
@@ -54,7 +58,9 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 func checkParameterEnumDiff(
 	opInfo opInfo,
 	enumDiff *diff.EnumDiff,
+	root *diff.SchemaDiff,
 	schemaDiff *diff.SchemaDiff,
+	propertyPath string,
 	removedId, addedId string,
 	becameEnumReported bool,
 	makeArgs func(enumVal any) []any,
@@ -70,7 +76,7 @@ func checkParameterEnumDiff(
 			removedId,
 			makeArgs(enumVal),
 			"",
-		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+		).WithSchema(root, schemaDiff, propertyPath).WithSources(baseSource, revisionSource))
 	}
 
 	added := enumDiff.Added
@@ -83,7 +89,7 @@ func checkParameterEnumDiff(
 			addedId,
 			makeArgs(enumVal),
 			"",
-		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+		).WithSchema(root, schemaDiff, propertyPath).WithSources(baseSource, revisionSource))
 	}
 
 	return result

@@ -35,6 +35,7 @@ func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 				func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 					changes := checkParameterPropertyListOfTypesChange(
 						p.opInfo,
+						p.paramDiff.SchemaDiff,
 						propertyPath,
 						propertyName,
 						propertyDiff,

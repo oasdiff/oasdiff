@@ -173,7 +173,7 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 				id,
 				[]any{p.location, p.name},
 				"",
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
 		schemawalk.ModifiedProperties(
@@ -185,7 +185,7 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 						id,
 						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 						"",
-					).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 				}
 			})
 	})
@@ -206,7 +206,7 @@ func ResponseHeaderSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSourc
 				id,
 				[]any{h.name, h.responseStatus},
 				"",
-			).WithSchema(h.headerDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(h.headerDiff.SchemaDiff, h.headerDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 	})
 
