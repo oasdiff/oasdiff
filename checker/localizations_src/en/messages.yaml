@@ -260,6 +260,7 @@ api-security-updated: the endpoint scheme security %s was updated from %s to %s
 api-global-security-added: the security scheme %s was added to the API
 api-global-security-removed: the security scheme %s was removed from the API
 api-global-security-scope-removed: the security scope %s was removed from the global security scheme %s
+global-security-not-inherited-comment: "This is not breaking because no checked operation inherits the top-level security list; each declares its own security"
 api-security-anonymous-access-removed: the endpoint no longer allows anonymous access
 api-security-anonymous-access-added: the endpoint now allows anonymous access
 api-global-security-anonymous-access-removed: the API no longer allows anonymous access to endpoints without their own security requirements

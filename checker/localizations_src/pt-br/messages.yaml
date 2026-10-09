@@ -250,6 +250,7 @@ api-security-updated: o esquema de segurança %s foi atualizado de %s para %s
 api-global-security-added: o esquema de segurança %s foi adicionado à api
 api-global-security-removed: o esquema de segurança %s foi removido da api
 api-global-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança global %s
+global-security-not-inherited-comment: "Isto não é uma alteração incompatível porque nenhuma operação verificada herda a lista de segurança de nível superior; cada uma declara sua própria segurança"
 api-security-anonymous-access-removed: o endpoint não permite mais acesso anônimo
 api-security-anonymous-access-added: o endpoint agora permite acesso anônimo
 api-global-security-anonymous-access-removed: a api não permite mais acesso anônimo aos endpoints sem requisitos de segurança próprios
