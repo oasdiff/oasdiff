@@ -243,6 +243,7 @@ api-security-updated: схема безопасности точки досту�
 api-global-security-added: схема безопасности %s была добавлена к API
 api-global-security-removed: схема безопасности %s была удалена из API
 api-global-security-scope-removed: из глобальной схемы безопасности %s была удалена область безопасности %s
+global-security-not-inherited-comment: "Это не критическое изменение, потому что ни одна проверяемая операция не наследует список безопасности верхнего уровня; каждая объявляет собственную безопасность"
 api-security-anonymous-access-removed: эндпоинт больше не допускает анонимный доступ
 api-security-anonymous-access-added: эндпоинт теперь допускает анонимный доступ
 api-global-security-anonymous-access-removed: API больше не допускает анонимный доступ к эндпоинтам без собственных требований безопасности

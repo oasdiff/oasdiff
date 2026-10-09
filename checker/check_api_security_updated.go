@@ -20,9 +20,11 @@ const (
 	APISecurityAnonymousAccessAddedId         = "api-security-anonymous-access-added"
 	APIGlobalSecurityAnonymousAccessRemovedId = "api-global-security-anonymous-access-removed"
 	APIGlobalSecurityAnonymousAccessAddedId   = "api-global-security-anonymous-access-added"
+
+	GlobalSecurityNotInheritedCommentId = "global-security-not-inherited-comment"
 )
 
-func checkGlobalSecurity(diffReport *diff.Diff) Changes {
+func checkGlobalSecurity(diffReport *diff.Diff, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.SecurityDiff == nil {
 		return result
@@ -34,35 +36,51 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 	baseSource := location.SourceFromField(diffReport.SecurityDiff.BaseOrigin, "security")
 	revisionSource := location.SourceFromField(diffReport.SecurityDiff.RevisionOrigin, "security")
 
+	// Removing an alternative or adding a scope narrows the top-level list, which
+	// rejects a client only on an operation that uses that list.
+	narrowingLevel := func(id string) (Level, string) {
+		switch globalSecurityReach(diffReport, config) {
+		case globalSecurityNotInherited:
+			return INFO, GlobalSecurityNotInheritedCommentId
+		case globalSecurityAnonymous:
+			return INFO, ""
+		}
+		return config.getLogLevel(id), ""
+	}
+
 	for _, addedSecurity := range diffReport.SecurityDiff.Added {
 		result = append(result, SecurityChange{
 			Id:    APIGlobalSecurityAddedCheckId,
-			Level: INFO,
+			Level: config.getLogLevel(APIGlobalSecurityAddedCheckId),
 			Args:  []any{addedSecurity.String()},
 		}.WithSources(nil, revisionSource))
 	}
 
 	for _, removedSecurity := range diffReport.SecurityDiff.Deleted {
+		level, comment := narrowingLevel(APIGlobalSecurityRemovedCheckId)
 		result = append(result, SecurityChange{
-			Id:    APIGlobalSecurityRemovedCheckId,
-			Level: INFO,
-			Args:  []any{removedSecurity.String()},
+			Id:      APIGlobalSecurityRemovedCheckId,
+			Level:   level,
+			Args:    []any{removedSecurity.String()},
+			Comment: comment,
 		}.WithSources(baseSource, nil))
 	}
 
 	for _, updatedSecurity := range diffReport.SecurityDiff.Modified {
 		for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity.Scopes {
 			for _, addedScope := range updatedSecuritySchemeScopes.Added {
+				level, comment := narrowingLevel(APIGlobalSecurityScopeAddedId)
 				result = append(result, SecurityChange{
-					Id:    APIGlobalSecurityScopeAddedId,
-					Level: INFO,
-					Args:  []any{addedScope, securitySchemeName},
+					Id:      APIGlobalSecurityScopeAddedId,
+					Level:   level,
+					Args:    []any{addedScope, securitySchemeName},
+					Comment: comment,
 				}.WithSources(nil, revisionSource))
 			}
 			for _, deletedScope := range updatedSecuritySchemeScopes.Deleted {
 				result = append(result, SecurityChange{
 					Id:    APIGlobalSecurityScopeRemovedId,
-					Level: INFO,
+					Level: config.getLogLevel(APIGlobalSecurityScopeRemovedId),
 					Args:  []any{deletedScope, securitySchemeName},
 				}.WithSources(baseSource, nil))
 			}
@@ -75,7 +93,7 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
-	result = append(result, checkGlobalSecurity(diffReport)...)
+	result = append(result, checkGlobalSecurity(diffReport, config)...)
 
 	inherited, handled := checkInheritedSecurity(diffReport, operationsSources, config)
 	result = append(result, inherited...)
@@ -170,6 +188,35 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 	}
 
 	return result, handled
+}
+
+type globalSecurityReachKind int
+
+const (
+	globalSecurityApplies globalSecurityReachKind = iota
+	// No operation in scope uses the top-level list in both specs.
+	globalSecurityNotInherited
+	// The revision's top-level list accepts unauthenticated requests.
+	globalSecurityAnonymous
+)
+
+// globalSecurityReach says whether narrowing the top-level security list can
+// reject a client. Without the security context it cannot tell, so it assumes
+// the list applies.
+func globalSecurityReach(diffReport *diff.Diff, config *Config) globalSecurityReachKind {
+	securityContext := diffReport.SecurityContext
+	if securityContext == nil {
+		return globalSecurityApplies
+	}
+	if allowsAnonymous(&securityContext.Revision) {
+		return globalSecurityAnonymous
+	}
+	for _, pair := range securityContext.Operations {
+		if pair.Base.Security == nil && pair.Revision.Security == nil && inStabilityScope(config, pair.Revision) {
+			return globalSecurityApplies
+		}
+	}
+	return globalSecurityNotInherited
 }
 
 // anonymousAccess records whether an operation accepts unauthenticated

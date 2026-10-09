@@ -86,9 +86,27 @@ func TestAPIGlobalSecurityScopeAdded(t *testing.T) {
 	require.Equal(t, checker.SecurityChange{
 		Id:    checker.APIGlobalSecurityScopeAddedId,
 		Args:  []any{"read:pets", "petstore_auth"},
-		Level: checker.INFO,
+		Level: checker.ERR,
 	}, errs[0])
 	require.Equal(t, "the security scope `read:pets` was added to the global security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// replacing the top-level security requirement rejects clients of an operation that inherits it
+func TestAPIGlobalSecurityReplaced(t *testing.T) {
+	changes := securityChanges(t, "api_security_global_api_key", "api_security_global_bearer")
+	require.Len(t, changes, 2)
+	require.Equal(t, checker.ERR, requireChange(t, changes, checker.APIGlobalSecurityRemovedCheckId).GetLevel())
+	require.Equal(t, checker.INFO, requireChange(t, changes, checker.APIGlobalSecurityAddedCheckId).GetLevel())
+}
+
+// an operation with its own security does not use the top-level list
+func TestAPIGlobalSecurityReplacedNotInherited(t *testing.T) {
+	changes := securityChanges(t, "api_security_global_api_key_op_api_key", "api_security_global_bearer_op_api_key")
+	require.Len(t, changes, 2)
+	removed := requireChange(t, changes, checker.APIGlobalSecurityRemovedCheckId)
+	require.Equal(t, checker.INFO, removed.GetLevel())
+	require.Equal(t, "This is not breaking because no checked operation inherits the top-level security list; each declares its own security", removed.GetComment(checker.NewDefaultLocalizer()))
+	require.Equal(t, checker.INFO, requireChange(t, changes, checker.APIGlobalSecurityAddedCheckId).GetLevel())
 }
 
 // adding a new security to the API endpoint
@@ -225,20 +243,23 @@ type securityFinding struct {
 
 func securityFindings(t *testing.T, base, revision string, opts ...checker.Option) []securityFinding {
 	t.Helper()
-	s1, err := open("../data/checker/api_security_anonymous_" + base + ".yaml")
+	result := []securityFinding{}
+	for _, change := range securityChanges(t, "api_security_anonymous_"+base, "api_security_anonymous_"+revision, opts...) {
+		result = append(result, securityFinding{Id: change.GetId(), Level: change.GetLevel(), Path: change.GetPath()})
+	}
+	return result
+}
+
+func securityChanges(t *testing.T, base, revision string, opts ...checker.Option) checker.Changes {
+	t.Helper()
+	s1, err := open("../data/checker/" + base + ".yaml")
 	require.NoError(t, err)
-	s2, err := open("../data/checker/api_security_anonymous_" + revision + ".yaml")
+	s2, err := open("../data/checker/" + revision + ".yaml")
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	changes := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck, opts...), d, osm, checker.INFO)
-
-	result := []securityFinding{}
-	for _, change := range changes {
-		result = append(result, securityFinding{Id: change.GetId(), Level: change.GetLevel(), Path: change.GetPath()})
-	}
-	return result
+	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck, opts...), d, osm, checker.INFO)
 }
 
 // No security requirement means anonymous access, so the first requirement
