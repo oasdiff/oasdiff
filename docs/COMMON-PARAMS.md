@@ -65,8 +65,9 @@ oasdiff diff data/common-params/params_in_path.yaml data/common-params/params_in
 The output will be empty meaning that no change was found.
 
 ## Changelog (incl. Breaking Changes) and Common Parameters
-The `changelog` and `breaking` sub-commands are focused on operation level parameters and ignore most parameter changes at the path level.  
-For example, changing `maxItems` of a path level parameter, won't normally be reported:
+The `changelog` and `breaking` sub-commands merge common parameters from the path level into each operation before comparing, since a path-level parameter is part of every request to the operations under that path.  
+That is, `--flatten-params` defaults to `true` for these sub-commands.  
+For example, changing `maxItems` of a path level parameter is reported on every operation of that path:
 
 ```
 paths:
@@ -94,10 +95,8 @@ paths:
             maxItems: 10
 ```
 
-But if you add the `--flatten-params` flag which merges common parameters from the path level into the operation level before running the diff, it will be reported as a breaking change:
-
 ```
-oasdiff changelog data/checker/common_request_parameter_max_items_updated_revision.yaml data/checker/common_request_parameter_max_items_updated_base.yaml --flatten-params
+oasdiff changelog data/checker/common_request_parameter_max_items_updated_revision.yaml data/checker/common_request_parameter_max_items_updated_base.yaml
 ```
 
 Output:
@@ -108,5 +107,6 @@ error	[request-parameter-max-items-decreased] at data/checker/common_request_par
 		for the `query` request parameter `category`, the maxItems was decreased from `20` to `10`
 ```
 
-## Summary
-It is recommended to use the `--flatten-params` flag to increase accuracy for common parameters.
+Moving a parameter between the path level and the operation level is not reported, because each operation takes the same parameters either way.
+
+To compare each level separately, as `diff` does, add `--flatten-params=false`. Only additions of path level parameters are then checked.

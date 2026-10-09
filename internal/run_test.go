@@ -363,6 +363,29 @@ func Test_BreakingChangesFlattenCommonParams(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/common-params/params_in_path.yaml ../data/common-params/params_in_op.yaml --flatten-params --fail-on ERR"), io.Discard, io.Discard))
 }
 
+// breaking and changelog merge path-level parameters into each operation by default.
+func Test_BreakingChangesFlattenCommonParamsByDefault(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/common-params/params_in_path.yaml ../data/common-params/params_in_op.yaml --fail-on ERR"), io.Discard, io.Discard))
+
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff breaking ../data/checker/common_request_parameter_max_items_updated_revision.yaml ../data/checker/common_request_parameter_max_items_updated_base.yaml --fail-on ERR --format json"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), `"id":"request-parameter-max-items-decreased"`)
+
+	stdout.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/checker/common_request_parameter_max_items_updated_revision.yaml ../data/checker/common_request_parameter_max_items_updated_base.yaml --format json"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), `"id":"request-parameter-max-items-decreased"`)
+}
+
+func Test_BreakingChangesFlattenCommonParamsDisabled(t *testing.T) {
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/checker/common_request_parameter_max_items_updated_revision.yaml ../data/checker/common_request_parameter_max_items_updated_base.yaml --flatten-params=false --fail-on ERR"), io.Discard, io.Discard))
+}
+
+// diff reports the document as written, so a parameter moved between the path
+// and the operation is a change.
+func Test_DiffCommonParamsNotFlattenedByDefault(t *testing.T) {
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff diff ../data/common-params/params_in_path.yaml ../data/common-params/params_in_op.yaml --fail-on-diff"), io.Discard, io.Discard))
+}
+
 func Test_BreakingChangesCaseInsensitiveHeaders(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers --fail-on-diff"), io.Discard, io.Discard))
 }
