@@ -1,0 +1,29 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: '1'
+paths:
+  /items/{id}:
+    get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: filter
+          in: query
+          schema: {}
+      responses:
+        '200':
+          description: ok

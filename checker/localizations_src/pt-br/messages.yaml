@@ -64,6 +64,10 @@ request-header-property-became-required: a propriedade %s do cabeçalho de requi
 request-header-property-became-enum: a propriedade %s do cabeçalho de requisição %s foi restrita a uma lista de valores enum
 request-parameter-became-required: o parâmetro de requisição do tipo %s e nome %s tornou-se obrigatório
 request-parameter-became-optional: o parâmetro de requisição do tipo %s e nome %s tornou-se opcional
+request-parameter-style-changed: "para o parâmetro de requisição do tipo %s e nome %s, o estilo foi alterado de %s para %s"
+request-parameter-explode-changed: "para o parâmetro de requisição do tipo %s e nome %s, explode foi alterado de %s para %s"
+request-parameter-became-allow-reserved: "o parâmetro de requisição do tipo %s e nome %s agora aceita caracteres reservados sem codificação percentual"
+request-parameter-became-not-allow-reserved: "o parâmetro de requisição do tipo %s e nome %s não aceita mais caracteres reservados sem codificação percentual"
 request-parameter-became-enum: o parâmetro de requisição do tipo %s e nome %s foi restrito a uma lista de valores enum
 request-parameter-became-nullable: o parâmetro de requisição %s %s tornou-se anulável
 request-parameter-became-not-nullable: o parâmetro de requisição %s %s tornou-se não anulável
@@ -472,6 +476,10 @@ request-parameter-became-not-nullable-description: o parâmetro de requisição 
 request-parameter-property-became-nullable-description: a propriedade do parâmetro de requisição tornou-se anulável
 request-parameter-property-became-not-nullable-description: a propriedade do parâmetro de requisição tornou-se não anulável
 request-parameter-became-optional-description: parâmetro da requisição tornou-se opcional
+request-parameter-style-changed-description: "estilo de serialização do parâmetro da requisição alterado"
+request-parameter-explode-changed-description: "explode do parâmetro da requisição alterado"
+request-parameter-became-allow-reserved-description: "parâmetro da requisição passou a permitir caracteres reservados"
+request-parameter-became-not-allow-reserved-description: "parâmetro da requisição deixou de permitir caracteres reservados"
 request-parameter-became-required-description: parâmetro da requisição tornou-se obrigatório
 request-parameter-default-value-added-description: valor padrão do parâmetro da requisição definido
 request-parameter-default-value-changed-description: valor padrão do parâmetro da requisição alterado
