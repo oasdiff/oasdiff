@@ -76,6 +76,10 @@ request-header-property-became-required: the %s request header's property %s bec
 request-header-property-became-enum: the %s request header's property %s was restricted to a list of enum values
 request-parameter-became-required: the %s request parameter %s became required
 request-parameter-became-optional: the %s request parameter %s became optional
+request-parameter-style-changed: "for the %s request parameter %s, the style was changed from %s to %s"
+request-parameter-explode-changed: "for the %s request parameter %s, explode was changed from %s to %s"
+request-parameter-became-allow-reserved: "the %s request parameter %s now accepts reserved characters without percent-encoding"
+request-parameter-became-not-allow-reserved: "the %s request parameter %s no longer accepts reserved characters without percent-encoding"
 request-parameter-became-enum: the %s request parameter %s was restricted to a list of enum values
 request-parameter-became-nullable: the %s request parameter %s became nullable
 request-parameter-became-not-nullable: the %s request parameter %s became not nullable
@@ -487,6 +491,10 @@ request-parameter-became-not-nullable-description: request parameter became not 
 request-parameter-property-became-nullable-description: request parameter property became nullable
 request-parameter-property-became-not-nullable-description: request parameter property became not nullable
 request-parameter-became-optional-description: request parameter became optional
+request-parameter-style-changed-description: "request parameter serialization style changed"
+request-parameter-explode-changed-description: "request parameter explode changed"
+request-parameter-became-allow-reserved-description: "request parameter started allowing reserved characters"
+request-parameter-became-not-allow-reserved-description: "request parameter stopped allowing reserved characters"
 request-parameter-became-required-description: request parameter became required
 request-parameter-default-value-added-description: request parameter default value set
 request-parameter-default-value-changed-description: request parameter default value changed

@@ -72,6 +72,7 @@ func dataFileFn(subdir string) func(string) string {
 var (
 	deprecationFile      = dataFileFn("deprecation")
 	paramDeprecationFile = dataFileFn("param-deprecation")
+	serializationFile    = dataFileFn("param-serialization")
 	requiredPropertyFile = dataFileFn("required-properties")
 	stabilityFile        = dataFileFn("stability")
 )

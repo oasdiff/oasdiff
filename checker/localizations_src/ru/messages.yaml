@@ -63,6 +63,10 @@ request-header-property-became-required: в заголовке запроса %s
 request-header-property-became-enum: свойство %s заголовка запроса %s было ограничено списком значений перечисления
 request-parameter-became-required: ранее необязательный %s параметр запроса %s стал обязательным
 request-parameter-became-optional: ранее необязательный параметр запроса %s %s теперь является необязательным
+request-parameter-style-changed: "у %s параметра запроса %s стиль сериализации изменён с %s на %s"
+request-parameter-explode-changed: "у %s параметра запроса %s значение explode изменено с %s на %s"
+request-parameter-became-allow-reserved: "%s параметр запроса %s теперь принимает зарезервированные символы без процентного кодирования"
+request-parameter-became-not-allow-reserved: "%s параметр запроса %s больше не принимает зарезервированные символы без процентного кодирования"
 request-parameter-became-enum: заголовок запроса %s поле %s было ограничено списком значений перечисления
 request-parameter-became-nullable: параметр запроса %s %s стал обнуляемым
 request-parameter-became-not-nullable: параметр запроса %s %s стал необнуляемым
@@ -479,6 +483,10 @@ request-parameter-became-not-nullable-description: параметр запрос
 request-parameter-property-became-nullable-description: свойство параметра запроса стало обнуляемым
 request-parameter-property-became-not-nullable-description: свойство параметра запроса стало необнуляемым
 request-parameter-became-optional-description: параметр запроса стал необязательным
+request-parameter-style-changed-description: "изменён стиль сериализации параметра запроса"
+request-parameter-explode-changed-description: "изменено значение explode параметра запроса"
+request-parameter-became-allow-reserved-description: "параметр запроса стал допускать зарезервированные символы"
+request-parameter-became-not-allow-reserved-description: "параметр запроса перестал допускать зарезервированные символы"
 request-parameter-became-required-description: параметр запроса стал обязательным
 request-parameter-default-value-added-description: установлено значение по умолчанию параметра запроса
 request-parameter-default-value-changed-description: изменено значение по умолчанию параметра запроса
