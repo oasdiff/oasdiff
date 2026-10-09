@@ -35,7 +35,7 @@ func RequestParameterSerializationUpdatedCheck(diffReport *diff.Diff, operations
 					[]any{p.location, p.name, baseStyle, revisionStyle},
 					"",
 				).WithSources(baseSource, revisionSource))
-			} else if baseExplode != revisionExplode && !(isScalarSchema(base.Schema) && isScalarSchema(revision.Schema)) {
+			} else if baseExplode != revisionExplode && (!isScalarSchema(base.Schema) || !isScalarSchema(revision.Schema)) {
 				baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "explode")
 				result = append(result, p.opInfo.NewApiChange(
 					RequestParameterExplodeChangedId,
