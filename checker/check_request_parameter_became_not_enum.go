@@ -18,7 +18,7 @@ func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources
 			return
 		}
 
-		if enumRemoved(p.paramDiff.SchemaDiff) {
+		if becameNotEnum(p.paramDiff.SchemaDiff) {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
 			result = append(result, p.opInfo.NewApiChange(
 				RequestParameterBecameNotEnumId,
@@ -30,7 +30,7 @@ func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources
 		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
-				if !enumRemoved(propertyDiff) {
+				if !becameNotEnum(propertyDiff) {
 					return
 				}
 				baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "enum")

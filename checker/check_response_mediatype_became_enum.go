@@ -13,7 +13,7 @@ func ResponseMediaTypeBecameEnumCheck(diffReport *diff.Diff, operationsSources *
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if !enumAdded(info.schemaDiff) {
+		if !becameEnum(info.schemaDiff) {
 			return
 		}
 		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")

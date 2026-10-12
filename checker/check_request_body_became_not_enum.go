@@ -13,7 +13,7 @@ func RequestBodyBecameNotEnumCheck(diffReport *diff.Diff, operationsSources *dif
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if !enumRemoved(info.schemaDiff) {
+		if !becameNotEnum(info.schemaDiff) {
 			return
 		}
 		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "enum")

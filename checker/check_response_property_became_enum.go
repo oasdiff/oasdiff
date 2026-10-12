@@ -15,7 +15,7 @@ func ResponsePropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources *d
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
-			if !enumAdded(p.propertyDiff) {
+			if !becameEnum(p.propertyDiff) {
 				return
 			}
 

@@ -146,16 +146,17 @@ func prefixItemsChangedContract(schemaDiff *diff.SchemaDiff) bool {
 		!diff.PrefixItemsValidationEquivalent(diff.NewConfig(), schemaDiff.Base, schemaDiff.Revision)
 }
 
-// enumRemoved reports whether the enum keyword was dropped with nothing left in
-// the revision that could still restrict the values, so every value accepted
-// before is still accepted. Removing only some values is not this change.
-func enumRemoved(schemaDiff *diff.SchemaDiff) bool {
+// becameNotEnum reports whether the schema now accepts every value of its type,
+// not only whether the enum keyword was dropped: EnumDeleted alone is also true
+// when the enum moved into a subschema, which can narrow the values. Removing
+// only some values is not this change.
+func becameNotEnum(schemaDiff *diff.SchemaDiff) bool {
 	return schemaDiff.EnumDiff != nil && schemaDiff.EnumDiff.EnumDeleted && !mayRestrictValues(schemaDiff.Revision)
 }
 
-// enumAdded is the mirror of enumRemoved: the enum keyword appeared on a
+// becameEnum is the mirror of becameNotEnum: the enum keyword appeared on a
 // schema that had nothing else restricting its values.
-func enumAdded(schemaDiff *diff.SchemaDiff) bool {
+func becameEnum(schemaDiff *diff.SchemaDiff) bool {
 	return schemaDiff.EnumDiff != nil && schemaDiff.EnumDiff.EnumAdded && !mayRestrictValues(schemaDiff.Base)
 }
 
@@ -171,7 +172,7 @@ func mayRestrictValues(schema *openapi3.Schema) bool {
 // deletedEnumValues returns the values removed from an enum, or none when the
 // enum itself was removed, since the values are then still accepted.
 func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
-	if schemaDiff.EnumDiff == nil || enumRemoved(schemaDiff) {
+	if schemaDiff.EnumDiff == nil || becameNotEnum(schemaDiff) {
 		return nil
 	}
 	return schemaDiff.EnumDiff.Deleted
@@ -180,7 +181,7 @@ func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
 // addedEnumValues returns the values added to an enum, or none when the enum
 // itself was added, since the schema is then narrowed to them, not widened by them.
 func addedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
-	if schemaDiff.EnumDiff == nil || enumAdded(schemaDiff) {
+	if schemaDiff.EnumDiff == nil || becameEnum(schemaDiff) {
 		return nil
 	}
 	return schemaDiff.EnumDiff.Added

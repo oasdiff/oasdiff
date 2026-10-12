@@ -15,7 +15,7 @@ func RequestPropertyBecameNotEnumCheck(diffReport *diff.Diff, operationsSources 
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
-			if !enumRemoved(p.propertyDiff) {
+			if !becameNotEnum(p.propertyDiff) {
 				return
 			}
 
