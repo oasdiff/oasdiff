@@ -1,5 +1,7 @@
 package diff
 
+import "slices"
+
 // StringMapDiff describes the changes between a pair of string maps
 type StringMapDiff struct {
 	Added    []string     `json:"added,omitempty" yaml:"added,omitempty"`
@@ -72,6 +74,10 @@ func getStringMapDiffInternal(strings1, strings2 map[string]string) *StringMapDi
 			result.Added = append(result.Added, k2)
 		}
 	}
+
+	// Map iteration order is random; the keys are reported in a stable order.
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result
 }
