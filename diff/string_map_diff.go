@@ -10,7 +10,7 @@ type StringMapDiff struct {
 // ModifiedKeys maps keys to their respective diffs
 type ModifiedKeys map[string]*ValueDiff
 
-func newStringMapDiffDiff() *StringMapDiff {
+func newStringMapDiff() *StringMapDiff {
 	return &StringMapDiff{
 		Added:    []string{},
 		Deleted:  []string{},
@@ -55,7 +55,7 @@ func getStringMapDiff(strings1, strings2 map[string]string) *StringMapDiff {
 }
 
 func getStringMapDiffInternal(strings1, strings2 map[string]string) *StringMapDiff {
-	result := newStringMapDiffDiff()
+	result := newStringMapDiff()
 
 	for k1, v1 := range strings1 {
 		if v2, ok := strings2[k1]; ok {
