@@ -41,7 +41,7 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 					id,
 					[]any{propName, info.responseStatus},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).withoutGuard(GuardWriteOnly).WithSources(propBaseSource, propRevisionSource))
 			}
 
 			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {

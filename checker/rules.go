@@ -56,12 +56,13 @@ const (
 	EffectUnknown      = rules.EffectUnknown
 	EffectViolation    = rules.EffectViolation
 
-	GuardReadOnly   = rules.GuardReadOnly
-	GuardWriteOnly  = rules.GuardWriteOnly
-	GuardSanctioned = rules.GuardSanctioned
-	GuardNonSuccess = rules.GuardNonSuccess
-	GuardHasDefault = rules.GuardHasDefault
-	GuardNegotiated = rules.GuardNegotiated
+	GuardReadOnly           = rules.GuardReadOnly
+	GuardWriteOnly          = rules.GuardWriteOnly
+	GuardSanctioned         = rules.GuardSanctioned
+	GuardNonSuccess         = rules.GuardNonSuccess
+	GuardHasDefault         = rules.GuardHasDefault
+	GuardNegotiated         = rules.GuardNegotiated
+	GuardRequiredInRequests = rules.GuardRequiredInRequests
 )
 
 // BackwardCompatibilityRule binds the rule metadata to the check function
@@ -445,12 +446,13 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// RequestPropertyWriteOnlyReadOnlyCheck
 		newBackwardCompatibilityRule(RequestOptionalPropertyBecameNonWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.requestBody.content.*.schema.writeOnly:unset"),
 		newBackwardCompatibilityRule(RequestOptionalPropertyBecameWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.requestBody.content.*.schema.writeOnly:set"),
-		newBackwardCompatibilityRule(RequestOptionalPropertyBecameReadOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.readOnly:set"),
-		newBackwardCompatibilityRule(RequestOptionalPropertyBecameNonReadOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
+		newBackwardCompatibilityRule(RequestOptionalPropertyBecameReadOnlyCheckId, WARN, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectUnknown, nil, "paths.*.*.requestBody.content.*.schema.readOnly:set"),
+		newBackwardCompatibilityRule(RequestOptionalPropertyBecameNonReadOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
 		newBackwardCompatibilityRule(RequestRequiredPropertyBecameNonWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.requestBody.content.*.schema.writeOnly:unset"),
 		newBackwardCompatibilityRule(RequestRequiredPropertyBecameWriteOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.requestBody.content.*.schema.writeOnly:set"),
-		newBackwardCompatibilityRule(RequestRequiredPropertyBecameReadOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.readOnly:set"),
-		newBackwardCompatibilityRule(RequestRequiredPropertyBecameNonReadOnlyCheckId, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNone, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
+		newBackwardCompatibilityRule(RequestRequiredPropertyBecameReadOnlyCheckId, WARN, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectUnknown, nil, "paths.*.*.requestBody.content.*.schema.readOnly:set"),
+		newBackwardCompatibilityRule(RequestRequiredPropertyBecameNonReadOnlyCheckId, ERR, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
+		newBackwardCompatibilityRule(RequestRequiredPropertyBecameNonReadOnly31Id, INFO, RequestPropertyWriteOnlyReadOnlyCheck, DirectionRequest, AreaSchema, KindMutability, EffectNarrows, []Guard{GuardRequiredInRequests}, "paths.*.*.requestBody.content.*.schema.readOnly:unset"),
 		// RequestPropertyXExtensibleEnumValueRemovedCheck
 		newBackwardCompatibilityRule(RequestPropertyXExtensibleEnumValueRemovedId, ERR, RequestPropertyXExtensibleEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
 		// ResponseDiscriminatorUpdatedCheck
@@ -602,8 +604,8 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyWrappedInOneOfId, ERR, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, EffectIncomparable, nil, "paths.*.*.responses.*.content.*.schema.oneOf.*:add"),
 		newBackwardCompatibilityRule(ResponseBodyWrappedInOneOfOriginalPreservedId, WARN, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, EffectUnknown, nil, "paths.*.*.responses.*.content.*.schema.oneOf.*:add"),
 		// ResponseRequiredPropertyWriteOnlyReadOnlyCheck
-		newBackwardCompatibilityRule(ResponseRequiredPropertyBecameNonWriteOnlyId, INFO, ResponseRequiredPropertyWriteOnlyReadOnlyCheck, DirectionResponse, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.writeOnly:unset"),
-		newBackwardCompatibilityRule(ResponseRequiredPropertyBecameWriteOnlyId, INFO, ResponseRequiredPropertyWriteOnlyReadOnlyCheck, DirectionResponse, AreaSchema, KindMutability, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.writeOnly:set"),
+		newBackwardCompatibilityRule(ResponseRequiredPropertyBecameNonWriteOnlyId, INFO, ResponseRequiredPropertyWriteOnlyReadOnlyCheck, DirectionResponse, AreaSchema, KindMutability, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.writeOnly:unset"),
+		newBackwardCompatibilityRule(ResponseRequiredPropertyBecameWriteOnlyId, ERR, ResponseRequiredPropertyWriteOnlyReadOnlyCheck, DirectionResponse, AreaSchema, KindMutability, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.writeOnly:set"),
 		newBackwardCompatibilityRule(ResponseRequiredPropertyBecameReadOnlyId, INFO, ResponseRequiredPropertyWriteOnlyReadOnlyCheck, DirectionResponse, AreaSchema, KindMutability, EffectNone, []Guard{GuardReadOnly}, "paths.*.*.responses.*.content.*.schema.readOnly:set"),
 		newBackwardCompatibilityRule(ResponseRequiredPropertyBecameNonReadOnlyId, INFO, ResponseRequiredPropertyWriteOnlyReadOnlyCheck, DirectionResponse, AreaSchema, KindMutability, EffectNone, []Guard{GuardReadOnly}, "paths.*.*.responses.*.content.*.schema.readOnly:unset"),
 		// ResponseSuccessStatusUpdatedCheck

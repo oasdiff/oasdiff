@@ -47,6 +47,11 @@ type Diff struct {
 	// either. Excluded from output because they are context, not a change.
 	BaseInfo     *openapi3.Info `json:"-" yaml:"-"`
 	RevisionInfo *openapi3.Info `json:"-" yaml:"-"`
+
+	// BaseOpenAPI and RevisionOpenAPI are each spec's openapi version, for
+	// checkers whose verdict depends on it. Set and excluded like BaseInfo.
+	BaseOpenAPI     string `json:"-" yaml:"-"`
+	RevisionOpenAPI string `json:"-" yaml:"-"`
 }
 
 // OperationsSourcesMap maps OpenAPI operations to their source file paths
@@ -270,6 +275,7 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	}
 
 	diff.BaseInfo, diff.RevisionInfo = s1.Info, s2.Info
+	diff.BaseOpenAPI, diff.RevisionOpenAPI = s1.OpenAPI, s2.OpenAPI
 
 	return diff, nil
 }
