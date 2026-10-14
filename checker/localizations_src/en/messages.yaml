@@ -162,6 +162,8 @@ request-property-min-items-set: the %s request property's minItems was set to %s
 request-body-min-set: the request's body min was set to %s
 request-property-min-set: the %s request property's min was set to %s
 request-property-removed: removed the request property %s
+request-property-removed-with-deprecation: removed the deprecated request property %s
+request-property-removed-before-sunset: removed the request property %s before the sunset date %s
 request-body-type-changed: the request's body %s changed from %s to %s
 request-body-type-generalized: the request's body %s was widened from %s to %s
 request-body-type-compatible: the request's body %s changed from %s to %s (backward compatible)
@@ -221,6 +223,8 @@ response-body-type-changed: the response's body %s changed from %s to %s for sta
 response-property-type-changed: the %s response's property %s changed from %s to %s for status %s
 response-required-property-became-not-write-only: the response required property %s became not write-only for the status %s
 response-required-property-removed: removed the required property %s from the response with the %s status
+response-required-property-removed-with-deprecation: removed the deprecated required property %s from the response with the %s status
+response-required-property-removed-before-sunset: removed the required property %s from the response with the %s status before the sunset date %s
 response-required-property-added: added the required property %s to the response with the %s status
 response-success-status-removed: removed the success response with the status %s
 response-non-success-status-removed: removed the non-success response with the status %s
@@ -570,6 +574,8 @@ request-property-pattern-changed-description: request property pattern changed
 request-property-pattern-generalized-description: request property pattern generalized
 request-property-pattern-removed-description: request property pattern unset
 request-property-removed-description: request property removed
+request-property-removed-with-deprecation-description: request property removed after deprecation
+request-property-removed-before-sunset-description: request property removed before sunset date
 request-property-type-changed-description: request property type changed
 request-property-type-generalized-description: request property type generalized
 request-property-type-compatible-description: request property type changed but backward compatible
@@ -662,6 +668,8 @@ response-required-property-became-not-write-only-description: response required 
 response-required-property-became-read-only-description: response required property became read-only
 response-required-property-became-write-only-description: response required property became write-only
 response-required-property-removed-description: response required property removed
+response-required-property-removed-with-deprecation-description: response required property removed after deprecation
+response-required-property-removed-before-sunset-description: response required property removed before sunset date
 response-required-write-only-property-added-description: response required write-only property added
 response-required-write-only-property-removed-description: response required write-only property removed
 response-success-status-added-description: response success status added

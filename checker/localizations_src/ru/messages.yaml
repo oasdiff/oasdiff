@@ -149,6 +149,8 @@ request-property-min-items-set: у поля запроса %s задано зн�
 request-body-min-set: задано значение min у тела запроса в %s
 request-property-min-set: у поля запроса %s задано значение min в %s
 request-property-removed: удалено поле запроса %s
+request-property-removed-with-deprecation: удалено устаревшее поле запроса %s
+request-property-removed-before-sunset: удалено поле запроса %s до даты прекращения действия %s
 request-body-type-changed: "%s тела запроса изменён с %s на %s"
 request-body-type-generalized: "%s тела запроса расширен с %s до %s"
 request-body-type-compatible: "%s тела запроса изменён с %s до %s (обратно совместимо)"
@@ -204,6 +206,8 @@ response-body-type-changed: "%s тела ответа изменён с %s на 
 response-property-type-changed: у свойства ответа %s %s изменён с %s на %s для статуса %s
 response-required-property-became-not-write-only: обязательное поле ответа %s перестало быть write-only для ответа со статусом %s
 response-required-property-removed: удалено обязательное поле ответа %s из ответа со статусом %s
+response-required-property-removed-with-deprecation: удалено устаревшее обязательное поле ответа %s из ответа со статусом %s
+response-required-property-removed-before-sunset: удалено обязательное поле ответа %s из ответа со статусом %s до даты прекращения действия %s
 response-required-property-added: добавил требуемое свойство %s в ответ со статусом %s
 response-success-status-removed: удален успешный (2xx) статус ответа %s
 response-non-success-status-removed: удален неуспешный (не 2xx) статус ответа %s
@@ -565,6 +569,8 @@ request-property-pattern-changed-description: изменен паттерн св
 request-property-pattern-generalized-description: обобщен паттерн свойства запроса
 request-property-pattern-removed-description: удален паттерн свойства запроса
 request-property-removed-description: удалено свойство запроса
+request-property-removed-with-deprecation-description: свойство запроса удалено после объявления устаревшим
+request-property-removed-before-sunset-description: свойство запроса удалено до даты прекращения действия
 request-property-type-changed-description: изменен тип свойства запроса
 request-property-type-generalized-description: обобщен тип свойства запроса
 request-property-type-compatible-description: изменён тип поля запроса, но обратно совместимо
@@ -666,6 +672,8 @@ response-required-property-became-read-only-description: обязательно�
 response-required-property-became-write-only-description: обязательное свойство ответа стало только для записи
 response-required-property-became-write-only: обязательное свойство ответа %s стало только для записи для статуса %s
 response-required-property-removed-description: удалено обязательное свойство ответа
+response-required-property-removed-with-deprecation-description: обязательное свойство ответа удалено после объявления устаревшим
+response-required-property-removed-before-sunset-description: обязательное свойство ответа удалено до даты прекращения действия
 response-required-write-only-property-added-description: добавлено обязательное свойство ответа только для записи
 response-required-write-only-property-removed-description: удалено обязательное свойство ответа только для записи
 response-success-status-added-description: добавлен статус успешного ответа

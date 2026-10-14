@@ -156,6 +156,8 @@ request-property-min-items-set: el número mínimo de elementos de la propiedad 
 request-body-min-set: el valor mínimo del cuerpo de solicitud fue establecido en %s
 request-property-min-set: el valor mínimo de la propiedad de solicitud %s fue establecido en %s
 request-property-removed: removida la propiedad de solicitud %s
+request-property-removed-with-deprecation: removida la propiedad de solicitud deprecada %s
+request-property-removed-before-sunset: removida la propiedad de solicitud %s antes de la fecha de expiración %s
 request-body-type-changed: el %s del cuerpo de solicitud fue cambiado de %s a %s
 request-body-type-generalized: el %s del cuerpo de solicitud fue ampliado de %s a %s
 request-body-type-compatible: el %s del cuerpo de solicitud cambió de %s a %s (retrocompatible)
@@ -221,6 +223,8 @@ response-body-type-changed: el %s del cuerpo de respuesta fue cambiado de %s a %
 response-property-type-changed: el %s de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
 response-required-property-became-not-write-only: la propiedad requerida de respuesta %s dejó de ser de solo escritura para el estado %s
 response-required-property-removed: removida la propiedad requerida %s de la respuesta con estado %s
+response-required-property-removed-with-deprecation: removida la propiedad requerida deprecada %s de la respuesta con estado %s
+response-required-property-removed-before-sunset: removida la propiedad requerida %s de la respuesta con estado %s antes de la fecha de expiración %s
 response-required-property-added: agregada la propiedad requerida %s a la respuesta con estado %s
 response-success-status-removed: removido el estado de respuesta exitosa %s
 response-non-success-status-removed: removido el estado de respuesta no exitosa %s
@@ -564,6 +568,8 @@ request-property-pattern-changed-description: patrón de la propiedad de solicit
 request-property-pattern-generalized-description: patrón de la propiedad de solicitud generalizado
 request-property-pattern-removed-description: patrón de la propiedad de solicitud removido
 request-property-removed-description: propiedad de solicitud removida
+request-property-removed-with-deprecation-description: propiedad de solicitud removida con deprecación
+request-property-removed-before-sunset-description: propiedad de solicitud removida antes de la fecha de expiración
 request-property-type-changed-description: tipo de la propiedad de solicitud cambiado
 request-property-type-generalized-description: tipo de la propiedad de solicitud generalizado
 request-property-type-compatible-description: tipo de la propiedad de solicitud cambiado pero retrocompatible
@@ -650,6 +656,8 @@ response-required-property-became-not-write-only-description: propiedad requerid
 response-required-property-became-read-only-description: propiedad requerida de respuesta se volvió de solo lectura
 response-required-property-became-write-only-description: propiedad requerida de respuesta se volvió de solo escritura
 response-required-property-removed-description: propiedad requerida de respuesta removida
+response-required-property-removed-with-deprecation-description: propiedad requerida de respuesta removida con deprecación
+response-required-property-removed-before-sunset-description: propiedad requerida de respuesta removida antes de la fecha de expiración
 response-required-write-only-property-added-description: propiedad requerida de solo escritura de respuesta agregada
 response-required-write-only-property-removed-description: propiedad requerida de solo escritura de respuesta removida
 response-success-status-added-description: estado de éxito de respuesta agregado
