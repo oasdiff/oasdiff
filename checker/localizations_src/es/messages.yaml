@@ -64,6 +64,10 @@ request-header-property-became-required: la propiedad %s del encabezado de solic
 request-header-property-became-enum: la propiedad %s del encabezado de solicitud %s fue restringida a una lista de valores enum
 request-parameter-became-required: el parámetro %s de solicitud %s se volvió requerido
 request-parameter-became-optional: el parámetro %s de solicitud %s se volvió opcional
+request-parameter-style-changed: "para el parámetro %s de solicitud %s, el estilo cambió de %s a %s"
+request-parameter-explode-changed: "para el parámetro %s de solicitud %s, explode cambió de %s a %s"
+request-parameter-became-allow-reserved: "el parámetro %s de solicitud %s ahora acepta caracteres reservados sin codificación porcentual"
+request-parameter-became-not-allow-reserved: "el parámetro %s de solicitud %s ya no acepta caracteres reservados sin codificación porcentual"
 request-parameter-became-enum: el parámetro %s de solicitud %s fue restringido a una lista de valores enum
 request-parameter-became-nullable: el parámetro de solicitud %s %s se volvió nulable
 request-parameter-became-not-nullable: el parámetro de solicitud %s %s se volvió no nulable
@@ -484,6 +488,10 @@ request-parameter-became-not-nullable-description: el parámetro de solicitud se
 request-parameter-property-became-nullable-description: la propiedad del parámetro de solicitud se volvió nulable
 request-parameter-property-became-not-nullable-description: la propiedad del parámetro de solicitud se volvió no nulable
 request-parameter-became-optional-description: parámetro de solicitud se volvió opcional
+request-parameter-style-changed-description: "estilo de serialización del parámetro de solicitud cambiado"
+request-parameter-explode-changed-description: "explode del parámetro de solicitud cambiado"
+request-parameter-became-allow-reserved-description: "el parámetro de solicitud empezó a permitir caracteres reservados"
+request-parameter-became-not-allow-reserved-description: "el parámetro de solicitud dejó de permitir caracteres reservados"
 request-parameter-became-required-description: parámetro de solicitud se volvió requerido
 request-parameter-default-value-added-description: valor por defecto del parámetro de solicitud establecido
 request-parameter-default-value-changed-description: valor por defecto del parámetro de solicitud cambiado

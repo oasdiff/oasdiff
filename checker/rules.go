@@ -310,6 +310,11 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// RequestParameterRequiredValueUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterBecomeRequiredId, ERR, RequestParameterRequiredValueUpdatedCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectNarrows, nil, "paths.*.*.parameters.*.required:set"),
 		newBackwardCompatibilityRule(RequestParameterBecomeOptionalId, INFO, RequestParameterRequiredValueUpdatedCheck, DirectionRequest, AreaParameters, KindRequiredness, EffectWidens, nil, "paths.*.*.parameters.*.required:unset"),
+		// RequestParameterSerializationUpdatedCheck
+		newBackwardCompatibilityRule(RequestParameterStyleChangedId, ERR, RequestParameterSerializationUpdatedCheck, DirectionRequest, AreaParameters, KindType, EffectIncomparable, nil, "paths.*.*.parameters.*.style:set,unset,change"),
+		newBackwardCompatibilityRule(RequestParameterExplodeChangedId, ERR, RequestParameterSerializationUpdatedCheck, DirectionRequest, AreaParameters, KindType, EffectIncomparable, nil, "paths.*.*.parameters.*.explode:set,unset"),
+		newBackwardCompatibilityRule(RequestParameterBecameAllowReservedId, INFO, RequestParameterSerializationUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectWidens, nil, "paths.*.*.parameters.*.allowReserved:set"),
+		newBackwardCompatibilityRule(RequestParameterBecameNotAllowReservedId, ERR, RequestParameterSerializationUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectNarrows, nil, "paths.*.*.parameters.*.allowReserved:unset"),
 		// RequestParameterTypeChangedCheck
 		newBackwardCompatibilityRule(RequestParameterTypeChangedId, ERR, RequestParameterTypeChangedCheck, DirectionRequest, AreaParameters, KindType, EffectIncomparable, nil, "paths.*.*.parameters.*.schema.type:add,remove", "paths.*.*.parameters.*.schema.format:set,unset,change"),
 		newBackwardCompatibilityRule(RequestParameterTypeGeneralizedId, INFO, RequestParameterTypeChangedCheck, DirectionRequest, AreaParameters, KindType, EffectWidens, nil, "paths.*.*.parameters.*.schema.type:add", "paths.*.*.parameters.*.schema.format:unset,change"),
