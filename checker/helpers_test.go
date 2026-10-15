@@ -214,3 +214,20 @@ func declaredLevel(t *testing.T, id string) checker.Level {
 	require.FailNowf(t, "unknown rule", "%s", id)
 	return checker.INVALID
 }
+
+const (
+	enumRemovedEntirelyBase     = "../data/checker/enum_removed_entirely_base.yaml"
+	enumRemovedEntirelyRevision = "../data/checker/enum_removed_entirely_revision.yaml"
+)
+
+// checkChanges runs a single check over the two specs and returns every change it reports.
+func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string) checker.Changes {
+	t.Helper()
+	s1, err := open(base)
+	require.NoError(t, err)
+	s2, err := open(revision)
+	require.NoError(t, err)
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(check), d, osm, checker.INFO)
+}

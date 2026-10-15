@@ -265,6 +265,9 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestParameterEnumValueRemovedId, ERR, RequestParameterEnumValueUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectNarrows, nil, "paths.*.*.parameters.*.schema.enum:remove"),
 		newBackwardCompatibilityRule(RequestParameterPropertyEnumValueAddedId, INFO, RequestParameterEnumValueUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectWidens, nil, "paths.*.*.parameters.*.schema.enum:add"),
 		newBackwardCompatibilityRule(RequestParameterPropertyEnumValueRemovedId, ERR, RequestParameterEnumValueUpdatedCheck, DirectionRequest, AreaParameters, KindValues, EffectNarrows, nil, "paths.*.*.parameters.*.schema.enum:remove"),
+		// RequestParameterBecameNotEnumCheck
+		newBackwardCompatibilityRule(RequestParameterBecameNotEnumId, INFO, RequestParameterBecameNotEnumCheck, DirectionRequest, AreaParameters, KindValues, EffectWidens, nil, "paths.*.*.parameters.*.schema.enum:remove"),
+		newBackwardCompatibilityRule(RequestParameterPropertyBecameNotEnumId, INFO, RequestParameterBecameNotEnumCheck, DirectionRequest, AreaParameters, KindValues, EffectWidens, nil, "paths.*.*.parameters.*.schema.enum:remove"),
 		// RequestParameterMaxItemsUpdatedCheck
 		newBackwardCompatibilityRule(RequestParameterMaxItemsIncreasedId, INFO, RequestParameterMaxItemsUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectWidens, nil, "paths.*.*.parameters.*.schema.maxItems:increase"),
 		newBackwardCompatibilityRule(RequestParameterMaxItemsDecreasedId, ERR, RequestParameterMaxItemsUpdatedCheck, DirectionRequest, AreaParameters, KindConstraints, EffectNarrows, nil, "paths.*.*.parameters.*.schema.maxItems:decrease"),
@@ -362,6 +365,8 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyEnumValueRemovedId, ERR, RequestPropertyEnumValueUpdatedCheck, DirectionRequest, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.enum:remove"),
 		newBackwardCompatibilityRule(RequestReadOnlyPropertyEnumValueRemovedId, INFO, RequestPropertyEnumValueUpdatedCheck, DirectionRequest, AreaSchema, KindValues, EffectNarrows, []Guard{GuardReadOnly}, "paths.*.*.requestBody.content.*.schema.enum:remove"),
 		newBackwardCompatibilityRule(RequestPropertyEnumValueAddedId, INFO, RequestPropertyEnumValueUpdatedCheck, DirectionRequest, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.enum:add"),
+		// RequestPropertyBecameNotEnumCheck
+		newBackwardCompatibilityRule(RequestPropertyBecameNotEnumId, INFO, RequestPropertyBecameNotEnumCheck, DirectionRequest, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.enum:remove"),
 		// RequestPropertyMaxDecreasedCheck
 		newBackwardCompatibilityRule(RequestBodyMaxDecreasedId, ERR, RequestPropertyMaxDecreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.maximum:decrease"),
 		newBackwardCompatibilityRule(RequestBodyMaxIncreasedId, INFO, RequestPropertyMaxDecreasedCheck, DirectionRequest, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.maximum:increase"),
@@ -555,6 +560,10 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// ResponsePropertyEnumValueAddedCheck
 		newBackwardCompatibilityRule(ResponsePropertyEnumValueAddedId, ERR, ResponsePropertyEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
 		newBackwardCompatibilityRule(ResponseWriteOnlyPropertyEnumValueAddedId, INFO, ResponsePropertyEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.enum:add"),
+		// ResponsePropertyBecameEnumCheck
+		newBackwardCompatibilityRule(ResponsePropertyBecameEnumId, INFO, ResponsePropertyBecameEnumCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
+		// ResponsePropertyBecameNotEnumCheck
+		newBackwardCompatibilityRule(ResponsePropertyBecameNotEnumId, ERR, ResponsePropertyBecameNotEnumCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
 		// ResponsePropertyMaxIncreasedCheck
 		newBackwardCompatibilityRule(ResponseBodyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maximum:increase"),
 		newBackwardCompatibilityRule(ResponsePropertyMaxIncreasedId, ERR, ResponsePropertyMaxIncreasedCheck, DirectionResponse, AreaSchema, KindConstraints, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.maximum:increase"),
@@ -627,10 +636,20 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyEnumValueRemovedId, INFO, ResponseParameterEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
 		// ResponseMediaTypeEnumValueRemovedCheck
 		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueRemovedId, INFO, ResponseMediaTypeEnumValueRemovedCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
+		// ResponseMediaTypeEnumValueAddedCheck
+		newBackwardCompatibilityRule(ResponseMediaTypeEnumValueAddedId, ERR, ResponseMediaTypeEnumValueAddedCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
+		// ResponseMediaTypeBecameEnumCheck
+		newBackwardCompatibilityRule(ResponseMediaTypeBecameEnumId, INFO, ResponseMediaTypeBecameEnumCheck, DirectionResponse, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.enum:add"),
+		// ResponseMediaTypeBecameNotEnumCheck
+		newBackwardCompatibilityRule(ResponseMediaTypeBecameNotEnumId, ERR, ResponseMediaTypeBecameNotEnumCheck, DirectionResponse, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.enum:remove"),
 		// RequestBodyEnumValueRemovedCheck: removing a value from a request body
 		// enum rejects input a client used to send, so it is breaking, the same
 		// as its request-property and request-parameter siblings.
 		newBackwardCompatibilityRule(RequestBodyEnumValueRemovedId, ERR, RequestBodyEnumValueRemovedCheck, DirectionRequest, AreaSchema, KindValues, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.enum:remove"),
+		// RequestBodyEnumValueAddedCheck
+		newBackwardCompatibilityRule(RequestBodyEnumValueAddedId, INFO, RequestBodyEnumValueAddedCheck, DirectionRequest, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.enum:add"),
+		// RequestBodyBecameNotEnumCheck
+		newBackwardCompatibilityRule(RequestBodyBecameNotEnumId, INFO, RequestBodyBecameNotEnumCheck, DirectionRequest, AreaSchema, KindValues, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.enum:remove"),
 		// RequestPropertyListOfTypesChangedCheck
 		newBackwardCompatibilityRule(RequestBodyListOfTypesWidenedId, INFO, RequestPropertyListOfTypesChangedCheck, DirectionRequest, AreaSchema, KindType, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.type:add"),
 		newBackwardCompatibilityRule(RequestBodyListOfTypesNarrowedId, ERR, RequestPropertyListOfTypesChangedCheck, DirectionRequest, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.type:remove"),
