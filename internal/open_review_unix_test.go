@@ -550,3 +550,48 @@ func TestUploadAndOpen_URLSources(t *testing.T) {
 	require.NotEmpty(t, payload.Blocks)
 	require.NotEmpty(t, payload.Blocks[0].BaseText, "blocks slice from the captured URL text")
 }
+
+// A transformed comparison uploads the rendered documents: the review's spec
+// panels must show the text the changes were computed against, so the bundle
+// carries the flattened rendering, not the source files.
+func TestOpenReview_TransformedComparisonUploadsRenderedSpecs(t *testing.T) {
+	stubBrowser(t)
+	var uploadedBlob []byte
+	stub := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		uploadedBlob, _ = io.ReadAll(r.Body)
+		_, _ = w.Write([]byte(`{"review_id":"r-1","expires_at":0}`))
+	}))
+	defer stub.Close()
+	t.Setenv("OASDIFF_URL", stub.URL)
+
+	flags := NewFlags()
+	flags.setBase(load.NewSource("../data/allof/two-recursive-branches.yaml"))
+	flags.setRevision(load.NewSource("../data/allof/two-recursive-branches-shifted.yaml"))
+	flags.v.Set("flatten-allof", true)
+	flags.v.Set("open", true)
+
+	r, returnErr := calcDiff(flags)
+	if returnErr != nil {
+		t.Fatal(returnErr.Error())
+	}
+	errs, returnErr := computeChanges(flags, r, checker.INFO)
+	require.Nil(t, returnErr)
+
+	var out bytes.Buffer
+	require.NoError(t, openReview(flags, &out, errs, r, checker.INFO, false))
+
+	m := keyFragmentRe.FindStringSubmatch(out.String())
+	require.Len(t, m, 2)
+	key, err := base64.RawURLEncoding.DecodeString(m[1])
+	require.NoError(t, err)
+
+	var payload review.Payload
+	require.NoError(t, json.Unmarshal(decryptBlob(t, uploadedBlob, key), &payload))
+
+	require.Contains(t, payload.BaseSpec, "AllOfMerged_NodeA_NodeB",
+		"the uploaded base must be the flattened rendering")
+	require.NotContains(t, payload.BaseSpec, "allOf:",
+		"the uploaded base must not be the unflattened source")
+	require.Contains(t, payload.RevisionSpec, "AllOfMerged_NodeC_NodeD")
+	require.NotEmpty(t, payload.Changes)
+}
