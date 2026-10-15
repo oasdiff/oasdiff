@@ -152,12 +152,8 @@ func severityForKinError(err error) checker.Level {
 // once at the PathItem level (no per-operation re-validation).
 //
 // A finding without a line (a JSON spec has none) cannot be told apart by
-// location, so components-rooted findings are also grouped by component:
-// kin reports each component on its own, so the same message in two
-// components is two defects. A path-rooted finding without a line is
-// dropped when a component reports the same message, since it is then
-// most likely that component's defect reached through a $ref. Such a
-// finding's text names its component, since there is no line to find it by.
+// location, so components-rooted findings are also grouped by component,
+// and their text names the component.
 func dedupePreferringComponents(in []kinFinding) formatters.Findings {
 	componentReported := make(map[defectKey]bool)
 	for _, f := range in {
@@ -170,6 +166,10 @@ func dedupePreferringComponents(in []kinFinding) formatters.Findings {
 	for i, f := range in {
 		k := f.defectKey()
 		if f.Source.Line == 0 {
+			// An operation reports the defect of a component it references
+			// again, with nothing naming the component, so drop it when any
+			// component reports the same text. This also drops a different
+			// defect with the same text in a schema inline in an operation.
 			if f.component == "" && componentReported[k] {
 				continue
 			}

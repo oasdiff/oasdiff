@@ -364,6 +364,26 @@ func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
 	require.Len(t, fingerprints, 3)
 }
 
+// A known limitation without lines: an operation's inline schema with the
+// same defect as a component is taken for the component's defect reached
+// through a $ref and dropped. With lines, as in YAML, both are reported, so
+// once JSON specs have lines the JSON case expects both too.
+func Test_ValidateCmd_InlineDefectSameAsComponentWithoutLines(t *testing.T) {
+	operations := func(spec string) []any {
+		var stdout bytes.Buffer
+		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
+		var findings []map[string]any
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+		out := make([]any, 0, len(findings))
+		for _, f := range findings {
+			out = append(out, f["operation"])
+		}
+		return out
+	}
+	require.ElementsMatch(t, []any{nil}, operations("../data/validate/inline-defect-same-as-component.json"))
+	require.ElementsMatch(t, []any{nil, "GET"}, operations("../data/validate/inline-defect-same-as-component.yaml"))
+}
+
 // When this fails, JSON specs have lines (#1128) and the handling of findings
 // without a line in dedupePreferringComponents can go.
 func Test_ValidateCmd_JSONFindingsHaveNoLine(t *testing.T) {
