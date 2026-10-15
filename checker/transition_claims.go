@@ -180,24 +180,12 @@ var transitions = []transition{
 }
 
 // dropClaimed removes the changes a recognized transition explains, which the
-// transition reports instead. The rest no longer need the schema node they
-// kept for the decision, so it is cleared and the changes returned do not
-// hold on to the diff.
+// transition reports instead.
 func dropClaimed(changes Changes) Changes {
-	result := make(Changes, 0, len(changes))
-	for _, change := range changes {
+	return slices.DeleteFunc(changes, func(change Change) bool {
 		apiChange, ok := change.(ApiChange)
-		if !ok {
-			result = append(result, change)
-			continue
-		}
-		if claimedByTransition(apiChange.schema, apiChange.Id) {
-			continue
-		}
-		apiChange.schema = nil
-		result = append(result, apiChange)
-	}
-	return result
+		return ok && claimedByTransition(apiChange.schema, apiChange.Id)
+	})
 }
 
 // claimedByTransition reports whether a change with the given rule id,

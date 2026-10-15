@@ -1,0 +1,18 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: "1"
+paths:
+  /things:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: Bad
+components:
+  schemas:
+    A:
+      type: Bad

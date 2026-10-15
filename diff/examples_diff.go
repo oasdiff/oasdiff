@@ -27,7 +27,7 @@ func (diff *ExamplesDiff) Empty() bool {
 		len(diff.Modified) == 0
 }
 
-func newExamplessDiff() *ExamplesDiff {
+func newExamplesDiff() *ExamplesDiff {
 	return &ExamplesDiff{
 		Added:    []string{},
 		Deleted:  []string{},
@@ -55,7 +55,7 @@ func getExamplesDiffInternal(config *Config, examples1, examples2 openapi3.Examp
 		return nil, nil
 	}
 
-	result := newExamplessDiff()
+	result := newExamplesDiff()
 
 	for name1, exampleRef1 := range examples1 {
 		if exampleRef2, ok := examples2[name1]; ok {
