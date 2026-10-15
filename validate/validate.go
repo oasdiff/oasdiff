@@ -95,7 +95,7 @@ func flattenKinErrors(source string, err error) []kinFinding {
 	// way to tell which component the finding is in.
 	if comp, ok := errors.AsType[*openapi3.ComponentValidationError](err); ok {
 		component = comp.Section + " " + strconv.Quote(comp.Name)
-		text = component + ": " + message
+		text = message + " in " + component
 		args = append([]any{comp.Section, comp.Name}, args...)
 	}
 	f := formatters.Finding{

@@ -357,9 +357,9 @@ func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
 		fingerprints[f["fingerprint"]] = true
 	}
 	require.ElementsMatch(t, []string{
-		`schema "A": unsupported 'type' value "Bad"`,
-		`schema "B": unsupported 'type' value "Bad"`,
-		`schema "C": unsupported 'type' value "Bad"`,
+		`unsupported 'type' value "Bad" in schema "A"`,
+		`unsupported 'type' value "Bad" in schema "B"`,
+		`unsupported 'type' value "Bad" in schema "C"`,
 	}, texts)
 	require.Len(t, fingerprints, 3)
 }
