@@ -38,17 +38,19 @@ func checkGlobalSecurity(diffReport *diff.Diff, config *Config) Changes {
 
 	// Removing an alternative or adding a scope narrows the top-level list, which
 	// rejects a client only on an operation that uses that list.
+	reach := globalSecurityReach(diffReport, config)
 	narrowingLevel := func(id string) (Level, string) {
-		switch globalSecurityReach(diffReport, config) {
-		case globalSecurityNotInherited:
+		if reach == globalSecurityNotInherited {
 			return INFO, GlobalSecurityNotInheritedCommentId
-		case globalSecurityAnonymous:
-			return INFO, ""
 		}
 		return config.getLogLevel(id), ""
 	}
 
+	// An empty alternative is reported as a change in anonymous access.
 	for _, addedSecurity := range diffReport.SecurityDiff.Added {
+		if len(addedSecurity.Schemes) == 0 {
+			continue
+		}
 		result = append(result, SecurityChange{
 			Id:    APIGlobalSecurityAddedCheckId,
 			Level: config.getLogLevel(APIGlobalSecurityAddedCheckId),
@@ -56,7 +58,12 @@ func checkGlobalSecurity(diffReport *diff.Diff, config *Config) Changes {
 		}.WithSources(nil, revisionSource))
 	}
 
+	// Once the revision's list accepts unauthenticated requests, nothing removed
+	// from it can reject a client.
 	for _, removedSecurity := range diffReport.SecurityDiff.Deleted {
+		if len(removedSecurity.Schemes) == 0 || reach == globalSecurityAnonymous {
+			continue
+		}
 		level, comment := narrowingLevel(APIGlobalSecurityRemovedCheckId)
 		result = append(result, SecurityChange{
 			Id:      APIGlobalSecurityRemovedCheckId,
@@ -69,6 +76,9 @@ func checkGlobalSecurity(diffReport *diff.Diff, config *Config) Changes {
 	for _, updatedSecurity := range diffReport.SecurityDiff.Modified {
 		for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity.Scopes {
 			for _, addedScope := range updatedSecuritySchemeScopes.Added {
+				if reach == globalSecurityAnonymous {
+					continue
+				}
 				level, comment := narrowingLevel(APIGlobalSecurityScopeAddedId)
 				result = append(result, SecurityChange{
 					Id:      APIGlobalSecurityScopeAddedId,
