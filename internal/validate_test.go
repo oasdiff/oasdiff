@@ -339,6 +339,31 @@ func Test_ValidateCmd_DedupePreferringComponents(t *testing.T) {
 	require.Contains(t, out, "invalid example: value must be a number")
 }
 
+// A JSON spec has no line numbers, so the same defect in three components
+// must not collapse into one finding (#1304). Each finding names its
+// component and has its own fingerprint, and the path-rooted echo of A
+// through its $ref is still dropped.
+func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/same-defect-in-components.json"), &stdout, io.Discard))
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+
+	texts := make([]string, 0, len(findings))
+	fingerprints := map[any]bool{}
+	for _, f := range findings {
+		require.Equal(t, "schema-type-unsupported", f["id"])
+		texts = append(texts, f["text"].(string))
+		fingerprints[f["fingerprint"]] = true
+	}
+	require.ElementsMatch(t, []string{
+		`schema "A": unsupported 'type' value "Bad"`,
+		`schema "B": unsupported 'type' value "Bad"`,
+		`schema "C": unsupported 'type' value "Bad"`,
+	}, texts)
+	require.Len(t, fingerprints, 3)
+}
+
 // --color only affects the text output, so pairing it with a non-text
 // format is rejected rather than silently ignored (matching changelog).
 func Test_ValidateCmd_ColorWithNonTextFormatRejected(t *testing.T) {

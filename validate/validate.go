@@ -62,18 +62,26 @@ func mapKinErrors(source string, err error) formatters.Findings {
 	return dedupePreferringComponents(flattenKinErrors(source, err))
 }
 
+// kinFinding is a finding with the parts of its kin error that identify the
+// defect: the message without its context, and the component it is in.
+type kinFinding struct {
+	formatters.Finding
+	message   string
+	component string
+}
+
 // flattenKinErrors walks the kin error tree (MultiError → leaves) and
 // produces one finding per leaf. Findings may include duplicates of the
 // same defect when a shared definition (e.g. a schema in components) is
 // referenced from multiple operations — the validator re-visits the
 // definition under each $ref. dedupePreferringComponents collapses those
 // into a single finding.
-func flattenKinErrors(source string, err error) formatters.Findings {
+func flattenKinErrors(source string, err error) []kinFinding {
 	if err == nil {
 		return nil
 	}
 	if me, ok := err.(openapi3.MultiError); ok {
-		var out formatters.Findings
+		var out []kinFinding
 		for _, sub := range me {
 			out = append(out, flattenKinErrors(source, sub)...)
 		}
@@ -81,9 +89,18 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 	}
 	path, operation := pathOperationForKinError(err)
 	line, column := lineColumnForKinError(err)
+	message := unwrapContext(err).Error()
+	text, component, args := message, "", argsForKinError(err)
+	// Without a line, as for a JSON spec, the component name is the only
+	// way to tell which component the finding is in.
+	if comp, ok := errors.AsType[*openapi3.ComponentValidationError](err); ok {
+		component = comp.Section + " " + strconv.Quote(comp.Name)
+		text = component + ": " + message
+		args = append([]any{comp.Section, comp.Name}, args...)
+	}
 	f := formatters.Finding{
 		Id:        knownRuleID(ruleIDForKinError(err)),
-		Text:      unwrapContext(err).Error(),
+		Text:      text,
 		Level:     severityForKinError(err),
 		Operation: operation,
 		Path:      path,
@@ -95,8 +112,8 @@ func flattenKinErrors(source string, err error) formatters.Findings {
 		},
 	}
 	// Fingerprint last so it hashes over the populated fields.
-	f.Fingerprint = checker.ComputeFingerprint(f.Id, f.Operation, f.Path, argsForKinError(err))
-	return formatters.Findings{f}
+	f.Fingerprint = checker.ComputeFingerprint(f.Id, f.Operation, f.Path, args)
+	return []kinFinding{{Finding: f, message: message, component: component}}
 }
 
 // severityForKinError classifies a kin validation error into a severity by
@@ -107,11 +124,10 @@ func severityForKinError(err error) checker.Level {
 }
 
 // dedupePreferringComponents groups findings by their underlying
-// defect identity (Id + Source location + Text — which carries the
-// args-derived discriminator) and keeps one representative per group.
-// When the group has a components-rooted finding (Section ==
-// "components"), prefer it: the components-rooted version points at
-// the definition site and has empty Operation/Path, giving a stable
+// defect identity (Id + Source location + message) and keeps one
+// representative per group. When the group has a components-rooted
+// finding, prefer it: the components-rooted version points at the
+// definition site and has empty Operation/Path, giving a stable
 // fingerprint across reference-graph changes.
 //
 // This covers the common case where a defect in components/schemas/X
@@ -119,35 +135,50 @@ func severityForKinError(err error) checker.Level {
 // walk and once from each operation that $refs it. Path-level shared
 // parameters don't need handling here because kin only validates them
 // once at the PathItem level (no per-operation re-validation).
-func dedupePreferringComponents(in formatters.Findings) formatters.Findings {
-	type group struct {
-		first  int // index into `in` of the first finding for this key
-		chosen int // index of the current best representative
-	}
-	keyOf := func(f formatters.Finding) string {
+//
+// A finding without a line (a JSON spec has none) cannot be told apart by
+// location, so components-rooted findings are also grouped by component:
+// kin reports each component on its own, so the same message in two
+// components is two defects. A path-rooted finding without a line is
+// dropped when a component reports the same message, since it is then
+// most likely that component's defect reached through a $ref.
+func dedupePreferringComponents(in []kinFinding) formatters.Findings {
+	keyOf := func(f kinFinding) string {
 		return f.Id + "\x00" + f.Source.File + "\x00" +
 			strconv.Itoa(f.Source.Line) + "\x00" +
-			strconv.Itoa(f.Source.Column) + "\x00" + f.Text
+			strconv.Itoa(f.Source.Column) + "\x00" + f.message
 	}
-	groups := make(map[string]*group)
-	var order []string // preserve first-seen order for stable output
+	componentReported := make(map[string]bool)
+	for _, f := range in {
+		if f.component != "" {
+			componentReported[keyOf(f)] = true
+		}
+	}
+	chosen := make(map[string]int) // key -> index of the current best representative
+	var order []string             // preserve first-seen order for stable output
 	for i, f := range in {
 		k := keyOf(f)
-		g, ok := groups[k]
+		if f.Source.Line == 0 {
+			if f.component == "" && componentReported[k] {
+				continue
+			}
+			k += "\x00" + f.component
+		}
+		c, ok := chosen[k]
 		if !ok {
-			groups[k] = &group{first: i, chosen: i}
+			chosen[k] = i
 			order = append(order, k)
 			continue
 		}
 		// Already have a candidate; prefer this one only if it's
 		// components-rooted and the current pick isn't.
-		if f.Section == "components" && in[g.chosen].Section != "components" {
-			g.chosen = i
+		if f.Section == "components" && in[c].Section != "components" {
+			chosen[k] = i
 		}
 	}
 	out := make(formatters.Findings, 0, len(order))
 	for _, k := range order {
-		out = append(out, in[groups[k].chosen])
+		out = append(out, in[chosen[k]].Finding)
 	}
 	return out
 }
