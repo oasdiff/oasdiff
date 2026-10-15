@@ -364,22 +364,30 @@ func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
 	require.Len(t, fingerprints, 3)
 }
 
-// Line numbers only locate a finding: the same spec in YAML, which has them,
-// gives the same texts and fingerprints as in JSON, which does not yet.
-func Test_ValidateCmd_SameDefectInComponentsWithAndWithoutLines(t *testing.T) {
-	findings := func(spec string) []map[string]any {
+// With a line, as in YAML, the location tells the components apart, so the
+// text does not name them. The fingerprints have no location and match the
+// JSON ones, so they stay the same when JSON specs gain lines.
+func Test_ValidateCmd_SameDefectInComponentsWithLines(t *testing.T) {
+	run := func(spec string) []map[string]any {
 		var stdout bytes.Buffer
 		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
-		var out []map[string]any
-		require.NoError(t, json.Unmarshal(stdout.Bytes(), &out))
-		for _, f := range out {
-			delete(f, "source")
+		var findings []map[string]any
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+		return findings
+	}
+	fingerprints := func(findings []map[string]any) []any {
+		out := make([]any, 0, len(findings))
+		for _, f := range findings {
+			out = append(out, f["fingerprint"])
 		}
 		return out
 	}
-	require.ElementsMatch(t,
-		findings("../data/validate/same-defect-in-components.json"),
-		findings("../data/validate/same-defect-in-components.yaml"))
+	withLines := run("../data/validate/same-defect-in-components.yaml")
+	require.Len(t, withLines, 3)
+	for _, f := range withLines {
+		require.Equal(t, `unsupported 'type' value "Bad"`, f["text"])
+	}
+	require.ElementsMatch(t, fingerprints(run("../data/validate/same-defect-in-components.json")), fingerprints(withLines))
 }
 
 // --color only affects the text output, so pairing it with a non-text
