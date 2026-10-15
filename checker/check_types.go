@@ -193,9 +193,6 @@ func isFormatContained(revisionType *openapi3.Types, to, from any) bool {
 		return (to == "int64" && from == "int32") ||
 			(to == "bigint" && from == "int32") ||
 			(to == "bigint" && from == "int64")
-	case "string":
-		return (to == "date-time" && from == "date") ||
-			(to == "date-time" && from == "time")
 	}
 
 	return false

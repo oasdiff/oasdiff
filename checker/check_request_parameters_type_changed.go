@@ -142,7 +142,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 				id,
 				[]any{p.location, p.name, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 				comment,
-			).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, schemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
 		schemawalk.ModifiedProperties(
@@ -162,7 +162,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 						id,
 						[]any{p.location, p.name, getTypeFormatDimension(schemaDiff), schemawalk.PropertyFullName(propertyPath, propertyName), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
 						comment,
-					).WithSchema(schemaDiff).WithSources(propBaseSource, propRevisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, schemaDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(propBaseSource, propRevisionSource))
 				}
 			})
 	})

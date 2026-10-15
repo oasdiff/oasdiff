@@ -57,7 +57,7 @@ func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *di
 			id,
 			[]any{h.name, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), h.responseStatus},
 			comment,
-		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+		).WithSchema(schemaDiff, schemaDiff, "").WithSources(baseSource, revisionSource))
 	})
 	return result
 }

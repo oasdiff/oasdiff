@@ -42,6 +42,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	// First, so a change a transition explains counts toward nothing below.
 	result = dropClaimed(result)
+	result = attachSharedSchemas(result)
 
 	// Runs before anything that reads a change's level.
 	result = capByGuards(config, result)
