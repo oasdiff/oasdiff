@@ -364,6 +364,24 @@ func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
 	require.Len(t, fingerprints, 3)
 }
 
+// Line numbers only locate a finding: the same spec in YAML, which has them,
+// gives the same texts and fingerprints as in JSON, which does not yet.
+func Test_ValidateCmd_SameDefectInComponentsWithAndWithoutLines(t *testing.T) {
+	findings := func(spec string) []map[string]any {
+		var stdout bytes.Buffer
+		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
+		var out []map[string]any
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &out))
+		for _, f := range out {
+			delete(f, "source")
+		}
+		return out
+	}
+	require.ElementsMatch(t,
+		findings("../data/validate/same-defect-in-components.json"),
+		findings("../data/validate/same-defect-in-components.yaml"))
+}
+
 // --color only affects the text output, so pairing it with a non-text
 // format is rejected rather than silently ignored (matching changelog).
 func Test_ValidateCmd_ColorWithNonTextFormatRejected(t *testing.T) {

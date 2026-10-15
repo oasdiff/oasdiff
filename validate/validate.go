@@ -70,6 +70,25 @@ type kinFinding struct {
 	component string
 }
 
+type defectKey struct {
+	id, file     string
+	line, column int
+	message      string
+	component    string
+}
+
+// defectKey leaves the component empty: with a line, the location already
+// tells components apart.
+func (f kinFinding) defectKey() defectKey {
+	return defectKey{
+		id:      f.Id,
+		file:    f.Source.File,
+		line:    f.Source.Line,
+		column:  f.Source.Column,
+		message: f.message,
+	}
+}
+
 // flattenKinErrors walks the kin error tree (MultiError → leaves) and
 // produces one finding per leaf. Findings may include duplicates of the
 // same defect when a shared definition (e.g. a schema in components) is
@@ -143,26 +162,21 @@ func severityForKinError(err error) checker.Level {
 // dropped when a component reports the same message, since it is then
 // most likely that component's defect reached through a $ref.
 func dedupePreferringComponents(in []kinFinding) formatters.Findings {
-	keyOf := func(f kinFinding) string {
-		return f.Id + "\x00" + f.Source.File + "\x00" +
-			strconv.Itoa(f.Source.Line) + "\x00" +
-			strconv.Itoa(f.Source.Column) + "\x00" + f.message
-	}
-	componentReported := make(map[string]bool)
+	componentReported := make(map[defectKey]bool)
 	for _, f := range in {
 		if f.component != "" {
-			componentReported[keyOf(f)] = true
+			componentReported[f.defectKey()] = true
 		}
 	}
-	chosen := make(map[string]int) // key -> index of the current best representative
-	var order []string             // preserve first-seen order for stable output
+	chosen := make(map[defectKey]int) // key -> index of the current best representative
+	var order []defectKey             // preserve first-seen order for stable output
 	for i, f := range in {
-		k := keyOf(f)
+		k := f.defectKey()
 		if f.Source.Line == 0 {
 			if f.component == "" && componentReported[k] {
 				continue
 			}
-			k += "\x00" + f.component
+			k.component = f.component
 		}
 		c, ok := chosen[k]
 		if !ok {
