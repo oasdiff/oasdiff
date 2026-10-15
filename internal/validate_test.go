@@ -364,6 +364,19 @@ func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
 	require.Len(t, fingerprints, 3)
 }
 
+// When this fails, JSON specs have lines (#1128) and the handling of findings
+// without a line in dedupePreferringComponents can go.
+func Test_ValidateCmd_JSONFindingsHaveNoLine(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/same-defect-in-components.json"), &stdout, io.Discard))
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.NotEmpty(t, findings)
+	for _, f := range findings {
+		require.NotContains(t, f["source"], "line", "JSON specs have lines now: remove the no-line handling in dedupePreferringComponents and this test")
+	}
+}
+
 // With a line, as in YAML, the location tells the components apart, so the
 // text does not name them. The fingerprints have no location and match the
 // JSON ones, so they stay the same when JSON specs gain lines.
