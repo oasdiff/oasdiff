@@ -17,6 +17,8 @@ oasdiff applies a few opt-out defaults so its diff matches what most users expec
 
 All other comparison-tuning flags (`--flatten-allof`, `--flatten-params`, `--include-path-params`, `--auto-upgrade`, ...) are opt-in (default `false`) because they transform the input or change matching semantics in ways that not every spec wants.
 
+`breaking` and `changelog` are an exception for `--flatten-params`: they default it to `true`, so that a change to a path-level parameter is checked on each operation that takes it. See [Common Parameters](COMMON-PARAMS.md).
+
 ## Output Formats
 The default diff output format is `yaml`.  
 Additional formats can be generated using the `--format` flag:

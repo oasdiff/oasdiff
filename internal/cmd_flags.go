@@ -20,7 +20,6 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("include-path-params", false, "include path parameter names in endpoint matching")
 	cmd.PersistentFlags().Bool("match-inline-refs", true, "match validation-equivalent inline/$ref subschemas as the same anyOf/oneOf branch")
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
-	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
 	cmd.PersistentFlags().Bool("case-insensitive-headers", true, "case-insensitive header name comparison (HTTP headers are case-insensitive per RFC 7230)")
 	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
@@ -88,7 +87,16 @@ func addComposedFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolP("composed", "c", false, "work in 'composed' mode, compare paths in all specs matching base and revision globs")
 }
 
+// addFlattenParamsFlag registers --flatten-params. The commands that report
+// breaking changes default it to true: a path-level parameter is part of every
+// request to the operations under that path, so they compare the parameters
+// each operation takes, wherever they are declared.
+func addFlattenParamsFlag(cmd *cobra.Command, defaultValue bool) {
+	cmd.PersistentFlags().Bool("flatten-params", defaultValue, "merge common parameters at path level with operation parameters")
+}
+
 func addCommonBreakingFlags(cmd *cobra.Command) {
+	addFlattenParamsFlag(cmd, true)
 	enumWithOptions(cmd, newEnumValue(localizations.GetSupportedLanguages(), localizations.LangDefault), "lang", "l", "language for localized output")
 	cmd.PersistentFlags().String("err-ignore", "", "configuration file for ignoring errors")
 	cmd.PersistentFlags().String("warn-ignore", "", "configuration file for ignoring warnings")

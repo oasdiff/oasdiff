@@ -42,7 +42,7 @@ var Waivers = []Waiver{
 	{CategoryOpen, "components.securitySchemes.**", "scheme fields beyond type, flow URLs, and scopes (apiKey name and in, http scheme, bearerFormat, openIdConnectUrl) have no checks (tracked in #1175)"},
 	{CategoryResolvedAtUsage, "components.**", "edits to component definitions surface as diffs at every referencing operation; only unused-component removal is reported directly (api-schemas-removed)"},
 	{CategoryOpen, "webhooks.**", "webhooks are diffed (WebhooksDiff) but checkers only report webhook add/remove; changes inside a webhook's operations have no checks yet (tracked in #1160)"},
-	{CategoryOpen, "paths.*.parameters.**", "path-level parameter additions are checked (new-request-*-default-parameter-to-existing-path); modifications and removals at path level have no checks yet (tracked in #1163)"},
+	{CategoryResolvedAtUsage, "paths.*.parameters.**", "breaking and changelog merge path-level parameters into each operation before the checks run (--flatten-params defaults to true there), so the operation parameter rules cover them; specs diffed without that option are checked only for path-level additions (new-request-*-default-parameter-to-existing-path)"},
 	{CategoryOpen, "paths.*.*.callbacks.**", "callbacks are not checked (tracked in #1161)"},
 	{CategoryOpen, "paths.*.*.requestBody.content.*.encoding.**", "multipart/form encoding metadata (contentType, per-part headers, style) has no checks (tracked in #1165)"},
 	{CategoryOpen, "paths.*.*.responses.*.content.*.encoding.**", "encoding metadata has no checks (tracked in #1165)"},

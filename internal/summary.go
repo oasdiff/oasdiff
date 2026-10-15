@@ -22,6 +22,7 @@ func getSummaryCmd() *cobra.Command {
 	}
 
 	addCommonDiffFlags(&cmd)
+	addFlattenParamsFlag(&cmd, false)
 	addComposedFlag(&cmd)
 	enumWithOptions(&cmd, newEnumSliceValue(diff.GetExcludeDiffOptions(), nil), "exclude-elements", "e", "elements to exclude")
 	enumWithOptions(&cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputSummary), string(formatters.FormatYAML)), "format", "f", "output format")
