@@ -1,9 +1,6 @@
 package diff
 
 import (
-	"cmp"
-	"slices"
-
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -27,27 +24,6 @@ type OperationPair struct {
 	Method   string
 	Base     *openapi3.Operation
 	Revision *openapi3.Operation
-}
-
-func (state *state) addOperationPairs(pathItemPairs pathItemPairs) {
-	for path, pathItemPair := range pathItemPairs {
-		for _, method := range methodsToCompare(pathItemPair.PathItem1, pathItemPair.PathItem2) {
-			operation1 := pathItemPair.PathItem1.GetOperation(method)
-			operation2 := pathItemPair.PathItem2.GetOperation(method)
-			if operation1 == nil || operation2 == nil {
-				continue
-			}
-			state.operationPairs = append(state.operationPairs, OperationPair{
-				Path:     path,
-				Method:   method,
-				Base:     operation1,
-				Revision: operation2,
-			})
-		}
-	}
-	slices.SortFunc(state.operationPairs, func(a, b OperationPair) int {
-		return cmp.Or(cmp.Compare(a.Path, b.Path), cmp.Compare(a.Method, b.Method))
-	})
 }
 
 // GetSecurityRequirementsDiff calculates the diff between a pair of security
