@@ -3,18 +3,9 @@ package diff_test
 import (
 	"testing"
 
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )
-
-func loadSpec(t *testing.T, path string) *openapi3.T {
-	t.Helper()
-	loader := openapi3.NewLoader()
-	spec, err := loader.LoadFromFile(path)
-	require.NoError(t, err)
-	return spec
-}
 
 func TestWebhooks_Empty(t *testing.T) {
 	require.True(t, (*diff.WebhooksDiff)(nil).Empty())
