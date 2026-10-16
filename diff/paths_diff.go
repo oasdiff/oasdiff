@@ -76,10 +76,6 @@ func getPathsDiffInternal(config *Config, state *state, paths1, paths2 *openapi3
 			return nil, err
 		}
 	}
-	// addModifiedPath removes the operations excluded by FilterExtension from
-	// each pair, so this must run after it for the pairs to leave them out too.
-	state.addOperationPairs(otherPaths)
-
 	result.Base = paths1Mod
 	result.Revision = paths2Mod
 

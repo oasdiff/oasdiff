@@ -1,8 +1,6 @@
 package diff
 
 import (
-	"cmp"
-	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -14,33 +12,10 @@ type state struct {
 	// The name of each document's components.schemas entries.
 	baseComponents     map[*openapi3.Schema]string
 	revisionComponents map[*openapi3.Schema]string
-
-	operationPairs []OperationPair
 }
 
 func newState() *state {
 	return &state{graph: newSchemaGraph()}
-}
-
-func (state *state) addOperationPairs(pathItemPairs pathItemPairs) {
-	for path, pathItemPair := range pathItemPairs {
-		for _, method := range methodsToCompare(pathItemPair.PathItem1, pathItemPair.PathItem2) {
-			operation1 := pathItemPair.PathItem1.GetOperation(method)
-			operation2 := pathItemPair.PathItem2.GetOperation(method)
-			if operation1 == nil || operation2 == nil {
-				continue
-			}
-			state.operationPairs = append(state.operationPairs, OperationPair{
-				Path:     path,
-				Method:   method,
-				Base:     operation1,
-				Revision: operation2,
-			})
-		}
-	}
-	slices.SortFunc(state.operationPairs, func(a, b OperationPair) int {
-		return cmp.Or(cmp.Compare(a.Path, b.Path), cmp.Compare(a.Method, b.Method))
-	})
 }
 
 func componentNames(spec *openapi3.T) map[*openapi3.Schema]string {
