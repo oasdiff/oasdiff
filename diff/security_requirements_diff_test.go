@@ -10,8 +10,8 @@ import (
 // `security: []` overrides the root list although it has no alternatives, so
 // declaring or dropping it is a change.
 func TestSecurityRequirementsListAddedAndDeleted(t *testing.T) {
-	withoutList := loadSecurityFixture(t, "global_api_key")
-	withList := loadSecurityFixture(t, "global_api_key_op_anonymous")
+	withoutList := loadSpec(t, getSecurityFile("global_api_key"))
+	withList := loadSpec(t, getSecurityFile("global_api_key_op_anonymous"))
 
 	added, err := diff.Get(diff.NewConfig(), withoutList, withList)
 	require.NoError(t, err)
