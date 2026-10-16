@@ -130,6 +130,14 @@ func newSecurityRequirementsDiff() *SecurityRequirementsDiff {
 	}
 }
 
+// GetSecurityRequirementsDiff calculates the diff between a pair of security
+// requirement lists that need not come from the same field, such as the lists
+// in effect for an operation before and after it stopped inheriting the
+// document-root list.
+func GetSecurityRequirementsDiff(securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
+	return getSecurityRequirementsDiff(securityRequirements1, securityRequirements2)
+}
+
 func getSecurityRequirementsDiff(securityRequirements1, securityRequirements2 *openapi3.SecurityRequirements) *SecurityRequirementsDiff {
 	diff := getSecurityRequirementsDiffInternal(securityRequirements1, securityRequirements2)
 
