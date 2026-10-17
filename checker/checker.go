@@ -18,7 +18,7 @@ func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operation
 // with level equal or higher than the given level. Changes claimed by a
 // recognized schema transition are dropped, so each transition is reported
 // only by its own finding (see transition_claims.go).
-// It does not mutate the caller's diffReport; clonePathsDiffForCheck isolates the pipeline's mutation surface.
+// It does not mutate the caller's diffReport; cloneDiffForCheck isolates the pipeline's mutation surface.
 func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, level Level) Changes {
 	result := make(Changes, 0)
 
@@ -26,7 +26,7 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 		return result
 	}
 
-	diffReport = clonePathsDiffForCheck(diffReport)
+	diffReport = cloneDiffForCheck(diffReport)
 
 	result = applyStabilityLevelPolicy(config, diffReport, result, operationsSources)
 
@@ -64,9 +64,9 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	return filteredResult
 }
 
-// clonePathsDiffForCheck returns a copy of diffReport whose PathsDiff —
-// and the specific nested fields the check pipeline writes to — are
-// separate allocations from the caller's. Everything outside that
+// cloneDiffForCheck returns a copy of diffReport whose PathsDiff and
+// SecurityContext, and the specific nested fields the check pipeline
+// writes to, are separate allocations from the caller's. Everything outside that
 // mutation surface (WebhooksDiff, ComponentsDiff, etc., and the
 // MethodDiff/PathDiff values themselves, which are only read) is
 // shared by reference.
@@ -79,8 +79,15 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 //   - For each PathDiff in PathsDiff.Modified: a fresh PathDiff
 //     because OperationsDiff.Deleted gets truncated and
 //     OperationsDiff.Modified has keys deleted.
-func clonePathsDiffForCheck(d *diff.Diff) *diff.Diff {
+//   - SecurityContext struct and its Operations slice (pairs deleted
+//     in place, see filterSecurityContextBelowStabilityThreshold)
+func cloneDiffForCheck(d *diff.Diff) *diff.Diff {
 	cloned := *d
+	if d.SecurityContext != nil {
+		securityContext := *d.SecurityContext
+		securityContext.Operations = slices.Clone(d.SecurityContext.Operations)
+		cloned.SecurityContext = &securityContext
+	}
 	if d.PathsDiff == nil {
 		return &cloned
 	}

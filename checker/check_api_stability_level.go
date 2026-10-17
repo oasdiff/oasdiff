@@ -192,17 +192,13 @@ func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 	}
 }
 
-// filterSecurityContextBelowStabilityThreshold replaces the security context
-// rather than editing it, because the caller's diff shares it.
 func filterSecurityContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 	if config == nil || diffReport.SecurityContext == nil {
 		return
 	}
-	filtered := *diffReport.SecurityContext
-	filtered.Operations = slices.DeleteFunc(slices.Clone(filtered.Operations), func(pair diff.OperationPair) bool {
+	diffReport.SecurityContext.Operations = slices.DeleteFunc(diffReport.SecurityContext.Operations, func(pair diff.OperationPair) bool {
 		return belowStabilityThreshold(config, pair.Revision)
 	})
-	diffReport.SecurityContext = &filtered
 }
 
 // An operation whose stability level does not parse counts as in scope.
