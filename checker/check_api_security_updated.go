@@ -128,9 +128,6 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 		if pair.Base.Security != nil && pair.Revision.Security != nil {
 			continue
 		}
-		if !inStabilityScope(config, pair.Revision) {
-			continue
-		}
 
 		baseSecurity := effectiveSecurity(pair.Base, &securityContext.Base)
 		revisionSecurity := effectiveSecurity(pair.Revision, &securityContext.Revision)
@@ -210,17 +207,6 @@ func allowsAnonymous(securityRequirements *openapi3.SecurityRequirements) bool {
 		}
 	}
 	return false
-}
-
-func inStabilityScope(config *Config, operation *openapi3.Operation) bool {
-	if config == nil {
-		return true
-	}
-	stability, err := getStabilityLevel(operation.Extensions)
-	if err != nil {
-		return true
-	}
-	return config.StabilityLevel.IsIncluded(stability)
 }
 
 func operationSecurityChanges(opInfo opInfo, operationsSources *diff.OperationsSourcesMap, base, revision *openapi3.Operation, securityDiff *diff.SecurityRequirementsDiff, access anonymousAccess) Changes {

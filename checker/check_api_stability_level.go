@@ -3,6 +3,7 @@ package checker
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/location"
@@ -16,6 +17,7 @@ const (
 
 // applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
 func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources *diff.OperationsSourcesMap) Changes {
+	filterSecurityContextBelowStabilityThreshold(config, diffReport)
 	if diffReport.PathsDiff == nil {
 		return result
 	}
@@ -183,15 +185,33 @@ func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 
 		// Filter modified operations below threshold
 		for operation := range pathDiff.OperationsDiff.Modified {
-			revisionStability, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions)
-			if err != nil {
-				continue
-			}
-			if !config.StabilityLevel.IsIncluded(revisionStability) {
+			if belowStabilityThreshold(config, pathDiff.Revision.GetOperation(operation)) {
 				delete(pathDiff.OperationsDiff.Modified, operation)
 			}
 		}
 	}
+}
+
+// filterSecurityContextBelowStabilityThreshold replaces the security context
+// rather than editing it, because the caller's diff shares it.
+func filterSecurityContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
+	if config == nil || diffReport.SecurityContext == nil {
+		return
+	}
+	filtered := *diffReport.SecurityContext
+	filtered.Operations = slices.DeleteFunc(slices.Clone(filtered.Operations), func(pair diff.OperationPair) bool {
+		return belowStabilityThreshold(config, pair.Revision)
+	})
+	diffReport.SecurityContext = &filtered
+}
+
+// An operation whose stability level does not parse counts as in scope.
+func belowStabilityThreshold(config *Config, operation *openapi3.Operation) bool {
+	stability, err := getStabilityLevel(operation.Extensions)
+	if err != nil {
+		return false
+	}
+	return !config.StabilityLevel.IsIncluded(stability)
 }
 
 // normalizedStability returns StabilityStable for an empty label, otherwise the label itself.

@@ -15,6 +15,7 @@ import (
 //     OperationsDiff.Deleted / OperationsDiff.Modified.
 //   - mergeWebhookOperationsIntoPathsDiff inserts webhook entries
 //     under "webhook:..." keys into PathsDiff.Modified.
+//   - applyStabilityLevelPolicy filters SecurityContext.Operations.
 //
 // Regression for #904.
 func TestBreaking_CheckDoesNotMutateCallerDiff(t *testing.T) {
@@ -50,4 +51,20 @@ func TestBreaking_CheckDoesNotMutateCallerDiff(t *testing.T) {
 		require.Equal(t, beforePathsDeleted, d.PathsDiff.Deleted, "PathsDiff.Deleted slice changed")
 	}
 	require.Equal(t, beforeWebhooksLen, len(d.WebhooksDiff.Modified), "WebhooksDiff.Modified length changed")
+}
+
+func TestBreaking_CheckDoesNotMutateCallerSecurityContext(t *testing.T) {
+	s1, err := open("../data/checker/api_security_anonymous_alpha_global_api_key.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/api_security_anonymous_alpha_global_anonymous.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.NotNil(t, d.SecurityContext)
+	before := slices.Clone(d.SecurityContext.Operations)
+
+	_ = checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.Equal(t, before, d.SecurityContext.Operations, "the alpha operation was filtered out of the caller's security context")
 }
