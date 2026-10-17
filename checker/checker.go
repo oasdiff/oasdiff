@@ -2,7 +2,6 @@ package checker
 
 //go:generate go-localize -input localizations_src -output localizations
 import (
-	"maps"
 	"slices"
 
 	"github.com/oasdiff/oasdiff/diff"
@@ -62,58 +61,6 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 
 	slices.SortFunc(filteredResult, CompareChanges)
 	return filteredResult
-}
-
-// cloneDiffForCheck returns a copy of diffReport whose PathsDiff and
-// SecurityContext, and the specific nested fields the check pipeline
-// writes to, are separate allocations from the caller's. Everything outside that
-// mutation surface (WebhooksDiff, ComponentsDiff, etc., and the
-// MethodDiff/PathDiff values themselves, which are only read) is
-// shared by reference.
-//
-// Mutation surface (must be cloned):
-//   - PathsDiff struct itself (Deleted/Modified are reassigned)
-//   - PathsDiff.Deleted slice (truncated in-place)
-//   - PathsDiff.Modified map (webhook entries inserted, see
-//     mergeWebhookOperationsIntoPathsDiff)
-//   - For each PathDiff in PathsDiff.Modified: a fresh PathDiff
-//     because OperationsDiff.Deleted gets truncated and
-//     OperationsDiff.Modified has keys deleted.
-//   - SecurityContext struct and its Operations slice (pairs deleted
-//     in place, see filterSecurityContextBelowStabilityThreshold)
-func cloneDiffForCheck(d *diff.Diff) *diff.Diff {
-	cloned := *d
-	if d.SecurityContext != nil {
-		securityContext := *d.SecurityContext
-		securityContext.Operations = slices.Clone(d.SecurityContext.Operations)
-		cloned.SecurityContext = &securityContext
-	}
-	if d.PathsDiff == nil {
-		return &cloned
-	}
-
-	pdCopy := *d.PathsDiff
-	cloned.PathsDiff = &pdCopy
-	cloned.PathsDiff.Deleted = slices.Clone(d.PathsDiff.Deleted)
-
-	if d.PathsDiff.Modified != nil {
-		cloned.PathsDiff.Modified = make(diff.ModifiedPaths, len(d.PathsDiff.Modified))
-		for k, v := range d.PathsDiff.Modified {
-			pdElem := *v
-			if v.OperationsDiff != nil {
-				odCopy := *v.OperationsDiff
-				pdElem.OperationsDiff = &odCopy
-				pdElem.OperationsDiff.Deleted = slices.Clone(v.OperationsDiff.Deleted)
-				if v.OperationsDiff.Modified != nil {
-					pdElem.OperationsDiff.Modified = make(diff.ModifiedOperations, len(v.OperationsDiff.Modified))
-					maps.Copy(pdElem.OperationsDiff.Modified, v.OperationsDiff.Modified)
-				}
-			}
-			cloned.PathsDiff.Modified[k] = &pdElem
-		}
-	}
-
-	return &cloned
 }
 
 // mergeWebhookOperationsIntoPathsDiff merges modified webhooks into PathsDiff.Modified with a "webhook:" prefix.
