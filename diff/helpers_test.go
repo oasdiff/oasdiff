@@ -16,3 +16,8 @@ func getXOfFile(file string) string {
 func getXOfTitlesFile(file string) string {
 	return fmt.Sprintf("../data/x-of-titles/%s", file)
 }
+
+// getSecurityFile returns the path to an api_security_anonymous_ fixture under data/checker/.
+func getSecurityFile(name string) string {
+	return fmt.Sprintf("../data/checker/api_security_anonymous_%s.yaml", name)
+}
