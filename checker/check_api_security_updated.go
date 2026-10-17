@@ -90,7 +90,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 		}
 		for operation, operationItem := range pathItem.OperationsDiff.Modified {
 
-			if operationItem.SecurityDiff == nil || handled[operationItem.Revision] {
+			if operationItem.SecurityDiff == nil || handled[diff.Endpoint{Method: operation, Path: path}] {
 				continue
 			}
 
@@ -111,12 +111,12 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 }
 
 // checkInheritedSecurity reports the operations whose security comes, on at
-// least one side, from the document-root list. It returns the revision
-// operations it reported on, so the caller skips their own security diff,
-// which does not account for the inherited list.
-func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) (Changes, map[*openapi3.Operation]bool) {
+// least one side, from the document-root list. It returns the endpoints it
+// reported on, so the caller skips their own security diff, which does not
+// account for the inherited list.
+func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) (Changes, map[diff.Endpoint]bool) {
 	result := make(Changes, 0)
-	handled := map[*openapi3.Operation]bool{}
+	handled := map[diff.Endpoint]bool{}
 
 	securityContext := diffReport.SecurityContext
 	if securityContext == nil {
@@ -147,7 +147,7 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 			continue
 		}
 
-		handled[pair.Revision] = true
+		handled[diff.Endpoint{Method: pair.Method, Path: pair.Path}] = true
 		opInfo := newOpInfo(config, pair.Revision, operationsSources, pair.Method, pair.Path)
 		securityDiff := diff.GetSecurityRequirementsDiff(baseSecurity, revisionSecurity)
 		result = append(result, operationSecurityChanges(opInfo, operationsSources, pair.Base, pair.Revision, securityDiff, access)...)
