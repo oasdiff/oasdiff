@@ -1,0 +1,23 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: '1'
+security:
+  - bearer: []
+paths:
+  /pets:
+    get:
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          description: ok
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    bearer:
+      type: http
+      scheme: bearer
