@@ -380,6 +380,28 @@ func Test_DiffCaseSensitiveHeadersOptOut(t *testing.T) {
 	require.NotZero(t, exit, "expected non-zero exit when case-only header differences are surfaced")
 }
 
+// The header an apiKey security scheme is sent in follows the same rule as
+// other header names; a query parameter name keeps its case.
+func Test_BreakingChangesApiKeyHeaderCase(t *testing.T) {
+	texts := func(flags string) []string {
+		t.Helper()
+		var stdout bytes.Buffer
+		require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/header-case/api_key_base.yaml ../data/header-case/api_key_revision.yaml --format json "+flags), &stdout, io.Discard))
+		cl := formatters.Changes{}
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &cl))
+		result := []string{}
+		for _, c := range cl {
+			result = append(result, c.Text)
+		}
+		return result
+	}
+	require.Equal(t, []string{"the component security scheme `query_key` api key name changed from `Api-Key` to `api-key`"}, texts(""))
+	require.ElementsMatch(t, []string{
+		"the component security scheme `header_key` api key name changed from `X-API-Key` to `x-api-key`",
+		"the component security scheme `query_key` api key name changed from `Api-Key` to `api-key`",
+	}, texts("--case-insensitive-headers=false"))
+}
+
 func Test_FlattenCmdOK(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff flatten ../data/allof/simple.yaml"), io.Discard, io.Discard))
 }
