@@ -266,6 +266,7 @@ api-global-security-scope-removed: o escopo de segurança %s foi removido do esq
 api-security-anonymous-access-removed: o endpoint não permite mais acesso anônimo e agora só aceita %s
 api-security-anonymous-access-added: o endpoint agora permite acesso anônimo
 api-security-inherited-comment: "Este endpoint herda os requisitos de segurança de nível superior da API."
+api-global-security-not-inherited-comment: "Nenhum endpoint herda os requisitos de segurança de nível superior da API, portanto esta mudança não afeta nenhum cliente."
 api-global-security-scope-added: o escopo de segurança %s foi adicionado ao esquema de segurança global %s
 api-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança do endpoint %s
 api-version-not-bumped-description: uma mudança incompatível foi detectada mas a versão não foi incrementada
