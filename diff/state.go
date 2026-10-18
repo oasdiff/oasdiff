@@ -34,15 +34,16 @@ func componentNames(spec *openapi3.T) map[*openapi3.Schema]string {
 // componentName names a compared schema after its components.schemas entry. A
 // $ref with fields beside it, such as an OpenAPI 3.1 description override,
 // resolves to a copy of the entry that names does not hold, so the copy is
-// named from the $ref. A $ref into an entry, rather than to one, names a
-// schema inside it and has no name.
+// named from the $ref. A $ref into an entry, rather than to one, is named
+// after the entry it points into.
 func componentName(names map[*openapi3.Schema]string, schema *openapi3.SchemaRef) string {
 	if name, ok := names[schema.Value]; ok {
 		return name
 	}
 	name, ok := strings.CutPrefix(schema.Ref, "#/components/schemas/")
-	if !ok || strings.Contains(name, "/") {
+	if !ok {
 		return ""
 	}
+	name, _, _ = strings.Cut(name, "/")
 	return name
 }

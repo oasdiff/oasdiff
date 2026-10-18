@@ -339,6 +339,90 @@ func Test_ValidateCmd_DedupePreferringComponents(t *testing.T) {
 	require.Contains(t, out, "invalid example: value must be a number")
 }
 
+// A JSON spec has no line numbers, so the same defect in three components
+// must not collapse into one finding (#1304). Each finding names its
+// component and has its own fingerprint, and the path-rooted echo of A
+// through its $ref is still dropped.
+func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/same-defect-in-components.json"), &stdout, io.Discard))
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+
+	texts := make([]string, 0, len(findings))
+	fingerprints := map[any]bool{}
+	for _, f := range findings {
+		require.Equal(t, "schema-type-unsupported", f["id"])
+		texts = append(texts, f["text"].(string))
+		fingerprints[f["fingerprint"]] = true
+	}
+	require.ElementsMatch(t, []string{
+		`unsupported 'type' value "Bad" in schema "A"`,
+		`unsupported 'type' value "Bad" in schema "B"`,
+		`unsupported 'type' value "Bad" in schema "C"`,
+	}, texts)
+	require.Len(t, fingerprints, 3)
+}
+
+// A known limitation without lines: an operation's inline schema with the
+// same defect as a component is taken for the component's defect reached
+// through a $ref and dropped. With lines, as in YAML, both are reported, so
+// once JSON specs have lines the JSON case expects both too.
+func Test_ValidateCmd_InlineDefectSameAsComponentWithoutLines(t *testing.T) {
+	operations := func(spec string) []any {
+		var stdout bytes.Buffer
+		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
+		var findings []map[string]any
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+		out := make([]any, 0, len(findings))
+		for _, f := range findings {
+			out = append(out, f["operation"])
+		}
+		return out
+	}
+	require.ElementsMatch(t, []any{nil}, operations("../data/validate/inline-defect-same-as-component.json"))
+	require.ElementsMatch(t, []any{nil, "GET"}, operations("../data/validate/inline-defect-same-as-component.yaml"))
+}
+
+// When this fails, JSON specs have lines (#1128) and the handling of findings
+// without a line in dedupePreferringComponents can go.
+func Test_ValidateCmd_JSONFindingsHaveNoLine(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/same-defect-in-components.json"), &stdout, io.Discard))
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.NotEmpty(t, findings)
+	for _, f := range findings {
+		require.NotContains(t, f["source"], "line", "JSON specs have lines now: remove the no-line handling in dedupePreferringComponents and this test")
+	}
+}
+
+// With a line, as in YAML, the location tells the components apart, so the
+// text does not name them. The fingerprints have no location and match the
+// JSON ones, so they stay the same when JSON specs gain lines.
+func Test_ValidateCmd_SameDefectInComponentsWithLines(t *testing.T) {
+	run := func(spec string) []map[string]any {
+		var stdout bytes.Buffer
+		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
+		var findings []map[string]any
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+		return findings
+	}
+	fingerprints := func(findings []map[string]any) []any {
+		out := make([]any, 0, len(findings))
+		for _, f := range findings {
+			out = append(out, f["fingerprint"])
+		}
+		return out
+	}
+	withLines := run("../data/validate/same-defect-in-components.yaml")
+	require.Len(t, withLines, 3)
+	for _, f := range withLines {
+		require.Equal(t, `unsupported 'type' value "Bad"`, f["text"])
+	}
+	require.ElementsMatch(t, fingerprints(run("../data/validate/same-defect-in-components.json")), fingerprints(withLines))
+}
+
 // --color only affects the text output, so pairing it with a non-text
 // format is rejected rather than silently ignored (matching changelog).
 func Test_ValidateCmd_ColorWithNonTextFormatRejected(t *testing.T) {

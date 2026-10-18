@@ -243,7 +243,7 @@ func TestBreaking_OperationIdRemoved(t *testing.T) {
 
 // removing a value from a request body enum is breaking by default: it rejects
 // input a client used to send, the same as its property and parameter siblings.
-func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
+func TestBreaking_RequestBodyBecameNotEnum(t *testing.T) {
 	s1, err := open("../data/enums/request-body-enum.yaml")
 	require.NoError(t, err)
 
@@ -266,7 +266,7 @@ func TestBreaking_RequestBodyEnumRemoved(t *testing.T) {
 }
 
 // removing an enum value from a response property is informational (it narrows the server's output), reported in the changelog
-func TestBreaking_ResponsePropertyEnumRemoved(t *testing.T) {
+func TestBreaking_ResponsePropertyBecameNotEnum(t *testing.T) {
 	s1 := l(t, 704)
 	s2 := l(t, 703)
 
@@ -300,7 +300,7 @@ func TestBreaking_TagRemoved(t *testing.T) {
 }
 
 // removing an enum value from a response media type is informational (it narrows the server's output), reported in the changelog
-func TestBreaking_ResponseMediaTypeEnumRemoved(t *testing.T) {
+func TestBreaking_ResponseMediaTypeBecameNotEnum(t *testing.T) {
 	s1, err := open("../data/enums/response-enum.yaml")
 	require.NoError(t, err)
 

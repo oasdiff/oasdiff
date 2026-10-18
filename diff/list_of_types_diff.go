@@ -136,37 +136,13 @@ func checkSchemaList(schemas []*openapi3.SchemaRef, source string) *listOfTypesP
 	}
 }
 
-// compareTypePatterns generates the diff between two type patterns
+// compareTypePatterns generates the diff between two type patterns. Types are
+// listed in the order the schema declares them, so the output, and the
+// fingerprint of a change built from it, is the same on every run.
 func compareTypePatterns(base, revision *typePattern) *ListOfTypesDiff {
-	baseTypes := make(map[string]bool)
-	revisionTypes := make(map[string]bool)
-
-	if base != nil {
-		for _, t := range base.Types {
-			baseTypes[t] = true
-		}
-	}
-
-	if revision != nil {
-		for _, t := range revision.Types {
-			revisionTypes[t] = true
-		}
-	}
-
-	diff := &ListOfTypesDiff{}
-
-	// Find added types
-	for t := range revisionTypes {
-		if !baseTypes[t] {
-			diff.Added = append(diff.Added, t)
-		}
-	}
-
-	// Find deleted types
-	for t := range baseTypes {
-		if !revisionTypes[t] {
-			diff.Deleted = append(diff.Deleted, t)
-		}
+	diff := &ListOfTypesDiff{
+		Added:   typesMissingFrom(revision, base),
+		Deleted: typesMissingFrom(base, revision),
 	}
 
 	if diff.Empty() {
@@ -174,6 +150,29 @@ func compareTypePatterns(base, revision *typePattern) *ListOfTypesDiff {
 	}
 
 	return diff
+}
+
+// typesMissingFrom returns the types of pattern that other does not have, in
+// pattern's order and without repeats.
+func typesMissingFrom(pattern, other *typePattern) []string {
+	if pattern == nil {
+		return nil
+	}
+	exclude := map[string]bool{}
+	if other != nil {
+		for _, t := range other.Types {
+			exclude[t] = true
+		}
+	}
+
+	var result []string
+	for _, t := range pattern.Types {
+		if !exclude[t] {
+			result = append(result, t)
+			exclude[t] = true
+		}
+	}
+	return result
 }
 
 // areTypePatternsEqual checks if two type patterns are equivalent

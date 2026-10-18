@@ -47,6 +47,11 @@ type Diff struct {
 	// either. Excluded from output because they are context, not a change.
 	BaseInfo     *openapi3.Info `json:"-" yaml:"-"`
 	RevisionInfo *openapi3.Info `json:"-" yaml:"-"`
+
+	// SecurityContext is context for checkers too, under the same rules as
+	// BaseInfo. It is nil for GetPathsDiff, which compares paths without
+	// their documents' root security.
+	SecurityContext *SecurityContext `json:"-" yaml:"-"`
 }
 
 // OperationsSourcesMap maps OpenAPI operations to their source file paths
@@ -147,23 +152,31 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSo
 	return result, &operationsSources, nil
 }
 
-func getPathItem(paths *openapi3.Paths, path string, includePathParams bool) *openapi3.PathItem {
+// pathKey returns the key under which mergedPaths matches path: the path
+// itself, or, when path parameter names are ignored, the path without them.
+func pathKey(path string, includePathParams bool) string {
 	if includePathParams {
-		return paths.Value(path)
+		return path
 	}
-
-	return paths.Find(path)
+	normalized, _, _ := normalizeTemplatedPath(path)
+	return normalized
 }
 
 func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, *OperationsSourcesMap, error) {
 	result := openapi3.NewPaths()
+	// Looking each path up in result with Paths.Find would scan every path
+	// added so far, which is quadratic in the number of paths.
+	byKey := map[string]*openapi3.PathItem{}
 	operationsSources := make(OperationsSourcesMap)
 	for _, s := range s1 {
 		for path, pathItem := range s.Spec.Paths.Map() {
 
-			p := getPathItem(result, path, includePathParams)
+			key := pathKey(path, includePathParams)
+			p := byKey[key]
 			if p == nil {
-				result.Set(path, copyPathItem(pathItem))
+				p = copyPathItem(pathItem)
+				result.Set(path, p)
+				byKey[key] = p
 				for _, opItem := range pathItem.Operations() {
 					operationsSources[opItem] = s.Url
 				}
@@ -262,6 +275,13 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	}
 
 	diff.BaseInfo, diff.RevisionInfo = s1.Info, s2.Info
+	// getDiffInternal has filtered s1.Paths and s2.Paths in place, so the
+	// pairs leave out the operations excluded by the path and extension filters.
+	diff.SecurityContext = &SecurityContext{
+		Base:       s1.Security,
+		Revision:   s2.Security,
+		Operations: getOperationPairs(config, s1.Paths, s2.Paths),
+	}
 
 	return diff, nil
 }
