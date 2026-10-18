@@ -202,14 +202,11 @@ func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 // a property that stops being read-only and leaves the required list in the
 // same change is not required in requests on either side
 func TestRequestRequiredPropertyBecameNonReadOnlyAndOptional(t *testing.T) {
-	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
+	s1, err := open("../data/checker/request_required_property_read_only_base.yaml")
 	require.NoError(t, err)
 
-	s2, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
+	s2, err := open("../data/checker/request_property_not_read_only_optional_revision.yaml")
 	require.NoError(t, err)
-
-	s1.Spec.Paths.Value("/api/v1.0/groups").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["id"].Value.ReadOnly = true
-	s2.Spec.Paths.Value("/api/v1.0/groups").Post.RequestBody.Value.Content["application/json"].Schema.Value.Required = nil
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
@@ -219,7 +216,7 @@ func TestRequestRequiredPropertyBecameNonReadOnlyAndOptional(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
+		Source:      load.NewSource("../data/checker/request_property_not_read_only_optional_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
@@ -229,14 +226,11 @@ func TestRequestRequiredPropertyBecameNonReadOnlyAndOptional(t *testing.T) {
 // responses only, so clients already sent the property and nothing becomes
 // required in requests
 func TestRequestRequiredPropertyBecameNonReadOnly31(t *testing.T) {
-	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
+	s1, err := open("../data/checker/request_required_property_read_only_31_base.yaml")
 	require.NoError(t, err)
 
-	s2, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
+	s2, err := open("../data/checker/request_required_property_not_read_only_31_revision.yaml")
 	require.NoError(t, err)
-
-	s1.Spec.OpenAPI, s2.Spec.OpenAPI = "3.1.0", "3.1.0"
-	s1.Spec.Paths.Value("/api/v1.0/groups").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["id"].Value.ReadOnly = true
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
