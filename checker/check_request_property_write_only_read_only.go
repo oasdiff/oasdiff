@@ -33,16 +33,16 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				// removed properties processed by the RequestOptionalPropertyUpdatedCheck check
 				return
 			}
-			// required in both, so a flip that comes with a change to the
-			// required list is not reported as if the list were unchanged
-			required := slices.Contains(p.parent.Base.Required, p.propertyName) &&
+			// a property added to or removed from required is reported by
+			// RequestPropertyRequiredUpdatedCheck
+			requiredOnBothSides := slices.Contains(p.parent.Base.Required, p.propertyName) &&
 				slices.Contains(p.parent.Revision.Required, p.propertyName)
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "writeOnly")
 				var id string
-				if required {
+				if requiredOnBothSides {
 					id = RequestRequiredPropertyBecameNonWriteOnlyCheckId
 					if writeOnlyDiff.To == true {
 						id = RequestRequiredPropertyBecameWriteOnlyCheckId
@@ -63,7 +63,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
 				var id, comment string
-				if required {
+				if requiredOnBothSides {
 					id = RequestRequiredPropertyBecameNonReadOnlyCheckId
 					if readOnlyDiff.To == true {
 						id = RequestRequiredPropertyBecameReadOnlyCheckId
@@ -76,7 +76,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				}
 				if readOnlyDiff.To == true {
 					comment = RequestPropertyBecameReadOnlyCommentId
-				} else if required && openAPI31OrLater(diffReport.BaseOpenAPI) {
+				} else if requiredOnBothSides && openAPI31OrLater(diffReport.BaseOpenAPI) {
 					// 3.0 applies required to a readOnly property in responses
 					// only, 3.1 and later in requests too, so in 3.1 the
 					// property was already required in requests
