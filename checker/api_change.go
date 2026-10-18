@@ -98,9 +98,9 @@ func (c ApiChange) WithGuards(guards []Guard) ApiChange {
 	return c
 }
 
-// withoutGuard is for a change that reports the guarded state being set: a
-// property becoming writeOnly is how it leaves the responses, so the guard
-// that says writeOnly properties are not in responses cannot excuse it.
+// withoutGuard is for a change to the state the guard tests. The guard
+// describes that state on one side of the change, so it cannot lower the
+// level of the change itself.
 func (c ApiChange) withoutGuard(guard Guard) ApiChange {
 	var guards []Guard
 	for _, g := range c.guards {
