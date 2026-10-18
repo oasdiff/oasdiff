@@ -48,6 +48,11 @@ type Diff struct {
 	BaseInfo     *openapi3.Info `json:"-" yaml:"-"`
 	RevisionInfo *openapi3.Info `json:"-" yaml:"-"`
 
+	// BaseOpenAPI and RevisionOpenAPI are each spec's openapi version, for
+	// checkers whose verdict depends on it. Set and excluded like BaseInfo.
+	BaseOpenAPI     string `json:"-" yaml:"-"`
+	RevisionOpenAPI string `json:"-" yaml:"-"`
+
 	// SecurityContext is context for checkers too, under the same rules as
 	// BaseInfo. It is nil for GetPathsDiff, which compares paths without
 	// their documents' root security.
@@ -275,6 +280,7 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	}
 
 	diff.BaseInfo, diff.RevisionInfo = s1.Info, s2.Info
+	diff.BaseOpenAPI, diff.RevisionOpenAPI = s1.OpenAPI, s2.OpenAPI
 	// getDiffInternal has filtered s1.Paths and s2.Paths in place, so the
 	// pairs leave out the operations excluded by the path and extension filters.
 	diff.SecurityContext = &SecurityContext{
