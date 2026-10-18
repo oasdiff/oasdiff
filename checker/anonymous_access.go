@@ -1,8 +1,6 @@
 package checker
 
 import (
-	"strings"
-
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -58,12 +56,12 @@ func allowsAnonymous(securityRequirements *openapi3.SecurityRequirements) bool {
 	return false
 }
 
-// securityRequirementsString joins the alternatives with OR, the way an
-// alternative joins its schemes with AND.
-func securityRequirementsString(securityRequirements openapi3.SecurityRequirements) string {
+// securityAlternatives lists each alternative the way the other security
+// findings name one.
+func securityAlternatives(securityRequirements openapi3.SecurityRequirements) []string {
 	alternatives := make([]string, len(securityRequirements))
 	for i, securityRequirement := range securityRequirements {
 		alternatives[i] = diff.SecurityAlternative{Schemes: securityRequirement}.String()
 	}
-	return strings.Join(alternatives, " OR ")
+	return alternatives
 }

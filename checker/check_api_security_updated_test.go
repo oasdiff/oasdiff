@@ -22,7 +22,7 @@ func TestAPIGlobalSecurityyAdded(t *testing.T) {
 	removed := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessRemovedId)
 	require.Equal(t, "POST", removed.GetOperation())
 	require.Equal(t, "/subscribe", removed.GetPath())
-	require.Equal(t, "the endpoint no longer allows anonymous access and now requires `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the endpoint no longer allows anonymous access and now only accepts `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // adding a global security that no endpoint inherits
@@ -106,12 +106,12 @@ func TestAPISecurityAdded(t *testing.T) {
 	removed := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessRemovedId)
 	requireApiChange(t, checker.ApiChange{
 		Id:        checker.APISecurityAnonymousAccessRemovedId,
-		Args:      []any{"petstore_auth: [read:pets, write:pets]"},
+		Args:      []any{[]string{"petstore_auth: [read:pets, write:pets]"}},
 		Operation: "POST",
 		Path:      "/subscribe",
 		Source:    load.NewSource("../data/checker/api_security_added_revision.yaml"),
 	}, removed)
-	require.Equal(t, "the endpoint no longer allows anonymous access and now requires `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the endpoint no longer allows anonymous access and now only accepts `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // adding an alternative to an endpoint that already requires security
@@ -348,9 +348,17 @@ func TestAPIInheritedSecurityAnonymousAccessStability(t *testing.T) {
 	require.Contains(t, securityFindingIds(t, "alpha_global_api_key", "alpha_global_anonymous", checker.WithStabilityLevel(checker.StabilityAlpha)), checker.APISecurityAnonymousAccessAddedId)
 }
 
+// each alternative the endpoint now accepts is listed
+func TestAPISecurityAnonymousAccessRemovedAlternatives(t *testing.T) {
+	errs := checkChanges(t, checker.APISecurityUpdatedCheck, "../data/checker/api_security_anonymous_none.yaml", "../data/checker/api_security_anonymous_op_api_key_or_bearer.yaml")
+	removed := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessRemovedId)
+	require.Equal(t, []any{[]string{"apiKey", "bearer"}}, removed.GetArgs())
+	require.Equal(t, "the endpoint no longer allows anonymous access and now only accepts `apiKey, bearer`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
 func TestAPISecurityAnonymousAccessText(t *testing.T) {
 	l := checker.NewDefaultLocalizer()
-	require.Equal(t, "the endpoint no longer allows anonymous access and now requires apiKey", l(checker.APISecurityAnonymousAccessRemovedId, "apiKey"))
+	require.Equal(t, "the endpoint no longer allows anonymous access and now only accepts apiKey", l(checker.APISecurityAnonymousAccessRemovedId, "apiKey"))
 	require.Equal(t, "the endpoint now allows anonymous access", l(checker.APISecurityAnonymousAccessAddedId))
 }
 

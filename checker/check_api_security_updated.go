@@ -192,7 +192,7 @@ func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source,
 	// that changed with it.
 	if access.changed() {
 		if access.base {
-			return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessRemovedId, []any{securityRequirementsString(*revisionSecurity)}, comment).WithSources(baseSource, revisionSource))
+			return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessRemovedId, []any{securityAlternatives(*revisionSecurity)}, comment).WithSources(baseSource, revisionSource))
 		}
 		return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessAddedId, nil, comment).WithSources(baseSource, revisionSource))
 	}
