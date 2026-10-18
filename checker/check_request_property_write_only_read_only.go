@@ -80,6 +80,8 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 					id = RequestRequiredPropertyBecameNonReadOnly31Id
 					comment = RequiredInRequestsCommentId
 				}
+				// the change is the property becoming or ceasing to be
+				// readOnly, so readOnly cannot excuse it
 				result = append(result, p.newChange(
 					id,
 					[]any{propName},

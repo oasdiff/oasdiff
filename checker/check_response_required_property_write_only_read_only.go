@@ -37,6 +37,8 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 				if writeOnlyDiff.To == true {
 					id = ResponseRequiredPropertyBecameWriteOnlyId
 				}
+				// the change is the property becoming or ceasing to be
+				// writeOnly, so writeOnly cannot excuse it
 				result = append(result, p.newChange(
 					id,
 					[]any{propName, info.responseStatus},
