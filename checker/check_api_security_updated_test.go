@@ -3,6 +3,7 @@ package checker_test
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
@@ -64,13 +65,10 @@ func TestAPIGlobalSecurityScopeRemoved(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.SecurityChange{
-		Id:    checker.APIGlobalSecurityScopeRemovedId,
-		Args:  []any{"read:pets", "petstore_auth"},
-		Level: checker.INFO,
-	}, errs[0])
-	require.Equal(t, "the security scope `read:pets` was removed from the global security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	removed := requireSingleChange(t, errs, checker.APISecurityScopeRemovedId)
+	require.Equal(t, checker.INFO, removed.GetLevel())
+	require.Equal(t, "/subscribe", removed.GetPath())
+	require.Equal(t, checker.APISecurityInheritedCommentId, removed.(checker.ApiChange).Comment)
 }
 
 // adding a security scope from an API global security
@@ -84,13 +82,26 @@ func TestAPIGlobalSecurityScopeAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	require.Len(t, errs, 1)
-	require.Equal(t, checker.SecurityChange{
-		Id:    checker.APIGlobalSecurityScopeAddedId,
-		Args:  []any{"read:pets", "petstore_auth"},
-		Level: checker.INFO,
-	}, errs[0])
-	require.Equal(t, "the security scope `read:pets` was added to the global security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	added := requireSingleChange(t, errs, checker.APISecurityScopeAddedId)
+	require.Equal(t, checker.ERR, added.GetLevel())
+	require.Equal(t, "/subscribe", added.GetPath())
+}
+
+// replacing the top-level requirement rejects clients of every operation that
+// inherits it
+func TestAPIGlobalSecurityReplaced(t *testing.T) {
+	require.ElementsMatch(t, []securityFinding{
+		{checker.APISecurityRemovedCheckId, checker.ERR, "/pets"},
+		{checker.APISecurityAddedCheckId, checker.INFO, "/pets"},
+	}, securityFindings(t, "global_api_key", "global_bearer"))
+}
+
+// a top-level change that no operation inherits affects no client
+func TestAPIGlobalSecurityNotInherited(t *testing.T) {
+	errs := checkChanges(t, checker.APISecurityUpdatedCheck, "../data/checker/api_security_anonymous_op_api_key.yaml", "../data/checker/api_security_anonymous_global_api_key_op_api_key.yaml")
+	added := requireSingleChange(t, errs, checker.APIGlobalSecurityAddedCheckId)
+	require.Equal(t, checker.INFO, added.GetLevel())
+	require.Equal(t, "No endpoint inherits the API's top-level security requirements, so this change affects no client.", added.GetComment(checker.NewDefaultLocalizer()))
 }
 
 // adding a new security to the API endpoint
@@ -374,4 +385,88 @@ func TestAPISecurityInheritedComment(t *testing.T) {
 	require.Empty(t, anonymous("none", "op_api_key"))
 	require.Empty(t, anonymous("global_api_key_op_anonymous", "global_api_key"))
 	require.Equal(t, "This endpoint inherits the API's top-level security requirements.", checker.NewDefaultLocalizer()(checker.APISecurityInheritedCommentId))
+}
+
+// The same change to a security list gives the same findings whether /pets
+// declares the list itself or inherits it from the top level.
+func TestAPISecurityListPositions(t *testing.T) {
+	lists := map[string]openapi3.SecurityRequirements{
+		"none":                 {},
+		"api key":              {{"apiKey": {}}},
+		"bearer":               {{"bearer": {}}},
+		"api key or bearer":    {{"apiKey": {}}, {"bearer": {}}},
+		"api key or anyone":    {{"apiKey": {}}, {}},
+		"oauth read":           {{"oauth": {"read"}}},
+		"oauth read or anyone": {{"oauth": {"read"}}, {}},
+		"oauth read write":     {{"oauth": {"read", "write"}}},
+	}
+
+	tests := []struct {
+		base, revision string
+		want           []securityFinding
+	}{
+		{"api key", "api key or anyone", []securityFinding{
+			{checker.APISecurityAnonymousAccessAddedId, checker.INFO, "/pets"},
+		}},
+		{"api key or anyone", "api key", []securityFinding{
+			{checker.APISecurityAnonymousAccessRemovedId, checker.ERR, "/pets"},
+		}},
+		{"api key", "none", []securityFinding{
+			{checker.APISecurityAnonymousAccessAddedId, checker.INFO, "/pets"},
+		}},
+		{"none", "api key", []securityFinding{
+			{checker.APISecurityAnonymousAccessRemovedId, checker.ERR, "/pets"},
+		}},
+		{"api key", "bearer", []securityFinding{
+			{checker.APISecurityRemovedCheckId, checker.ERR, "/pets"},
+			{checker.APISecurityAddedCheckId, checker.INFO, "/pets"},
+		}},
+		{"api key", "api key or bearer", []securityFinding{
+			{checker.APISecurityAddedCheckId, checker.INFO, "/pets"},
+		}},
+		{"api key or bearer", "api key", []securityFinding{
+			{checker.APISecurityRemovedCheckId, checker.ERR, "/pets"},
+		}},
+		{"oauth read", "oauth read write", []securityFinding{
+			{checker.APISecurityScopeAddedId, checker.ERR, "/pets"},
+		}},
+		{"oauth read write", "oauth read", []securityFinding{
+			{checker.APISecurityScopeRemovedId, checker.INFO, "/pets"},
+		}},
+		{"oauth read or anyone", "oauth read write", []securityFinding{
+			{checker.APISecurityAnonymousAccessRemovedId, checker.ERR, "/pets"},
+		}},
+		{"oauth read write", "oauth read or anyone", []securityFinding{
+			{checker.APISecurityAnonymousAccessAddedId, checker.INFO, "/pets"},
+		}},
+	}
+
+	findings := func(t *testing.T, base, revision openapi3.SecurityRequirements, topLevel bool) []securityFinding {
+		t.Helper()
+		spec := func(security openapi3.SecurityRequirements) *load.SpecInfo {
+			s, err := open("../data/checker/api_security_anonymous_none.yaml")
+			require.NoError(t, err)
+			if topLevel {
+				s.Spec.Security = security
+			} else {
+				s.Spec.Paths.Value("/pets").Get.Security = &security
+			}
+			return s
+		}
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), spec(base), spec(revision))
+		require.NoError(t, err)
+		result := []securityFinding{}
+		for _, change := range checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO) {
+			result = append(result, securityFinding{Id: change.GetId(), Level: change.GetLevel(), Path: change.GetPath()})
+		}
+		return result
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.base+" to "+tc.revision, func(t *testing.T) {
+			base, revision := lists[tc.base], lists[tc.revision]
+			require.ElementsMatch(t, tc.want, findings(t, base, revision, false), "operation")
+			require.ElementsMatch(t, tc.want, findings(t, base, revision, true), "top level")
+		})
+	}
 }
