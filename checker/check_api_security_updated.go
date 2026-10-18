@@ -95,15 +95,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			}
 
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			access := anonymousAccess{
-				// An operation that inherits the root list on either side was
-				// handled above when the diff carries that list; otherwise its
-				// effective security is unknown.
-				known:    operationItem.Base.Security != nil && operationItem.Revision.Security != nil,
-				base:     allowsAnonymous(operationItem.Base.Security),
-				revision: allowsAnonymous(operationItem.Revision.Security),
-			}
-			result = append(result, operationSecurityChanges(opInfo, operationsSources, operationItem.Base, operationItem.Revision, operationItem.SecurityDiff, access)...)
+			result = append(result, operationSecurityChanges(opInfo, operationsSources, operationItem.Base, operationItem.Revision, operationItem.SecurityDiff, declaredAnonymousAccess(operationItem))...)
 		}
 	}
 
@@ -131,11 +123,7 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 
 		baseSecurity := effectiveSecurity(pair.Base, &securityContext.Base)
 		revisionSecurity := effectiveSecurity(pair.Revision, &securityContext.Revision)
-		access := anonymousAccess{
-			known:    true,
-			base:     allowsAnonymous(baseSecurity),
-			revision: allowsAnonymous(revisionSecurity),
-		}
+		access := effectiveAnonymousAccess(baseSecurity, revisionSecurity)
 
 		if pair.Base.Security == nil && pair.Revision.Security == nil {
 			// Only the root list changed for this operation, so the change is
@@ -169,44 +157,11 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 	return result, handled
 }
 
-// anonymousAccess records whether an operation accepts unauthenticated
-// requests before and after the change.
-type anonymousAccess struct {
-	known    bool
-	base     bool
-	revision bool
-}
-
-func (access anonymousAccess) changed() bool {
-	return access.known && access.base != access.revision
-}
-
-// Once the revision accepts unauthenticated requests it accepts every request,
-// so nothing removed from its requirements can reject a client.
-func (access anonymousAccess) revisionAcceptsAll() bool {
-	return access.known && access.revision
-}
-
 func effectiveSecurity(operation *openapi3.Operation, global *openapi3.SecurityRequirements) *openapi3.SecurityRequirements {
 	if operation.Security != nil {
 		return operation.Security
 	}
 	return global
-}
-
-// allowsAnonymous reports whether a security list accepts a request without
-// credentials: an empty list requires nothing, and an empty alternative (`{}`)
-// is satisfied by any request.
-func allowsAnonymous(securityRequirements *openapi3.SecurityRequirements) bool {
-	if securityRequirements == nil || len(*securityRequirements) == 0 {
-		return true
-	}
-	for _, securityRequirement := range *securityRequirements {
-		if len(securityRequirement) == 0 {
-			return true
-		}
-	}
-	return false
 }
 
 func operationSecurityChanges(opInfo opInfo, operationsSources *diff.OperationsSourcesMap, base, revision *openapi3.Operation, securityDiff *diff.SecurityRequirementsDiff, access anonymousAccess) Changes {
