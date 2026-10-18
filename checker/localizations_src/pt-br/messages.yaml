@@ -263,6 +263,9 @@ api-security-updated: o esquema de segurança %s foi atualizado de %s para %s
 api-global-security-added: o esquema de segurança %s foi adicionado à api
 api-global-security-removed: o esquema de segurança %s foi removido da api
 api-global-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança global %s
+api-security-anonymous-access-removed: o endpoint não permite mais acesso anônimo e agora só aceita %s
+api-security-anonymous-access-added: o endpoint agora permite acesso anônimo
+api-security-inherited-comment: "Este endpoint herda os requisitos de segurança de nível superior da API."
 api-global-security-scope-added: o escopo de segurança %s foi adicionado ao esquema de segurança global %s
 api-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança do endpoint %s
 api-version-not-bumped-description: uma mudança incompatível foi detectada mas a versão não foi incrementada
@@ -391,6 +394,8 @@ api-global-security-added-description: esquema de segurança adicionado na segur
 api-global-security-removed-description: esquema de segurança removido na segurança
 api-global-security-scope-added-description: escopo adicionado a um esquema de segurança na segurança
 api-global-security-scope-removed-description: escopo removido de um esquema de segurança na segurança
+api-security-anonymous-access-removed-description: a segurança do endpoint mudou e agora rejeita requisições não autenticadas
+api-security-anonymous-access-added-description: a segurança do endpoint mudou e agora aceita requisições não autenticadas
 api-operation-id-added-description: id de operação adicionado a um endpoint
 api-operation-id-removed-description: id de operação removido de um endpoint
 api-path-removed-before-sunset-description: caminho e endpoint removidos antes da data de expiração
