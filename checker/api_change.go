@@ -98,9 +98,10 @@ func (c ApiChange) WithGuards(guards []Guard) ApiChange {
 	return c
 }
 
-// withoutGuard is for a change to the state the guard tests. The guard
-// describes that state on one side of the change, so it cannot lower the
-// level of the change itself.
+// withoutGuard removes a guard from a change that adds or removes the
+// condition the guard checks. A guard lowers the level of a change because
+// the condition holds, so it must not lower the level of the change that
+// makes the condition hold or stop holding.
 func (c ApiChange) withoutGuard(guard Guard) ApiChange {
 	var guards []Guard
 	for _, g := range c.guards {
