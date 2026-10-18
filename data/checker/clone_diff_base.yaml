@@ -1,0 +1,37 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /alpha-gone:
+    get:
+      x-stability-level: alpha
+      responses:
+        "200":
+          description: OK
+  /stable-gone:
+    get:
+      responses:
+        "200":
+          description: OK
+  /pets:
+    get:
+      x-stability-level: alpha
+      responses:
+        "200":
+          description: OK
+    delete:
+      x-stability-level: alpha
+      responses:
+        "200":
+          description: OK
+    patch:
+      responses:
+        "200":
+          description: OK
+webhooks:
+  orderCreated:
+    post:
+      responses:
+        "200":
+          description: OK
