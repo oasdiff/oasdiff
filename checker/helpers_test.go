@@ -221,7 +221,7 @@ const (
 )
 
 // checkChanges runs a single check over the two specs and returns every change it reports.
-func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string) checker.Changes {
+func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
 	t.Helper()
 	s1, err := open(base)
 	require.NoError(t, err)
@@ -229,5 +229,26 @@ func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, 
 	require.NoError(t, err)
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(check), d, osm, checker.INFO)
+	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(check, opts...), d, osm, checker.INFO)
+}
+
+type securityFinding struct {
+	Id    string
+	Level checker.Level
+	Path  string
+}
+
+// securityFindings runs APISecurityUpdatedCheck over two api_security_anonymous_ fixtures.
+func securityFindings(t *testing.T, base, revision string, opts ...checker.Option) []securityFinding {
+	t.Helper()
+	changes := checkChanges(t, checker.APISecurityUpdatedCheck,
+		"../data/checker/api_security_anonymous_"+base+".yaml",
+		"../data/checker/api_security_anonymous_"+revision+".yaml",
+		opts...)
+
+	result := []securityFinding{}
+	for _, change := range changes {
+		result = append(result, securityFinding{Id: change.GetId(), Level: change.GetLevel(), Path: change.GetPath()})
+	}
+	return result
 }

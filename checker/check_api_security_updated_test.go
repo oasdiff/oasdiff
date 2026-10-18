@@ -217,30 +217,6 @@ func TestAPISecurityDeleted_WithSources(t *testing.T) {
 	require.Equal(t, "../data/checker/api_security_added_base.yaml", errs[0].GetRevisionSource().File)
 }
 
-type securityFinding struct {
-	Id    string
-	Level checker.Level
-	Path  string
-}
-
-func securityFindings(t *testing.T, base, revision string, opts ...checker.Option) []securityFinding {
-	t.Helper()
-	s1, err := open("../data/checker/api_security_anonymous_" + base + ".yaml")
-	require.NoError(t, err)
-	s2, err := open("../data/checker/api_security_anonymous_" + revision + ".yaml")
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	changes := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck, opts...), d, osm, checker.INFO)
-
-	result := []securityFinding{}
-	for _, change := range changes {
-		result = append(result, securityFinding{Id: change.GetId(), Level: change.GetLevel(), Path: change.GetPath()})
-	}
-	return result
-}
-
 // No security requirement means anonymous access, so the first requirement
 // narrows access and removing the last one widens it. Each fixture has a
 // /pets operation that varies and a /health operation that always declares
