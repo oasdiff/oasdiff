@@ -13,13 +13,13 @@ type anonymousAccess struct {
 	revision bool
 }
 
-func declaredAnonymousAccess(operationItem *diff.MethodDiff) anonymousAccess {
+func declaredAnonymousAccess(methodDiff *diff.MethodDiff) anonymousAccess {
 	return anonymousAccess{
 		// The effective security of an operation that inherits the root list
 		// is unknown here, since only the operation's own list is available.
-		known:    operationItem.Base.Security != nil && operationItem.Revision.Security != nil,
-		base:     allowsAnonymous(operationItem.Base.Security),
-		revision: allowsAnonymous(operationItem.Revision.Security),
+		known:    methodDiff.Base.Security != nil && methodDiff.Revision.Security != nil,
+		base:     allowsAnonymous(methodDiff.Base.Security),
+		revision: allowsAnonymous(methodDiff.Revision.Security),
 	}
 }
 
