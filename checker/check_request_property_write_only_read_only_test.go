@@ -177,13 +177,11 @@ func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 
 // changing required request property to not read-only
 func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
-	s1, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
+	s1, err := open("../data/checker/request_required_property_read_only_base.yaml")
 	require.NoError(t, err)
 
-	s2, err := open("../data/checker/request_optional_property_write_only_read_only_base.yaml")
+	s2, err := open("../data/checker/request_required_property_not_read_only_revision.yaml")
 	require.NoError(t, err)
-
-	s1.Spec.Paths.Value("/api/v1.0/groups").Post.RequestBody.Value.Content["application/json"].Schema.Value.Properties["id"].Value.ReadOnly = true
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
@@ -193,7 +191,7 @@ func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
+		Source:      load.NewSource("../data/checker/request_required_property_not_read_only_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
