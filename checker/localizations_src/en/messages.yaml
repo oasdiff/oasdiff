@@ -273,9 +273,9 @@ api-security-updated: the endpoint scheme security %s was updated from %s to %s
 api-global-security-added: the security scheme %s was added to the API
 api-global-security-removed: the security scheme %s was removed from the API
 api-global-security-scope-removed: the security scope %s was removed from the global security scheme %s
-api-security-anonymous-access-removed: the endpoint no longer allows anonymous access
+api-security-anonymous-access-removed: the endpoint no longer allows anonymous access and now requires %s
 api-security-anonymous-access-added: the endpoint now allows anonymous access
-api-global-security-anonymous-access-removed: the API no longer allows anonymous access to endpoints without their own security requirements
+api-global-security-anonymous-access-removed: the API no longer allows anonymous access to endpoints without their own security requirements, which now require %s
 api-global-security-anonymous-access-added: the API now allows anonymous access to endpoints without their own security requirements
 api-global-security-scope-added: the security scope %s was added to the global security scheme %s
 api-security-scope-removed: the security scope %s was removed from the endpoint's security scheme %s
