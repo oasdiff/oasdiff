@@ -98,6 +98,19 @@ func (c ApiChange) WithGuards(guards []Guard) ApiChange {
 	return c
 }
 
+// withoutGuard removes a guard observed at the change's location, so the
+// guard neither lowers the change's level nor adds its comment.
+func (c ApiChange) withoutGuard(guard Guard) ApiChange {
+	var guards []Guard
+	for _, g := range c.guards {
+		if g != guard {
+			guards = append(guards, g)
+		}
+	}
+	c.guards = guards
+	return c
+}
+
 // WithDisclaimers is additive and drops duplicates: a change can gather the
 // same condition from more than one place.
 func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
