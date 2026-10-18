@@ -258,8 +258,6 @@ api-global-security-removed: схема безопасности %s была у�
 api-global-security-scope-removed: из глобальной схемы безопасности %s была удалена область безопасности %s
 api-security-anonymous-access-removed: эндпоинт больше не допускает анонимный доступ и теперь требует %s
 api-security-anonymous-access-added: эндпоинт теперь допускает анонимный доступ
-api-global-security-anonymous-access-removed: API больше не допускает анонимный доступ к эндпоинтам без собственных требований безопасности, теперь они требуют %s
-api-global-security-anonymous-access-added: API теперь допускает анонимный доступ к эндпоинтам без собственных требований безопасности
 api-global-security-scope-added: к глобальной схеме безопасности %s была добавлена область безопасности %s
 api-security-scope-removed: из схемы безопасности эндпоинта %s была удалена область безопасности %s
 api-security-scope-added: к схеме безопасности эндпоинта %s была добавлена область безопасности %s
@@ -390,8 +388,6 @@ api-global-security-scope-added-description: разрешение добавле
 api-global-security-scope-removed-description: разрешение удалено из схемы безопасности в security
 api-security-anonymous-access-removed-description: безопасность эндпоинта изменена, неаутентифицированные запросы отклоняются
 api-security-anonymous-access-added-description: безопасность эндпоинта изменена, неаутентифицированные запросы принимаются
-api-global-security-anonymous-access-removed-description: security изменена, эндпоинты, наследующие её, отклоняют неаутентифицированные запросы
-api-global-security-anonymous-access-added-description: security изменена, эндпоинты, наследующие её, принимают неаутентифицированные запросы
 api-invalid-stability-level-description: неверный уровень стабильности
 api-operation-id-added-description: идентификатор операции добавлен к эндпоинту
 api-operation-id-removed-description: идентификатор операции удален из эндпоинта

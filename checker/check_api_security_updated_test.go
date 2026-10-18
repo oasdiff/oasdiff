@@ -19,13 +19,10 @@ func TestAPIGlobalSecurityyAdded(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	removed := requireSingleChange(t, errs, checker.APIGlobalSecurityAnonymousAccessRemovedId)
-	require.Equal(t, checker.SecurityChange{
-		Id:    checker.APIGlobalSecurityAnonymousAccessRemovedId,
-		Args:  []any{"petstore_auth: [read:pets, write:pets]"},
-		Level: checker.ERR,
-	}, removed)
-	require.Equal(t, "the API no longer allows anonymous access to endpoints without their own security requirements, which now require `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	removed := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessRemovedId)
+	require.Equal(t, "POST", removed.GetOperation())
+	require.Equal(t, "/subscribe", removed.GetPath())
+	require.Equal(t, "the endpoint no longer allows anonymous access and now requires `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // adding a global security that no endpoint inherits
@@ -45,7 +42,8 @@ func TestAPIGlobalSecurityyDeleted(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	requireSingleChange(t, errs, checker.APIGlobalSecurityAnonymousAccessAddedId)
+	added := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessAddedId)
+	require.Equal(t, "/subscribe", added.GetPath())
 }
 
 // removing a global security that no endpoint inherits
@@ -194,7 +192,7 @@ func TestAPIGlobalSecurityDeleted_WithSources(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
-	anonymous := requireSingleChange(t, errs, checker.APIGlobalSecurityAnonymousAccessAddedId)
+	anonymous := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessAddedId)
 	require.NotEmpty(t, anonymous.GetBaseSource())
 	require.Equal(t, "../data/checker/api_security_global_added_revision.yaml", anonymous.GetBaseSource().File)
 	require.Equal(t, 5, anonymous.GetBaseSource().Line)
@@ -246,13 +244,13 @@ func TestAPISecurityAnonymousAccess(t *testing.T) {
 		{
 			name: "global security added to anonymous api", base: "none", revision: "global_api_key",
 			want: []securityFinding{
-				{checker.APIGlobalSecurityAnonymousAccessRemovedId, checker.ERR, ""},
+				{checker.APISecurityAnonymousAccessRemovedId, checker.ERR, "/pets"},
 			},
 		},
 		{
 			name: "global security removed", base: "global_api_key", revision: "none",
 			want: []securityFinding{
-				{checker.APIGlobalSecurityAnonymousAccessAddedId, checker.INFO, ""},
+				{checker.APISecurityAnonymousAccessAddedId, checker.INFO, "/pets"},
 			},
 		},
 		{
@@ -334,8 +332,6 @@ var oppositeSecurityId = map[string]string{
 	checker.APIGlobalSecurityRemovedCheckId:           checker.APIGlobalSecurityAddedCheckId,
 	checker.APISecurityAnonymousAccessAddedId:         checker.APISecurityAnonymousAccessRemovedId,
 	checker.APISecurityAnonymousAccessRemovedId:       checker.APISecurityAnonymousAccessAddedId,
-	checker.APIGlobalSecurityAnonymousAccessAddedId:   checker.APIGlobalSecurityAnonymousAccessRemovedId,
-	checker.APIGlobalSecurityAnonymousAccessRemovedId: checker.APIGlobalSecurityAnonymousAccessAddedId,
 }
 
 // An operation below the stability threshold is out of scope even when only
@@ -347,9 +343,9 @@ func TestAPISecurityAnonymousAccessStability(t *testing.T) {
 	}, securityFindings(t, "alpha_global_api_key", "alpha_global_api_key_op_anonymous", checker.WithStabilityLevel(checker.StabilityAlpha)))
 }
 
-func TestAPIGlobalSecurityAnonymousAccessStability(t *testing.T) {
-	require.NotContains(t, securityFindingIds(t, "alpha_global_api_key", "alpha_global_anonymous"), checker.APIGlobalSecurityAnonymousAccessAddedId)
-	require.Contains(t, securityFindingIds(t, "alpha_global_api_key", "alpha_global_anonymous", checker.WithStabilityLevel(checker.StabilityAlpha)), checker.APIGlobalSecurityAnonymousAccessAddedId)
+func TestAPIInheritedSecurityAnonymousAccessStability(t *testing.T) {
+	require.NotContains(t, securityFindingIds(t, "alpha_global_api_key", "alpha_global_anonymous"), checker.APISecurityAnonymousAccessAddedId)
+	require.Contains(t, securityFindingIds(t, "alpha_global_api_key", "alpha_global_anonymous", checker.WithStabilityLevel(checker.StabilityAlpha)), checker.APISecurityAnonymousAccessAddedId)
 }
 
 func securityFindingIds(t *testing.T, base, revision string, opts ...checker.Option) []string {
@@ -365,6 +361,4 @@ func TestAPISecurityAnonymousAccessText(t *testing.T) {
 	l := checker.NewDefaultLocalizer()
 	require.Equal(t, "the endpoint no longer allows anonymous access and now requires apiKey", l(checker.APISecurityAnonymousAccessRemovedId, "apiKey"))
 	require.Equal(t, "the endpoint now allows anonymous access", l(checker.APISecurityAnonymousAccessAddedId))
-	require.Equal(t, "the API no longer allows anonymous access to endpoints without their own security requirements, which now require apiKey", l(checker.APIGlobalSecurityAnonymousAccessRemovedId, "apiKey"))
-	require.Equal(t, "the API now allows anonymous access to endpoints without their own security requirements", l(checker.APIGlobalSecurityAnonymousAccessAddedId))
 }
