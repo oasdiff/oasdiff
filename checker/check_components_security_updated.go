@@ -21,6 +21,9 @@ const (
 	APIComponentsSecurityHttpSchemeUpdatedId        = "api-security-component-http-scheme-changed"
 	APIComponentsSecurityBearerFormatUpdatedId      = "api-security-component-bearer-format-changed"
 	APIComponentsSecurityOpenIdConnectUrlUpdatedId  = "api-security-component-openid-connect-url-changed"
+	APIComponentsSecurityOauthRefreshUrlUpdatedId   = "api-security-component-oauth-refresh-url-changed"
+
+	SecuritySchemeURLChangedCommentId = "security-scheme-url-changed-warn-comment"
 )
 
 const ComponentSecuritySchemes = "securitySchemes"
@@ -33,60 +36,78 @@ const ComponentSecuritySchemes = "securitySchemes"
 func checkOAuthUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string, baseSource, revisionSource *Source) Changes {
 	result := make(Changes, 0)
 
-	if updatedSecurity.OAuthFlowsDiff == nil {
+	flowsDiff := updatedSecurity.OAuthFlowsDiff
+	if flowsDiff == nil {
 		return result
 	}
 
-	if updatedSecurity.OAuthFlowsDiff.ImplicitDiff == nil {
+	flows := []struct {
+		name string
+		diff *diff.OAuthFlowDiff
+	}{
+		{"implicit", flowsDiff.ImplicitDiff},
+		{"password", flowsDiff.PasswordDiff},
+		{"clientCredentials", flowsDiff.ClientCredentialsDiff},
+		{"authorizationCode", flowsDiff.AuthorizationCodeDiff},
+	}
+	for _, flow := range flows {
+		if flow.diff != nil {
+			result = append(result, checkOAuthFlowUpdates(flow.diff, updatedSecurityName, flow.name, baseSource, revisionSource)...)
+		}
+	}
+
+	return result
+}
+
+func checkOAuthFlowUpdates(flowDiff *diff.OAuthFlowDiff, updatedSecurityName, flowName string, baseSource, revisionSource *Source) Changes {
+	result := make(Changes, 0)
+
+	urlChange := func(id string, urlDiff *diff.ValueDiff) {
+		if urlDiff == nil || sameURL(urlDiff.From, urlDiff.To) {
+			return
+		}
+		result = append(result, ComponentChange{
+			Id:        id,
+			Level:     WARN,
+			Args:      []any{updatedSecurityName, flowName, urlDiff.From, urlDiff.To},
+			Comment:   SecuritySchemeURLChangedCommentId,
+			Component: ComponentSecuritySchemes,
+		}.WithSources(baseSource, revisionSource))
+	}
+	urlChange(APIComponentsSecurityComponentOauthUrlUpdatedId, flowDiff.AuthorizationURLDiff)
+	urlChange(APIComponentsSecurityOauthTokenUrlUpdatedId, flowDiff.TokenURLDiff)
+	urlChange(APIComponentsSecurityOauthRefreshUrlUpdatedId, flowDiff.RefreshURLDiff)
+
+	scopesDiff := flowDiff.ScopesDiff
+	if scopesDiff == nil {
 		return result
 	}
 
-	if urlDiff := updatedSecurity.OAuthFlowsDiff.ImplicitDiff.AuthorizationURLDiff; urlDiff != nil {
+	for _, addedScope := range scopesDiff.Added {
 		result = append(result, ComponentChange{
-			Id:        APIComponentsSecurityComponentOauthUrlUpdatedId,
+			Id:        APIComponentSecurityOauthScopeAddedId,
 			Level:     INFO,
-			Args:      []any{updatedSecurityName, urlDiff.From, urlDiff.To},
+			Args:      []any{updatedSecurityName, flowName, addedScope},
 			Component: ComponentSecuritySchemes,
-		}.WithSources(baseSource, revisionSource))
+		}.WithSources(nil, revisionSource))
 	}
 
-	if tokenDiff := updatedSecurity.OAuthFlowsDiff.ImplicitDiff.TokenURLDiff; tokenDiff != nil {
+	for _, removedScope := range scopesDiff.Deleted {
 		result = append(result, ComponentChange{
-			Id:        APIComponentsSecurityOauthTokenUrlUpdatedId,
+			Id:        APIComponentSecurityOauthScopeRemovedId,
 			Level:     INFO,
-			Args:      []any{updatedSecurityName, tokenDiff.From, tokenDiff.To},
+			Args:      []any{updatedSecurityName, flowName, removedScope},
 			Component: ComponentSecuritySchemes,
-		}.WithSources(baseSource, revisionSource))
+		}.WithSources(baseSource, nil))
 	}
 
-	if scopesDiff := updatedSecurity.OAuthFlowsDiff.ImplicitDiff.ScopesDiff; scopesDiff != nil {
-		for _, addedScope := range scopesDiff.Added {
-			result = append(result, ComponentChange{
-				Id:        APIComponentSecurityOauthScopeAddedId,
-				Level:     INFO,
-				Args:      []any{updatedSecurityName, addedScope},
-				Component: ComponentSecuritySchemes,
-			}.WithSources(nil, revisionSource))
-		}
-
-		for _, removedScope := range scopesDiff.Deleted {
-			result = append(result, ComponentChange{
-				Id:        APIComponentSecurityOauthScopeRemovedId,
-				Level:     INFO,
-				Args:      []any{updatedSecurityName, removedScope},
-				Component: ComponentSecuritySchemes,
-			}.WithSources(baseSource, nil))
-		}
-
-		for name, modifiedScope := range scopesDiff.Modified {
-			result = append(result, ComponentChange{
-				Id:        APIComponentSecurityOauthScopeUpdatedId,
-				Level:     INFO,
-				Args:      []any{updatedSecurityName, name, modifiedScope.From, modifiedScope.To},
-				Component: ComponentSecuritySchemes,
-			}.WithSources(baseSource, revisionSource))
-		}
-
+	for name, modifiedScope := range scopesDiff.Modified {
+		result = append(result, ComponentChange{
+			Id:        APIComponentSecurityOauthScopeUpdatedId,
+			Level:     INFO,
+			Args:      []any{updatedSecurityName, flowName, name, modifiedScope.From, modifiedScope.To},
+			Component: ComponentSecuritySchemes,
+		}.WithSources(baseSource, revisionSource))
 	}
 
 	return result
@@ -181,7 +202,15 @@ func checkWireFieldUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecu
 		report(APIComponentsSecurityHttpSchemeUpdatedId, ERR, schemeDiff)
 	}
 	report(APIComponentsSecurityBearerFormatUpdatedId, INFO, updatedSecurity.BearerFormatDiff)
-	report(APIComponentsSecurityOpenIdConnectUrlUpdatedId, ERR, updatedSecurity.OpenIDConnectURLDiff)
+	if urlDiff := updatedSecurity.OpenIDConnectURLDiff; urlDiff != nil && !sameURL(urlDiff.From, urlDiff.To) {
+		result = append(result, ComponentChange{
+			Id:        APIComponentsSecurityOpenIdConnectUrlUpdatedId,
+			Level:     WARN,
+			Args:      []any{updatedSecurityName, urlDiff.From, urlDiff.To},
+			Comment:   SecuritySchemeURLChangedCommentId,
+			Component: ComponentSecuritySchemes,
+		}.WithSources(baseSource, revisionSource))
+	}
 
 	return result
 }

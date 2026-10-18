@@ -24,11 +24,12 @@ func TestComponentSecurityOauthURLUpdated(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityComponentOauthUrlUpdatedId,
-		Args:      []any{"petstore_auth", "http://example.org/api/oauth/dialog", "http://example.new.org/api/oauth/dialog"},
-		Level:     checker.INFO,
+		Args:      []any{"petstore_auth", "implicit", "http://example.org/api/oauth/dialog", "http://example.new.org/api/oauth/dialog"},
+		Level:     checker.WARN,
+		Comment:   checker.SecuritySchemeURLChangedCommentId,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `petstore_auth` oauth url changed from `http://example.org/api/oauth/dialog` to `http://example.new.org/api/oauth/dialog`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth `implicit` flow authorization url changed from `http://example.org/api/oauth/dialog` to `http://example.new.org/api/oauth/dialog`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing security component token url
@@ -46,11 +47,12 @@ func TestComponentSecurityOauthTokenUpdated(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityOauthTokenUrlUpdatedId,
-		Args:      []any{"petstore_auth", "", "http://example.new.org/api/oauth/dialog"},
-		Level:     checker.INFO,
+		Args:      []any{"petstore_auth", "implicit", "", "http://example.new.org/api/oauth/dialog"},
+		Level:     checker.WARN,
+		Comment:   checker.SecuritySchemeURLChangedCommentId,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `petstore_auth` oauth token url changed from `` to `http://example.new.org/api/oauth/dialog`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth `implicit` flow token url changed from `` to `http://example.new.org/api/oauth/dialog`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing security component type
@@ -130,11 +132,11 @@ func TestComponentSecurityOauthScopeAdded(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ComponentChange{
 		Id:        checker.APIComponentSecurityOauthScopeAddedId,
-		Args:      []any{"petstore_auth", "admin:pets"},
+		Args:      []any{"petstore_auth", "implicit", "admin:pets"},
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `admin:pets` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth `implicit` flow scope `admin:pets` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // adding an oauth scope, with source tracking: the change points at the
@@ -174,11 +176,11 @@ func TestComponentSecurityOauthScopeRemoved(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ComponentChange{
 		Id:        "api-security-component-oauth-scope-removed",
-		Args:      []any{"petstore_auth", "admin:pets"},
+		Args:      []any{"petstore_auth", "implicit", "admin:pets"},
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `admin:pets` was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth `implicit` flow scope `admin:pets` was removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing a new oauth security scope
@@ -196,11 +198,11 @@ func TestComponentSecurityOauthScopeUpdated(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.ComponentChange{
 		Id:        "api-security-component-oauth-scope-changed",
-		Args:      []any{"petstore_auth", "read:pets", "read your pets", "grants access to pets (deprecated)"},
+		Args:      []any{"petstore_auth", "implicit", "read:pets", "read your pets", "grants access to pets (deprecated)"},
 		Level:     checker.INFO,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `read:pets` was updated from `read your pets` to `grants access to pets (deprecated)`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `petstore_auth` oauth `implicit` flow scope `read:pets` was updated from `read your pets` to `grants access to pets (deprecated)`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 func checkWireFields(t *testing.T, modify func(schemes openapi3.SecuritySchemes)) checker.Changes {
@@ -292,7 +294,8 @@ func TestComponentSecurityOpenIdConnectUrlUpdated(t *testing.T) {
 	require.Equal(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityOpenIdConnectUrlUpdatedId,
 		Args:      []any{"oidc", "https://example.com/.well-known/openid-configuration", "https://auth.example.com/.well-known/openid-configuration"},
-		Level:     checker.ERR,
+		Level:     checker.WARN,
+		Comment:   checker.SecuritySchemeURLChangedCommentId,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
 	require.Equal(t, "the component security scheme `oidc` OpenID Connect url changed from `https://example.com/.well-known/openid-configuration` to `https://auth.example.com/.well-known/openid-configuration`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
@@ -307,4 +310,119 @@ func TestComponentSecurityTypeUpdated_WireFieldsNotRepeated(t *testing.T) {
 	require.Len(t, errs, 1)
 	require.Equal(t, checker.APIComponentsSecurityTypeUpdatedId, errs[0].GetId())
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
+}
+
+// URLs that name the same resource under RFC 3986 normalization are not a
+// change; anything else is
+func TestComponentSecurityURLEquivalence(t *testing.T) {
+	tests := []struct {
+		from, to string
+		same     bool
+	}{
+		{"https://example.com/.well-known/openid-configuration", "HTTPS://Example.COM/.well-known/openid-configuration", true},
+		{"https://example.com/.well-known/openid-configuration", "https://example.com:443/.well-known/openid-configuration", true},
+		{"http://example.com/token", "http://example.com:80/token", true},
+		{"https://example.com", "https://example.com/", true},
+		{"https://example.com/a%2fb", "https://example.com/a%2Fb", true},
+		{"https://example.com/~user", "https://example.com/%7Euser", true},
+		{"https://[::1]:443/token", "https://[::1]/token", true},
+		{"/token", "/token", true},
+		{"https://example.com/.well-known/openid-configuration", "https://example.com/.well-known/OpenID-configuration", false},
+		{"https://example.com/token", "http://example.com/token", false},
+		{"https://example.com/token", "https://example.com:8443/token", false},
+		{"https://example.com/token", "https://example.com/token/", false},
+		{"https://example.com/token", "https://example.com/token?tenant=a", false},
+		{"https://example.com/a/b", "https://example.com/a%2Fb", false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.from+" to "+tc.to, func(t *testing.T) {
+			s1, err := open("../data/checker/component_security_wire_fields_base.yaml")
+			require.NoError(t, err)
+			s2, err := open("../data/checker/component_security_wire_fields_base.yaml")
+			require.NoError(t, err)
+			s1.Spec.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl = tc.from
+			s2.Spec.Components.SecuritySchemes["oidc"].Value.OpenIdConnectUrl = tc.to
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+			errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
+			if tc.same {
+				require.Empty(t, errs)
+			} else {
+				requireSingleChange(t, errs, checker.APIComponentsSecurityOpenIdConnectUrlUpdatedId)
+			}
+		})
+	}
+}
+
+// every OAuth flow is checked, and each finding names its flow
+func TestComponentSecurityOauthFlows(t *testing.T) {
+	flow := func() *openapi3.OAuthFlow {
+		return &openapi3.OAuthFlow{
+			AuthorizationURL: "https://example.com/authorize",
+			TokenURL:         "https://example.com/token",
+			RefreshURL:       "https://example.com/refresh",
+			Scopes:           map[string]string{"read": "read pets"},
+		}
+	}
+	setFlow := func(flows *openapi3.OAuthFlows, name string, f *openapi3.OAuthFlow) {
+		switch name {
+		case "implicit":
+			flows.Implicit = f
+		case "password":
+			flows.Password = f
+		case "clientCredentials":
+			flows.ClientCredentials = f
+		case "authorizationCode":
+			flows.AuthorizationCode = f
+		}
+	}
+
+	for _, name := range []string{"implicit", "password", "clientCredentials", "authorizationCode"} {
+		t.Run(name, func(t *testing.T) {
+			s1, err := open("../data/checker/component_security_updated_base.yaml")
+			require.NoError(t, err)
+			s2, err := open("../data/checker/component_security_updated_base.yaml")
+			require.NoError(t, err)
+			s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows = &openapi3.OAuthFlows{}
+			s2.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows = &openapi3.OAuthFlows{}
+
+			setFlow(s1.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows, name, flow())
+			revision := flow()
+			revision.AuthorizationURL = "https://auth.example.com/authorize"
+			revision.TokenURL = "https://auth.example.com/token"
+			revision.RefreshURL = "https://auth.example.com/refresh"
+			revision.Scopes["write"] = "write pets"
+			setFlow(s2.Spec.Components.SecuritySchemes["petstore_auth"].Value.Flows, name, revision)
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+			errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
+
+			found := map[string]checker.Level{}
+			for _, change := range errs {
+				require.Equal(t, name, change.GetArgs()[1], change.GetId())
+				found[change.GetId()] = change.GetLevel()
+			}
+			require.Equal(t, map[string]checker.Level{
+				checker.APIComponentsSecurityComponentOauthUrlUpdatedId: checker.WARN,
+				checker.APIComponentsSecurityOauthTokenUrlUpdatedId:     checker.WARN,
+				checker.APIComponentsSecurityOauthRefreshUrlUpdatedId:   checker.WARN,
+				checker.APIComponentSecurityOauthScopeAddedId:           checker.INFO,
+			}, found)
+		})
+	}
+}
+
+func TestComponentSecurityOauthRefreshUrlText(t *testing.T) {
+	require.Equal(t,
+		"the component security scheme `oauth` oauth `password` flow refresh url changed from `https://a.example.com` to `https://b.example.com`",
+		checker.ComponentChange{
+			Id:   checker.APIComponentsSecurityOauthRefreshUrlUpdatedId,
+			Args: []any{"oauth", "password", "https://a.example.com", "https://b.example.com"},
+		}.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t,
+		"This is a warning because the spec does not say whether credentials obtained through the previous URL are still accepted.",
+		checker.NewDefaultLocalizer()(checker.SecuritySchemeURLChangedCommentId))
 }

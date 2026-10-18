@@ -289,13 +289,14 @@ response-property-stability-decreased-description: response property stability l
 response-property-stability-increased-description: response property stability level increased
 api-security-scope-added: the security scope %s was added to the endpoint's security scheme %s
 api-security-component-type-changed: the component security scheme %s type changed from %s to %s
-api-security-component-oauth-url-changed: the component security scheme %s oauth url changed from %s to %s
-api-security-component-oauth-token-url-changed: the component security scheme %s oauth token url changed from %s to %s
+api-security-component-oauth-url-changed: the component security scheme %s oauth %s flow authorization url changed from %s to %s
+api-security-component-oauth-token-url-changed: the component security scheme %s oauth %s flow token url changed from %s to %s
+api-security-component-oauth-refresh-url-changed: the component security scheme %s oauth %s flow refresh url changed from %s to %s
 api-security-component-added: the component security scheme %s was added
 api-security-component-removed: the component security scheme %s was removed
-api-security-component-oauth-scope-added: the component security scheme %s oauth scope %s was added
-api-security-component-oauth-scope-removed: the component security scheme %s oauth scope %s was removed
-api-security-component-oauth-scope-changed: the component security scheme %s oauth scope %s was updated from %s to %s
+api-security-component-oauth-scope-added: the component security scheme %s oauth %s flow scope %s was added
+api-security-component-oauth-scope-removed: the component security scheme %s oauth %s flow scope %s was removed
+api-security-component-oauth-scope-changed: the component security scheme %s oauth %s flow scope %s was updated from %s to %s
 api-security-component-api-key-name-changed: the component security scheme %s api key name changed from %s to %s
 api-security-component-api-key-in-changed: the component security scheme %s api key location changed from %s to %s
 api-security-component-http-scheme-changed: the component security scheme %s http scheme changed from %s to %s
@@ -431,6 +432,7 @@ api-security-component-oauth-scope-added-description: scope added to OAuth flow 
 api-security-component-oauth-scope-changed-description: scope modified in OAuth flow in components/securitySchemes
 api-security-component-oauth-scope-removed-description: scope deleted from OAuth flow in components/securitySchemes
 api-security-component-oauth-token-url-changed-description: token URL modified in OAuth flow in components/securitySchemes
+api-security-component-oauth-refresh-url-changed-description: refresh URL modified in OAuth flow in components/securitySchemes
 api-security-component-oauth-url-changed-description: auth URL modified in OAuth flow in components/securitySchemes
 api-security-component-openid-connect-url-changed-description: OpenID Connect url modified in components/securitySchemes
 api-security-component-removed-description: security scheme deleted in components/securitySchemes
@@ -1601,3 +1603,4 @@ shared-schema-detail-also: "also at %s"
 shared-schema-detail-also-cyclic: "also at %s and more"
 shared-schema-detail-also-more: "also at %s and %d more"
 shared-schema-detail-name: "shared schema: %s"
+security-scheme-url-changed-warn-comment: "This is a warning because the spec does not say whether credentials obtained through the previous URL are still accepted."
