@@ -1,6 +1,20 @@
 package diff_test
 
-import "fmt"
+import (
+	"fmt"
+	"testing"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/stretchr/testify/require"
+)
+
+func loadSpec(t *testing.T, path string) *openapi3.T {
+	t.Helper()
+	loader := openapi3.NewLoader()
+	spec, err := loader.LoadFromFile(path)
+	require.NoError(t, err)
+	return spec
+}
 
 // getPrefixFile returns the path to a file under data/prefix/.
 func getPrefixFile(file string) string {
