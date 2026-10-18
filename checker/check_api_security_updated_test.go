@@ -348,15 +348,6 @@ func TestAPIInheritedSecurityAnonymousAccessStability(t *testing.T) {
 	require.Contains(t, securityFindingIds(t, "alpha_global_api_key", "alpha_global_anonymous", checker.WithStabilityLevel(checker.StabilityAlpha)), checker.APISecurityAnonymousAccessAddedId)
 }
 
-func securityFindingIds(t *testing.T, base, revision string, opts ...checker.Option) []string {
-	t.Helper()
-	result := []string{}
-	for _, finding := range securityFindings(t, base, revision, opts...) {
-		result = append(result, finding.Id)
-	}
-	return result
-}
-
 func TestAPISecurityAnonymousAccessText(t *testing.T) {
 	l := checker.NewDefaultLocalizer()
 	require.Equal(t, "the endpoint no longer allows anonymous access and now requires apiKey", l(checker.APISecurityAnonymousAccessRemovedId, "apiKey"))

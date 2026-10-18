@@ -252,3 +252,12 @@ func securityFindings(t *testing.T, base, revision string, opts ...checker.Optio
 	}
 	return result
 }
+
+func securityFindingIds(t *testing.T, base, revision string, opts ...checker.Option) []string {
+	t.Helper()
+	result := []string{}
+	for _, finding := range securityFindings(t, base, revision, opts...) {
+		result = append(result, finding.Id)
+	}
+	return result
+}
