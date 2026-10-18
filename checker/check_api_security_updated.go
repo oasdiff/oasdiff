@@ -21,12 +21,20 @@ const (
 	APISecurityAnonymousAccessRemovedId = "api-security-anonymous-access-removed"
 	APISecurityAnonymousAccessAddedId   = "api-security-anonymous-access-added"
 
-	APISecurityInheritedCommentId = "api-security-inherited-comment"
+	APISecurityInheritedCommentId          = "api-security-inherited-comment"
+	APIGlobalSecurityNotInheritedCommentId = "api-global-security-not-inherited-comment"
 )
 
-func checkGlobalSecurity(diffReport *diff.Diff) Changes {
+// checkGlobalSecurity reports changes to the root list when no operation
+// inherits it, since there is then no operation to report them on.
+func checkGlobalSecurity(diffReport *diff.Diff, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.SecurityDiff == nil {
+		return result
+	}
+
+	securityContext := diffReport.SecurityContext
+	if securityContext != nil && inheritsRootSecurity(securityContext.Operations) {
 		return result
 	}
 
@@ -36,43 +44,38 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 	baseSource := location.SourceFromField(diffReport.SecurityDiff.BaseOrigin, "security")
 	revisionSource := location.SourceFromField(diffReport.SecurityDiff.RevisionOrigin, "security")
 
-	// Each operation that inherits the root list reports the change in
-	// anonymous access, which accounts for every alternative changed with it.
-	if rootAnonymousAccessReachesOperations(diffReport.SecurityContext) {
-		return result
+	// A diff without the security context cannot say whether any operation
+	// inherits the list, so the rule's level applies.
+	newChange := func(id string, args []any) SecurityChange {
+		if securityContext == nil {
+			return SecurityChange{Id: id, Level: config.getLogLevel(id), Args: args}
+		}
+		return SecurityChange{Id: id, Level: INFO, Args: args, Comment: APIGlobalSecurityNotInheritedCommentId}
 	}
 
+	// An empty alternative changes only anonymous access, which matters only
+	// to operations that inherit the list.
 	for _, addedSecurity := range diffReport.SecurityDiff.Added {
-		result = append(result, SecurityChange{
-			Id:    APIGlobalSecurityAddedCheckId,
-			Level: INFO,
-			Args:  []any{addedSecurity.String()},
-		}.WithSources(nil, revisionSource))
+		if len(addedSecurity.Schemes) == 0 {
+			continue
+		}
+		result = append(result, newChange(APIGlobalSecurityAddedCheckId, []any{addedSecurity.String()}).WithSources(nil, revisionSource))
 	}
 
 	for _, removedSecurity := range diffReport.SecurityDiff.Deleted {
-		result = append(result, SecurityChange{
-			Id:    APIGlobalSecurityRemovedCheckId,
-			Level: INFO,
-			Args:  []any{removedSecurity.String()},
-		}.WithSources(baseSource, nil))
+		if len(removedSecurity.Schemes) == 0 {
+			continue
+		}
+		result = append(result, newChange(APIGlobalSecurityRemovedCheckId, []any{removedSecurity.String()}).WithSources(baseSource, nil))
 	}
 
 	for _, updatedSecurity := range diffReport.SecurityDiff.Modified {
 		for securitySchemeName, updatedSecuritySchemeScopes := range updatedSecurity.Scopes {
 			for _, addedScope := range updatedSecuritySchemeScopes.Added {
-				result = append(result, SecurityChange{
-					Id:    APIGlobalSecurityScopeAddedId,
-					Level: INFO,
-					Args:  []any{addedScope, securitySchemeName},
-				}.WithSources(nil, revisionSource))
+				result = append(result, newChange(APIGlobalSecurityScopeAddedId, []any{addedScope, securitySchemeName}).WithSources(nil, revisionSource))
 			}
 			for _, deletedScope := range updatedSecuritySchemeScopes.Deleted {
-				result = append(result, SecurityChange{
-					Id:    APIGlobalSecurityScopeRemovedId,
-					Level: INFO,
-					Args:  []any{deletedScope, securitySchemeName},
-				}.WithSources(baseSource, nil))
+				result = append(result, newChange(APIGlobalSecurityScopeRemovedId, []any{deletedScope, securitySchemeName}).WithSources(baseSource, nil))
 			}
 		}
 	}
@@ -83,7 +86,7 @@ func checkGlobalSecurity(diffReport *diff.Diff) Changes {
 func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
-	result = append(result, checkGlobalSecurity(diffReport)...)
+	result = append(result, checkGlobalSecurity(diffReport, config)...)
 
 	inherited, handled := checkInheritedSecurity(diffReport, operationsSources, config)
 	result = append(result, inherited...)
@@ -136,10 +139,6 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 
 		comment := ""
 		if pair.Base.Security == nil && pair.Revision.Security == nil {
-			// Other changes to the root list are reported once, against the root list.
-			if !access.changed() {
-				continue
-			}
 			// The operation's own definition is unchanged.
 			comment = APISecurityInheritedCommentId
 		}
@@ -155,13 +154,8 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 	return result, handled
 }
 
-// rootAnonymousAccessReachesOperations reports whether the root list gained or
-// lost anonymous access and some operation inherits it on both sides.
-func rootAnonymousAccessReachesOperations(securityContext *diff.SecurityContext) bool {
-	if securityContext == nil || !effectiveAnonymousAccess(&securityContext.Base, &securityContext.Revision).changed() {
-		return false
-	}
-	return slices.ContainsFunc(securityContext.Operations, func(pair diff.OperationPair) bool {
+func inheritsRootSecurity(operations []diff.OperationPair) bool {
+	return slices.ContainsFunc(operations, func(pair diff.OperationPair) bool {
 		return pair.Base.Security == nil && pair.Revision.Security == nil
 	})
 }
@@ -209,7 +203,7 @@ func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source,
 		result = append(result, opInfo.NewApiChange(
 			APISecurityAddedCheckId,
 			[]any{addedSecurity.String()},
-			"",
+			comment,
 		).WithSources(nil, revisionSource))
 	}
 
@@ -221,7 +215,7 @@ func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source,
 			result = append(result, opInfo.NewApiChange(
 				APISecurityRemovedCheckId,
 				[]any{deletedSecurity.String()},
-				"",
+				comment,
 			).WithSources(baseSource, nil))
 		}
 	}
@@ -233,7 +227,7 @@ func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source,
 					result = append(result, opInfo.NewApiChange(
 						APISecurityScopeAddedId,
 						[]any{addedScope, securitySchemeName},
-						"",
+						comment,
 					).WithSources(nil, revisionSource))
 				}
 			}
@@ -241,7 +235,7 @@ func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source,
 				result = append(result, opInfo.NewApiChange(
 					APISecurityScopeRemovedId,
 					[]any{deletedScope, securitySchemeName},
-					"",
+					comment,
 				).WithSources(baseSource, nil))
 			}
 		}

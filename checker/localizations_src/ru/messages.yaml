@@ -260,6 +260,7 @@ api-global-security-scope-removed: из глобальной схемы безо
 api-security-anonymous-access-removed: эндпоинт больше не допускает анонимный доступ и теперь принимает только %s
 api-security-anonymous-access-added: эндпоинт теперь допускает анонимный доступ
 api-security-inherited-comment: "Этот эндпоинт наследует требования безопасности верхнего уровня API."
+api-global-security-not-inherited-comment: "Ни один эндпоинт не наследует требования безопасности верхнего уровня API, поэтому это изменение не затрагивает клиентов."
 api-global-security-scope-added: к глобальной схеме безопасности %s была добавлена область безопасности %s
 api-security-scope-removed: из схемы безопасности эндпоинта %s была удалена область безопасности %s
 api-security-scope-added: к схеме безопасности эндпоинта %s была добавлена область безопасности %s
