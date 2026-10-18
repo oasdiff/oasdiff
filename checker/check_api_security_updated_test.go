@@ -326,12 +326,12 @@ func TestAPISecurityAnonymousAccess(t *testing.T) {
 }
 
 var oppositeSecurityId = map[string]string{
-	checker.APISecurityAddedCheckId:                   checker.APISecurityRemovedCheckId,
-	checker.APISecurityRemovedCheckId:                 checker.APISecurityAddedCheckId,
-	checker.APIGlobalSecurityAddedCheckId:             checker.APIGlobalSecurityRemovedCheckId,
-	checker.APIGlobalSecurityRemovedCheckId:           checker.APIGlobalSecurityAddedCheckId,
-	checker.APISecurityAnonymousAccessAddedId:         checker.APISecurityAnonymousAccessRemovedId,
-	checker.APISecurityAnonymousAccessRemovedId:       checker.APISecurityAnonymousAccessAddedId,
+	checker.APISecurityAddedCheckId:             checker.APISecurityRemovedCheckId,
+	checker.APISecurityRemovedCheckId:           checker.APISecurityAddedCheckId,
+	checker.APIGlobalSecurityAddedCheckId:       checker.APIGlobalSecurityRemovedCheckId,
+	checker.APIGlobalSecurityRemovedCheckId:     checker.APIGlobalSecurityAddedCheckId,
+	checker.APISecurityAnonymousAccessAddedId:   checker.APISecurityAnonymousAccessRemovedId,
+	checker.APISecurityAnonymousAccessRemovedId: checker.APISecurityAnonymousAccessAddedId,
 }
 
 // An operation below the stability threshold is out of scope even when only
@@ -361,4 +361,18 @@ func TestAPISecurityAnonymousAccessText(t *testing.T) {
 	l := checker.NewDefaultLocalizer()
 	require.Equal(t, "the endpoint no longer allows anonymous access and now requires apiKey", l(checker.APISecurityAnonymousAccessRemovedId, "apiKey"))
 	require.Equal(t, "the endpoint now allows anonymous access", l(checker.APISecurityAnonymousAccessAddedId))
+}
+
+// A finding on an operation whose own definition did not change says the
+// change came through the root list.
+func TestAPISecurityInheritedComment(t *testing.T) {
+	anonymous := func(base, revision string) string {
+		t.Helper()
+		changes := checkChanges(t, checker.APISecurityUpdatedCheck, "../data/checker/api_security_anonymous_"+base+".yaml", "../data/checker/api_security_anonymous_"+revision+".yaml")
+		return requireSingleChange(t, changes, checker.APISecurityAnonymousAccessRemovedId).(checker.ApiChange).Comment
+	}
+	require.Equal(t, checker.APISecurityInheritedCommentId, anonymous("none", "global_api_key"))
+	require.Empty(t, anonymous("none", "op_api_key"))
+	require.Empty(t, anonymous("global_api_key_op_anonymous", "global_api_key"))
+	require.Equal(t, "This endpoint inherits the API's top-level security requirements.", checker.NewDefaultLocalizer()(checker.APISecurityInheritedCommentId))
 }

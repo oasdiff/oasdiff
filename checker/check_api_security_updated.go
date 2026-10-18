@@ -20,6 +20,8 @@ const (
 
 	APISecurityAnonymousAccessRemovedId = "api-security-anonymous-access-removed"
 	APISecurityAnonymousAccessAddedId   = "api-security-anonymous-access-added"
+
+	APISecurityInheritedCommentId = "api-security-inherited-comment"
 )
 
 func checkGlobalSecurity(diffReport *diff.Diff) Changes {
@@ -103,7 +105,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			baseSource := location.SecuritySource(operationsSources, operationItem.Base)
 			revisionSource := location.SecuritySource(operationsSources, operationItem.Revision)
-			result = append(result, operationSecurityChanges(opInfo, baseSource, revisionSource, operationItem.Revision.Security, operationItem.SecurityDiff, declaredAnonymousAccess(operationItem))...)
+			result = append(result, operationSecurityChanges(opInfo, baseSource, revisionSource, operationItem.Revision.Security, operationItem.SecurityDiff, declaredAnonymousAccess(operationItem), "")...)
 		}
 	}
 
@@ -132,9 +134,14 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 		revisionSecurity := effectiveSecurity(pair.Revision, &securityContext.Revision)
 		access := effectiveAnonymousAccess(baseSecurity, revisionSecurity)
 
-		// Other changes to the root list are reported once, against the root list.
-		if pair.Base.Security == nil && pair.Revision.Security == nil && !access.changed() {
-			continue
+		comment := ""
+		if pair.Base.Security == nil && pair.Revision.Security == nil {
+			// Other changes to the root list are reported once, against the root list.
+			if !access.changed() {
+				continue
+			}
+			// The operation's own definition is unchanged.
+			comment = APISecurityInheritedCommentId
 		}
 
 		handled[diff.Endpoint{Method: pair.Method, Path: pair.Path}] = true
@@ -142,7 +149,7 @@ func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.Opera
 		baseSource := inheritedSecuritySource(operationsSources, pair.Base, diffReport.SecurityDiff, true)
 		revisionSource := inheritedSecuritySource(operationsSources, pair.Revision, diffReport.SecurityDiff, false)
 		securityDiff := diff.GetSecurityRequirementsDiff(baseSecurity, revisionSecurity)
-		result = append(result, operationSecurityChanges(opInfo, baseSource, revisionSource, revisionSecurity, securityDiff, access)...)
+		result = append(result, operationSecurityChanges(opInfo, baseSource, revisionSource, revisionSecurity, securityDiff, access, comment)...)
 	}
 
 	return result, handled
@@ -178,16 +185,16 @@ func effectiveSecurity(operation *openapi3.Operation, global *openapi3.SecurityR
 	return global
 }
 
-func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source, revisionSecurity *openapi3.SecurityRequirements, securityDiff *diff.SecurityRequirementsDiff, access anonymousAccess) Changes {
+func operationSecurityChanges(opInfo opInfo, baseSource, revisionSource *Source, revisionSecurity *openapi3.SecurityRequirements, securityDiff *diff.SecurityRequirementsDiff, access anonymousAccess, comment string) Changes {
 	result := make(Changes, 0)
 
 	// The change in anonymous access accounts for every alternative and scope
 	// that changed with it.
 	if access.changed() {
 		if access.base {
-			return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessRemovedId, []any{securityRequirementsString(*revisionSecurity)}, "").WithSources(baseSource, revisionSource))
+			return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessRemovedId, []any{securityRequirementsString(*revisionSecurity)}, comment).WithSources(baseSource, revisionSource))
 		}
-		return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessAddedId, nil, "").WithSources(baseSource, revisionSource))
+		return append(result, opInfo.NewApiChange(APISecurityAnonymousAccessAddedId, nil, comment).WithSources(baseSource, revisionSource))
 	}
 
 	if securityDiff == nil {
