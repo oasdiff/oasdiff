@@ -38,10 +38,8 @@ const (
 	// not, the reverse of plain response polarity.
 	GuardNegotiated Guard = "negotiated"
 	// GuardRequiredInRequests: the property was already required in
-	// requests. OpenAPI 3.0 applies required to a readOnly property in
-	// responses only; 3.1 and later apply it in requests too, so a required
-	// readOnly property was already sent and the request-side effect of it
-	// becoming writable is nullified.
+	// requests, so the request-side effect of a change that requires it
+	// there is nullified.
 	GuardRequiredInRequests Guard = "required-in-requests"
 )
 
