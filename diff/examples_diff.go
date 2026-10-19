@@ -58,8 +58,8 @@ func getExamplesDiffInternal(config *Config, examples1, examples2 openapi3.Examp
 	result := newExamplesDiff()
 
 	added, deleted, common := keysDiff(examples1, examples2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		value1, err := derefExample(examples1[name])

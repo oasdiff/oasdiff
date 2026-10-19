@@ -57,8 +57,8 @@ func getSecuritySchemesDiffInternal(config *Config, securitySchemes1, securitySc
 	result.Revision = securitySchemes2
 
 	added, deleted, common := keysDiff(securitySchemes1, securitySchemes2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		value1, err := derefSecurityScheme(securitySchemes1[name])

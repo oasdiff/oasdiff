@@ -58,8 +58,8 @@ func getStringMapDiffInternal(strings1, strings2 map[string]string) *StringMapDi
 	result := newStringMapDiff()
 
 	added, deleted, common := keysDiff(strings1, strings2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, k := range common {
 		if v1, v2 := strings1[k], strings2[k]; v1 != v2 {

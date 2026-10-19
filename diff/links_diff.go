@@ -53,8 +53,8 @@ func getLinksDiffsInternal(config *Config, links1, links2 openapi3.Links) (*Link
 	result := newLinksDiff()
 
 	added, deleted, common := keysDiff(links1, links2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		value1, err := derefLink(links1[name])

@@ -55,8 +55,8 @@ func getCallbacksDiffInternal(config *Config, state *state, callbacks1, callback
 	result := newCallbacksDiff()
 
 	added, deleted, common := keysDiff(callbacks1, callbacks2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		value1, err := derefCallback(callbacks1[name])

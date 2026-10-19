@@ -50,8 +50,8 @@ func getSchemasDiffInternal(config *Config, state *state, schemas1, schemas2 ope
 	result := newSchemasDiff()
 
 	added, deleted, common := keysDiff(schemas1, schemas2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		if err := result.addModifiedSchema(config, state, name, schemas1[name], schemas2[name]); err != nil {

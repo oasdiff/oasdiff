@@ -57,8 +57,8 @@ func getWebhooksDiffInternal(config *Config, state *state, webhooks1, webhooks2 
 	result := newWebhooksDiff()
 
 	added, deleted, common := keysDiff(webhooks1, webhooks2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		// Webhooks don't have path parameters, so we pass an empty PathParamsMap

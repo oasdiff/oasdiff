@@ -50,8 +50,8 @@ func getVariablesDiffInternal(config *Config, variables1, variables2 map[string]
 	result := newVariablesDiff()
 
 	added, deleted, common := keysDiff(variables1, variables2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		diff, err := getVariableDiff(config, variables1[name], variables2[name])

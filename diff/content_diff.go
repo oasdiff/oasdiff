@@ -55,8 +55,8 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 	// and deletions, sorted, so that when several media types are equivalent the
 	// same ones are paired on every run.
 	added, deleted, common := keysDiff(content1, content2)
-	initialResult.MediaTypeAdded = append(initialResult.MediaTypeAdded, added...)
-	initialResult.MediaTypeDeleted = append(initialResult.MediaTypeDeleted, deleted...)
+	initialResult.MediaTypeAdded = added
+	initialResult.MediaTypeDeleted = deleted
 
 	for _, name := range common {
 		diff, err := getMediaTypeDiff(config, state, name, name, content1[name], content2[name])

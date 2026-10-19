@@ -55,8 +55,8 @@ func getResponsesDiffInternal(config *Config, state *state, responses1, response
 
 	responses1Map, responses2Map := responses1.Map(), responses2.Map()
 	added, deleted, common := keysDiff(responses1Map, responses2Map)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		value1, err := derefResponse(responses1Map[name])

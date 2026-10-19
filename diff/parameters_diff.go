@@ -48,8 +48,8 @@ func getParametersDiffInternal(config *Config, state *state, params1, params2 op
 	result := newParametersDiff()
 
 	added, deleted, common := keysDiff(params1, params2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		param1, err := derefParam(params1[name])

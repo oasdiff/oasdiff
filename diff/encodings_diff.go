@@ -51,8 +51,8 @@ func getEncodingsDiffInternal(config *Config, state *state, encodings1, encoding
 	result := newEncodingsDiff()
 
 	added, deleted, common := keysDiff(encodings1, encodings2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		diff, err := getEncodingDiff(config, state, encodings1[name], encodings2[name])

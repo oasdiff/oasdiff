@@ -51,8 +51,8 @@ func getRequestBodiesDiffInternal(config *Config, state *state, requestBodies1, 
 	result := newRequestBodiesDiff()
 
 	added, deleted, common := keysDiff(requestBodies1, requestBodies2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		diff, err := getRequestBodyDiff(config, state, requestBodies1[name], requestBodies2[name])

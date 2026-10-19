@@ -53,8 +53,8 @@ func getHeadersDiffInternal(config *Config, state *state, headers1, headers2 ope
 	result := newHeadersDiff()
 
 	added, deleted, common := keysDiff(headers1, headers2)
-	result.Added = append(result.Added, added...)
-	result.Deleted = append(result.Deleted, deleted...)
+	result.Added = added
+	result.Deleted = deleted
 
 	for _, name := range common {
 		value1, err := derefHeader(headers1[name])
