@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 
 	"cloud.google.com/go/civil"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -173,8 +174,12 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 	// added so far, which is quadratic in the number of paths.
 	byKey := map[string]*openapi3.PathItem{}
 	operationsSources := make(OperationsSourcesMap)
+	// the path each operation was declared under, to name both sides of a duplicate
+	operationPaths := map[*openapi3.Operation]string{}
 	for _, s := range s1 {
-		for path, pathItem := range s.Spec.Paths.Map() {
+		// sorted, so a duplicate is reported the same way on every run
+		for _, path := range slices.Sorted(maps.Keys(s.Spec.Paths.Map())) {
+			pathItem := s.Spec.Paths.Value(path)
 
 			key := pathKey(path, includePathParams)
 			p := byKey[key]
@@ -184,15 +189,19 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				byKey[key] = p
 				for _, opItem := range pathItem.Operations() {
 					operationsSources[opItem] = s.Url
+					operationPaths[opItem] = path
 				}
 				continue
 			}
 
-			for op, opItem := range pathItem.Operations() {
+			operations := pathItem.Operations()
+			for _, op := range slices.Sorted(maps.Keys(operations)) {
+				opItem := operations[op]
 				oldOperation := p.GetOperation(op)
 				if oldOperation == nil {
 					p.SetOperation(op, opItem)
 					operationsSources[opItem] = s.Url
+					operationPaths[opItem] = path
 					continue
 				}
 
@@ -207,10 +216,11 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				if newSince.After(oldSince) {
 					p.SetOperation(op, opItem)
 					operationsSources[opItem] = s.Url
+					operationPaths[opItem] = path
 				}
 
 				if newSince == oldSince {
-					return nil, nil, fmt.Errorf("duplicate endpoint (%s %s) found in %s and %s. You may add the %s extension to specify order", op, path, operationsSources[oldOperation], s.Url, SinceDateExtension)
+					return nil, nil, fmt.Errorf("duplicate endpoint: %s %s in %s and %s %s in %s. You may add the %s extension to specify order", op, operationPaths[oldOperation], operationsSources[oldOperation], op, path, s.Url, SinceDateExtension)
 				}
 			}
 		}

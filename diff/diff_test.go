@@ -1159,6 +1159,19 @@ func TestGetPathsDiff_WithSinceDate(t *testing.T) {
 	require.Nil(t, osm)
 }
 
+// The spec has three paths that are the same endpoint once parameter names are
+// ignored. The error names the first two in sorted order, on every run.
+func TestGetPathsDiff_DuplicateEndpoint(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/base.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	for range 10 {
+		_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+		require.EqualError(t, err, "duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may add the x-since-date extension to specify order")
+	}
+}
+
 // Regression for #1041: OR-alternatives that share a security scheme (the only
 // way to express "scope A OR scope B" for one OAuth2 scheme) were matched by
 // scheme name alone, inventing a phantom scope add/remove, even on a spec
