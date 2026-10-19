@@ -1,8 +1,6 @@
 package diff
 
 import (
-	"slices"
-
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -52,28 +50,19 @@ func getEncodingsDiffInternal(config *Config, state *state, encodings1, encoding
 
 	result := newEncodingsDiff()
 
-	for name1, encoding1 := range encodings1 {
-		if encoding2, ok := encodings2[name1]; ok {
-			diff, err := getEncodingDiff(config, state, encoding1, encoding2)
-			if err != nil {
-				return nil, err
-			}
-			if !diff.Empty() {
-				result.Modified[name1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, name1)
+	added, deleted, common := keysDiff(encodings1, encodings2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
+
+	for _, name := range common {
+		diff, err := getEncodingDiff(config, state, encodings1[name], encodings2[name])
+		if err != nil {
+			return nil, err
+		}
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
-
-	for name2 := range encodings2 {
-		if _, ok := encodings1[name2]; !ok {
-			result.Added = append(result.Added, name2)
-		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
 
 	return result, nil
 }

@@ -2,7 +2,6 @@ package diff
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -58,40 +57,30 @@ func getExamplesDiffInternal(config *Config, examples1, examples2 openapi3.Examp
 
 	result := newExamplesDiff()
 
-	for name1, exampleRef1 := range examples1 {
-		if exampleRef2, ok := examples2[name1]; ok {
+	added, deleted, common := keysDiff(examples1, examples2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
 
-			value1, err := derefExample(exampleRef1)
-			if err != nil {
-				return nil, err
-			}
+	for _, name := range common {
+		value1, err := derefExample(examples1[name])
+		if err != nil {
+			return nil, err
+		}
 
-			value2, err := derefExample(exampleRef2)
-			if err != nil {
-				return nil, err
-			}
+		value2, err := derefExample(examples2[name])
+		if err != nil {
+			return nil, err
+		}
 
-			diff, err := getExampleDiff(config, value1, value2)
-			if err != nil {
-				return nil, err
-			}
+		diff, err := getExampleDiff(config, value1, value2)
+		if err != nil {
+			return nil, err
+		}
 
-			if !diff.Empty() {
-				result.Modified[name1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, name1)
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
-
-	for name2 := range examples2 {
-		if _, ok := examples1[name2]; !ok {
-			result.Added = append(result.Added, name2)
-		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
 
 	return result, nil
 }

@@ -2,7 +2,6 @@ package diff
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -55,39 +54,29 @@ func getCallbacksDiffInternal(config *Config, state *state, callbacks1, callback
 
 	result := newCallbacksDiff()
 
-	for callbackName1, callbackRef1 := range callbacks1 {
-		if callbackRef2, ok := callbacks2[callbackName1]; ok {
+	added, deleted, common := keysDiff(callbacks1, callbacks2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
 
-			value1, err := derefCallback(callbackRef1)
-			if err != nil {
-				return nil, err
-			}
-			value2, err := derefCallback(callbackRef2)
-			if err != nil {
-				return nil, err
-			}
+	for _, name := range common {
+		value1, err := derefCallback(callbacks1[name])
+		if err != nil {
+			return nil, err
+		}
+		value2, err := derefCallback(callbacks2[name])
+		if err != nil {
+			return nil, err
+		}
 
-			diff, err := getCallbackDiff(config, state, value1, value2)
-			if err != nil {
-				return nil, err
-			}
+		diff, err := getCallbackDiff(config, state, value1, value2)
+		if err != nil {
+			return nil, err
+		}
 
-			if !diff.Empty() {
-				result.Modified[callbackName1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, callbackName1)
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
-
-	for callbackValue2 := range callbacks2 {
-		if _, ok := callbacks1[callbackValue2]; !ok {
-			result.Added = append(result.Added, callbackValue2)
-		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
 
 	return result, nil
 

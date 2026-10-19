@@ -1,8 +1,6 @@
 package diff
 
 import (
-	"slices"
-
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -58,36 +56,23 @@ func getWebhooksDiff(config *Config, state *state, webhooks1, webhooks2 map[stri
 func getWebhooksDiffInternal(config *Config, state *state, webhooks1, webhooks2 map[string]*openapi3.PathItem) (*WebhooksDiff, error) {
 	result := newWebhooksDiff()
 
-	for name := range webhooks1 {
-		if _, ok := webhooks2[name]; !ok {
-			result.Deleted = append(result.Deleted, name)
+	added, deleted, common := keysDiff(webhooks1, webhooks2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
+
+	for _, name := range common {
+		// Webhooks don't have path parameters, so we pass an empty PathParamsMap
+		pathItemPair := &pathItemPair{
+			PathItem1:     webhooks1[name],
+			PathItem2:     webhooks2[name],
+			PathParamsMap: PathParamsMap{},
 		}
-	}
-
-	for name := range webhooks2 {
-		if _, ok := webhooks1[name]; !ok {
-			result.Added = append(result.Added, name)
+		pathDiff, err := getPathDiff(config, state, pathItemPair)
+		if err != nil {
+			return nil, err
 		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
-
-	for name, pathItem1 := range webhooks1 {
-		if pathItem2, ok := webhooks2[name]; ok {
-			// Webhooks don't have path parameters, so we pass an empty PathParamsMap
-			pathItemPair := &pathItemPair{
-				PathItem1:     pathItem1,
-				PathItem2:     pathItem2,
-				PathParamsMap: PathParamsMap{},
-			}
-			pathDiff, err := getPathDiff(config, state, pathItemPair)
-			if err != nil {
-				return nil, err
-			}
-			if !pathDiff.Empty() {
-				result.Modified[name] = pathDiff
-			}
+		if !pathDiff.Empty() {
+			result.Modified[name] = pathDiff
 		}
 	}
 

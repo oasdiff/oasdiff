@@ -1,8 +1,6 @@
 package diff
 
 import (
-	"slices"
-
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -49,41 +47,30 @@ func getParametersDiffInternal(config *Config, state *state, params1, params2 op
 
 	result := newParametersDiff()
 
-	for paramName1, paramRef1 := range params1 {
+	added, deleted, common := keysDiff(params1, params2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
 
-		if paramRef2, ok := params2[paramName1]; ok {
+	for _, name := range common {
+		param1, err := derefParam(params1[name])
+		if err != nil {
+			return nil, err
+		}
 
-			param1, err := derefParam(paramRef1)
-			if err != nil {
-				return nil, err
-			}
+		param2, err := derefParam(params2[name])
+		if err != nil {
+			return nil, err
+		}
 
-			param2, err := derefParam(paramRef2)
-			if err != nil {
-				return nil, err
-			}
+		diff, err := getParameterDiff(config, state, param1, param2)
+		if err != nil {
+			return nil, err
+		}
 
-			diff, err := getParameterDiff(config, state, param1, param2)
-			if err != nil {
-				return nil, err
-			}
-
-			if !diff.Empty() {
-				result.Modified[paramName1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, paramName1)
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
-
-	for paramName2 := range params2 {
-		if _, ok := params1[paramName2]; !ok {
-			result.Added = append(result.Added, paramName2)
-		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
 
 	return result, nil
 }

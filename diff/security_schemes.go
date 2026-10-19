@@ -2,7 +2,6 @@ package diff
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -57,36 +56,27 @@ func getSecuritySchemesDiffInternal(config *Config, securitySchemes1, securitySc
 	result.Base = securitySchemes1
 	result.Revision = securitySchemes2
 
-	for name1, ref1 := range securitySchemes1 {
-		if ref2, ok := securitySchemes2[name1]; ok {
-			value1, err := derefSecurityScheme(ref1)
-			if err != nil {
-				return nil, err
-			}
-			value2, err := derefSecurityScheme(ref2)
-			if err != nil {
-				return nil, err
-			}
-			diff, err := getSecuritySchemeDiff(config, value1, value2)
-			if err != nil {
-				return nil, err
-			}
-			if !diff.Empty() {
-				result.Modified[name1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, name1)
+	added, deleted, common := keysDiff(securitySchemes1, securitySchemes2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
+
+	for _, name := range common {
+		value1, err := derefSecurityScheme(securitySchemes1[name])
+		if err != nil {
+			return nil, err
+		}
+		value2, err := derefSecurityScheme(securitySchemes2[name])
+		if err != nil {
+			return nil, err
+		}
+		diff, err := getSecuritySchemeDiff(config, value1, value2)
+		if err != nil {
+			return nil, err
+		}
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
-
-	for value2 := range securitySchemes2 {
-		if _, ok := securitySchemes1[value2]; !ok {
-			result.Added = append(result.Added, value2)
-		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
 
 	return result, nil
 }

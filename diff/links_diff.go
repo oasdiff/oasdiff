@@ -2,7 +2,6 @@ package diff
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -53,38 +52,29 @@ func getLinksDiffsInternal(config *Config, links1, links2 openapi3.Links) (*Link
 
 	result := newLinksDiff()
 
-	for name1, ref1 := range links1 {
-		if ref2, ok := links2[name1]; ok {
-			value1, err := derefLink(ref1)
-			if err != nil {
-				return nil, err
-			}
+	added, deleted, common := keysDiff(links1, links2)
+	result.Added = append(result.Added, added...)
+	result.Deleted = append(result.Deleted, deleted...)
 
-			value2, err := derefLink(ref2)
-			if err != nil {
-				return nil, err
-			}
+	for _, name := range common {
+		value1, err := derefLink(links1[name])
+		if err != nil {
+			return nil, err
+		}
 
-			diff, err := getLinkDiff(config, value1, value2)
-			if err != nil {
-				return nil, err
-			}
-			if !diff.Empty() {
-				result.Modified[name1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, name1)
+		value2, err := derefLink(links2[name])
+		if err != nil {
+			return nil, err
+		}
+
+		diff, err := getLinkDiff(config, value1, value2)
+		if err != nil {
+			return nil, err
+		}
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
-
-	for name2 := range links2 {
-		if _, ok := links1[name2]; !ok {
-			result.Added = append(result.Added, name2)
-		}
-	}
-
-	slices.Sort(result.Added)
-	slices.Sort(result.Deleted)
 
 	return result, nil
 }
