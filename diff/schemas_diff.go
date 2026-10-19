@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -65,6 +67,9 @@ func getSchemasDiffInternal(config *Config, state *state, schemas1, schemas2 ope
 	for schema := range deletedSchemas {
 		result.addDeletedSchema(schema)
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	for schemaName, schemaRefPair := range otherSchemas {
 		err := result.addModifiedSchema(config, state, schemaName, schemaRefPair.SchemaRef1, schemaRefPair.SchemaRef2)

@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -69,6 +71,9 @@ func getEncodingsDiffInternal(config *Config, state *state, encodings1, encoding
 			result.Added = append(result.Added, name2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }

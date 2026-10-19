@@ -1,5 +1,7 @@
 package diff
 
+import "slices"
+
 // InterfaceMap is a map of string to interface
 type InterfaceMap map[string]any
 
@@ -65,6 +67,9 @@ func getInterfaceMapDiffInternal(map1, map2 InterfaceMap) (*InterfaceMapDiff, er
 			result.Added = append(result.Added, name2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }

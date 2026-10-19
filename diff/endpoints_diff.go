@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -91,6 +93,9 @@ func getEndpointsDiffInternal(config *Config, state *state, paths1, paths2 *open
 			return nil, err
 		}
 	}
+
+	slices.SortFunc(result.Added, result.Added.SortFunc)
+	slices.SortFunc(result.Deleted, result.Deleted.SortFunc)
 
 	return result, nil
 }

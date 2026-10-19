@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -71,6 +73,9 @@ func getVariablesDiffInternal(config *Config, variables1, variables2 map[string]
 			result.Added = append(result.Added, name2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }

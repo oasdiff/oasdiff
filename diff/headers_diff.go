@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -82,6 +83,9 @@ func getHeadersDiffInternal(config *Config, state *state, headers1, headers2 ope
 			result.Added = append(result.Added, headerName2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }

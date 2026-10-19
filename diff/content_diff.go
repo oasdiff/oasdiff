@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -77,6 +79,10 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 			initialResult.MediaTypeAdded = append(initialResult.MediaTypeAdded, name2)
 		}
 	}
+
+	// sorted, so that when several media types are equivalent the same ones are paired on every run
+	slices.Sort(initialResult.MediaTypeAdded)
+	slices.Sort(initialResult.MediaTypeDeleted)
 
 	// 3. Iteratively find equivalent pairs from initial Added/Deleted lists
 	finalAdded := make([]string, 0, len(initialResult.MediaTypeAdded))

@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -84,6 +85,9 @@ func getCallbacksDiffInternal(config *Config, state *state, callbacks1, callback
 			result.Added = append(result.Added, callbackValue2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 

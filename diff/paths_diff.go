@@ -3,6 +3,7 @@ package diff
 import (
 	"fmt"
 	"regexp"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -69,6 +70,9 @@ func getPathsDiffInternal(config *Config, state *state, paths1, paths2 *openapi3
 	for endpoint := range deletedPaths.Map() {
 		result.addDeletedPath(endpoint)
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	for endpoint, pathItemPair := range otherPaths {
 		err := result.addModifiedPath(config, state, endpoint, pathItemPair)

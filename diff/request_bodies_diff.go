@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -69,6 +71,9 @@ func getRequestBodiesDiffInternal(config *Config, state *state, requestBodies1, 
 			result.Added = append(result.Added, requestBodyValue2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }

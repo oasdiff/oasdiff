@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -67,6 +69,9 @@ func getWebhooksDiffInternal(config *Config, state *state, webhooks1, webhooks2 
 			result.Added = append(result.Added, name)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	for name, pathItem1 := range webhooks1 {
 		if pathItem2, ok := webhooks2[name]; ok {

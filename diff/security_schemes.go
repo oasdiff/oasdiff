@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -83,6 +84,9 @@ func getSecuritySchemesDiffInternal(config *Config, securitySchemes1, securitySc
 			result.Added = append(result.Added, value2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }

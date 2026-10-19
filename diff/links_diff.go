@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -81,6 +82,9 @@ func getLinksDiffsInternal(config *Config, links1, links2 openapi3.Links) (*Link
 			result.Added = append(result.Added, name2)
 		}
 	}
+
+	slices.Sort(result.Added)
+	slices.Sort(result.Deleted)
 
 	return result, nil
 }
