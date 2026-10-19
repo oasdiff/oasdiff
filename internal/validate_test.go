@@ -582,7 +582,7 @@ func Test_ValidateCmd_AdditionalOperationsInvalidMethod(t *testing.T) {
 // Each fixture triggers one rule; the location is the field at fault.
 func Test_ValidateCmd_RuleLocations(t *testing.T) {
 	for _, tc := range []struct {
-		fixture, id string
+		fixture, id  string
 		line, column int
 	}{
 		// the additionalOperations: field, as for the other additionalOperations key rules
