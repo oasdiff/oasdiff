@@ -579,6 +579,38 @@ func Test_ValidateCmd_AdditionalOperationsInvalidMethod(t *testing.T) {
 	require.Contains(t, stdout.String(), "additional-operations-invalid-method.yaml:7:5")
 }
 
+// Each fixture triggers one rule; the location is the field at fault.
+func Test_ValidateCmd_RuleLocations(t *testing.T) {
+	for _, tc := range []struct {
+		fixture, id string
+		line, column int
+	}{
+		// the additionalOperations: field, as for the other additionalOperations key rules
+		{"additional-operations-fixed-method-case.yaml", "additional-operations-fixed-method-case", 11, 5},
+		// one of the two overlapping keys; the message names both
+		{"content-keys-overlap.yaml", "content-keys-overlap", 12, 13},
+		{"encoding-content-type-invalid.yaml", "encoding-content-type-invalid", 19, 17},
+		{"exclusive-bound-boolean-in-3-1.yaml", "exclusive-bound-boolean-before-3-1", 11, 7},
+		{"exclusive-bound-number-in-3-0.yaml", "exclusive-bound-number-for-3-1-plus", 10, 7},
+		// the operation's security: field
+		{"security-requirement-scheme-undefined.yaml", "security-requirement-scheme-undefined", 8, 7},
+		{"type-array-in-3-0.yaml", "type-array-for-3-1-plus", 9, 7},
+	} {
+		t.Run(tc.id, func(t *testing.T) {
+			var stdout bytes.Buffer
+			internal.Run(cmdToArgs("oasdiff validate -f yaml --fail-on INFO ../data/validate/"+tc.fixture), &stdout, io.Discard)
+
+			var findings []map[string]any
+			require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &findings))
+			require.Len(t, findings, 1)
+			require.Equal(t, tc.id, findings[0]["id"])
+			src := findings[0]["source"].(map[string]any)
+			require.Equal(t, tc.line, src["line"])
+			require.Equal(t, tc.column, src["column"])
+		})
+	}
+}
+
 // The same field listed twice in a schema's `required` array. kin puts the
 // Origin on the schema, so the refinement pins to its `required:` line (10)
 // rather than the schema's own line.
