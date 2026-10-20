@@ -71,7 +71,14 @@ request-body-became-required: request body became required
 request-body-became-optional: request body became optional
 request-body-became-enum: request body was restricted to a list of enum values
 request-body-enum-value-removed: request body enum value removed %s
+request-body-enum-value-added: "request body enum value added %s"
+request-body-became-not-enum: removed the enum constraint from the request body
 response-mediatype-enum-value-removed: response schema %s enum value removed %s
+response-mediatype-became-enum: "the response schema %s for the response status %s was restricted to a list of enum values"
+response-mediatype-enum-value-added-comment: "The server may now return a value the previous contract excluded, so a client written against it may not handle the response. If the value set is meant to grow, declare it with x-extensible-enum."
+response-mediatype-enum-value-added: "added the new %s enum value to the response schema %s for the response status %s"
+response-mediatype-became-not-enum: removed the enum constraint from the response schema %s for the response status %s
+response-mediatype-became-not-enum-comment: The server may now return any value of the schema's type, including values the previous enum excluded, so a client written against it may not handle the response.
 request-header-property-became-required: the %s request header's property %s became required
 request-header-property-became-enum: the %s request header's property %s was restricted to a list of enum values
 request-parameter-became-required: the %s request parameter %s became required
@@ -83,9 +90,12 @@ request-parameter-property-became-nullable: the %s property of the %s request pa
 request-parameter-property-became-not-nullable: the %s property of the %s request parameter %s became not nullable
 request-parameter-enum-value-removed: removed the enum value %s from the %s request parameter %s
 request-parameter-enum-value-added: added the new enum value %s to the %s request parameter %s
+request-parameter-became-not-enum: removed the enum constraint from the %s request parameter %s
 request-parameter-property-enum-value-removed: removed the enum value %s from the property %s of the %s request parameter %s
 request-parameter-property-enum-value-added: added the enum value %s to the property %s of the %s request parameter %s
+request-parameter-property-became-not-enum: removed the enum constraint from the property %s of the %s request parameter %s
 pattern-changed-warn-comment: "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')"
+request-property-became-read-only-comment: "This is a warning because a read-only property should not be sent in a request, and the specification leaves it to the server whether to ignore it or reject the request. Clients that send it may be rejected, or find the value they send is no longer used."
 pattern-added-error-comment: "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients"
 request-parameter-x-extensible-enum-value-removed: removed the x-extensible-enum value %s from the %s request parameter %s
 request-parameter-max-decreased: for the %s request parameter %s, the max was decreased from %s to %s
@@ -132,6 +142,7 @@ request-property-became-enum: request property %s was restricted to a list of en
 request-property-enum-value-removed: removed the enum value %s of the request property %s
 request-read-only-property-enum-value-removed: removed the enum value %s of the request read-only property %s
 request-property-enum-value-added: added the new %s enum value to the request property %s
+request-property-became-not-enum: removed the enum constraint from the request property %s
 request-body-max-decreased: the request's body max was decreased to %s
 request-property-max-decreased: the %s request property's max was decreased to %s
 request-read-only-property-max-decreased: the %s request read-only property's max was decreased to %s
@@ -207,6 +218,9 @@ response-body-became-not-nullable: the response's body became not nullable
 response-property-enum-value-added: added the new %s enum value to the %s response property for the response status %s
 response-property-enum-value-added-comment: The server may now return a value the previous contract excluded, so a client written against it may not handle the response. If the value set is meant to grow, declare it with x-extensible-enum.
 response-property-enum-value-removed: removed the %s enum value from the %s response property for the response status %s
+response-property-became-not-enum: removed the enum constraint from the %s response property for the response status %s
+response-property-became-not-enum-comment: The server may now return any value of the property's type, including values the previous enum excluded, so a client written against it may not handle the response.
+response-property-became-enum: the %s response property for the response status %s was restricted to a list of enum values
 response-body-max-length-increased: the response's body maxLength was increased from %s to %s
 response-property-max-length-increased: the %s response property's maxLength was increased from %s to %s for the response status %s
 response-body-max-length-unset: the response's body maxLength was unset from %s
@@ -260,6 +274,10 @@ api-security-updated: the endpoint scheme security %s was updated from %s to %s
 api-global-security-added: the security scheme %s was added to the API
 api-global-security-removed: the security scheme %s was removed from the API
 api-global-security-scope-removed: the security scope %s was removed from the global security scheme %s
+api-security-anonymous-access-removed: the endpoint no longer allows anonymous access and now only accepts %s
+api-security-anonymous-access-added: the endpoint now allows anonymous access
+api-security-inherited-comment: "This endpoint inherits the API's top-level security requirements."
+api-global-security-not-inherited-comment: "No endpoint inherits the API's top-level security requirements, so this change affects no client."
 api-global-security-scope-added: the security scope %s was added to the global security scheme %s
 api-security-scope-removed: the security scope %s was removed from the endpoint's security scheme %s
 api-version-not-bumped-description: a breaking change was detected but the version was not bumped
@@ -280,6 +298,11 @@ api-security-component-removed: the component security scheme %s was removed
 api-security-component-oauth-scope-added: the component security scheme %s oauth scope %s was added
 api-security-component-oauth-scope-removed: the component security scheme %s oauth scope %s was removed
 api-security-component-oauth-scope-changed: the component security scheme %s oauth scope %s was updated from %s to %s
+api-security-component-api-key-name-changed: the component security scheme %s api key name changed from %s to %s
+api-security-component-api-key-in-changed: the component security scheme %s api key location changed from %s to %s
+api-security-component-http-scheme-changed: the component security scheme %s http scheme changed from %s to %s
+api-security-component-bearer-format-changed: the component security scheme %s bearer format changed from %s to %s
+api-security-component-openid-connect-url-changed: the component security scheme %s OpenID Connect url changed from %s to %s
 response-optional-property-added: added the optional property %s to the response with the %s status
 response-optional-write-only-property-added: added the optional write-only property %s to the response with the %s status
 response-optional-write-only-property-removed: removed the optional write-only property %s from the response with the %s status
@@ -344,6 +367,7 @@ response-body-all-of-removed: removed %s from the response body `allOf` list for
 all-of-not-flattened-comment: "This compared the `allOf` branches one at a time, so another branch may still guarantee what this one dropped. Run with --flatten-allof to merge the branches and compare what they describe together."
 read-only-comment: "The property is read-only, so it never appears in requests and this change cannot invalidate one."
 write-only-comment: "The property is write-only, so it never appears in responses and this change cannot invalidate one."
+required-in-requests-comment: "In OpenAPI 3.1 and later, required applies to a read-only property in requests too, so clients already send it and this change cannot invalidate a request."
 response-property-all-of-added: added %s to the %s response property `allOf` list for the response status %s
 response-property-all-of-removed: removed %s from the %s response property `allOf` list for the response status %s
 response-body-discriminator-added: added response discriminator for the response status %s
@@ -372,6 +396,7 @@ request-body-discriminator-mapping-changed: mapped value for key %s changed from
 request-property-discriminator-mapping-changed: mapped value for discriminator key %s changed from %s to %s for %s request property
 request-required-property-became-read-only: the request required property %s became read-only
 request-required-property-became-not-read-only: the request required property %s became not read-only
+request-required-property-became-not-read-only-in-openapi-31: the request required property %s became not read-only
 request-optional-property-became-write-only: the request optional property %s became write-only
 request-optional-property-became-read-only: the request optional property %s became read-only
 request-optional-property-became-not-write-only: the request optional property %s became not write-only
@@ -390,6 +415,8 @@ api-global-security-added-description: security scheme added in security
 api-global-security-removed-description: security scheme deleted in security
 api-global-security-scope-added-description: scope added to a security scheme in security
 api-global-security-scope-removed-description: scope deleted from a security scheme in security
+api-security-anonymous-access-removed-description: endpoint security changed so that unauthenticated requests are rejected
+api-security-anonymous-access-added-description: endpoint security changed so that unauthenticated requests are accepted
 api-operation-id-added-description: operation ID added to an endpoint
 api-operation-id-removed-description: operation ID deleted from an endpoint
 api-path-removed-before-sunset-description: path and endpoint deleted before sunset date
@@ -400,11 +427,16 @@ api-removed-without-deprecation-description: endpoint deleted without deprecatio
 api-schema-removed-description: schema deleted from components/schemas
 api-security-added-description: security requirements added to endpoint
 api-security-component-added-description: security scheme added in components/securitySchemes
+api-security-component-api-key-in-changed-description: apiKey location (in) modified in components/securitySchemes
+api-security-component-api-key-name-changed-description: apiKey name modified in components/securitySchemes
+api-security-component-bearer-format-changed-description: bearer format modified in components/securitySchemes
+api-security-component-http-scheme-changed-description: http authentication scheme modified in components/securitySchemes
 api-security-component-oauth-scope-added-description: scope added to OAuth flow in components/securitySchemes
 api-security-component-oauth-scope-changed-description: scope modified in OAuth flow in components/securitySchemes
 api-security-component-oauth-scope-removed-description: scope deleted from OAuth flow in components/securitySchemes
 api-security-component-oauth-token-url-changed-description: token URL modified in OAuth flow in components/securitySchemes
 api-security-component-oauth-url-changed-description: auth URL modified in OAuth flow in components/securitySchemes
+api-security-component-openid-connect-url-changed-description: OpenID Connect url modified in components/securitySchemes
 api-security-component-removed-description: security scheme deleted in components/securitySchemes
 api-security-component-type-changed-description: security scheme type modified in components/securitySchemes
 api-security-removed-description: security requirements deleted from endpoint
@@ -450,6 +482,8 @@ request-body-discriminator-mapping-deleted-description: request body discriminat
 request-body-discriminator-property-name-changed-description: request body discriminator property name changed
 request-body-discriminator-removed-description: request body discriminator deleted
 request-body-enum-value-removed-description: request body enum value deleted
+request-body-enum-value-added-description: "request body enum value added"
+request-body-became-not-enum-description: request body enum removed
 request-body-max-decreased-description: request body max decreased
 request-body-max-increased-description: request body max increased
 request-body-max-length-decreased-description: request body max length decreased
@@ -492,8 +526,10 @@ request-parameter-default-value-added-description: request parameter default val
 request-parameter-default-value-changed-description: request parameter default value changed
 request-parameter-default-value-removed-description:  request parameter default value unset
 request-parameter-enum-value-added-description: request parameter enum value added
+request-parameter-became-not-enum-description: request parameter enum removed
 request-parameter-enum-value-removed-description: request parameter enum value deleted
 request-parameter-property-enum-value-added-description: request parameter property enum value added
+request-parameter-property-became-not-enum-description: request parameter property enum removed
 request-parameter-property-enum-value-removed-description: request parameter property enum value removed
 request-parameter-max-decreased-description: request parameter max decreased
 request-parameter-max-increased-description: request parameter max increased
@@ -545,6 +581,7 @@ request-property-discriminator-mapping-deleted-description: request property dis
 request-property-discriminator-property-name-changed-description: request property discriminator property name changed
 request-property-discriminator-removed-description: request property discriminator removed
 request-property-enum-value-added-description: request property enum value added
+request-property-became-not-enum-description: request property enum removed
 request-property-enum-value-removed-description: request property enum value removed
 request-read-only-property-enum-value-removed-description: request read-only property enum value removed
 request-property-max-decreased-description: request property max decreased
@@ -575,6 +612,7 @@ request-property-type-generalized-description: request property type generalized
 request-property-type-compatible-description: request property type changed but backward compatible
 request-property-x-extensible-enum-value-removed-description: request property x-extensible-enum value removed
 request-required-property-became-not-read-only-description: request required property became not read-only
+request-required-property-became-not-read-only-in-openapi-31-description: request required property became not read-only in OpenAPI 3.1 or later
 request-required-property-became-not-write-only-description: request required property became not write-only
 request-required-property-became-read-only-description: request required property became read-only
 request-required-property-became-write-only-description: request required property became write-only
@@ -612,6 +650,9 @@ response-header-became-optional-description: response header became optional
 response-media-type-added-description: response media type added
 response-media-type-removed-description: response media type removed
 response-mediatype-enum-value-removed-description: response mediatype enum value removed
+response-mediatype-became-enum-description: "response mediatype restricted to enum"
+response-mediatype-enum-value-added-description: "response mediatype enum value added"
+response-mediatype-became-not-enum-description: response mediatype enum removed
 response-non-success-status-added-description: response non-success status added
 response-non-success-status-removed-description: response non-success status removed
 response-optional-property-added-description: response optional property added
@@ -643,6 +684,8 @@ response-property-discriminator-property-name-changed-description: response prop
 response-property-discriminator-removed-description: response property discriminator removed
 response-property-enum-value-added-description: response property enum value added
 response-property-enum-value-removed-description: response property enum value removed
+response-property-became-not-enum-description: response property enum removed
+response-property-became-enum-description: response property restricted to enum
 response-property-max-increased-description: response property max increased
 response-property-max-length-increased-description: response property max length increased
 response-property-max-length-unset-description: response property max length unset
