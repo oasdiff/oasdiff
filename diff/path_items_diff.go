@@ -71,23 +71,15 @@ This implementation is based on Paths.Find in openapi3
 */
 func findNormalizedEndpoint(key string, paths *openapi3.Paths) (*openapi3.PathItem, PathParamsMap, bool) {
 	normalizedPath, expected, pathParams1 := normalizeTemplatedPath(key)
-	var (
-		found         bool
-		foundPath     string
-		foundItem     *openapi3.PathItem
-		foundParamMap PathParamsMap
-	)
-	for path, pathItem := range paths.Map() {
-		// several paths can match; take the smallest so the match is the same on every run
-		if found && path > foundPath {
-			continue
-		}
+	pathsMap := paths.Map()
+	// several paths can match; visit them in order so the match is the same on every run
+	for _, path := range slices.Sorted(maps.Keys(pathsMap)) {
 		pathNormalized, got, pathParams2 := normalizeTemplatedPath(path)
 		if got == expected && pathNormalized == normalizedPath {
 			if pathParamsMap, ok := NewPathParamsMap(pathParams1, pathParams2); ok {
-				found, foundPath, foundItem, foundParamMap = true, path, pathItem, pathParamsMap
+				return pathsMap[path], pathParamsMap, true
 			}
 		}
 	}
-	return foundItem, foundParamMap, found
+	return nil, nil, false
 }
