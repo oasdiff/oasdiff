@@ -12,6 +12,7 @@ func extensionValueText(value any) string {
 		return s
 	}
 	text, err := json.Marshal(value)
+	// a value set in code, rather than decoded from the spec, may not marshal
 	if err != nil {
 		return fmt.Sprint(value)
 	}
