@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/oasdiff/oasdiff/checker/location"
@@ -37,12 +38,12 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 
 		fromSlice := make([]string, len(from))
 		for i, item := range from {
-			fromSlice[i] = item.(string)
+			fromSlice[i] = fmt.Sprint(item)
 		}
 
 		toSlice := make([]string, len(to))
 		for i, item := range to {
-			toSlice[i] = item.(string)
+			toSlice[i] = fmt.Sprint(item)
 		}
 
 		deletedVals := make([]string, 0)
