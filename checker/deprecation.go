@@ -30,5 +30,5 @@ func getSunsetDate(sunset any) (civil.Date, error) {
 		}
 	}
 
-	return civil.Date{}, fmt.Errorf("sunset date doesn't conform with RFC3339: %v", sunset)
+	return civil.Date{}, fmt.Errorf("sunset date doesn't conform with RFC3339: %s", extensionValueText(sunset))
 }

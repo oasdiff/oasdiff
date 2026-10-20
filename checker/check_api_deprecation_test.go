@@ -359,7 +359,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	requireSingleChange(t, errs, checker.APIDeprecatedSunsetParseId)
-	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: map[invalid:object]`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: {\"invalid\":\"object\"}`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // endpoint deprecation message includes sunset date
