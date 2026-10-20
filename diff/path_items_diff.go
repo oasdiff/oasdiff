@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -14,31 +16,32 @@ type pathItemPair struct {
 
 type pathItemPairs map[string]*pathItemPair
 
-func getPathItemsDiff(config *Config, paths1, paths2 *openapi3.Paths) (openapi3.Paths, openapi3.Paths, pathItemPairs) {
+// getPathItemsDiff matches the paths of two specs. The added and deleted
+// paths are sorted, and so are the base paths of the matched pairs.
+func getPathItemsDiff(config *Config, paths1, paths2 *openapi3.Paths) (added, deleted, common []string, pairs pathItemPairs) {
 
-	added := openapi3.Paths{}
-	deleted := openapi3.Paths{}
-	other := pathItemPairs{}
+	pairs = pathItemPairs{}
 
-	for endpoint1, pathItem1 := range paths1.Map() {
+	for _, endpoint1 := range slices.Sorted(maps.Keys(paths1.Map())) {
 		if pathItem2, pathParamsMap, ok := findEndpoint(config, endpoint1, paths2); ok {
-			other[endpoint1] = &pathItemPair{
-				PathItem1:     pathItem1,
+			common = append(common, endpoint1)
+			pairs[endpoint1] = &pathItemPair{
+				PathItem1:     paths1.Value(endpoint1),
 				PathItem2:     pathItem2,
 				PathParamsMap: pathParamsMap,
 			}
 		} else {
-			deleted.Set(endpoint1, pathItem1)
+			deleted = append(deleted, endpoint1)
 		}
 	}
 
-	for endpoint2, pathItem2 := range paths2.Map() {
+	for _, endpoint2 := range slices.Sorted(maps.Keys(paths2.Map())) {
 		if _, _, ok := findEndpoint(config, endpoint2, paths1); !ok {
-			added.Set(endpoint2, pathItem2)
+			added = append(added, endpoint2)
 		}
 	}
 
-	return added, deleted, other
+	return added, deleted, common, pairs
 }
 
 func rewritePrefix(paths map[string]*openapi3.PathItem, strip, prepend string) *openapi3.Paths {
@@ -68,11 +71,13 @@ This implementation is based on Paths.Find in openapi3
 */
 func findNormalizedEndpoint(key string, paths *openapi3.Paths) (*openapi3.PathItem, PathParamsMap, bool) {
 	normalizedPath, expected, pathParams1 := normalizeTemplatedPath(key)
-	for path, pathItem := range paths.Map() {
+	pathsMap := paths.Map()
+	// several paths can match; visit them in order so the match is the same on every run
+	for _, path := range slices.Sorted(maps.Keys(pathsMap)) {
 		pathNormalized, got, pathParams2 := normalizeTemplatedPath(path)
 		if got == expected && pathNormalized == normalizedPath {
 			if pathParamsMap, ok := NewPathParamsMap(pathParams1, pathParams2); ok {
-				return pathItem, pathParamsMap, true
+				return pathsMap[path], pathParamsMap, true
 			}
 		}
 	}

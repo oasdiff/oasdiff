@@ -8,8 +8,9 @@ import (
 // StringSet is a set of string values
 type StringSet map[string]struct{}
 
+// ToStringList returns the set's values, sorted
 func (stringSet StringSet) ToStringList() []string {
-	return slices.Collect(maps.Keys(stringSet))
+	return slices.Sorted(maps.Keys(stringSet))
 }
 
 // StringSetFromSlice creates a StringSet from a string slice
