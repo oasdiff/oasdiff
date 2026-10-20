@@ -37,12 +37,12 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 
 			fromSlice := make([]string, len(from))
 			for i, item := range from {
-				fromSlice[i] = item.(string)
+				fromSlice[i] = extensionValueText(item)
 			}
 
 			toSlice := make([]string, len(to))
 			for i, item := range to {
-				toSlice[i] = item.(string)
+				toSlice[i] = extensionValueText(item)
 			}
 
 			deletedVals := make([]string, 0)
