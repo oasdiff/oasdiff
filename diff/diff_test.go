@@ -1304,7 +1304,7 @@ func TestGetPathsDiff_InvalidSinceDateOld(t *testing.T) {
 	require.NoError(t, err)
 
 	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
-	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{a}), failed to parse time")
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{a}), \"not a date\" is not a date in YYYY-MM-DD format")
 }
 
 func TestGetPathsDiff_InvalidSinceDateNew(t *testing.T) {
@@ -1313,5 +1313,15 @@ func TestGetPathsDiff_InvalidSinceDateNew(t *testing.T) {
 	require.NoError(t, err)
 
 	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
-	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{b}), failed to parse time")
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{b}), \"not a date\" is not a date in YYYY-MM-DD format")
+}
+
+// kin decodes an unquoted number as a float64, which is not a date either.
+func TestGetPathsDiff_InvalidSinceDateNumber(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/invalid_since_date/number.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{a}), 12345 is not a date in YYYY-MM-DD format")
 }

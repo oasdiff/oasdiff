@@ -3,6 +3,7 @@ package diff
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"maps"
 	"slices"
 
@@ -251,23 +252,23 @@ func sinceDateFrom(pathItem openapi3.PathItem, operation openapi3.Operation) (ci
 }
 
 func getSinceDate(extensions map[string]any) (civil.Date, bool, error) {
-	var since string
-	since, ok := extensions[SinceDateExtension].(string)
+	value, ok := extensions[SinceDateExtension]
 	if !ok {
-		sinceJson, ok := extensions[SinceDateExtension].(json.RawMessage)
-
-		if !ok {
-			return DefaultSinceDate, false, nil
-		}
-
-		if err := json.Unmarshal(sinceJson, &since); err != nil {
-			return civil.Date{}, false, errors.New("unmarshal failed")
+		return DefaultSinceDate, false, nil
+	}
+	if raw, ok := value.(json.RawMessage); ok {
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return civil.Date{}, false, fmt.Errorf("%s is not valid JSON: %w", raw, err)
 		}
 	}
 
+	since, ok := value.(string)
+	if !ok {
+		return civil.Date{}, false, fmt.Errorf("%v is not a date in YYYY-MM-DD format", value)
+	}
 	date, err := civil.ParseDate(since)
 	if err != nil {
-		return civil.Date{}, false, errors.New("failed to parse time")
+		return civil.Date{}, false, fmt.Errorf("%q is not a date in YYYY-MM-DD format", since)
 	}
 
 	return date, true, nil
