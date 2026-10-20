@@ -92,6 +92,15 @@ func derefCallback(ref *openapi3.CallbackRef) (*openapi3.Callback, error) {
 }
 
 func getCallbackDiff(config *Config, state *state, callback1, callback2 *openapi3.Callback) (*PathsDiff, error) {
+	// a pair reached again inside itself is already being compared, and its
+	// changes are reported there
+	pair := callbackPair{callback1, callback2}
+	if _, ok := state.callbacksInProgress[pair]; ok {
+		return nil, nil
+	}
+	state.callbacksInProgress[pair] = struct{}{}
+	defer delete(state.callbacksInProgress, pair)
+
 	return getPathsDiff(config, state, callBackToPaths(callback1), callBackToPaths(callback2))
 }
 
