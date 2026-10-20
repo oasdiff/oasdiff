@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"net"
 	"net/url"
 	"regexp"
 	"strings"
@@ -46,17 +45,9 @@ func normalizeURL(rawURL string) string {
 	}
 
 	u.Scheme = strings.ToLower(u.Scheme)
-	host, port := strings.ToLower(u.Hostname()), u.Port()
-	if u.Scheme == "https" && port == "443" || u.Scheme == "http" && port == "80" {
-		port = ""
-	}
-	switch {
-	case port != "":
-		u.Host = net.JoinHostPort(host, port)
-	case strings.Contains(host, ":"):
-		u.Host = "[" + host + "]"
-	default:
-		u.Host = host
+	u.Host = strings.ToLower(u.Host)
+	if port := u.Port(); u.Scheme == "https" && port == "443" || u.Scheme == "http" && port == "80" {
+		u.Host = strings.TrimSuffix(u.Host, ":"+port)
 	}
 	if u.Path == "" && (u.Scheme == "http" || u.Scheme == "https") {
 		u.Path = "/"
