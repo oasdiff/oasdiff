@@ -220,12 +220,21 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				}
 
 				if newSince == oldSince {
-					return nil, nil, fmt.Errorf("duplicate endpoint: %s %s in %s and %s %s in %s. You may add the %s extension to specify order", op, operationPaths[oldOperation], operationsSources[oldOperation], op, path, s.Url, SinceDateExtension)
+					return nil, nil, duplicateEndpointError(op, operationPaths[oldOperation], operationsSources[oldOperation], path, s.Url)
 				}
 			}
 		}
 	}
 	return result, &operationsSources, nil
+}
+
+func duplicateEndpointError(op, path1, source1, path2, source2 string) error {
+	hint := fmt.Sprintf("add the %s extension to specify order", SinceDateExtension)
+	// paths that differ only match when path parameter names are ignored
+	if path1 != path2 {
+		hint = "include path parameter names in endpoint matching with --include-path-params, or " + hint
+	}
+	return fmt.Errorf("duplicate endpoint: %s %s in %s and %s %s in %s. You may %s", op, path1, source1, op, path2, source2, hint)
 }
 
 // copyPathItem returns a shallow copy of the path item.
