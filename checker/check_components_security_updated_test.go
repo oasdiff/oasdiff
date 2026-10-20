@@ -3,6 +3,7 @@ package checker_test
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
@@ -68,7 +69,7 @@ func TestComponentSecurityTypeUpdated(t *testing.T) {
 	require.Equal(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityTypeUpdatedId,
 		Args:      []any{"petstore_auth", "oauth2", "http"},
-		Level:     checker.INFO,
+		Level:     checker.ERR,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
 	require.Equal(t, "the component security scheme `petstore_auth` type changed from `oauth2` to `http`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
@@ -200,4 +201,110 @@ func TestComponentSecurityOauthScopeUpdated(t *testing.T) {
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
 	require.Equal(t, "the component security scheme `petstore_auth` oauth scope `read:pets` was updated from `read your pets` to `grants access to pets (deprecated)`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+func checkWireFields(t *testing.T, modify func(schemes openapi3.SecuritySchemes)) checker.Changes {
+	t.Helper()
+	s1, err := open("../data/checker/component_security_wire_fields_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/component_security_wire_fields_base.yaml")
+	require.NoError(t, err)
+
+	modify(s2.Spec.Components.SecuritySchemes)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
+}
+
+// changing the apiKey name moves the key to a different header
+func TestComponentSecurityApiKeyNameUpdated(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["api_key"].Value.Name = "X-Token"
+	})
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ComponentChange{
+		Id:        checker.APIComponentsSecurityApiKeyNameUpdatedId,
+		Args:      []any{"api_key", "X-API-Key", "X-Token"},
+		Level:     checker.ERR,
+		Component: checker.ComponentSecuritySchemes,
+	}, errs[0])
+	require.Equal(t, "the component security scheme `api_key` api key name changed from `X-API-Key` to `X-Token`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// changing the apiKey location moves the key, e.g. from a header to the query
+func TestComponentSecurityApiKeyInUpdated(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["api_key"].Value.In = "query"
+	})
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ComponentChange{
+		Id:        checker.APIComponentsSecurityApiKeyInUpdatedId,
+		Args:      []any{"api_key", "header", "query"},
+		Level:     checker.ERR,
+		Component: checker.ComponentSecuritySchemes,
+	}, errs[0])
+	require.Equal(t, "the component security scheme `api_key` api key location changed from `header` to `query`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// changing the http scheme changes the Authorization header format
+func TestComponentSecurityHttpSchemeUpdated(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["basic_auth"].Value.Scheme = "bearer"
+	})
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ComponentChange{
+		Id:        checker.APIComponentsSecurityHttpSchemeUpdatedId,
+		Args:      []any{"basic_auth", "basic", "bearer"},
+		Level:     checker.ERR,
+		Component: checker.ComponentSecuritySchemes,
+	}, errs[0])
+	require.Equal(t, "the component security scheme `basic_auth` http scheme changed from `basic` to `bearer`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// HTTP authentication scheme names are case-insensitive (RFC 9110, section 11.1)
+func TestComponentSecurityHttpSchemeCaseChanged(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["basic_auth"].Value.Scheme = "Basic"
+	})
+	require.Empty(t, errs)
+}
+
+func TestComponentSecurityBearerFormatUpdated(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["bearer_auth"].Value.BearerFormat = "opaque"
+	})
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ComponentChange{
+		Id:        checker.APIComponentsSecurityBearerFormatUpdatedId,
+		Args:      []any{"bearer_auth", "JWT", "opaque"},
+		Level:     checker.INFO,
+		Component: checker.ComponentSecuritySchemes,
+	}, errs[0])
+	require.Equal(t, "the component security scheme `bearer_auth` bearer format changed from `JWT` to `opaque`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+func TestComponentSecurityOpenIdConnectUrlUpdated(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["oidc"].Value.OpenIdConnectUrl = "https://auth.example.com/.well-known/openid-configuration"
+	})
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.ComponentChange{
+		Id:        checker.APIComponentsSecurityOpenIdConnectUrlUpdatedId,
+		Args:      []any{"oidc", "https://example.com/.well-known/openid-configuration", "https://auth.example.com/.well-known/openid-configuration"},
+		Level:     checker.ERR,
+		Component: checker.ComponentSecuritySchemes,
+	}, errs[0])
+	require.Equal(t, "the component security scheme `oidc` OpenID Connect url changed from `https://example.com/.well-known/openid-configuration` to `https://auth.example.com/.well-known/openid-configuration`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// a type change replaces the whole authentication method, so the fields that
+// come and go with it are reported as the type change alone
+func TestComponentSecurityTypeUpdated_WireFieldsNotRepeated(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["api_key"].Value = &openapi3.SecurityScheme{Type: "http", Scheme: "bearer"}
+	})
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.APIComponentsSecurityTypeUpdatedId, errs[0].GetId())
+	require.Equal(t, checker.ERR, errs[0].GetLevel())
 }

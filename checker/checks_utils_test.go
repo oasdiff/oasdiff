@@ -3,6 +3,7 @@ package checker
 import (
 	"testing"
 
+	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,4 +39,10 @@ func TestInterfaceToString_Bool(t *testing.T) {
 func TestInterfaceToString_Fallback(t *testing.T) {
 	// A type not explicitly handled falls through to fmt.Sprintf("%v", arg)
 	require.Equal(t, "[1 2 3]", interfaceToString([]int{1, 2, 3}))
+}
+
+// A schema whose enum did not change has no enum values added or removed.
+func TestEnumValues_NoEnumChange(t *testing.T) {
+	require.Nil(t, deletedEnumValues(&diff.SchemaDiff{}))
+	require.Nil(t, addedEnumValues(&diff.SchemaDiff{}))
 }

@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -18,16 +20,16 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 			return
 		}
 
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
 		if p.paramDiff.SchemaDiff.EnumDiff != nil && p.paramDiff.SchemaDiff.EnumDiff.EnumAdded {
 			result = append(result, p.opInfo.NewApiChange(
 				RequestHeaderPropertyBecameEnumId,
 				[]any{p.name},
 				"",
-			).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 
@@ -35,12 +37,12 @@ func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSourc
 					return
 				}
 
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "enum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "enum")
 				result = append(result, p.opInfo.NewApiChange(
 					RequestHeaderPropertyBecameEnumId,
-					[]any{p.name, propertyFullName(propertyPath, propertyName)},
+					[]any{p.name, schemawalk.PropertyFullName(propertyPath, propertyName)},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(propBaseSource, propRevisionSource))
 			})
 	})
 	return result

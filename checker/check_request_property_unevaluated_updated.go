@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -21,7 +23,7 @@ func RequestPropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.UnevaluatedItemsDiff != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedItems")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedItems")
 			if info.schemaDiff.UnevaluatedItemsDiff.SchemaAdded {
 				result = append(result, info.newChange(RequestBodyUnevaluatedItemsAddedId, nil, "").
 					WithSources(nil, revisionSource))
@@ -33,7 +35,7 @@ func RequestPropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSou
 		}
 
 		if info.schemaDiff.UnevaluatedPropertiesDiff != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedProperties")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedProperties")
 			if info.schemaDiff.UnevaluatedPropertiesDiff.SchemaAdded {
 				result = append(result, info.newChange(RequestBodyUnevaluatedPropertiesAddedId, nil, "").
 					WithSources(nil, revisionSource))
@@ -45,10 +47,10 @@ func RequestPropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSou
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if p.propertyDiff.UnevaluatedItemsDiff != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedItems")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedItems")
 				if p.propertyDiff.UnevaluatedItemsDiff.SchemaAdded {
 					result = append(result, p.newChange(RequestPropertyUnevaluatedItemsAddedId, []any{propName}, "").
 						WithSources(nil, propRevisionSource))
@@ -60,7 +62,7 @@ func RequestPropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSou
 			}
 
 			if p.propertyDiff.UnevaluatedPropertiesDiff != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedProperties")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedProperties")
 				if p.propertyDiff.UnevaluatedPropertiesDiff.SchemaAdded {
 					result = append(result, p.newChange(RequestPropertyUnevaluatedPropertiesAddedId, []any{propName}, "").
 						WithSources(nil, propRevisionSource))

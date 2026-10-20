@@ -5,6 +5,7 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -41,7 +42,7 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 				for _, paramName := range paramItems {
 					param := operationItem.Base.Parameters.GetByInAndName(paramLocation, paramName)
 					if change, ok := checkParameterRemoval(opInfo, param); ok {
-						baseSource := parameterSource(operationsSources, operationItem.Base, param)
+						baseSource := location.ParameterSource(operationsSources, operationItem.Base, param)
 						result = append(result, change.WithSources(baseSource, nil))
 					}
 				}

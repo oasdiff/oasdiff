@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -22,7 +24,7 @@ func RequestPropertyPrefixItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if prefixItemsChangedContract(info.schemaDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "prefixItems")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "prefixItems")
 			if len(info.schemaDiff.PrefixItemsDiff.Added) > 0 {
 				result = append(result, info.newChange(RequestBodyPrefixItemsAddedId, []any{info.schemaDiff.PrefixItemsDiff.Added.String()}, PrefixItemsChangedCommentId).
 					WithSources(nil, revisionSource))
@@ -37,8 +39,8 @@ func RequestPropertyPrefixItemsUpdatedCheck(diffReport *diff.Diff, operationsSou
 			if !prefixItemsChangedContract(p.propertyDiff) {
 				return
 			}
-			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "prefixItems")
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "prefixItems")
 
 			if len(p.propertyDiff.PrefixItemsDiff.Added) > 0 {
 				result = append(result, p.newChange(RequestPropertyPrefixItemsAddedId, []any{p.propertyDiff.PrefixItemsDiff.Added.String(), propName}, PrefixItemsChangedCommentId).

@@ -70,7 +70,7 @@ A team migrating their spec from 3.0 to 3.1 has two problems oasdiff can help wi
 
 ### Converting a spec with `oasdiff upgrade`
 
-The `upgrade` subcommand rewrites a 3.0 spec into the latest 3.x canonical form (currently 3.2.0). The transforms are idempotent, so running it on an already-canonical spec just bumps the version string.
+The `upgrade` subcommand rewrites a 3.0 spec into the latest 3.x canonical form (currently 3.2.1). The transforms are idempotent, so running it on an already-canonical spec just bumps the version string.
 
 It targets the latest 3.x rather than 3.1 because of the compatibility guarantee above, so one migration covers the next few versions. See [Why the target is 3.2](https://www.oasdiff.com/docs/openapi-31-migration).
 

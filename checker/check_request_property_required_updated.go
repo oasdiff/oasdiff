@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -18,14 +20,17 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 			if schemaDiff.RequiredDiff == nil {
 				return
 			}
+			newChange := func(id string, args []any, comment string) ApiChange {
+				return info.newChange(id, args, comment).WithSchema(info.schemaDiff, schemaDiff, schemawalk.PropertyFullName(propertyPath, propertyName))
+			}
 			for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Added {
 				if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
 					continue
 				}
-				srcBase, srcRevision := SchemaAddedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
-				args := []any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))}
+				srcBase, srcRevision := location.SchemaAddedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
+				args := []any{schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))}
 				if schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.Default == nil {
-					result = append(result, info.newChange(RequestPropertyBecameRequiredId, args, "").
+					result = append(result, newChange(RequestPropertyBecameRequiredId, args, "").
 						WithSources(srcBase, srcRevision))
 				} else {
 					// The property has a default value, but a request that omits a
@@ -33,7 +38,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 					// default is a server-side fallback, not a validity rule). So this
 					// is breaking, same as the no-default case, with a comment
 					// explaining why the default does not make it safe.
-					result = append(result, info.newChange(RequestPropertyBecameRequiredWithDefaultId, args, RequiredRequestPropertyWithDefaultCommentId).
+					result = append(result, newChange(RequestPropertyBecameRequiredWithDefaultId, args, RequiredRequestPropertyWithDefaultCommentId).
 						WithSources(srcBase, srcRevision))
 				}
 			}
@@ -41,9 +46,9 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 				if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
 					continue
 				}
-				srcBase, srcRevision := SchemaDeletedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
-				args := []any{propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))}
-				result = append(result, info.newChange(RequestPropertyBecameOptionalId, args, "").
+				srcBase, srcRevision := location.SchemaDeletedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
+				args := []any{schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))}
+				result = append(result, newChange(RequestPropertyBecameOptionalId, args, "").
 					WithSources(srcBase, srcRevision))
 			}
 		}

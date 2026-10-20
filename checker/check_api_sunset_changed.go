@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -26,7 +27,7 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			opRevision := pathItem.Revision.GetOperation(operation)
 			opBase := pathItem.Base.GetOperation(operation)
-			baseSource, revisionSource := operationFieldSources(operationsSources, operationDiff, diff.SunsetExtension)
+			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationDiff, diff.SunsetExtension)
 
 			if !opRevision.Deprecated {
 				continue

@@ -66,7 +66,24 @@ func TestClaimedByTransition(t *testing.T) {
 	require.False(t, claimedByTransition(nullable, "no-such-rule"), "unregistered id")
 	require.False(t, claimedByTransition(&diff.SchemaDiff{}, RequestPropertyTypeChangedId), "no transition present")
 
-	// WithSchema is the construction-time entry point for the decision.
-	require.True(t, ApiChange{Id: RequestPropertyEnumValueRemovedId}.WithSchema(nullable).claimed)
-	require.False(t, ApiChange{Id: RequestPropertyEnumValueRemovedId}.WithSchema(nil).claimed)
+	// A change keeps the last node recorded for it, and is claimed from that
+	// node: a property's own diff replaces the body's it was first given.
+	change := ApiChange{Id: RequestPropertyEnumValueRemovedId}.WithSchema(nil, &diff.SchemaDiff{}, "").WithSchema(nil, nullable, "")
+	require.True(t, claimedByTransition(change.schema, change.Id))
+	change = ApiChange{Id: RequestPropertyEnumValueRemovedId}.WithSchema(nil, nullable, "").WithSchema(nil, nil, "")
+	require.False(t, claimedByTransition(change.schema, change.Id))
+}
+
+// The claimed change goes, and the others pass through.
+func TestDropClaimed(t *testing.T) {
+	nullable := &diff.SchemaDiff{NullableWrappingDiff: &diff.NullableWrappingDiff{NullabilityAdded: true}}
+	claimed := ApiChange{Id: RequestPropertyEnumValueRemovedId}.WithSchema(nil, nullable, "")
+	kept := ApiChange{Id: RequestParameterBecameNullableId}.WithSchema(nil, nullable, "")
+	component := ComponentChange{Id: APIComponentsSecurityComponentOauthUrlUpdatedId}
+
+	result := dropClaimed(Changes{claimed, kept, component})
+
+	require.Len(t, result, 2)
+	require.Equal(t, RequestParameterBecameNullableId, result[0].GetId())
+	require.Equal(t, component, result[1])
 }

@@ -1,0 +1,31 @@
+openapi: 3.0.3
+info:
+  title: Security Scheme Wire Fields
+  version: 1.0.0
+security:
+  - api_key: []
+  - basic_auth: []
+  - bearer_auth: []
+  - oidc: []
+paths:
+  /pets:
+    get:
+      responses:
+        "200":
+          description: OK
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    basic_auth:
+      type: http
+      scheme: basic
+    bearer_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    oidc:
+      type: openIdConnect
+      openIdConnectUrl: https://example.com/.well-known/openid-configuration

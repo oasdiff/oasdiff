@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -23,7 +25,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minDiff := info.schemaDiff.MinDiff; minDiff != nil &&
 			minDiff.From != nil && minDiff.To != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			if isIncreasedValue(minDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMinIncreasedId,
@@ -41,7 +43,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 		if exMinDiff := info.schemaDiff.ExclusiveMinDiff; exMinDiff != nil &&
 			exMinDiff.From != nil && exMinDiff.To != nil &&
 			(isIncreasedValue(exMinDiff) || isDecreasedValue(exMinDiff)) {
-			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
+			exBaseSource, exRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			if isIncreasedValue(exMinDiff) {
 				result = append(result, info.newChange(
 					RequestBodyExclusiveMinIncreasedId,
@@ -58,11 +60,11 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if minDiff := p.propertyDiff.MinDiff; minDiff != nil &&
 				minDiff.From != nil && minDiff.To != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
 				if isIncreasedValue(minDiff) {
 					id := RequestPropertyMinIncreasedId
 					if p.propertyDiff.Revision.ReadOnly {
@@ -85,7 +87,7 @@ func RequestPropertyMinIncreasedCheck(diffReport *diff.Diff, operationsSources *
 			if exMinDiff := p.propertyDiff.ExclusiveMinDiff; exMinDiff != nil &&
 				exMinDiff.From != nil && exMinDiff.To != nil &&
 				(isIncreasedValue(exMinDiff) || isDecreasedValue(exMinDiff)) {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				if isIncreasedValue(exMinDiff) {
 					id := RequestPropertyExclusiveMinIncreasedId
 					if p.propertyDiff.Revision.ReadOnly {

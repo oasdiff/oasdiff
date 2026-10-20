@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"strconv"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -40,7 +42,7 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if multipleOfDiff := info.schemaDiff.MultipleOfDiff; multipleOfDiff != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "multipleOf")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "multipleOf")
 			switch {
 			case multipleOfDiff.From == nil:
 				result = append(result, info.newChange(
@@ -75,8 +77,8 @@ func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSour
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "multipleOf")
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "multipleOf")
 			switch {
 			case multipleOfDiff.From == nil:
 				result = append(result, p.newChange(

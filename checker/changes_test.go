@@ -142,3 +142,13 @@ func TestCompareChanges_Equal(t *testing.T) {
 	result := checker.CompareChanges(a, b)
 	require.Equal(t, 0, result)
 }
+
+// Two changes that differ only in their media type are different changes, so
+// they must not sort as equal: their order would then follow map iteration.
+func TestCompareChanges_Details(t *testing.T) {
+	json := checker.ApiChange{Id: "change_id", Operation: "POST", Path: "/pets", Details: "(media type: application/json)"}
+	xml := checker.ApiChange{Id: "change_id", Operation: "POST", Path: "/pets", Details: "(media type: application/xml)"}
+
+	require.Negative(t, checker.CompareChanges(json, xml))
+	require.Positive(t, checker.CompareChanges(xml, json))
+}

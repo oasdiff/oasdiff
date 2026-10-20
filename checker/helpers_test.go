@@ -183,7 +183,7 @@ func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checke
 // normalizeApiChange clears fields that are not part of a change's test identity.
 func normalizeApiChange(c checker.ApiChange) checker.ApiChange {
 	c.Level = 0 // derived from the id via the rule registry, not part of test identity
-	return c
+	return c.WithoutSchemaDiffs()
 }
 
 // singleChange compares the two specs and asserts they produce exactly the one
@@ -213,4 +213,51 @@ func declaredLevel(t *testing.T, id string) checker.Level {
 	}
 	require.FailNowf(t, "unknown rule", "%s", id)
 	return checker.INVALID
+}
+
+const (
+	enumRemovedEntirelyBase     = "../data/checker/enum_removed_entirely_base.yaml"
+	enumRemovedEntirelyRevision = "../data/checker/enum_removed_entirely_revision.yaml"
+)
+
+// checkChanges runs a single check over the two specs and returns every change it reports.
+func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
+	t.Helper()
+	s1, err := open(base)
+	require.NoError(t, err)
+	s2, err := open(revision)
+	require.NoError(t, err)
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(check, opts...), d, osm, checker.INFO)
+}
+
+type securityFinding struct {
+	Id    string
+	Level checker.Level
+	Path  string
+}
+
+// securityFindings runs APISecurityUpdatedCheck over two api_security_anonymous_ fixtures.
+func securityFindings(t *testing.T, base, revision string, opts ...checker.Option) []securityFinding {
+	t.Helper()
+	changes := checkChanges(t, checker.APISecurityUpdatedCheck,
+		"../data/checker/api_security_anonymous_"+base+".yaml",
+		"../data/checker/api_security_anonymous_"+revision+".yaml",
+		opts...)
+
+	result := []securityFinding{}
+	for _, change := range changes {
+		result = append(result, securityFinding{Id: change.GetId(), Level: change.GetLevel(), Path: change.GetPath()})
+	}
+	return result
+}
+
+func securityFindingIds(t *testing.T, base, revision string, opts ...checker.Option) []string {
+	t.Helper()
+	result := []string{}
+	for _, finding := range securityFindings(t, base, revision, opts...) {
+		result = append(result, finding.Id)
+	}
+	return result
 }

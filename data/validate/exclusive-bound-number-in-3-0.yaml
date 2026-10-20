@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+paths: {}
+components:
+  schemas:
+    Age:
+      type: integer
+      exclusiveMinimum: 0

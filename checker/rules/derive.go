@@ -39,6 +39,11 @@ func applyGuards(effect Effect, direction Direction, guards []Guard) (Effect, Di
 		case GuardSanctioned:
 			// the deprecation contract was honored
 			effect = EffectNone
+		case GuardRequiredInRequests:
+			// the property was required in requests before the change
+			if direction == DirectionRequest {
+				effect = EffectNone
+			}
 		case GuardNegotiated:
 			// the client chooses or relies on the variant
 			direction = DirectionRequest

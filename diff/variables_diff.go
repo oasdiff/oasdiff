@@ -49,26 +49,17 @@ func getVariablesDiff(config *Config, variables1, variables2 map[string]*openapi
 func getVariablesDiffInternal(config *Config, variables1, variables2 map[string]*openapi3.ServerVariable) (*VariablesDiff, error) {
 	result := newVariablesDiff()
 
-	for name1, var1 := range variables1 {
-		var2, ok := variables2[name1]
-		if !ok {
-			result.Deleted = append(result.Deleted, name1)
-			continue
-		}
+	added, deleted, common := keysDiff(variables1, variables2)
+	result.Added = added
+	result.Deleted = deleted
 
-		diff, err := getVariableDiff(config, var1, var2)
+	for _, name := range common {
+		diff, err := getVariableDiff(config, variables1[name], variables2[name])
 		if err != nil {
 			return nil, err
 		}
 		if !diff.Empty() {
-			result.Modified[name1] = diff
-		}
-	}
-
-	for name2 := range variables2 {
-		_, ok := variables1[name2]
-		if !ok {
-			result.Added = append(result.Added, name2)
+			result.Modified[name] = diff
 		}
 	}
 

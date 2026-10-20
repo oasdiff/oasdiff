@@ -1,0 +1,23 @@
+openapi: 3.1.0
+info:
+  title: renamed component
+  version: "1"
+paths:
+  /example:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/New'
+components:
+  schemas:
+    New:
+      type: object
+      properties:
+        id:
+          type: string
+        extra:
+          type: string

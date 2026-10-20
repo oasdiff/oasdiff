@@ -50,23 +50,17 @@ func getRequestBodiesDiffInternal(config *Config, state *state, requestBodies1, 
 
 	result := newRequestBodiesDiff()
 
-	for requestBodyValue1, requestBodyRef1 := range requestBodies1 {
-		if requestBodyValue2, ok := requestBodies2[requestBodyValue1]; ok {
-			diff, err := getRequestBodyDiff(config, state, requestBodyRef1, requestBodyValue2)
-			if err != nil {
-				return nil, err
-			}
-			if !diff.Empty() {
-				result.Modified[requestBodyValue1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, requestBodyValue1)
-		}
-	}
+	added, deleted, common := keysDiff(requestBodies1, requestBodies2)
+	result.Added = added
+	result.Deleted = deleted
 
-	for requestBodyValue2 := range requestBodies2 {
-		if _, ok := requestBodies1[requestBodyValue2]; !ok {
-			result.Added = append(result.Added, requestBodyValue2)
+	for _, name := range common {
+		diff, err := getRequestBodyDiff(config, state, requestBodies1[name], requestBodies2[name])
+		if err != nil {
+			return nil, err
+		}
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
 

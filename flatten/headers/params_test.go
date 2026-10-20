@@ -90,3 +90,21 @@ func TestLowercaseInResponse(t *testing.T) {
 
 	require.Contains(t, spec.Paths.Find("/path").GetOperation("GET").Responses.Default().Value.Headers, "x-header")
 }
+
+func TestLowercaseSecuritySchemeHeader(t *testing.T) {
+	spec := &openapi3.T{
+		Components: &openapi3.Components{
+			SecuritySchemes: openapi3.SecuritySchemes{
+				"header": {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "header", Name: "X-API-Key"}},
+				"query":  {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "query", Name: "Api-Key"}},
+				"cookie": {Value: &openapi3.SecurityScheme{Type: "apiKey", In: "cookie", Name: "Session-Id"}},
+			},
+		},
+	}
+
+	headers.Lowercase(spec)
+
+	require.Equal(t, "x-api-key", spec.Components.SecuritySchemes["header"].Value.Name)
+	require.Equal(t, "Api-Key", spec.Components.SecuritySchemes["query"].Value.Name)
+	require.Equal(t, "Session-Id", spec.Components.SecuritySchemes["cookie"].Value.Name)
+}

@@ -58,7 +58,14 @@ request-body-became-required: тело запроса стало обязате�
 request-body-became-optional: тело запроса стало необязательным
 request-body-became-enum: тело запроса было ограничено списком значений перечисления
 request-body-enum-value-removed: значение перечисления тела запроса удалено %s
+request-body-enum-value-added: "значение перечисления тела запроса добавлено %s"
+request-body-became-not-enum: удалено ограничение enum тела запроса
 response-mediatype-enum-value-removed: значение перечисления схемы ответа %s удалено %s
+response-mediatype-became-enum: "схема ответа %s для статуса ответа %s была ограничена списком значений перечисления"
+response-mediatype-enum-value-added-comment: "Сервер теперь может вернуть значение, которое исключал прежний контракт, поэтому клиент, написанный по нему, может не обработать ответ. Если набор значений предполагает расширение, объявите его через x-extensible-enum."
+response-mediatype-enum-value-added: "добавлено новое enum значение %s в схему ответа %s для ответа со статусом %s"
+response-mediatype-became-not-enum: удалено ограничение enum схемы ответа %s для статуса ответа %s
+response-mediatype-became-not-enum-comment: Сервер теперь может вернуть любое значение типа схемы, включая значения, которые исключал прежний enum, поэтому клиент, написанный по нему, может не обработать ответ.
 request-header-property-became-required: в заголовке запроса %s поле %s стало обязательным
 request-header-property-became-enum: свойство %s заголовка запроса %s было ограничено списком значений перечисления
 request-parameter-became-required: ранее необязательный %s параметр запроса %s стал обязательным
@@ -70,9 +77,12 @@ request-parameter-property-became-nullable: свойство %s параметр
 request-parameter-property-became-not-nullable: свойство %s параметра запроса %s %s стало необнуляемым
 request-parameter-enum-value-removed: удалено значение enum %s у %s параметра запроса %s
 request-parameter-enum-value-added: добавлено значение enum %s у %s параметра запроса %s
+request-parameter-became-not-enum: удалено ограничение enum у %s параметра запроса %s
 request-parameter-property-enum-value-removed: удалено значение enum %s из свойства %s %s параметра запроса %s
 request-parameter-property-enum-value-added: добавлено значение enum %s в свойство %s %s параметра запроса %s
+request-parameter-property-became-not-enum: удалено ограничение enum из свойства %s %s параметра запроса %s
 pattern-changed-warn-comment: Это предупреждение, потому что сложно автоматически проанализировать, является ли новый шаблон надмножеством предыдущего шаблона (например, изменен с '[0-9]+' на '[0-9]*').
+request-property-became-read-only-comment: "Это предупреждение, потому что свойство только для чтения не должно отправляться в запросе, а спецификация оставляет серверу решать, игнорировать его или отклонить запрос. Клиенты, которые его отправляют, могут получить отказ или обнаружить, что отправленное значение больше не используется."
 request-parameter-x-extensible-enum-value-removed: удалено из x-extensible-enum значение %s у %s параметра запроса %s
 pattern-added-error-comment: Это критическое изменение, потому что добавление ограничения шаблона к ранее неограниченному параметру отклонит значения, которые ранее принимались, сломав существующих клиентов
 request-parameter-max-decreased: в %s параметре запроса %s, max уменьшен с %s до %s
@@ -119,6 +129,7 @@ request-property-became-enum: свойство запроса %s было огр
 request-property-enum-value-removed: удалено enum значение %s у поля запроса %s
 request-read-only-property-enum-value-removed: удалено enum значение %s из поля запроса только для чтения %s
 request-property-enum-value-added: добавлено enum значение %s у поля запроса %s
+request-property-became-not-enum: удалено ограничение enum у поля запроса %s
 request-body-min-length-increased: минимальная длина тела запроса была увеличена с %s до %s
 request-property-min-length-increased: минимальная длина свойства запроса %s была увеличена с %s до %s
 request-body-min-length-decreased: минимальная длина тела запроса была уменьшена с %s до %s
@@ -144,8 +155,6 @@ request-body-min-items-increased: значение minItems у тела запр
 request-property-min-items-increased: значение minItems у поля запроса %s увеличено до %s
 request-body-min-decreased: минимум тела запроса был уменьшен с %s до %s
 request-property-min-decreased: минимум свойства запроса %s был уменьшен с %s до %s
-request-body-min-items-decreased: минимальное количество элементов тела запроса было уменьшено с %s до %s
-request-property-min-items-decreased: минимальное количество элементов свойства запроса %s было уменьшено с %s до %s
 request-body-min-items-set: задано значение minItems у тела запроса в %s
 request-property-min-items-set: у поля запроса %s задано значение minItems в %s
 request-body-min-set: задано значение min у тела запроса в %s
@@ -192,6 +201,9 @@ response-body-became-not-nullable: тело ответа стало необну
 response-property-enum-value-added: добавлено новое enum значение %s в поле ответа %s для ответа со статусом %s
 response-property-enum-value-added-comment: Сервер теперь может вернуть значение, которое исключал прежний контракт, поэтому клиент, написанный по нему, может не обработать ответ. Если набор значений предполагает расширение, объявите его через x-extensible-enum.
 response-property-enum-value-removed: удалено значение перечисления %s из свойства ответа %s для статуса ответа %s.
+response-property-became-not-enum: удалено ограничение enum из свойства ответа %s для статуса ответа %s
+response-property-became-not-enum-comment: Сервер теперь может вернуть любое значение типа свойства, включая значения, которые исключал прежний enum, поэтому клиент, написанный по нему, может не обработать ответ.
+response-property-became-enum: свойство ответа %s для статуса ответа %s было ограничено списком значений перечисления
 response-body-max-length-increased: у тела ответа maxLength увеличен с %s до %s
 response-property-max-length-increased: у поля ответа %s maxLength увеличен с %s до %s для ответа со статусом %s
 response-body-max-length-unset: у тела ответа maxLength был удалён, предыдущее значение - %s
@@ -245,6 +257,10 @@ api-security-updated: схема безопасности точки досту�
 api-global-security-added: схема безопасности %s была добавлена к API
 api-global-security-removed: схема безопасности %s была удалена из API
 api-global-security-scope-removed: из глобальной схемы безопасности %s была удалена область безопасности %s
+api-security-anonymous-access-removed: эндпоинт больше не допускает анонимный доступ и теперь принимает только %s
+api-security-anonymous-access-added: эндпоинт теперь допускает анонимный доступ
+api-security-inherited-comment: "Этот эндпоинт наследует требования безопасности верхнего уровня API."
+api-global-security-not-inherited-comment: "Ни один эндпоинт не наследует требования безопасности верхнего уровня API, поэтому это изменение не затрагивает клиентов."
 api-global-security-scope-added: к глобальной схеме безопасности %s была добавлена область безопасности %s
 api-security-scope-removed: из схемы безопасности эндпоинта %s была удалена область безопасности %s
 api-security-scope-added: к схеме безопасности эндпоинта %s была добавлена область безопасности %s
@@ -256,6 +272,11 @@ api-security-component-removed: компонент схемы безопасно
 api-security-component-oauth-scope-added: добавлено разрешение OAuth %s для компонента схемы безопасности %s
 api-security-component-oauth-scope-removed: удалено разрешение OAuth %s для компонента схемы безопасности %s
 api-security-component-oauth-scope-changed: разрешение OAuth %s для компонента схемы безопасности %s было обновлено с %s на %s
+api-security-component-api-key-name-changed: имя API-ключа компонента схемы безопасности %s было изменено с %s на %s
+api-security-component-api-key-in-changed: расположение API-ключа компонента схемы безопасности %s было изменено с %s на %s
+api-security-component-http-scheme-changed: http схема компонента схемы безопасности %s была изменена с %s на %s
+api-security-component-bearer-format-changed: формат bearer компонента схемы безопасности %s был изменен с %s на %s
+api-security-component-openid-connect-url-changed: URL OpenID Connect компонента схемы безопасности %s был изменен с %s на %s
 response-optional-property-added: добавлено необязательное свойство %s в ответе со статусом %s
 response-optional-write-only-property-added: добавлено необязательное свойство только для записи %s в ответе со статусом %s
 response-optional-write-only-property-removed: удалено необязательное свойство только для записи %s из ответа со статусом %s
@@ -318,6 +339,7 @@ response-body-all-of-removed: удалён %s из списка `allOf` тела
 all-of-not-flattened-comment: "Ветви `allOf` сравнивались по отдельности, поэтому другая ветвь может по-прежнему гарантировать то, что утрачено в этой. Запустите с --flatten-allof, чтобы объединить ветви и сравнить то, что они описывают вместе."
 read-only-comment: "Свойство доступно только для чтения, поэтому оно не встречается в запросах, и это изменение не может сделать запрос недействительным."
 write-only-comment: "Свойство доступно только для записи, поэтому оно не встречается в ответах, и это изменение не может сделать ответ недействительным."
+required-in-requests-comment: "В OpenAPI 3.1 и более поздних версиях required применяется к свойству только для чтения и в запросах, поэтому клиенты уже его отправляют, и это изменение не может сделать запрос недействительным."
 response-property-all-of-added: добавлено %s в список `allOf` свойства ответа %s для статуса ответа %s
 response-property-all-of-removed: удалён %s из списка `allOf` свойства ответа %s для статуса ответа %s
 response-body-discriminator-added: добавлен дискриминатор ответа для статуса ответа %s
@@ -346,6 +368,7 @@ request-body-discriminator-mapping-changed: значение для ключа %
 request-property-discriminator-mapping-changed: значение для ключа дискриминатора %s изменено с %s на %s для свойства запроса %s
 request-required-property-became-read-only: обязательное поле запроса %s стало только для чтения
 request-required-property-became-not-read-only: обязательное поле запроса %s перестало быть только для чтения
+request-required-property-became-not-read-only-in-openapi-31: обязательное поле запроса %s перестало быть только для чтения
 request-optional-property-became-write-only: необязательное поле запроса %s стало только для записи
 request-optional-property-became-read-only: необязательное поле запроса %s стало только для чтения
 request-optional-property-became-not-write-only: необязательное поле запроса %s перестало быть только для записи
@@ -373,6 +396,8 @@ api-global-security-added-description: схема безопасности до�
 api-global-security-removed-description: схема безопасности удалена из security
 api-global-security-scope-added-description: разрешение добавлено к схеме безопасности в security
 api-global-security-scope-removed-description: разрешение удалено из схемы безопасности в security
+api-security-anonymous-access-removed-description: безопасность эндпоинта изменена, неаутентифицированные запросы отклоняются
+api-security-anonymous-access-added-description: безопасность эндпоинта изменена, неаутентифицированные запросы принимаются
 api-invalid-stability-level-description: неверный уровень стабильности
 api-operation-id-added-description: идентификатор операции добавлен к эндпоинту
 api-operation-id-removed-description: идентификатор операции удален из эндпоинта
@@ -384,11 +409,16 @@ api-removed-without-deprecation-description: эндпоинт удален бе�
 api-schema-removed-description: схема удалена из components/schemas
 api-security-added-description: требования безопасности добавлены к эндпоинту
 api-security-component-added-description: схема безопасности добавлена в components/securitySchemes
+api-security-component-api-key-in-changed-description: расположение (in) API-ключа изменено в components/securitySchemes
+api-security-component-api-key-name-changed-description: имя API-ключа изменено в components/securitySchemes
+api-security-component-bearer-format-changed-description: формат bearer изменен в components/securitySchemes
+api-security-component-http-scheme-changed-description: схема http-аутентификации изменена в components/securitySchemes
 api-security-component-oauth-scope-added-description: разрешение добавлено к OAuth потоку в components/securitySchemes
 api-security-component-oauth-scope-changed-description: разрешение изменено в OAuth потоке в components/securitySchemes
 api-security-component-oauth-scope-removed-description: разрешение удалено из OAuth потока в components/securitySchemes
 api-security-component-oauth-token-url-changed-description: URL токена изменен в OAuth потоке в components/securitySchemes
 api-security-component-oauth-url-changed-description: URL аутентификации изменен в OAuth потоке в components/securitySchemes
+api-security-component-openid-connect-url-changed-description: URL OpenID Connect изменен в components/securitySchemes
 api-security-component-removed-description: схема безопасности удалена в components/securitySchemes
 api-security-component-type-changed-description: тип схемы безопасности изменен в components/securitySchemes
 api-security-removed-description: требования безопасности удалены из эндпоинта
@@ -442,6 +472,8 @@ request-body-discriminator-mapping-deleted-description: удалено сопо�
 request-body-discriminator-property-name-changed-description: изменено имя свойства дискриминатора тела запроса
 request-body-discriminator-removed-description: удален дискриминатор тела запроса
 request-body-enum-value-removed-description: удалено enum значение тела запроса
+request-body-enum-value-added-description: "добавлено enum значение тела запроса"
+request-body-became-not-enum-description: удалено enum тела запроса
 request-body-max-decreased-description: уменьшено максимальное значение тела запроса
 request-body-max-increased-description: увеличено максимальное значение тела запроса
 request-body-max-length-decreased-description: уменьшена максимальная длина тела запроса
@@ -488,8 +520,10 @@ request-parameter-default-value-removed-description: удалено значен
 request-parameter-deprecated-sunset-missing: "%s параметр запроса %s объявлен устаревшим без даты прекращения действия"
 request-parameter-deprecated: "%s параметр запроса %s объявлен устаревшим"
 request-parameter-enum-value-added-description: добавлено enum значение параметра запроса
+request-parameter-became-not-enum-description: удалено enum параметра запроса
 request-parameter-enum-value-removed-description: удалено enum значение параметра запроса
 request-parameter-property-enum-value-added-description: добавлено enum значение свойства параметра запроса
+request-parameter-property-became-not-enum-description: удалено enum свойства параметра запроса
 request-parameter-property-enum-value-removed-description: удалено enum значение свойства параметра запроса
 request-parameter-max-decreased-description: уменьшено максимальное значение параметра запроса
 request-parameter-max-increased-description: увеличено максимальное значение параметра запроса
@@ -546,6 +580,7 @@ request-property-discriminator-mapping-deleted-description: удалено со�
 request-property-discriminator-property-name-changed-description: изменено имя свойства дискриминатора свойства запроса
 request-property-discriminator-removed-description: удален дискриминатор свойства запроса
 request-property-enum-value-added-description: добавлено enum значение свойства запроса
+request-property-became-not-enum-description: удалено enum свойства запроса
 request-property-enum-value-removed-description: удалено enum значение свойства запроса
 request-property-max-decreased-description: уменьшено максимальное значение свойства запроса
 request-property-max-increased-description: увеличено максимальное значение свойства запроса
@@ -576,6 +611,7 @@ request-read-only-property-max-decreased-description: уменьшено мак�
 request-read-only-property-max-length-decreased-description: уменьшена максимальная длина свойства запроса только для чтения
 request-read-only-property-min-increased-description: увеличено минимальное значение свойства запроса только для чтения
 request-required-property-became-not-read-only-description: обязательное свойство запроса перестало быть только для чтения
+request-required-property-became-not-read-only-in-openapi-31-description: обязательное свойство запроса перестало быть только для чтения в OpenAPI 3.1 или новее
 request-required-property-became-not-write-only-description: обязательное свойство запроса перестало быть только для записи
 request-required-property-became-read-only-description: обязательное свойство запроса стало только для чтения
 request-required-property-became-write-only-description: обязательное свойство запроса стало только для записи
@@ -620,6 +656,9 @@ response-media-type-name-generalized: медиа-тип %s изменен на �
 response-media-type-name-specialized: медиа-тип %s изменен на более специфичный медиа-тип %s для ответа со статусом %s
 response-media-type-removed-description: удален медиа-тип ответа
 response-mediatype-enum-value-removed-description: удалено enum значение медиа-типа ответа
+response-mediatype-became-enum-description: "медиа-тип ответа ограничен enum"
+response-mediatype-enum-value-added-description: "добавлено enum значение медиа-типа ответа"
+response-mediatype-became-not-enum-description: удалено enum медиа-типа ответа
 response-non-success-status-added-description: добавлен статус неуспешного ответа
 response-non-success-status-removed-description: удален статус неуспешного ответа
 response-optional-property-added-description: добавлено необязательное свойство ответа
@@ -648,6 +687,8 @@ response-property-discriminator-property-name-changed-description: измене�
 response-property-discriminator-removed-description: удален дискриминатор свойства ответа
 response-property-enum-value-added-description: добавлено enum значение свойства ответа
 response-property-enum-value-removed-description: удалено enum значение свойства ответа
+response-property-became-not-enum-description: удалено enum свойства ответа
+response-property-became-enum-description: свойство ответа ограничено enum
 response-property-max-increased-description: увеличено максимальное значение свойства ответа
 response-property-max-length-increased-description: увеличена максимальная длина свойства ответа
 response-property-max-length-unset-description: удалена максимальная длина свойства ответа
@@ -1213,12 +1254,16 @@ request-body-min-contains-set: у тела запроса задано знач�
 request-body-min-contains-set-description: установлено значение minContains тела запроса
 request-body-min-contains-unset: значение minContains у тела запроса удалено, предыдущее значение - %s
 request-body-min-contains-unset-description: удалено значение minContains тела запроса
+request-body-min-items-decreased: значение minItems у тела запроса уменьшено с %s до %s
+request-body-min-items-decreased-description: уменьшено значение minItems тела запроса
 request-body-min-items-unset: значение minItems у тела запроса удалено, предыдущее значение - %s
 request-body-min-items-unset-description: удалено значение minItems тела запроса
 request-body-min-length-set: у тела запроса задано значение minLength в %s
 request-body-min-length-set-description: установлено значение minLength тела запроса
 request-body-min-length-unset: значение minLength у тела запроса удалено, предыдущее значение - %s
 request-body-min-length-unset-description: удалено значение minLength тела запроса
+request-body-min-properties-decreased: значение minProperties у тела запроса уменьшено с %s до %s
+request-body-min-properties-decreased-description: уменьшено значение minProperties тела запроса
 request-body-min-properties-set: у тела запроса задано значение minProperties в %s
 request-body-min-properties-set-description: установлено значение minProperties тела запроса
 request-body-min-properties-unset: значение minProperties у тела запроса удалено, предыдущее значение - %s
@@ -1229,6 +1274,10 @@ request-parameter-exclusive-max-unset: значение exclusiveMaximum в %s �
 request-parameter-exclusive-max-unset-description: удалено значение exclusiveMaximum параметра запроса
 request-parameter-exclusive-min-unset: значение exclusiveMinimum в %s параметре запроса %s удалено, предыдущее значение - %s
 request-parameter-exclusive-min-unset-description: удалено значение exclusiveMinimum параметра запроса
+request-parameter-max-contains-decreased: значение maxContains в %s параметре запроса %s уменьшено с %s до %s
+request-parameter-max-contains-decreased-description: уменьшено значение maxContains параметра запроса
+request-parameter-max-contains-increased: значение maxContains в %s параметре запроса %s увеличено с %s до %s
+request-parameter-max-contains-increased-description: увеличено значение maxContains параметра запроса
 request-parameter-max-contains-set: в %s параметре запроса %s задано значение maxContains в %s
 request-parameter-max-contains-set-description: установлено значение maxContains параметра запроса
 request-parameter-max-contains-unset: значение maxContains в %s параметре запроса %s удалено, предыдущее значение - %s
@@ -1239,12 +1288,20 @@ request-parameter-max-items-unset: значение maxItems в %s параме�
 request-parameter-max-items-unset-description: удалено значение maxItems параметра запроса
 request-parameter-max-length-unset: значение maxLength в %s параметре запроса %s удалено, предыдущее значение - %s
 request-parameter-max-length-unset-description: удалено значение maxLength параметра запроса
+request-parameter-max-properties-decreased: значение maxProperties в %s параметре запроса %s уменьшено с %s до %s
+request-parameter-max-properties-decreased-description: уменьшено значение maxProperties параметра запроса
+request-parameter-max-properties-increased: значение maxProperties в %s параметре запроса %s увеличено с %s до %s
+request-parameter-max-properties-increased-description: увеличено значение maxProperties параметра запроса
 request-parameter-max-properties-set: в %s параметре запроса %s задано значение maxProperties в %s
 request-parameter-max-properties-set-description: установлено значение maxProperties параметра запроса
 request-parameter-max-properties-unset: значение maxProperties в %s параметре запроса %s удалено, предыдущее значение - %s
 request-parameter-max-properties-unset-description: удалено значение maxProperties параметра запроса
 request-parameter-max-unset: значение max в %s параметре запроса %s удалено, предыдущее значение - %s
 request-parameter-max-unset-description: удалено значение max параметра запроса
+request-parameter-min-contains-decreased: значение minContains в %s параметре запроса %s уменьшено с %s до %s
+request-parameter-min-contains-decreased-description: уменьшено значение minContains параметра запроса
+request-parameter-min-contains-increased: значение minContains в %s параметре запроса %s увеличено с %s до %s
+request-parameter-min-contains-increased-description: увеличено значение minContains параметра запроса
 request-parameter-min-contains-set: в %s параметре запроса %s задано значение minContains в %s
 request-parameter-min-contains-set-description: установлено значение minContains параметра запроса
 request-parameter-min-contains-unset: значение minContains в %s параметре запроса %s удалено, предыдущее значение - %s
@@ -1255,6 +1312,10 @@ request-parameter-min-length-set: в %s параметре запроса %s з�
 request-parameter-min-length-set-description: установлено значение minLength параметра запроса
 request-parameter-min-length-unset: значение minLength в %s параметре запроса %s удалено, предыдущее значение - %s
 request-parameter-min-length-unset-description: удалено значение minLength параметра запроса
+request-parameter-min-properties-decreased: значение minProperties в %s параметре запроса %s уменьшено с %s до %s
+request-parameter-min-properties-decreased-description: уменьшено значение minProperties параметра запроса
+request-parameter-min-properties-increased: значение minProperties в %s параметре запроса %s увеличено с %s до %s
+request-parameter-min-properties-increased-description: увеличено значение minProperties параметра запроса
 request-parameter-min-properties-set: в %s параметре запроса %s задано значение minProperties в %s
 request-parameter-min-properties-set-description: установлено значение minProperties параметра запроса
 request-parameter-min-properties-unset: значение minProperties в %s параметре запроса %s удалено, предыдущее значение - %s
@@ -1285,22 +1346,30 @@ request-property-min-contains-set: у поля запроса %s задано з
 request-property-min-contains-set-description: установлено значение minContains поля запроса
 request-property-min-contains-unset: значение minContains у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-contains-unset-description: удалено значение minContains поля запроса
+request-property-min-items-decreased: значение minItems у поля запроса %s уменьшено с %s до %s
+request-property-min-items-decreased-description: уменьшено значение minItems поля запроса
 request-property-min-items-unset: значение minItems у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-items-unset-description: удалено значение minItems поля запроса
 request-property-min-length-set: у поля запроса %s задано значение minLength в %s
 request-property-min-length-set-description: установлено значение minLength поля запроса
 request-property-min-length-unset: значение minLength у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-length-unset-description: удалено значение minLength поля запроса
+request-property-min-properties-decreased: значение minProperties у поля запроса %s уменьшено с %s до %s
+request-property-min-properties-decreased-description: уменьшено значение minProperties поля запроса
 request-property-min-properties-set: у поля запроса %s задано значение minProperties в %s
 request-property-min-properties-set-description: установлено значение minProperties поля запроса
 request-property-min-properties-unset: значение minProperties у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-properties-unset-description: удалено значение minProperties поля запроса
 request-property-min-unset: значение min у поля запроса %s удалено, предыдущее значение - %s
 request-property-min-unset-description: удалено значение min поля запроса
+response-body-exclusive-max-decreased: значение exclusiveMaximum у тела ответа уменьшено с %s до %s
+response-body-exclusive-max-decreased-description: уменьшено значение exclusiveMaximum тела ответа
 response-body-exclusive-max-set: у тела ответа задано значение exclusiveMaximum в %s
 response-body-exclusive-max-set-description: установлено значение exclusiveMaximum тела ответа
 response-body-exclusive-max-unset: значение exclusiveMaximum у тела ответа удалено, предыдущее значение - %s
 response-body-exclusive-max-unset-description: удалено значение exclusiveMaximum тела ответа
+response-body-exclusive-min-increased: значение exclusiveMinimum у тела ответа увеличено с %s до %s
+response-body-exclusive-min-increased-description: увеличено значение exclusiveMinimum тела ответа
 response-body-exclusive-min-set: у тела ответа задано значение exclusiveMinimum в %s
 response-body-exclusive-min-set-description: установлено значение exclusiveMinimum тела ответа
 response-body-exclusive-min-unset: значение exclusiveMinimum у тела ответа удалено, предыдущее значение - %s
@@ -1309,12 +1378,20 @@ response-body-max-contains-set: у тела ответа задано значе
 response-body-max-contains-set-description: установлено значение maxContains тела ответа
 response-body-max-contains-unset: значение maxContains у тела ответа удалено, предыдущее значение - %s
 response-body-max-contains-unset-description: удалено значение maxContains тела ответа
+response-body-max-decreased: значение max у тела ответа уменьшено с %s до %s
+response-body-max-decreased-description: уменьшено значение max тела ответа
+response-body-max-items-decreased: значение maxItems у тела ответа уменьшено с %s до %s
+response-body-max-items-decreased-description: уменьшено значение maxItems тела ответа
 response-body-max-items-set: у тела ответа задано значение maxItems в %s
 response-body-max-items-set-description: установлено значение maxItems тела ответа
 response-body-max-items-unset: значение maxItems у тела ответа удалено, предыдущее значение - %s
 response-body-max-items-unset-description: удалено значение maxItems тела ответа
+response-body-max-length-decreased: значение maxLength у тела ответа уменьшено с %s до %s
+response-body-max-length-decreased-description: уменьшено значение maxLength тела ответа
 response-body-max-length-set: у тела ответа задано значение maxLength в %s
 response-body-max-length-set-description: установлено значение maxLength тела ответа
+response-body-max-properties-decreased: значение maxProperties у тела ответа уменьшено с %s до %s
+response-body-max-properties-decreased-description: уменьшено значение maxProperties тела ответа
 response-body-max-properties-set: у тела ответа задано значение maxProperties в %s
 response-body-max-properties-set-description: установлено значение maxProperties тела ответа
 response-body-max-properties-unset: значение maxProperties у тела ответа удалено, предыдущее значение - %s
@@ -1327,12 +1404,20 @@ response-body-min-contains-set: у тела ответа задано значе
 response-body-min-contains-set-description: установлено значение minContains тела ответа
 response-body-min-contains-unset: значение minContains у тела ответа удалено, предыдущее значение - %s
 response-body-min-contains-unset-description: удалено значение minContains тела ответа
+response-body-min-increased: значение min у тела ответа увеличено с %s до %s
+response-body-min-increased-description: увеличено значение min тела ответа
+response-body-min-items-increased: значение minItems у тела ответа увеличено с %s до %s
+response-body-min-items-increased-description: увеличено значение minItems тела ответа
 response-body-min-items-set: у тела ответа задано значение minItems в %s
 response-body-min-items-set-description: установлено значение minItems тела ответа
+response-body-min-length-increased: значение minLength у тела ответа увеличено с %s до %s
+response-body-min-length-increased-description: увеличено значение minLength тела ответа
 response-body-min-length-set: у тела ответа задано значение minLength в %s
 response-body-min-length-set-description: установлено значение minLength тела ответа
 response-body-min-length-unset: значение minLength у тела ответа удалено, предыдущее значение - %s
 response-body-min-length-unset-description: удалено значение minLength тела ответа
+response-body-min-properties-increased: значение minProperties у тела ответа увеличено с %s до %s
+response-body-min-properties-increased-description: увеличено значение minProperties тела ответа
 response-body-min-properties-set: у тела ответа задано значение minProperties в %s
 response-body-min-properties-set-description: установлено значение minProperties тела ответа
 response-body-min-properties-unset: значение minProperties у тела ответа удалено, предыдущее значение - %s
@@ -1343,26 +1428,54 @@ response-body-min-unset: значение min у тела ответа удал�
 response-body-min-unset-description: удалено значение min тела ответа
 response-body-multiple-of-set: у тела ответа задано значение multipleOf в %s
 response-body-multiple-of-set-description: установлено значение multipleOf тела ответа
+response-header-exclusive-max-decreased: значение exclusiveMaximum у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-exclusive-max-decreased-description: уменьшено значение exclusiveMaximum заголовка ответа
+response-header-exclusive-max-increased: значение exclusiveMaximum у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-exclusive-max-increased-description: увеличено значение exclusiveMaximum заголовка ответа
 response-header-exclusive-max-set: у заголовка ответа %s задано значение exclusiveMaximum в %s для статуса %s
 response-header-exclusive-max-set-description: установлено значение exclusiveMaximum заголовка ответа
 response-header-exclusive-max-unset: значение exclusiveMaximum у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-exclusive-max-unset-description: удалено значение exclusiveMaximum заголовка ответа
+response-header-exclusive-min-decreased: значение exclusiveMinimum у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-exclusive-min-decreased-description: уменьшено значение exclusiveMinimum заголовка ответа
+response-header-exclusive-min-increased: значение exclusiveMinimum у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-exclusive-min-increased-description: увеличено значение exclusiveMinimum заголовка ответа
 response-header-exclusive-min-set: у заголовка ответа %s задано значение exclusiveMinimum в %s для статуса %s
 response-header-exclusive-min-set-description: установлено значение exclusiveMinimum заголовка ответа
 response-header-exclusive-min-unset: значение exclusiveMinimum у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-exclusive-min-unset-description: удалено значение exclusiveMinimum заголовка ответа
+response-header-max-contains-decreased: значение maxContains у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-max-contains-decreased-description: уменьшено значение maxContains заголовка ответа
+response-header-max-contains-increased: значение maxContains у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-max-contains-increased-description: увеличено значение maxContains заголовка ответа
 response-header-max-contains-set: у заголовка ответа %s задано значение maxContains в %s для статуса %s
 response-header-max-contains-set-description: установлено значение maxContains заголовка ответа
 response-header-max-contains-unset: значение maxContains у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-max-contains-unset-description: удалено значение maxContains заголовка ответа
+response-header-max-decreased: значение max у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-max-decreased-description: уменьшено значение max заголовка ответа
+response-header-max-increased: значение max у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-max-increased-description: увеличено значение max заголовка ответа
+response-header-max-items-decreased: значение maxItems у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-max-items-decreased-description: уменьшено значение maxItems заголовка ответа
+response-header-max-items-increased: значение maxItems у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-max-items-increased-description: увеличено значение maxItems заголовка ответа
 response-header-max-items-set: у заголовка ответа %s задано значение maxItems в %s для статуса %s
 response-header-max-items-set-description: установлено значение maxItems заголовка ответа
 response-header-max-items-unset: значение maxItems у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-max-items-unset-description: удалено значение maxItems заголовка ответа
+response-header-max-length-decreased: значение maxLength у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-max-length-decreased-description: уменьшено значение maxLength заголовка ответа
+response-header-max-length-increased: значение maxLength у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-max-length-increased-description: увеличено значение maxLength заголовка ответа
 response-header-max-length-set: у заголовка ответа %s задано значение maxLength в %s для статуса %s
 response-header-max-length-set-description: установлено значение maxLength заголовка ответа
 response-header-max-length-unset: значение maxLength у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-max-length-unset-description: удалено значение maxLength заголовка ответа
+response-header-max-properties-decreased: значение maxProperties у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-max-properties-decreased-description: уменьшено значение maxProperties заголовка ответа
+response-header-max-properties-increased: значение maxProperties у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-max-properties-increased-description: увеличено значение maxProperties заголовка ответа
 response-header-max-properties-set: у заголовка ответа %s задано значение maxProperties в %s для статуса %s
 response-header-max-properties-set-description: установлено значение maxProperties заголовка ответа
 response-header-max-properties-unset: значение maxProperties у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
@@ -1371,18 +1484,38 @@ response-header-max-set: у заголовка ответа %s задано зн
 response-header-max-set-description: установлено значение max заголовка ответа
 response-header-max-unset: значение max у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-max-unset-description: удалено значение max заголовка ответа
+response-header-min-contains-decreased: значение minContains у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-min-contains-decreased-description: уменьшено значение minContains заголовка ответа
+response-header-min-contains-increased: значение minContains у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-min-contains-increased-description: увеличено значение minContains заголовка ответа
 response-header-min-contains-set: у заголовка ответа %s задано значение minContains в %s для статуса %s
 response-header-min-contains-set-description: установлено значение minContains заголовка ответа
 response-header-min-contains-unset: значение minContains у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-min-contains-unset-description: удалено значение minContains заголовка ответа
+response-header-min-decreased: значение min у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-min-decreased-description: уменьшено значение min заголовка ответа
+response-header-min-increased: значение min у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-min-increased-description: увеличено значение min заголовка ответа
+response-header-min-items-decreased: значение minItems у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-min-items-decreased-description: уменьшено значение minItems заголовка ответа
+response-header-min-items-increased: значение minItems у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-min-items-increased-description: увеличено значение minItems заголовка ответа
 response-header-min-items-set: у заголовка ответа %s задано значение minItems в %s для статуса %s
 response-header-min-items-set-description: установлено значение minItems заголовка ответа
 response-header-min-items-unset: значение minItems у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-min-items-unset-description: удалено значение minItems заголовка ответа
+response-header-min-length-decreased: значение minLength у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-min-length-decreased-description: уменьшено значение minLength заголовка ответа
+response-header-min-length-increased: значение minLength у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-min-length-increased-description: увеличено значение minLength заголовка ответа
 response-header-min-length-set: у заголовка ответа %s задано значение minLength в %s для статуса %s
 response-header-min-length-set-description: установлено значение minLength заголовка ответа
 response-header-min-length-unset: значение minLength у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-min-length-unset-description: удалено значение minLength заголовка ответа
+response-header-min-properties-decreased: значение minProperties у заголовка ответа %s уменьшено с %s до %s для статуса %s
+response-header-min-properties-decreased-description: уменьшено значение minProperties заголовка ответа
+response-header-min-properties-increased: значение minProperties у заголовка ответа %s увеличено с %s до %s для статуса %s
+response-header-min-properties-increased-description: увеличено значение minProperties заголовка ответа
 response-header-min-properties-set: у заголовка ответа %s задано значение minProperties в %s для статуса %s
 response-header-min-properties-set-description: установлено значение minProperties заголовка ответа
 response-header-min-properties-unset: значение minProperties у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
@@ -1395,10 +1528,14 @@ response-header-multiple-of-set: у заголовка ответа %s зада�
 response-header-multiple-of-set-description: установлено значение multipleOf заголовка ответа
 response-header-multiple-of-unset: значение multipleOf у заголовка ответа %s удалено, предыдущее значение - %s, для статуса %s
 response-header-multiple-of-unset-description: удалено значение multipleOf заголовка ответа
+response-property-exclusive-max-decreased: значение exclusiveMaximum у поля ответа %s уменьшено с %s до %s, для ответа со статусом %s
+response-property-exclusive-max-decreased-description: уменьшено значение exclusiveMaximum поля ответа
 response-property-exclusive-max-set: у поля ответа %s задано значение exclusiveMaximum в %s, для ответа со статусом %s
 response-property-exclusive-max-set-description: установлено значение exclusiveMaximum поля ответа
 response-property-exclusive-max-unset: значение exclusiveMaximum у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
 response-property-exclusive-max-unset-description: удалено значение exclusiveMaximum поля ответа
+response-property-exclusive-min-increased: значение exclusiveMinimum у поля ответа %s увеличено с %s до %s, для ответа со статусом %s
+response-property-exclusive-min-increased-description: увеличено значение exclusiveMinimum поля ответа
 response-property-exclusive-min-set: у поля ответа %s задано значение exclusiveMinimum в %s, для ответа со статусом %s
 response-property-exclusive-min-set-description: установлено значение exclusiveMinimum поля ответа
 response-property-exclusive-min-unset: значение exclusiveMinimum у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
@@ -1407,12 +1544,20 @@ response-property-max-contains-set: у поля ответа %s задано з�
 response-property-max-contains-set-description: установлено значение maxContains поля ответа
 response-property-max-contains-unset: значение maxContains у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
 response-property-max-contains-unset-description: удалено значение maxContains поля ответа
+response-property-max-decreased: значение max у поля ответа %s уменьшено с %s до %s, для ответа со статусом %s
+response-property-max-decreased-description: уменьшено значение max поля ответа
+response-property-max-items-decreased: значение maxItems у поля ответа %s уменьшено с %s до %s, для ответа со статусом %s
+response-property-max-items-decreased-description: уменьшено значение maxItems поля ответа
 response-property-max-items-set: у поля ответа %s задано значение maxItems в %s, для ответа со статусом %s
 response-property-max-items-set-description: установлено значение maxItems поля ответа
 response-property-max-items-unset: значение maxItems у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
 response-property-max-items-unset-description: удалено значение maxItems поля ответа
+response-property-max-length-decreased: значение maxLength у поля ответа %s уменьшено с %s до %s, для ответа со статусом %s
+response-property-max-length-decreased-description: уменьшено значение maxLength поля ответа
 response-property-max-length-set: у поля ответа %s задано значение maxLength в %s, для ответа со статусом %s
 response-property-max-length-set-description: установлено значение maxLength поля ответа
+response-property-max-properties-decreased: значение maxProperties у поля ответа %s уменьшено с %s до %s, для ответа со статусом %s
+response-property-max-properties-decreased-description: уменьшено значение maxProperties поля ответа
 response-property-max-properties-set: у поля ответа %s задано значение maxProperties в %s, для ответа со статусом %s
 response-property-max-properties-set-description: установлено значение maxProperties поля ответа
 response-property-max-properties-unset: значение maxProperties у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
@@ -1425,12 +1570,20 @@ response-property-min-contains-set: у поля ответа %s задано з�
 response-property-min-contains-set-description: установлено значение minContains поля ответа
 response-property-min-contains-unset: значение minContains у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
 response-property-min-contains-unset-description: удалено значение minContains поля ответа
+response-property-min-increased: значение min у поля ответа %s увеличено с %s до %s, для ответа со статусом %s
+response-property-min-increased-description: увеличено значение min поля ответа
+response-property-min-items-increased: значение minItems у поля ответа %s увеличено с %s до %s, для ответа со статусом %s
+response-property-min-items-increased-description: увеличено значение minItems поля ответа
 response-property-min-items-set: у поля ответа %s задано значение minItems в %s, для ответа со статусом %s
 response-property-min-items-set-description: установлено значение minItems поля ответа
+response-property-min-length-increased: значение minLength у поля ответа %s увеличено с %s до %s, для ответа со статусом %s
+response-property-min-length-increased-description: увеличено значение minLength поля ответа
 response-property-min-length-set: у поля ответа %s задано значение minLength в %s, для ответа со статусом %s
 response-property-min-length-set-description: установлено значение minLength поля ответа
 response-property-min-length-unset: значение minLength у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
 response-property-min-length-unset-description: удалено значение minLength поля ответа
+response-property-min-properties-increased: значение minProperties у поля ответа %s увеличено с %s до %s, для ответа со статусом %s
+response-property-min-properties-increased-description: увеличено значение minProperties поля ответа
 response-property-min-properties-set: у поля ответа %s задано значение minProperties в %s, для ответа со статусом %s
 response-property-min-properties-set-description: установлено значение minProperties поля ответа
 response-property-min-properties-unset: значение minProperties у поля ответа %s удалено, предыдущее значение - %s, для ответа со статусом %s
@@ -1441,3 +1594,7 @@ response-property-min-unset: значение min у поля ответа %s у
 response-property-min-unset-description: удалено значение min поля ответа
 response-property-multiple-of-set: у поля ответа %s задано значение multipleOf в %s, для ответа со статусом %s
 response-property-multiple-of-set-description: установлено значение multipleOf поля ответа
+shared-schema-detail-also: "также в %s"
+shared-schema-detail-also-cyclic: "также в %s и других"
+shared-schema-detail-also-more: "также в %s и ещё %d"
+shared-schema-detail-name: "общая схема: %s"

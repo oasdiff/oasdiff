@@ -33,6 +33,7 @@ func ResponsePropertyListOfTypesChangedCheck(diffReport *diff.Diff, operationsSo
 			}
 			result = append(result, checkPropertyListOfTypesChange(
 				opInfo,
+				p.schemaDiff,
 				p.propertyPath,
 				p.propertyName,
 				p.propertyDiff,

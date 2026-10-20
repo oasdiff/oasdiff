@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
@@ -81,14 +82,14 @@ func TestNewChanges_FingerprintIndependentOfSourceLocation(t *testing.T) {
 		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
 		Source: &load.Source{}, Args: []any{"p"},
 		CommonChange: checker.CommonChange{
-			BaseSource: checker.NewSource("base.yaml", 10, 5),
+			BaseSource: location.NewSource("base.yaml", 10, 5),
 		},
 	})
 	b := fingerprintOf(checker.ApiChange{
 		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
 		Source: &load.Source{}, Args: []any{"p"},
 		CommonChange: checker.CommonChange{
-			BaseSource: checker.NewSource("base.yaml", 99, 5),
+			BaseSource: location.NewSource("base.yaml", 99, 5),
 		},
 	})
 	require.Equal(t, a, b)
@@ -101,4 +102,25 @@ func TestNewChanges_FingerprintNoArgs(t *testing.T) {
 		Source: &load.Source{},
 	})
 	require.Len(t, got, 12)
+}
+
+// A consumer gets every property a shared-schema change is at as a field,
+// without parsing the text.
+func TestNewChanges_SharedSchema(t *testing.T) {
+	shared := &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "userId"}}
+	change := checker.ApiChange{Id: "change_id", Level: checker.INFO, Operation: "GET", Path: "/orders", Source: &load.Source{}}
+
+	changes := formatters.NewChanges(checker.Changes{change.WithSharedSchema(shared), change}, MockLocalizer)
+
+	require.Equal(t, shared, changes[0].SharedSchema)
+	require.Nil(t, changes[1].SharedSchema)
+}
+
+// The shared schema is context for the reader, not part of the change's
+// identity, so attaching it leaves stored approvals matching.
+func TestNewChanges_SharedSchemaKeepsFingerprint(t *testing.T) {
+	change := checker.ApiChange{Id: "change_id", Level: checker.INFO, Operation: "GET", Path: "/orders", Source: &load.Source{}, Args: []any{"customerId"}}
+	shared := &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "userId"}}
+
+	require.Equal(t, fingerprintOf(change), fingerprintOf(change.WithSharedSchema(shared)))
 }

@@ -113,7 +113,7 @@ func TestListOfTypesDiff_ListToSingle(t *testing.T) {
 	valueDiff := schemaDiffs["value"].ListOfTypesDiff
 	require.NotNil(t, valueDiff)
 	require.Empty(t, valueDiff.Added)
-	require.ElementsMatch(t, []string{"number", "boolean"}, valueDiff.Deleted)
+	require.Equal(t, []string{"number", "boolean"}, valueDiff.Deleted)
 	require.False(t, valueDiff.Empty())
 }
 
@@ -137,7 +137,7 @@ func TestListOfTypesDiff_ListToList(t *testing.T) {
 	// Test 'data' property: oneOf[string, integer] -> anyOf[string, number, boolean]
 	dataDiff := schemaDiffs["data"].ListOfTypesDiff
 	require.NotNil(t, dataDiff)
-	require.ElementsMatch(t, []string{"number", "boolean"}, dataDiff.Added)
+	require.Equal(t, []string{"number", "boolean"}, dataDiff.Added)
 	require.Equal(t, []string{"integer"}, dataDiff.Deleted)
 	require.False(t, dataDiff.Empty())
 
@@ -358,4 +358,23 @@ func TestListOfTypesDiff_NoTypeNotSupported(t *testing.T) {
 	// anyOfWithNoType should NOT have list-of-types diff
 	anyOfDiff := schemaDiffs["anyOfWithNoType"].ListOfTypesDiff
 	require.Nil(t, anyOfDiff, "anyOf with no-type schema should not be analyzed as list-of-types")
+}
+
+// The types come out in the order the schema declares them on every run, so
+// a change built from them has the same text and fingerprint each time.
+func TestListOfTypesDiff_OrderIsStable(t *testing.T) {
+	loader := openapi3.NewLoader()
+	base, err := loader.LoadFromFile("../data/list-of-types/list-to-list-base.yaml")
+	require.NoError(t, err)
+	revision, err := loader.LoadFromFile("../data/list-of-types/list-to-list-revision.yaml")
+	require.NoError(t, err)
+
+	for range 50 {
+		diffReport, err := diff.Get(diff.NewConfig(), base, revision)
+		require.NoError(t, err)
+		dataDiff := diffReport.PathsDiff.Modified["/api"].OperationsDiff.Modified["GET"].
+			ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].
+			SchemaDiff.PropertiesDiff.Modified["data"].ListOfTypesDiff
+		require.Equal(t, []string{"number", "boolean"}, dataDiff.Added)
+	}
 }

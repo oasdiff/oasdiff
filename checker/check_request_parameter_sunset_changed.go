@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +18,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 	result := make(Changes, 0)
 
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
-		baseSource, revisionSource := parameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, diff.SunsetExtension)
+		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, diff.SunsetExtension)
 
 		paramBase := p.paramDiff.Base
 		paramRevision := p.paramDiff.Revision

@@ -51,34 +51,25 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 	initialResult := newContentDiff()
 	processedDeleted := make(map[string]bool) // Keep track of deleted items that found an equivalent added item
 
-	// 1. Find exact matches and initial deletions
-	for name1, media1 := range content1 {
+	// 1. Diff media types with the same name. The rest are initial additions
+	// and deletions, sorted, so that when several media types are equivalent the
+	// same ones are paired on every run.
+	added, deleted, common := keysDiff(content1, content2)
+	initialResult.MediaTypeAdded = added
+	initialResult.MediaTypeDeleted = deleted
 
-		if media2, ok := content2[name1]; ok { // Exact match found
+	for _, name := range common {
+		diff, err := getMediaTypeDiff(config, state, name, name, content1[name], content2[name])
+		if err != nil {
+			return nil, err
+		}
 
-			diff, err := getMediaTypeDiff(config, state, name1, name1, media1, media2)
-			if err != nil {
-				return nil, err
-			}
-
-			if !diff.Empty() {
-				initialResult.MediaTypeModified[name1] = diff
-			}
-			// Mark as processed (implicitly, by not adding to deleted)
-		} else {
-			// No exact match, potential deletion
-			initialResult.MediaTypeDeleted = append(initialResult.MediaTypeDeleted, name1)
+		if !diff.Empty() {
+			initialResult.MediaTypeModified[name] = diff
 		}
 	}
 
-	// 2. Find initial additions
-	for name2 := range content2 {
-		if _, ok := content1[name2]; !ok {
-			initialResult.MediaTypeAdded = append(initialResult.MediaTypeAdded, name2)
-		}
-	}
-
-	// 3. Iteratively find equivalent pairs from initial Added/Deleted lists
+	// 2. Iteratively find equivalent pairs from initial Added/Deleted lists
 	finalAdded := make([]string, 0, len(initialResult.MediaTypeAdded))
 	finalModified := initialResult.MediaTypeModified // Start with exact matches
 
@@ -113,7 +104,7 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 		}
 	}
 
-	// 4. Collect final deletions (those not marked as processed)
+	// 3. Collect final deletions (those not marked as processed)
 	finalDeleted := make([]string, 0, len(initialResult.MediaTypeDeleted))
 	for _, deletedName := range initialResult.MediaTypeDeleted {
 		if !processedDeleted[deletedName] {
@@ -121,7 +112,7 @@ func getContentDiffInternal(config *Config, state *state, content1, content2 ope
 		}
 	}
 
-	// 5. Construct final ContentDiff
+	// 4. Construct final ContentDiff
 	finalResult := &ContentDiff{
 		MediaTypeAdded:    finalAdded,
 		MediaTypeDeleted:  finalDeleted,

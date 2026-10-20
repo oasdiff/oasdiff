@@ -3,6 +3,7 @@ package checker
 import (
 	"fmt"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -14,12 +15,8 @@ func RequestBodyEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		enumDiff := info.schemaDiff.EnumDiff
-		if enumDiff == nil || enumDiff.Deleted == nil {
-			return
-		}
-		for _, enumVal := range enumDiff.Deleted {
-			baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+		for _, enumVal := range deletedEnumValues(info.schemaDiff) {
+			baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, info.schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 			result = append(result, info.newChange(RequestBodyEnumValueRemovedId, []any{enumVal}, "").
 				WithSources(baseSource, revisionSource))
 		}

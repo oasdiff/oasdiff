@@ -9,7 +9,7 @@ components:
       type: bogus
     badHttp:
       type: http
-      scheme: bogus
+      scheme: "not a token"
     badApiKey:
       type: apiKey
       name: key

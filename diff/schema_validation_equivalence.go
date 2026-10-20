@@ -8,15 +8,7 @@ import "github.com/getkin/kin-openapi/openapi3"
 // comments are ignored; checker-significant metadata such as deprecated is
 // treated as a contract change.
 func SchemaRefsValidationEquivalent(config *Config, schemaRef1, schemaRef2 *openapi3.SchemaRef) bool {
-	// Use a fresh diff state (cycle-detection sets + schema-diff cache)
-	// rather than the caller's, so a call made from inside another diff
-	// traversal is not affected by what that traversal has already visited.
-	schemaDiff, err := getSchemaDiff(config, newState(), trueSchemaAsEmpty(schemaRef1), trueSchemaAsEmpty(schemaRef2))
-	if err != nil {
-		return false
-	}
-
-	return !schemaDiffHasValidationChanges(schemaDiff)
+	return newUnroller(config, newState()).equivalent(schemaRef1, schemaRef2)
 }
 
 // trueSchemaAsEmpty maps a schema written as the boolean `true` to the empty
@@ -29,8 +21,12 @@ func trueSchemaAsEmpty(ref *openapi3.SchemaRef) *openapi3.SchemaRef {
 	if ref == nil || ref.Value == nil || ref.Value.Always == nil || !*ref.Value.Always {
 		return ref
 	}
-	return &openapi3.SchemaRef{Value: &openapi3.Schema{}}
+	return emptySchemaForTrue
 }
+
+// emptySchemaForTrue stands in for every `true` schema, so that all of them
+// are one value in the schema diff graph.
+var emptySchemaForTrue = &openapi3.SchemaRef{Value: &openapi3.Schema{}}
 
 func schemaDiffHasValidationChanges(schemaDiff *SchemaDiff) bool {
 	validationDiff := schemaDiffWithoutAnnotationChanges(schemaDiff)

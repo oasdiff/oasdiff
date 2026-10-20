@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+            Application/JSON:
+              schema:
+                type: object

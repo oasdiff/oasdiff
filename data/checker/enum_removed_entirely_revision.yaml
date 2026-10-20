@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info: {title: t, version: '1'}
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      parameters:
+        - name: status
+          in: query
+          schema: {type: string}
+        - name: filter
+          in: query
+          style: deepObject
+          explode: true
+          schema:
+            type: object
+            properties:
+              origin: {type: string}
+      responses:
+        '200':
+          description: ok
+    post:
+      operationId: createPet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: {type: string}
+                kind: {type: string, readOnly: true}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: {type: string}
+                  secret: {type: string, writeOnly: true}
+  /mode:
+    put:
+      operationId: setMode
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema: {type: string}
+      responses:
+        '200':
+          description: ok
+          content:
+            text/plain:
+              schema: {type: string}

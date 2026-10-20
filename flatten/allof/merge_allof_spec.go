@@ -2,7 +2,6 @@ package allof
 
 import (
 	"fmt"
-	"maps"
 	"reflect"
 	"slices"
 
@@ -10,41 +9,54 @@ import (
 )
 
 // MergeSpec merges all instances of allOf in place, across every schema in
-// the document. Merge handles each schema's whole subtree (including its own
-// cycle tracking), so the walk hands it each attachment point once and skips
-// descent.
+// the document, and gives every cycle the merge anchors a $ref
+// (nameAnchoredCycles), so the merged document always serializes. One merge
+// state serves the whole document, so a schema reached from several
+// attachment points is merged once and stays one object: every $ref to it
+// keeps sharing one Value, as in the input.
 func MergeSpec(spec *openapi3.T) (*openapi3.T, error) {
-	var anchored []*openapi3.SchemaRef
-	hints := map[*openapi3.Schema]string{}
+	state := newState()
 	err := spec.WalkSchemas(func(_ string, s *openapi3.SchemaRef) error {
-		m, edges, mergeHints, err := mergeWithAnchors(*s)
-		if err != nil {
+		if _, err := mergeInternal(state, s); err != nil {
 			return err
-		}
-		anchored = append(anchored, edges...)
-		maps.Copy(hints, mergeHints)
-		// Every $ref to this schema shares one Value, so writing the merge
-		// into it updates every use. Assigning s.Value would update only
-		// this reference and leave the rest unmerged.
-		*s.Value = *m
-		// The copy leaves the subtree's self-references aimed at the object
-		// Merge returned rather than the one just written into: a recursive
-		// schema's one-object cycle becomes a two-object cycle, and later
-		// attachment points then see two distinct originals for one schema,
-		// which the merge cache cannot unify.
-		redirectSchemaRefs(reflect.ValueOf(s.Value), m, s.Value, map[*openapi3.Schema]bool{})
-		// the copy also detaches m from its hint; the written-back object is
-		// the one the anchored edges now point at
-		if hint, ok := hints[m]; ok {
-			hints[s.Value] = hint
 		}
 		return openapi3.SkipSubtree
 	})
 	if err != nil {
 		return spec, err
 	}
-	nameAnchoredCycles(spec, anchored, hints)
+	if err := mergeCircular(state); err != nil {
+		return spec, err
+	}
+	writeBack(spec, state)
+	nameAnchoredCycles(spec, state.anchored, state.hints)
 	return spec, nil
+}
+
+// writeBack writes each merge into the object it was merged from and points
+// every reference to a merged copy back at that object, so the merged
+// document reuses the input's objects: a copy referenced from many places
+// would otherwise multiply into one copy per attachment point.
+func writeBack(spec *openapi3.T, state *state) {
+	originals := map[*openapi3.Schema]*openapi3.Schema{}
+	for original, merged := range state.mergedSchemas {
+		// the merge may have replaced its own result value (anchorInFlight);
+		// the last replacement is the merge, and every value along the way
+		// is referenced somewhere
+		for {
+			originals[merged] = original
+			replacement, ok := state.replaced[merged]
+			if !ok {
+				break
+			}
+			merged = replacement
+		}
+		*original = *merged
+		if hint, ok := state.hints[merged]; ok {
+			state.hints[original] = hint
+		}
+	}
+	redirectSchemaRefs(reflect.ValueOf(spec), originals, map[*openapi3.Schema]bool{})
 }
 
 // nameAnchoredCycles gives every anchored back-edge a $ref. The edge's value
@@ -80,24 +92,11 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef, hints 
 		return walkOrder[a.Value] - walkOrder[b.Value]
 	})
 
-	next := 1
+	namer := componentNamer{spec: spec, next: 1}
 	for _, edge := range anchored {
 		name, ok := nameByValue[edge.Value]
 		if !ok {
-			base := "AllOfMerged"
-			if hint := hints[edge.Value]; hint != "" {
-				base = "AllOfMerged_" + hint
-				name = base
-			}
-			for suffix := 2; name == "" || (spec.Components != nil && spec.Components.Schemas[name] != nil); {
-				if base == "AllOfMerged" {
-					name = fmt.Sprintf("%s%d", base, next)
-					next++
-				} else {
-					name = fmt.Sprintf("%s_%d", base, suffix)
-					suffix++
-				}
-			}
+			name = namer.name(hints[edge.Value])
 			if spec.Components == nil {
 				spec.Components = &openapi3.Components{}
 			}
@@ -111,20 +110,53 @@ func nameAnchoredCycles(spec *openapi3.T, anchored []*openapi3.SchemaRef, hints 
 	}
 }
 
+// componentNamer builds names for hoisted cycle components that are free in
+// the spec's components section.
+type componentNamer struct {
+	spec *openapi3.T
+	next int
+}
+
+// name returns AllOfMerged_<hint>, numerically suffixed past collisions, or
+// the next free numeric AllOfMergedN when there is no hint. Hint-derived
+// names depend only on what was merged, so they are stable across revisions;
+// the numeric forms depend on the caller's naming order.
+func (n *componentNamer) name(hint string) string {
+	if hint != "" {
+		name := "AllOfMerged_" + hint
+		for suffix := 2; n.taken(name); suffix++ {
+			name = fmt.Sprintf("AllOfMerged_%s_%d", hint, suffix)
+		}
+		return name
+	}
+	for {
+		name := fmt.Sprintf("AllOfMerged%d", n.next)
+		n.next++
+		if !n.taken(name) {
+			return name
+		}
+	}
+}
+
+func (n *componentNamer) taken(name string) bool {
+	return n.spec.Components != nil && n.spec.Components.Schemas[name] != nil
+}
+
 // redirectSchemaRefs walks every SchemaRef reachable from v and points those
-// whose Value is from at to instead. The traversal is type-driven so a new
-// schema field carrying subschemas is covered without being listed here.
-func redirectSchemaRefs(v reflect.Value, from, to *openapi3.Schema, seen map[*openapi3.Schema]bool) {
+// whose Value is a key of to at the key's value instead. The traversal is
+// type-driven so a new schema field carrying subschemas is covered without
+// being listed here.
+func redirectSchemaRefs(v reflect.Value, to map[*openapi3.Schema]*openapi3.Schema, seen map[*openapi3.Schema]bool) {
 	switch v.Kind() {
 	case reflect.Pointer:
 		if v.IsNil() {
 			return
 		}
 		if ref, ok := v.Interface().(*openapi3.SchemaRef); ok {
-			if ref.Value == from {
-				ref.Value = to
+			if target, ok := to[ref.Value]; ok {
+				ref.Value = target
 			}
-			redirectSchemaRefs(reflect.ValueOf(ref.Value), from, to, seen)
+			redirectSchemaRefs(reflect.ValueOf(ref.Value), to, seen)
 			return
 		}
 		if schema, ok := v.Interface().(*openapi3.Schema); ok {
@@ -133,19 +165,19 @@ func redirectSchemaRefs(v reflect.Value, from, to *openapi3.Schema, seen map[*op
 			}
 			seen[schema] = true
 		}
-		redirectSchemaRefs(v.Elem(), from, to, seen)
+		redirectSchemaRefs(v.Elem(), to, seen)
 	case reflect.Slice:
 		for i := range v.Len() {
-			redirectSchemaRefs(v.Index(i), from, to, seen)
+			redirectSchemaRefs(v.Index(i), to, seen)
 		}
 	case reflect.Map:
 		for _, key := range v.MapKeys() {
-			redirectSchemaRefs(v.MapIndex(key), from, to, seen)
+			redirectSchemaRefs(v.MapIndex(key), to, seen)
 		}
 	case reflect.Struct:
 		for i := range v.NumField() {
 			if v.Type().Field(i).IsExported() {
-				redirectSchemaRefs(v.Field(i), from, to, seen)
+				redirectSchemaRefs(v.Field(i), to, seen)
 			}
 		}
 	}

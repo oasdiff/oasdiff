@@ -59,7 +59,14 @@ request-body-became-required: el cuerpo de solicitud se volvió requerido
 request-body-became-optional: el cuerpo de solicitud se volvió opcional
 request-body-became-enum: el cuerpo de solicitud fue restringido a una lista de valores enum
 request-body-enum-value-removed: removido el valor enum %s del cuerpo de solicitud
+request-body-enum-value-added: "agregado el valor enum %s al cuerpo de solicitud"
+request-body-became-not-enum: removida la restricción enum del cuerpo de solicitud
 response-mediatype-enum-value-removed: removido el valor enum %s del esquema de respuesta %s
+response-mediatype-became-enum: "el esquema de respuesta %s para el estado %s fue restringido a una lista de valores enum"
+response-mediatype-enum-value-added-comment: "El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum."
+response-mediatype-enum-value-added: "agregado el nuevo valor enum %s al esquema de respuesta %s para el estado %s"
+response-mediatype-became-not-enum: removida la restricción enum del esquema de respuesta %s para el estado %s
+response-mediatype-became-not-enum-comment: El servidor ahora puede devolver cualquier valor del tipo del esquema, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
 request-header-property-became-required: la propiedad %s del encabezado de solicitud %s se volvió requerida
 request-header-property-became-enum: la propiedad %s del encabezado de solicitud %s fue restringida a una lista de valores enum
 request-parameter-became-required: el parámetro %s de solicitud %s se volvió requerido
@@ -71,9 +78,12 @@ request-parameter-property-became-nullable: la propiedad %s del parámetro de so
 request-parameter-property-became-not-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió no nulable
 request-parameter-enum-value-removed: removido el valor enum %s del parámetro %s de solicitud %s
 request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro %s de solicitud %s
+request-parameter-became-not-enum: removida la restricción enum del parámetro %s de solicitud %s
 request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
 request-parameter-property-enum-value-added: agregado el valor enum %s a la propiedad %s del parámetro %s de solicitud %s
+request-parameter-property-became-not-enum: removida la restricción enum de la propiedad %s del parámetro %s de solicitud %s
 pattern-changed-warn-comment: "Esta es una advertencia porque agregar o cambiar un patrón puede restringir los valores aceptados y romper clientes existentes. Para cambios de patrón, es difícil analizar automáticamente si el nuevo patrón es un superconjunto del patrón anterior (ej. cambiado de '[0-9]+' a '[0-9]*')"
+request-property-became-read-only-comment: "Esta es una advertencia porque una propiedad de solo lectura no debería enviarse en una solicitud, y la especificación deja al servidor decidir si la ignora o rechaza la solicitud. Los clientes que la envían pueden ser rechazados, o descubrir que el valor que envían ya no se usa."
 request-parameter-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s del parámetro %s de solicitud %s
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
 request-parameter-max-decreased: para el parámetro %s de solicitud %s, el máximo fue disminuido de %s a %s
@@ -126,6 +136,7 @@ request-property-became-enum: la propiedad de solicitud %s fue restringida a una
 request-property-enum-value-removed: removido el valor enum %s de la propiedad de solicitud %s
 request-read-only-property-enum-value-removed: removido el valor enum %s de la propiedad de solicitud de solo lectura %s
 request-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de solicitud %s
+request-property-became-not-enum: removida la restricción enum de la propiedad de solicitud %s
 request-body-max-decreased: el valor máximo del cuerpo de solicitud fue disminuido a %s
 request-property-max-decreased: el valor máximo de la propiedad de solicitud %s fue disminuido a %s
 request-read-only-property-max-decreased: el valor máximo de la propiedad de solicitud de solo lectura %s fue disminuido a %s
@@ -151,8 +162,6 @@ request-body-min-items-increased: el número mínimo de elementos del cuerpo de 
 request-property-min-items-increased: el número mínimo de elementos de la propiedad de solicitud %s fue aumentado a %s
 request-body-min-decreased: el valor mínimo del cuerpo de solicitud fue disminuido de %s a %s
 request-property-min-decreased: el valor mínimo de la propiedad de solicitud %s fue disminuido de %s a %s
-request-body-min-items-decreased: el número mínimo de elementos del cuerpo de solicitud fue disminuido de %s a %s
-request-property-min-items-decreased: el número mínimo de elementos de la propiedad de solicitud %s fue disminuido de %s a %s
 request-body-min-items-set: el número mínimo de elementos del cuerpo de solicitud fue establecido en %s
 request-property-min-items-set: el número mínimo de elementos de la propiedad de solicitud %s fue establecido en %s
 request-body-min-set: el valor mínimo del cuerpo de solicitud fue establecido en %s
@@ -209,6 +218,9 @@ response-body-became-not-nullable: el cuerpo de respuesta se volvió no nulable
 response-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de respuesta %s para el estado %s
 response-property-enum-value-added-comment: El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum.
 response-property-enum-value-removed: removido el valor enum %s de la propiedad de respuesta %s para el estado %s
+response-property-became-not-enum: removida la restricción enum de la propiedad de respuesta %s para el estado %s
+response-property-became-not-enum-comment: El servidor ahora puede devolver cualquier valor del tipo de la propiedad, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
+response-property-became-enum: la propiedad de respuesta %s para el estado %s fue restringida a una lista de valores enum
 response-body-max-length-increased: la longitud máxima del cuerpo de respuesta fue aumentada de %s a %s
 response-property-max-length-increased: la longitud máxima de la propiedad de respuesta %s fue aumentada de %s a %s para el estado %s
 response-body-max-length-unset: la longitud máxima del cuerpo de respuesta fue removida de %s
@@ -262,6 +274,10 @@ api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
 api-global-security-added: el esquema de seguridad %s fue agregado a la api
 api-global-security-removed: el esquema de seguridad %s fue removido de la api
 api-global-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad global %s
+api-security-anonymous-access-removed: el endpoint ya no permite acceso anónimo y ahora solo acepta %s
+api-security-anonymous-access-added: el endpoint ahora permite acceso anónimo
+api-security-inherited-comment: "Este endpoint hereda los requisitos de seguridad de nivel superior de la API."
+api-global-security-not-inherited-comment: "Ningún endpoint hereda los requisitos de seguridad de nivel superior de la API, por lo que este cambio no afecta a ningún cliente."
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
 api-version-not-bumped-description: se detectó un cambio incompatible pero la versión no fue incrementada
@@ -282,6 +298,11 @@ api-security-component-removed: el esquema de seguridad %s fue removido
 api-security-component-oauth-scope-added: el alcance OAuth %s fue agregado al esquema de seguridad %s
 api-security-component-oauth-scope-removed: el alcance OAuth %s fue removido del esquema de seguridad %s
 api-security-component-oauth-scope-changed: el alcance OAuth %s del esquema de seguridad %s fue actualizado de %s a %s
+api-security-component-api-key-name-changed: el nombre de la clave API del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-api-key-in-changed: la ubicación de la clave API del esquema de seguridad %s fue cambiada de %s a %s
+api-security-component-http-scheme-changed: el esquema http del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-bearer-format-changed: el formato bearer del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-openid-connect-url-changed: la URL de OpenID Connect del esquema de seguridad %s fue cambiada de %s a %s
 response-optional-property-added: agregada la propiedad opcional %s a la respuesta con estado %s
 response-optional-write-only-property-added: agregada la propiedad opcional de solo escritura %s a la respuesta con estado %s
 response-optional-write-only-property-removed: removida la propiedad opcional de solo escritura %s de la respuesta con estado %s
@@ -345,6 +366,7 @@ response-body-all-of-removed: "%s fue removido de la lista `allOf` del cuerpo de
 all-of-not-flattened-comment: "Esto comparó las ramas de `allOf` una por una, así que otra rama todavía puede garantizar lo que esta perdió. Ejecute con --flatten-allof para fusionar las ramas y comparar lo que describen en conjunto."
 read-only-comment: "La propiedad es de solo lectura, por lo que nunca aparece en las solicitudes y este cambio no puede invalidar ninguna."
 write-only-comment: "La propiedad es de solo escritura, por lo que nunca aparece en las respuestas y este cambio no puede invalidar ninguna."
+required-in-requests-comment: "En OpenAPI 3.1 y posteriores, required se aplica también en las solicitudes a una propiedad de solo lectura, así que los clientes ya la envían y este cambio no puede invalidar una solicitud."
 response-property-all-of-added: "%s fue agregado a la lista `allOf` de la propiedad de respuesta %s para el estado %s"
 response-property-all-of-removed: "%s fue removido de la lista `allOf` de la propiedad de respuesta %s para el estado %s"
 response-body-discriminator-added: agregado discriminador de respuesta para el estado %s
@@ -373,6 +395,7 @@ request-body-discriminator-mapping-changed: el valor mapeado para la clave %s fu
 request-property-discriminator-mapping-changed: el valor mapeado para la clave del discriminador %s fue cambiado de %s a %s para la propiedad de solicitud %s
 request-required-property-became-read-only: la propiedad requerida de solicitud %s se volvió de solo lectura
 request-required-property-became-not-read-only: la propiedad requerida de solicitud %s dejó de ser de solo lectura
+request-required-property-became-not-read-only-in-openapi-31: la propiedad requerida de solicitud %s dejó de ser de solo lectura
 request-optional-property-became-write-only: la propiedad opcional de solicitud %s se volvió de solo escritura
 request-optional-property-became-read-only: la propiedad opcional de solicitud %s se volvió de solo lectura
 request-optional-property-became-not-write-only: la propiedad opcional de solicitud %s dejó de ser de solo escritura
@@ -391,6 +414,8 @@ api-global-security-added-description: esquema de seguridad agregado en security
 api-global-security-removed-description: esquema de seguridad removido en security
 api-global-security-scope-added-description: alcance agregado a un esquema de seguridad en security
 api-global-security-scope-removed-description: alcance removido de un esquema de seguridad en security
+api-security-anonymous-access-removed-description: la seguridad del endpoint cambió y ahora rechaza solicitudes no autenticadas
+api-security-anonymous-access-added-description: la seguridad del endpoint cambió y ahora acepta solicitudes no autenticadas
 api-operation-id-added-description: id de operación agregado a un endpoint
 api-operation-id-removed-description: id de operación removido de un endpoint
 api-path-removed-before-sunset-description: path y endpoint removidos antes de la fecha de expiración
@@ -401,11 +426,16 @@ api-removed-without-deprecation-description: endpoint removido sin deprecación
 api-schema-removed-description: esquema removido de components/schemas
 api-security-added-description: requisitos de seguridad agregados al endpoint
 api-security-component-added-description: esquema de seguridad agregado en components/securitySchemes
+api-security-component-api-key-in-changed-description: ubicación (in) de la clave API modificada en components/securitySchemes
+api-security-component-api-key-name-changed-description: nombre de la clave API modificado en components/securitySchemes
+api-security-component-bearer-format-changed-description: formato bearer modificado en components/securitySchemes
+api-security-component-http-scheme-changed-description: esquema de autenticación http modificado en components/securitySchemes
 api-security-component-oauth-scope-added-description: alcance agregado al flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-changed-description: alcance modificado en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-removed-description: alcance removido del flujo OAuth en components/securitySchemes
 api-security-component-oauth-token-url-changed-description: url del token modificada en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-url-changed-description: url de autorización modificada en el flujo OAuth en components/securitySchemes
+api-security-component-openid-connect-url-changed-description: URL de OpenID Connect modificada en components/securitySchemes
 api-security-component-removed-description: esquema de seguridad removido en components/securitySchemes
 api-security-component-type-changed-description: tipo del esquema de seguridad modificado en components/securitySchemes
 api-security-removed-description: requisitos de seguridad removidos del endpoint
@@ -448,6 +478,8 @@ request-body-discriminator-mapping-deleted-description: mapeo del discriminador 
 request-body-discriminator-property-name-changed-description: nombre de la propiedad del discriminador del cuerpo de solicitud cambiado
 request-body-discriminator-removed-description: discriminador del cuerpo de solicitud removido
 request-body-enum-value-removed-description: valor del enum del cuerpo de solicitud removido
+request-body-enum-value-added-description: "valor del enum del cuerpo de solicitud agregado"
+request-body-became-not-enum-description: enum del cuerpo de solicitud removido
 request-body-max-decreased-description: valor máximo del cuerpo de solicitud reducido
 request-body-max-increased-description: valor máximo del cuerpo de solicitud aumentado
 request-body-max-length-decreased-description: longitud máxima del cuerpo de solicitud reducida
@@ -491,8 +523,10 @@ request-parameter-default-value-added-description: valor por defecto del paráme
 request-parameter-default-value-changed-description: valor por defecto del parámetro de solicitud cambiado
 request-parameter-default-value-removed-description: valor por defecto del parámetro de solicitud removido
 request-parameter-enum-value-added-description: valor del enum del parámetro de solicitud agregado
+request-parameter-became-not-enum-description: enum del parámetro de solicitud removido
 request-parameter-enum-value-removed-description: valor del enum del parámetro de solicitud removido
 request-parameter-property-enum-value-added-description: valor del enum de propiedad del parámetro de solicitud agregado
+request-parameter-property-became-not-enum-description: enum de propiedad del parámetro de solicitud removido
 request-parameter-property-enum-value-removed-description: valor del enum de propiedad del parámetro de solicitud removido
 request-parameter-max-decreased-description: valor máximo del parámetro de solicitud reducido
 request-parameter-max-increased-description: valor máximo del parámetro de solicitud aumentado
@@ -541,6 +575,7 @@ request-property-discriminator-mapping-deleted-description: mapeo del discrimina
 request-property-discriminator-property-name-changed-description: nombre de la propiedad del discriminador de solicitud cambiado
 request-property-discriminator-removed-description: discriminador de la propiedad de solicitud removido
 request-property-enum-value-added-description: valor del enum de la propiedad de solicitud agregado
+request-property-became-not-enum-description: enum de la propiedad de solicitud removido
 request-property-enum-value-removed-description: valor del enum de la propiedad de solicitud removido
 request-read-only-property-enum-value-removed-description: valor del enum de la propiedad de solicitud de solo lectura removido
 request-property-max-decreased-description: valor máximo de la propiedad de solicitud reducido
@@ -571,6 +606,7 @@ request-property-type-generalized-description: tipo de la propiedad de solicitud
 request-property-type-compatible-description: tipo de la propiedad de solicitud cambiado pero retrocompatible
 request-property-x-extensible-enum-value-removed-description: valor x-extensible-enum de la propiedad de solicitud removido
 request-required-property-became-not-read-only-description: propiedad requerida de solicitud dejó de ser de solo lectura
+request-required-property-became-not-read-only-in-openapi-31-description: propiedad requerida de solicitud dejó de ser de solo lectura en OpenAPI 3.1 o posterior
 request-required-property-became-not-write-only-description: propiedad requerida de solicitud dejó de ser de solo escritura
 request-required-property-became-read-only-description: propiedad requerida de solicitud se volvió de solo lectura
 request-required-property-became-write-only-description: propiedad requerida de solicitud se volvió de solo escritura
@@ -605,6 +641,9 @@ response-header-became-optional-description: encabezado de respuesta se volvió 
 response-media-type-added-description: tipo de media de respuesta agregado
 response-media-type-removed-description: tipo de media de respuesta removido
 response-mediatype-enum-value-removed-description: valor del enum del tipo de media de respuesta removido
+response-mediatype-became-enum-description: "tipo de media de respuesta restringido a enum"
+response-mediatype-enum-value-added-description: "valor del enum del tipo de media de respuesta agregado"
+response-mediatype-became-not-enum-description: enum del tipo de media de respuesta removido
 response-non-success-status-added-description: estado de no éxito de respuesta agregado
 response-non-success-status-removed-description: estado de no éxito de respuesta removido
 response-optional-property-added-description: propiedad opcional de respuesta agregada
@@ -633,6 +672,8 @@ response-property-discriminator-property-name-changed-description: nombre de la 
 response-property-discriminator-removed-description: discriminador de la propiedad de respuesta removido
 response-property-enum-value-added-description: valor del enum de la propiedad de respuesta agregado
 response-property-enum-value-removed-description: valor del enum de la propiedad de respuesta removido
+response-property-became-not-enum-description: enum de la propiedad de respuesta removido
+response-property-became-enum-description: propiedad de respuesta restringida a enum
 response-property-max-increased-description: valor máximo de la propiedad de respuesta aumentado
 response-property-max-length-increased-description: longitud máxima de la propiedad de respuesta aumentada
 response-property-max-length-unset-description: longitud máxima de la propiedad de respuesta removida
@@ -1210,12 +1251,16 @@ request-body-min-contains-set: el valor minContains del cuerpo de solicitud fue 
 request-body-min-contains-set-description: valor minContains del cuerpo de solicitud establecido
 request-body-min-contains-unset: el valor minContains del cuerpo de solicitud fue removido de %s
 request-body-min-contains-unset-description: valor minContains del cuerpo de solicitud removido
+request-body-min-items-decreased: el valor minItems del cuerpo de solicitud fue reducido de %s a %s
+request-body-min-items-decreased-description: valor minItems del cuerpo de solicitud reducido
 request-body-min-items-unset: el valor minItems del cuerpo de solicitud fue removido de %s
 request-body-min-items-unset-description: valor minItems del cuerpo de solicitud removido
 request-body-min-length-set: el valor minLength del cuerpo de solicitud fue establecido en %s
 request-body-min-length-set-description: valor minLength del cuerpo de solicitud establecido
 request-body-min-length-unset: el valor minLength del cuerpo de solicitud fue removido de %s
 request-body-min-length-unset-description: valor minLength del cuerpo de solicitud removido
+request-body-min-properties-decreased: el valor minProperties del cuerpo de solicitud fue reducido de %s a %s
+request-body-min-properties-decreased-description: valor minProperties del cuerpo de solicitud reducido
 request-body-min-properties-set: el valor minProperties del cuerpo de solicitud fue establecido en %s
 request-body-min-properties-set-description: valor minProperties del cuerpo de solicitud establecido
 request-body-min-properties-unset: el valor minProperties del cuerpo de solicitud fue removido de %s
@@ -1226,6 +1271,10 @@ request-parameter-exclusive-max-unset: para el parámetro %s de solicitud %s, el
 request-parameter-exclusive-max-unset-description: valor exclusiveMaximum del parámetro de solicitud removido
 request-parameter-exclusive-min-unset: para el parámetro %s de solicitud %s, el valor exclusiveMinimum fue removido de %s
 request-parameter-exclusive-min-unset-description: valor exclusiveMinimum del parámetro de solicitud removido
+request-parameter-max-contains-decreased: para el parámetro %s de solicitud %s, el valor maxContains fue reducido de %s a %s
+request-parameter-max-contains-decreased-description: valor maxContains del parámetro de solicitud reducido
+request-parameter-max-contains-increased: para el parámetro %s de solicitud %s, el valor maxContains fue incrementado de %s a %s
+request-parameter-max-contains-increased-description: valor maxContains del parámetro de solicitud incrementado
 request-parameter-max-contains-set: para el parámetro %s de solicitud %s, el valor maxContains fue establecido en %s
 request-parameter-max-contains-set-description: valor maxContains del parámetro de solicitud establecido
 request-parameter-max-contains-unset: para el parámetro %s de solicitud %s, el valor maxContains fue removido de %s
@@ -1236,12 +1285,20 @@ request-parameter-max-items-unset: para el parámetro %s de solicitud %s, el val
 request-parameter-max-items-unset-description: valor maxItems del parámetro de solicitud removido
 request-parameter-max-length-unset: para el parámetro %s de solicitud %s, el valor maxLength fue removido de %s
 request-parameter-max-length-unset-description: valor maxLength del parámetro de solicitud removido
+request-parameter-max-properties-decreased: para el parámetro %s de solicitud %s, el valor maxProperties fue reducido de %s a %s
+request-parameter-max-properties-decreased-description: valor maxProperties del parámetro de solicitud reducido
+request-parameter-max-properties-increased: para el parámetro %s de solicitud %s, el valor maxProperties fue incrementado de %s a %s
+request-parameter-max-properties-increased-description: valor maxProperties del parámetro de solicitud incrementado
 request-parameter-max-properties-set: para el parámetro %s de solicitud %s, el valor maxProperties fue establecido en %s
 request-parameter-max-properties-set-description: valor maxProperties del parámetro de solicitud establecido
 request-parameter-max-properties-unset: para el parámetro %s de solicitud %s, el valor maxProperties fue removido de %s
 request-parameter-max-properties-unset-description: valor maxProperties del parámetro de solicitud removido
 request-parameter-max-unset: para el parámetro %s de solicitud %s, el valor max fue removido de %s
 request-parameter-max-unset-description: valor max del parámetro de solicitud removido
+request-parameter-min-contains-decreased: para el parámetro %s de solicitud %s, el valor minContains fue reducido de %s a %s
+request-parameter-min-contains-decreased-description: valor minContains del parámetro de solicitud reducido
+request-parameter-min-contains-increased: para el parámetro %s de solicitud %s, el valor minContains fue incrementado de %s a %s
+request-parameter-min-contains-increased-description: valor minContains del parámetro de solicitud incrementado
 request-parameter-min-contains-set: para el parámetro %s de solicitud %s, el valor minContains fue establecido en %s
 request-parameter-min-contains-set-description: valor minContains del parámetro de solicitud establecido
 request-parameter-min-contains-unset: para el parámetro %s de solicitud %s, el valor minContains fue removido de %s
@@ -1252,6 +1309,10 @@ request-parameter-min-length-set: para el parámetro %s de solicitud %s, el valo
 request-parameter-min-length-set-description: valor minLength del parámetro de solicitud establecido
 request-parameter-min-length-unset: para el parámetro %s de solicitud %s, el valor minLength fue removido de %s
 request-parameter-min-length-unset-description: valor minLength del parámetro de solicitud removido
+request-parameter-min-properties-decreased: para el parámetro %s de solicitud %s, el valor minProperties fue reducido de %s a %s
+request-parameter-min-properties-decreased-description: valor minProperties del parámetro de solicitud reducido
+request-parameter-min-properties-increased: para el parámetro %s de solicitud %s, el valor minProperties fue incrementado de %s a %s
+request-parameter-min-properties-increased-description: valor minProperties del parámetro de solicitud incrementado
 request-parameter-min-properties-set: para el parámetro %s de solicitud %s, el valor minProperties fue establecido en %s
 request-parameter-min-properties-set-description: valor minProperties del parámetro de solicitud establecido
 request-parameter-min-properties-unset: para el parámetro %s de solicitud %s, el valor minProperties fue removido de %s
@@ -1282,22 +1343,30 @@ request-property-min-contains-set: el valor minContains de la propiedad de solic
 request-property-min-contains-set-description: valor minContains de la propiedad de solicitud establecido
 request-property-min-contains-unset: el valor minContains de la propiedad de solicitud %s fue removido de %s
 request-property-min-contains-unset-description: valor minContains de la propiedad de solicitud removido
+request-property-min-items-decreased: el valor minItems de la propiedad de solicitud %s fue reducido de %s a %s
+request-property-min-items-decreased-description: valor minItems de la propiedad de solicitud reducido
 request-property-min-items-unset: el valor minItems de la propiedad de solicitud %s fue removido de %s
 request-property-min-items-unset-description: valor minItems de la propiedad de solicitud removido
 request-property-min-length-set: el valor minLength de la propiedad de solicitud %s fue establecido en %s
 request-property-min-length-set-description: valor minLength de la propiedad de solicitud establecido
 request-property-min-length-unset: el valor minLength de la propiedad de solicitud %s fue removido de %s
 request-property-min-length-unset-description: valor minLength de la propiedad de solicitud removido
+request-property-min-properties-decreased: el valor minProperties de la propiedad de solicitud %s fue reducido de %s a %s
+request-property-min-properties-decreased-description: valor minProperties de la propiedad de solicitud reducido
 request-property-min-properties-set: el valor minProperties de la propiedad de solicitud %s fue establecido en %s
 request-property-min-properties-set-description: valor minProperties de la propiedad de solicitud establecido
 request-property-min-properties-unset: el valor minProperties de la propiedad de solicitud %s fue removido de %s
 request-property-min-properties-unset-description: valor minProperties de la propiedad de solicitud removido
 request-property-min-unset: el valor min de la propiedad de solicitud %s fue removido de %s
 request-property-min-unset-description: valor min de la propiedad de solicitud removido
+response-body-exclusive-max-decreased: el valor exclusiveMaximum del cuerpo de respuesta fue reducido de %s a %s
+response-body-exclusive-max-decreased-description: valor exclusiveMaximum del cuerpo de respuesta reducido
 response-body-exclusive-max-set: el valor exclusiveMaximum del cuerpo de respuesta fue establecido en %s
 response-body-exclusive-max-set-description: valor exclusiveMaximum del cuerpo de respuesta establecido
 response-body-exclusive-max-unset: el valor exclusiveMaximum del cuerpo de respuesta fue removido de %s
 response-body-exclusive-max-unset-description: valor exclusiveMaximum del cuerpo de respuesta removido
+response-body-exclusive-min-increased: el valor exclusiveMinimum del cuerpo de respuesta fue incrementado de %s a %s
+response-body-exclusive-min-increased-description: valor exclusiveMinimum del cuerpo de respuesta incrementado
 response-body-exclusive-min-set: el valor exclusiveMinimum del cuerpo de respuesta fue establecido en %s
 response-body-exclusive-min-set-description: valor exclusiveMinimum del cuerpo de respuesta establecido
 response-body-exclusive-min-unset: el valor exclusiveMinimum del cuerpo de respuesta fue removido de %s
@@ -1306,12 +1375,20 @@ response-body-max-contains-set: el valor maxContains del cuerpo de respuesta fue
 response-body-max-contains-set-description: valor maxContains del cuerpo de respuesta establecido
 response-body-max-contains-unset: el valor maxContains del cuerpo de respuesta fue removido de %s
 response-body-max-contains-unset-description: valor maxContains del cuerpo de respuesta removido
+response-body-max-decreased: el valor max del cuerpo de respuesta fue reducido de %s a %s
+response-body-max-decreased-description: valor max del cuerpo de respuesta reducido
+response-body-max-items-decreased: el valor maxItems del cuerpo de respuesta fue reducido de %s a %s
+response-body-max-items-decreased-description: valor maxItems del cuerpo de respuesta reducido
 response-body-max-items-set: el valor maxItems del cuerpo de respuesta fue establecido en %s
 response-body-max-items-set-description: valor maxItems del cuerpo de respuesta establecido
 response-body-max-items-unset: el valor maxItems del cuerpo de respuesta fue removido de %s
 response-body-max-items-unset-description: valor maxItems del cuerpo de respuesta removido
+response-body-max-length-decreased: el valor maxLength del cuerpo de respuesta fue reducido de %s a %s
+response-body-max-length-decreased-description: valor maxLength del cuerpo de respuesta reducido
 response-body-max-length-set: el valor maxLength del cuerpo de respuesta fue establecido en %s
 response-body-max-length-set-description: valor maxLength del cuerpo de respuesta establecido
+response-body-max-properties-decreased: el valor maxProperties del cuerpo de respuesta fue reducido de %s a %s
+response-body-max-properties-decreased-description: valor maxProperties del cuerpo de respuesta reducido
 response-body-max-properties-set: el valor maxProperties del cuerpo de respuesta fue establecido en %s
 response-body-max-properties-set-description: valor maxProperties del cuerpo de respuesta establecido
 response-body-max-properties-unset: el valor maxProperties del cuerpo de respuesta fue removido de %s
@@ -1324,12 +1401,20 @@ response-body-min-contains-set: el valor minContains del cuerpo de respuesta fue
 response-body-min-contains-set-description: valor minContains del cuerpo de respuesta establecido
 response-body-min-contains-unset: el valor minContains del cuerpo de respuesta fue removido de %s
 response-body-min-contains-unset-description: valor minContains del cuerpo de respuesta removido
+response-body-min-increased: el valor min del cuerpo de respuesta fue incrementado de %s a %s
+response-body-min-increased-description: valor min del cuerpo de respuesta incrementado
+response-body-min-items-increased: el valor minItems del cuerpo de respuesta fue incrementado de %s a %s
+response-body-min-items-increased-description: valor minItems del cuerpo de respuesta incrementado
 response-body-min-items-set: el valor minItems del cuerpo de respuesta fue establecido en %s
 response-body-min-items-set-description: valor minItems del cuerpo de respuesta establecido
+response-body-min-length-increased: el valor minLength del cuerpo de respuesta fue incrementado de %s a %s
+response-body-min-length-increased-description: valor minLength del cuerpo de respuesta incrementado
 response-body-min-length-set: el valor minLength del cuerpo de respuesta fue establecido en %s
 response-body-min-length-set-description: valor minLength del cuerpo de respuesta establecido
 response-body-min-length-unset: el valor minLength del cuerpo de respuesta fue removido de %s
 response-body-min-length-unset-description: valor minLength del cuerpo de respuesta removido
+response-body-min-properties-increased: el valor minProperties del cuerpo de respuesta fue incrementado de %s a %s
+response-body-min-properties-increased-description: valor minProperties del cuerpo de respuesta incrementado
 response-body-min-properties-set: el valor minProperties del cuerpo de respuesta fue establecido en %s
 response-body-min-properties-set-description: valor minProperties del cuerpo de respuesta establecido
 response-body-min-properties-unset: el valor minProperties del cuerpo de respuesta fue removido de %s
@@ -1340,26 +1425,54 @@ response-body-min-unset: el valor min del cuerpo de respuesta fue removido de %s
 response-body-min-unset-description: valor min del cuerpo de respuesta removido
 response-body-multiple-of-set: el valor multipleOf del cuerpo de respuesta fue establecido en %s
 response-body-multiple-of-set-description: valor multipleOf del cuerpo de respuesta establecido
+response-header-exclusive-max-decreased: el valor exclusiveMaximum del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-exclusive-max-decreased-description: valor exclusiveMaximum del encabezado de respuesta reducido
+response-header-exclusive-max-increased: el valor exclusiveMaximum del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-exclusive-max-increased-description: valor exclusiveMaximum del encabezado de respuesta incrementado
 response-header-exclusive-max-set: el valor exclusiveMaximum del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-exclusive-max-set-description: valor exclusiveMaximum del encabezado de respuesta establecido
 response-header-exclusive-max-unset: el valor exclusiveMaximum del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-exclusive-max-unset-description: valor exclusiveMaximum del encabezado de respuesta removido
+response-header-exclusive-min-decreased: el valor exclusiveMinimum del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-exclusive-min-decreased-description: valor exclusiveMinimum del encabezado de respuesta reducido
+response-header-exclusive-min-increased: el valor exclusiveMinimum del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-exclusive-min-increased-description: valor exclusiveMinimum del encabezado de respuesta incrementado
 response-header-exclusive-min-set: el valor exclusiveMinimum del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-exclusive-min-set-description: valor exclusiveMinimum del encabezado de respuesta establecido
 response-header-exclusive-min-unset: el valor exclusiveMinimum del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-exclusive-min-unset-description: valor exclusiveMinimum del encabezado de respuesta removido
+response-header-max-contains-decreased: el valor maxContains del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-max-contains-decreased-description: valor maxContains del encabezado de respuesta reducido
+response-header-max-contains-increased: el valor maxContains del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-max-contains-increased-description: valor maxContains del encabezado de respuesta incrementado
 response-header-max-contains-set: el valor maxContains del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-max-contains-set-description: valor maxContains del encabezado de respuesta establecido
 response-header-max-contains-unset: el valor maxContains del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-max-contains-unset-description: valor maxContains del encabezado de respuesta removido
+response-header-max-decreased: el valor max del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-max-decreased-description: valor max del encabezado de respuesta reducido
+response-header-max-increased: el valor max del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-max-increased-description: valor max del encabezado de respuesta incrementado
+response-header-max-items-decreased: el valor maxItems del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-max-items-decreased-description: valor maxItems del encabezado de respuesta reducido
+response-header-max-items-increased: el valor maxItems del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-max-items-increased-description: valor maxItems del encabezado de respuesta incrementado
 response-header-max-items-set: el valor maxItems del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-max-items-set-description: valor maxItems del encabezado de respuesta establecido
 response-header-max-items-unset: el valor maxItems del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-max-items-unset-description: valor maxItems del encabezado de respuesta removido
+response-header-max-length-decreased: el valor maxLength del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-max-length-decreased-description: valor maxLength del encabezado de respuesta reducido
+response-header-max-length-increased: el valor maxLength del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-max-length-increased-description: valor maxLength del encabezado de respuesta incrementado
 response-header-max-length-set: el valor maxLength del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-max-length-set-description: valor maxLength del encabezado de respuesta establecido
 response-header-max-length-unset: el valor maxLength del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-max-length-unset-description: valor maxLength del encabezado de respuesta removido
+response-header-max-properties-decreased: el valor maxProperties del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-max-properties-decreased-description: valor maxProperties del encabezado de respuesta reducido
+response-header-max-properties-increased: el valor maxProperties del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-max-properties-increased-description: valor maxProperties del encabezado de respuesta incrementado
 response-header-max-properties-set: el valor maxProperties del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-max-properties-set-description: valor maxProperties del encabezado de respuesta establecido
 response-header-max-properties-unset: el valor maxProperties del encabezado de respuesta %s fue removido de %s para el estado %s
@@ -1368,18 +1481,38 @@ response-header-max-set: el valor max del encabezado de respuesta %s fue estable
 response-header-max-set-description: valor max del encabezado de respuesta establecido
 response-header-max-unset: el valor max del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-max-unset-description: valor max del encabezado de respuesta removido
+response-header-min-contains-decreased: el valor minContains del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-min-contains-decreased-description: valor minContains del encabezado de respuesta reducido
+response-header-min-contains-increased: el valor minContains del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-min-contains-increased-description: valor minContains del encabezado de respuesta incrementado
 response-header-min-contains-set: el valor minContains del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-min-contains-set-description: valor minContains del encabezado de respuesta establecido
 response-header-min-contains-unset: el valor minContains del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-min-contains-unset-description: valor minContains del encabezado de respuesta removido
+response-header-min-decreased: el valor min del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-min-decreased-description: valor min del encabezado de respuesta reducido
+response-header-min-increased: el valor min del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-min-increased-description: valor min del encabezado de respuesta incrementado
+response-header-min-items-decreased: el valor minItems del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-min-items-decreased-description: valor minItems del encabezado de respuesta reducido
+response-header-min-items-increased: el valor minItems del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-min-items-increased-description: valor minItems del encabezado de respuesta incrementado
 response-header-min-items-set: el valor minItems del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-min-items-set-description: valor minItems del encabezado de respuesta establecido
 response-header-min-items-unset: el valor minItems del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-min-items-unset-description: valor minItems del encabezado de respuesta removido
+response-header-min-length-decreased: el valor minLength del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-min-length-decreased-description: valor minLength del encabezado de respuesta reducido
+response-header-min-length-increased: el valor minLength del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-min-length-increased-description: valor minLength del encabezado de respuesta incrementado
 response-header-min-length-set: el valor minLength del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-min-length-set-description: valor minLength del encabezado de respuesta establecido
 response-header-min-length-unset: el valor minLength del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-min-length-unset-description: valor minLength del encabezado de respuesta removido
+response-header-min-properties-decreased: el valor minProperties del encabezado de respuesta %s fue reducido de %s a %s para el estado %s
+response-header-min-properties-decreased-description: valor minProperties del encabezado de respuesta reducido
+response-header-min-properties-increased: el valor minProperties del encabezado de respuesta %s fue incrementado de %s a %s para el estado %s
+response-header-min-properties-increased-description: valor minProperties del encabezado de respuesta incrementado
 response-header-min-properties-set: el valor minProperties del encabezado de respuesta %s fue establecido en %s para el estado %s
 response-header-min-properties-set-description: valor minProperties del encabezado de respuesta establecido
 response-header-min-properties-unset: el valor minProperties del encabezado de respuesta %s fue removido de %s para el estado %s
@@ -1392,10 +1525,14 @@ response-header-multiple-of-set: el valor multipleOf del encabezado de respuesta
 response-header-multiple-of-set-description: valor multipleOf del encabezado de respuesta establecido
 response-header-multiple-of-unset: el valor multipleOf del encabezado de respuesta %s fue removido de %s para el estado %s
 response-header-multiple-of-unset-description: valor multipleOf del encabezado de respuesta removido
+response-property-exclusive-max-decreased: el valor exclusiveMaximum de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
+response-property-exclusive-max-decreased-description: valor exclusiveMaximum de la propiedad de respuesta reducido
 response-property-exclusive-max-set: el valor exclusiveMaximum de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-exclusive-max-set-description: valor exclusiveMaximum de la propiedad de respuesta establecido
 response-property-exclusive-max-unset: el valor exclusiveMaximum de la propiedad de respuesta %s fue removido de %s para el estado %s
 response-property-exclusive-max-unset-description: valor exclusiveMaximum de la propiedad de respuesta removido
+response-property-exclusive-min-increased: el valor exclusiveMinimum de la propiedad de respuesta %s fue incrementado de %s a %s para el estado %s
+response-property-exclusive-min-increased-description: valor exclusiveMinimum de la propiedad de respuesta incrementado
 response-property-exclusive-min-set: el valor exclusiveMinimum de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-exclusive-min-set-description: valor exclusiveMinimum de la propiedad de respuesta establecido
 response-property-exclusive-min-unset: el valor exclusiveMinimum de la propiedad de respuesta %s fue removido de %s para el estado %s
@@ -1404,12 +1541,20 @@ response-property-max-contains-set: el valor maxContains de la propiedad de resp
 response-property-max-contains-set-description: valor maxContains de la propiedad de respuesta establecido
 response-property-max-contains-unset: el valor maxContains de la propiedad de respuesta %s fue removido de %s para el estado %s
 response-property-max-contains-unset-description: valor maxContains de la propiedad de respuesta removido
+response-property-max-decreased: el valor max de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
+response-property-max-decreased-description: valor max de la propiedad de respuesta reducido
+response-property-max-items-decreased: el valor maxItems de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
+response-property-max-items-decreased-description: valor maxItems de la propiedad de respuesta reducido
 response-property-max-items-set: el valor maxItems de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-max-items-set-description: valor maxItems de la propiedad de respuesta establecido
 response-property-max-items-unset: el valor maxItems de la propiedad de respuesta %s fue removido de %s para el estado %s
 response-property-max-items-unset-description: valor maxItems de la propiedad de respuesta removido
+response-property-max-length-decreased: el valor maxLength de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
+response-property-max-length-decreased-description: valor maxLength de la propiedad de respuesta reducido
 response-property-max-length-set: el valor maxLength de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-max-length-set-description: valor maxLength de la propiedad de respuesta establecido
+response-property-max-properties-decreased: el valor maxProperties de la propiedad de respuesta %s fue reducido de %s a %s para el estado %s
+response-property-max-properties-decreased-description: valor maxProperties de la propiedad de respuesta reducido
 response-property-max-properties-set: el valor maxProperties de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-max-properties-set-description: valor maxProperties de la propiedad de respuesta establecido
 response-property-max-properties-unset: el valor maxProperties de la propiedad de respuesta %s fue removido de %s para el estado %s
@@ -1422,12 +1567,20 @@ response-property-min-contains-set: el valor minContains de la propiedad de resp
 response-property-min-contains-set-description: valor minContains de la propiedad de respuesta establecido
 response-property-min-contains-unset: el valor minContains de la propiedad de respuesta %s fue removido de %s para el estado %s
 response-property-min-contains-unset-description: valor minContains de la propiedad de respuesta removido
+response-property-min-increased: el valor min de la propiedad de respuesta %s fue incrementado de %s a %s para el estado %s
+response-property-min-increased-description: valor min de la propiedad de respuesta incrementado
+response-property-min-items-increased: el valor minItems de la propiedad de respuesta %s fue incrementado de %s a %s para el estado %s
+response-property-min-items-increased-description: valor minItems de la propiedad de respuesta incrementado
 response-property-min-items-set: el valor minItems de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-min-items-set-description: valor minItems de la propiedad de respuesta establecido
+response-property-min-length-increased: el valor minLength de la propiedad de respuesta %s fue incrementado de %s a %s para el estado %s
+response-property-min-length-increased-description: valor minLength de la propiedad de respuesta incrementado
 response-property-min-length-set: el valor minLength de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-min-length-set-description: valor minLength de la propiedad de respuesta establecido
 response-property-min-length-unset: el valor minLength de la propiedad de respuesta %s fue removido de %s para el estado %s
 response-property-min-length-unset-description: valor minLength de la propiedad de respuesta removido
+response-property-min-properties-increased: el valor minProperties de la propiedad de respuesta %s fue incrementado de %s a %s para el estado %s
+response-property-min-properties-increased-description: valor minProperties de la propiedad de respuesta incrementado
 response-property-min-properties-set: el valor minProperties de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-min-properties-set-description: valor minProperties de la propiedad de respuesta establecido
 response-property-min-properties-unset: el valor minProperties de la propiedad de respuesta %s fue removido de %s para el estado %s
@@ -1438,3 +1591,7 @@ response-property-min-unset: el valor min de la propiedad de respuesta %s fue re
 response-property-min-unset-description: valor min de la propiedad de respuesta removido
 response-property-multiple-of-set: el valor multipleOf de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-multiple-of-set-description: valor multipleOf de la propiedad de respuesta establecido
+shared-schema-detail-also: "también en %s"
+shared-schema-detail-also-cyclic: "también en %s y más"
+shared-schema-detail-also-more: "también en %s y %d más"
+shared-schema-detail-name: "esquema compartido: %s"

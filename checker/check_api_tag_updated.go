@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -27,7 +28,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 
 			baseOp := pathItem.Base.GetOperation(operation)
 			revisionOp := pathItem.Revision.GetOperation(operation)
-			fieldBase, fieldRevision := operationFieldSources(operationsSources, operationItem, "tags")
+			fieldBase, fieldRevision := location.OperationFieldSources(operationsSources, operationItem, "tags")
 
 			for _, tag := range operationItem.TagsDiff.Deleted {
 				result = append(result, NewApiChange(
@@ -39,7 +40,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					baseOp,
 					operation,
 					path,
-				).WithSources(sequenceItemSource(operationsSources, baseOp, "tags", tag, fieldBase), nil))
+				).WithSources(location.SequenceItemSource(operationsSources, baseOp, "tags", tag, fieldBase), nil))
 			}
 
 			for _, tag := range operationItem.TagsDiff.Added {
@@ -52,7 +53,7 @@ func APITagUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Operation
 					baseOp,
 					operation,
 					path,
-				).WithSources(nil, sequenceItemSource(operationsSources, revisionOp, "tags", tag, fieldRevision)))
+				).WithSources(nil, location.SequenceItemSource(operationsSources, revisionOp, "tags", tag, fieldRevision)))
 			}
 		}
 	}

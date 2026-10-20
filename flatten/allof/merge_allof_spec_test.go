@@ -1,6 +1,7 @@
 package allof_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -194,4 +195,45 @@ func Test_MergeSpec_HoistedNameIsStable(t *testing.T) {
 	shifted := name("../../data/allof/two-recursive-branches-shifted.yaml")
 	require.Equal(t, "#/components/schemas/AllOfMerged_NodeA_NodeB", base)
 	require.Equal(t, base, shifted, "an unrelated earlier cycle must not move the name")
+}
+
+// A schema reached from several attachment points is merged once: after
+// MergeSpec every $ref to it, from an operation or from another schema, still
+// points at the component's own object, as in the input. Merging each
+// attachment point separately would give each its own copy of everything it
+// reaches, multiplying the document by the number of attachment points.
+func TestMergeSpec_RefsKeepSharingOneObject(t *testing.T) {
+	spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("testdata/shared_ref.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	node := spec.Spec.Components.Schemas["Node"].Value
+	leaf := spec.Spec.Components.Schemas["Leaf"].Value
+	for _, path := range []string{"/a", "/b"} {
+		require.Same(t, node, spec.Spec.Paths.Value(path).Get.Responses.Value("200").Value.Content["application/json"].Schema.Value, path)
+	}
+	require.Same(t, node, node.Properties["next"].Value)
+	require.Same(t, leaf, node.Properties["leaf"].Value)
+}
+
+// PeriodZone's allOf references Zone, whose own allOf is merged in the same
+// pass. Zone must be merged first whichever order the properties are visited
+// in, or PeriodZone merges from Zone's still unmerged value and comes out
+// empty in some runs (https://github.com/oasdiff/oasdiff/issues/1279).
+func TestMergeSpec_AllOfOfAnAllOfIsMergedInAnyOrder(t *testing.T) {
+	var first []byte
+	for range 50 {
+		spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/cycle-through-oneof.yaml"), load.WithFlattenAllOf())
+		require.NoError(t, err)
+
+		periodZone := spec.Spec.Components.Schemas["PeriodZone"].Value
+		require.True(t, periodZone.Type.Is("object"))
+		require.Contains(t, periodZone.Properties, "periods")
+
+		out, err := json.Marshal(spec.Spec)
+		require.NoError(t, err)
+		if first == nil {
+			first = out
+		}
+		require.Equal(t, string(first), string(out))
+	}
 }

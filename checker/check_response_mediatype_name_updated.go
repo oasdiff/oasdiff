@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -47,7 +48,7 @@ func ResponseMediaTypeNameUpdatedCheck(diffReport *diff.Diff, operationsSources 
 
 					fromMediaType, _ := mediaType.NameDiff.NameDiff.From.(string)
 					toMediaType, _ := mediaType.NameDiff.NameDiff.To.(string)
-					baseSource, revisionSource := responseMediaTypeNameSources(operationsSources, operationItem, responsesDiff, fromMediaType, toMediaType)
+					baseSource, revisionSource := location.ResponseMediaTypeNameSources(operationsSources, operationItem, responsesDiff, fromMediaType, toMediaType)
 
 					// A difference in the media type parameters, classified by
 					// what happened: a parameter appearing narrows what the

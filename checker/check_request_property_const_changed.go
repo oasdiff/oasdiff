@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,7 +20,7 @@ func RequestPropertyConstChangedCheck(diffReport *diff.Diff, operationsSources *
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.ConstDiff != nil {
 			constDiff := info.schemaDiff.ConstDiff
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "const")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "const")
 
 			if constDiff.From == nil {
 				result = append(result, info.newChange(
@@ -48,7 +49,7 @@ func RequestPropertyConstChangedCheck(diffReport *diff.Diff, operationsSources *
 			}
 
 			constDiff := p.propertyDiff.ConstDiff
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "const")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "const")
 
 			if constDiff.From == nil {
 				result = append(result, p.newChange(

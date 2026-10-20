@@ -37,7 +37,11 @@ const (
 	// element were on the request side: narrowing is breaking, widening is
 	// not, the reverse of plain response polarity.
 	GuardNegotiated Guard = "negotiated"
+	// GuardRequiredInRequests: the property was already required in
+	// requests, so the request-side effect of a change that requires it
+	// there is nullified.
+	GuardRequiredInRequests Guard = "required-in-requests"
 )
 
 // Guards lists every guard, in declaration order.
-var Guards = []Guard{GuardReadOnly, GuardWriteOnly, GuardSanctioned, GuardNonSuccess, GuardHasDefault, GuardNegotiated}
+var Guards = []Guard{GuardReadOnly, GuardWriteOnly, GuardSanctioned, GuardNonSuccess, GuardHasDefault, GuardNegotiated, GuardRequiredInRequests}

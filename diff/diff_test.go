@@ -1159,6 +1159,33 @@ func TestGetPathsDiff_WithSinceDate(t *testing.T) {
 	require.Nil(t, osm)
 }
 
+// The spec has three paths that are the same endpoint once parameter names are
+// ignored. The error names the first two in sorted order, on every run.
+func TestGetPathsDiff_DuplicateEndpoint(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/base.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	for range 10 {
+		_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+		require.EqualError(t, err, "duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may add the x-since-date extension to specify order, or include path parameter names in endpoint matching with --include-path-params")
+	}
+}
+
+// The same path in two composed specs can't be told apart by path parameter
+// names, so the error only suggests x-since-date.
+func TestGetPathsDiff_DuplicateEndpointSamePath(t *testing.T) {
+	const dir = "../data/duplicate_endpoints/composed/"
+	loader := openapi3.NewLoader()
+	a, err := load.NewSpecInfo(loader, load.NewSource(dir+"a.yaml"))
+	require.NoError(t, err)
+	b, err := load.NewSpecInfo(loader, load.NewSource(dir+"b.yaml"))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{a, b}, []*load.SpecInfo{a})
+	require.EqualError(t, err, "duplicate endpoint: GET /pets in "+dir+"a.yaml and GET /pets in "+dir+"b.yaml. You may add the x-since-date extension to specify order")
+}
+
 // Regression for #1041: OR-alternatives that share a security scheme (the only
 // way to express "scope A OR scope B" for one OAuth2 scheme) were matched by
 // scheme name alone, inventing a phantom scope add/remove, even on a spec
@@ -1267,4 +1294,34 @@ func TestDiff_SharedSchemeORAlternatives_AmbiguousScopeChangeIsAddDelete(t *test
 	require.ElementsMatch(t,
 		[]string{"petstore_auth: [list:pets, read:pets]", "petstore_auth: [audit:pets, write:pets]"},
 		securityAlternativeStrings(securityDiff.Added))
+}
+
+// The path that was merged first has the invalid x-since-date, so the error
+// names that path, not the one being merged.
+func TestGetPathsDiff_InvalidSinceDateOld(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/invalid_since_date/old.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{a}), \"not a date\" is not a date in YYYY-MM-DD format")
+}
+
+func TestGetPathsDiff_InvalidSinceDateNew(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/invalid_since_date/new.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{b}), \"not a date\" is not a date in YYYY-MM-DD format")
+}
+
+// kin decodes an unquoted number as a float64, which is not a date either.
+func TestGetPathsDiff_InvalidSinceDateNumber(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/invalid_since_date/number.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{a}), 12345 is not a date in YYYY-MM-DD format")
 }

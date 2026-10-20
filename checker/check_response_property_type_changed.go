@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -50,7 +52,7 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 		if !typeDiff.Empty() || !formatDiff.Empty() {
 			id, comment := responseTypeChangeId(typeDiff, formatDiff, isStronglyTyped(info.mediaType), TypeChangeLooselyTypedCommentId, schemaDiff,
 				ResponseBodyTypeSpecializedId, ResponseBodyTypeCompatibleId, ResponseBodyTypeGeneralizedId, ResponseBodyTypeChangedId)
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
 				id,
 				[]any{getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), info.responseStatus},
@@ -70,10 +72,10 @@ func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *
 			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
 				id, comment := responseTypeChangeId(propTypeDiff, propFormatDiff, isStronglyTyped(info.mediaType), TypeChangeLooselyTypedCommentId, propSchemaDiff,
 					ResponsePropertyTypeSpecializedId, ResponsePropertyTypeCompatibleId, ResponsePropertyTypeGeneralizedId, ResponsePropertyTypeChangedId)
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff), info.responseStatus},
 					comment,
 				).WithSources(propBaseSource, propRevisionSource))
 			}

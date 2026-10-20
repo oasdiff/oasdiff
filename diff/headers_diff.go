@@ -52,34 +52,28 @@ func getHeadersDiffInternal(config *Config, state *state, headers1, headers2 ope
 
 	result := newHeadersDiff()
 
-	for headerName1, headerRef1 := range headers1 {
-		if headerRef2, ok := headers2[headerName1]; ok {
-			value1, err := derefHeader(headerRef1)
-			if err != nil {
-				return nil, err
-			}
+	added, deleted, common := keysDiff(headers1, headers2)
+	result.Added = added
+	result.Deleted = deleted
 
-			value2, err := derefHeader(headerRef2)
-			if err != nil {
-				return nil, err
-			}
-
-			diff, err := getHeaderDiff(config, state, value1, value2)
-			if err != nil {
-				return nil, err
-			}
-
-			if !diff.Empty() {
-				result.Modified[headerName1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, headerName1)
+	for _, name := range common {
+		value1, err := derefHeader(headers1[name])
+		if err != nil {
+			return nil, err
 		}
-	}
 
-	for headerName2 := range headers2 {
-		if _, ok := headers1[headerName2]; !ok {
-			result.Added = append(result.Added, headerName2)
+		value2, err := derefHeader(headers2[name])
+		if err != nil {
+			return nil, err
+		}
+
+		diff, err := getHeaderDiff(config, state, value1, value2)
+		if err != nil {
+			return nil, err
+		}
+
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
 

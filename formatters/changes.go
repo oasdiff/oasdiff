@@ -5,20 +5,21 @@ import (
 )
 
 type Change struct {
-	Id             string          `json:"id,omitempty" yaml:"id,omitempty"`
-	Text           string          `json:"text,omitempty" yaml:"text,omitempty"`
-	Comment        string          `json:"comment,omitempty" yaml:"comment,omitempty"`
-	Disclaimers    []string        `json:"disclaimers,omitempty" yaml:"disclaimers,omitempty"`
-	Level          checker.Level   `json:"level" yaml:"level"`
-	Operation      string          `json:"operation,omitempty" yaml:"operation,omitempty"`
-	OperationId    string          `json:"operationId,omitempty" yaml:"operationId,omitempty"`
-	Path           string          `json:"path,omitempty" yaml:"path,omitempty"`
-	Section        string          `json:"section,omitempty" yaml:"section,omitempty"`
-	IsBreaking     bool            `json:"-" yaml:"-"`
-	Attributes     map[string]any  `json:"attributes,omitempty" yaml:"attributes,omitempty"`
-	BaseSource     *checker.Source `json:"baseSource,omitempty" yaml:"baseSource,omitempty"`
-	RevisionSource *checker.Source `json:"revisionSource,omitempty" yaml:"revisionSource,omitempty"`
-	Fingerprint    string          `json:"fingerprint,omitempty" yaml:"fingerprint,omitempty"`
+	Id             string                `json:"id,omitempty" yaml:"id,omitempty"`
+	Text           string                `json:"text,omitempty" yaml:"text,omitempty"`
+	Comment        string                `json:"comment,omitempty" yaml:"comment,omitempty"`
+	Disclaimers    []string              `json:"disclaimers,omitempty" yaml:"disclaimers,omitempty"`
+	SharedSchema   *checker.SharedSchema `json:"sharedSchema,omitempty" yaml:"sharedSchema,omitempty"`
+	Level          checker.Level         `json:"level" yaml:"level"`
+	Operation      string                `json:"operation,omitempty" yaml:"operation,omitempty"`
+	OperationId    string                `json:"operationId,omitempty" yaml:"operationId,omitempty"`
+	Path           string                `json:"path,omitempty" yaml:"path,omitempty"`
+	Section        string                `json:"section,omitempty" yaml:"section,omitempty"`
+	IsBreaking     bool                  `json:"-" yaml:"-"`
+	Attributes     map[string]any        `json:"attributes,omitempty" yaml:"attributes,omitempty"`
+	BaseSource     *checker.Source       `json:"baseSource,omitempty" yaml:"baseSource,omitempty"`
+	RevisionSource *checker.Source       `json:"revisionSource,omitempty" yaml:"revisionSource,omitempty"`
+	Fingerprint    string                `json:"fingerprint,omitempty" yaml:"fingerprint,omitempty"`
 }
 
 // disclaimerNames renders disclaimers for output. The name is the stable form:
@@ -56,6 +57,9 @@ func NewChanges(originalChanges checker.Changes, l checker.Localizer) Changes {
 			BaseSource:     change.GetBaseSource(),
 			RevisionSource: change.GetRevisionSource(),
 			Fingerprint:    checker.Fingerprint(change),
+		}
+		if apiChange, ok := change.(checker.ApiChange); ok {
+			changes[i].SharedSchema = apiChange.GetSharedSchema()
 		}
 	}
 	return changes

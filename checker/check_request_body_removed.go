@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -27,7 +28,7 @@ func RequestBodyRemovedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 
 			if operationItem.RequestBodyDiff.Deleted {
-				baseSource := requestBodySource(operationsSources, operationItem.Base)
+				baseSource := location.RequestBodySource(operationsSources, operationItem.Base)
 				result = append(result, opInfo.NewApiChange(
 					RequestBodyRemovedId,
 					nil,

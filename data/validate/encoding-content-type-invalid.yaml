@@ -1,0 +1,22 @@
+openapi: 3.0.0
+info:
+  title: t
+  version: "1.0"
+paths:
+  /pets:
+    post:
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                photo:
+                  type: string
+                  format: binary
+            encoding:
+              photo:
+                contentType: png
+      responses:
+        '200':
+          description: ok

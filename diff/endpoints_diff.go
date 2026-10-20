@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -72,25 +74,28 @@ func getEndpointsDiffInternal(config *Config, state *state, paths1, paths2 *open
 	paths1Mod := rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase)
 	paths2Mod := rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision)
 
-	addedPaths, deletedPaths, otherPaths := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	added, deleted, common, pairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
 
-	for path, pathItem := range addedPaths.Map() {
-		for method := range pathItem.Operations() {
+	for _, path := range added {
+		for method := range paths2Mod.Value(path).Operations() {
 			result.addAddedPath(path, method)
 		}
 	}
 
-	for path, pathItem := range deletedPaths.Map() {
-		for method := range pathItem.Operations() {
+	for _, path := range deleted {
+		for method := range paths1Mod.Value(path).Operations() {
 			result.addDeletedPath(path, method)
 		}
 	}
 
-	for path, pathItemPair := range otherPaths {
-		if err := result.addModifiedPaths(config, state, path, pathItemPair); err != nil {
+	for _, path := range common {
+		if err := result.addModifiedPaths(config, state, path, pairs[path]); err != nil {
 			return nil, err
 		}
 	}
+
+	slices.SortFunc(result.Added, result.Added.SortFunc)
+	slices.SortFunc(result.Deleted, result.Deleted.SortFunc)
 
 	return result, nil
 }

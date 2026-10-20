@@ -1,0 +1,17 @@
+openapi: 3.1.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      x-stability-level: alpha
+      responses:
+        "200":
+          description: Pets
+webhooks:
+  orderCreated:
+    post:
+      responses:
+        "200":
+          description: Created

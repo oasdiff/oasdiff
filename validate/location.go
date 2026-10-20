@@ -125,6 +125,16 @@ func locationForKinError(err error) *openapi3.Location {
 	if aoi, ok := errors.AsType[*openapi3.AdditionalOperationsInvalidMethodError](err); ok && aoi.Origin != nil {
 		return additionalOperationsLoc(aoi.Origin)
 	}
+	if aof, ok := errors.AsType[*openapi3.AdditionalOperationsFixedMethodCaseError](err); ok && aof.Origin != nil {
+		return additionalOperationsLoc(aof.Origin)
+	}
+	if iect, ok := errors.AsType[*openapi3.InvalidEncodingContentTypeError](err); ok && iect.Origin != nil {
+		return fieldLoc(iect.Origin, "contentType")
+	}
+	if srsu, ok := errors.AsType[*openapi3.SecurityRequirementSchemeUndefinedError](err); ok && srsu.Origin != nil {
+		// Origin is the document or operation holding the requirement.
+		return fieldLoc(srsu.Origin, "security")
+	}
 	if drf, ok := errors.AsType[*openapi3.DuplicateRequiredFieldError](err); ok && drf.Origin != nil {
 		// Origin is the schema; the duplicate is inside its `required`
 		// array, so pin there rather than at the schema's own line.

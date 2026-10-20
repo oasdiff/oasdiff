@@ -1,10 +1,10 @@
 package internal
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"slices"
+	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/checker/coverage"
@@ -30,31 +30,38 @@ func getChecksCoverageCmd() *cobra.Command {
 
 	addChecksFormatFlags(&cmd)
 	enumWithOptions(&cmd, newEnumSliceValue(GetCoverageTags(), nil), "tags", "t", "include only edits matching the tags: values of the same dimension are ORed, dimensions are ANDed")
+	cmd.PersistentFlags().String("id", "", "include only edits covered by the check with this id")
+	cmd.PersistentFlags().String("location", "", "include only edits whose location contains this string")
 	cmd.PersistentFlags().Bool("patterns", false, "list the waiver and non-contract patterns instead of the edits")
 
 	return &cmd
 }
 
-// getChecksCoverageArgs rejects arguments and the flag combination the
-// command cannot honour.
+// getChecksCoverageArgs rejects arguments, an --id naming no check, and the
+// flag combination the command cannot honour.
 func getChecksCoverageArgs() cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
 		if err := cobra.NoArgs(cmd, args); err != nil {
 			return err
 		}
-		return checkPatternsWithoutTags(cmd)
+		if err := checkKnownId(cmd); err != nil {
+			return err
+		}
+		return checkPatternsWithoutEditFilters(cmd)
 	}
 }
 
-// checkPatternsWithoutTags rejects --tags with --patterns: the patterns
-// listing has no edits to filter.
-func checkPatternsWithoutTags(cmd *cobra.Command) error {
+// checkPatternsWithoutEditFilters rejects --tags and --location with
+// --patterns: the patterns listing has no edits to filter.
+func checkPatternsWithoutEditFilters(cmd *cobra.Command) error {
 	patterns, err := cmd.Flags().GetBool("patterns")
 	if err != nil || !patterns {
 		return nil
 	}
-	if cmd.Flags().Changed("tags") {
-		return errors.New("--tags cannot be used with --patterns: --tags filters edits, and --patterns lists patterns rather than edits")
+	for _, name := range []string{"tags", "id", "location"} {
+		if cmd.Flags().Changed(name) {
+			return fmt.Errorf("--%s cannot be used with --patterns: --%s filters edits, and --patterns lists patterns rather than edits", name, name)
+		}
 	}
 	return nil
 }
@@ -68,12 +75,16 @@ func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
 		return false, getErrUnsupportedFormat(format, checksCoverageCmd)
 	}
 
+	id := flags.getId()
+
 	var bytes []byte
 	if flags.getViper().GetBool("patterns") {
 		bytes, err = formatter.RenderCoveragePatterns(coverage.Patterns(), formatters.NewRenderOpts())
 	} else {
 		edits := slices.DeleteFunc(coverage.Analyze(checker.GetAllRules().Metadata()), func(edit coverage.Edit) bool {
-			return !matchCoverageTags(flags.getTags(), edit)
+			return !matchCoverageTags(flags.getTags(), edit) ||
+				!strings.Contains(edit.Location, flags.getLocation()) ||
+				(id != "" && !slices.Contains(edit.Checks, id))
 		})
 		bytes, err = formatter.RenderCoverage(edits, formatters.NewRenderOpts())
 	}

@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +19,7 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if maxDiff := info.schemaDiff.MaxDiff; maxDiff != nil &&
 			maxDiff.From != nil && maxDiff.To != nil && isIncreasedValue(maxDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
 			result = append(result, info.newChange(
 				ResponseBodyMaxIncreasedId,
 				[]any{maxDiff.From, maxDiff.To},
@@ -26,7 +28,7 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 		}
 		if exMaxDiff := info.schemaDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
 			exMaxDiff.From != nil && exMaxDiff.To != nil && isIncreasedValue(exMaxDiff) {
-			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
+			exBaseSource, exRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
 			result = append(result, info.newChange(
 				ResponseBodyExclusiveMaxIncreasedId,
 				[]any{exMaxDiff.From, exMaxDiff.To},
@@ -35,11 +37,11 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if maxDiff := p.propertyDiff.MaxDiff; maxDiff != nil &&
 				maxDiff.To != nil && maxDiff.From != nil && isIncreasedValue(maxDiff) {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
 				result = append(result, p.newChange(
 					ResponsePropertyMaxIncreasedId,
 					[]any{propName, maxDiff.From, maxDiff.To, info.responseStatus},
@@ -49,7 +51,7 @@ func ResponsePropertyMaxIncreasedCheck(diffReport *diff.Diff, operationsSources 
 
 			if exMaxDiff := p.propertyDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
 				exMaxDiff.To != nil && exMaxDiff.From != nil && isIncreasedValue(exMaxDiff) {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
 				result = append(result, p.newChange(
 					ResponsePropertyExclusiveMaxIncreasedId,
 					[]any{propName, exMaxDiff.From, exMaxDiff.To, info.responseStatus},

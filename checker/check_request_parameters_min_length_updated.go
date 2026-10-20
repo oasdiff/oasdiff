@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -23,7 +24,7 @@ func RequestParameterMinLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 			return
 		}
 
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minLength")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minLength")
 
 		id := RequestParameterMinLengthIncreasedId
 		if isDecreasedValue(minLengthDiff) {

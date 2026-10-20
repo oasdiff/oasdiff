@@ -77,9 +77,10 @@ func boundSchema(t *testing.T, keyword string, value uint64) *openapi3.SchemaRef
 	return &openapi3.SchemaRef{Value: s}
 }
 
-// Each diff.SchemaBounds row matches its getter's absence encoding: going from
-// absent to a value classifies as WasSet, the reverse as WasUnset, and a change
-// between two values as neither. A getter that changes how it encodes
+// Each diff.SchemaBounds row matches its getter's absence encoding: going
+// from absent to a value classifies as WasSet, the reverse as WasUnset, and a
+// change between two present values as WasIncreased or WasDecreased, each
+// classification excluding the others. A getter that changes how it encodes
 // absence fails here.
 func TestSchemaBounds(t *testing.T) {
 	for _, bound := range diff.SchemaBounds {
@@ -93,6 +94,8 @@ func TestSchemaBounds(t *testing.T) {
 		require.NotNil(t, value, bound.Keyword)
 		_, ok = bound.WasUnset(set)
 		require.False(t, ok, bound.Keyword)
+		_, _, ok = bound.WasIncreased(set)
+		require.False(t, ok, "%s: absent to value is not WasIncreased", bound.Keyword)
 
 		unset := schemaPairDiff(t, low, absent)
 		value, ok = bound.WasUnset(unset)
@@ -100,12 +103,28 @@ func TestSchemaBounds(t *testing.T) {
 		require.NotNil(t, value, bound.Keyword)
 		_, ok = bound.WasSet(unset)
 		require.False(t, ok, bound.Keyword)
+		_, _, ok = bound.WasDecreased(unset)
+		require.False(t, ok, "%s: value to absent is not WasDecreased", bound.Keyword)
 
-		changed := schemaPairDiff(t, low, high)
-		_, ok = bound.WasSet(changed)
+		increased := schemaPairDiff(t, low, high)
+		from, to, ok := bound.WasIncreased(increased)
+		require.True(t, ok, "%s: a growing value must classify as WasIncreased", bound.Keyword)
+		require.NotNil(t, from, bound.Keyword)
+		require.NotNil(t, to, bound.Keyword)
+		_, _, ok = bound.WasDecreased(increased)
+		require.False(t, ok, bound.Keyword)
+		_, ok = bound.WasSet(increased)
 		require.False(t, ok, "%s: value to value is not WasSet", bound.Keyword)
-		_, ok = bound.WasUnset(changed)
+		_, ok = bound.WasUnset(increased)
 		require.False(t, ok, "%s: value to value is not WasUnset", bound.Keyword)
+
+		decreased := schemaPairDiff(t, high, low)
+		from, to, ok = bound.WasDecreased(decreased)
+		require.True(t, ok, "%s: a shrinking value must classify as WasDecreased", bound.Keyword)
+		require.NotNil(t, from, bound.Keyword)
+		require.NotNil(t, to, bound.Keyword)
+		_, _, ok = bound.WasIncreased(decreased)
+		require.False(t, ok, bound.Keyword)
 	}
 }
 
@@ -186,4 +205,12 @@ func TestSchemaBounds_ExclusiveBooleanForm(t *testing.T) {
 	value, ok = bound.WasUnset(trueToNil)
 	require.True(t, ok, "removing an exclusive true widens")
 	require.Equal(t, true, value)
+
+	ten := 10.0
+	numeric := &openapi3.SchemaRef{Value: &openapi3.Schema{ExclusiveMax: openapi3.ExclusiveBound{Value: &ten}}}
+	boolToNumeric := schemaPairDiff(t, boolSchema(true), numeric)
+	_, _, ok = bound.WasIncreased(boolToNumeric)
+	require.False(t, ok, "a bool form against a numeric form is not ordered")
+	_, _, ok = bound.WasDecreased(boolToNumeric)
+	require.False(t, ok)
 }

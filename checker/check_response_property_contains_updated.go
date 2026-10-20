@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -24,7 +26,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if containsDiff := info.schemaDiff.ContainsDiff; containsDiff != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contains")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contains")
 			if containsDiff.SchemaAdded {
 				result = append(result, info.newChange(ResponseBodyContainsAddedId, []any{info.responseStatus}, "").
 					WithSources(nil, revisionSource))
@@ -36,7 +38,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		}
 
 		if d := info.schemaDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
 			if isIncreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMinContainsIncreasedId, []any{d.From, d.To, info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
@@ -48,7 +50,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		}
 
 		if d := info.schemaDiff.MaxContainsDiff; d != nil && d.From != nil && d.To != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxContains")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxContains")
 			if isIncreasedValue(d) {
 				result = append(result, info.newChange(ResponseBodyMaxContainsIncreasedId, []any{d.From, d.To, info.responseStatus}, "").
 					WithSources(baseSource, revisionSource))
@@ -60,10 +62,10 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if containsDiff := p.propertyDiff.ContainsDiff; containsDiff != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contains")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contains")
 				if containsDiff.SchemaAdded {
 					result = append(result, p.newChange(ResponsePropertyContainsAddedId, []any{propName, info.responseStatus}, "").
 						WithSources(nil, propRevisionSource))
@@ -75,7 +77,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 
 			if d := p.propertyDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
 				if isIncreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMinContainsIncreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
 						WithSources(propBaseSource, propRevisionSource))
@@ -87,7 +89,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 
 			if d := p.propertyDiff.MaxContainsDiff; d != nil && d.From != nil && d.To != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxContains")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxContains")
 				if isIncreasedValue(d) {
 					result = append(result, p.newChange(ResponsePropertyMaxContainsIncreasedId, []any{propName, d.From, d.To, info.responseStatus}, "").
 						WithSources(propBaseSource, propRevisionSource))

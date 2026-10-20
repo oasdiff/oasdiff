@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,27 +21,27 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 		}
 
 		if id := nullabilityChangeId(p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "nullable")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "nullable")
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
 				"",
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
 					return
 				}
 				if id := nullabilityChangeId(propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
+					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
-						[]any{propertyFullName(propertyPath, propertyName), p.location, p.name},
+						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 						"",
-					).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 				}
 			})
 	})

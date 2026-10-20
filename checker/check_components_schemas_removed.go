@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -23,7 +24,7 @@ func APIComponentsSchemaRemovedCheck(diffReport *diff.Diff, operationsSources *d
 	for _, deletedSchema := range diffReport.ComponentsDiff.SchemasDiff.Deleted {
 		var baseSource *Source
 		if ref := diffReport.ComponentsDiff.SchemasDiff.Base[deletedSchema]; ref != nil && ref.Value != nil {
-			baseSource = sourceFromOrigin(ref.Value.Origin)
+			baseSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        APISchemasRemovedId,

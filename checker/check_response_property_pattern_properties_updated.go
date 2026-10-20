@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -18,12 +20,12 @@ func ResponsePropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operat
 		if info.schemaDiff.PatternPropertiesDiff != nil {
 			patPropsDiff := info.schemaDiff.PatternPropertiesDiff
 			for _, pattern := range patPropsDiff.Added {
-				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
+				revisionSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
 				result = append(result, info.newChange(ResponseBodyPatternPropertyAddedId, []any{pattern, info.responseStatus}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, pattern := range patPropsDiff.Deleted {
-				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
+				baseSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
 				result = append(result, info.newChange(ResponseBodyPatternPropertyRemovedId, []any{pattern, info.responseStatus}, "").
 					WithSources(baseSource, nil))
 			}
@@ -33,15 +35,15 @@ func ResponsePropertyPatternPropertiesUpdatedCheck(diffReport *diff.Diff, operat
 			if p.propertyDiff.PatternPropertiesDiff == nil {
 				return
 			}
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			patPropsDiff := p.propertyDiff.PatternPropertiesDiff
 			for _, pattern := range patPropsDiff.Added {
-				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
+				revisionSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Revision, patPropsDiff.Revision, pattern)
 				result = append(result, p.newChange(ResponsePropertyPatternPropertyAddedId, []any{pattern, propName, info.responseStatus}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, pattern := range patPropsDiff.Deleted {
-				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
+				baseSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Base, patPropsDiff.Base, pattern)
 				result = append(result, p.newChange(ResponsePropertyPatternPropertyRemovedId, []any{pattern, propName, info.responseStatus}, "").
 					WithSources(baseSource, nil))
 			}

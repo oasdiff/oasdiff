@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -31,7 +32,7 @@ func NewRequestPathParameterCheck(diffReport *diff.Diff, operationsSources *diff
 					var revisionSource *Source
 					for _, param := range operationItem.Revision.Parameters {
 						if param.Value.Name == paramName && param.Value.In == paramLocation {
-							revisionSource = parameterSource(operationsSources, operationItem.Revision, param.Value)
+							revisionSource = location.ParameterSource(operationsSources, operationItem.Revision, param.Value)
 							break
 						}
 					}

@@ -8,6 +8,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	groupCompare    = "compare"
+	groupSingleSpec = "single-spec"
+	groupGit        = "git"
+	groupReference  = "reference"
+)
+
+func inGroup(cmd *cobra.Command, groupID string) *cobra.Command {
+	cmd.GroupID = groupID
+	return cmd
+}
+
 func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 
 	rootCmd := &cobra.Command{
@@ -31,18 +43,25 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	// readConfFile: --config > OASDIFF_CONFIG env var > .oasdiff.* in cwd.
 	rootCmd.PersistentFlags().String("config", "", "path to config file (overrides .oasdiff.* lookup; can also use the OASDIFF_CONFIG env var)")
 
+	rootCmd.AddGroup(
+		&cobra.Group{ID: groupCompare, Title: "Compare two specs:"},
+		&cobra.Group{ID: groupSingleSpec, Title: "Process a single spec:"},
+		&cobra.Group{ID: groupGit, Title: "Git integration:"},
+		&cobra.Group{ID: groupReference, Title: "Reference:"},
+	)
+
 	rootCmd.AddCommand(
-		getDiffCmd(),
-		getSummaryCmd(),
-		getBreakingChangesCmd(),
-		getBreakingFilesCmd(),
-		getChangelogCmd(),
-		getFlattenCmd(),
-		getUpgradeCmd(),
-		getChecksCmd(),
-		getValidateCmd(),
-		getSchemaCmd(),
-		getGitDiffDriverCmd(),
+		inGroup(getBreakingChangesCmd(), groupCompare),
+		inGroup(getChangelogCmd(), groupCompare),
+		inGroup(getDiffCmd(), groupCompare),
+		inGroup(getSummaryCmd(), groupCompare),
+		inGroup(getValidateCmd(), groupSingleSpec),
+		inGroup(getUpgradeCmd(), groupSingleSpec),
+		inGroup(getFlattenCmd(), groupSingleSpec),
+		inGroup(getBreakingFilesCmd(), groupGit),
+		inGroup(getGitDiffDriverCmd(), groupGit),
+		inGroup(getChecksCmd(), groupReference),
+		inGroup(getSchemaCmd(), groupReference),
 	)
 
 	return run(rootCmd)

@@ -38,8 +38,13 @@ type Waiver struct {
 var Waivers = []Waiver{
 	// security schemes are consumed by name, never resolved through $ref
 	// into usage sites, so the resolved-at-usage reasoning below does not
-	// apply to them; this entry must precede components.**
-	{CategoryOpen, "components.securitySchemes.**", "scheme fields beyond type, flow URLs, and scopes (apiKey name and in, http scheme, bearerFormat, openIdConnectUrl) have no checks (tracked in #1175)"},
+	// apply to them; these entries must precede components.**, and they name
+	// each uncovered field so that a new scheme field is not absorbed silently
+	{CategoryOpen, "components.securitySchemes.*.type:set,unset", "type is required, so it is set or unset only where the scheme is invalid on one side; no check reports that"},
+	{CategoryOpen, "components.securitySchemes.*.flows:set,unset", "adding or removing the OAuth flows object has no check"},
+	{CategoryOpen, "components.securitySchemes.*.flows.*:set,unset", "adding or removing an OAuth flow has no check"},
+	{CategoryOpen, "components.securitySchemes.*.flows.*.refreshUrl", "OAuth refresh URL changes have no check"},
+	{CategoryCoveredAs, "components.securitySchemes.*.flows.*.scopes.*:set,unset", "a scope appearing or disappearing is the scope add/remove, which is claimed"},
 	{CategoryResolvedAtUsage, "components.**", "edits to component definitions surface as diffs at every referencing operation; only unused-component removal is reported directly (api-schemas-removed)"},
 	{CategoryOpen, "webhooks.**", "webhooks are diffed (WebhooksDiff) but checkers only report webhook add/remove; changes inside a webhook's operations have no checks yet (tracked in #1160)"},
 	{CategoryOpen, "paths.*.parameters.**", "path-level parameter additions are checked (new-request-*-default-parameter-to-existing-path); modifications and removals at path level have no checks yet (tracked in #1163)"},
@@ -49,7 +54,7 @@ var Waivers = []Waiver{
 	{CategoryOpen, "paths.*.*.parameters.*.content.**", "parameters serialized via a content map are not checked (only the schema form is) (tracked in #1166)"},
 	{CategoryOpen, "paths.*.*.requestBody.content.*.itemSchema.**", "only itemSchema existence is checked (request-body-media-type-item-schema-added/removed); changes inside it are not (tracked in #1167)"},
 	{CategoryOpen, "paths.*.*.responses.*.content.*.itemSchema.**", "only itemSchema existence is checked; changes inside it are not (tracked in #1167)"},
-	{CategoryOpen, "paths.*.*.responses.*.headers.*.**", "response headers are checked for existence, required, and schema type/format/nullable only; serialization fields, the content form, and the remaining schema keywords are unchecked (tracked in #1162)"},
+	{CategoryOpen, "paths.*.*.responses.*.headers.*.**", "response headers are checked for existence, required, and schema type/format/nullable and the bound keywords; serialization fields, the content form, and the remaining schema keywords are unchecked (tracked in #1162)"},
 	{CategoryOpen, "paths.*.*.parameters.*.schema:set,unset", "a parameter schema appearing or disappearing is unchecked (the media-type analog has request-body-media-type-schema-added/removed) (tracked in #1054)"},
 	{CategoryOpen, "paths.*.*.parameters.*.schema.**", "parameter schemas are checked for type/format, enum, bounds, pattern, nullable, default, and required/property membership; the remaining schema keywords are unchecked (tracked in #1054, #1155, #1156, #1157)"},
 	{CategoryOpen, "paths.*.*.parameters.*.style", "parameter serialization style changes the wire format but is unchecked (tracked in #1164)"},
@@ -58,20 +63,9 @@ var Waivers = []Waiver{
 	{CategoryCoveredAs, "**.discriminator.mapping.*:set,unset", "add/remove: a mapping entry appearing or disappearing is the entry add/remove, which is claimed"},
 	{CategoryCoveredAs, "**.discriminator.propertyName:set,unset", "discriminator set/unset: propertyName is required inside discriminator, so its presence tracks the discriminator's"},
 	{CategoryOpen, "**.schema.additionalProperties", "setting additionalProperties:false narrows accepted request objects (breaking) and is unchecked (tracked in #1054)"},
-	{CategoryOpen, "**.schema.multipleOf", "increase/decrease at parameter and header scope are unchecked; set/unset have rules at every scope (tracked in #1117, #1162)"},
 	{CategoryOpen, "**.schema.uniqueItems", "response set (narrowing the output) and parameter/header scopes are unchecked; a flag rather than an ordered bound, so outside the generated set/unset rules"},
-	{CategoryOpen, "**.schema.maxProperties", "increase/decrease at parameter and header scope are unchecked; set/unset have rules at every scope (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.minProperties", "increase/decrease at parameter and header scope are unchecked; set/unset have rules at every scope (tracked in #1117, #1162)"},
 	{CategoryOpen, "**.schema.items:set,unset", "an items subschema appearing on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1054)"},
 	{CategoryOpen, "**.schema.not", "a not subschema appearing on a request narrows the accepted set (breaking) and is unchecked (tracked in #1054)"},
-	{CategoryOpen, "**.schema.maxItems", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.maximum", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.minimum", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.maxLength", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.minLength", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.minItems", "increase/decrease at header scope are unchecked; every other direction has rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.exclusiveMaximum", "the boolean-to-number change form and increase/decrease at header scope are unchecked; set/unset and the body/property/parameter change directions have rules (tracked in #1117, #1162)"},
-	{CategoryOpen, "**.schema.exclusiveMinimum", "the boolean-to-number change form and increase/decrease at header scope are unchecked; set/unset and the body/property/parameter change directions have rules (tracked in #1117, #1162)"},
 	{CategoryOpen, "**.schema.unevaluatedItems:change", "switching unevaluatedItems between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 	{CategoryOpen, "**.schema.unevaluatedProperties:change", "switching unevaluatedProperties between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 }

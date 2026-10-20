@@ -38,6 +38,10 @@ var ruleLevels = map[string]checker.Level{
 	"extra-sibling-fields": checker.WARN,
 	"conflicting-paths":    checker.WARN,
 	"duplicate-parameter":  checker.WARN,
+	// http methods are case-sensitive, so an additionalOperations key `Post`
+	// is a method of its own, which the spec allows, but it is easily mistaken
+	// for the POST operation.
+	"additional-operations-fixed-method-case": checker.WARN,
 
 	// oasdiff's own SHOULD-level lints, which kin does not enforce. The spec
 	// still parses in every case; each is a correctness or portability risk.

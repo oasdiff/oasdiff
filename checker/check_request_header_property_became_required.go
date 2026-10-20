@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -32,16 +34,16 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 					continue
 				}
 
-				baseSource, revisionSource := SchemaAddedItemSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "required", changedRequiredPropertyName)
+				baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "required", changedRequiredPropertyName)
 				result = append(result, p.opInfo.NewApiChange(
 					RequestHeaderPropertyBecameRequiredId,
 					[]any{p.name, changedRequiredPropertyName},
 					"",
-				).WithSources(baseSource, revisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 			}
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				requiredDiff := propertyDiff.RequiredDiff
@@ -55,12 +57,12 @@ func RequestHeaderPropertyBecameRequiredCheck(diffReport *diff.Diff, operationsS
 					if propertyDiff.Revision.Properties[changedRequiredPropertyName].Value.ReadOnly {
 						continue
 					}
-					propBaseSource, propRevisionSource := SchemaAddedItemSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "required", changedRequiredPropertyName)
+					propBaseSource, propRevisionSource := location.SchemaAddedItemSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "required", changedRequiredPropertyName)
 					result = append(result, p.opInfo.NewApiChange(
 						RequestHeaderPropertyBecameRequiredId,
-						[]any{p.name, propertyFullName(propertyPath, propertyFullName(propertyName, changedRequiredPropertyName))},
+						[]any{p.name, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))},
 						"",
-					).WithSources(propBaseSource, propRevisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))).WithSources(propBaseSource, propRevisionSource))
 				}
 			})
 	})

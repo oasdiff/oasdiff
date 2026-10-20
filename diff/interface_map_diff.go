@@ -46,23 +46,17 @@ func getInterfaceMapDiffInternal(map1, map2 InterfaceMap) (*InterfaceMapDiff, er
 
 	result := newInterfaceMapDiff()
 
-	for name1, interface1 := range map1 {
-		if interface2, ok := map2[name1]; ok {
-			patch, err := compareJson(interface1, interface2)
-			if err != nil {
-				return nil, err
-			}
-			if !patch.Empty() {
-				result.Modified[name1] = patch
-			}
-		} else {
-			result.Deleted = append(result.Deleted, name1)
-		}
-	}
+	added, deleted, common := keysDiff(map1, map2)
+	result.Added = added
+	result.Deleted = deleted
 
-	for name2 := range map2 {
-		if _, ok := map1[name2]; !ok {
-			result.Added = append(result.Added, name2)
+	for _, name := range common {
+		patch, err := compareJson(map1[name], map2[name])
+		if err != nil {
+			return nil, err
+		}
+		if !patch.Empty() {
+			result.Modified[name] = patch
 		}
 	}
 

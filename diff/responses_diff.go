@@ -53,33 +53,27 @@ func getResponsesDiffInternal(config *Config, state *state, responses1, response
 
 	result := newResponsesDiff()
 
-	for responseValue1, responseRef1 := range responses1.Map() {
-		if responseRef2 := responses2.Value(responseValue1); responseRef2 != nil {
-			value1, err := derefResponse(responseRef1)
-			if err != nil {
-				return nil, err
-			}
+	added, deleted, common := keysDiff(responses1.Map(), responses2.Map())
+	result.Added = added
+	result.Deleted = deleted
 
-			value2, err := derefResponse(responseRef2)
-			if err != nil {
-				return nil, err
-			}
-
-			diff, err := diffResponseValues(config, state, value1, value2)
-			if err != nil {
-				return nil, err
-			}
-			if !diff.Empty() {
-				result.Modified[responseValue1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, responseValue1)
+	for _, name := range common {
+		value1, err := derefResponse(responses1.Value(name))
+		if err != nil {
+			return nil, err
 		}
-	}
 
-	for responseValue2 := range responses2.Map() {
-		if responseRef1 := responses1.Value(responseValue2); responseRef1 == nil {
-			result.Added = append(result.Added, responseValue2)
+		value2, err := derefResponse(responses2.Value(name))
+		if err != nil {
+			return nil, err
+		}
+
+		diff, err := diffResponseValues(config, state, value1, value2)
+		if err != nil {
+			return nil, err
+		}
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
 

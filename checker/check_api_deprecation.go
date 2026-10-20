@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -55,7 +56,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 		}
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			op := pathItem.Revision.GetOperation(operation)
-			baseSource, revisionSource := operationFieldSources(operationsSources, operationDiff, "deprecated")
+			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationDiff, "deprecated")
 
 			if operationDiff.DeprecatedDiff == nil {
 				continue
