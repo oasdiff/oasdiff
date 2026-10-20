@@ -1,0 +1,26 @@
+openapi: 3.0.3
+info:
+  title: callback cycle
+  version: "1"
+paths:
+  /x:
+    post:
+      description: before
+      responses:
+        '200':
+          description: ok
+      callbacks:
+        cb:
+          $ref: '#/components/callbacks/cb'
+components:
+  callbacks:
+    cb:
+      '{$request.body#/u}':
+        post:
+          description: inner before
+          responses:
+            '200':
+              description: ok
+          callbacks:
+            cb:
+              $ref: '#/components/callbacks/cb'
