@@ -32,7 +32,7 @@ type OperationPair struct {
 func getOperationPairs(config *Config, paths1, paths2 *openapi3.Paths) []OperationPair {
 	paths1Mod := rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase)
 	paths2Mod := rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision)
-	_, _, pathItemPairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	_, _, _, pathItemPairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
 
 	result := []OperationPair{}
 	for path, pathItemPair := range pathItemPairs {

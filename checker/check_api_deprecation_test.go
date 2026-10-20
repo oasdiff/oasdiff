@@ -344,7 +344,7 @@ func TestBreaking_DeprecationWithRFC3339Sunset(t *testing.T) {
 	require.Equal(t, checker.INFO, change.GetLevel())
 }
 
-// deprecating an operation with invalid JSON sunset date is breaking
+// deprecating an operation with a JSON sunset that isn't a string is breaking
 func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	s1, err := open(deprecationFile("base.yaml"))
 	require.NoError(t, err)
@@ -352,7 +352,6 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	s2, err := open(deprecationFile("deprecated-future.yaml"))
 	require.NoError(t, err)
 
-	// Use invalid JSON that can't be unmarshaled to a string
 	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = json.RawMessage(`{"invalid": "object"}`)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -360,7 +359,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	requireSingleChange(t, errs, checker.APIDeprecatedSunsetParseId)
-	require.Contains(t, errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()), "failed to unmarshal sunset json")
+	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: {\"invalid\":\"object\"}`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // endpoint deprecation message includes sunset date

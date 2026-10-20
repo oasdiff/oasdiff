@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"slices"
 
 	"cloud.google.com/go/civil"
 	"github.com/getkin/kin-openapi/openapi3"
@@ -173,8 +174,12 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 	// added so far, which is quadratic in the number of paths.
 	byKey := map[string]*openapi3.PathItem{}
 	operationsSources := make(OperationsSourcesMap)
+	// the path each operation was declared under, to name both sides of a duplicate
+	operationPaths := map[*openapi3.Operation]string{}
 	for _, s := range s1 {
-		for path, pathItem := range s.Spec.Paths.Map() {
+		// sorted, so a duplicate is reported the same way on every run
+		for _, path := range slices.Sorted(maps.Keys(s.Spec.Paths.Map())) {
+			pathItem := s.Spec.Paths.Value(path)
 
 			key := pathKey(path, includePathParams)
 			p := byKey[key]
@@ -184,33 +189,38 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				byKey[key] = p
 				for _, opItem := range pathItem.Operations() {
 					operationsSources[opItem] = s.Url
+					operationPaths[opItem] = path
 				}
 				continue
 			}
 
-			for op, opItem := range pathItem.Operations() {
+			operations := pathItem.Operations()
+			for _, op := range slices.Sorted(maps.Keys(operations)) {
+				opItem := operations[op]
 				oldOperation := p.GetOperation(op)
 				if oldOperation == nil {
 					p.SetOperation(op, opItem)
 					operationsSources[opItem] = s.Url
+					operationPaths[opItem] = path
 					continue
 				}
 
 				oldSince, err := sinceDateFrom(*p, *oldOperation)
 				if err != nil {
-					return nil, nil, fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, operationsSources[oldOperation], op, path, err)
+					return nil, nil, invalidSinceDateError(operationsSources[oldOperation], op, operationPaths[oldOperation], err)
 				}
 				newSince, err := sinceDateFrom(*pathItem, *opItem)
 				if err != nil {
-					return nil, nil, fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, s.Url, op, path, err)
+					return nil, nil, invalidSinceDateError(s.Url, op, path, err)
 				}
 				if newSince.After(oldSince) {
 					p.SetOperation(op, opItem)
 					operationsSources[opItem] = s.Url
+					operationPaths[opItem] = path
 				}
 
 				if newSince == oldSince {
-					return nil, nil, fmt.Errorf("duplicate endpoint (%s %s) found in %s and %s. You may add the %s extension to specify order", op, path, operationsSources[oldOperation], s.Url, SinceDateExtension)
+					return nil, nil, &DuplicateEndpointError{Method: op, Path1: operationPaths[oldOperation], Source1: operationsSources[oldOperation], Path2: path, Source2: s.Url}
 				}
 			}
 		}
@@ -242,23 +252,23 @@ func sinceDateFrom(pathItem openapi3.PathItem, operation openapi3.Operation) (ci
 }
 
 func getSinceDate(extensions map[string]any) (civil.Date, bool, error) {
-	var since string
-	since, ok := extensions[SinceDateExtension].(string)
+	value, ok := extensions[SinceDateExtension]
 	if !ok {
-		sinceJson, ok := extensions[SinceDateExtension].(json.RawMessage)
-
-		if !ok {
-			return DefaultSinceDate, false, nil
-		}
-
-		if err := json.Unmarshal(sinceJson, &since); err != nil {
-			return civil.Date{}, false, errors.New("unmarshal failed")
+		return DefaultSinceDate, false, nil
+	}
+	if raw, ok := value.(json.RawMessage); ok {
+		if err := json.Unmarshal(raw, &value); err != nil {
+			return civil.Date{}, false, fmt.Errorf("%s is not valid JSON: %w", raw, err)
 		}
 	}
 
+	since, ok := value.(string)
+	if !ok {
+		return civil.Date{}, false, fmt.Errorf("%v is not a date in YYYY-MM-DD format", value)
+	}
 	date, err := civil.ParseDate(since)
 	if err != nil {
-		return civil.Date{}, false, errors.New("failed to parse time")
+		return civil.Date{}, false, fmt.Errorf("%q is not a date in YYYY-MM-DD format", since)
 	}
 
 	return date, true, nil
