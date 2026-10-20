@@ -291,13 +291,14 @@ response-property-stability-decreased-description: el nivel de estabilidad de la
 response-property-stability-increased-description: el nivel de estabilidad de la propiedad de respuesta fue aumentado
 api-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad del endpoint %s
 api-security-component-type-changed: el tipo del esquema de seguridad %s fue cambiado de %s a %s
-api-security-component-oauth-url-changed: la URL OAuth del esquema de seguridad %s fue cambiada de %s a %s
-api-security-component-oauth-token-url-changed: la URL del token OAuth del esquema de seguridad %s fue cambiada de %s a %s
+api-security-component-oauth-url-changed: en el esquema de seguridad %s, la URL de autorización del flujo OAuth %s fue cambiada de %s a %s
+api-security-component-oauth-token-url-changed: en el esquema de seguridad %s, la URL del token del flujo OAuth %s fue cambiada de %s a %s
+api-security-component-oauth-refresh-url-changed: en el esquema de seguridad %s, la URL de actualización del flujo OAuth %s fue cambiada de %s a %s
 api-security-component-added: el esquema de seguridad %s fue agregado
 api-security-component-removed: el esquema de seguridad %s fue removido
-api-security-component-oauth-scope-added: el alcance OAuth %s fue agregado al esquema de seguridad %s
-api-security-component-oauth-scope-removed: el alcance OAuth %s fue removido del esquema de seguridad %s
-api-security-component-oauth-scope-changed: el alcance OAuth %s del esquema de seguridad %s fue actualizado de %s a %s
+api-security-component-oauth-scope-added: en el esquema de seguridad %s, el flujo OAuth %s agregó el alcance %s
+api-security-component-oauth-scope-removed: en el esquema de seguridad %s, el flujo OAuth %s removió el alcance %s
+api-security-component-oauth-scope-changed: en el esquema de seguridad %s, el alcance %s del flujo OAuth %s fue actualizado de %s a %s
 api-security-component-api-key-name-changed: el nombre de la clave API del esquema de seguridad %s fue cambiado de %s a %s
 api-security-component-api-key-in-changed: la ubicación de la clave API del esquema de seguridad %s fue cambiada de %s a %s
 api-security-component-http-scheme-changed: el esquema http del esquema de seguridad %s fue cambiado de %s a %s
@@ -434,6 +435,7 @@ api-security-component-oauth-scope-added-description: alcance agregado al flujo 
 api-security-component-oauth-scope-changed-description: alcance modificado en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-removed-description: alcance removido del flujo OAuth en components/securitySchemes
 api-security-component-oauth-token-url-changed-description: url del token modificada en el flujo OAuth en components/securitySchemes
+api-security-component-oauth-refresh-url-changed-description: url de actualización modificada en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-url-changed-description: url de autorización modificada en el flujo OAuth en components/securitySchemes
 api-security-component-openid-connect-url-changed-description: URL de OpenID Connect modificada en components/securitySchemes
 api-security-component-removed-description: esquema de seguridad removido en components/securitySchemes
@@ -1595,3 +1597,4 @@ shared-schema-detail-also: "también en %s"
 shared-schema-detail-also-cyclic: "también en %s y más"
 shared-schema-detail-also-more: "también en %s y %d más"
 shared-schema-detail-name: "esquema compartido: %s"
+security-scheme-url-changed-warn-comment: "Esta es una advertencia porque la especificación no indica si las credenciales obtenidas a través de la URL anterior siguen siendo aceptadas."
