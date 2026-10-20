@@ -17,3 +17,9 @@ func (e *DuplicateEndpointError) Error() string {
 	return fmt.Sprintf("duplicate endpoint: %s %s in %s and %s %s in %s. You may add the %s extension to specify order",
 		e.Method, e.Path1, e.Source1, e.Method, e.Path2, e.Source2, SinceDateExtension)
 }
+
+// PathParamNamesDiffer reports whether the two paths differ only by their
+// parameter names, so matching on the names would tell them apart.
+func (e *DuplicateEndpointError) PathParamNamesDiffer() bool {
+	return e.Path1 != e.Path2
+}
