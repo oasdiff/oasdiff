@@ -235,18 +235,16 @@ func getStabilityLevel(i map[string]any) (string, error) {
 	if i == nil || i[diff.XStabilityLevelExtension] == nil {
 		return "", nil
 	}
-	var stabilityLevel string
+	value := i[diff.XStabilityLevelExtension]
+	if jsonStabilityRaw, ok := value.(json.RawMessage); ok {
+		if err := json.Unmarshal(jsonStabilityRaw, &value); err != nil {
+			return "", fmt.Errorf("failed to unmarshal x-stability-level json: %w", err)
+		}
+	}
 
-	stabilityLevel, ok := i[diff.XStabilityLevelExtension].(string)
+	stabilityLevel, ok := value.(string)
 	if !ok {
-		jsonStabilityRaw, ok := i[diff.XStabilityLevelExtension].(json.RawMessage)
-		if !ok {
-			return "", fmt.Errorf("x-stability-level isn't a string nor valid json")
-		}
-		err := json.Unmarshal(jsonStabilityRaw, &stabilityLevel)
-		if err != nil {
-			return "", fmt.Errorf("failed to unmarshal x-stability-level json")
-		}
+		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %v", StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable, value)
 	}
 
 	if stabilityLevel != StabilityDraft &&
