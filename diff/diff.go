@@ -236,10 +236,6 @@ func copyPathItem(pathItem *openapi3.PathItem) *openapi3.PathItem {
 	return &copied
 }
 
-func invalidSinceDateError(source, op, path string, err error) error {
-	return fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, source, op, path, err)
-}
-
 func sinceDateFrom(pathItem openapi3.PathItem, operation openapi3.Operation) (civil.Date, error) {
 	since, _, err := getSinceDate(pathItem.Extensions)
 	if err != nil {

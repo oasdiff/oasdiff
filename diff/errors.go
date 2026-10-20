@@ -21,3 +21,7 @@ func (e *DuplicateEndpointError) Error() string {
 	return fmt.Sprintf("duplicate endpoint: %s %s in %s and %s %s in %s. You may %s",
 		e.Method, e.Path1, e.Source1, e.Method, e.Path2, e.Source2, hint)
 }
+
+func invalidSinceDateError(source, op, path string, err error) error {
+	return fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, source, op, path, err)
+}
