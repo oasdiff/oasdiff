@@ -1168,19 +1168,8 @@ func TestGetPathsDiff_DuplicateEndpoint(t *testing.T) {
 
 	for range 10 {
 		_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
-		require.EqualError(t, err, "duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may include path parameter names in endpoint matching with --include-path-params, or add the x-since-date extension to specify order")
+		require.EqualError(t, err, "duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may add the x-since-date extension to specify order")
 	}
-}
-
-// The same path in two specs only differs by its source, so the error leaves
-// out the path parameter hint.
-func TestGetPathsDiff_DuplicateEndpointSamePath(t *testing.T) {
-	const spec = "../data/simple.yaml"
-	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
-	require.NoError(t, err)
-
-	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s, s}, []*load.SpecInfo{s})
-	require.EqualError(t, err, "duplicate endpoint: GET /partner-api/test/another-method in "+spec+" and GET /partner-api/test/another-method in "+spec+". You may add the x-since-date extension to specify order")
 }
 
 // Regression for #1041: OR-alternatives that share a security scheme (the only

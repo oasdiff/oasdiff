@@ -595,3 +595,21 @@ func Test_BreakingFiles_RequiresArgs(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files openapi.yaml"), io.Discard, &stderr))
 	require.Contains(t, stderr.String(), "please specify --base")
 }
+
+// Paths that differ only by parameter names can also be told apart by
+// matching on the names, so the error suggests --include-path-params too.
+func Test_DuplicateEndpoint(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/base.yaml"
+	var stderr bytes.Buffer
+	require.Equal(t, 104, internal.Run(cmdToArgs("oasdiff changelog "+spec+" "+spec), io.Discard, &stderr))
+	require.Equal(t, "Error: diff failed: duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may add the x-since-date extension to specify order, or include path parameter names in endpoint matching with --include-path-params\n", stderr.String())
+}
+
+// The same path in two composed specs can't be resolved by path parameter
+// names, so the error only suggests x-since-date.
+func Test_DuplicateEndpointSamePath(t *testing.T) {
+	const dir = "../data/duplicate_endpoints/composed/"
+	var stderr bytes.Buffer
+	require.Equal(t, 104, internal.Run(cmdToArgs("oasdiff changelog -c "+dir+"*.yaml "+dir+"a.yaml"), io.Discard, &stderr))
+	require.Equal(t, "Error: diff failed: duplicate endpoint: GET /pets in "+dir+"a.yaml and GET /pets in "+dir+"b.yaml. You may add the x-since-date extension to specify order\n", stderr.String())
+}
