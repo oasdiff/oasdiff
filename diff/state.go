@@ -1,17 +1,17 @@
 package diff
 
-type state struct {
-	cache    schemaDiffCache
-	inFlight map[schemaPair]struct{}
+import (
+	"github.com/getkin/kin-openapi/openapi3"
+)
 
-	// when a cycle is detected, the cut count is incremented; a diff whose
-	// computation included a cut is not cached.
-	cuts int
+type state struct {
+	graph schemaGraph
+
+	// The name of each document's components.schemas entries.
+	baseComponents     map[*openapi3.Schema]string
+	revisionComponents map[*openapi3.Schema]string
 }
 
 func newState() *state {
-	return &state{
-		cache:    schemaDiffCache{},
-		inFlight: map[schemaPair]struct{}{},
-	}
+	return &state{graph: newSchemaGraph()}
 }

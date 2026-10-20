@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -36,7 +37,7 @@ func ResponseHeaderRemovedCheck(diffReport *diff.Diff, operationsSources *diff.O
 						continue
 					}
 					header := responseDiff.Base.Headers[headerName].Value
-					baseSource := NewSourceFromOrigin(operationsSources, operationItem.Base, header.Origin)
+					baseSource := location.NewSourceFromOrigin(operationsSources, operationItem.Base, header.Origin)
 					required := header.Required
 					if required {
 						result = append(result, opInfo.NewApiChange(

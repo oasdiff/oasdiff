@@ -3,6 +3,8 @@ package checker
 import (
 	"github.com/getkin/kin-openapi/openapi3"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -84,31 +86,31 @@ func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSour
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if id := falseSchemaChangeId(info.schemaDiff, RequestBodySchemaBecameFalseId, RequestBodySchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "type")
 			result = append(result, info.newChange(id, nil, "").
 				WithSources(baseSource, revisionSource))
 		}
 
 		if id := falseItemsChangeId(info.schemaDiff, RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "items")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "items")
 			result = append(result, info.newChange(id, []any{"items"}, "").
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
 			if id := falseSchemaChangeId(p.propertyDiff, RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId); id != "" {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName)},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
 			if id := falseItemsChangeId(p.propertyDiff, RequestPropertySchemaBecameFalseId, RequestPropertySchemaBecameNotFalseId); id != "" {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName, "items")},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName, "items")},
 					"",
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -123,31 +125,31 @@ func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if id := falseSchemaChangeId(info.schemaDiff, ResponseBodySchemaBecameFalseId, ResponseBodySchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "type")
 			result = append(result, info.newChange(id, nil, falseSchemaComment(id)).
 				WithSources(baseSource, revisionSource))
 		}
 
 		if id := falseItemsChangeId(info.schemaDiff, ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "items")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "items")
 			result = append(result, info.newChange(id, []any{"items", info.responseStatus}, falseSchemaComment(id)).
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
 			if id := falseSchemaChangeId(p.propertyDiff, ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId); id != "" {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					falseSchemaComment(id),
 				).WithSources(propBaseSource, propRevisionSource))
 			}
 			if id := falseItemsChangeId(p.propertyDiff, ResponsePropertySchemaBecameFalseId, ResponsePropertySchemaBecameNotFalseId); id != "" {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "items")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName, "items"), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName, "items"), info.responseStatus},
 					falseSchemaComment(id),
 				).WithSources(propBaseSource, propRevisionSource))
 			}
@@ -166,24 +168,24 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 		}
 
 		if id := falseSchemaChangeId(p.paramDiff.SchemaDiff, RequestParameterSchemaBecameFalseId, RequestParameterSchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "type")
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
 				"",
-			).WithSchema(p.paramDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				if id := falseSchemaChangeId(propertyDiff, RequestParameterPropertySchemaBecameFalseId, RequestParameterPropertySchemaBecameNotFalseId); id != "" {
-					baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
+					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
-						[]any{propertyFullName(propertyPath, propertyName), p.location, p.name},
+						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
 						"",
-					).WithSchema(propertyDiff).WithSources(baseSource, revisionSource))
+					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 				}
 			})
 	})
@@ -199,12 +201,12 @@ func ResponseHeaderSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSourc
 			return
 		}
 		if id := falseSchemaChangeId(h.headerDiff.SchemaDiff, ResponseHeaderSchemaBecameFalseId, ResponseHeaderSchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, h.opInfo.methodDiff, h.headerDiff.SchemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, h.opInfo.methodDiff, h.headerDiff.SchemaDiff, "type")
 			result = append(result, h.opInfo.NewApiChange(
 				id,
 				[]any{h.name, h.responseStatus},
 				"",
-			).WithSchema(h.headerDiff.SchemaDiff).WithSources(baseSource, revisionSource))
+			).WithSchema(h.headerDiff.SchemaDiff, h.headerDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 	})
 

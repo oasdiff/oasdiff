@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -14,7 +16,7 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minItemsDiff := info.schemaDiff.MinItemsDiff; uintBoundSet(minItemsDiff) {
-			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
+			_, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minItems")
 			result = append(result, info.newChange(
 				RequestBodyMinItemsSetId,
 				[]any{minItemsDiff.To},
@@ -28,10 +30,10 @@ func RequestPropertyMinItemsSetCheck(diffReport *diff.Diff, operationsSources *d
 				return
 			}
 
-			_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
+			_, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minItems")
 			result = append(result, p.newChange(
 				RequestPropertyMinItemsSetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), minItemsDiff.To},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), minItemsDiff.To},
 				boundSetComment,
 			).WithSources(nil, propRevisionSource))
 		})

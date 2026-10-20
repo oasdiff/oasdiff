@@ -1,6 +1,9 @@
 package checker
 
 import (
+	"strings"
+
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -13,6 +16,11 @@ const (
 	APIComponentSecurityOauthScopeAddedId           = "api-security-component-oauth-scope-added"
 	APIComponentSecurityOauthScopeRemovedId         = "api-security-component-oauth-scope-removed"
 	APIComponentSecurityOauthScopeUpdatedId         = "api-security-component-oauth-scope-changed"
+	APIComponentsSecurityApiKeyNameUpdatedId        = "api-security-component-api-key-name-changed"
+	APIComponentsSecurityApiKeyInUpdatedId          = "api-security-component-api-key-in-changed"
+	APIComponentsSecurityHttpSchemeUpdatedId        = "api-security-component-http-scheme-changed"
+	APIComponentsSecurityBearerFormatUpdatedId      = "api-security-component-bearer-format-changed"
+	APIComponentsSecurityOpenIdConnectUrlUpdatedId  = "api-security-component-openid-connect-url-changed"
 )
 
 const ComponentSecuritySchemes = "securitySchemes"
@@ -98,7 +106,7 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	for _, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Added {
 		var revisionSource *Source
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Revision[updatedSecurity]; ref != nil && ref.Value != nil {
-			revisionSource = sourceFromOrigin(ref.Value.Origin)
+			revisionSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        APIComponentsSecurityAddedId,
@@ -111,7 +119,7 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	for _, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Deleted {
 		var baseSource *Source
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurity]; ref != nil && ref.Value != nil {
-			baseSource = sourceFromOrigin(ref.Value.Origin)
+			baseSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		result = append(result, ComponentChange{
 			Id:        APIComponentsSecurityRemovedId,
@@ -124,10 +132,10 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	for updatedSecurityName, updatedSecurity := range diffReport.ComponentsDiff.SecuritySchemesDiff.Modified {
 		var baseSource, revisionSource *Source
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurityName]; ref != nil && ref.Value != nil {
-			baseSource = sourceFromOrigin(ref.Value.Origin)
+			baseSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 		if ref := diffReport.ComponentsDiff.SecuritySchemesDiff.Revision[updatedSecurityName]; ref != nil && ref.Value != nil {
-			revisionSource = sourceFromOrigin(ref.Value.Origin)
+			revisionSource = location.SourceFromOrigin(ref.Value.Origin)
 		}
 
 		result = append(result, checkOAuthUpdates(updatedSecurity, updatedSecurityName, baseSource, revisionSource)...)
@@ -135,12 +143,45 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 		if updatedSecurity.TypeDiff != nil {
 			result = append(result, ComponentChange{
 				Id:        APIComponentsSecurityTypeUpdatedId,
-				Level:     INFO,
+				Level:     ERR,
 				Args:      []any{updatedSecurityName, updatedSecurity.TypeDiff.From, updatedSecurity.TypeDiff.To},
 				Component: ComponentSecuritySchemes,
 			}.WithSources(baseSource, revisionSource))
+		} else {
+			// under a type change, the old type's fields disappear and the new
+			// type's appear; reporting each would repeat the type change
+			result = append(result, checkWireFieldUpdates(updatedSecurity, updatedSecurityName, baseSource, revisionSource)...)
 		}
 	}
+
+	return result
+}
+
+// checkWireFieldUpdates reports changes to the fields that tell a client how
+// to send its credentials.
+func checkWireFieldUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string, baseSource, revisionSource *Source) Changes {
+	result := make(Changes, 0)
+
+	report := func(id string, level Level, valueDiff *diff.ValueDiff) {
+		if valueDiff == nil {
+			return
+		}
+		result = append(result, ComponentChange{
+			Id:        id,
+			Level:     level,
+			Args:      []any{updatedSecurityName, valueDiff.From, valueDiff.To},
+			Component: ComponentSecuritySchemes,
+		}.WithSources(baseSource, revisionSource))
+	}
+
+	report(APIComponentsSecurityApiKeyNameUpdatedId, ERR, updatedSecurity.NameDiff)
+	report(APIComponentsSecurityApiKeyInUpdatedId, ERR, updatedSecurity.InDiff)
+	// HTTP authentication scheme names are case-insensitive (RFC 9110, section 11.1)
+	if schemeDiff := updatedSecurity.SchemeDiff; schemeDiff != nil && !strings.EqualFold(interfaceToString(schemeDiff.From), interfaceToString(schemeDiff.To)) {
+		report(APIComponentsSecurityHttpSchemeUpdatedId, ERR, schemeDiff)
+	}
+	report(APIComponentsSecurityBearerFormatUpdatedId, INFO, updatedSecurity.BearerFormatDiff)
+	report(APIComponentsSecurityOpenIdConnectUrlUpdatedId, ERR, updatedSecurity.OpenIDConnectURLDiff)
 
 	return result
 }

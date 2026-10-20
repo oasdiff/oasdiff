@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -31,28 +31,6 @@ func ResponseNonSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	return responseStatusUpdated(diffReport, operationsSources, config, notSuccess, ResponseNonSuccessStatusRemovedId)
 }
 
-// responseSource returns a Source for a specific response status code within an operation.
-// Falls back to the "responses" field location if the specific status has no origin data.
-func responseSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, responseStatus string) *Source {
-	if op == nil {
-		return nil
-	}
-
-	if op.Responses != nil {
-		if responseRef := op.Responses.Value(responseStatus); responseRef != nil {
-			if responseRef.Value != nil && responseRef.Value.Origin != nil {
-				return NewSourceFromOrigin(operationsSources, op, responseRef.Value.Origin)
-			}
-		}
-	}
-
-	// Fall back to "responses" field within the operation
-	if op.Origin == nil {
-		return nil
-	}
-	return NewSourceFromField(operationsSources, op, op.Origin, "responses")
-}
-
 func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, filter func(int) bool, id string) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
@@ -77,7 +55,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 				}
 
 				if filter(status) {
-					baseSource := responseSource(operationsSources, operationItem.Base, responseStatus)
+					baseSource := location.ResponseSource(operationsSources, operationItem.Base, responseStatus)
 					var revisionSource *Source
 					result = append(result, opInfo.NewApiChange(
 						id,
@@ -96,7 +74,7 @@ func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.Operat
 
 				if filter(status) {
 					var baseSource *Source
-					revisionSource := responseSource(operationsSources, operationItem.Revision, responseStatus)
+					revisionSource := location.ResponseSource(operationsSources, operationItem.Revision, responseStatus)
 					result = append(result, opInfo.NewApiChange(
 						addedId,
 						[]any{responseStatus},

@@ -3,8 +3,10 @@ package checker
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,6 +17,7 @@ const (
 
 // applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
 func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources *diff.OperationsSourcesMap) Changes {
+	filterSecurityContextBelowStabilityThreshold(config, diffReport)
 	if diffReport.PathsDiff == nil {
 		return result
 	}
@@ -41,18 +44,18 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 		}
 		for operation, operationItem := range pathDiff.OperationsDiff.Modified {
 			if _, err := getStabilityLevel(pathDiff.Base.GetOperation(operation).Extensions); err != nil {
-				baseSource := stabilityFieldSource(operationsSources, operationItem.Base, operationItem.Base.Origin)
+				baseSource := location.StabilityFieldSource(operationsSources, operationItem.Base, operationItem.Base.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Base, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 			if _, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions); err != nil {
-				revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
+				revisionSource := location.StabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem.Revision, operationsSources, operation, path, err).WithSources(nil, revisionSource))
 			}
 		}
 		for _, operation := range pathDiff.OperationsDiff.Deleted {
 			operationItem := pathDiff.Base.GetOperation(operation)
 			if _, err := getStabilityLevel(operationItem.Extensions); err != nil {
-				baseSource := stabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
+				baseSource := location.StabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 		}
@@ -63,7 +66,7 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 		pathVal := diffReport.PathsDiff.Base.Value(path)
 		for operation, operationItem := range pathVal.Operations() {
 			if _, err := getStabilityLevel(pathVal.GetOperation(operation).Extensions); err != nil {
-				baseSource := stabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
+				baseSource := location.StabilityFieldSource(operationsSources, operationItem, operationItem.Origin)
 				result = append(result, getAPIInvalidStabilityLevel(config, operationItem, operationsSources, operation, path, err).WithSources(baseSource, nil))
 			}
 		}
@@ -115,8 +118,8 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 				changeId = APIStabilityDecreasedId
 			}
 
-			baseSource := stabilityFieldSource(operationsSources, pathDiff.Base.GetOperation(operation), pathDiff.Base.GetOperation(operation).Origin)
-			revisionSource := stabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
+			baseSource := location.StabilityFieldSource(operationsSources, pathDiff.Base.GetOperation(operation), pathDiff.Base.GetOperation(operation).Origin)
+			revisionSource := location.StabilityFieldSource(operationsSources, operationItem.Revision, operationItem.Revision.Origin)
 
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			result = append(result, opInfo.NewApiChange(
@@ -182,15 +185,29 @@ func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 
 		// Filter modified operations below threshold
 		for operation := range pathDiff.OperationsDiff.Modified {
-			revisionStability, err := getStabilityLevel(pathDiff.Revision.GetOperation(operation).Extensions)
-			if err != nil {
-				continue
-			}
-			if !config.StabilityLevel.IsIncluded(revisionStability) {
+			if belowStabilityThreshold(config, pathDiff.Revision.GetOperation(operation)) {
 				delete(pathDiff.OperationsDiff.Modified, operation)
 			}
 		}
 	}
+}
+
+func filterSecurityContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
+	if config == nil || diffReport.SecurityContext == nil {
+		return
+	}
+	diffReport.SecurityContext.Operations = slices.DeleteFunc(diffReport.SecurityContext.Operations, func(pair diff.OperationPair) bool {
+		return belowStabilityThreshold(config, pair.Revision)
+	})
+}
+
+// An operation whose stability level does not parse counts as in scope.
+func belowStabilityThreshold(config *Config, operation *openapi3.Operation) bool {
+	stability, err := getStabilityLevel(operation.Extensions)
+	if err != nil {
+		return false
+	}
+	return !config.StabilityLevel.IsIncluded(stability)
 }
 
 // normalizedStability returns StabilityStable for an empty label, otherwise the label itself.

@@ -3,6 +3,8 @@ package checker
 import (
 	"strings"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -21,7 +23,7 @@ func RequestPropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operati
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if info.schemaDiff.DependentRequiredDiff != nil {
 			depReqDiff := info.schemaDiff.DependentRequiredDiff
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "dependentRequired")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "dependentRequired")
 			for key, values := range depReqDiff.Added {
 				result = append(result, info.newChange(
 					RequestBodyDependentRequiredAddedId,
@@ -50,8 +52,8 @@ func RequestPropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operati
 				return
 			}
 			depReqDiff := p.propertyDiff.DependentRequiredDiff
-			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "dependentRequired")
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "dependentRequired")
 			for key, values := range depReqDiff.Added {
 				result = append(result, p.newChange(
 					RequestPropertyDependentRequiredAddedId,

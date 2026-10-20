@@ -181,6 +181,14 @@ func (flags *Flags) getTags() []string {
 	return fixViperStringSlice(flags.v.GetStringSlice("tags"))
 }
 
+func (flags *Flags) getId() string {
+	return flags.v.GetString("id")
+}
+
+func (flags *Flags) getLocation() string {
+	return flags.v.GetString("location")
+}
+
 func (flags *Flags) getTemplate() string {
 	return flags.v.GetString("template")
 }

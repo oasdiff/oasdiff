@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -29,7 +30,7 @@ func RequestParameterMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 			id = RequestParameterMaxLengthIncreasedId
 		}
 
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "maxLength")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "maxLength")
 		result = append(result, p.opInfo.NewApiChange(
 			id,
 			[]any{p.location, p.name, maxLengthDiff.From, maxLengthDiff.To},

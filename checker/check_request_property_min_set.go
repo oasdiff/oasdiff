@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,7 +18,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if value, ok := minimumBound.WasSet(info.schemaDiff); ok {
-			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
+			_, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minimum")
 			result = append(result, info.newChange(
 				RequestBodyMinSetId,
 				[]any{value},
@@ -24,7 +26,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 			).WithSources(nil, revisionSource))
 		}
 		if value, ok := exclusiveMinimumBound.WasSet(info.schemaDiff); ok {
-			_, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
+			_, exRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMinimum")
 			result = append(result, info.newChange(
 				RequestBodyExclusiveMinSetId,
 				[]any{value},
@@ -33,10 +35,10 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if value, ok := minimumBound.WasSet(p.propertyDiff); ok {
-				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
+				_, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minimum")
 				result = append(result, p.newChange(
 					RequestPropertyMinSetId,
 					[]any{propName, value},
@@ -45,7 +47,7 @@ func RequestPropertyMinSetCheck(diffReport *diff.Diff, operationsSources *diff.O
 			}
 
 			if value, ok := exclusiveMinimumBound.WasSet(p.propertyDiff); ok {
-				_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
+				_, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMinimum")
 				result = append(result, p.newChange(
 					RequestPropertyExclusiveMinSetId,
 					[]any{propName, value},

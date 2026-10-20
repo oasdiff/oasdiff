@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -26,8 +27,8 @@ func APIAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSour
 			method,
 			path,
 		).WithSources(
-			NewEmptySource(),
-			NewSourceFromOrigin(operationsSources, operation, operation.Origin),
+			location.NewEmptySource(),
+			location.NewSourceFromOrigin(operationsSources, operation, operation.Origin),
 		))
 	}
 

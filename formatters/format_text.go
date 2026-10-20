@@ -90,10 +90,17 @@ func (f TEXTFormatter) RenderCoveragePatterns(patterns []coverage.Pattern, opts 
 func (f TEXTFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, error) {
 	result := bytes.NewBuffer(nil)
 
+	// the description is the widest and most variable column, so it goes
+	// last, where tabwriter leaves it ragged rather than padding every row
+	// to the longest description
 	w := tabwriter.NewWriter(result, 1, 1, 1, ' ', 0)
-	_, _ = fmt.Fprintln(w, "ID\tDESCRIPTION\tLEVEL\tGUARDS")
+	_, _ = fmt.Fprintln(w, "ID\tLEVEL\tGUARDS\tGENERATED\tDESCRIPTION")
 	for _, check := range checks {
-		_, _ = fmt.Fprintln(w, check.Id+"\t"+f.Localizer(check.Description)+"\t"+check.Level+"\t"+strings.Join(check.Guards, ","))
+		generated := ""
+		if check.Generated {
+			generated = "yes"
+		}
+		_, _ = fmt.Fprintln(w, check.Id+"\t"+check.Level+"\t"+strings.Join(check.Guards, ",")+"\t"+generated+"\t"+f.Localizer(check.Description))
 	}
 	_ = w.Flush()
 

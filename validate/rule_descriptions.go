@@ -47,8 +47,9 @@ var ruleDescriptions = map[string]string{
 	"request-body-content-required":      "request body has no content",
 	// additionalOperations is the OpenAPI 3.2 map of custom http methods. The
 	// version gate on the field itself is described by versionGateDescription.
-	"additional-operations-duplicate-method": "an additionalOperations key names a method that already has its own path item field",
-	"additional-operations-invalid-method":   "an additionalOperations key is not a valid http method name",
+	"additional-operations-duplicate-method":  "an additionalOperations key names a method that already has its own path item field",
+	"additional-operations-invalid-method":    "an additionalOperations key is not a valid http method name",
+	"additional-operations-fixed-method-case": "an additionalOperations key differs only by case from a method that has its own path item field",
 
 	// Parameters and headers
 	"parameter-name-required":        "parameter name is missing",
@@ -57,6 +58,8 @@ var ruleDescriptions = map[string]string{
 	"parameter-content-single-entry": "parameter content must hold exactly one media type",
 	"header-content-single-entry":    "header content must hold exactly one media type",
 	"content-or-schema-exactly-one":  "parameter or header must use either content or schema, not both",
+	"content-keys-overlap":           "two content keys match the same media type",
+	"encoding-content-type-invalid":  "encoding contentType is not a media type or media range",
 	"name-forbidden":                 "header must not declare a name field",
 	"in-forbidden":                   "header must not declare an in field",
 	"serialization-method-invalid":   "style and explode combination is not valid for this parameter",
@@ -73,6 +76,9 @@ var ruleDescriptions = map[string]string{
 	"default-violates-schema":                     "default value does not satisfy its own schema",
 	"example-violates-schema":                     "example does not satisfy its schema",
 	"default-required":                            "a default value is missing where one is required",
+	"type-array-for-3-1-plus":                     "type is a list of types, which is only valid in OpenAPI 3.1 or later",
+	"exclusive-bound-number-for-3-1-plus":         "exclusiveMinimum or exclusiveMaximum is a number, which is only valid in OpenAPI 3.1 or later",
+	"exclusive-bound-boolean-before-3-1":          "exclusiveMinimum or exclusiveMaximum is a boolean, which is only valid before OpenAPI 3.1",
 
 	// Schema constraint coherence (oasdiff-native)
 	"multiple-of-not-positive":              "multipleOf is not greater than zero",
@@ -103,7 +109,8 @@ var ruleDescriptions = map[string]string{
 	"security-scheme-type-invalid":          "security scheme type is not valid",
 	"security-scheme-name-required":         "api key security scheme is missing its name",
 	"security-scheme-apikey-in-invalid":     "api key location is not query, header or cookie",
-	"security-scheme-http-scheme-invalid":   "http security scheme is missing its scheme",
+	"security-scheme-http-scheme-invalid":   "http security scheme has no scheme, or one that is not a valid scheme name",
+	"security-requirement-scheme-undefined": "a security requirement names a security scheme that is not declared",
 	"openid-connect-url-required":           "openIdConnect security scheme is missing its url",
 	"bearer-format-forbidden":               "bearerFormat is set on a non-bearer security scheme",
 	"flows-required":                        "oauth2 security scheme is missing its flows",

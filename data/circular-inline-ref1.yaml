@@ -1,0 +1,21 @@
+openapi: 3.1.0
+info:
+  title: circular inline ref
+  version: "1"
+paths: {}
+components:
+  schemas:
+    Node:
+      type: object
+      properties:
+        child:
+          anyOf:
+            - $ref: '#/components/schemas/Link'
+            - type: 'null'
+    Link:
+      type: object
+      properties:
+        target:
+          anyOf:
+            - $ref: '#/components/schemas/Node'
+            - type: 'null'

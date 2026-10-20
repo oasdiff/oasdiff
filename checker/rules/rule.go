@@ -22,6 +22,7 @@ type Rule struct {
 	// Locations are the edits the rule covers, as
 	// "pattern:action[,action...]" claims (see metaschema.ParseClaim).
 	Locations []string
+	Generated bool
 }
 
 // Actions returns the syntactic edits the rule covers, derived from its

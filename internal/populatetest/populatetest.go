@@ -12,6 +12,13 @@ import (
 // from v's type. String samples include the tag, so a value traces back to
 // the field it was built for. It reports false for a kind it cannot build.
 func NonZero(v reflect.Value, tag string) bool {
+	return NonZeroScale(v, tag, 1)
+}
+
+// NonZeroScale is NonZero with the numeric sample set to scale, so two calls
+// with different scales produce ordered values for numeric kinds. Non-numeric
+// kinds ignore the scale.
+func NonZeroScale(v reflect.Value, tag string, scale uint64) bool {
 	if !v.CanSet() {
 		return false
 	}
@@ -34,22 +41,22 @@ func NonZero(v reflect.Value, tag string) bool {
 		v.SetBool(true)
 		return true
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		v.SetInt(1)
+		v.SetInt(int64(scale))
 		return true
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		v.SetUint(1)
+		v.SetUint(scale)
 		return true
 	case reflect.Float64:
-		v.SetFloat(1)
+		v.SetFloat(float64(scale))
 		return true
 	case reflect.Slice:
 		v.Set(reflect.MakeSlice(v.Type(), 1, 1))
-		return NonZero(v.Index(0), tag)
+		return NonZeroScale(v.Index(0), tag, scale)
 	case reflect.Map:
 		m := reflect.MakeMap(v.Type())
 		k := reflect.New(v.Type().Key()).Elem()
 		val := reflect.New(v.Type().Elem()).Elem()
-		if !NonZero(k, tag) || !NonZero(val, tag) {
+		if !NonZeroScale(k, tag, scale) || !NonZeroScale(val, tag, scale) {
 			return false
 		}
 		m.SetMapIndex(k, val)
@@ -66,7 +73,7 @@ func NonZero(v reflect.Value, tag string) bool {
 			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 			reflect.Float64:
-			NonZero(p.Elem(), tag)
+			NonZeroScale(p.Elem(), tag, scale)
 		}
 		v.Set(p)
 		return true
@@ -76,7 +83,7 @@ func NonZero(v reflect.Value, tag string) bool {
 	case reflect.Struct:
 		populated := false
 		for _, fv := range v.Fields() {
-			if NonZero(fv, tag) {
+			if NonZeroScale(fv, tag, scale) {
 				populated = true
 			}
 		}

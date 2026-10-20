@@ -1,0 +1,993 @@
+openapi: 3.1.2
+info:
+  title: cyclic nullable fan-out
+  version: "1"
+paths: {}
+components:
+  schemas:
+    ActionSection: {}
+    ActionStyle: {}
+    AlertAction: {}
+    Badge: {}
+    BigFeatureSection: {}
+    CancellationAction: {}
+    CarRentalAction: {}
+    ChipsSection: {}
+    ComboAction: {}
+    ContentHeaderSection: {}
+    CopyAction: {}
+    DetailSection: {}
+    DrivingLicenseUploadAction: {}
+    EmailAction: {}
+    ExtendBookingAction: {}
+    ExtendRentalAction: {}
+    FeatureSection: {}
+    FeedbackAction:
+      properties:
+        feedback:
+          properties:
+            placeholder_text:
+              type:
+                - string
+                - "null"
+            email_required:
+              type: boolean
+            submit_text:
+              type:
+                - string
+                - "null"
+            page_title:
+              type:
+                - string
+                - "null"
+            messages:
+              anyOf:
+                - $ref: '#/components/schemas/Messages'
+                - type: "null"
+          type: object
+      type: object
+    FieldSection:
+      properties:
+        fields:
+          properties: {}
+          type: object
+      type: object
+    FlowAction:
+      properties:
+        flow:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            data:
+              type: object
+            prerequisites:
+              anyOf:
+                - items:
+                    type: string
+                  type: array
+                - type: "null"
+          type: object
+      type: object
+    GenericUIAction:
+      properties:
+        ui:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            screens:
+              items:
+                $ref: '#/components/schemas/GenericUIScreen'
+              type: array
+          type: object
+      type: object
+    GenericUIScreen:
+      properties:
+        condition:
+          type:
+            - string
+            - "null"
+        page_title:
+          type:
+            - string
+            - "null"
+        message:
+          anyOf:
+            - type: string
+            - type: object
+            - type: "null"
+        image_url:
+          anyOf:
+            - type: string
+            - type: object
+            - type: "null"
+        tracking_screen_name:
+          type:
+            - string
+            - "null"
+        inline_action:
+          anyOf:
+            - $ref: '#/components/schemas/FeedbackAction'
+            - $ref: '#/components/schemas/LinkAction'
+            - type: "null"
+        actions:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/PartnerAction'
+              type: array
+            - type: "null"
+      type: object
+    GenericUISection:
+      properties:
+        generic_ui:
+          properties:
+            condition:
+              type:
+                - string
+                - "null"
+            page_title:
+              type:
+                - string
+                - "null"
+            message:
+              anyOf:
+                - type: string
+                - type: object
+                - type: "null"
+            image_url:
+              anyOf:
+                - type: string
+                - type: object
+                - type: "null"
+            tracking_screen_name:
+              type:
+                - string
+                - "null"
+            inline_action:
+              anyOf:
+                - $ref: '#/components/schemas/FeedbackAction'
+                - $ref: '#/components/schemas/LinkAction'
+                - type: "null"
+            actions:
+              anyOf:
+                - items:
+                    $ref: '#/components/schemas/PartnerAction'
+                  type: array
+                - type: "null"
+          type: object
+      type: object
+    HeaderSection:
+      properties:
+        header:
+          properties:
+            text:
+              type: string
+            action:
+              anyOf:
+                - $ref: '#/components/schemas/PartnerAction'
+                - type: "null"
+          type: object
+      type: object
+    HeadingSection:
+      properties:
+        heading:
+          properties: {}
+          type: object
+      type: object
+    HeadingWithImageSection:
+      properties:
+        heading_with_image:
+          properties:
+            text:
+              type: string
+            image:
+              type: string
+          type: object
+      type: object
+    IconsSection:
+      properties:
+        icons:
+          properties:
+            images:
+              items:
+                type: string
+              type: array
+          type: object
+      type: object
+    ImageSection:
+      properties:
+        image:
+          properties:
+            url:
+              type: string
+            width:
+              type:
+                - string
+                - "null"
+            height:
+              type:
+                - string
+                - "null"
+          type: object
+      type: object
+    IntentAction:
+      properties:
+        intent:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            id:
+              type: string
+          type: object
+      type: object
+    KeyValueSection:
+      properties:
+        key_value_field:
+          properties:
+            key:
+              type: string
+            value:
+              type: string
+          type: object
+      type: object
+    Label:
+      properties:
+        label:
+          type: string
+        value:
+          type:
+            - string
+            - "null"
+        info_text:
+          type:
+            - string
+            - "null"
+      type: object
+    LinkAction:
+      properties:
+        link:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            target:
+              $ref: '#/components/schemas/LinkAction.Target'
+          type: object
+      type: object
+    LinkAction.CallTarget:
+      properties:
+        call:
+          type: string
+      type: object
+    LinkAction.Target:
+      properties:
+        android:
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/LinkAction.CallTarget'
+              - $ref: '#/components/schemas/LinkAction.UrlTarget'
+          type: array
+        ios:
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/LinkAction.CallTarget'
+              - $ref: '#/components/schemas/LinkAction.UrlTarget'
+          type: array
+      type: object
+    LinkAction.UrlTarget:
+      properties:
+        url:
+          type: string
+      type: object
+    LocationPickerAction:
+      properties:
+        location_picker:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            start:
+              items:
+                type: number
+              type: array
+            destination:
+              items:
+                type: number
+              type: array
+          type: object
+      type: object
+    MarkupAction:
+      properties:
+        markup:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            page_title:
+              type:
+                - string
+                - "null"
+            url:
+              type:
+                - string
+                - "null"
+            source:
+              anyOf:
+                - items:
+                    $ref: '#/components/schemas/Section'
+                  type: array
+                - type: "null"
+          type: object
+      type: object
+    Message:
+      properties:
+        type:
+          type: string
+        text:
+          $ref: '#/components/schemas/UIText'
+        badge:
+          anyOf:
+            - $ref: '#/components/schemas/Badge'
+            - type: "null"
+        action:
+          anyOf:
+            - $ref: '#/components/schemas/PartnerAction'
+            - type: "null"
+      type: object
+    MessageSection:
+      properties:
+        message:
+          properties:
+            type:
+              type: string
+            text:
+              $ref: '#/components/schemas/UIText'
+            badge:
+              anyOf:
+                - $ref: '#/components/schemas/Badge'
+                - type: "null"
+            action:
+              anyOf:
+                - $ref: '#/components/schemas/PartnerAction'
+                - type: "null"
+          type: object
+      type: object
+    Messages:
+      properties:
+        top:
+          items:
+            $ref: '#/components/schemas/Message'
+          type: array
+        bottom:
+          items:
+            $ref: '#/components/schemas/Message'
+          type: array
+      type: object
+    NoopAction:
+      properties:
+        noop:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            left_text:
+              type: string
+            right_text:
+              type:
+                - string
+                - "null"
+            left_subtitle:
+              type:
+                - string
+                - "null"
+            right_subtitle:
+              type:
+                - string
+                - "null"
+          type: object
+      type: object
+    ParagraphSection:
+      properties:
+        paragraph:
+          properties: {}
+          type: object
+      type: object
+    PartnerAction:
+      oneOf:
+        - $ref: '#/components/schemas/ReportAction'
+        - $ref: '#/components/schemas/FlowAction'
+        - $ref: '#/components/schemas/IntentAction'
+        - $ref: '#/components/schemas/LinkAction'
+        - $ref: '#/components/schemas/MarkupAction'
+        - $ref: '#/components/schemas/EmailAction'
+        - $ref: '#/components/schemas/GenericUIAction'
+        - $ref: '#/components/schemas/FeedbackAction'
+        - $ref: '#/components/schemas/RoutingAction'
+        - $ref: '#/components/schemas/CarRentalAction'
+        - $ref: '#/components/schemas/TutorialAction'
+        - $ref: '#/components/schemas/RequestAction'
+        - $ref: '#/components/schemas/ComboAction'
+        - $ref: '#/components/schemas/ScanQRAction'
+        - $ref: '#/components/schemas/ReservationAction'
+        - $ref: '#/components/schemas/AlertAction'
+        - $ref: '#/components/schemas/CancellationAction'
+        - $ref: '#/components/schemas/ExtendRentalAction'
+        - $ref: '#/components/schemas/ExtendBookingAction'
+        - $ref: '#/components/schemas/LocationPickerAction'
+        - $ref: '#/components/schemas/NoopAction'
+        - $ref: '#/components/schemas/CopyAction'
+        - $ref: '#/components/schemas/DrivingLicenseUploadAction'
+    ReportAction:
+      properties:
+        report:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            provider:
+              type: string
+            provider_id:
+              type:
+                - string
+                - "null"
+            existing_damages:
+              items:
+                $ref: '#/components/schemas/ReportAction.Damage'
+              type: array
+            context:
+              type: object
+            origin:
+              type:
+                - string
+                - "null"
+          type: object
+      type: object
+    ReportAction.Damage:
+      properties:
+        name:
+          type: string
+      type: object
+    RequestAction:
+      properties:
+        request:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            method:
+              type: string
+            url:
+              type: string
+            max_distance:
+              type:
+                - integer
+                - "null"
+            start_location:
+              anyOf:
+                - items:
+                    type: number
+                  type: array
+                - type: "null"
+            alert:
+              anyOf:
+                - $ref: '#/components/schemas/RequestAction.Alert'
+                - type: "null"
+          type: object
+      type: object
+    RequestAction.Alert:
+      properties:
+        image_url:
+          type:
+            - string
+            - "null"
+        message:
+          type: string
+        button_text:
+          type:
+            - string
+            - "null"
+        timeout:
+          type:
+            - integer
+            - "null"
+        features:
+          anyOf:
+            - items:
+                $ref: '#/components/schemas/RequestAction.AlertFeature'
+              type: array
+            - type: "null"
+      type: object
+    RequestAction.AlertFeature:
+      properties:
+        asset_id:
+          type: string
+        text:
+          type: string
+      type: object
+    ReservationAction:
+      properties:
+        reservation:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            reservation:
+              anyOf:
+                - $ref: '#/components/schemas/ReservationAction.Info'
+                - type: "null"
+            choice:
+              $ref: '#/components/schemas/ReservationAction.Choice'
+          type: object
+      type: object
+    ReservationAction.Choice:
+      properties: {}
+      type: object
+    ReservationAction.Info:
+      properties:
+        reservation_id:
+          type: string
+        expires:
+          type: string
+        text:
+          type: string
+      type: object
+    RoutingAction:
+      properties:
+        routing:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            location:
+              type: object
+            external:
+              type: boolean
+          type: object
+      type: object
+    ScanQRAction:
+      properties:
+        scan:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            page_title:
+              type:
+                - string
+                - "null"
+            headline:
+              type:
+                - string
+                - "null"
+            supported_providers:
+              anyOf:
+                - items:
+                    type: string
+                  type: array
+                - type: "null"
+            url:
+              type: string
+            data:
+              anyOf:
+                - type: object
+                - type: "null"
+          type: object
+      type: object
+    Section:
+      anyOf:
+        - $ref: '#/components/schemas/ActionSection'
+        - $ref: '#/components/schemas/FeatureSection'
+        - $ref: '#/components/schemas/BigFeatureSection'
+        - $ref: '#/components/schemas/MessageSection'
+        - $ref: '#/components/schemas/KeyValueSection'
+        - $ref: '#/components/schemas/DetailSection'
+        - $ref: '#/components/schemas/FieldSection'
+        - $ref: '#/components/schemas/ParagraphSection'
+        - $ref: '#/components/schemas/SeparatorSection'
+        - $ref: '#/components/schemas/HeadingSection'
+        - $ref: '#/components/schemas/StatsSection'
+        - $ref: '#/components/schemas/ChipsSection'
+        - $ref: '#/components/schemas/SimpleCardSection'
+        - $ref: '#/components/schemas/GenericUISection'
+        - $ref: '#/components/schemas/HeadingWithImageSection'
+        - $ref: '#/components/schemas/IconsSection'
+        - $ref: '#/components/schemas/ImageSection'
+        - $ref: '#/components/schemas/HeaderSection'
+        - $ref: '#/components/schemas/ContentHeaderSection'
+    SeparatorSection:
+      properties:
+        separator:
+          properties: {}
+          type: object
+      type: object
+    SimpleCardSection:
+      properties:
+        simple_card:
+          properties:
+            image:
+              type:
+                - string
+                - "null"
+            action:
+              anyOf:
+                - $ref: '#/components/schemas/PartnerAction'
+                - type: "null"
+            title_style:
+              anyOf:
+                - type: string
+                - type: "null"
+          type: object
+      type: object
+    StatsSection:
+      properties:
+        stats:
+          properties:
+            label:
+              type: string
+            sublabel:
+              type:
+                - string
+                - "null"
+            month:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            color:
+              type:
+                - string
+                - "null"
+            value:
+              type:
+                - number
+                - "null"
+            type:
+              type:
+                - string
+                - "null"
+            fields:
+              anyOf:
+                - items:
+                    $ref: '#/components/schemas/Label'
+                  type: array
+                - type: "null"
+          type: object
+      type: object
+    StyledStr:
+      properties:
+        styled:
+          properties:
+            text:
+              type: string
+            color:
+              type:
+                - string
+                - "null"
+            is_markdown:
+              type: boolean
+          type: object
+      type: object
+    TutorialAction:
+      properties:
+        tutorial:
+          properties:
+            icon:
+              type:
+                - string
+                - "null"
+            asset_id:
+              type:
+                - string
+                - "null"
+            style:
+              anyOf:
+                - $ref: '#/components/schemas/ActionStyle'
+                - type: "null"
+            subtitle:
+              anyOf:
+                - type: string
+                - $ref: '#/components/schemas/StyledStr'
+                - type: "null"
+            tracking_name:
+              type:
+                - string
+                - "null"
+            separator_after:
+              type:
+                - boolean
+                - "null"
+            pages:
+              items:
+                $ref: '#/components/schemas/TutorialAction.Page'
+              type: array
+          type: object
+      type: object
+    TutorialAction.Page:
+      properties:
+        headline:
+          type: string
+        body:
+          type: string
+        image:
+          type: string
+      type: object
+    UIText:
+      anyOf:
+        - type: string
+        - $ref: '#/components/schemas/StyledStr'
+  securitySchemes:
+    oAuth2Dev:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: https://api-dev.i-mobility.at/v2/token
+          scopes: {}

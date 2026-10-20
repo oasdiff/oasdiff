@@ -3,6 +3,8 @@ package checker
 import (
 	"slices"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -27,23 +29,25 @@ func ResponseRequiredPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, opera
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if writeOnlyDiff := p.propertyDiff.WriteOnlyDiff; writeOnlyDiff != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "writeOnly")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "writeOnly")
 				id := ResponseRequiredPropertyBecameNonWriteOnlyId
 				if writeOnlyDiff.To == true {
 					id = ResponseRequiredPropertyBecameWriteOnlyId
 				}
+				// the change is the property becoming or ceasing to be
+				// writeOnly, so writeOnly cannot excuse it
 				result = append(result, p.newChange(
 					id,
 					[]any{propName, info.responseStatus},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).withoutGuard(GuardWriteOnly).WithSources(propBaseSource, propRevisionSource))
 			}
 
 			if readOnlyDiff := p.propertyDiff.ReadOnlyDiff; readOnlyDiff != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "readOnly")
 				id := ResponseRequiredPropertyBecameNonReadOnlyId
 				if readOnlyDiff.To == true {
 					id = ResponseRequiredPropertyBecameReadOnlyId

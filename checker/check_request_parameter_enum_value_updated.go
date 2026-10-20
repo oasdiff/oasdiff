@@ -3,6 +3,8 @@ package checker
 import (
 	"fmt"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -24,22 +26,28 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 			p.opInfo,
 			p.paramDiff.SchemaDiff.EnumDiff,
 			p.paramDiff.SchemaDiff,
+			p.paramDiff.SchemaDiff,
+			"",
 			RequestParameterEnumValueRemovedId,
 			RequestParameterEnumValueAddedId,
+			true,
 			func(enumVal any) []any { return []any{enumVal, p.location, p.name} },
 		)...)
 
-		checkModifiedPropertiesDiff(
+		schemawalk.ModifiedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				result = append(result, checkParameterEnumDiff(
 					p.opInfo,
 					propertyDiff.EnumDiff,
+					p.paramDiff.SchemaDiff,
 					propertyDiff,
+					schemawalk.PropertyFullName(propertyPath, propertyName),
 					RequestParameterPropertyEnumValueRemovedId,
 					RequestParameterPropertyEnumValueAddedId,
+					false, // no became-enum rule covers query, path or cookie parameter properties
 					func(enumVal any) []any {
-						return []any{enumVal, propertyFullName(propertyPath, propertyName), p.location, p.name}
+						return []any{enumVal, schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name}
 					},
 				)...)
 			})
@@ -50,8 +58,11 @@ func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSour
 func checkParameterEnumDiff(
 	opInfo opInfo,
 	enumDiff *diff.EnumDiff,
+	root *diff.SchemaDiff,
 	schemaDiff *diff.SchemaDiff,
+	propertyPath string,
 	removedId, addedId string,
+	becameEnumReported bool,
 	makeArgs func(enumVal any) []any,
 ) Changes {
 	result := make(Changes, 0)
@@ -59,22 +70,26 @@ func checkParameterEnumDiff(
 		return result
 	}
 
-	for _, enumVal := range enumDiff.Deleted {
-		baseSource, revisionSource := SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+	for _, enumVal := range deletedEnumValues(schemaDiff) {
+		baseSource, revisionSource := location.SchemaDeletedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, opInfo.NewApiChange(
 			removedId,
 			makeArgs(enumVal),
 			"",
-		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+		).WithSchema(root, schemaDiff, propertyPath).WithSources(baseSource, revisionSource))
 	}
 
-	for _, enumVal := range enumDiff.Added {
-		baseSource, revisionSource := SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
+	added := enumDiff.Added
+	if becameEnumReported {
+		added = addedEnumValues(schemaDiff)
+	}
+	for _, enumVal := range added {
+		baseSource, revisionSource := location.SchemaAddedItemSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "enum", fmt.Sprintf("%v", enumVal))
 		result = append(result, opInfo.NewApiChange(
 			addedId,
 			makeArgs(enumVal),
 			"",
-		).WithSchema(schemaDiff).WithSources(baseSource, revisionSource))
+		).WithSchema(root, schemaDiff, propertyPath).WithSources(baseSource, revisionSource))
 	}
 
 	return result

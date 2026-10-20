@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -36,7 +37,7 @@ func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *d
 							if !param.Value.Required {
 								id = NewOptionalRequestParameterId
 							}
-							revisionSource := parameterSource(operationsSources, operationItem.Revision, param.Value)
+							revisionSource := location.ParameterSource(operationsSources, operationItem.Revision, param.Value)
 							result = append(result, opInfo.NewApiChange(
 								id,
 								[]any{paramLocation, paramName},

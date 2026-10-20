@@ -4,6 +4,8 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,8 +19,8 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 		if p.location != "header" {
 			return
 		}
-		baseSource, revisionSource := ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
-		checkAddedPropertiesDiff(
+		baseSource, revisionSource := location.ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
+		schemawalk.AddedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if newProperty.ReadOnly {
@@ -30,9 +32,9 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 
 				result = append(result, p.opInfo.NewApiChange(
 					NewRequiredRequestHeaderPropertyId,
-					[]any{p.name, propertyFullName(propertyPath, newPropertyName)},
+					[]any{p.name, schemawalk.PropertyFullName(propertyPath, newPropertyName)},
 					"",
-				).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, revisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, parent, schemawalk.PropertyFullName(propertyPath, newPropertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, revisionSource))
 			})
 	})
 	return result

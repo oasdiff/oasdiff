@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -38,7 +39,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources *d
 			if !isDecreasedValue(entry.diff) {
 				id = entry.increasedId
 			}
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name, entry.diff.From, entry.diff.To},

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,7 +17,7 @@ func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operations
 		if requiredDiff == nil {
 			return
 		}
-		baseSource, revisionSource := parameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "required")
+		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "required")
 
 		id := RequestParameterBecomeRequiredId
 

@@ -13,7 +13,7 @@ import (
 // either side without the other fails instead of silently generating
 // nothing.
 func TestBoundSpecsMatchSchemaBounds(t *testing.T) {
-	require.Len(t, boundRules(), 124)
+	require.Len(t, boundRules(), 180)
 
 	specs := map[string]bool{}
 	for _, spec := range boundSpecs {
@@ -37,11 +37,14 @@ func TestHandWrittenBoundIdsMatchTheGrammar(t *testing.T) {
 		for _, direction := range []Direction{DirectionRequest, DirectionResponse} {
 			for _, scope := range boundScopes(direction) {
 				for _, action := range boundActions {
+					if _, ok := boundEffect(spec.polarity, action); !ok {
+						continue
+					}
 					cells = append(cells, metaschema.Edit{
 						Location: boundLocation(direction, scope, spec.keyword),
-						Action:   metaschema.Action(action.action),
+						Action:   metaschema.Action(action.claim),
 					})
-					grammar[boundRuleId(direction, scope, spec.idName, action.action)] = true
+					grammar[boundRuleId(direction, scope, spec.idName, action.verb)] = true
 				}
 			}
 		}
@@ -49,6 +52,12 @@ func TestHandWrittenBoundIdsMatchTheGrammar(t *testing.T) {
 
 	for _, rule := range handWrittenRules() {
 		if grammar[rule.Id] {
+			continue
+		}
+		// a guarded rule is a variant of a cell fired only under its guard
+		// (e.g. request-read-only-property-max-decreased); the cell's
+		// unguarded owner is held to the grammar above
+		if len(rule.Guards) > 0 {
 			continue
 		}
 		for _, loc := range rule.Locations {

@@ -9,6 +9,7 @@ import (
 // Lowercase replaces header names to lowercase
 func Lowercase(spec *openapi3.T) {
 	lowerHeaderNames(spec)
+	lowerSecuritySchemeHeaderNames(spec)
 }
 
 func lowerHeaderNames(spec *openapi3.T) {
@@ -50,4 +51,18 @@ func lowerResponseHeaders(headers openapi3.Headers) openapi3.Headers {
 		result[strings.ToLower(k)] = v
 	}
 	return result
+}
+
+// lowerSecuritySchemeHeaderNames lowercases the header an apiKey security
+// scheme is sent in. A scheme sent in a query parameter or a cookie keeps its
+// case, since those names are case-sensitive.
+func lowerSecuritySchemeHeaderNames(spec *openapi3.T) {
+	if spec.Components == nil {
+		return
+	}
+	for _, schemeRef := range spec.Components.SecuritySchemes {
+		if scheme := schemeRef.Value; scheme != nil && scheme.Type == "apiKey" && scheme.In == "header" {
+			scheme.Name = strings.ToLower(scheme.Name)
+		}
+	}
 }

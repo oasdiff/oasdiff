@@ -64,6 +64,15 @@ func TestNullableWrapping_SingleFindingPerLevel(t *testing.T) {
 		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_param_base.yaml", "../data/checker/nullable_wrap_param_revision.yaml")
 		require.Equal(t, []string{checker.RequestParameterBecameNullableId}, ids)
 	})
+	t.Run("header parameter", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_header_property_base.yaml", "../data/checker/nullable_wrap_header_property_revision.yaml")
+		require.ElementsMatch(t, []string{
+			checker.RequestParameterBecameNullableId,         // X-Owner
+			checker.RequestParameterBecameNullableId,         // X-Status
+			checker.RequestParameterPropertyBecameNullableId, // X-Meta owner
+			checker.RequestParameterPropertyBecameNullableId, // X-Meta status
+		}, ids)
+	})
 }
 
 // The reverse direction: removing the wrapper reports one became-not-nullable
@@ -86,6 +95,15 @@ func TestNullableUnwrapping_SingleFindingPerLevel(t *testing.T) {
 	t.Run("parameter", func(t *testing.T) {
 		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_param_revision.yaml", "../data/checker/nullable_wrap_param_base.yaml")
 		require.Equal(t, []string{checker.RequestParameterBecameNotNullableId}, ids)
+	})
+	t.Run("header parameter", func(t *testing.T) {
+		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_header_property_revision.yaml", "../data/checker/nullable_wrap_header_property_base.yaml")
+		require.ElementsMatch(t, []string{
+			checker.RequestParameterBecameNotNullableId,         // X-Owner
+			checker.RequestParameterBecameNotNullableId,         // X-Status
+			checker.RequestParameterPropertyBecameNotNullableId, // X-Meta owner
+			checker.RequestParameterPropertyBecameNotNullableId, // X-Meta status
+		}, ids)
 	})
 	t.Run("response property", func(t *testing.T) {
 		ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_response_revision.yaml", "../data/checker/nullable_wrap_response_base.yaml")

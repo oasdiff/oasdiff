@@ -23,6 +23,8 @@ universal_binaries:
 homebrew_casks:
  -
    name: oasdiff
+   # a pre-release tag (v1.33.0-rc.1) must not reach brew upgrade
+   skip_upload: auto
    homepage: "https://github.com/oasdiff/oasdiff"
    description: "A diff tool for OpenAPI Specification."
    repository:

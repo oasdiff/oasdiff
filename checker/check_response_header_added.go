@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -38,7 +39,7 @@ func ResponseHeaderAddedCheck(diffReport *diff.Diff, operationsSources *diff.Ope
 						continue
 					}
 					header := responseDiff.Revision.Headers[headerName].Value
-					revisionSource := NewSourceFromOrigin(operationsSources, operationItem.Revision, header.Origin)
+					revisionSource := location.NewSourceFromOrigin(operationsSources, operationItem.Revision, header.Origin)
 					result = append(result, opInfo.NewApiChange(
 						ResponseHeaderAddedId,
 						[]any{headerName, responseStatus},

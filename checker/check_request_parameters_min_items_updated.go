@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -24,7 +25,7 @@ func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			return
 		}
 
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
 
 		id := RequestParameterMinItemsIncreasedId
 		if !isIncreasedValue(minItemsDiff) {

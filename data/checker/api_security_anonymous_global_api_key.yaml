@@ -1,0 +1,27 @@
+openapi: 3.0.3
+info:
+  title: anonymous access
+  version: '1'
+security:
+  - apiKey: []
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: ok
+  /health:
+    get:
+      security: []
+      responses:
+        '200':
+          description: ok
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    bearer:
+      type: http
+      scheme: bearer
