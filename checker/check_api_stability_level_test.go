@@ -119,7 +119,7 @@ func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse stability level: `x-stability-level isn't a string nor valid json`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: 1`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability-2.yaml", errs[0].GetSource())
 }
 

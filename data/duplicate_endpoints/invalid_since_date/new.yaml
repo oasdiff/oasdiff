@@ -1,0 +1,28 @@
+openapi: 3.0.3
+info:
+  title: Pets
+  version: 1.0.0
+paths:
+  /pet/{a}:
+    get:
+      parameters:
+        - name: a
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+  /pet/{b}:
+    get:
+      x-since-date: "not a date"
+      parameters:
+        - name: b
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK

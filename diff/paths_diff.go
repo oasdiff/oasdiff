@@ -60,19 +60,12 @@ func getPathsDiffInternal(config *Config, state *state, paths1, paths2 *openapi3
 	paths1Mod := rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase)
 	paths2Mod := rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision)
 
-	addedPaths, deletedPaths, otherPaths := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	added, deleted, common, pairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	result.Added = added
+	result.Deleted = deleted
 
-	for endpoint := range addedPaths.Map() {
-		result.addAddedPath(endpoint)
-	}
-
-	for endpoint := range deletedPaths.Map() {
-		result.addDeletedPath(endpoint)
-	}
-
-	for endpoint, pathItemPair := range otherPaths {
-		err := result.addModifiedPath(config, state, endpoint, pathItemPair)
-		if err != nil {
+	for _, endpoint := range common {
+		if err := result.addModifiedPath(config, state, endpoint, pairs[endpoint]); err != nil {
 			return nil, err
 		}
 	}
@@ -88,14 +81,6 @@ func (pathsDiff *PathsDiff) getSummary() *SummaryDetails {
 		Deleted:  len(pathsDiff.Deleted),
 		Modified: len(pathsDiff.Modified),
 	}
-}
-
-func (pathsDiff *PathsDiff) addAddedPath(path string) {
-	pathsDiff.Added = append(pathsDiff.Added, path)
-}
-
-func (pathsDiff *PathsDiff) addDeletedPath(path string) {
-	pathsDiff.Deleted = append(pathsDiff.Deleted, path)
 }
 
 func (pathsDiff *PathsDiff) addModifiedPath(config *Config, state *state, path1 string, pathItemPair *pathItemPair) error {
