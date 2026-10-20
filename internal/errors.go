@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 )
@@ -53,9 +52,6 @@ func getErrFailedToLoadSpecs(what string, path string, err error) *ReturnError {
 }
 
 func getErrDiffFailed(err error) *ReturnError {
-	if dupErr, ok := errors.AsType[*diff.DuplicateEndpointError](err); ok && dupErr.PathParamNamesDiffer() {
-		err = fmt.Errorf("%w, or include path parameter names in endpoint matching with --%s", err, includePathParamsFlag)
-	}
 	return getError(
 		fmt.Errorf("diff failed: %w", err),
 		104,

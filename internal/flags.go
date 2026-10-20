@@ -84,7 +84,7 @@ func (flags *Flags) getFetch() bool {
 }
 
 func (flags *Flags) getIncludePathParams() bool {
-	return flags.v.GetBool(includePathParamsFlag)
+	return flags.v.GetBool("include-path-params")
 }
 
 func (flags *Flags) getMatchInlineRefs() bool {

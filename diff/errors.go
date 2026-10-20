@@ -3,8 +3,7 @@ package diff
 import "fmt"
 
 // DuplicateEndpointError reports two operations that are the same endpoint
-// and have the same x-since-date, so neither can be chosen. Returned as a
-// distinct type so callers can use errors.As to tell how the two paths match.
+// and have the same x-since-date, so neither can be chosen.
 type DuplicateEndpointError struct {
 	Method  string
 	Path1   string
@@ -14,12 +13,11 @@ type DuplicateEndpointError struct {
 }
 
 func (e *DuplicateEndpointError) Error() string {
-	return fmt.Sprintf("duplicate endpoint: %s %s in %s and %s %s in %s. You may add the %s extension to specify order",
-		e.Method, e.Path1, e.Source1, e.Method, e.Path2, e.Source2, SinceDateExtension)
-}
-
-// PathParamNamesDiffer reports whether the two paths differ only by their
-// parameter names, so matching on the names would tell them apart.
-func (e *DuplicateEndpointError) PathParamNamesDiffer() bool {
-	return e.Path1 != e.Path2
+	hint := fmt.Sprintf("add the %s extension to specify order", SinceDateExtension)
+	// different paths only match because path parameter names are ignored
+	if e.Path1 != e.Path2 {
+		hint += ", or include path parameter names in endpoint matching with --include-path-params"
+	}
+	return fmt.Sprintf("duplicate endpoint: %s %s in %s and %s %s in %s. You may %s",
+		e.Method, e.Path1, e.Source1, e.Method, e.Path2, e.Source2, hint)
 }

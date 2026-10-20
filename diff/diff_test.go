@@ -1168,8 +1168,22 @@ func TestGetPathsDiff_DuplicateEndpoint(t *testing.T) {
 
 	for range 10 {
 		_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
-		require.EqualError(t, err, "duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may add the x-since-date extension to specify order")
+		require.EqualError(t, err, "duplicate endpoint: GET /pet/{petId2} in "+spec+" and GET /pet/{petId3} in "+spec+". You may add the x-since-date extension to specify order, or include path parameter names in endpoint matching with --include-path-params")
 	}
+}
+
+// The same path in two composed specs can't be told apart by path parameter
+// names, so the error only suggests x-since-date.
+func TestGetPathsDiff_DuplicateEndpointSamePath(t *testing.T) {
+	const dir = "../data/duplicate_endpoints/composed/"
+	loader := openapi3.NewLoader()
+	a, err := load.NewSpecInfo(loader, load.NewSource(dir+"a.yaml"))
+	require.NoError(t, err)
+	b, err := load.NewSpecInfo(loader, load.NewSource(dir+"b.yaml"))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{a, b}, []*load.SpecInfo{a})
+	require.EqualError(t, err, "duplicate endpoint: GET /pets in "+dir+"a.yaml and GET /pets in "+dir+"b.yaml. You may add the x-since-date extension to specify order")
 }
 
 // Regression for #1041: OR-alternatives that share a security scheme (the only
