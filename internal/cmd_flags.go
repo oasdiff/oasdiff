@@ -9,6 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// named, so an error that suggests the flag can't drift from its name
+const includePathParamsFlag = "include-path-params"
+
 func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringP("match-path", "p", "", "include only paths that match this regular expression")
 	cmd.PersistentFlags().StringP("unmatch-path", "q", "", "exclude paths that match this regular expression")
@@ -17,7 +20,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("prefix-revision", "", "add this prefix to paths in revised-spec before comparison")
 	cmd.PersistentFlags().String("strip-prefix-base", "", "strip this prefix from paths in base-spec before comparison")
 	cmd.PersistentFlags().String("strip-prefix-revision", "", "strip this prefix from paths in revised-spec before comparison")
-	cmd.PersistentFlags().Bool("include-path-params", false, "include path parameter names in endpoint matching")
+	cmd.PersistentFlags().Bool(includePathParamsFlag, false, "include path parameter names in endpoint matching")
 	cmd.PersistentFlags().Bool("match-inline-refs", true, "match validation-equivalent inline/$ref subschemas as the same anyOf/oneOf branch")
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")

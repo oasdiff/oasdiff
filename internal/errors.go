@@ -55,7 +55,7 @@ func getErrFailedToLoadSpecs(what string, path string, err error) *ReturnError {
 func getErrDiffFailed(err error) *ReturnError {
 	// different paths only match because path parameter names are ignored
 	if dupErr, ok := errors.AsType[*diff.DuplicateEndpointError](err); ok && dupErr.Path1 != dupErr.Path2 {
-		err = fmt.Errorf("%w, or include path parameter names in endpoint matching with --include-path-params", err)
+		err = fmt.Errorf("%w, or include path parameter names in endpoint matching with --%s", err, includePathParamsFlag)
 	}
 	return getError(
 		fmt.Errorf("diff failed: %w", err),
