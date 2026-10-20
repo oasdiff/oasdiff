@@ -1281,3 +1281,23 @@ func TestDiff_SharedSchemeORAlternatives_AmbiguousScopeChangeIsAddDelete(t *test
 		[]string{"petstore_auth: [list:pets, read:pets]", "petstore_auth: [audit:pets, write:pets]"},
 		securityAlternativeStrings(securityDiff.Added))
 }
+
+// The path that was merged first has the invalid x-since-date, so the error
+// names that path, not the one being merged.
+func TestGetPathsDiff_InvalidSinceDateOld(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/invalid_since_date/old.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{a}), failed to parse time")
+}
+
+func TestGetPathsDiff_InvalidSinceDateNew(t *testing.T) {
+	const spec = "../data/duplicate_endpoints/invalid_since_date/new.yaml"
+	s, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(spec))
+	require.NoError(t, err)
+
+	_, _, err = diff.GetPathsDiff(diff.NewConfig(), []*load.SpecInfo{s}, []*load.SpecInfo{s})
+	require.EqualError(t, err, "invalid x-since-date extension value in "+spec+" (GET /pet/{b}), failed to parse time")
+}

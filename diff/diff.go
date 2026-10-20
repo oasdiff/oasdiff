@@ -207,11 +207,11 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 
 				oldSince, err := sinceDateFrom(*p, *oldOperation)
 				if err != nil {
-					return nil, nil, fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, operationsSources[oldOperation], op, path, err)
+					return nil, nil, invalidSinceDateError(operationsSources[oldOperation], op, operationPaths[oldOperation], err)
 				}
 				newSince, err := sinceDateFrom(*pathItem, *opItem)
 				if err != nil {
-					return nil, nil, fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, s.Url, op, path, err)
+					return nil, nil, invalidSinceDateError(s.Url, op, path, err)
 				}
 				if newSince.After(oldSince) {
 					p.SetOperation(op, opItem)
@@ -234,6 +234,10 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 func copyPathItem(pathItem *openapi3.PathItem) *openapi3.PathItem {
 	copied := *pathItem
 	return &copied
+}
+
+func invalidSinceDateError(source, op, path string, err error) error {
+	return fmt.Errorf("invalid %s extension value in %s (%s %s), %w", SinceDateExtension, source, op, path, err)
 }
 
 func sinceDateFrom(pathItem openapi3.PathItem, operation openapi3.Operation) (civil.Date, error) {
