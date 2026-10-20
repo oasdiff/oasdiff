@@ -43,7 +43,6 @@ var Waivers = []Waiver{
 	{CategoryOpen, "components.securitySchemes.*.type:set,unset", "type is required, so it is set or unset only where the scheme is invalid on one side; no check reports that"},
 	{CategoryOpen, "components.securitySchemes.*.flows:set,unset", "adding or removing the OAuth flows object has no check"},
 	{CategoryOpen, "components.securitySchemes.*.flows.*:set,unset", "adding or removing an OAuth flow has no check"},
-	{CategoryOpen, "components.securitySchemes.*.flows.*.refreshUrl", "OAuth refresh URL changes have no check"},
 	{CategoryCoveredAs, "components.securitySchemes.*.flows.*.scopes.*:set,unset", "a scope appearing or disappearing is the scope add/remove, which is claimed"},
 	{CategoryResolvedAtUsage, "components.**", "edits to component definitions surface as diffs at every referencing operation; only unused-component removal is reported directly (api-schemas-removed)"},
 	{CategoryOpen, "webhooks.**", "webhooks are diffed (WebhooksDiff) but checkers only report webhook add/remove; changes inside a webhook's operations have no checks yet (tracked in #1160)"},

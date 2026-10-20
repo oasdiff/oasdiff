@@ -265,13 +265,14 @@ api-global-security-scope-added: к глобальной схеме безопа
 api-security-scope-removed: из схемы безопасности эндпоинта %s была удалена область безопасности %s
 api-security-scope-added: к схеме безопасности эндпоинта %s была добавлена область безопасности %s
 api-security-component-type-changed: тип компонента схемы безопасности %s был изменен с %s на %s
-api-security-component-oauth-url-changed: Token URL OAuth компонента схемы безопасности %s был изменен с %s на %s
-api-security-component-oauth-token-url-changed: URL OAuth компонента схемы безопасности %s был изменен с %s на %s
+api-security-component-oauth-url-changed: в схеме безопасности %s URL авторизации OAuth потока %s изменен с %s на %s
+api-security-component-oauth-token-url-changed: в схеме безопасности %s URL токена OAuth потока %s изменен с %s на %s
+api-security-component-oauth-refresh-url-changed: в схеме безопасности %s URL обновления токена OAuth потока %s изменен с %s на %s
 api-security-component-added: компонент схемы безопасности %s был добавлен
 api-security-component-removed: компонент схемы безопасности %s был удален
-api-security-component-oauth-scope-added: добавлено разрешение OAuth %s для компонента схемы безопасности %s
-api-security-component-oauth-scope-removed: удалено разрешение OAuth %s для компонента схемы безопасности %s
-api-security-component-oauth-scope-changed: разрешение OAuth %s для компонента схемы безопасности %s было обновлено с %s на %s
+api-security-component-oauth-scope-added: в схеме безопасности %s OAuth поток %s получил разрешение %s
+api-security-component-oauth-scope-removed: в схеме безопасности %s из OAuth потока %s удалено разрешение %s
+api-security-component-oauth-scope-changed: в схеме безопасности %s в OAuth потоке %s разрешение %s обновлено с %s на %s
 api-security-component-api-key-name-changed: имя API-ключа компонента схемы безопасности %s было изменено с %s на %s
 api-security-component-api-key-in-changed: расположение API-ключа компонента схемы безопасности %s было изменено с %s на %s
 api-security-component-http-scheme-changed: http схема компонента схемы безопасности %s была изменена с %s на %s
@@ -417,6 +418,7 @@ api-security-component-oauth-scope-added-description: разрешение до�
 api-security-component-oauth-scope-changed-description: разрешение изменено в OAuth потоке в components/securitySchemes
 api-security-component-oauth-scope-removed-description: разрешение удалено из OAuth потока в components/securitySchemes
 api-security-component-oauth-token-url-changed-description: URL токена изменен в OAuth потоке в components/securitySchemes
+api-security-component-oauth-refresh-url-changed-description: URL обновления токена изменен в OAuth потоке в components/securitySchemes
 api-security-component-oauth-url-changed-description: URL аутентификации изменен в OAuth потоке в components/securitySchemes
 api-security-component-openid-connect-url-changed-description: URL OpenID Connect изменен в components/securitySchemes
 api-security-component-removed-description: схема безопасности удалена в components/securitySchemes
@@ -1598,3 +1600,4 @@ shared-schema-detail-also: "также в %s"
 shared-schema-detail-also-cyclic: "также в %s и других"
 shared-schema-detail-also-more: "также в %s и ещё %d"
 shared-schema-detail-name: "общая схема: %s"
+security-scheme-url-changed-warn-comment: "Это предупреждение, потому что спецификация не указывает, принимаются ли учетные данные, полученные через прежний URL."
