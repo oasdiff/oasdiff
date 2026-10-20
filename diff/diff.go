@@ -3,7 +3,6 @@ package diff
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"maps"
 	"slices"
 
