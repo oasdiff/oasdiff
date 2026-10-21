@@ -144,7 +144,7 @@ Shape and enrich the report.
 
 ### Reference
 - [OpenAPI 3.1 and 3.2 support](OPENAPI-31.md) — what's supported
-- [Security: control external `$ref` loading to prevent SSRF](SECURITY.md)
+- [External `$ref`s: control external loading to prevent SSRF](EXTERNAL-REFS.md)
 - [Usage examples](USAGE_EXAMPLES.md) — recipes for common scenarios
 - [Contributing](CONTRIB.md)
 
