@@ -9,10 +9,8 @@ import (
 )
 
 // A refPolicy that names neither a root document nor an enforcing inner reader
-// is what a new call site gets by forgetting to say which it wants. It must
-// refuse, not allow: before the two cases were separate fields, a caller that
-// passed no root silently got no policy at all, which is the shape of both
-// GHSA-2jcc-mxv7-p3f9 and the capture-reader issue after it.
+// matches no document, so it refuses every $ref. That is what a call site gets
+// by not choosing, so the omission fails closed.
 func TestRefPolicy_ZeroValueFailsClosed(t *testing.T) {
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = false
