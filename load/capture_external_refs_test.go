@@ -43,13 +43,20 @@ paths:
 		return p
 	}
 
-	for name, ref := range map[string]string{
-		"outside the spec directory": "../outside/target.yaml#/Leak",
-		"sibling file":               "sibling.yaml#/Leak",
-		"http url":                   "http://127.0.0.1:1/target.yaml#/Leak",
+	// Each case names its own spec file: the cases share a directory, so
+	// deriving the name from the case would let two of them collide and
+	// overwrite each other's spec.
+	for _, tt := range []struct {
+		name string
+		file string
+		ref  string
+	}{
+		{"outside the spec directory", "traversal.yaml", "../outside/target.yaml#/Leak"},
+		{"sibling file", "sibling_ref.yaml", "sibling.yaml#/Leak"},
+		{"http url", "http_ref.yaml", "http://127.0.0.1:1/target.yaml#/Leak"},
 	} {
-		t.Run(name, func(t *testing.T) {
-			path := write("rev_"+t.Name()[len(t.Name())-1:]+".yaml", ref)
+		t.Run(tt.name, func(t *testing.T) {
+			path := write(tt.file, tt.ref)
 
 			loader := openapi3.NewLoader()
 			loader.IsExternalRefsAllowed = false
