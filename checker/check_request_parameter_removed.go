@@ -18,37 +18,17 @@ const (
 
 func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-
-			opInfo := newOpInfo(
-				config,
-				operationItem.Revision,
-				operationsSources,
-				operation,
-				path,
-			)
-
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Deleted {
-				for _, paramName := range paramItems {
-					param := operationItem.Base.Parameters.GetByInAndName(paramLocation, paramName)
-					if change, ok := checkParameterRemoval(opInfo, param); ok {
-						baseSource := location.ParameterSource(operationsSources, operationItem.Base, param)
-						result = append(result, change.WithSources(baseSource, nil))
-					}
+	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
+		for paramLocation, paramItems := range o.ParametersDiff.Deleted {
+			for _, paramName := range paramItems {
+				param := o.BaseParameters.GetByInAndName(paramLocation, paramName)
+				if change, ok := checkParameterRemoval(o.opInfo, param); ok {
+					baseSource := location.ParameterSource(operationsSources, o.Base, param)
+					result = append(result, change.WithSources(baseSource, nil))
 				}
 			}
 		}
-	}
+	})
 	return result
 }
 

@@ -12,33 +12,49 @@ type paramInfo struct {
 	paramDiff *diff.ParameterDiff
 }
 
-// walkModifiedParameters invokes processor for every modified parameter of
-// every modified operation.
-func walkModifiedParameters(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(p paramInfo)) {
-	if diffReport.PathsDiff == nil {
+// operationParams is what walkOperationsParameters hands its processor.
+type operationParams struct {
+	opInfo opInfo
+	diff.OperationParameters
+}
+
+// walkOperationsParameters invokes processor for every operation whose
+// parameters changed, comparing the parameters each operation has, its own and
+// its path item's, rather than each list where it is written.
+func walkOperationsParameters(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(o operationParams)) {
+	parametersContext := diffReport.ParametersContext
+	if parametersContext == nil {
 		return
 	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil || operationItem.ParametersDiff.Modified == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for location, params := range operationItem.ParametersDiff.Modified {
-				for name, paramDiff := range params {
-					processor(paramInfo{
-						opInfo:    opInfo,
-						location:  location,
-						name:      name,
-						paramDiff: paramDiff,
-					})
-				}
-			}
+	walk := func(pathPrefix string, operations []diff.OperationParameters) {
+		for _, operation := range operations {
+			// the source lookups read only Base and Revision
+			methodDiff := &diff.MethodDiff{Base: operation.Base, Revision: operation.Revision}
+			processor(operationParams{
+				opInfo:              newOpInfoFromDiff(config, methodDiff, operationsSources, operation.Method, pathPrefix+operation.Path),
+				OperationParameters: operation,
+			})
 		}
 	}
+	walk("", parametersContext.Operations)
+	walk(webhookPathPrefix, parametersContext.Webhooks)
+}
+
+// walkModifiedParameters invokes processor for every modified parameter of
+// every operation whose parameters changed.
+func walkModifiedParameters(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(p paramInfo)) {
+	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
+		for location, params := range o.ParametersDiff.Modified {
+			for name, paramDiff := range params {
+				processor(paramInfo{
+					opInfo:    o.opInfo,
+					location:  location,
+					name:      name,
+					paramDiff: paramDiff,
+				})
+			}
+		}
+	})
 }
 
 // headerInfo is what walkModifiedResponseHeaders hands its processor.

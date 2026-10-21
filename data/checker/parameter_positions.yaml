@@ -1,0 +1,20 @@
+openapi: 3.0.3
+info:
+  title: parameter positions
+  version: "1"
+paths:
+  /pets:
+    get:
+      responses:
+        '200':
+          description: ok
+    post:
+      responses:
+        '200':
+          description: ok
+webhooks:
+  newPet:
+    post:
+      responses:
+        '200':
+          description: ok
