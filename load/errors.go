@@ -49,8 +49,7 @@ func IsExternalRefDisallowed(err error) bool {
 	if err == nil {
 		return false
 	}
-	var extErr *ExternalRefError
-	if errors.As(err, &extErr) {
+	if _, ok := errors.AsType[*ExternalRefError](err); ok {
 		return true
 	}
 	return strings.Contains(err.Error(), kinRefusalMessage)
