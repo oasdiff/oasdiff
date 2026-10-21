@@ -1,0 +1,90 @@
+package load_test
+
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/load"
+	"github.com/stretchr/testify/require"
+)
+
+// The capture reader that --open installs is a custom ReadFromURIFunc, and
+// kin-openapi applies IsExternalRefsAllowed only when no custom reader is
+// installed. A reader that does not apply it turns --allow-external-refs=false
+// into a no-op, letting a spec read any local file or reach any URL and putting
+// what it read into the uploaded review.
+func TestCapture_HonorsExternalRefsPolicy(t *testing.T) {
+	dir := t.TempDir()
+	outside := filepath.Join(dir, "outside")
+	spec := filepath.Join(dir, "spec")
+	require.NoError(t, os.MkdirAll(outside, 0o755))
+	require.NoError(t, os.MkdirAll(spec, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(outside, "target.yaml"),
+		[]byte("Leak:\n  type: string\n  format: OUTSIDE\n"), 0o644))
+
+	write := func(name, ref string) string {
+		p := filepath.Join(spec, name)
+		require.NoError(t, os.WriteFile(p, []byte(`openapi: 3.0.0
+info: {title: t, version: "1.0"}
+paths:
+  /a:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "`+ref+`"
+`), 0o644))
+		return p
+	}
+
+	for name, ref := range map[string]string{
+		"outside the spec directory": "../outside/target.yaml#/Leak",
+		"sibling file":               "sibling.yaml#/Leak",
+		"http url":                   "http://127.0.0.1:1/target.yaml#/Leak",
+	} {
+		t.Run(name, func(t *testing.T) {
+			path := write("rev_"+t.Name()[len(t.Name())-1:]+".yaml", ref)
+
+			loader := openapi3.NewLoader()
+			loader.IsExternalRefsAllowed = false
+			_, err := load.NewSpecInfoWithCapture(loader, load.NewSource(path))
+
+			require.Error(t, err, "the capture reader must apply the policy")
+			var extErr *load.ExternalRefError
+			require.ErrorAs(t, err, &extErr, "callers map this type to a dedicated exit code")
+		})
+	}
+}
+
+// With external refs allowed, --open keeps working and still captures the
+// referenced file, which is what the review bundle slices blocks from.
+func TestCapture_AllowedExternalRefStillCaptured(t *testing.T) {
+	dir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "target.yaml"),
+		[]byte("Leak:\n  type: string\n  format: OUTSIDE\n"), 0o644))
+	path := filepath.Join(dir, "rev.yaml")
+	require.NoError(t, os.WriteFile(path, []byte(`openapi: 3.0.0
+info: {title: t, version: "1.0"}
+paths:
+  /a:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "target.yaml#/Leak"
+`), 0o644))
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	si, err := load.NewSpecInfoWithCapture(loader, load.NewSource(path))
+	require.NoError(t, err)
+	require.Len(t, si.Sources, 2, "root and the referenced file")
+}
