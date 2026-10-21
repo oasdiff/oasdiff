@@ -29,6 +29,10 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
     strategy:
       fail-fast: false
@@ -40,16 +44,16 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+        uses: actions/checkout@v7
 
       - name: Install Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # ratchet:actions/setup-go@v7
+        uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # ratchet:github/codeql-action/init@v4
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           # If you wish to specify custom queries, you can do so here or in a config file.
@@ -60,7 +64,7 @@ jobs:
       # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
       # If this step fails, then you should remove it and run the build manually (see below)
       - name: Autobuild
-        uses: github/codeql-action/autobuild@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # ratchet:github/codeql-action/autobuild@v4
+        uses: github/codeql-action/autobuild@v4
 
       # ℹ️ Command-line programs to run using the OS shell.
       # 📚 https://git.io/JvXDl
@@ -74,4 +78,4 @@ jobs:
       #   make release
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # ratchet:github/codeql-action/analyze@v4
+        uses: github/codeql-action/analyze@v4

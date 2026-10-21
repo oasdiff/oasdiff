@@ -13,6 +13,8 @@ concurrency:
 
 jobs:
   build-and-test:
+    permissoins:
+      contents: read
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GO111MODULE: 'on'
@@ -33,9 +35,9 @@ jobs:
     steps:
 
       - name: Check out code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v7
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # ratchet:actions/setup-go@v7
+      - uses: actions/setup-go@v7
         with:
           go-version: ${{ matrix.go }}
 
@@ -45,7 +47,7 @@ jobs:
           echo "go-mod=$(go env GOMODCACHE)" >> "$GITHUB_OUTPUT"
 
       - name: Go Build Cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # ratchet:actions/cache@v6
+        uses: actions/cache@v6
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
           key: ${{ runner.os }}-go-${{ matrix.go }}-build-v3-${{ hashFiles('**/go.sum', 'checker/localizations_src/**/*.yaml') }}
@@ -53,7 +55,7 @@ jobs:
             ${{ runner.os }}-go-${{ matrix.go }}-build-v3-
 
       - name: Go Mod Cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # ratchet:actions/cache@v6
+        uses: actions/cache@v6
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-${{ matrix.go }}-mod-v3-${{ hashFiles('**/go.sum') }}
@@ -102,7 +104,7 @@ jobs:
         run: |
           ! git grep -InE 'json:"' | grep -v _test.go | grep -v yaml:
 
-      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # ratchet:codecov/codecov-action@v7
+      - uses: codecov/codecov-action@v7
         with:
           files: ./coverage.txt
           flags: unittests # optional
