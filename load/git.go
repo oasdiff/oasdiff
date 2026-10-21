@@ -86,7 +86,10 @@ func loadFromGitRevision(loader *openapi3.Loader, gitRef string, fetch bool, cap
 	// the loader would return the cached base spec for the revision.
 	u := &url.URL{Path: filepath.ToSlash(gitRef)}
 	if capture != nil {
-		loaderCopy = *withCapture(&loaderCopy, capture)
+		// The reader installed above already applies IsExternalRefsAllowed for this
+		// path, where an allowed $ref keeps its "<rev>:" prefix rather than naming a
+		// file, so pass no root and let that check stand as the only one.
+		loaderCopy = *withCapture(&loaderCopy, capture, "")
 		// the root is loaded from bytes below (git show already read it), so
 		// ReadFromURIFunc never fires for it; record it directly under the same
 		// key kin will use for its origin (u.String()).

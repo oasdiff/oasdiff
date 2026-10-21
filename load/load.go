@@ -17,11 +17,11 @@ func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*ope
 	case SourceTypeStdin:
 		return loader.LoadFromStdin()
 	case SourceTypeURL:
-		return withCapture(loader, capture).LoadFromURI(source.Uri)
+		return withCapture(loader, capture, source.Uri.String()).LoadFromURI(source.Uri)
 	case SourceTypeGitRevision:
 		return loadFromGitRevision(loader, source.Path, source.Fetch, capture)
 	default:
-		return withCapture(loader, capture).LoadFromFile(source.Path)
+		return withCapture(loader, capture, source.Path).LoadFromFile(source.Path)
 	}
 }
 
@@ -29,12 +29,12 @@ func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*ope
 // copy whose ReadFromURIFunc records every file the loader reads. The copy keeps
 // the recorder off the caller's loader while still sharing its visitedDocuments
 // cache (the same reason loadFromGitRevision copies the loader).
-func withCapture(loader *openapi3.Loader, capture *sourceCapture) *openapi3.Loader {
+func withCapture(loader *openapi3.Loader, capture *sourceCapture, root string) *openapi3.Loader {
 	if capture == nil {
 		return loader
 	}
 	lc := *loader
-	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture)
+	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture, root)
 	return &lc
 }
 
