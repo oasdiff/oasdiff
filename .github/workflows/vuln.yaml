@@ -4,11 +4,6 @@ on:
     branches: [main]
   pull_request:
 
-permissions:
-  contents: read
-  # Optional: allow read access to pull request. Use with `only-new-issues` option.
-  # pull-requests: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -17,6 +12,8 @@ jobs:
     govulncheck_job:
         runs-on: ubuntu-latest
         name: Run govulncheck
+        permissions:
+          contents: read
         steps:
           - uses: actions/checkout@v7
           - uses: actions/setup-go@v7
@@ -35,8 +32,8 @@ jobs:
             run: |
                 set -eo pipefail
                 minor=$(awk '/^go /{split($2,a,"."); print a[1]"."a[2]; exit}' go.mod)
-                latest=$(curl -fsSL "https://go.dev/dl/?mode=json&include=all" \
-                  | python3 -c "import sys,json; vs=[r['version'] for r in json.load(sys.stdin) if r.get('stable') and r['version'].startswith('go${minor}.')]; vs.sort(key=lambda v:[int(x) for x in v[2:].split('.')]); print(vs[-1])")
+                curl -fsSL -o go_versions.json "https://go.dev/dl/?mode=json&include=all"
+                latest=$(cat go_versions.json | python3 -c "import sys,json; vs=[r['version'] for r in json.load(sys.stdin) if r.get('stable') and r['version'].startswith('go${minor}.')]; vs.sort(key=lambda v:[int(x) for x in v[2:].split('.')]); print(vs[-1])")
                 echo "Resolved latest go${minor} patch: ${latest}"
                 export GOTOOLCHAIN=${latest}
                 go install golang.org/x/vuln/cmd/govulncheck@latest

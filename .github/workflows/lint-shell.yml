@@ -8,6 +8,8 @@ on:
 jobs:
   shellcheck:
     name: shellcheck
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -18,6 +20,8 @@ jobs:
           check_together: 'yes'
   actionlint:
     name: actionlint
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: checkout

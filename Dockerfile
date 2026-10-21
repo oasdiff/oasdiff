@@ -15,7 +15,14 @@ RUN VERSION=$(git describe --always --tags) && \
 
 ### Create image ###
 FROM alpine:3
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 RUN apk add --no-cache git
 WORKDIR /usr/bin
 COPY --from=builder /go/src/app/oasdiff .
+
+USER appuser
+
 ENTRYPOINT ["/usr/bin/oasdiff"]
+
