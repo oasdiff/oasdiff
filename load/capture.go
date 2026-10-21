@@ -44,9 +44,9 @@ func (c *sourceCapture) asStrings() map[string]string {
 // its marsh.go), so a captured file is found by an element's origin File on
 // every platform. It is installed only when the load is given a capture;
 // ordinary loads install no recorder and pay nothing.
-func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture, root string) openapi3.ReadFromURIFunc {
+func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture, policy refPolicy) openapi3.ReadFromURIFunc {
 	return func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
-		if err := allowLocation(loader, location, root); err != nil {
+		if err := policy.allow(loader, location); err != nil {
 			return nil, err
 		}
 		var (
@@ -65,24 +65,43 @@ func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture, roo
 	}
 }
 
-// allowLocation applies the loader's external-refs policy to a location a custom
-// reader is about to read.
+// refPolicy says how a recording reader applies the loader's external-refs
+// policy: either by comparing against the one document the load was asked for,
+// or not at all because the reader it wraps already applies it.
 //
 // kin-openapi applies that policy itself only when no custom ReadFromURIFunc is
 // installed; with one it hands the policy to the reader (see
 // Loader.loadSingleElementFromURI). A custom reader that does not apply it
 // therefore turns --allow-external-refs=false into a no-op, which is how
 // GHSA-2jcc-mxv7-p3f9 happened on the git-revision path and how it happened
-// again here. Both readers now go through this.
+// again in the capture reader.
+//
+// The two cases are separate fields rather than one path that means "no policy"
+// when empty, so a caller has to name the one it wants. A zero refPolicy
+// enforces and matches no document, so a caller that sets neither field refuses
+// every external $ref rather than allowing every one.
+type refPolicy struct {
+	// root is the only document that may be read. Compared with sameLocation.
+	root string
+
+	// innerEnforces skips the comparison because the wrapped reader applies
+	// the policy itself. Only the git-revision reader does: an allowed $ref
+	// there keeps its "<rev>:" prefix rather than naming a file, so there is
+	// no root path to compare against.
+	innerEnforces bool
+}
+
+// allow reports whether a location may be read, as an error so the caller can
+// return it unchanged.
 //
 // With external refs disallowed a spec must be self-contained, so only the
 // document the load was asked for may be read. That matches what kin-openapi
 // refuses on its own: any $ref to another document, a sibling file included.
-func allowLocation(loader *openapi3.Loader, location *url.URL, root string) error {
-	if loader == nil || loader.IsExternalRefsAllowed || root == "" {
+func (p refPolicy) allow(loader *openapi3.Loader, location *url.URL) error {
+	if loader == nil || loader.IsExternalRefsAllowed || p.innerEnforces {
 		return nil
 	}
-	if sameLocation(location, root) {
+	if sameLocation(location, p.root) {
 		return nil
 	}
 	return &ExternalRefError{Ref: location.String()}

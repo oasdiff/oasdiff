@@ -26,15 +26,27 @@ func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*ope
 }
 
 // withCapture returns loader unchanged when capture is nil, otherwise a shallow
-// copy whose ReadFromURIFunc records every file the loader reads. The copy keeps
+// copy whose ReadFromURIFunc records every file the loader reads and refuses any
+// $ref to another document while external refs are disallowed. The copy keeps
 // the recorder off the caller's loader while still sharing its visitedDocuments
 // cache (the same reason loadFromGitRevision copies the loader).
-func withCapture(loader *openapi3.Loader, capture *sourceCapture, root string) *openapi3.Loader {
+func withCapture(loader *openapi3.Loader, capture *sourceCapture, rootDocument string) *openapi3.Loader {
+	return withRecordingReader(loader, capture, refPolicy{root: rootDocument})
+}
+
+// withCaptureInnerEnforcesPolicy is withCapture for a loader whose own
+// ReadFromURIFunc already applies the external-refs policy, so the recorder
+// must not apply it a second time against a root path it does not have.
+func withCaptureInnerEnforcesPolicy(loader *openapi3.Loader, capture *sourceCapture) *openapi3.Loader {
+	return withRecordingReader(loader, capture, refPolicy{innerEnforces: true})
+}
+
+func withRecordingReader(loader *openapi3.Loader, capture *sourceCapture, policy refPolicy) *openapi3.Loader {
 	if capture == nil {
 		return loader
 	}
 	lc := *loader
-	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture, root)
+	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture, policy)
 	return &lc
 }
 
