@@ -35,6 +35,7 @@ allow-external-refs: false
 This flag is supported by the `diff`, `breaking`, `breaking-files`, `changelog`, `summary`, `flatten`, and `validate` commands.
 
 When external refs are disabled, oasdiff will return an error if a spec contains an external `$ref`, rather than fetching it.
+The exit code is 123, so a CI step can tell a refused `$ref` from any other reason a spec failed to load.
 
 ## Recommendation for CI
 
