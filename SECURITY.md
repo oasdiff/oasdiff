@@ -29,6 +29,9 @@ you can publish your own write-up afterwards.
 This policy covers [oasdiff](https://github.com/oasdiff/oasdiff) and
 [oasdiff-action](https://github.com/oasdiff/oasdiff-action).
 
+For how to stop oasdiff following `$ref` values that point outside a spec, see
+[External `$ref`s](docs/EXTERNAL-REFS.md).
+
 oasdiff reads OpenAPI specifications, which are often untrusted: a spec may come
 from a pull request opened by anyone. Reports about a spec causing oasdiff to
 read files, make network requests, or consume unbounded resources are in scope

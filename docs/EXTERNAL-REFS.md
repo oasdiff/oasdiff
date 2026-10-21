@@ -1,6 +1,9 @@
-# Security
+# External $refs
 
-## SSRF via External $refs
+How oasdiff handles `$ref` values that point outside the spec, and how to stop it
+following them.
+
+## SSRF via external $refs
 
 OpenAPI specs can contain `$ref` values that point to external URLs or files.
 By default, oasdiff follows these external refs to fully resolve the spec.
@@ -29,7 +32,7 @@ Alternatively, set it in an [oasdiff configuration file](CONFIG-FILES.md):
 allow-external-refs: false
 ```
 
-This flag is supported by the `diff`, `breaking`, `changelog`, `summary`, and `flatten` commands.
+This flag is supported by the `diff`, `breaking`, `breaking-files`, `changelog`, `summary`, `flatten`, and `validate` commands.
 
 When external refs are disabled, oasdiff will return an error if a spec contains an external `$ref`, rather than fetching it.
 
