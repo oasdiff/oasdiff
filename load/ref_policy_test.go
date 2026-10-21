@@ -17,7 +17,7 @@ func TestRefPolicy_ZeroValueFailsClosed(t *testing.T) {
 	location, err := url.Parse("http://169.254.169.254/latest/meta-data/schema.yaml")
 	require.NoError(t, err)
 
-	err = refPolicy{}.allow(loader, location)
+	err = refPolicy{}.checkLocation(loader, location)
 
 	require.Error(t, err, "a policy that names no root must refuse every $ref")
 	var extErr *ExternalRefError
@@ -32,6 +32,6 @@ func TestRefPolicy_InnerEnforcesSkipsTheComparison(t *testing.T) {
 	location, err := url.Parse("HEAD:openapi.yaml")
 	require.NoError(t, err)
 
-	require.NoError(t, refPolicy{innerEnforces: true}.allow(loader, location),
+	require.NoError(t, refPolicy{innerEnforces: true}.checkLocation(loader, location),
 		"the git reader applies the policy itself")
 }

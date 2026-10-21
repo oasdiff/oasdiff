@@ -33,13 +33,13 @@ type refPolicy struct {
 	innerEnforces bool
 }
 
-// allow reports whether a location may be read, as an error so the caller can
-// return it unchanged.
+// checkLocation returns an ExternalRefError when the location may not be read,
+// nil when it may, so the caller returns the error unchanged.
 //
 // With external refs disallowed a spec must be self-contained, so only the
 // document the load was asked for may be read. That matches what kin-openapi
 // refuses on its own: any $ref to another document, a sibling file included.
-func (p refPolicy) allow(loader *openapi3.Loader, location *url.URL) error {
+func (p refPolicy) checkLocation(loader *openapi3.Loader, location *url.URL) error {
 	if loader == nil || loader.IsExternalRefsAllowed || p.innerEnforces {
 		return nil
 	}

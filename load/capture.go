@@ -45,7 +45,7 @@ func (c *sourceCapture) asStrings() map[string]string {
 // ordinary loads install no recorder and pay nothing.
 func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture, policy refPolicy) openapi3.ReadFromURIFunc {
 	return func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
-		if err := policy.allow(loader, location); err != nil {
+		if err := policy.checkLocation(loader, location); err != nil {
 			return nil, err
 		}
 		var (
