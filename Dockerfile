@@ -19,10 +19,10 @@ FROM alpine:3
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 RUN apk add --no-cache git
+RUN git config --system --add safe.directory '*'
 WORKDIR /usr/bin
 COPY --from=builder /go/src/app/oasdiff .
 
 USER appuser
-
 ENTRYPOINT ["/usr/bin/oasdiff"]
 
