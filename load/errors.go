@@ -1,6 +1,10 @@
 package load
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+	"strings"
+)
 
 // FlattenError reports a failure to merge allOf during WithFlattenAllOf.
 // Returned wrapped so callers can use errors.As to distinguish a flatten
@@ -28,4 +32,25 @@ type ExternalRefError struct {
 
 func (e *ExternalRefError) Error() string {
 	return fmt.Sprintf("external $ref not allowed (enable --allow-external-refs to permit): %s", e.Ref)
+}
+
+// kinRefusalMessage is the text kin-openapi uses when it refuses an external
+// $ref itself, which it does only when no custom ReadFromURIFunc is installed.
+// The error is untyped there, so the message is the only thing that
+// distinguishes a refusal from a read that failed for another reason.
+const kinRefusalMessage = "disallowed external reference"
+
+// IsExternalRefDisallowed reports whether err is a refusal of an external $ref
+// under IsExternalRefsAllowed=false, from either place that applies the policy:
+// a reader in this package, which returns *ExternalRefError, or kin-openapi
+// itself. Callers that map a refusal to an exit code or a remedy should ask
+// this rather than matching one of the two.
+func IsExternalRefDisallowed(err error) bool {
+	if err == nil {
+		return false
+	}
+	if _, ok := errors.AsType[*ExternalRefError](err); ok {
+		return true
+	}
+	return strings.Contains(err.Error(), kinRefusalMessage)
 }
