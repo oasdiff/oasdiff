@@ -11,39 +11,16 @@ const (
 
 func NewRequestPathParameterCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
+	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
+		for _, paramName := range o.ParametersDiff.Added["path"] {
+			param := o.RevisionParameters.GetByInAndName("path", paramName)
+			revisionSource := location.ParameterSource(operationsSources, o.Revision, param)
+			result = append(result, o.opInfo.NewApiChange(
+				NewRequestPathParameterId,
+				[]any{paramName},
+				"",
+			).WithSources(nil, revisionSource))
 		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
-				continue
-			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Added {
-				if paramLocation != "path" {
-					continue
-				}
-
-				for _, paramName := range paramItems {
-					var revisionSource *Source
-					for _, param := range operationItem.Revision.Parameters {
-						if param.Value.Name == paramName && param.Value.In == paramLocation {
-							revisionSource = location.ParameterSource(operationsSources, operationItem.Revision, param.Value)
-							break
-						}
-					}
-					result = append(result, opInfo.NewApiChange(
-						NewRequestPathParameterId,
-						[]any{paramName},
-						"",
-					).WithSources(nil, revisionSource))
-				}
-			}
-		}
-	}
+	})
 	return result
 }

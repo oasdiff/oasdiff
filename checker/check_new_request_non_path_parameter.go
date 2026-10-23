@@ -12,43 +12,30 @@ const (
 
 func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.OperationsDiff == nil {
-			continue
-		}
-		for operation, operationItem := range pathItem.OperationsDiff.Modified {
-			if operationItem.ParametersDiff == nil {
+	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
+		for paramLocation, paramItems := range o.ParametersDiff.Added {
+			if paramLocation == "path" {
+				// it is processed in the separate check NewRequestPathParameterCheck
 				continue
 			}
-			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
-			for paramLocation, paramItems := range operationItem.ParametersDiff.Added {
-				if paramLocation == "path" {
-					// it is processed in the separate check NewRequestPathParameterCheck
+			for _, paramName := range paramItems {
+				// a parameter added to the path item is reported by NewRequestNonPathDefaultParameterCheck
+				param := o.Revision.Parameters.GetByInAndName(paramLocation, paramName)
+				if param == nil {
 					continue
 				}
-
-				for _, paramName := range paramItems {
-					for _, param := range operationItem.Revision.Parameters {
-						if param.Value.Name == paramName {
-							id := NewRequiredRequestParameterId
-							if !param.Value.Required {
-								id = NewOptionalRequestParameterId
-							}
-							revisionSource := location.ParameterSource(operationsSources, operationItem.Revision, param.Value)
-							result = append(result, opInfo.NewApiChange(
-								id,
-								[]any{paramLocation, paramName},
-								"",
-							).WithSources(nil, revisionSource))
-							break
-						}
-					}
+				id := NewRequiredRequestParameterId
+				if !param.Required {
+					id = NewOptionalRequestParameterId
 				}
+				revisionSource := location.ParameterSource(operationsSources, o.Revision, param)
+				result = append(result, o.opInfo.NewApiChange(
+					id,
+					[]any{paramLocation, paramName},
+					"",
+				).WithSources(nil, revisionSource))
 			}
 		}
-	}
+	})
 	return result
 }
