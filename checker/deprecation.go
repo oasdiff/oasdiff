@@ -6,33 +6,45 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
-	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// propertyRemovalId returns the rule id and arguments reporting a removed
-// property, by its deprecation and sunset date as in checkParameterRemoval, or
-// "" when the sunset date has passed. A sunset date that can't be parsed keeps
-// removedId: the property deprecation checks report it.
-func propertyRemovalId(property *openapi3.Schema, args []any, removedId, withDeprecationId, beforeSunsetId string) (string, []any) {
-	if !property.Deprecated {
-		return removedId, args
+// removalIds names the id that reports a removal at each stage of the
+// deprecation process. sunsetParse is empty where another check already
+// reports an unparseable sunset date, and the removal reports removed instead.
+type removalIds struct {
+	removed         string
+	withDeprecation string
+	beforeSunset    string
+	sunsetParse     string
+}
+
+// removalId follows the deprecation process for a removed element: its
+// deprecation and sunset date decide which id reports it, and which arguments
+// that id takes beyond the ones naming the element. ok is false once the
+// sunset date has passed, where the removal is not reported at all.
+func removalId(deprecated bool, extensions map[string]any, ids removalIds) (string, []any, bool) {
+	if !deprecated {
+		return ids.removed, nil, true
 	}
 
-	sunset, ok := getSunset(property.Extensions)
-	if !ok {
-		return withDeprecationId, args
+	sunset, found := getSunset(extensions)
+	if !found {
+		return ids.withDeprecation, nil, true
 	}
 
 	date, err := getSunsetDate(sunset)
 	if err != nil {
-		return removedId, args
+		if ids.sunsetParse == "" {
+			return ids.removed, nil, true
+		}
+		return ids.sunsetParse, []any{err}, true
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {
-		return beforeSunsetId, append(args, date)
+		return ids.beforeSunset, []any{date}, true
 	}
-	return "", nil
+	return "", nil, false
 }
 
 func getSunset(Extensions map[string]any) (any, bool) {
