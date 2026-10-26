@@ -17,24 +17,38 @@ func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*ope
 	case SourceTypeStdin:
 		return loader.LoadFromStdin()
 	case SourceTypeURL:
-		return withCapture(loader, capture).LoadFromURI(source.Uri)
+		return withCapture(loader, capture, source.Uri.String()).LoadFromURI(source.Uri)
 	case SourceTypeGitRevision:
 		return loadFromGitRevision(loader, source.Path, source.Fetch, capture)
 	default:
-		return withCapture(loader, capture).LoadFromFile(source.Path)
+		return withCapture(loader, capture, source.Path).LoadFromFile(source.Path)
 	}
 }
 
-// withCapture returns loader unchanged when capture is nil, otherwise a shallow
-// copy whose ReadFromURIFunc records every file the loader reads. The copy keeps
-// the recorder off the caller's loader while still sharing its visitedDocuments
-// cache (the same reason loadFromGitRevision copies the loader).
-func withCapture(loader *openapi3.Loader, capture *sourceCapture) *openapi3.Loader {
+// withCapture records the files a load reads and refuses any $ref to a document
+// other than rootDocument while external refs are disallowed.
+func withCapture(loader *openapi3.Loader, capture *sourceCapture, rootDocument string) *openapi3.Loader {
+	return withRecordingReader(loader, capture, refPolicy{root: rootDocument})
+}
+
+// withCaptureInnerEnforcesPolicy is withCapture for a loader whose own
+// ReadFromURIFunc already applies the external-refs policy, so the recorder
+// must not apply it a second time against a root path it does not have.
+func withCaptureInnerEnforcesPolicy(loader *openapi3.Loader, capture *sourceCapture) *openapi3.Loader {
+	return withRecordingReader(loader, capture, refPolicy{innerEnforces: true})
+}
+
+// withRecordingReader returns loader unchanged when capture is nil, otherwise a
+// shallow copy whose ReadFromURIFunc records every file the loader reads and
+// applies policy to each location before reading it. The copy keeps the recorder
+// off the caller's loader while still sharing its visitedDocuments cache (the
+// same reason loadFromGitRevision copies the loader).
+func withRecordingReader(loader *openapi3.Loader, capture *sourceCapture, policy refPolicy) *openapi3.Loader {
 	if capture == nil {
 		return loader
 	}
 	lc := *loader
-	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture)
+	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture, policy)
 	return &lc
 }
 

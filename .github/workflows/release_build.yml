@@ -5,6 +5,9 @@ on:
     tags:
       - "*" # triggers only if push new tag version, like `0.8.4` or else
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: GoReleaser build
@@ -23,7 +26,7 @@ jobs:
         id: go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v7
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # ratchet:goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           # Pin to the v2 major. goreleaser-action no longer treats `latest`
