@@ -52,6 +52,6 @@ Notes:
 
 ## Supported Resources for Deprecation
 OpenAPI 3 supports the `deprecation` field for `Operations`, `Parameters`, `Headers` and `Schemas`.  
-Oasdiff currently supports the full deprecation process described above for `Operations` and `Parameters`: once deprecated (and past the sunset date, if one is set), they can be removed without a breaking change.
+Oasdiff currently supports the full deprecation process described above for `Operations`, `Parameters`, request properties and required response properties: once deprecated (and past the sunset date, if one is set), they can be removed without a breaking change.
 
-For `Properties` (in request and response bodies), oasdiff detects deprecation and checks the sunset date, but removing a deprecated property is still reported the same way as removing any other property (for example, `response-required-property-removed`). Support for removing deprecated properties is tracked in [#858](https://github.com/oasdiff/oasdiff/issues/858).
+Removing an optional response property is reported as `response-optional-property-removed` whether or not it was deprecated, since that removal is not breaking either way. Two property-level checks are still missing: shortening a sunset date and deleting one. See [#858](https://github.com/oasdiff/oasdiff/issues/858).

@@ -11,6 +11,8 @@ import (
 
 const (
 	RequestPropertyRemovedId                = "request-property-removed"
+	RequestPropertyRemovedWithDeprecationId = "request-property-removed-with-deprecation"
+	RequestPropertyRemovedBeforeSunsetId    = "request-property-removed-before-sunset"
 	NewRequiredRequestPropertyId            = "new-required-request-property"
 	NewRequiredRequestPropertyWithDefaultId = "new-required-request-property-with-default"
 	NewOptionalRequestPropertyId            = "new-optional-request-property"
@@ -70,10 +72,16 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					return
 				}
 
+				id, args := propertyRemovalId(propertyItem, []any{schemawalk.PropertyFullName(propertyPath, propertyName)},
+					RequestPropertyRemovedId, RequestPropertyRemovedWithDeprecationId, RequestPropertyRemovedBeforeSunsetId)
+				if id == "" {
+					return
+				}
+
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
-					RequestPropertyRemovedId,
-					[]any{schemawalk.PropertyFullName(propertyPath, propertyName)},
+					id,
+					args,
 					"",
 				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
