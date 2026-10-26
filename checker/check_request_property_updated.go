@@ -72,11 +72,15 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					return
 				}
 
-				id, args := propertyRemovalId(propertyItem, []any{schemawalk.PropertyFullName(propertyPath, propertyName)},
-					RequestPropertyRemovedId, RequestPropertyRemovedWithDeprecationId, RequestPropertyRemovedBeforeSunsetId)
-				if id == "" {
+				id, extra, ok := removalId(propertyItem.Deprecated, propertyItem.Extensions, removalIds{
+					removed:         RequestPropertyRemovedId,
+					withDeprecation: RequestPropertyRemovedWithDeprecationId,
+					beforeSunset:    RequestPropertyRemovedBeforeSunsetId,
+				})
+				if !ok {
 					return
 				}
+				args := append([]any{schemawalk.PropertyFullName(propertyPath, propertyName)}, extra...)
 
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
