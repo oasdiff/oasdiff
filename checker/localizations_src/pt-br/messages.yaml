@@ -167,6 +167,8 @@ request-property-min-items-set: o número mínimo de itens da propriedade de req
 request-body-min-set: o valor mínimo do corpo da requisição foi definido como %s
 request-property-min-set: o valor mínimo da propriedade de requisição %s foi definido como %s
 request-property-removed: a propriedade de requisição %s foi removida
+request-property-removed-with-deprecation: a propriedade de requisição depreciada %s foi removida
+request-property-removed-before-sunset: a propriedade de requisição %s foi removida antes da data de expiração %s
 request-body-type-changed: o %s do corpo da requisição foi alterado de %s para %s
 request-body-type-generalized: o %s do corpo da requisição foi expandido de %s para %s
 request-body-type-compatible: o %s do corpo da requisição mudou de %s para %s (retrocompatível)
@@ -225,6 +227,8 @@ response-body-type-changed: o %s do corpo da resposta foi alterado de %s para %s
 response-property-type-changed: o %s da propriedade de resposta %s foi alterado de %s para %s para o status %s
 response-required-property-became-not-write-only: a propriedade obrigatória de resposta %s deixou de ser somente escrita para o status %s
 response-required-property-removed: a propriedade obrigatória %s foi removida da resposta com o status %s
+response-required-property-removed-with-deprecation: a propriedade obrigatória depreciada %s foi removida da resposta com o status %s
+response-required-property-removed-before-sunset: a propriedade obrigatória %s foi removida da resposta com o status %s antes da data de expiração %s
 response-required-property-added: a propriedade obrigatória %s foi adicionada à resposta com o status %s
 response-success-status-removed: a resposta de sucesso com o status %s foi removida
 response-non-success-status-removed: a resposta de não sucesso com o status %s foi removida
@@ -591,6 +595,8 @@ request-property-pattern-changed-description: padrão da propriedade de requisi�
 request-property-pattern-generalized-description: padrão da propriedade de requisição generalizado
 request-property-pattern-removed-description: padrão da propriedade de requisição removido
 request-property-removed-description: propriedade de requisição removida
+request-property-removed-with-deprecation-description: propriedade de requisição removida com depreciação
+request-property-removed-before-sunset-description: propriedade de requisição removida antes da data de expiração
 request-property-type-changed-description: tipo da propriedade de requisição alterado
 request-property-type-generalized-description: tipo da propriedade de requisição generalizado
 request-property-type-compatible-description: tipo da propriedade de requisição mudou mas é retrocompatível
@@ -683,6 +689,8 @@ response-required-property-became-not-write-only-description: propriedade obriga
 response-required-property-became-read-only-description: propriedade obrigatória da resposta tornou-se somente leitura
 response-required-property-became-write-only-description: propriedade obrigatória da resposta tornou-se somente escrita
 response-required-property-removed-description: propriedade obrigatória da resposta removida
+response-required-property-removed-with-deprecation-description: propriedade obrigatória da resposta removida com depreciação
+response-required-property-removed-before-sunset-description: propriedade obrigatória da resposta removida antes da data de expiração
 response-required-write-only-property-added-description: propriedade obrigatória somente escrita da resposta adicionada
 response-required-write-only-property-removed-description: propriedade obrigatória somente escrita da resposta removida
 response-success-status-added-description: status de sucesso da resposta adicionado
