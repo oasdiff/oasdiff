@@ -467,16 +467,20 @@ func Test_ValidateCmd_DuplicateOperationID(t *testing.T) {
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
 }
 
-// Fields appearing as siblings of $ref where the spec disallows them →
+// An object carrying a field that is neither known nor an x- extension →
 // kin returns *ExtraSiblingFieldsError{Fields:[...]} (added in #1187).
 // Rule ID: "extra-sibling-fields". Origin (also added in #1187) pins
-// to the parent object holding the unexpected siblings.
+// to the parent object holding the unexpected fields.
+//
+// A field beside a $ref no longer qualifies: the Reference Object says
+// added properties are ignored, so kin stopped reporting those in
+// v0.152.0 (getkin/kin-openapi#1371).
 func Test_ValidateCmd_ExtraSiblingFields(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/extra-sibling-fields.yaml"), &stdout, io.Discard))
 	out := stdout.String()
 	require.Contains(t, out, "[extra-sibling-fields]")
-	require.Contains(t, out, "extra sibling fields: [description]")
+	require.Contains(t, out, "extra sibling fields: [descriptionn]")
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
 }
 
