@@ -3,6 +3,7 @@ package checker
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"time"
 
 	"cloud.google.com/go/civil"
@@ -33,6 +34,47 @@ func propertyRemovalId(property *openapi3.Schema, args []any, removedId, withDep
 		return beforeSunsetId, append(args, date)
 	}
 	return "", nil
+}
+
+// sunsetChangeIds names the id that reports each change to a sunset date.
+type sunsetChangeIds struct {
+	deleted         string
+	sunsetParse     string
+	changedTooSmall string
+}
+
+// sunsetChangeId returns the id that reports a change to the sunset date of an
+// element that stays deprecated, as RequestParameterSunsetChangedCheck does for
+// parameters, and the arguments that id takes beyond the ones naming the
+// element. ok is false when the change is not reported.
+func sunsetChangeId(extensionsDiff *diff.ExtensionsDiff, base, revision map[string]any, deprecationDays uint, ids sunsetChangeIds) (string, []any, bool) {
+	if extensionsDiff == nil {
+		return "", nil, false
+	}
+
+	if slices.Contains(extensionsDiff.Deleted, diff.SunsetExtension) {
+		return ids.deleted, nil, true
+	}
+
+	if _, ok := extensionsDiff.Modified[diff.SunsetExtension]; !ok {
+		return "", nil, false
+	}
+
+	date, err := getSunsetDate(revision[diff.SunsetExtension])
+	if err != nil {
+		return ids.sunsetParse, []any{err}, true
+	}
+
+	// an invalid base date gave clients no date to rely on, so replacing it is a fix
+	baseDate, err := getSunsetDate(base[diff.SunsetExtension])
+	if err != nil {
+		return "", nil, false
+	}
+
+	if baseDate.After(date) && date.DaysSince(civil.DateOf(time.Now())) < int(deprecationDays) {
+		return ids.changedTooSmall, []any{baseDate, date, baseDate, deprecationDays}, true
+	}
+	return "", nil, false
 }
 
 func getSunset(Extensions map[string]any) (any, bool) {
