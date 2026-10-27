@@ -44,3 +44,32 @@ func TestResponsePropertySunsetChanged_ToInvalid(t *testing.T) {
 	require.Equal(t, checker.ERR, change.GetLevel())
 	require.Equal(t, "response property `legacyField` deprecated with invalid sunset date: `sunset date doesn't conform with RFC3339: invalid-date-format`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
+
+// changing the sunset date of a deprecated response property to a later date is not breaking, even if the deprecation policy asks for more
+func TestResponsePropertySunsetChanged_Later(t *testing.T) {
+	s1, err := open(deprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+	s1.Spec.Components.Schemas["TestResponse"].Value.Properties["legacyField"].Value.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(5).String())
+
+	s2, err := open(deprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+	s2.Spec.Components.Schemas["TestResponse"].Value.Properties["legacyField"].Value.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(9).String())
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, checker.CheckBackwardCompatibility(singleCheckConfig(checker.ResponsePropertySunsetChangedCheck, checker.WithDeprecation(0, 10)), d, osm))
+}
+
+// a sunset date change under an invalid stability level is skipped (handled in CheckBackwardCompatibility)
+func TestResponsePropertySunsetChanged_WithInvalidStability(t *testing.T) {
+	s1, err := open(deprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("property_deprecated_no_sunset.yaml"))
+	require.NoError(t, err)
+	s2.Spec.Paths.Value("/test").Post.Extensions[diff.XStabilityLevelExtension] = toJson(t, "invalid-stability")
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, checker.ResponsePropertySunsetChangedCheck(d, osm, checker.NewConfig(nil)))
+}
