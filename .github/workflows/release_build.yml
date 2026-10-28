@@ -5,6 +5,9 @@ on:
     tags:
       - "*" # triggers only if push new tag version, like `0.8.4` or else
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: GoReleaser build
@@ -23,7 +26,7 @@ jobs:
         id: go
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v7
+        uses: goreleaser/goreleaser-action@a4f02ab5355a589de60d917a659ce617ed19b3de # ratchet:goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
           # Pin to the v2 major. goreleaser-action no longer treats `latest`
@@ -34,3 +37,8 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
+          # Take the version from the pushed tag. A release and the candidate it
+          # was cut from can sit on the same commit, and goreleaser otherwise
+          # reads the version from git describe, which picked the candidate and
+          # failed uploading its assets a second time.
+          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}

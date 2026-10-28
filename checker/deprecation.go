@@ -6,8 +6,34 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
+
+// propertyRemovalId returns the rule id and arguments reporting a removed
+// property, by its deprecation and sunset date as in checkParameterRemoval, or
+// "" when the sunset date has passed. A sunset date that can't be parsed keeps
+// removedId: the property deprecation checks report it.
+func propertyRemovalId(property *openapi3.Schema, args []any, removedId, withDeprecationId, beforeSunsetId string) (string, []any) {
+	if !property.Deprecated {
+		return removedId, args
+	}
+
+	sunset, ok := getSunset(property.Extensions)
+	if !ok {
+		return withDeprecationId, args
+	}
+
+	date, err := getSunsetDate(sunset)
+	if err != nil {
+		return removedId, args
+	}
+
+	if civil.DateOf(time.Now()).Before(date) {
+		return beforeSunsetId, append(args, date)
+	}
+	return "", nil
+}
 
 func getSunset(Extensions map[string]any) (any, bool) {
 	value, ok := Extensions[diff.SunsetExtension]
