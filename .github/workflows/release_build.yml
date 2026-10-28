@@ -37,3 +37,8 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GO_RELEASER_GITHUB_TOKEN }}
+          # Take the version from the pushed tag. A release and the candidate it
+          # was cut from can sit on the same commit, and goreleaser otherwise
+          # reads the version from git describe, which picked the candidate and
+          # failed uploading its assets a second time.
+          GORELEASER_CURRENT_TAG: ${{ github.ref_name }}
