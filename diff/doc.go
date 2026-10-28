@@ -23,7 +23,7 @@ Config controls diff behavior:
   - FilterExtension: filter by x- extension presence
   - PathPrefixBase/PathPrefixRevision: add prefix to paths before comparison
   - PathStripPrefixBase/PathStripPrefixRevision: strip prefix from paths before comparison
-  - ExcludeElements: skip comparing certain elements (examples, description, title, summary, extensions, endpoints)
+  - ExcludeElements: skip comparing certain elements (examples, description, title, summary, extensions, endpoints, tags)
   - ExcludeExtensions: skip specific x- extensions
   - IncludePathParams: include path parameter names in endpoint identity
 
