@@ -200,8 +200,7 @@ func PropertyFullName(propertyPath string, propertyNames ...string) string {
 		parts = append(parts, propertyPath)
 	}
 	for _, propertyName := range propertyNames {
-		// A subschema is walked with a path and no name of its own, and
-		// joining that empty name left the name ending in a separator.
+		// A subschema is walked with a path and no name of its own.
 		if propertyName != "" {
 			parts = append(parts, propertyName)
 		}
