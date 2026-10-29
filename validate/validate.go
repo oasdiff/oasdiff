@@ -6,8 +6,10 @@
 package validate
 
 import (
+	"cmp"
 	"context"
 	"errors"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -52,7 +54,24 @@ func Validate(spec *openapi3.T, source string) formatters.Findings {
 	findings = append(findings, lintTypeFormatMismatch(spec, source)...)
 	findings = append(findings, lintSchemaConstraints(spec, source)...)
 	findings = append(findings, lintMutabilityReachability(spec, source)...)
+	sortFindings(findings)
 	return findings
+}
+
+// sortFindings puts the findings in source order, which is the order a
+// reader expects and the only one that holds between runs: the lints walk
+// maps, and so does kin when it reports its own errors, so the order they
+// come out in is arbitrary.
+func sortFindings(findings formatters.Findings) {
+	slices.SortStableFunc(findings, func(a, b formatters.Finding) int {
+		return cmp.Or(
+			strings.Compare(a.Source.File, b.Source.File),
+			cmp.Compare(a.Source.Line, b.Source.Line),
+			cmp.Compare(a.Source.Column, b.Source.Column),
+			strings.Compare(a.Id, b.Id),
+			strings.Compare(a.Text, b.Text),
+		)
+	})
 }
 
 // mapKinErrors flattens kin-openapi's MultiError tree into a list of
