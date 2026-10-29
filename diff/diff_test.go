@@ -129,6 +129,13 @@ func TestDiff_AddedTag(t *testing.T) {
 		"security")
 }
 
+func TestDiff_ExcludeTags(t *testing.T) {
+	excludeTags := diff.NewConfig(diff.WithExcludeElements([]string{diff.ExcludeTagsOption}))
+
+	require.Nil(t, d(t, excludeTags, 1, 3).TagsDiff)
+	require.Nil(t, d(t, excludeTags, 3, 1).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].TagsDiff)
+}
+
 func TestDiff_DeletedEncoding(t *testing.T) {
 	require.Contains(t,
 		d(t, diff.NewConfig(), 1, 3).PathsDiff.Modified["/subscribe"].OperationsDiff.Modified["POST"].CallbacksDiff.Modified["myEvent"].Modified["hi"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].EncodingsDiff.Deleted,

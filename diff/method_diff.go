@@ -60,7 +60,9 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	if err != nil {
 		return nil, err
 	}
-	result.TagsDiff = getStringsDiff(operation1.Tags, operation2.Tags)
+	if !config.IsExcludeTags() {
+		result.TagsDiff = getStringsDiff(operation1.Tags, operation2.Tags)
+	}
 	result.SummaryDiff = getValueDiffConditional(config.IsExcludeSummary(), operation1.Summary, operation2.Summary)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), operation1.Description, operation2.Description)
 	result.OperationIDDiff = getValueDiff(operation1.OperationID, operation2.OperationID)

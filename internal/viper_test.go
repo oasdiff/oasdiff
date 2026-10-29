@@ -120,7 +120,7 @@ func TestViper_InvalidExcludeElements(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid exclude-elements \"invalid\", allowed values: examples, description, endpoints, title, summary, extensions")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid exclude-elements \"invalid\", allowed values: examples, description, endpoints, title, summary, extensions, tags")
 }
 
 func TestViper_InvalidSeverity(t *testing.T) {
