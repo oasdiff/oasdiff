@@ -13,3 +13,13 @@ docker run --rm -t -v $(pwd):/specs:ro -w /specs tufin/oasdiff changelog openapi
 ```
 
 Replace `$(pwd)` by the path that contains your specs.  
+
+## Running as a non-root user
+The container runs as root. The actions in [oasdiff-action](https://github.com/oasdiff/oasdiff-action) build on this image and need root, so the image keeps it.
+
+Pass `--user` to run as someone else:
+```bash
+docker run --user $(id -u):$(id -g) --rm -t -v $(pwd):/specs:ro -w /specs tufin/oasdiff changelog openapi-test1.yaml openapi-test3.yaml
+```
+
+Loading specs from [git revisions](GIT-REVISION.md) works as any user, because the image trusts a mounted repository whatever uid owns it. `--fetch` is the exception: it writes to `.git`, so it needs a user that can write to the mount. `$(id -u):$(id -g)` can, another uid cannot.
