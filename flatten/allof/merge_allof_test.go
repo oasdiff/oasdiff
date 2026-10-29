@@ -1431,6 +1431,54 @@ func TestMerge_EnumNoIntersection(t *testing.T) {
 	require.Error(t, err)
 }
 
+// an explicit empty enum permits no value, so it conflicts with every other
+// branch's enum.
+func TestMerge_EnumEmpty(t *testing.T) {
+	_, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							Enum: []any{},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							Enum: []any{"1"},
+						},
+					},
+				},
+			}})
+	require.Error(t, err)
+}
+
+// a branch with no enum is unconstrained, so it leaves the other branch's
+// enum as it is.
+func TestMerge_EnumAbsent(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+						},
+					},
+					&openapi3.SchemaRef{
+						Value: &openapi3.Schema{
+							Type: &openapi3.Types{"object"},
+							Enum: []any{"1"},
+						},
+					},
+				},
+			}})
+	require.NoError(t, err)
+	require.ElementsMatch(t, []any{"1"}, merged.Enum)
+}
+
 // Properties range is the most restrictive
 func TestMerge_RangeProperties(t *testing.T) {
 	merged, err := allof.Merge(

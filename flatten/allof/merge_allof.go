@@ -1069,18 +1069,22 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	return schema, nil
 }
 
+// resolveEnum intersects the enums of the branches that have one. A branch
+// with no enum is unconstrained and takes no part in the intersection, while
+// an explicit empty enum permits no value at all, so it empties the
+// intersection and the branches conflict.
 func resolveEnum(values [][]any) ([]any, error) {
-	var nonEmptyEnum [][]any
+	var enums [][]any
 	for _, enum := range values {
-		if len(enum) > 0 {
-			nonEmptyEnum = append(nonEmptyEnum, enum)
+		if enum == nil {
+			continue
 		}
+		enums = append(enums, enum)
 	}
-	var intersection []any
-	if len(nonEmptyEnum) == 0 {
-		return intersection, nil
+	if len(enums) == 0 {
+		return nil, nil
 	}
-	intersection = findIntersectionOfArrays(nonEmptyEnum)
+	intersection := findIntersectionOfArrays(enums)
 	if len(intersection) == 0 {
 		return nil, errors.New("unable to resolve Enum conflict: intersection of values must be non-empty")
 	}
