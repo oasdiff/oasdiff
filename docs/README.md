@@ -23,8 +23,6 @@ docker run --rm -t tufin/oasdiff changelog \
 
 That prints a human-readable changelog of the changes that can affect API consumers, breaking and non-breaking. Swap `changelog` for `breaking` to see only the changes that break existing API clients, or `diff` for the full machine-readable diff of the API definition, including documentation-only edits.
 
-**Note for Docker users:** By default, the container runs as root to maintain compatibility with downstream CI/CD actions. If your security policy requires running the container as a non-root user, you can override it using the `--user` flag: `docker run --user $(id -u):$(id -g) --rm -t tufin/oasdiff ...`
-
 ## Installation
 
 ### Install with Go
