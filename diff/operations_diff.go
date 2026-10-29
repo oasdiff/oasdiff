@@ -1,7 +1,6 @@
 package diff
 
 import (
-	"fmt"
 	"maps"
 	"regexp"
 	"slices"
@@ -40,9 +39,11 @@ type ModifiedOperations map[string]*MethodDiff
 
 func getOperationsDiff(config *Config, state *state, pathItemPair *pathItemPair) (*OperationsDiff, error) {
 
-	if err := filterOperations(config.FilterExtension, pathItemPair); err != nil {
+	filters, err := getFilters(config, state)
+	if err != nil {
 		return nil, err
 	}
+	filterOperationsByExtensions(filters.extension, pathItemPair)
 
 	diff, err := getOperationsDiffInternal(config, state, pathItemPair)
 	if err != nil {
@@ -128,29 +129,13 @@ func (operationsDiff *OperationsDiff) diffOperation(config *Config, state *state
 	return nil
 }
 
-func filterOperations(filterExtension string, pathItemPair *pathItemPair) error {
-
-	if err := filterOperationsByExtensions(filterExtension, pathItemPair); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func filterOperationsByExtensions(filterExtension string, pathItemPair *pathItemPair) error {
-	if filterExtension == "" {
-		return nil
-	}
-
-	r, err := regexp.Compile(filterExtension)
-	if err != nil {
-		return fmt.Errorf("failed to compile extension filter regex %q: %w", filterExtension, err)
+func filterOperationsByExtensions(r *regexp.Regexp, pathItemPair *pathItemPair) {
+	if r == nil {
+		return
 	}
 
 	filterOperationsByExtensionInternal(pathItemPair.PathItem1, r)
 	filterOperationsByExtensionInternal(pathItemPair.PathItem2, r)
-
-	return nil
 }
 
 func filterOperationsByExtensionInternal(pathItem *openapi3.PathItem, r *regexp.Regexp) {

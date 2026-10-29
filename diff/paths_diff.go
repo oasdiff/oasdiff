@@ -37,9 +37,11 @@ func newPathsDiff() *PathsDiff {
 
 func getPathsDiff(config *Config, state *state, paths1, paths2 *openapi3.Paths) (*PathsDiff, error) {
 
-	if err := filterPaths(config.MatchPath, config.UnmatchPath, config.FilterExtension, paths1, paths2); err != nil {
+	filters, err := getFilters(config, state)
+	if err != nil {
 		return nil, err
 	}
+	filterPaths(filters, paths1, paths2)
 
 	diff, err := getPathsDiffInternal(config, state, paths1, paths2)
 	if err != nil {
@@ -87,37 +89,69 @@ func (pathsDiff *PathsDiff) addModifiedPath(config *Config, state *state, path1 
 	return pathsDiff.Modified.addPathDiff(config, state, path1, pathItemPair)
 }
 
-func filterPaths(matchPath, unmatchPath, filterExtension string, paths1, paths2 *openapi3.Paths) error {
-
-	if err := filterPathsByName(matchPath, true, paths1, paths2); err != nil {
-		return err
-	}
-
-	if err := filterPathsByName(unmatchPath, false, paths1, paths2); err != nil {
-		return err
-	}
-
-	if err := filterPathsByExtensions(filterExtension, paths1, paths2); err != nil {
-		return err
-	}
-
-	return nil
+// pathFilters are the compiled --match-path, --unmatch-path and
+// --filter-extension patterns. A nil pattern means that filter is off.
+type pathFilters struct {
+	matchPath   *regexp.Regexp
+	unmatchPath *regexp.Regexp
+	extension   *regexp.Regexp
 }
 
-func filterPathsByName(filter string, negate bool, paths1, paths2 *openapi3.Paths) error {
-	if filter == "" {
-		return nil
+// getFilters compiles the config's filter patterns and keeps them on the
+// state, so each pattern is compiled once per diff. The operations filter is
+// applied to every path pair being compared.
+func getFilters(config *Config, state *state) (*pathFilters, error) {
+	if state.filters != nil {
+		return state.filters, nil
 	}
 
-	r, err := regexp.Compile(filter)
+	filters := &pathFilters{}
+
+	var err error
+	if filters.matchPath, err = compileFilter(config.MatchPath, "filter"); err != nil {
+		return nil, err
+	}
+	if filters.unmatchPath, err = compileFilter(config.UnmatchPath, "filter"); err != nil {
+		return nil, err
+	}
+	if filters.extension, err = compileFilter(config.FilterExtension, "extension filter"); err != nil {
+		return nil, err
+	}
+
+	state.filters = filters
+
+	return filters, nil
+}
+
+// compileFilter compiles one filter pattern. An empty pattern compiles to nil,
+// which leaves that filter off.
+func compileFilter(pattern, name string) (*regexp.Regexp, error) {
+	if pattern == "" {
+		return nil, nil
+	}
+
+	r, err := regexp.Compile(pattern)
 	if err != nil {
-		return fmt.Errorf("failed to compile filter regex %q: %w", filter, err)
+		return nil, fmt.Errorf("failed to compile %s regex %q: %w", name, pattern, err)
+	}
+
+	return r, nil
+}
+
+func filterPaths(filters *pathFilters, paths1, paths2 *openapi3.Paths) {
+
+	filterPathsByName(filters.matchPath, true, paths1, paths2)
+	filterPathsByName(filters.unmatchPath, false, paths1, paths2)
+	filterPathsByExtensions(filters.extension, paths1, paths2)
+}
+
+func filterPathsByName(r *regexp.Regexp, negate bool, paths1, paths2 *openapi3.Paths) {
+	if r == nil {
+		return
 	}
 
 	filterPathsInternal(paths1, r, negate)
 	filterPathsInternal(paths2, r, negate)
-
-	return nil
 }
 
 func filterPathsInternal(paths *openapi3.Paths, r *regexp.Regexp, negate bool) {
@@ -132,20 +166,13 @@ func filterPathsInternal(paths *openapi3.Paths, r *regexp.Regexp, negate bool) {
 	}
 }
 
-func filterPathsByExtensions(filterExtension string, paths1, paths2 *openapi3.Paths) error {
-	if filterExtension == "" {
-		return nil
-	}
-
-	r, err := regexp.Compile(filterExtension)
-	if err != nil {
-		return fmt.Errorf("failed to compile extension filter regex %q: %w", filterExtension, err)
+func filterPathsByExtensions(r *regexp.Regexp, paths1, paths2 *openapi3.Paths) {
+	if r == nil {
+		return
 	}
 
 	filterPathsByExtensionInternal(paths1, r)
 	filterPathsByExtensionInternal(paths2, r)
-
-	return nil
 }
 
 func filterPathsByExtensionInternal(paths *openapi3.Paths, r *regexp.Regexp) {

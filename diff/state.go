@@ -14,6 +14,9 @@ type state struct {
 	// The callback pairs being compared. A callback can reach itself through
 	// its operations' callbacks.
 	callbacksInProgress map[callbackPair]struct{}
+
+	// The compiled path and extension filters, set on first use.
+	filters *pathFilters
 }
 
 type callbackPair struct {
