@@ -21,6 +21,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/build"
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/oasdiff/oasdiff/review"
@@ -355,6 +356,60 @@ func uploadAuthenticatedReview(token string, metaEntries []string, blob, key []b
 // git-ref read, including blob-hash handling, lives in the load package);
 // stdin and URL sources are rejected here because the upload requires bytes
 // the CLI can attribute to a filename.
+// renderedSpecInfo renders a compared document and reloads it from the
+// rendered bytes. The reloaded spec's origins point into the rendered text,
+// so the review's spec panels, blocks, and change locations all describe one
+// document; uploading the source file instead would show text the changes
+// were not computed against.
+func renderedSpecInfo(flags *Flags, spec *openapi3.T, source *load.Source) (*load.SpecInfo, error) {
+	format := "yaml"
+	if strings.HasSuffix(strings.ToLower(source.DisplayPath()), ".json") {
+		format = "json"
+	}
+	formatter, err := formatters.Lookup(format, formatters.DefaultFormatterOpts())
+	if err != nil {
+		return nil, err
+	}
+	data, err := formatter.RenderFlatten(spec, formatters.NewRenderOpts())
+	if err != nil {
+		return nil, err
+	}
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
+	doc, err := loader.LoadFromDataWithPath(data, &url.URL{Path: source.Path})
+	if err != nil {
+		return nil, err
+	}
+	return &load.SpecInfo{
+		Spec:    doc,
+		Url:     source.Path,
+		Version: doc.OpenAPI,
+		Sources: map[string]string{source.Path: string(data)},
+	}, nil
+}
+
+// renderedDiffResult re-runs the comparison on the rendered documents, for
+// the review bundle of a transformed comparison. The console output keeps
+// the first pass, whose locations point into the source files; the bundle
+// carries this pass, whose every part describes the rendered text.
+func renderedDiffResult(flags *Flags, base, revision *load.SpecInfo) (*diffResult, error) {
+	s1, err := renderedSpecInfo(flags, base.Spec, flags.getBase())
+	if err != nil {
+		return nil, fmt.Errorf("render base spec: %w", err)
+	}
+	s2, err := renderedSpecInfo(flags, revision.Spec, flags.getRevision())
+	if err != nil {
+		return nil, fmt.Errorf("render revision spec: %w", err)
+	}
+	diffReport, operationsSources, err := diff.GetWithOperationsSourcesMap(flags.toConfig(), s1, s2)
+	if err != nil {
+		return nil, err
+	}
+	r := newDiffResult(diffReport, operationsSources, load.NewSpecInfoPair(s1, s2))
+	r.baseSpecs, r.revSpecs = []*load.SpecInfo{s1}, []*load.SpecInfo{s2}
+	return r, nil
+}
+
 func readSpecSource(source *load.Source, specs []*load.SpecInfo) ([]byte, string, error) {
 	if source == nil {
 		return nil, "", errors.New("spec source is required")
@@ -365,15 +420,15 @@ func readSpecSource(source *load.Source, specs []*load.SpecInfo) ([]byte, string
 	// DisplayPath strips the "<ref>:" prefix for git sources; Base trims any
 	// directory so the upload's filename is just "openapi.yaml".
 	name := filepath.Base(source.DisplayPath())
-	if source.IsURL() {
-		// The loader already fetched the URL; take those exact bytes (captured
-		// in Sources) so the bundle cannot disagree with the diff if the remote
-		// content changed between reads.
-		if len(specs) > 0 && specs[0] != nil {
-			if text, ok := specs[0].Sources[source.Path]; ok {
-				return []byte(text), name, nil
-			}
+	// Captured or rendered content is authoritative when present: for URLs it
+	// pins the exact bytes the loader fetched, and for a transformed
+	// comparison it is the rendered document the changes describe.
+	if len(specs) > 0 && specs[0] != nil {
+		if text, ok := specs[0].Sources[source.Path]; ok {
+			return []byte(text), name, nil
 		}
+	}
+	if source.IsURL() {
 		return nil, "", fmt.Errorf("no captured content for %q", source.Path)
 	}
 	// Only file and git-revision sources remain (stdin and URL returned above);
