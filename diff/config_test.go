@@ -14,6 +14,7 @@ func TestConfig_Default(t *testing.T) {
 	require.False(t, c.IsExcludeEndpoints())
 	require.False(t, c.IsExcludeTitle())
 	require.False(t, c.IsExcludeSummary())
+	require.False(t, c.IsExcludeTags())
 }
 
 func TestConfig_ExcludeElements(t *testing.T) {
@@ -23,6 +24,7 @@ func TestConfig_ExcludeElements(t *testing.T) {
 	require.True(t, c.IsExcludeEndpoints())
 	require.True(t, c.IsExcludeTitle())
 	require.True(t, c.IsExcludeSummary())
+	require.True(t, c.IsExcludeTags())
 }
 
 func TestConfig_MatchInlineRefsDefault(t *testing.T) {

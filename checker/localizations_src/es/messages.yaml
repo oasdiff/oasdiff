@@ -59,7 +59,14 @@ request-body-became-required: el cuerpo de solicitud se volvió requerido
 request-body-became-optional: el cuerpo de solicitud se volvió opcional
 request-body-became-enum: el cuerpo de solicitud fue restringido a una lista de valores enum
 request-body-enum-value-removed: removido el valor enum %s del cuerpo de solicitud
+request-body-enum-value-added: "agregado el valor enum %s al cuerpo de solicitud"
+request-body-became-not-enum: removida la restricción enum del cuerpo de solicitud
 response-mediatype-enum-value-removed: removido el valor enum %s del esquema de respuesta %s
+response-mediatype-became-enum: "el esquema de respuesta %s para el estado %s fue restringido a una lista de valores enum"
+response-mediatype-enum-value-added-comment: "El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum."
+response-mediatype-enum-value-added: "agregado el nuevo valor enum %s al esquema de respuesta %s para el estado %s"
+response-mediatype-became-not-enum: removida la restricción enum del esquema de respuesta %s para el estado %s
+response-mediatype-became-not-enum-comment: El servidor ahora puede devolver cualquier valor del tipo del esquema, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
 request-header-property-became-required: la propiedad %s del encabezado de solicitud %s se volvió requerida
 request-header-property-became-enum: la propiedad %s del encabezado de solicitud %s fue restringida a una lista de valores enum
 request-parameter-became-required: el parámetro %s de solicitud %s se volvió requerido
@@ -71,9 +78,12 @@ request-parameter-property-became-nullable: la propiedad %s del parámetro de so
 request-parameter-property-became-not-nullable: la propiedad %s del parámetro de solicitud %s %s se volvió no nulable
 request-parameter-enum-value-removed: removido el valor enum %s del parámetro %s de solicitud %s
 request-parameter-enum-value-added: agregado el nuevo valor enum %s al parámetro %s de solicitud %s
+request-parameter-became-not-enum: removida la restricción enum del parámetro %s de solicitud %s
 request-parameter-property-enum-value-removed: removido el valor enum %s de la propiedad %s del parámetro %s de solicitud %s
 request-parameter-property-enum-value-added: agregado el valor enum %s a la propiedad %s del parámetro %s de solicitud %s
+request-parameter-property-became-not-enum: removida la restricción enum de la propiedad %s del parámetro %s de solicitud %s
 pattern-changed-warn-comment: "Esta es una advertencia porque agregar o cambiar un patrón puede restringir los valores aceptados y romper clientes existentes. Para cambios de patrón, es difícil analizar automáticamente si el nuevo patrón es un superconjunto del patrón anterior (ej. cambiado de '[0-9]+' a '[0-9]*')"
+request-property-became-read-only-comment: "Esta es una advertencia porque una propiedad de solo lectura no debería enviarse en una solicitud, y la especificación deja al servidor decidir si la ignora o rechaza la solicitud. Los clientes que la envían pueden ser rechazados, o descubrir que el valor que envían ya no se usa."
 request-parameter-x-extensible-enum-value-removed: removido el valor x-extensible-enum %s del parámetro %s de solicitud %s
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
 request-parameter-max-decreased: para el parámetro %s de solicitud %s, el máximo fue disminuido de %s a %s
@@ -126,6 +136,7 @@ request-property-became-enum: la propiedad de solicitud %s fue restringida a una
 request-property-enum-value-removed: removido el valor enum %s de la propiedad de solicitud %s
 request-read-only-property-enum-value-removed: removido el valor enum %s de la propiedad de solicitud de solo lectura %s
 request-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de solicitud %s
+request-property-became-not-enum: removida la restricción enum de la propiedad de solicitud %s
 request-body-max-decreased: el valor máximo del cuerpo de solicitud fue disminuido a %s
 request-property-max-decreased: el valor máximo de la propiedad de solicitud %s fue disminuido a %s
 request-read-only-property-max-decreased: el valor máximo de la propiedad de solicitud de solo lectura %s fue disminuido a %s
@@ -156,6 +167,8 @@ request-property-min-items-set: el número mínimo de elementos de la propiedad 
 request-body-min-set: el valor mínimo del cuerpo de solicitud fue establecido en %s
 request-property-min-set: el valor mínimo de la propiedad de solicitud %s fue establecido en %s
 request-property-removed: removida la propiedad de solicitud %s
+request-property-removed-with-deprecation: removida la propiedad de solicitud deprecada %s
+request-property-removed-before-sunset: removida la propiedad de solicitud %s antes de la fecha de expiración %s
 request-body-type-changed: el %s del cuerpo de solicitud fue cambiado de %s a %s
 request-body-type-generalized: el %s del cuerpo de solicitud fue ampliado de %s a %s
 request-body-type-compatible: el %s del cuerpo de solicitud cambió de %s a %s (retrocompatible)
@@ -207,6 +220,9 @@ response-body-became-not-nullable: el cuerpo de respuesta se volvió no nulable
 response-property-enum-value-added: agregado el nuevo valor enum %s a la propiedad de respuesta %s para el estado %s
 response-property-enum-value-added-comment: El servidor ahora puede devolver un valor que el contrato anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta. Si el conjunto de valores está destinado a crecer, decláralo con x-extensible-enum.
 response-property-enum-value-removed: removido el valor enum %s de la propiedad de respuesta %s para el estado %s
+response-property-became-not-enum: removida la restricción enum de la propiedad de respuesta %s para el estado %s
+response-property-became-not-enum-comment: El servidor ahora puede devolver cualquier valor del tipo de la propiedad, incluidos valores que el enum anterior excluía, por lo que un cliente escrito contra él puede no manejar la respuesta.
+response-property-became-enum: la propiedad de respuesta %s para el estado %s fue restringida a una lista de valores enum
 response-body-max-length-increased: la longitud máxima del cuerpo de respuesta fue aumentada de %s a %s
 response-property-max-length-increased: la longitud máxima de la propiedad de respuesta %s fue aumentada de %s a %s para el estado %s
 response-body-max-length-unset: la longitud máxima del cuerpo de respuesta fue removida de %s
@@ -221,6 +237,8 @@ response-body-type-changed: el %s del cuerpo de respuesta fue cambiado de %s a %
 response-property-type-changed: el %s de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
 response-required-property-became-not-write-only: la propiedad requerida de respuesta %s dejó de ser de solo escritura para el estado %s
 response-required-property-removed: removida la propiedad requerida %s de la respuesta con estado %s
+response-required-property-removed-with-deprecation: removida la propiedad requerida deprecada %s de la respuesta con estado %s
+response-required-property-removed-before-sunset: removida la propiedad requerida %s de la respuesta con estado %s antes de la fecha de expiración %s
 response-required-property-added: agregada la propiedad requerida %s a la respuesta con estado %s
 response-success-status-removed: removido el estado de respuesta exitosa %s
 response-non-success-status-removed: removido el estado de respuesta no exitosa %s
@@ -260,6 +278,10 @@ api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
 api-global-security-added: el esquema de seguridad %s fue agregado a la api
 api-global-security-removed: el esquema de seguridad %s fue removido de la api
 api-global-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad global %s
+api-security-anonymous-access-removed: el endpoint ya no permite acceso anónimo y ahora solo acepta %s
+api-security-anonymous-access-added: el endpoint ahora permite acceso anónimo
+api-security-inherited-comment: "Este endpoint hereda los requisitos de seguridad de nivel superior de la API."
+api-global-security-not-inherited-comment: "Ningún endpoint hereda los requisitos de seguridad de nivel superior de la API, por lo que este cambio no afecta a ningún cliente."
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
 api-version-not-bumped-description: se detectó un cambio incompatible pero la versión no fue incrementada
@@ -273,13 +295,19 @@ response-property-stability-decreased-description: el nivel de estabilidad de la
 response-property-stability-increased-description: el nivel de estabilidad de la propiedad de respuesta fue aumentado
 api-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad del endpoint %s
 api-security-component-type-changed: el tipo del esquema de seguridad %s fue cambiado de %s a %s
-api-security-component-oauth-url-changed: la URL OAuth del esquema de seguridad %s fue cambiada de %s a %s
-api-security-component-oauth-token-url-changed: la URL del token OAuth del esquema de seguridad %s fue cambiada de %s a %s
+api-security-component-oauth-url-changed: en el esquema de seguridad %s, la URL de autorización del flujo OAuth %s fue cambiada de %s a %s
+api-security-component-oauth-token-url-changed: en el esquema de seguridad %s, la URL del token del flujo OAuth %s fue cambiada de %s a %s
+api-security-component-oauth-refresh-url-changed: en el esquema de seguridad %s, la URL de actualización del flujo OAuth %s fue cambiada de %s a %s
 api-security-component-added: el esquema de seguridad %s fue agregado
 api-security-component-removed: el esquema de seguridad %s fue removido
-api-security-component-oauth-scope-added: el alcance OAuth %s fue agregado al esquema de seguridad %s
-api-security-component-oauth-scope-removed: el alcance OAuth %s fue removido del esquema de seguridad %s
-api-security-component-oauth-scope-changed: el alcance OAuth %s del esquema de seguridad %s fue actualizado de %s a %s
+api-security-component-oauth-scope-added: en el esquema de seguridad %s, el flujo OAuth %s agregó el alcance %s
+api-security-component-oauth-scope-removed: en el esquema de seguridad %s, el flujo OAuth %s removió el alcance %s
+api-security-component-oauth-scope-changed: en el esquema de seguridad %s, el alcance %s del flujo OAuth %s fue actualizado de %s a %s
+api-security-component-api-key-name-changed: el nombre de la clave API del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-api-key-in-changed: la ubicación de la clave API del esquema de seguridad %s fue cambiada de %s a %s
+api-security-component-http-scheme-changed: el esquema http del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-bearer-format-changed: el formato bearer del esquema de seguridad %s fue cambiado de %s a %s
+api-security-component-openid-connect-url-changed: la URL de OpenID Connect del esquema de seguridad %s fue cambiada de %s a %s
 response-optional-property-added: agregada la propiedad opcional %s a la respuesta con estado %s
 response-optional-write-only-property-added: agregada la propiedad opcional de solo escritura %s a la respuesta con estado %s
 response-optional-write-only-property-removed: removida la propiedad opcional de solo escritura %s de la respuesta con estado %s
@@ -343,6 +371,7 @@ response-body-all-of-removed: "%s fue removido de la lista `allOf` del cuerpo de
 all-of-not-flattened-comment: "Esto comparó las ramas de `allOf` una por una, así que otra rama todavía puede garantizar lo que esta perdió. Ejecute con --flatten-allof para fusionar las ramas y comparar lo que describen en conjunto."
 read-only-comment: "La propiedad es de solo lectura, por lo que nunca aparece en las solicitudes y este cambio no puede invalidar ninguna."
 write-only-comment: "La propiedad es de solo escritura, por lo que nunca aparece en las respuestas y este cambio no puede invalidar ninguna."
+required-in-requests-comment: "En OpenAPI 3.1 y posteriores, required se aplica también en las solicitudes a una propiedad de solo lectura, así que los clientes ya la envían y este cambio no puede invalidar una solicitud."
 response-property-all-of-added: "%s fue agregado a la lista `allOf` de la propiedad de respuesta %s para el estado %s"
 response-property-all-of-removed: "%s fue removido de la lista `allOf` de la propiedad de respuesta %s para el estado %s"
 response-body-discriminator-added: agregado discriminador de respuesta para el estado %s
@@ -371,6 +400,7 @@ request-body-discriminator-mapping-changed: el valor mapeado para la clave %s fu
 request-property-discriminator-mapping-changed: el valor mapeado para la clave del discriminador %s fue cambiado de %s a %s para la propiedad de solicitud %s
 request-required-property-became-read-only: la propiedad requerida de solicitud %s se volvió de solo lectura
 request-required-property-became-not-read-only: la propiedad requerida de solicitud %s dejó de ser de solo lectura
+request-required-property-became-not-read-only-in-openapi-31: la propiedad requerida de solicitud %s dejó de ser de solo lectura
 request-optional-property-became-write-only: la propiedad opcional de solicitud %s se volvió de solo escritura
 request-optional-property-became-read-only: la propiedad opcional de solicitud %s se volvió de solo lectura
 request-optional-property-became-not-write-only: la propiedad opcional de solicitud %s dejó de ser de solo escritura
@@ -389,6 +419,8 @@ api-global-security-added-description: esquema de seguridad agregado en security
 api-global-security-removed-description: esquema de seguridad removido en security
 api-global-security-scope-added-description: alcance agregado a un esquema de seguridad en security
 api-global-security-scope-removed-description: alcance removido de un esquema de seguridad en security
+api-security-anonymous-access-removed-description: la seguridad del endpoint cambió y ahora rechaza solicitudes no autenticadas
+api-security-anonymous-access-added-description: la seguridad del endpoint cambió y ahora acepta solicitudes no autenticadas
 api-operation-id-added-description: id de operación agregado a un endpoint
 api-operation-id-removed-description: id de operación removido de un endpoint
 api-path-removed-before-sunset-description: path y endpoint removidos antes de la fecha de expiración
@@ -399,11 +431,17 @@ api-removed-without-deprecation-description: endpoint removido sin deprecación
 api-schema-removed-description: esquema removido de components/schemas
 api-security-added-description: requisitos de seguridad agregados al endpoint
 api-security-component-added-description: esquema de seguridad agregado en components/securitySchemes
+api-security-component-api-key-in-changed-description: ubicación (in) de la clave API modificada en components/securitySchemes
+api-security-component-api-key-name-changed-description: nombre de la clave API modificado en components/securitySchemes
+api-security-component-bearer-format-changed-description: formato bearer modificado en components/securitySchemes
+api-security-component-http-scheme-changed-description: esquema de autenticación http modificado en components/securitySchemes
 api-security-component-oauth-scope-added-description: alcance agregado al flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-changed-description: alcance modificado en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-scope-removed-description: alcance removido del flujo OAuth en components/securitySchemes
 api-security-component-oauth-token-url-changed-description: url del token modificada en el flujo OAuth en components/securitySchemes
+api-security-component-oauth-refresh-url-changed-description: url de actualización modificada en el flujo OAuth en components/securitySchemes
 api-security-component-oauth-url-changed-description: url de autorización modificada en el flujo OAuth en components/securitySchemes
+api-security-component-openid-connect-url-changed-description: URL de OpenID Connect modificada en components/securitySchemes
 api-security-component-removed-description: esquema de seguridad removido en components/securitySchemes
 api-security-component-type-changed-description: tipo del esquema de seguridad modificado en components/securitySchemes
 api-security-removed-description: requisitos de seguridad removidos del endpoint
@@ -446,6 +484,8 @@ request-body-discriminator-mapping-deleted-description: mapeo del discriminador 
 request-body-discriminator-property-name-changed-description: nombre de la propiedad del discriminador del cuerpo de solicitud cambiado
 request-body-discriminator-removed-description: discriminador del cuerpo de solicitud removido
 request-body-enum-value-removed-description: valor del enum del cuerpo de solicitud removido
+request-body-enum-value-added-description: "valor del enum del cuerpo de solicitud agregado"
+request-body-became-not-enum-description: enum del cuerpo de solicitud removido
 request-body-max-decreased-description: valor máximo del cuerpo de solicitud reducido
 request-body-max-increased-description: valor máximo del cuerpo de solicitud aumentado
 request-body-max-length-decreased-description: longitud máxima del cuerpo de solicitud reducida
@@ -489,8 +529,10 @@ request-parameter-default-value-added-description: valor por defecto del paráme
 request-parameter-default-value-changed-description: valor por defecto del parámetro de solicitud cambiado
 request-parameter-default-value-removed-description: valor por defecto del parámetro de solicitud removido
 request-parameter-enum-value-added-description: valor del enum del parámetro de solicitud agregado
+request-parameter-became-not-enum-description: enum del parámetro de solicitud removido
 request-parameter-enum-value-removed-description: valor del enum del parámetro de solicitud removido
 request-parameter-property-enum-value-added-description: valor del enum de propiedad del parámetro de solicitud agregado
+request-parameter-property-became-not-enum-description: enum de propiedad del parámetro de solicitud removido
 request-parameter-property-enum-value-removed-description: valor del enum de propiedad del parámetro de solicitud removido
 request-parameter-max-decreased-description: valor máximo del parámetro de solicitud reducido
 request-parameter-max-increased-description: valor máximo del parámetro de solicitud aumentado
@@ -539,6 +581,7 @@ request-property-discriminator-mapping-deleted-description: mapeo del discrimina
 request-property-discriminator-property-name-changed-description: nombre de la propiedad del discriminador de solicitud cambiado
 request-property-discriminator-removed-description: discriminador de la propiedad de solicitud removido
 request-property-enum-value-added-description: valor del enum de la propiedad de solicitud agregado
+request-property-became-not-enum-description: enum de la propiedad de solicitud removido
 request-property-enum-value-removed-description: valor del enum de la propiedad de solicitud removido
 request-read-only-property-enum-value-removed-description: valor del enum de la propiedad de solicitud de solo lectura removido
 request-property-max-decreased-description: valor máximo de la propiedad de solicitud reducido
@@ -564,11 +607,14 @@ request-property-pattern-changed-description: patrón de la propiedad de solicit
 request-property-pattern-generalized-description: patrón de la propiedad de solicitud generalizado
 request-property-pattern-removed-description: patrón de la propiedad de solicitud removido
 request-property-removed-description: propiedad de solicitud removida
+request-property-removed-with-deprecation-description: propiedad de solicitud removida con deprecación
+request-property-removed-before-sunset-description: propiedad de solicitud removida antes de la fecha de expiración
 request-property-type-changed-description: tipo de la propiedad de solicitud cambiado
 request-property-type-generalized-description: tipo de la propiedad de solicitud generalizado
 request-property-type-compatible-description: tipo de la propiedad de solicitud cambiado pero retrocompatible
 request-property-x-extensible-enum-value-removed-description: valor x-extensible-enum de la propiedad de solicitud removido
 request-required-property-became-not-read-only-description: propiedad requerida de solicitud dejó de ser de solo lectura
+request-required-property-became-not-read-only-in-openapi-31-description: propiedad requerida de solicitud dejó de ser de solo lectura en OpenAPI 3.1 o posterior
 request-required-property-became-not-write-only-description: propiedad requerida de solicitud dejó de ser de solo escritura
 request-required-property-became-read-only-description: propiedad requerida de solicitud se volvió de solo lectura
 request-required-property-became-write-only-description: propiedad requerida de solicitud se volvió de solo escritura
@@ -603,6 +649,9 @@ response-header-became-optional-description: encabezado de respuesta se volvió 
 response-media-type-added-description: tipo de media de respuesta agregado
 response-media-type-removed-description: tipo de media de respuesta removido
 response-mediatype-enum-value-removed-description: valor del enum del tipo de media de respuesta removido
+response-mediatype-became-enum-description: "tipo de media de respuesta restringido a enum"
+response-mediatype-enum-value-added-description: "valor del enum del tipo de media de respuesta agregado"
+response-mediatype-became-not-enum-description: enum del tipo de media de respuesta removido
 response-non-success-status-added-description: estado de no éxito de respuesta agregado
 response-non-success-status-removed-description: estado de no éxito de respuesta removido
 response-optional-property-added-description: propiedad opcional de respuesta agregada
@@ -631,6 +680,8 @@ response-property-discriminator-property-name-changed-description: nombre de la 
 response-property-discriminator-removed-description: discriminador de la propiedad de respuesta removido
 response-property-enum-value-added-description: valor del enum de la propiedad de respuesta agregado
 response-property-enum-value-removed-description: valor del enum de la propiedad de respuesta removido
+response-property-became-not-enum-description: enum de la propiedad de respuesta removido
+response-property-became-enum-description: propiedad de respuesta restringida a enum
 response-property-max-increased-description: valor máximo de la propiedad de respuesta aumentado
 response-property-max-length-increased-description: longitud máxima de la propiedad de respuesta aumentada
 response-property-max-length-unset-description: longitud máxima de la propiedad de respuesta removida
@@ -650,6 +701,8 @@ response-required-property-became-not-write-only-description: propiedad requerid
 response-required-property-became-read-only-description: propiedad requerida de respuesta se volvió de solo lectura
 response-required-property-became-write-only-description: propiedad requerida de respuesta se volvió de solo escritura
 response-required-property-removed-description: propiedad requerida de respuesta removida
+response-required-property-removed-with-deprecation-description: propiedad requerida de respuesta removida con deprecación
+response-required-property-removed-before-sunset-description: propiedad requerida de respuesta removida antes de la fecha de expiración
 response-required-write-only-property-added-description: propiedad requerida de solo escritura de respuesta agregada
 response-required-write-only-property-removed-description: propiedad requerida de solo escritura de respuesta removida
 response-success-status-added-description: estado de éxito de respuesta agregado
@@ -1548,3 +1601,8 @@ response-property-min-unset: el valor min de la propiedad de respuesta %s fue re
 response-property-min-unset-description: valor min de la propiedad de respuesta removido
 response-property-multiple-of-set: el valor multipleOf de la propiedad de respuesta %s fue establecido en %s para el estado %s
 response-property-multiple-of-set-description: valor multipleOf de la propiedad de respuesta establecido
+shared-schema-detail-also: "también en %s"
+shared-schema-detail-also-cyclic: "también en %s y más"
+shared-schema-detail-also-more: "también en %s y %d más"
+shared-schema-detail-name: "esquema compartido: %s"
+security-scheme-url-changed-warn-comment: "Esta es una advertencia porque la especificación no indica si las credenciales obtenidas a través de la URL anterior siguen siendo aceptadas."

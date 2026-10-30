@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -19,7 +21,7 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
 			maxLengthDiff.From != nil &&
 			maxLengthDiff.To != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
 			if isDecreasedValue(maxLengthDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMaxLengthDecreasedId,
@@ -45,8 +47,8 @@ func RequestPropertyMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
 
 			if isDecreasedValue(maxLengthDiff) {
 

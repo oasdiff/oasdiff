@@ -46,5 +46,15 @@ func CompareChanges(a, b Change) int {
 			return c
 		}
 	}
-	return 0
+	return cmp.Compare(details(a), details(b))
+}
+
+// details is the part of a change's message that is not an argument, such as
+// the media type, which is all that tells apart the same change reported for
+// two media types.
+func details(c Change) string {
+	if apiChange, ok := c.(ApiChange); ok {
+		return apiChange.Details
+	}
+	return ""
 }

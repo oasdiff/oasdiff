@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -76,8 +77,8 @@ func checkRemovedOperations(pathsDiff *diff.PathsDiff, operationsSources *diff.O
 
 func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 
-	baseSource := NewSourceFromOrigin(opInfo.operationsSources, opInfo.operation, opInfo.operation.Origin)
-	revisionSource := NewEmptySource()
+	baseSource := location.NewSourceFromOrigin(opInfo.operationsSources, opInfo.operation, opInfo.operation.Origin)
+	revisionSource := location.NewEmptySource()
 
 	if !opInfo.operation.Deprecated {
 		return opInfo.NewApiChange(

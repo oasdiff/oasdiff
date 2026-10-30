@@ -3,6 +3,8 @@ package checker
 import (
 	"fmt"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,16 +17,11 @@ func ResponseParameterEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
-			enumDiff := p.propertyDiff.EnumDiff
-			if enumDiff == nil || enumDiff.Deleted == nil {
-				return
-			}
-
-			for _, enumVal := range enumDiff.Deleted {
-				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
+			for _, enumVal := range deletedEnumValues(p.propertyDiff) {
+				baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 				result = append(result, p.newChange(
 					ResponsePropertyEnumValueRemovedId,
-					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+					[]any{enumVal, schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 					"",
 				).WithSources(baseSource, revisionSource))
 			}

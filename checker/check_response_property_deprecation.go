@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -37,8 +39,8 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 				return
 			}
 
-			propName := propertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "deprecated")
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "deprecated")
 
 			// Check if property was reactivated (un-deprecated)
 			if p.propertyDiff.DeprecatedDiff.To == nil || p.propertyDiff.DeprecatedDiff.To == false {

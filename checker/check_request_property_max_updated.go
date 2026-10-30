@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -23,7 +25,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if maxDiff := info.schemaDiff.MaxDiff; maxDiff != nil &&
 			maxDiff.From != nil && maxDiff.To != nil {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maximum")
 			if isDecreasedValue(maxDiff) {
 				result = append(result, info.newChange(
 					RequestBodyMaxDecreasedId,
@@ -41,7 +43,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 		if exMaxDiff := info.schemaDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
 			exMaxDiff.From != nil && exMaxDiff.To != nil &&
 			(isIncreasedValue(exMaxDiff) || isDecreasedValue(exMaxDiff)) {
-			exBaseSource, exRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
+			exBaseSource, exRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "exclusiveMaximum")
 			if isDecreasedValue(exMaxDiff) {
 				result = append(result, info.newChange(
 					RequestBodyExclusiveMaxDecreasedId,
@@ -58,11 +60,11 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			if maxDiff := p.propertyDiff.MaxDiff; maxDiff != nil &&
 				maxDiff.From != nil && maxDiff.To != nil {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maximum")
 				if isDecreasedValue(maxDiff) {
 					id := RequestPropertyMaxDecreasedId
 					if p.propertyDiff.Revision.ReadOnly {
@@ -85,7 +87,7 @@ func RequestPropertyMaxDecreasedCheck(diffReport *diff.Diff, operationsSources *
 			if exMaxDiff := p.propertyDiff.ExclusiveMaxDiff; exMaxDiff != nil &&
 				exMaxDiff.From != nil && exMaxDiff.To != nil &&
 				(isIncreasedValue(exMaxDiff) || isDecreasedValue(exMaxDiff)) {
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "exclusiveMaximum")
 				if isDecreasedValue(exMaxDiff) {
 					id := RequestPropertyExclusiveMaxDecreasedId
 					if p.propertyDiff.Revision.ReadOnly {

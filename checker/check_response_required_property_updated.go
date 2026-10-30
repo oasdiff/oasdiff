@@ -4,6 +4,8 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,6 +17,9 @@ const (
 	ResponseBodyWrappedInOneOfId               = "response-body-wrapped-in-one-of"
 
 	ResponseBodyWrappedInOneOfOriginalPreservedId = "response-body-wrapped-in-one-of-original-preserved"
+
+	ResponseRequiredPropertyRemovedWithDeprecationId = "response-required-property-removed-with-deprecation"
+	ResponseRequiredPropertyRemovedBeforeSunsetId    = "response-required-property-removed-before-sunset"
 )
 
 func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -38,11 +43,9 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			result = append(result, info.newChange(id, nil, comment).WithSources(nil, nil))
 		}
 
-		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff walk
-		// properties that were dropped or introduced entirely, not just
-		// modified ones — different from info.walkProperties, which
-		// delegates to checkModifiedPropertiesDiff. Used directly here.
-		checkDeletedPropertiesDiff(
+		// info.walkProperties reports modified properties only, so the added
+		// and removed ones are walked here.
+		schemawalk.DeletedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				id := ResponseRequiredPropertyRemovedId
@@ -63,14 +66,24 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					return
 				}
 
-				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				args := []any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus}
+				// A writeOnly property is not in responses, so its deprecation doesn't matter here.
+				if !propertyItem.WriteOnly {
+					id, args = propertyRemovalId(propertyItem, args,
+						ResponseRequiredPropertyRemovedId, ResponseRequiredPropertyRemovedWithDeprecationId, ResponseRequiredPropertyRemovedBeforeSunsetId)
+					if id == "" {
+						return
+					}
+				}
+
+				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					args,
 					"",
-				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
-		checkAddedPropertiesDiff(
+		schemawalk.AddedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				id := ResponseRequiredPropertyAddedId
@@ -82,12 +95,12 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					return
 				}
 
-				revisionSource := propertySource(operationsSources, info.operationItem.Revision, propertyItem)
+				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 			})
 	})
 

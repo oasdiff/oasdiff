@@ -3,6 +3,8 @@ package checker
 import (
 	"slices"
 
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -35,12 +37,12 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 
 			fromSlice := make([]string, len(from))
 			for i, item := range from {
-				fromSlice[i] = item.(string)
+				fromSlice[i] = extensionValueText(item)
 			}
 
 			toSlice := make([]string, len(to))
 			for i, item := range to {
-				toSlice[i] = item.(string)
+				toSlice[i] = extensionValueText(item)
 			}
 
 			deletedVals := make([]string, 0)
@@ -51,10 +53,10 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 			}
 
 			for _, enumVal := range deletedVals {
-				baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, diff.XExtensibleEnumExtension, enumVal)
+				baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, info.operationItem, p.propertyDiff, diff.XExtensibleEnumExtension, enumVal)
 				result = append(result, p.newChange(
 					RequestPropertyXExtensibleEnumValueRemovedId,
-					[]any{enumVal, propertyFullName(p.propertyPath, p.propertyName)},
+					[]any{enumVal, schemawalk.PropertyFullName(p.propertyPath, p.propertyName)},
 					"",
 				).WithSources(baseSource, revisionSource))
 			}

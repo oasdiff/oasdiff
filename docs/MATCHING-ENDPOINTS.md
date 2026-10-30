@@ -13,7 +13,7 @@ Because oasdiff compares matching endpoints to each other, it expects a single i
 In some cases, your specs may contain duplicate matching endpoints which will cause oasdiff to return an error, for example:
 ```
 ✗ oasdiff diff data/duplicate_endpoints/base.yaml data/duplicate_endpoints/revision.yaml
-Error: diff failed with duplicate endpoint (GET /pet/{petId3}) found in data/duplicate_endpoints/base.yaml and data/duplicate_endpoints/base.yaml. You may add the x-since-date extension to specify order
+Error: diff failed: duplicate endpoint: GET /pet/{petId2} in data/duplicate_endpoints/base.yaml and GET /pet/{petId3} in data/duplicate_endpoints/base.yaml. You may add the x-since-date extension to specify order, or include path parameter names in endpoint matching with --include-path-params
 ```
 
 There are two ways to overcome this:

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -22,7 +23,7 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources *
 			return
 		}
 
-		_, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
+		_, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
 		result = append(result, p.opInfo.NewApiChange(
 			RequestParameterMinItemsSetId,
 			[]any{p.location, p.name, minItemsDiff.To},

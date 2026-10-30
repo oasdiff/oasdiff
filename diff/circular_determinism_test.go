@@ -6,6 +6,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -116,4 +117,23 @@ func TestCircularSchema_InlineBranchBackToSelf(t *testing.T) {
 	node := d.ComponentsDiff.SchemasDiff.Modified["Node"]
 	require.Equal(t, []string{"q"}, node.PropertiesDiff.Added)
 	require.Nil(t, node.AnyOfDiff, "the inline branch is unchanged")
+}
+
+// Two separately loaded copies of a spec whose allOf chains run through a
+// cycle are flattened independently, so a flatten that depends on map order
+// makes identical copies differ in some runs
+// (https://github.com/oasdiff/oasdiff/issues/1279).
+func TestFlattenedIdenticalCopies_NoDiff(t *testing.T) {
+	loadCopy := func() *load.SpecInfo {
+		t.Helper()
+		spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/allof/cycle-through-oneof.yaml"), load.WithFlattenAllOf())
+		require.NoError(t, err)
+		return spec
+	}
+
+	for range 50 {
+		d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), loadCopy(), loadCopy())
+		require.NoError(t, err)
+		require.True(t, d.Empty())
+	}
 }

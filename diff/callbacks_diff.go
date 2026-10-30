@@ -54,34 +54,27 @@ func getCallbacksDiffInternal(config *Config, state *state, callbacks1, callback
 
 	result := newCallbacksDiff()
 
-	for callbackName1, callbackRef1 := range callbacks1 {
-		if callbackRef2, ok := callbacks2[callbackName1]; ok {
+	added, deleted, common := keysDiff(callbacks1, callbacks2)
+	result.Added = added
+	result.Deleted = deleted
 
-			value1, err := derefCallback(callbackRef1)
-			if err != nil {
-				return nil, err
-			}
-			value2, err := derefCallback(callbackRef2)
-			if err != nil {
-				return nil, err
-			}
-
-			diff, err := getCallbackDiff(config, state, value1, value2)
-			if err != nil {
-				return nil, err
-			}
-
-			if !diff.Empty() {
-				result.Modified[callbackName1] = diff
-			}
-		} else {
-			result.Deleted = append(result.Deleted, callbackName1)
+	for _, name := range common {
+		value1, err := derefCallback(callbacks1[name])
+		if err != nil {
+			return nil, err
 		}
-	}
+		value2, err := derefCallback(callbacks2[name])
+		if err != nil {
+			return nil, err
+		}
 
-	for callbackValue2 := range callbacks2 {
-		if _, ok := callbacks1[callbackValue2]; !ok {
-			result.Added = append(result.Added, callbackValue2)
+		diff, err := getCallbackDiff(config, state, value1, value2)
+		if err != nil {
+			return nil, err
+		}
+
+		if !diff.Empty() {
+			result.Modified[name] = diff
 		}
 	}
 
@@ -99,6 +92,15 @@ func derefCallback(ref *openapi3.CallbackRef) (*openapi3.Callback, error) {
 }
 
 func getCallbackDiff(config *Config, state *state, callback1, callback2 *openapi3.Callback) (*PathsDiff, error) {
+	// a pair reached again inside itself is already being compared, and its
+	// changes are reported there
+	pair := callbackPair{callback1, callback2}
+	if _, ok := state.callbacksInProgress[pair]; ok {
+		return nil, nil
+	}
+	state.callbacksInProgress[pair] = struct{}{}
+	defer delete(state.callbacksInProgress, pair)
+
 	return getPathsDiff(config, state, callBackToPaths(callback1), callBackToPaths(callback2))
 }
 

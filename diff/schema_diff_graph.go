@@ -108,12 +108,16 @@ func getSchemaDiffNode(config *Config, state *state, schema1, schema2 *openapi3.
 		return node, nil
 	}
 
-	node := &SchemaDiff{Base: schema1.Value, Revision: schema2.Value}
+	node := &SchemaDiff{}
 	graph.nodes[pair] = node
 	graph.depth++
 	diff, err := getSchemaDiffInternal(config, state, schema1, schema2)
 	if err == nil {
 		*node = *diff
+		// the copy carries the compared schemas; the names come from the
+		// documents, which the comparison itself does not see
+		node.BaseComponent = componentName(state.baseComponents, schema1)
+		node.RevisionComponent = componentName(state.revisionComponents, schema2)
 		graph.candidates[node], err = getCandidates(config, state, node)
 	}
 	graph.depth--
@@ -196,10 +200,12 @@ func (graph *schemaGraph) children(node *SchemaDiff) []*SchemaDiff {
 }
 
 // assignComponents numbers the strongly connected components of the nodes
-// that have none yet (Tarjan). A node only ever links to nodes that exist
-// when it is built, so a node added later cannot join an existing component,
-// and the numbering of the existing nodes stands.
-func (graph *schemaGraph) assignComponents() {
+// reachable from root that have none yet (Tarjan). A node only ever links to
+// nodes that exist when it is built, so a node added later cannot join an
+// existing component, and the numbering of the existing nodes stands. It
+// visits only what root reaches, so its cost is the new nodes rather than the
+// whole graph.
+func (graph *schemaGraph) assignComponents(root *SchemaDiff) {
 	index := map[*SchemaDiff]int{}
 	lowLink := map[*SchemaDiff]int{}
 	onStack := map[*SchemaDiff]bool{}
@@ -237,11 +243,7 @@ func (graph *schemaGraph) assignComponents() {
 			}
 		}
 	}
-	for _, node := range graph.nodes {
-		if _, done := graph.component[node]; !done {
-			visit(node)
-		}
-	}
+	visit(root)
 }
 
 // unroller walks the graph from a node and produces its diff, expanding
@@ -321,10 +323,8 @@ func (u *unroller) cutKey(node *SchemaDiff) string {
 	graph := &u.state.graph
 	component, ok := graph.component[node]
 	if !ok {
-		graph.assignComponents()
-		if component, ok = graph.component[node]; !ok {
-			return ""
-		}
+		graph.assignComponents(node)
+		component = graph.component[node]
 	}
 	var cut []*SchemaDiff
 	for _, ancestor := range u.stack {

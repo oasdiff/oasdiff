@@ -1,6 +1,7 @@
 package allof_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -212,4 +213,27 @@ func TestMergeSpec_RefsKeepSharingOneObject(t *testing.T) {
 	}
 	require.Same(t, node, node.Properties["next"].Value)
 	require.Same(t, leaf, node.Properties["leaf"].Value)
+}
+
+// PeriodZone's allOf references Zone, whose own allOf is merged in the same
+// pass. Zone must be merged first whichever order the properties are visited
+// in, or PeriodZone merges from Zone's still unmerged value and comes out
+// empty in some runs (https://github.com/oasdiff/oasdiff/issues/1279).
+func TestMergeSpec_AllOfOfAnAllOfIsMergedInAnyOrder(t *testing.T) {
+	var first []byte
+	for range 50 {
+		spec, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../../data/allof/cycle-through-oneof.yaml"), load.WithFlattenAllOf())
+		require.NoError(t, err)
+
+		periodZone := spec.Spec.Components.Schemas["PeriodZone"].Value
+		require.True(t, periodZone.Type.Is("object"))
+		require.Contains(t, periodZone.Properties, "periods")
+
+		out, err := json.Marshal(spec.Spec)
+		require.NoError(t, err)
+		if first == nil {
+			first = out
+		}
+		require.Equal(t, string(first), string(out))
+	}
 }

@@ -3,6 +3,7 @@ package checker
 import (
 	"slices"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -36,12 +37,12 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 
 		fromSlice := make([]string, len(from))
 		for i, item := range from {
-			fromSlice[i] = item.(string)
+			fromSlice[i] = extensionValueText(item)
 		}
 
 		toSlice := make([]string, len(to))
 		for i, item := range to {
-			toSlice[i] = item.(string)
+			toSlice[i] = extensionValueText(item)
 		}
 
 		deletedVals := make([]string, 0)
@@ -52,7 +53,7 @@ func RequestParameterXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, ope
 		}
 
 		for _, enumVal := range deletedVals {
-			baseSource, revisionSource := SchemaDeletedItemSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, diff.XExtensibleEnumExtension, enumVal)
+			baseSource, revisionSource := location.SchemaDeletedItemSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, diff.XExtensibleEnumExtension, enumVal)
 			result = append(result, p.opInfo.NewApiChange(
 				RequestParameterXExtensibleEnumValueRemovedId,
 				[]any{enumVal, p.location, p.name},

@@ -19,6 +19,7 @@ const (
 	ConstErrorMessage            = "unable to resolve Const conflict: all Const values must be identical"
 	ContentMediaTypeErrorMessage = "unable to resolve ContentMediaType conflict: all ContentMediaType values must be identical"
 	ContentEncodingErrorMessage  = "unable to resolve ContentEncoding conflict: all ContentEncoding values must be identical"
+	EnumErrorMessage             = "unable to resolve Enum conflict: intersection of values must be non-empty"
 
 	FormatInt32  = "int32"
 	FormatInt64  = "int64"
@@ -77,6 +78,10 @@ type state struct {
 	// after mergeInternal is executed, circularAllOf contains all SchemaRefs which have circular allof.
 	circularAllOf openapi3.SchemaRefs
 
+	// pendingAllOf holds the results in circularAllOf whose allOf
+	// mergeCircular has not flattened yet.
+	pendingAllOf map[*openapi3.Schema]*openapi3.SchemaRef
+
 	// flattening tracks input schemas currently being processed by
 	// flattenSchemas, mapping each to the result Value being populated
 	// for that call. Re-entry with an in-flight schema short-circuits
@@ -108,6 +113,7 @@ func newState() *state {
 		mergedSchemas: map[*openapi3.Schema]*openapi3.Schema{},
 		refs:          map[string]bool{},
 		circularAllOf: openapi3.SchemaRefs{},
+		pendingAllOf:  map[*openapi3.Schema]*openapi3.SchemaRef{},
 		flattening:    map[*openapi3.Schema]*openapi3.Schema{},
 		replaced:      map[*openapi3.Schema]*openapi3.Schema{},
 		hints:         map[*openapi3.Schema]string{},
@@ -142,6 +148,23 @@ func mergeCircular(state *state) error {
 }
 
 func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
+	if _, ok := state.pendingAllOf[baseSchemaRef.Value]; !ok {
+		return nil
+	}
+	delete(state.pendingAllOf, baseSchemaRef.Value)
+
+	// flattenSchemas reads only the top-level keywords of its inputs, so a
+	// subschema whose own allOf is still pending is flattened first. Otherwise
+	// the result depends on the order the sets were found in, which follows
+	// the order of properties in a map.
+	for _, subschema := range baseSchemaRef.Value.AllOf {
+		if pending, ok := state.pendingAllOf[subschema.Value]; ok {
+			if err := mergeCircularAllOf(state, pending); err != nil {
+				return err
+			}
+		}
+	}
+
 	allOfCopy := make(openapi3.SchemaRefs, len(baseSchemaRef.Value.AllOf))
 	copy(allOfCopy, baseSchemaRef.Value.AllOf)
 
@@ -353,6 +376,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	updateRefs(state, base.Value.AllOf)
 	if isAllOfCircular(state, base.Value.AllOf) {
 		state.circularAllOf = append(state.circularAllOf, result)
+		state.pendingAllOf[result.Value] = result
 		result.Value.AllOf = allOf
 		return result, nil
 	}
@@ -1046,20 +1070,24 @@ func mergeProps(state *state, schema *openapi3.Schema, collection *SchemaCollect
 	return schema, nil
 }
 
+// resolveEnum intersects the enums of the branches that have one. A branch
+// with no enum is unconstrained and takes no part in the intersection, while
+// an explicit empty enum permits no value at all, so it empties the
+// intersection and the branches conflict.
 func resolveEnum(values [][]any) ([]any, error) {
-	var nonEmptyEnum [][]any
+	var enums [][]any
 	for _, enum := range values {
-		if len(enum) > 0 {
-			nonEmptyEnum = append(nonEmptyEnum, enum)
+		if enum == nil {
+			continue
 		}
+		enums = append(enums, enum)
 	}
-	var intersection []any
-	if len(nonEmptyEnum) == 0 {
-		return intersection, nil
+	if len(enums) == 0 {
+		return nil, nil
 	}
-	intersection = findIntersectionOfArrays(nonEmptyEnum)
+	intersection := findIntersectionOfArrays(enums)
 	if len(intersection) == 0 {
-		return nil, errors.New("unable to resolve Enum conflict: intersection of values must be non-empty")
+		return nil, errors.New(EnumErrorMessage)
 	}
 	return intersection, nil
 }

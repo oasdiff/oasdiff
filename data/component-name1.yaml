@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  title: component names
+  version: "1"
+paths:
+  /example:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  left:
+                    $ref: '#/components/schemas/Shared'
+                  right:
+                    $ref: '#/components/schemas/Shared'
+                  inline:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                  untouched:
+                    $ref: '#/components/schemas/Untouched'
+components:
+  schemas:
+    Shared:
+      type: object
+      properties:
+        id:
+          type: string
+    Untouched:
+      type: object
+      properties:
+        id:
+          type: string

@@ -4,6 +4,8 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -18,11 +20,9 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the
-		// added/removed property sides; info.walkProperties only delegates
-		// to checkModifiedPropertiesDiff so the primitives are called
-		// directly inside the walker callback.
-		checkDeletedPropertiesDiff(
+		// info.walkProperties reports modified properties only, so the added
+		// and removed ones are walked here.
+		schemawalk.DeletedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if slices.Contains(parent.Base.Required, propertyName) {
@@ -42,15 +42,15 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				if propertyItem.WriteOnly {
 					id = ResponseOptionalWriteOnlyPropertyRemovedId
 				}
-				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
-		checkAddedPropertiesDiff(
+		schemawalk.AddedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if slices.Contains(parent.Revision.Required, propertyName) {
@@ -61,12 +61,12 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				if propertyItem.WriteOnly {
 					id = ResponseOptionalWriteOnlyPropertyAddedId
 				}
-				revisionSource := propertySource(operationsSources, info.operationItem.Revision, propertyItem)
+				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 				result = append(result, info.newChange(
 					id,
-					[]any{propertyFullName(propertyPath, propertyName), info.responseStatus},
+					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 			})
 	})
 

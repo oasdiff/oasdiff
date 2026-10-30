@@ -51,6 +51,10 @@ func applyGuard(g Guard, effect Effect, direction Direction) (Effect, Direction,
 		return EffectNone, direction, "The status is not a success status, and the responses map does not promise that the server returns only the statuses it lists."
 	case GuardSanctioned:
 		return EffectNone, direction, "The element was deprecated and its sunset date honored, so the change keeps the deprecation contract."
+	case GuardRequiredInRequests:
+		if direction == DirectionRequest {
+			return EffectNone, direction, "The property was already required in requests, so requiring it there changes nothing for them."
+		}
 	case GuardNegotiated:
 		return effect, DirectionRequest, "The client selects or relies on this element, so the change is judged as if it were on the request side."
 	}

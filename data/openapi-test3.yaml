@@ -253,8 +253,8 @@ components:
       type: oauth2
       flows:
         authorizationCode:
-          authorizationUrl: https://example.org/auth
-          tokenUrl: https://example.org/token
+          authorizationUrl: https://tufin.io/auth
+          tokenUrl: https://tufin.io/token
           scopes:
             accountRead: Allows account data to be read
             accountWrite: Allows accounts data to be written

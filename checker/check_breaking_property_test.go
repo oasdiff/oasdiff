@@ -130,7 +130,7 @@ func TestBreaking_ReqBodyBecameEnum(t *testing.T) {
 // adding an enum value to request body is not breaking. The -revision fixture
 // has the smaller enum, so it is the base here (the reverse direction adds a
 // value). Removing a value, the other direction, is breaking, see
-// TestBreaking_RequestBodyEnumRemoved.
+// TestBreaking_RequestBodyBecameNotEnum.
 func TestBreaking_ReqBodyEnumValueAdded(t *testing.T) {
 	s1, err := open("../data/enums/request-body-enum-revision.yaml")
 	require.NoError(t, err)
@@ -509,6 +509,86 @@ func TestBreaking_WriteOnlyDeleteNonRequiredProperty(t *testing.T) {
 	requireChange(t, all, checker.ResponseOptionalPropertyRemovedId)
 }
 
+// deleting a deprecated property after its sunset date is not reported
+func TestBreaking_PropertyDeprecationPast(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-past.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}
+
+// deleting a deprecated property before its sunset date is breaking
+func TestBreaking_PropertyDeprecationFuture(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.ERR)
+	require.Len(t, errs, 3)
+	require.Equal(t, "removed the request property `created` before the sunset date `9999-08-10`", requireChange(t, errs, checker.RequestPropertyRemovedBeforeSunsetId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed the required property `created` from the response with the `200` status before the sunset date `9999-08-10`", requireChange(t, errs, checker.ResponseRequiredPropertyRemovedBeforeSunsetId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// deleting a deprecated property without a sunset date is not breaking
+func TestBreaking_PropertyDeprecationNoSunset(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+	delete(s1.Spec.Components.Schemas["GroupView"].Value.Properties["created"].Value.Extensions, "x-sunset")
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Equal(t, "removed the deprecated request property `created`", requireChange(t, errs, checker.RequestPropertyRemovedWithDeprecationId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed the deprecated required property `created` from the response with the `200` status", requireChange(t, errs, checker.ResponseRequiredPropertyRemovedWithDeprecationId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// deleting a deprecated property with an invalid sunset date is breaking, as if it wasn't deprecated
+func TestBreaking_RemovePropertyWithInvalidSunset(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+	s1.Spec.Components.Schemas["GroupView"].Value.Properties["created"].Value.Extensions["x-sunset"] = "invalid-date"
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Len(t, errs, 3)
+	requireChange(t, errs, checker.RequestPropertyRemovedId)
+	requireChange(t, errs, checker.ResponseRequiredPropertyRemovedId)
+}
+
+// deleting a deprecated write-only property before its sunset date is breaking
+// on the request side only: the property is not in responses
+func TestBreaking_WriteOnlyPropertyDeprecationFuture(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+	s1.Spec.Components.Schemas["GroupView"].Value.Properties["created"].Value.WriteOnly = true
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	requireSingleChange(t, errs, checker.RequestPropertyRemovedBeforeSunsetId)
+}
+
 // changing an existing write-only property in response body to optional is not breaking
 func TestBreaking_WriteOnlyPropertyRequiredDisabled(t *testing.T) {
 	s1, err := open(requiredPropertyFile("write-only-base.yaml"))
@@ -523,7 +603,9 @@ func TestBreaking_WriteOnlyPropertyRequiredDisabled(t *testing.T) {
 	require.Empty(t, errs)
 }
 
-// changing an existing required property in response body to write-only is not breaking
+// changing an existing required property in response body to write-only is
+// breaking: a write-only property is not sent in responses, so clients that
+// read it stop getting it, same as removing it
 func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
 	s1, err := open(requiredPropertyFile("write-only-changed-base.yaml"))
 	require.NoError(t, err)
@@ -534,7 +616,11 @@ func TestBreaking_RequiredPropertyWriteOnlyEnabled(t *testing.T) {
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-	require.Empty(t, errs)
+	require.Len(t, errs, 2)
+	for _, e := range errs {
+		require.Equal(t, checker.ResponseRequiredPropertyBecameWriteOnlyId, e.GetId())
+		require.Equal(t, checker.ERR, e.GetLevel())
+	}
 }
 
 // changing an existing required property in response body to not-write-only is

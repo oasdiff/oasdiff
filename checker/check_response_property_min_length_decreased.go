@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +17,7 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if minLengthDiff := info.schemaDiff.MinLengthDiff; minLengthDiff != nil &&
 			!uintBoundUnset(minLengthDiff) && isDecreasedValue(minLengthDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minLength")
 			result = append(result, info.newChange(
 				ResponseBodyMinLengthDecreasedId,
 				[]any{minLengthDiff.From, minLengthDiff.To},
@@ -32,10 +34,10 @@ func ResponsePropertyMinLengthDecreasedCheck(diffReport *diff.Diff, operationsSo
 				return
 			}
 
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minLength")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minLength")
 			result = append(result, p.newChange(
 				ResponsePropertyMinLengthDecreasedId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), minLengthDiff.From, minLengthDiff.To, info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), minLengthDiff.From, minLengthDiff.To, info.responseStatus},
 				"",
 			).WithSources(propBaseSource, propRevisionSource))
 		})

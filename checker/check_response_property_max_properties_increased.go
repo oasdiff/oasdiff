@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -17,7 +19,7 @@ func ResponsePropertyMaxPropertiesIncreasedCheck(diffReport *diff.Diff, operatio
 			maxPropertiesDiff.From != nil &&
 			maxPropertiesDiff.To != nil &&
 			isIncreasedValue(maxPropertiesDiff) {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxProperties")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxProperties")
 			result = append(result, info.newChange(
 				ResponseBodyMaxPropertiesIncreasedId,
 				[]any{maxPropertiesDiff.From, maxPropertiesDiff.To},
@@ -38,10 +40,10 @@ func ResponsePropertyMaxPropertiesIncreasedCheck(diffReport *diff.Diff, operatio
 				return
 			}
 
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
 			result = append(result, p.newChange(
 				ResponsePropertyMaxPropertiesIncreasedId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.From, maxPropertiesDiff.To, info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.From, maxPropertiesDiff.To, info.responseStatus},
 				"",
 			).WithSources(propBaseSource, propRevisionSource))
 		})

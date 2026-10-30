@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -33,7 +34,7 @@ func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 			return
 		}
 
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "default")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "default")
 		appendResultItem := func(messageId string, a ...any) {
 			result = append(result, p.opInfo.NewApiChange(
 				messageId,

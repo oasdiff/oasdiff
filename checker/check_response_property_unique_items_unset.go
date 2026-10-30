@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +17,7 @@ func ResponsePropertyUniqueItemsUnsetCheck(diffReport *diff.Diff, operationsSour
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if uniqueItemsDiff := info.schemaDiff.UniqueItemsDiff; uniqueItemsDiff != nil &&
 			uniqueItemsDiff.To == false {
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "uniqueItems")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "uniqueItems")
 			result = append(result, info.newChange(
 				ResponseBodyUniqueItemsUnsetId,
 				[]any{},
@@ -29,10 +31,10 @@ func ResponsePropertyUniqueItemsUnsetCheck(diffReport *diff.Diff, operationsSour
 				return
 			}
 
-			propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
+			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "uniqueItems")
 			result = append(result, p.newChange(
 				ResponsePropertyUniqueItemsUnsetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
 				"",
 			).WithSources(propBaseSource, propRevisionSource))
 		})

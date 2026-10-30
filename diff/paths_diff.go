@@ -1,9 +1,6 @@
 package diff
 
 import (
-	"fmt"
-	"regexp"
-
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -37,9 +34,11 @@ func newPathsDiff() *PathsDiff {
 
 func getPathsDiff(config *Config, state *state, paths1, paths2 *openapi3.Paths) (*PathsDiff, error) {
 
-	if err := filterPaths(config.MatchPath, config.UnmatchPath, config.FilterExtension, paths1, paths2); err != nil {
+	filters, err := getFilters(config, state)
+	if err != nil {
 		return nil, err
 	}
+	filterPaths(filters, paths1, paths2)
 
 	diff, err := getPathsDiffInternal(config, state, paths1, paths2)
 	if err != nil {
@@ -60,19 +59,12 @@ func getPathsDiffInternal(config *Config, state *state, paths1, paths2 *openapi3
 	paths1Mod := rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase)
 	paths2Mod := rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision)
 
-	addedPaths, deletedPaths, otherPaths := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	added, deleted, common, pairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	result.Added = added
+	result.Deleted = deleted
 
-	for endpoint := range addedPaths.Map() {
-		result.addAddedPath(endpoint)
-	}
-
-	for endpoint := range deletedPaths.Map() {
-		result.addDeletedPath(endpoint)
-	}
-
-	for endpoint, pathItemPair := range otherPaths {
-		err := result.addModifiedPath(config, state, endpoint, pathItemPair)
-		if err != nil {
+	for _, endpoint := range common {
+		if err := result.addModifiedPath(config, state, endpoint, pairs[endpoint]); err != nil {
 			return nil, err
 		}
 	}
@@ -90,86 +82,6 @@ func (pathsDiff *PathsDiff) getSummary() *SummaryDetails {
 	}
 }
 
-func (pathsDiff *PathsDiff) addAddedPath(path string) {
-	pathsDiff.Added = append(pathsDiff.Added, path)
-}
-
-func (pathsDiff *PathsDiff) addDeletedPath(path string) {
-	pathsDiff.Deleted = append(pathsDiff.Deleted, path)
-}
-
 func (pathsDiff *PathsDiff) addModifiedPath(config *Config, state *state, path1 string, pathItemPair *pathItemPair) error {
 	return pathsDiff.Modified.addPathDiff(config, state, path1, pathItemPair)
-}
-
-func filterPaths(matchPath, unmatchPath, filterExtension string, paths1, paths2 *openapi3.Paths) error {
-
-	if err := filterPathsByName(matchPath, true, paths1, paths2); err != nil {
-		return err
-	}
-
-	if err := filterPathsByName(unmatchPath, false, paths1, paths2); err != nil {
-		return err
-	}
-
-	if err := filterPathsByExtensions(filterExtension, paths1, paths2); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func filterPathsByName(filter string, negate bool, paths1, paths2 *openapi3.Paths) error {
-	if filter == "" {
-		return nil
-	}
-
-	r, err := regexp.Compile(filter)
-	if err != nil {
-		return fmt.Errorf("failed to compile filter regex %q: %w", filter, err)
-	}
-
-	filterPathsInternal(paths1, r, negate)
-	filterPathsInternal(paths2, r, negate)
-
-	return nil
-}
-
-func filterPathsInternal(paths *openapi3.Paths, r *regexp.Regexp, negate bool) {
-	for path := range paths.Map() {
-		match := r.MatchString(path)
-		if negate {
-			match = !match
-		}
-		if match {
-			paths.Delete(path)
-		}
-	}
-}
-
-func filterPathsByExtensions(filterExtension string, paths1, paths2 *openapi3.Paths) error {
-	if filterExtension == "" {
-		return nil
-	}
-
-	r, err := regexp.Compile(filterExtension)
-	if err != nil {
-		return fmt.Errorf("failed to compile extension filter regex %q: %w", filterExtension, err)
-	}
-
-	filterPathsByExtensionInternal(paths1, r)
-	filterPathsByExtensionInternal(paths2, r)
-
-	return nil
-}
-
-func filterPathsByExtensionInternal(paths *openapi3.Paths, r *regexp.Regexp) {
-	for path, pathItem := range paths.Map() {
-		for extension := range pathItem.Extensions {
-			if r.MatchString(extension) {
-				paths.Delete(path)
-				break
-			}
-		}
-	}
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
@@ -113,8 +114,8 @@ func TestJsonFormatter_RenderChangelog_WithSources(t *testing.T) {
 			Path:      "/test",
 			Source:    &load.Source{}, // Need this to avoid nil pointer dereference
 			CommonChange: checker.CommonChange{
-				BaseSource:     checker.NewSource("base.yaml", 10, 5),
-				RevisionSource: checker.NewEmptySource(), // Empty - API was removed
+				BaseSource:     location.NewSource("base.yaml", 10, 5),
+				RevisionSource: location.NewEmptySource(), // Empty - API was removed
 			},
 		},
 	}

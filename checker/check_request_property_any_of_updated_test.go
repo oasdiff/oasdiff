@@ -228,3 +228,27 @@ func TestRequestPropertyAnyOfNoSchemaDiff(t *testing.T) {
 	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
 }
+
+// The same anyOf change in two media types is reported in the same order on
+// every run.
+func TestRequestBodyAnyOfMultiMediaTypeOrderIsStable(t *testing.T) {
+	s1, err := open("../data/checker/request_body_any_of_media_type_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/request_body_any_of_media_type_revision.yaml")
+	require.NoError(t, err)
+
+	details := func() []string {
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		var result []string
+		for _, change := range checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyAnyOfUpdatedCheck), d, osm, checker.INFO) {
+			result = append(result, change.GetId()+" "+change.(checker.ApiChange).Details)
+		}
+		return result
+	}
+
+	first := details()
+	for range 20 {
+		require.Equal(t, first, details())
+	}
+}

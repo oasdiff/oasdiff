@@ -38,6 +38,10 @@ jobs:
     - uses: actions/setup-go@v7
       with:
         go-version: ${{ matrix.go }}
+        # The cache steps below cover the same two directories, and setup-go
+        # extracts its copy first, so tar refuses to overwrite every file it
+        # already restored and the runner annotates each refusal as an error.
+        cache: false
 
     - id: go-cache-paths
       run: |

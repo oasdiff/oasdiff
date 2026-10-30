@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -18,12 +20,12 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 		if info.schemaDiff.DependentSchemasDiff != nil {
 			depSchemasDiff := info.schemaDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
-				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				revisionSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
 				result = append(result, info.newChange(RequestBodyDependentSchemaAddedId, []any{name}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, name := range depSchemasDiff.Deleted {
-				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				baseSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
 				result = append(result, info.newChange(RequestBodyDependentSchemaRemovedId, []any{name}, "").
 					WithSources(baseSource, nil))
 			}
@@ -33,15 +35,15 @@ func RequestPropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operatio
 			if p.propertyDiff.DependentSchemasDiff == nil {
 				return
 			}
-			propName := propertyFullName(p.propertyPath, p.propertyName)
+			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			depSchemasDiff := p.propertyDiff.DependentSchemasDiff
 			for _, name := range depSchemasDiff.Added {
-				revisionSource := schemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
+				revisionSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Revision, depSchemasDiff.Revision, name)
 				result = append(result, p.newChange(RequestPropertyDependentSchemaAddedId, []any{name, propName}, "").
 					WithSources(nil, revisionSource))
 			}
 			for _, name := range depSchemasDiff.Deleted {
-				baseSource := schemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
+				baseSource := location.SchemaMapItemSource(operationsSources, info.operationItem.Base, depSchemasDiff.Base, name)
 				result = append(result, p.newChange(RequestPropertyDependentSchemaRemovedId, []any{name, propName}, "").
 					WithSources(baseSource, nil))
 			}

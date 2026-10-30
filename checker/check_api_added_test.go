@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )
@@ -40,7 +41,7 @@ func TestApiAdded_DetectsNewPathsAndNewOperations(t *testing.T) {
 	require.Equal(t, "GET", e1.Operation)
 	require.Equal(t, "/api/test3", e1.Path)
 	require.Empty(t, e1.GetBaseSource())
-	require.Equal(t, checker.NewSource("../data/new_endpoints/revision.yaml", 27, 5).WithEnd(30, 26), e1.GetRevisionSource())
+	require.Equal(t, location.NewSource("../data/new_endpoints/revision.yaml", 27, 5).WithEnd(30, 26), e1.GetRevisionSource())
 }
 
 // new paths or path operations
@@ -65,5 +66,5 @@ func TestApiAdded_DetectsModifiedPathsWithPathParam(t *testing.T) {
 	require.Equal(t, "POST", e0.Operation)
 	require.Equal(t, "/api/test/{id}", e0.Path)
 	require.Empty(t, e0.GetBaseSource())
-	require.Equal(t, checker.NewSource("../data/new_endpoints/revision_with_path_param.yaml", 15, 5).WithEnd(18, 26), e0.GetRevisionSource())
+	require.Equal(t, location.NewSource("../data/new_endpoints/revision_with_path_param.yaml", 15, 5).WithEnd(18, 26), e0.GetRevisionSource())
 }

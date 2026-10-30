@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
@@ -18,8 +19,8 @@ var apiChange = checker.ApiChange{
 	Path:        "/test",
 	Source:      load.NewSource("source"),
 	CommonChange: checker.CommonChange{
-		BaseSource:     checker.NewSource("base.yaml", 10, 5),
-		RevisionSource: checker.NewSource("revision.yaml", 12, 7),
+		BaseSource:     location.NewSource("base.yaml", 10, 5),
+		RevisionSource: location.NewSource("revision.yaml", 12, 7),
 	},
 	SourceFile:      "sourceFile",
 	SourceLine:      1,
@@ -84,4 +85,51 @@ func TestApiChange_MultiLineError_NoComment(t *testing.T) {
 	apiChangeNoComment.Comment = ""
 
 	require.Equal(t, "error\t[change_id] at source\n\tin API GET /test\n\t\tThis is a breaking change.", apiChangeNoComment.MultiLineError(MockLocalizer, checker.ColorNever))
+}
+
+func TestApiChange_SourceFile(t *testing.T) {
+	apiChangeSourceFile := apiChange
+	apiChangeSourceFile.SourceFile = ""
+	apiChangeSourceFile.Source = load.NewSource("spec.yaml")
+
+	require.Equal(t, "spec.yaml", apiChangeSourceFile.GetSourceFile())
+}
+
+func TestApiChange_SourceUrl(t *testing.T) {
+	apiChangeSourceFile := apiChange
+	apiChangeSourceFile.SourceFile = ""
+	apiChangeSourceFile.Source = load.NewSource("http://google.com/spec.yaml")
+
+	require.Equal(t, "", apiChangeSourceFile.GetSourceFile())
+}
+
+func TestApiChangeWithSources_DirectConstruction(t *testing.T) {
+	// Test direct construction of ApiChange with BaseSource and RevisionSource
+	baseSource := location.NewSource("base.yaml", 10, 5)
+	revisionSource := location.NewSource("revision.yaml", 12, 7)
+
+	change := checker.ApiChange{
+		Id:        "test-id",
+		Args:      []any{"arg1"},
+		Comment:   "test comment",
+		Level:     checker.INFO,
+		Operation: "GET",
+		Path:      "/test",
+		CommonChange: checker.CommonChange{
+			BaseSource:     baseSource,
+			RevisionSource: revisionSource,
+		},
+	}
+
+	// Test that the new fields are set correctly
+	require.Equal(t, baseSource, change.GetBaseSource())
+	require.Equal(t, revisionSource, change.GetRevisionSource())
+	require.NotEmpty(t, change.GetBaseSource())
+	require.NotEmpty(t, change.GetRevisionSource())
+	require.Equal(t, "base.yaml", change.GetBaseSource().File)
+	require.Equal(t, 10, change.GetBaseSource().Line)
+	require.Equal(t, 5, change.GetBaseSource().Column)
+	require.Equal(t, "revision.yaml", change.GetRevisionSource().File)
+	require.Equal(t, 12, change.GetRevisionSource().Line)
+	require.Equal(t, 7, change.GetRevisionSource().Column)
 }

@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +17,7 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if maxLengthDiff := info.schemaDiff.MaxLengthDiff; maxLengthDiff != nil &&
 			maxLengthDiff.From != nil && maxLengthDiff.To == nil {
-			baseSource, _ := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
+			baseSource, _ := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxLength")
 			result = append(result, info.newChange(
 				ResponseBodyMaxLengthUnsetId,
 				[]any{maxLengthDiff.From},
@@ -29,10 +31,10 @@ func ResponsePropertyMaxLengthUnsetCheck(diffReport *diff.Diff, operationsSource
 				return
 			}
 
-			propBaseSource, _ := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
+			propBaseSource, _ := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxLength")
 			result = append(result, p.newChange(
 				ResponsePropertyMaxLengthUnsetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), maxLengthDiff.From, info.responseStatus},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), maxLengthDiff.From, info.responseStatus},
 				"",
 			).WithSources(propBaseSource, nil))
 		})

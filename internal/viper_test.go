@@ -141,7 +141,7 @@ func TestViper_InvalidExcludeElements(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid exclude-elements \"invalid\", allowed values: examples, description, endpoints, title, summary, extensions")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid exclude-elements \"invalid\", allowed values: examples, description, endpoints, title, summary, extensions, tags")
 }
 
 func TestViper_InvalidSeverity(t *testing.T) {
@@ -163,7 +163,7 @@ func TestViper_InvalidTags(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid tags \"invalid\", allowed values: request, response, add, remove, set, unset, change, increase, decrease, widens, narrows, schema, parameters, requestBody, responses, paths, headers, security, tags, components, existence, requiredness, mutability, type, constraints, values, structure, lifecycle, read-only, write-only, sanctioned, non-success, has-default, negotiated, generated, hand-written")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid tags \"invalid\", allowed values: request, response, add, remove, set, unset, change, increase, decrease, widens, narrows, schema, parameters, requestBody, responses, paths, headers, security, tags, components, existence, requiredness, mutability, type, constraints, values, structure, lifecycle, read-only, write-only, sanctioned, non-success, has-default, negotiated, required-in-requests, generated, hand-written")
 }
 
 func TestViper_ValidTags(t *testing.T) {

@@ -3,7 +3,9 @@ package checker
 import (
 	"sync"
 
+	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/rules"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -275,7 +277,7 @@ func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *di
 	info.walkProperties(func(p propertyInfo) {
 		result = append(result, boundSchemaChanges(p.propertyDiff, direction, "property", operationsSources, info.operationItem,
 			func(values []any) []any {
-				args := append([]any{propertyFullName(p.propertyPath, p.propertyName)}, values...)
+				args := append([]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, values...)
 				if direction == DirectionResponse {
 					args = append(args, info.responseStatus)
 				}
@@ -313,7 +315,7 @@ func boundSchemaChanges(
 			continue
 		}
 		effect, _ := boundEffect(spec.polarity, action)
-		baseSource, revisionSource := SchemaFieldSources(operationsSources, methodDiff, schemaDiff, spec.keyword)
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, methodDiff, schemaDiff, spec.keyword)
 		result = append(result, newChange(
 			id,
 			args(values),

@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +17,7 @@ func RequestPropertyMaxPropertiesSetCheck(diffReport *diff.Diff, operationsSourc
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if maxPropertiesDiff := info.schemaDiff.MaxPropsDiff; maxPropertiesDiff != nil &&
 			maxPropertiesDiff.From == nil && maxPropertiesDiff.To != nil {
-			_, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxProperties")
+			_, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "maxProperties")
 			result = append(result, info.newChange(
 				RequestBodyMaxPropertiesSetId,
 				[]any{maxPropertiesDiff.To},
@@ -29,10 +31,10 @@ func RequestPropertyMaxPropertiesSetCheck(diffReport *diff.Diff, operationsSourc
 				return
 			}
 
-			_, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
+			_, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "maxProperties")
 			result = append(result, p.newChange(
 				RequestPropertyMaxPropertiesSetId,
-				[]any{propertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.To},
+				[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), maxPropertiesDiff.To},
 				boundSetComment,
 			).WithSources(nil, propRevisionSource))
 		})

@@ -4,11 +4,15 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
 	RequestPropertyRemovedId                = "request-property-removed"
+	RequestPropertyRemovedWithDeprecationId = "request-property-removed-with-deprecation"
+	RequestPropertyRemovedBeforeSunsetId    = "request-property-removed-before-sunset"
 	NewRequiredRequestPropertyId            = "new-required-request-property"
 	NewRequiredRequestPropertyWithDefaultId = "new-required-request-property-with-default"
 	NewOptionalRequestPropertyId            = "new-optional-request-property"
@@ -51,10 +55,9 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 			result = append(result, info.newChange(id, nil, comment).WithSources(nil, nil))
 		}
 
-		// checkDeletedPropertiesDiff / checkAddedPropertiesDiff handle the
-		// added/removed property sides — different from info.walkProperties,
-		// which delegates to checkModifiedPropertiesDiff. Used directly here.
-		checkDeletedPropertiesDiff(
+		// info.walkProperties reports modified properties only, so the added
+		// and removed ones are walked here.
+		schemawalk.DeletedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if propertyItem.ReadOnly {
@@ -69,23 +72,29 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					return
 				}
 
-				baseSource := propertySource(operationsSources, info.operationItem.Base, propertyItem)
+				id, args := propertyRemovalId(propertyItem, []any{schemawalk.PropertyFullName(propertyPath, propertyName)},
+					RequestPropertyRemovedId, RequestPropertyRemovedWithDeprecationId, RequestPropertyRemovedBeforeSunsetId)
+				if id == "" {
+					return
+				}
+
+				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
-					RequestPropertyRemovedId,
-					[]any{propertyFullName(propertyPath, propertyName)},
+					id,
+					args,
 					"",
-				).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
 			})
 
-		checkAddedPropertiesDiff(
+		schemawalk.AddedProperties(
 			info.schemaDiff,
 			func(propertyPath string, propertyName string, propertyItem *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {
 				if propertyItem.ReadOnly {
 					return
 				}
 
-				propName := propertyFullName(propertyPath, propertyName)
-				revisionSource := propertySource(operationsSources, info.operationItem.Revision, propertyItem)
+				propName := schemawalk.PropertyFullName(propertyPath, propertyName)
+				revisionSource := location.PropertySource(operationsSources, info.operationItem.Revision, propertyItem)
 
 				if slices.Contains(parent.Revision.Required, propertyName) {
 					if propertyItem.Default == nil {
@@ -93,20 +102,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 							NewRequiredRequestPropertyId,
 							[]any{propName},
 							"",
-						).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							RequiredRequestPropertyWithDefaultCommentId,
-						).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
 						"",
-					).WithSchema(parent).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+					).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
 				}
 			})
 	})

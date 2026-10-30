@@ -330,8 +330,8 @@ func Test_ChangelogWithAttributes(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/openapi-test1.yaml ../data/openapi-test3.yaml --attributes x-beta,x-extension-test -f yaml"), &stdout, io.Discard))
 	cl := formatters.Changes{}
 	require.NoError(t, yaml.Unmarshal(stdout.Bytes(), &cl))
-	require.Len(t, cl, 22)
-	require.Equal(t, map[string]any{"x-beta": true, "x-extension-test": any(nil)}, cl[14].Attributes)
+	require.Len(t, cl, 26)
+	require.Equal(t, map[string]any{"x-beta": true, "x-extension-test": any(nil)}, cl[15].Attributes)
 }
 
 func Test_BreakingChangesChangelogOptionalCheckersAreInfoLevel(t *testing.T) {
@@ -400,7 +400,7 @@ func Test_UpgradeCmdProducesCanonicalForm(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/simple-30.yaml"), &stdout, io.Discard))
 	out := stdout.String()
 	// Version-string bump.
-	require.Contains(t, out, "openapi: 3.2.0")
+	require.Contains(t, out, "openapi: 3.2.1")
 	// nullable: true -> type array including "null".
 	require.Contains(t, out, "- \"null\"")
 	require.NotContains(t, out, "nullable: true")
@@ -415,7 +415,7 @@ func Test_UpgradeCmdAlreadyCurrent(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/already-31.yaml"), &stdout, io.Discard))
 	out := stdout.String()
-	require.Contains(t, out, "openapi: 3.2.0")
+	require.Contains(t, out, "openapi: 3.2.1")
 	require.Contains(t, out, "title: already-31")
 }
 
@@ -424,7 +424,7 @@ func Test_UpgradeCmdJsonFormat(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff upgrade ../data/upgrade/simple-30.yaml --format json"), &stdout, io.Discard))
 	var doc map[string]any
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &doc))
-	require.Equal(t, "3.2.0", doc["openapi"])
+	require.Equal(t, "3.2.1", doc["openapi"])
 }
 
 func Test_UpgradeCmdInvalid(t *testing.T) {
@@ -476,7 +476,7 @@ func Test_ColorWithNonTextFormat(t *testing.T) {
 func Test_InvalidEnumValue(t *testing.T) {
 	var stderr bytes.Buffer
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml --exclude-elements xxx"), io.Discard, &stderr))
-	require.Equal(t, `Error: invalid argument "xxx" for "-e, --exclude-elements" flag: xxx is not one of the allowed values: description, endpoints, examples, extensions, summary, or title
+	require.Equal(t, `Error: invalid argument "xxx" for "-e, --exclude-elements" flag: xxx is not one of the allowed values: description, endpoints, examples, extensions, summary, tags, or title
 `, stderr.String())
 }
 

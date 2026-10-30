@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -43,7 +45,7 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 		if !typeDiff.Empty() || !formatDiff.Empty() {
 			id, comment := requestTypeChangeId(typeDiff, formatDiff, isStronglyTyped(info.mediaType), TypeChangeLooselyTypedCommentId, schemaDiff,
 				RequestBodyTypeGeneralizedId, RequestBodyTypeCompatibleId, RequestBodyTypeChangedId)
-			baseSource, revisionSource := SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, schemaDiff, "type")
 			result = append(result, info.newChange(
 				id,
 				[]any{getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff)},
@@ -63,10 +65,10 @@ func RequestPropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *d
 			if !propTypeDiff.Empty() || !propFormatDiff.Empty() {
 				id, comment := requestTypeChangeId(propTypeDiff, propFormatDiff, isStronglyTyped(info.mediaType), TypeChangeLooselyTypedCommentId, propSchemaDiff,
 					RequestPropertyTypeGeneralizedId, RequestPropertyTypeCompatibleId, RequestPropertyTypeChangedId)
-				propBaseSource, propRevisionSource := SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "type")
 				result = append(result, p.newChange(
 					id,
-					[]any{propertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff)},
+					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), getTypeFormatDimension(propSchemaDiff), getBaseTypeFormat(propSchemaDiff), getRevisionTypeFormat(propSchemaDiff)},
 					comment,
 				).WithSources(propBaseSource, propRevisionSource))
 			}
