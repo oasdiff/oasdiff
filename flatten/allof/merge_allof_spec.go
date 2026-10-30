@@ -51,7 +51,12 @@ func writeBack(spec *openapi3.T, state *state) {
 			}
 			merged = replacement
 		}
+		// The merged schema is assembled from the branches, so it has no
+		// origin of its own. Keep the origin of the schema that held the
+		// allOf, which is where a reader looks for the merged result.
+		origin := original.Origin
 		*original = *merged
+		original.Origin = origin
 		if hint, ok := state.hints[merged]; ok {
 			state.hints[original] = hint
 		}
