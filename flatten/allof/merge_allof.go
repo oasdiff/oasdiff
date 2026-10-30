@@ -19,6 +19,7 @@ const (
 	ConstErrorMessage            = "unable to resolve Const conflict: all Const values must be identical"
 	ContentMediaTypeErrorMessage = "unable to resolve ContentMediaType conflict: all ContentMediaType values must be identical"
 	ContentEncodingErrorMessage  = "unable to resolve ContentEncoding conflict: all ContentEncoding values must be identical"
+	EnumErrorMessage             = "unable to resolve Enum conflict: intersection of values must be non-empty"
 
 	FormatInt32  = "int32"
 	FormatInt64  = "int64"
@@ -1086,7 +1087,7 @@ func resolveEnum(values [][]any) ([]any, error) {
 	}
 	intersection := findIntersectionOfArrays(enums)
 	if len(intersection) == 0 {
-		return nil, errors.New("unable to resolve Enum conflict: intersection of values must be non-empty")
+		return nil, errors.New(EnumErrorMessage)
 	}
 	return intersection, nil
 }

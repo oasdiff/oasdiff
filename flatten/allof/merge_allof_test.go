@@ -1428,7 +1428,7 @@ func TestMerge_EnumNoIntersection(t *testing.T) {
 					},
 				},
 			}})
-	require.Error(t, err)
+	require.EqualError(t, err, allof.EnumErrorMessage)
 }
 
 // an explicit empty enum permits no value, so it conflicts with every other
@@ -1452,7 +1452,7 @@ func TestMerge_EnumEmpty(t *testing.T) {
 					},
 				},
 			}})
-	require.Error(t, err)
+	require.EqualError(t, err, allof.EnumErrorMessage)
 }
 
 // a branch with no enum is unconstrained, so it leaves the other branch's
