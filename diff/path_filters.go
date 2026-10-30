@@ -26,10 +26,10 @@ func getFilters(config *Config, state *state) (*pathFilters, error) {
 	filters := &pathFilters{}
 
 	var err error
-	if filters.matchPath, err = compileFilter(config.MatchPath, "filter"); err != nil {
+	if filters.matchPath, err = compileFilter(config.MatchPath, "match-path filter"); err != nil {
 		return nil, err
 	}
-	if filters.unmatchPath, err = compileFilter(config.UnmatchPath, "filter"); err != nil {
+	if filters.unmatchPath, err = compileFilter(config.UnmatchPath, "unmatch-path filter"); err != nil {
 		return nil, err
 	}
 	if filters.extension, err = compileFilter(config.FilterExtension, "extension filter"); err != nil {
