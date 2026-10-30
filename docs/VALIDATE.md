@@ -46,10 +46,43 @@ All findings are reported in one pass (multi-error), not just the first one.
 Every finding comes from the OpenAPI / JSON Schema rules, but they are classified by impact:
 
 - **error** — the spec can't be reliably consumed: missing required fields, unresolved `$ref`s, invalid types, malformed paths, and similar structural breaks. Also `duplicate-operation-id`, since a non-unique operationId breaks code generators.
-- **warning** — structurally valid but a real risk: a 3.1-only field in an older doc, `$ref` siblings that are silently ignored, conflicting paths, duplicate parameters, a `default` value that doesn't match its schema, duplicate enum values (JSON Schema says enum entries SHOULD be unique; a duplicate usually signals a copy-paste error), and a parameter whose `type` union mixes a structured type with a scalar (`type: [array, integer]` has no well-defined serialization: a server cannot tell whether `?token=5` is `["5"]` or `5`).
+- **warning** — structurally valid but a real risk: a 3.1-only field in an older doc, `$ref` siblings that are silently ignored, conflicting paths, duplicate parameters, a `default` value that doesn't match its schema, duplicate enum values (JSON Schema says enum entries SHOULD be unique; a duplicate usually signals a copy-paste error), a parameter whose `type` union mixes a structured type with a scalar (`type: [array, integer]` has no well-defined serialization: a server cannot tell whether `?token=5` is `["5"]` or `5`), and, under `--flatten-allof`, subschemas that cannot be merged.
 - **info** — informational only: an `example` that doesn't match its schema (the contract itself is valid).
 
 `--fail-on` decides which severities fail the command (see Exit codes). The classification is currently fixed; per-rule customization may be added later.
+
+## Merging allOf
+
+Some rules only break once `allOf` combines its subschemas, and `validate` checks each schema as written. In OpenAPI 3.0 a property must not be both `readOnly` and `writeOnly`, which `validate` reports when one schema sets both. Split across `allOf`, nothing is reported:
+
+```yaml
+name:
+  allOf:
+    - {type: string, readOnly: true}
+    - {writeOnly: true}
+```
+
+The property has both flags all the same, since JSON Schema treats a flag as true when any applicable subschema sets it. `--flatten-allof` merges the subschemas first (see [Merging allOf](ALLOF.md)), so the rules see the schema a payload is validated against:
+
+```bash
+oasdiff validate --flatten-allof openapi.yaml
+```
+
+```
+error	[read-only-write-only-mutually-exclusive] at openapi.yaml:11:9
+	a property MUST NOT be marked as both readOnly and writeOnly being true
+```
+
+The finding is reported at the schema that holds the `allOf`, since the merged schema has no line of its own.
+
+Some combinations cannot be merged: the subschemas may contradict each other, so no payload satisfies them all, or the merge may have no rule for the combination. That is reported as an `allof-subschemas-conflict` warning naming the conflict, and the spec is then validated as written:
+
+```
+warning	[allof-subschemas-conflict] at openapi.yaml
+	subschemas under allOf cannot be merged, so the merged schema was not validated: unable to resolve Type conflict: all Type values must be identical
+```
+
+Only `allOf` is merged. The branches of `anyOf` and `oneOf` are alternatives, so a flag in one branch does not combine with a flag in another.
 
 ## Flags
 
@@ -59,6 +92,7 @@ Every finding comes from the OpenAPI / JSON Schema rules, but they are classifie
 | `-o, --fail-on` | `ERR` | exit with code 1 when a finding has this severity or higher: `ERR`, `WARN`, or `INFO` |
 | `--color` | `auto` | when to colorize text output: `auto`, `always`, `never` |
 | `--allow-external-refs` | `true` | resolve external `$ref`s; set to `false` to prevent SSRF when validating untrusted specs |
+| `--flatten-allof` | `false` | merge subschemas under `allOf` before validating (see Merging allOf) |
 
 ## Exit codes
 

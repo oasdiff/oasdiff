@@ -6,7 +6,9 @@ import (
 	"io"
 	"testing"
 
+	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/internal"
+	"github.com/oasdiff/oasdiff/validate"
 	"github.com/stretchr/testify/require"
 	"go.yaml.in/yaml/v3"
 )
@@ -690,4 +692,75 @@ func Test_ValidateCmd_WriteOnlyOnlyInResponses(t *testing.T) {
 	src := findings[0]["source"].(map[string]any)
 	require.Equal(t, 18, src["line"], "should pin the writeOnly flag line")
 	require.Equal(t, 21, src["column"])
+}
+
+// Some rules only break once allOf combines the subschemas. Validate checks
+// each schema as written, so without --flatten-allof it sees neither flag
+// beside the other and reports nothing; with the flag it reports the
+// combination, at the property holding the allOf.
+func Test_ValidateCmd_FlattenAllOf_ReportsASplitCombination(t *testing.T) {
+	const fixture = "../data/validate/allof-split-flags.yaml"
+
+	var asWritten bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff validate "+fixture), &asWritten, io.Discard))
+	require.Contains(t, asWritten.String(), "No findings detected")
+
+	var merged bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json --flatten-allof "+fixture), &merged, io.Discard))
+
+	findings := decodeFindings(t, &merged)
+	require.Len(t, findings, 1)
+	require.Equal(t, "read-only-write-only-mutually-exclusive", findings[0].Id)
+	require.Equal(t, checker.ERR, findings[0].Level)
+	// line 11, column 9 is the `name:` property that holds the allOf
+	require.Equal(t, 11, findings[0].Source.Line)
+	require.Equal(t, 9, findings[0].Source.Column)
+}
+
+// --flatten is the hidden synonym for --flatten-allof, so it merges too.
+func Test_ValidateCmd_FlattenSynonym(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --flatten ../data/validate/allof-split-flags.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "read-only-write-only-mutually-exclusive")
+}
+
+// Subschemas that cannot be merged are a finding, not a failure to load: the
+// spec parsed, so the rules still have the spec as written to check.
+func Test_ValidateCmd_FlattenAllOf_MergeFailureIsAFinding(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json --fail-on WARN --flatten-allof ../data/validate/allof-conflict.yaml"), &stdout, io.Discard))
+
+	findings := decodeFindings(t, &stdout)
+	require.Len(t, findings, 1)
+	require.Equal(t, validate.AllOfConflictID, findings[0].Id)
+	require.Equal(t, checker.WARN, findings[0].Level)
+	require.Contains(t, findings[0].Text, "unable to resolve Type conflict")
+	require.Equal(t, "../data/validate/allof-conflict.yaml", findings[0].Source.File)
+}
+
+// A merge failure does not fail the command on its own: the default --fail-on
+// is error, and the finding is a warning.
+func Test_ValidateCmd_FlattenAllOf_MergeFailureDoesNotFailByDefault(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff validate --flatten-allof ../data/validate/allof-conflict.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), validate.AllOfConflictID)
+}
+
+type decodedFinding struct {
+	Id     string        `json:"id"`
+	Text   string        `json:"text"`
+	Level  checker.Level `json:"level"`
+	Source struct {
+		File   string `json:"file"`
+		Line   int    `json:"line"`
+		Column int    `json:"column"`
+	} `json:"source"`
+}
+
+func decodeFindings(t *testing.T, stdout *bytes.Buffer) []decodedFinding {
+	t.Helper()
+
+	var findings []decodedFinding
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	return findings
 }
