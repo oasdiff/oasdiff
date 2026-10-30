@@ -30,10 +30,7 @@ import (
 // symmetryWaivers records every intentional asymmetry. Key is the canonical
 // absence string emitted by symmetryAbsences; value is why it is acceptable.
 // Removing a real check, or adding one that fills a gap, must update this map.
-var symmetryWaivers = map[string]string{
-	"add<->remove request/schema/lifecycle missing-remove":  "deprecation rules claim x-* add/change (sunset annotations appearing or changing); deleting a property-level sunset has no check yet, unlike the operation-level sunset-deleted.",
-	"add<->remove response/schema/lifecycle missing-remove": "same as the request side: property-level sunset deletion is unchecked.",
-}
+var symmetryWaivers = map[string]string{}
 
 // symmetryAbsences returns the canonical key for every coordinate that is
 // populated on one side of a symmetry axis but completely empty on the mirror.

@@ -127,6 +127,9 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedInvalidId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.deprecated:set", "paths.*.*.requestBody.content.*.schema.x-*:add,change"),
 		newBackwardCompatibilityRule(RequestPropertyReactivatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.requestBody.content.*.schema.deprecated:unset"),
 		newBackwardCompatibilityRule(RequestPropertySunsetDateTooSmallId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.deprecated:set", "paths.*.*.requestBody.content.*.schema.x-*:add,change"),
+		// RequestPropertySunsetChangedCheck
+		newBackwardCompatibilityRule(RequestPropertySunsetDeletedId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:remove"),
+		newBackwardCompatibilityRule(RequestPropertySunsetDateChangedTooSmallId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
 		// Response property deprecation checks
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set"),
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedWithSunsetId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set"),
@@ -134,6 +137,9 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedInvalidId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set", "paths.*.*.responses.*.content.*.schema.x-*:add,change"),
 		newBackwardCompatibilityRule(ResponsePropertyReactivatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:unset"),
 		newBackwardCompatibilityRule(ResponsePropertySunsetDateTooSmallId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set", "paths.*.*.responses.*.content.*.schema.x-*:add,change"),
+		// ResponsePropertySunsetChangedCheck
+		newBackwardCompatibilityRule(ResponsePropertySunsetDeletedId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:remove"),
+		newBackwardCompatibilityRule(ResponsePropertySunsetDateChangedTooSmallId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:change"),
 		// APIAddedCheck
 		newBackwardCompatibilityRule(EndpointAddedId, INFO, APIAddedCheck, DirectionNone, AreaPaths, KindExistence, EffectWidens, nil, "paths.*:add", "paths.*.*:add"),
 		// APIComponentsSecurityUpdatedCheck

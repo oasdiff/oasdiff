@@ -118,6 +118,8 @@ request-property-deprecated-sunset-missing: "поле запроса %s уста
 request-property-deprecated-sunset-invalid: "поле запроса %s устарело с недействительной датой прекращения: %s"
 request-property-reactivated: "поле запроса %s реактивировано"
 request-property-sunset-date-too-small: "дата прекращения %s поля запроса %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
+request-property-sunset-deleted: "дата прекращения действия поля запроса %s удалена, но deprecated=true сохранено"
+request-property-sunset-date-changed-too-small: "дата прекращения действия поля запроса %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента"
 request-property-became-required: поле запроса %s стало обязательным
 request-property-became-required-with-default: свойство запроса %s стало обязательным со значением по умолчанию
 request-property-became-optional: поле запроса %s стало необязательным
@@ -195,6 +197,8 @@ response-property-deprecated-sunset-missing: "поле ответа %s уста�
 response-property-deprecated-sunset-invalid: "поле ответа %s устарело с недействительной датой прекращения: %s"
 response-property-reactivated: "поле ответа %s реактивировано"
 response-property-sunset-date-too-small: "дата прекращения %s поля ответа %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
+response-property-sunset-deleted: "дата прекращения действия поля ответа %s удалена, но deprecated=true сохранено"
+response-property-sunset-date-changed-too-small: "дата прекращения действия поля ответа %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента"
 response-property-became-optional: поле ответа %s стало необязательным для ответа со статусом %s
 response-property-became-nullable: поле ответа %s стало обнуляемым для ответа со статусом %s
 response-body-became-nullable: у тела ответа стало обнуляемым
@@ -1080,6 +1084,8 @@ request-property-deprecated-sunset-missing-description: свойство зап�
 request-property-deprecated-with-sunset-description: свойство запроса устарело с датой прекращения действия
 request-property-reactivated-description: свойство запроса реактивировано (устаревание установлено в false)
 request-property-sunset-date-too-small-description: свойство запроса устарело до минимального требуемого количества дней устаревания
+request-property-sunset-deleted-description: дата прекращения действия свойства запроса удалена, но свойство остается устаревшим
+request-property-sunset-date-changed-too-small-description: измененная дата прекращения действия свойства запроса не соответствует минимальному требуемому количеству дней устаревания
 response-media-type-name-changed-description: изменен медиа-тип ответа
 response-media-type-name-generalized-description: медиа-тип ответа изменен на более общий
 response-media-type-name-specialized-description: медиа-тип ответа изменен на более конкретный
@@ -1089,6 +1095,8 @@ response-property-deprecated-sunset-missing-description: свойство отв
 response-property-deprecated-with-sunset-description: свойство ответа устарело с датой прекращения действия
 response-property-reactivated-description: свойство ответа реактивировано (устаревание установлено в false)
 response-property-sunset-date-too-small-description: свойство ответа устарело до минимального требуемого количества дней устаревания
+response-property-sunset-deleted-description: дата прекращения действия свойства ответа удалена, но свойство остается устаревшим
+response-property-sunset-date-changed-too-small-description: измененная дата прекращения действия свойства ответа не соответствует минимальному требуемому количеству дней устаревания
 # media type schema existence (#1050)
 request-body-media-type-schema-added: схема добавлена к типу медиа %s тела запроса
 request-body-media-type-schema-removed: схема удалена из типа медиа %s тела запроса

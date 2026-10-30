@@ -41,12 +41,16 @@ request-property-deprecated-sunset-missing: "request property %s deprecated with
 request-property-deprecated-sunset-invalid: "request property %s deprecated with invalid sunset date: %s"
 request-property-reactivated: "request property %s reactivated"
 request-property-sunset-date-too-small: "request property %s sunset date %s is too small, must be at least %s days from now"
+request-property-sunset-deleted: "request property %s sunset date deleted, but deprecated=true kept"
+request-property-sunset-date-changed-too-small: "request property %s sunset date changed to an earlier date, from %s to %s, new sunset date must be not earlier than %s and at least %s days from now"
 response-property-deprecated: "response property %s deprecated"
 response-property-deprecated-with-sunset: "response property %s deprecated with sunset date %s"
 response-property-deprecated-sunset-missing: "response property %s deprecated without sunset date"
 response-property-deprecated-sunset-invalid: "response property %s deprecated with invalid sunset date: %s"
 response-property-reactivated: "response property %s reactivated"
 response-property-sunset-date-too-small: "response property %s sunset date %s is too small, must be at least %s days from now"
+response-property-sunset-deleted: "response property %s sunset date deleted, but deprecated=true kept"
+response-property-sunset-date-changed-too-small: "response property %s sunset date changed to an earlier date, from %s to %s, new sunset date must be not earlier than %s and at least %s days from now"
 api-path-removed-without-deprecation: api path removed without deprecation
 api-path-removed-with-deprecation: api path removed with deprecation
 api-path-removed-before-sunset: api path removed before the sunset date %s
@@ -1088,6 +1092,8 @@ request-property-deprecated-sunset-missing-description: request property depreca
 request-property-deprecated-with-sunset-description: request property deprecated with sunset date
 request-property-reactivated-description: request property reactivated (deprecation set to false)
 request-property-sunset-date-too-small-description: deprecated request property sunset before min required deprecation days
+request-property-sunset-deleted-description: request property sunset date deleted while still deprecated
+request-property-sunset-date-changed-too-small-description: request property sunset date moved below min required deprecation days
 response-media-type-name-changed-description: response media type changed
 response-media-type-name-generalized-description: response media type changed to a more general type
 response-media-type-name-specialized-description: response media type changed to a more specific type
@@ -1097,6 +1103,8 @@ response-property-deprecated-sunset-missing-description: response property depre
 response-property-deprecated-with-sunset-description: response property deprecated with sunset date
 response-property-reactivated-description: response property reactivated (deprecation set to false)
 response-property-sunset-date-too-small-description: deprecated response property sunset before min required deprecation days
+response-property-sunset-deleted-description: response property sunset date deleted while still deprecated
+response-property-sunset-date-changed-too-small-description: response property sunset date moved below min required deprecation days
 # media type schema existence (#1050)
 request-body-media-type-schema-added: added a schema to the media type %s of the request body
 request-body-media-type-schema-removed: removed the schema from the media type %s of the request body
