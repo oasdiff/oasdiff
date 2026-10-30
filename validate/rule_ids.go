@@ -15,6 +15,7 @@ var ruleIDs = []string{
 	"additional-operations-fixed-method-case",
 	"additional-operations-invalid-method",
 	"additional-properties-both-forms-exclusive",
+	"allof-subschemas-conflict",
 	"ambiguous-parameter-serialization",
 	"anchor-field-for-3-1-plus",
 	"authorization-url-forbidden",
@@ -137,6 +138,7 @@ var ruleIDs = []string{
 // oasdiff-native lints and the unknown-error fallback. Kept apart so
 // TestRuleIDs_MatchKinCatalog can assert ruleIDs == kin's codes ∪ these.
 var nativeRuleIDs = []string{
+	AllOfConflictID,
 	AmbiguousParameterSerializationID,
 	DuplicateEnumValueID,
 	RequiredWithDefaultID,

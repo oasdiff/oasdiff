@@ -23,7 +23,7 @@ In order to reduce such false-positives, oasdiff supports the ability to replace
 oasdiff breaking data/allof/simple.yaml data/allof/revision.yaml --flatten-allof
 ```
 In this case no breaking changes are reported, correctly.  
-The `--flatten-allof` flag is also supported with `diff`, `changelog` and `summary`.
+The `--flatten-allof` flag is also supported with `diff`, `changelog`, `summary` and `validate`.
 
 In order to see how oasdiff merges allOf, you can use the dedicated `flatten` command:
 ```
@@ -32,6 +32,8 @@ oasdiff flatten data/allof/simple.yaml
 
 ## Source location limitations
 When using `--flatten-allof`, source locations (file, line, column) are not available for changes detected in flattened schemas. This is because the merged schema is a new construct that doesn't correspond to a single location in the original file.
+
+A merged schema does keep the origin of the schema that held the `allOf`, which is the location `oasdiff validate --flatten-allof` reports for a finding on a merged schema.
 
 The following schema fields are not merged:
 - Extensions

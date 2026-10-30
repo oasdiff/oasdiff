@@ -96,6 +96,7 @@ var ruleDescriptions = map[string]string{
 	"required-with-default":                 "a required parameter or property also has a default, which is never used",
 	"write-only-property-only-in-responses": "a writeOnly property is only reachable from the response side, where it never appears",
 	"ambiguous-parameter-serialization":     "parameter type mixes a structured type with a scalar, so its serialization is ambiguous",
+	"allof-subschemas-conflict":             "subschemas under allOf cannot be merged, so the merged schema was not validated",
 
 	// Examples and links
 	"example-examples-mutually-exclusive":           "example and examples are both set",
