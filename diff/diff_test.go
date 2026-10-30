@@ -617,12 +617,17 @@ func TestFilterPathsByExtension(t *testing.T) {
 
 func TestFilterByInvalidRegex(t *testing.T) {
 	_, err := diff.Get(&diff.Config{MatchPath: "["}, l(t, 1), l(t, 2))
-	require.EqualError(t, err, "failed to compile filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+	require.EqualError(t, err, "failed to compile match-path filter regex \"[\": error parsing regexp: missing closing ]: `[`")
 }
 
 func TestFilterByInvalidInvertedRegex(t *testing.T) {
 	_, err := diff.Get(&diff.Config{UnmatchPath: "["}, l(t, 1), l(t, 2))
-	require.EqualError(t, err, "failed to compile filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+	require.EqualError(t, err, "failed to compile unmatch-path filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+}
+
+func TestFilterByInvalidExtensionRegex(t *testing.T) {
+	_, err := diff.Get(&diff.Config{FilterExtension: "["}, l(t, 1), l(t, 2))
+	require.EqualError(t, err, "failed to compile extension filter regex \"[\": error parsing regexp: missing closing ]: `[`")
 }
 
 func TestFilterOperationssByExtension(t *testing.T) {
