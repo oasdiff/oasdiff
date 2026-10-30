@@ -2,7 +2,6 @@ package diff
 
 import (
 	"maps"
-	"regexp"
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -127,24 +126,4 @@ func (operationsDiff *OperationsDiff) diffOperation(config *Config, state *state
 	}
 
 	return nil
-}
-
-func filterOperationsByExtensions(r *regexp.Regexp, pathItemPair *pathItemPair) {
-	if r == nil {
-		return
-	}
-
-	filterOperationsByExtensionInternal(pathItemPair.PathItem1, r)
-	filterOperationsByExtensionInternal(pathItemPair.PathItem2, r)
-}
-
-func filterOperationsByExtensionInternal(pathItem *openapi3.PathItem, r *regexp.Regexp) {
-	for method, operation := range pathItem.Operations() {
-		for extension := range operation.Extensions {
-			if r.MatchString(extension) {
-				pathItem.SetOperation(method, nil)
-				break
-			}
-		}
-	}
 }
