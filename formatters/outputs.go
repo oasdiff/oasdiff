@@ -7,6 +7,7 @@ const (
 	OutputSummary
 	OutputChangelog
 	OutputChecks
+	OutputExplain
 	OutputFlatten
 	OutputValidate
 )
