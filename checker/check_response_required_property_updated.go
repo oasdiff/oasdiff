@@ -69,11 +69,15 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				args := []any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus}
 				// A writeOnly property is not in responses, so its deprecation doesn't matter here.
 				if !propertyItem.WriteOnly {
-					id, args = propertyRemovalId(propertyItem, args,
-						ResponseRequiredPropertyRemovedId, ResponseRequiredPropertyRemovedWithDeprecationId, ResponseRequiredPropertyRemovedBeforeSunsetId)
-					if id == "" {
+					stageId, extra, ok := removalId(propertyItem.Deprecated, propertyItem.Extensions, removalIds{
+						removed:         ResponseRequiredPropertyRemovedId,
+						withDeprecation: ResponseRequiredPropertyRemovedWithDeprecationId,
+						beforeSunset:    ResponseRequiredPropertyRemovedBeforeSunsetId,
+					})
+					if !ok {
 						return
 					}
+					id, args = stageId, append(args, extra...)
 				}
 
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)

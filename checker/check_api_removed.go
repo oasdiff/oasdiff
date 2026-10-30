@@ -1,9 +1,6 @@
 package checker
 
 import (
-	"time"
-
-	"cloud.google.com/go/civil"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -76,43 +73,18 @@ func checkRemovedOperations(pathsDiff *diff.PathsDiff, operationsSources *diff.O
 }
 
 func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
+	id, extra, ok := removalId(opInfo.operation.Deprecated, opInfo.operation.Extensions, removalIds{
+		removed:         getWithoutDeprecationId(isPath),
+		withDeprecation: getWithDeprecationId(isPath),
+		beforeSunset:    getBeforeSunsetId(isPath),
+		sunsetParse:     APIPathSunsetParseId,
+	})
+	if !ok {
+		return nil
+	}
 
 	baseSource := location.NewSourceFromOrigin(opInfo.operationsSources, opInfo.operation, opInfo.operation.Origin)
-	revisionSource := location.NewEmptySource()
-
-	if !opInfo.operation.Deprecated {
-		return opInfo.NewApiChange(
-			getWithoutDeprecationId(isPath),
-			nil,
-			"",
-		).WithSources(baseSource, revisionSource)
-	}
-	sunset, ok := getSunset(opInfo.operation.Extensions)
-	if !ok {
-		return opInfo.NewApiChange(
-			getWithDeprecationId(isPath),
-			nil,
-			"",
-		).WithSources(baseSource, revisionSource)
-	}
-
-	date, err := getSunsetDate(sunset)
-	if err != nil {
-		return opInfo.NewApiChange(
-			APIPathSunsetParseId,
-			[]any{err},
-			"",
-		).WithSources(baseSource, nil)
-	}
-
-	if civil.DateOf(time.Now()).Before(date) {
-		return opInfo.NewApiChange(
-			getBeforeSunsetId(isPath),
-			[]any{date},
-			"",
-		).WithSources(baseSource, revisionSource)
-	}
-	return nil
+	return opInfo.NewApiChange(id, extra, "").WithSources(baseSource, location.NewEmptySource())
 }
 
 func getAPIPathSunsetParse(opInfo opInfo, err error) ApiChange {
