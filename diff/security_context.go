@@ -29,11 +29,15 @@ type OperationPair struct {
 	Revision *openapi3.Operation
 }
 
-func getOperationPairs(config *Config, paths1, paths2 *openapi3.Paths) []OperationPair {
+// getPathItemPairs matches the paths of two specs the same way as PathsDiff.
+func getPathItemPairs(config *Config, paths1, paths2 *openapi3.Paths) pathItemPairs {
 	paths1Mod := rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase)
 	paths2Mod := rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision)
-	_, _, _, pathItemPairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	_, _, _, pairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
+	return pairs
+}
 
+func getOperationPairs(pathItemPairs pathItemPairs) []OperationPair {
 	result := []OperationPair{}
 	for path, pathItemPair := range pathItemPairs {
 		for _, method := range methodsToCompare(pathItemPair.PathItem1, pathItemPair.PathItem2) {

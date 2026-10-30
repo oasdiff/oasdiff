@@ -65,8 +65,9 @@ oasdiff diff data/common-params/params_in_path.yaml data/common-params/params_in
 The output will be empty meaning that no change was found.
 
 ## Changelog (incl. Breaking Changes) and Common Parameters
-The `changelog` and `breaking` sub-commands are focused on operation level parameters and ignore most parameter changes at the path level.  
-For example, changing `maxItems` of a path level parameter, won't normally be reported:
+The `changelog` and `breaking` sub-commands compare the parameters each operation takes: its own, and those of its path that it doesn't override by name and location.  
+A path level parameter is part of every request to the operations under that path, so a change to it is reported on each of those operations.  
+For example, changing `maxItems` of a path level parameter:
 
 ```
 paths:
@@ -94,10 +95,8 @@ paths:
             maxItems: 10
 ```
 
-But if you add the `--flatten-params` flag which merges common parameters from the path level into the operation level before running the diff, it will be reported as a breaking change:
-
 ```
-oasdiff changelog data/checker/common_request_parameter_max_items_updated_revision.yaml data/checker/common_request_parameter_max_items_updated_base.yaml --flatten-params
+oasdiff changelog data/checker/common_request_parameter_max_items_updated_revision.yaml data/checker/common_request_parameter_max_items_updated_base.yaml
 ```
 
 Output:
@@ -108,5 +107,14 @@ error	[request-parameter-max-items-decreased] at data/checker/common_request_par
 		for the `query` request parameter `category`, the maxItems was decreased from `20` to `10`
 ```
 
-## Summary
-It is recommended to use the `--flatten-params` flag to increase accuracy for common parameters.
+Moving a parameter between the path level and the operation level is not reported, because each operation takes the same parameters either way:
+```
+oasdiff breaking data/common-params/params_in_path.yaml data/common-params/params_in_op.yaml
+```
+Output:
+```
+No breaking changes to report, but the specs are different.
+Run 'oasdiff diff' to see structural differences.
+```
+
+The `--flatten-params` flag doesn't change what `changelog` and `breaking` report.
