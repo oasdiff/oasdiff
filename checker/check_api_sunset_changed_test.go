@@ -127,3 +127,24 @@ func TestBreaking_NoChangeToSunsetDeprecatedEndpoint(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
 	require.Empty(t, errs)
 }
+
+// a sunset date that fails to parse on one side only is reported against that
+// side, so the side that parsed carries no source.
+func TestSunsetChanged_ParseFailureIsOneSided(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+
+	s1, err := open(deprecationFile("deprecated-invalid.yaml"), loader)
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("deprecated-future.yaml"), loader)
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
+
+	change := requireChange(t, errs, checker.APIPathSunsetParseId)
+	require.NotNil(t, change.GetBaseSource())
+	require.Equal(t, 13, change.GetBaseSource().Line) // the base's x-sunset, which is the unparseable one
+	require.Nil(t, change.GetRevisionSource(), "the revision's sunset date parsed, so it is not part of this finding")
+}

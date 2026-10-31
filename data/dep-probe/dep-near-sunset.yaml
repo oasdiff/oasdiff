@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: Test
+  version: "1"
+paths:
+  /items:
+    get:
+      deprecated: true
+      x-sunset: "2026-11-05"
+      parameters:
+        - name: q
+          in: query
+          deprecated: true
+          x-sunset: "2026-11-05"
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old:
+                  type: string
+                  deprecated: true
+                  x-sunset: "2026-11-05"
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  res:
+                    type: string
+                    deprecated: true
+                    x-sunset: "2026-11-05"

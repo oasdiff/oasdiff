@@ -58,14 +58,16 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 			date, err := getSunsetDate(opRevision.Extensions[diff.SunsetExtension])
 			if err != nil {
 				opInfo := newOpInfo(config, opRevision, operationsSources, operation, path)
-				result = append(result, getAPIPathSunsetParse(opInfo, err).WithSources(baseSource, revisionSource))
+				// The revision's value is the one that failed to parse, so the
+				// base, which parsed, is not part of this finding.
+				result = append(result, getAPIPathSunsetParse(opInfo, err).WithSources(nil, revisionSource))
 				continue
 			}
 
 			baseDate, err := getSunsetDate(opBase.Extensions[diff.SunsetExtension])
 			if err != nil {
 				opInfo := newOpInfo(config, opBase, operationsSources, operation, path)
-				result = append(result, getAPIPathSunsetParse(opInfo, err).WithSources(baseSource, revisionSource))
+				result = append(result, getAPIPathSunsetParse(opInfo, err).WithSources(baseSource, nil))
 				continue
 			}
 
