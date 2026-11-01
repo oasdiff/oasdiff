@@ -240,5 +240,5 @@ func TestDiff_ComponentCallbacksNil(t *testing.T) {
 
 func TestFilterByRegex_Invalid(t *testing.T) {
 	_, err := diff.Get(&diff.Config{MatchPath: "["}, l(t, 1), l(t, 2))
-	require.EqualError(t, err, "failed to compile filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+	require.EqualError(t, err, "failed to compile match-path filter regex \"[\": error parsing regexp: missing closing ]: `[`")
 }

@@ -15,7 +15,12 @@ RUN VERSION=$(git describe --always --tags) && \
 
 ### Create image ###
 FROM alpine:3
+
 RUN apk add --no-cache git
+# oasdiff runs git for the rev:path syntax. A repo mounted from the host is
+# owned by a different uid, which git refuses to read, so trust any repo.
+RUN git config --system --add safe.directory '*'
 WORKDIR /usr/bin
 COPY --from=builder /go/src/app/oasdiff .
+
 ENTRYPOINT ["/usr/bin/oasdiff"]
