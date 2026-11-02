@@ -41,14 +41,19 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.method,
 		info.path,
 	).WithSchema(info.schemaDiff, info.schemaDiff, "").WithDetails(info.mediaTypeDetails).
-		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff))
+		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff, id))
 }
 
 // allOfDisclaimers determines whether a change is under an allOf branch or has an allOf itself, and returns the appropriate disclaimers.
 // Two ways underAllOf is true:
 //  1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
 //  2. The schema itself has an allOf
-func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer {
+func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID ...string) []Disclaimer {
+	// Adding a request conjunct cannot widen the accepted values, so it
+	// retains its declared severity even when branches are not flattened.
+	if len(changeID) > 0 && (changeID[0] == RequestBodyAllOfAddedId || changeID[0] == RequestPropertyAllOfAddedId) {
+		return nil
+	}
 	if schemaDiff != nil && (schemaHasAllOf(schemaDiff.Base) || schemaHasAllOf(schemaDiff.Revision)) {
 		underAllOf = true
 	}
@@ -103,7 +108,7 @@ type propertyInfo struct {
 // call replaces the first.
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.schemaDiff, p.propertyDiff, schemawalk.PropertyFullName(p.propertyPath, p.propertyName)).
-		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
+		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff, id)).
 		WithGuards(propertyGuards(p.propertyDiff))
 }
 

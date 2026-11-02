@@ -25,7 +25,6 @@ func TestRequestPropertyAllOfAdded(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.RequestBodyAllOfAddedId,
-			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
 			Args:        []any{"#/components/schemas/Rabbit"},
 			Operation:   "POST",
 			Path:        "/pets",
@@ -34,7 +33,6 @@ func TestRequestPropertyAllOfAdded(t *testing.T) {
 		},
 		{
 			Id:          checker.RequestPropertyAllOfAddedId,
-			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",

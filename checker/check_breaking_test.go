@@ -680,17 +680,60 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	// The rule declares ERR: adding a conjunct narrows what the request
-	// accepts. Compared branch by branch oasdiff cannot tell whether this
-	// branch narrows anything the others did not already, so the disclaimer
-	// caps it. Under --flatten-allof the merged schemas settle it.
 	change := requireChange(t, errs, checker.RequestBodyAllOfAddedId)
-	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Equal(t, checker.ERR, change.GetLevel())
+	require.NotContains(t, change.GetDisclaimers(), checker.DisclaimerAllOfNotFlattened)
+	require.NotContains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
 	require.Equal(t, "added `#/components/schemas/Rabbit` to the request body `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 	change = requireChange(t, errs, checker.RequestPropertyAllOfAddedId)
-	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Equal(t, checker.ERR, change.GetLevel())
+	require.NotContains(t, change.GetDisclaimers(), checker.DisclaimerAllOfNotFlattened)
+	require.NotContains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+func TestBreaking_RequestAllOfAdded_NoDisclaimer(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		base     string
+		revision string
+		id       string
+	}{
+		{
+			name:     "body",
+			base:     `{"type":"string","enum":["red","green","blue"]}`,
+			revision: `{"type":"string","allOf":[{"enum":["red"]}]}`,
+			id:       checker.RequestBodyAllOfAddedId,
+		},
+		{
+			name:     "property",
+			base:     `{"type":"object","properties":{"color":{"type":"string","enum":["red","green","blue"]}}}`,
+			revision: `{"type":"object","properties":{"color":{"type":"string","allOf":[{"enum":["red"]}]}}}`,
+			id:       checker.RequestPropertyAllOfAddedId,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			const prefix = `{"openapi":"3.0.3","info":{"title":"Colors","version":"1.0"},"paths":{"/colors":{"post":{"requestBody":{"content":{"application/json":{"schema":`
+			const suffix = `}}},"responses":{"200":{"description":"OK"}}}}}}`
+			loader := openapi3.NewLoader()
+			s1, err := loader.LoadFromData([]byte(prefix + tc.base + suffix))
+			require.NoError(t, err)
+			s2, err := loader.LoadFromData([]byte(prefix + tc.revision + suffix))
+			require.NoError(t, err)
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(),
+				&load.SpecInfo{Spec: s1},
+				&load.SpecInfo{Spec: s2},
+			)
+			require.NoError(t, err)
+			errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+			change := requireChange(t, errs, tc.id)
+			require.Equal(t, checker.ERR, change.GetLevel())
+			require.NotContains(t, change.GetDisclaimers(), checker.DisclaimerAllOfNotFlattened)
+			require.NotContains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
+		})
+	}
 }
 
 // removing 'allOf' subschema from the request body or request body property
