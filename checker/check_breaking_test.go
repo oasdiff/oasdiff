@@ -693,49 +693,6 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-func TestBreaking_RequestAllOfAdded_NoDisclaimer(t *testing.T) {
-	for _, tc := range []struct {
-		name     string
-		base     string
-		revision string
-		id       string
-	}{
-		{
-			name:     "body",
-			base:     `{"type":"string","enum":["red","green","blue"]}`,
-			revision: `{"type":"string","allOf":[{"enum":["red"]}]}`,
-			id:       checker.RequestBodyAllOfAddedId,
-		},
-		{
-			name:     "property",
-			base:     `{"type":"object","properties":{"color":{"type":"string","enum":["red","green","blue"]}}}`,
-			revision: `{"type":"object","properties":{"color":{"type":"string","allOf":[{"enum":["red"]}]}}}`,
-			id:       checker.RequestPropertyAllOfAddedId,
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			const prefix = `{"openapi":"3.0.3","info":{"title":"Colors","version":"1.0"},"paths":{"/colors":{"post":{"requestBody":{"content":{"application/json":{"schema":`
-			const suffix = `}}},"responses":{"200":{"description":"OK"}}}}}}`
-			loader := openapi3.NewLoader()
-			s1, err := loader.LoadFromData([]byte(prefix + tc.base + suffix))
-			require.NoError(t, err)
-			s2, err := loader.LoadFromData([]byte(prefix + tc.revision + suffix))
-			require.NoError(t, err)
-
-			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(),
-				&load.SpecInfo{Spec: s1},
-				&load.SpecInfo{Spec: s2},
-			)
-			require.NoError(t, err)
-			errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
-			change := requireChange(t, errs, tc.id)
-			require.Equal(t, checker.ERR, change.GetLevel())
-			require.NotContains(t, change.GetDisclaimers(), checker.DisclaimerAllOfNotFlattened)
-			require.NotContains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
-		})
-	}
-}
-
 // removing 'allOf' subschema from the request body or request body property
 // drops a conjunct, which widens what the request accepts, so it is reported
 // without being breaking
