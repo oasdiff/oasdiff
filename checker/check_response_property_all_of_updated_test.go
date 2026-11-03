@@ -138,6 +138,7 @@ func TestResponsePropertyAllOfAdded_AnnotationOnly_EmitsInfoWithDistinctId(t *te
 
 	requireSingleChange(t, errs, checker.ResponseBodyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Empty(t, errs[0].GetDisclaimers())
 	// Distinct from the original allOf-added INFO ID.
 	require.NotEqual(t, checker.ResponseBodyAllOfAddedId, errs[0].GetId())
 }

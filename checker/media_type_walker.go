@@ -41,13 +41,17 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.method,
 		info.path,
 	).WithSchema(info.schemaDiff, info.schemaDiff, "").WithDetails(info.mediaTypeDetails).
-		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff, id))
+		WithAllOfDisclaimers(false, info.schemaDiff)
 }
 
 // allOfDisclaimers determines whether a change is under an allOf branch or has an allOf itself, and returns the appropriate disclaimers.
 // Two ways underAllOf is true:
 //  1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
 //  2. The schema itself has an allOf
+//
+// Changes whose ID is in allOfDisclaimerSkipIds never get a disclaimer. The
+// four removed allOf ids are not in the map, so they keep it through the
+// schemaHasAllOf test.
 func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID string) []Disclaimer {
 	if allOfDisclaimerSkipIds[changeID] {
 		return nil
@@ -65,10 +69,7 @@ func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID str
 // DisclaimerAllOfNotFlattened. The disclaimer says a sibling branch may still
 // guarantee what this branch dropped, which only holds when a constraining
 // branch is removed: an added branch drops nothing, and an annotation-only
-// branch never constrained anything. These schemas always have an allOf, so
-// the four removed ids keep the disclaimer by falling through to the
-// schemaHasAllOf test; skipping the rest also lets the two added request ids
-// retain their declared severity.
+// branch never constrained anything.
 var allOfDisclaimerSkipIds = map[string]bool{
 	RequestBodyAllOfAddedId:                      true,
 	RequestPropertyAllOfAddedId:                  true,
@@ -129,7 +130,7 @@ type propertyInfo struct {
 // call replaces the first.
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.schemaDiff, p.propertyDiff, schemawalk.PropertyFullName(p.propertyPath, p.propertyName)).
-		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff, id)).
+		WithAllOfDisclaimers(p.underAllOf, p.propertyDiff).
 		WithGuards(propertyGuards(p.propertyDiff))
 }
 

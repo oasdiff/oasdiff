@@ -143,6 +143,7 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_EmitsInfo(t *testing.T) {
 
 	requireSingleChange(t, errs, checker.RequestBodyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Empty(t, errs[0].GetDisclaimers())
 	// And critically: not the original ERR-level breaking-change ID.
 	require.NotEqual(t, checker.RequestBodyAllOfAddedId, errs[0].GetId())
 }
@@ -162,5 +163,6 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_AtProperty_EmitsInfo(t *testin
 
 	requireSingleChange(t, errs, checker.RequestPropertyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Empty(t, errs[0].GetDisclaimers())
 	require.NotEqual(t, checker.RequestPropertyAllOfAddedId, errs[0].GetId())
 }
