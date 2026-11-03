@@ -41,6 +41,8 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "deprecated")
+			// A finding about the sunset date points at x-sunset, not at deprecated.
+			sunsetBaseSource, sunsetRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, diff.SunsetExtension)
 
 			// Check if property was reactivated (un-deprecated)
 			if p.propertyDiff.DeprecatedDiff.To == nil || p.propertyDiff.DeprecatedDiff.To == false {
@@ -79,7 +81,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					ResponsePropertyDeprecatedInvalidId,
 					[]any{propName, err},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSources(sunsetBaseSource, sunsetRevisionSource))
 				return
 			}
 
@@ -90,7 +92,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 					ResponsePropertySunsetDateTooSmallId,
 					[]any{propName, date, deprecationDays},
 					"",
-				).WithSources(propBaseSource, propRevisionSource))
+				).WithSources(sunsetBaseSource, sunsetRevisionSource))
 				return
 			}
 

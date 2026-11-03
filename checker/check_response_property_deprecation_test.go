@@ -259,3 +259,23 @@ func TestResponsePropertyDeprecationCheck_SourceLocation(t *testing.T) {
 	require.NotNil(t, revSource, "revision source must be set")
 	require.Equal(t, 28, revSource.Line, "source must point to `deprecated: true` line, not status-code or operation level")
 }
+
+// a finding about a property's sunset date points at x-sunset, not at deprecated
+func TestResponsePropertyDeprecation_SunsetFindingPointsAtSunset(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+
+	s1, err := open(deprecationFile("property_base_stable.yaml"), loader)
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("property_deprecated_invalid_sunset.yaml"), loader)
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	c := singleCheckConfig(checker.ResponsePropertyDeprecationCheck)
+	errs := checker.CheckBackwardCompatibility(c, d, osm)
+
+	source := requireChange(t, errs, checker.ResponsePropertyDeprecatedInvalidId).GetRevisionSource()
+	require.NotNil(t, source)
+	require.Equal(t, 47, source.Line) // the x-sunset field, not deprecated on 46
+}

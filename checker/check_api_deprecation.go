@@ -55,12 +55,14 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 			continue
 		}
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
-			op := pathItem.Revision.GetOperation(operation)
-			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationDiff, "deprecated")
-
 			if operationDiff.DeprecatedDiff == nil {
 				continue
 			}
+
+			op := pathItem.Revision.GetOperation(operation)
+			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationDiff, "deprecated")
+			// A finding about the sunset date points at x-sunset, not at deprecated.
+			sunsetBaseSource, sunsetRevisionSource := location.OperationFieldSources(operationsSources, operationDiff, diff.SunsetExtension)
 
 			if operationDiff.DeprecatedDiff.To == nil || operationDiff.DeprecatedDiff.To == false {
 				// not breaking changes
@@ -117,7 +119,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				).WithSources(sunsetBaseSource, sunsetRevisionSource))
 				continue
 			}
 
@@ -133,7 +135,7 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 					op,
 					operation,
 					path,
-				).WithSources(baseSource, revisionSource))
+				).WithSources(sunsetBaseSource, sunsetRevisionSource))
 				continue
 			}
 

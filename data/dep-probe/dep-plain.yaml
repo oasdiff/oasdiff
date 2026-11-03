@@ -1,0 +1,34 @@
+openapi: 3.0.3
+info:
+  title: Test
+  version: "1"
+paths:
+  /items:
+    get:
+      deprecated: true
+      parameters:
+        - name: q
+          in: query
+          deprecated: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                old:
+                  type: string
+                  deprecated: true
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  res:
+                    type: string
+                    deprecated: true
