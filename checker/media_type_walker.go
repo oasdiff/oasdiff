@@ -49,9 +49,7 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 //  1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
 //  2. The schema itself has an allOf
 func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID string) []Disclaimer {
-	// Adding a request conjunct cannot widen the accepted values, so it
-	// retains its declared severity even when branches are not flattened.
-	if changeID == RequestBodyAllOfAddedId || changeID == RequestPropertyAllOfAddedId {
+	if allOfDisclaimerSkipIds[changeID] {
 		return nil
 	}
 	if schemaDiff != nil && (schemaHasAllOf(schemaDiff.Base) || schemaHasAllOf(schemaDiff.Revision)) {
@@ -61,6 +59,29 @@ func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID str
 		return nil
 	}
 	return []Disclaimer{DisclaimerAllOfNotFlattened}
+}
+
+// allOfDisclaimerSkipIds are the allOf branch changes that never carry
+// DisclaimerAllOfNotFlattened. The disclaimer says a sibling branch may still
+// guarantee what this branch dropped, which only holds when a constraining
+// branch is removed: an added branch drops nothing, and an annotation-only
+// branch never constrained anything. These schemas always have an allOf, so
+// the four removed ids keep the disclaimer by falling through to the
+// schemaHasAllOf test; skipping the rest also lets the two added request ids
+// retain their declared severity.
+var allOfDisclaimerSkipIds = map[string]bool{
+	RequestBodyAllOfAddedId:                      true,
+	RequestPropertyAllOfAddedId:                  true,
+	ResponseBodyAllOfAddedId:                     true,
+	ResponsePropertyAllOfAddedId:                 true,
+	RequestBodyAllOfAddedAnnotationOnlyId:        true,
+	RequestBodyAllOfRemovedAnnotationOnlyId:      true,
+	RequestPropertyAllOfAddedAnnotationOnlyId:    true,
+	RequestPropertyAllOfRemovedAnnotationOnlyId:  true,
+	ResponseBodyAllOfAddedAnnotationOnlyId:       true,
+	ResponseBodyAllOfRemovedAnnotationOnlyId:     true,
+	ResponsePropertyAllOfAddedAnnotationOnlyId:   true,
+	ResponsePropertyAllOfRemovedAnnotationOnlyId: true,
 }
 
 func schemaHasAllOf(schema *openapi3.Schema) bool {
