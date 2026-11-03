@@ -122,6 +122,12 @@ func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
 	return c
 }
 
+// WithAllOfDisclaimers adds the allOf disclaimers for this change, taking the
+// change ID from c so it is written once at the call site.
+func (c ApiChange) WithAllOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) ApiChange {
+	return c.WithDisclaimers(allOfDisclaimers(underAllOf, schemaDiff, c.Id))
+}
+
 // WithDetails returns a copy of the ApiChange with Details set
 func (c ApiChange) WithDetails(details string) ApiChange {
 	c.Details = details
