@@ -83,7 +83,7 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					id,
 					args,
 					"",
-				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(baseSource, nil))
 			})
 
 		schemawalk.AddedProperties(
@@ -102,20 +102,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 							NewRequiredRequestPropertyId,
 							[]any{propName},
 							"",
-						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							RequiredRequestPropertyWithDefaultCommentId,
-						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
 						"",
-					).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+					).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 				}
 			})
 	})
