@@ -357,7 +357,7 @@ request-property-all-of-added: "%s foi adicionado à lista `allOf` da propriedad
 request-property-all-of-removed: "%s foi removido da lista `allOf` da propriedade de requisição %s"
 response-body-all-of-added: "%s foi adicionado à lista `allOf` do corpo da resposta para o status %s"
 response-body-all-of-removed: "%s foi removido da lista `allOf` do corpo da resposta para o status %s"
-all-of-not-flattened-comment: "Isto comparou os ramos do `allOf` um a um, então outro ramo ainda pode garantir o que este perdeu. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
+all-of-not-flattened-comment: "Isto comparou os ramos do `allOf` um a um, então outro ramo já pode descrever o que mudou aqui, deixando o esquema mesclado igual. Execute com --flatten-allof para mesclar os ramos e comparar o que eles descrevem em conjunto."
 read-only-comment: "A propriedade é somente leitura, portanto nunca aparece em requisições e esta mudança não pode invalidar nenhuma."
 write-only-comment: "A propriedade é somente escrita, portanto nunca aparece em respostas e esta mudança não pode invalidar nenhuma."
 required-in-requests-comment: "No OpenAPI 3.1 e posteriores, required também se aplica nas requisições a uma propriedade somente leitura, então os clientes já a enviam e esta mudança não pode invalidar uma requisição."
