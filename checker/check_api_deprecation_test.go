@@ -391,3 +391,44 @@ func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 	require.NotNil(t, sunsetChange, "expected to find endpoint-deprecated-with-sunset change")
 	require.Equal(t, fmt.Sprintf("endpoint deprecated with sunset date `%s`", sunsetDate.String()), sunsetChange.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
+
+// a finding about the sunset date points at x-sunset, not at deprecated, in
+// both the unparseable and the too-early case.
+func TestDeprecation_SunsetFindingsPointAtSunset(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+
+	t.Run("unparseable", func(t *testing.T) {
+		s1, err := open(deprecationFile("base.yaml"), loader)
+		require.NoError(t, err)
+
+		s2, err := open(deprecationFile("deprecated-with-invalid-sunset.yaml"), loader)
+		require.NoError(t, err)
+
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
+		errs := checker.CheckBackwardCompatibility(c, d, osm)
+
+		source := requireChange(t, errs, checker.APIDeprecatedSunsetParseId).GetRevisionSource()
+		require.NotNil(t, source)
+		require.Equal(t, 13, source.Line) // the x-sunset field, not deprecated on 12
+	})
+
+	t.Run("too early", func(t *testing.T) {
+		s1, err := open(deprecationFile("base.yaml"), loader)
+		require.NoError(t, err)
+
+		s2, err := open(deprecationFile("deprecated-future.yaml"), loader)
+		require.NoError(t, err)
+		s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(9).String())
+
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
+		errs := checker.CheckBackwardCompatibility(c, d, osm)
+
+		source := requireChange(t, errs, checker.APISunsetDateTooSmallId).GetRevisionSource()
+		require.NotNil(t, source)
+		require.Equal(t, 13, source.Line) // the x-sunset field, not deprecated on 12
+	})
+}
