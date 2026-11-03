@@ -8,12 +8,4 @@ paths:
       responses:
         '200':
           description: ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/T'
-                description: should-not-be-here
-components:
-  schemas:
-    T:
-      type: string
+          descriptionn: typo-not-a-known-field

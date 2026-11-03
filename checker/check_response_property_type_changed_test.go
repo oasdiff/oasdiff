@@ -96,7 +96,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"anyOf[subschema #3: Rabbit]/", "type", "string", "number", "200"},
+			Args:        []any{"anyOf[subschema #3: Rabbit]", "type", "string", "number", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_any_of_complex_revision.yaml"),
@@ -104,7 +104,7 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 		},
 		{
 			Id:          checker.ResponsePropertyTypeChangedId,
-			Args:        []any{"anyOf[subschema #4 -> subschema #5]/", "type", "string", "number", "200"},
+			Args:        []any{"anyOf[subschema #4 -> subschema #5]", "type", "string", "number", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
 			Source:      load.NewSource("../data/checker/response_property_any_of_complex_revision.yaml"),

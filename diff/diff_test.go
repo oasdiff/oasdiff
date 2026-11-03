@@ -129,6 +129,13 @@ func TestDiff_AddedTag(t *testing.T) {
 		"security")
 }
 
+func TestDiff_ExcludeTags(t *testing.T) {
+	excludeTags := diff.NewConfig(diff.WithExcludeElements([]string{diff.ExcludeTagsOption}))
+
+	require.Nil(t, d(t, excludeTags, 1, 3).TagsDiff)
+	require.Nil(t, d(t, excludeTags, 3, 1).PathsDiff.Modified[securityScorePath].OperationsDiff.Modified["GET"].TagsDiff)
+}
+
 func TestDiff_DeletedEncoding(t *testing.T) {
 	require.Contains(t,
 		d(t, diff.NewConfig(), 1, 3).PathsDiff.Modified["/subscribe"].OperationsDiff.Modified["POST"].CallbacksDiff.Modified["myEvent"].Modified["hi"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].EncodingsDiff.Deleted,
@@ -610,12 +617,17 @@ func TestFilterPathsByExtension(t *testing.T) {
 
 func TestFilterByInvalidRegex(t *testing.T) {
 	_, err := diff.Get(&diff.Config{MatchPath: "["}, l(t, 1), l(t, 2))
-	require.EqualError(t, err, "failed to compile filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+	require.EqualError(t, err, "failed to compile match-path filter regex \"[\": error parsing regexp: missing closing ]: `[`")
 }
 
 func TestFilterByInvalidInvertedRegex(t *testing.T) {
 	_, err := diff.Get(&diff.Config{UnmatchPath: "["}, l(t, 1), l(t, 2))
-	require.EqualError(t, err, "failed to compile filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+	require.EqualError(t, err, "failed to compile unmatch-path filter regex \"[\": error parsing regexp: missing closing ]: `[`")
+}
+
+func TestFilterByInvalidExtensionRegex(t *testing.T) {
+	_, err := diff.Get(&diff.Config{FilterExtension: "["}, l(t, 1), l(t, 2))
+	require.EqualError(t, err, "failed to compile extension filter regex \"[\": error parsing regexp: missing closing ]: `[`")
 }
 
 func TestFilterOperationssByExtension(t *testing.T) {

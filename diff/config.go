@@ -26,6 +26,7 @@ const (
 	ExcludeTitleOption       = "title"
 	ExcludeSummaryOption     = "summary"
 	ExcludeExtensionsOption  = "extensions"
+	ExcludeTagsOption        = "tags"
 )
 
 func GetExcludeDiffOptions() []string {
@@ -36,6 +37,7 @@ func GetExcludeDiffOptions() []string {
 		ExcludeTitleOption,
 		ExcludeSummaryOption,
 		ExcludeExtensionsOption,
+		ExcludeTagsOption,
 	}
 }
 
@@ -70,7 +72,7 @@ func WithMatchInlineRefs(matchInlineRefs bool) Option {
 }
 
 // WithExcludeElements sets the elements (description, summary,
-// endpoints, examples, extensions, title) to omit from the diff.
+// endpoints, examples, extensions, title, tags) to omit from the diff.
 func WithExcludeElements(excludeElements []string) Option {
 	return func(c *Config) {
 		c.ExcludeElements = utils.StringSetFromSlice(excludeElements)
@@ -108,6 +110,10 @@ func (config *Config) IsExcludeSummary() bool {
 
 func (config *Config) IsExcludeExtensions() bool {
 	return config.ExcludeElements.Contains(ExcludeExtensionsOption)
+}
+
+func (config *Config) IsExcludeTags() bool {
+	return config.ExcludeElements.Contains(ExcludeTagsOption)
 }
 
 // IsExcludedExtension checks if a specific extension name should be excluded from diff

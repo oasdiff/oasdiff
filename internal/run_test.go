@@ -476,7 +476,7 @@ func Test_ColorWithNonTextFormat(t *testing.T) {
 func Test_InvalidEnumValue(t *testing.T) {
 	var stderr bytes.Buffer
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff ../data/openapi-test1.yaml ../data/openapi-test3.yaml --exclude-elements xxx"), io.Discard, &stderr))
-	require.Equal(t, `Error: invalid argument "xxx" for "-e, --exclude-elements" flag: xxx is not one of the allowed values: description, endpoints, examples, extensions, summary, or title
+	require.Equal(t, `Error: invalid argument "xxx" for "-e, --exclude-elements" flag: xxx is not one of the allowed values: description, endpoints, examples, extensions, summary, tags, or title
 `, stderr.String())
 }
 

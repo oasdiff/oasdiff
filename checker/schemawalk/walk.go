@@ -195,9 +195,15 @@ func DeletedProperties(schemaDiff *diff.SchemaDiff, processor func(propertyPath 
 // how the walk names a sub-schema, so a check that names one in a message
 // uses it too.
 func PropertyFullName(propertyPath string, propertyNames ...string) string {
-	fullName := strings.Join(propertyNames, "/")
+	parts := make([]string, 0, len(propertyNames)+1)
 	if propertyPath != "" {
-		fullName = propertyPath + "/" + fullName
+		parts = append(parts, propertyPath)
 	}
-	return fullName
+	for _, propertyName := range propertyNames {
+		// A subschema is walked with a path and no name of its own.
+		if propertyName != "" {
+			parts = append(parts, propertyName)
+		}
+	}
+	return strings.Join(parts, "/")
 }
