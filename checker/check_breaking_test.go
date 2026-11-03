@@ -680,16 +680,16 @@ func TestBreaking_RequestPropertyAllOfAdded(t *testing.T) {
 
 	require.Len(t, errs, 2)
 
-	// The rule declares ERR: adding a conjunct narrows what the request
-	// accepts. Compared branch by branch oasdiff cannot tell whether this
-	// branch narrows anything the others did not already, so the disclaimer
-	// caps it. Under --flatten-allof the merged schemas settle it.
 	change := requireChange(t, errs, checker.RequestBodyAllOfAddedId)
-	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Equal(t, checker.ERR, change.GetLevel())
+	require.NotContains(t, change.GetDisclaimers(), checker.DisclaimerAllOfNotFlattened)
+	require.NotContains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
 	require.Equal(t, "added `#/components/schemas/Rabbit` to the request body `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 	change = requireChange(t, errs, checker.RequestPropertyAllOfAddedId)
-	require.Equal(t, checker.WARN, change.GetLevel())
+	require.Equal(t, checker.ERR, change.GetLevel())
+	require.NotContains(t, change.GetDisclaimers(), checker.DisclaimerAllOfNotFlattened)
+	require.NotContains(t, change.GetComment(checker.NewDefaultLocalizer()), "--flatten-allof")
 	require.Equal(t, "added `#/components/schemas/Breed3` to the `allOf[#/components/schemas/Dog]/breed` request property `allOf` list", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
