@@ -252,3 +252,34 @@ func TestParameterDeprecated_MessageIncludesStabilityOnly(t *testing.T) {
 
 	require.Equal(t, "`query` request parameter `id` was deprecated (stability: beta)", requireChange(t, errs, checker.RequestParameterDeprecatedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
+
+// TestParameterDeprecated_SourceLocation covers #1362: deprecated is a field of
+// the Parameter Object, so the change points at that field. It used to point at
+// the operation, and at nothing at all when the parameter's schema changed in
+// the same revision.
+func TestParameterDeprecated_SourceLocation(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+
+	for _, revision := range []string{
+		"inline-deprecated.yaml",
+		"inline-deprecated-maxlength.yaml",
+	} {
+		t.Run(revision, func(t *testing.T) {
+			s1, err := open(paramDeprecationFile("inline-base.yaml"), loader)
+			require.NoError(t, err)
+
+			s2, err := open(paramDeprecationFile(revision), loader)
+			require.NoError(t, err)
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+
+			c := singleCheckConfig(checker.RequestParameterDeprecationCheck, checker.WithDeprecation(0, 0))
+			errs := checker.CheckBackwardCompatibilityUntilLevel(c, d, osm, checker.INFO)
+			revSource := requireChange(t, errs, checker.RequestParameterDeprecatedId).GetRevisionSource()
+			require.NotNil(t, revSource)
+			require.Equal(t, 11, revSource.Line, "the `deprecated: true` line")
+			require.Equal(t, 11, revSource.Column)
+		})
+	}
+}
