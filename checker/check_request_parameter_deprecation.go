@@ -23,7 +23,8 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *
 		if p.paramDiff.DeprecatedDiff == nil {
 			return
 		}
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "deprecated")
+		// deprecated is a field of the Parameter Object, not of its schema.
+		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "deprecated")
 
 		param := p.paramDiff.Revision
 
