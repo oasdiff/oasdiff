@@ -48,10 +48,10 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 // Two ways underAllOf is true:
 //  1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
 //  2. The schema itself has an allOf
-func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID ...string) []Disclaimer {
+func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID string) []Disclaimer {
 	// Adding a request conjunct cannot widen the accepted values, so it
 	// retains its declared severity even when branches are not flattened.
-	if len(changeID) > 0 && (changeID[0] == RequestBodyAllOfAddedId || changeID[0] == RequestPropertyAllOfAddedId) {
+	if changeID == RequestBodyAllOfAddedId || changeID == RequestPropertyAllOfAddedId {
 		return nil
 	}
 	if schemaDiff != nil && (schemaHasAllOf(schemaDiff.Base) || schemaHasAllOf(schemaDiff.Revision)) {
