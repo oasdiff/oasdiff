@@ -202,8 +202,8 @@ func TestRequestPropertyOneOfWrappedOriginalPreserved(t *testing.T) {
 }
 
 // A property added or deleted inside an unflattened allOf branch is as
-// doubtful as a modified one: another branch may still guarantee what this
-// one dropped. All three now carry the all-of-not-flattened disclaimer and
+// doubtful as a modified one: another branch may already describe it. All
+// three now carry the all-of-not-flattened disclaimer and
 // cap to warning, where previously only the modified property did (#1152).
 func TestRequestProperty_AllOfBranchExistenceCarriesDisclaimer(t *testing.T) {
 	s1, err := open("../data/checker/allof_property_existence_base.yaml")
