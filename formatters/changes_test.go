@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
@@ -82,14 +81,14 @@ func TestNewChanges_FingerprintIndependentOfSourceLocation(t *testing.T) {
 		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
 		Source: &load.Source{}, Args: []any{"p"},
 		CommonChange: checker.CommonChange{
-			BaseSource: location.NewSource("base.yaml", 10, 5),
+			BaseSource: &checker.Source{File: "base.yaml", Line: 10, Column: 5},
 		},
 	})
 	b := fingerprintOf(checker.ApiChange{
 		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
 		Source: &load.Source{}, Args: []any{"p"},
 		CommonChange: checker.CommonChange{
-			BaseSource: location.NewSource("base.yaml", 99, 5),
+			BaseSource: &checker.Source{File: "base.yaml", Line: 99, Column: 5},
 		},
 	})
 	require.Equal(t, a, b)

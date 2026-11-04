@@ -5,7 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )

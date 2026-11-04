@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
@@ -105,8 +104,8 @@ func TestYamlFormatter_RenderChangelog_WithSources(t *testing.T) {
 			Path:      "/api/test",
 			Source:    &load.Source{}, // Need this to avoid nil pointer dereference
 			CommonChange: checker.CommonChange{
-				BaseSource:     location.NewSource("base.yaml", 10, 5),
-				RevisionSource: location.NewSource("revision.yaml", 12, 7),
+				BaseSource:     &checker.Source{File: "base.yaml", Line: 10, Column: 5},
+				RevisionSource: &checker.Source{File: "revision.yaml", Line: 12, Column: 7},
 			},
 		},
 	}

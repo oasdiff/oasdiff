@@ -3,7 +3,7 @@ package schemawalk_test
 import (
 	"testing"
 
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )

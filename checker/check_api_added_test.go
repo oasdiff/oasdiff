@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
 )

@@ -4,8 +4,8 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
