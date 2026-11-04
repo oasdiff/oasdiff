@@ -8,6 +8,13 @@ import (
 )
 
 const (
+	RequestPropertyDeprecatedId              = "request-property-deprecated"
+	RequestPropertyDeprecatedWithSunsetId    = "request-property-deprecated-with-sunset"
+	RequestPropertyDeprecatedSunsetMissingId = "request-property-deprecated-sunset-missing"
+	RequestPropertyDeprecatedInvalidId       = "request-property-deprecated-sunset-invalid"
+	RequestPropertyReactivatedId             = "request-property-reactivated"
+	RequestPropertySunsetDateTooSmallId      = "request-property-sunset-date-too-small"
+
 	ResponsePropertyDeprecatedId              = "response-property-deprecated"
 	ResponsePropertyDeprecatedWithSunsetId    = "response-property-deprecated-with-sunset"
 	ResponsePropertyDeprecatedSunsetMissingId = "response-property-deprecated-sunset-missing"
@@ -15,6 +22,15 @@ const (
 	ResponsePropertyReactivatedId             = "response-property-reactivated"
 	ResponsePropertySunsetDateTooSmallId      = "response-property-sunset-date-too-small"
 )
+
+var requestPropertyDeprecationIds = deprecation.Ids{
+	Reactivated:    RequestPropertyReactivatedId,
+	Deprecated:     RequestPropertyDeprecatedId,
+	WithSunset:     RequestPropertyDeprecatedWithSunsetId,
+	SunsetMissing:  RequestPropertyDeprecatedSunsetMissingId,
+	SunsetParse:    RequestPropertyDeprecatedInvalidId,
+	SunsetTooSmall: RequestPropertySunsetDateTooSmallId,
+}
 
 var responsePropertyDeprecationIds = deprecation.Ids{
 	Reactivated:    ResponsePropertyReactivatedId,
@@ -25,11 +41,29 @@ var responsePropertyDeprecationIds = deprecation.Ids{
 	SunsetTooSmall: ResponsePropertySunsetDateTooSmallId,
 }
 
+// RequestPropertyDeprecationCheck detects deprecated properties in request bodies
+func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+	return propertyDeprecationCheck(walkModifiedRequestBodySchemas, diffReport, operationsSources, config, requestPropertyDeprecationIds)
+}
+
 // ResponsePropertyDeprecationCheck detects deprecated properties in response bodies
 func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+	return propertyDeprecationCheck(walkModifiedResponseSchemas, diffReport, operationsSources, config, responsePropertyDeprecationIds)
+}
+
+// propertyDeprecationCheck reports where each property the walker reaches
+// stands in the deprecation process. The ids decide which side it reports,
+// request or response, so the two checks differ only in their walker and ids.
+func propertyDeprecationCheck(
+	walk func(*diff.Diff, *diff.OperationsSourcesMap, *Config, func(mediaTypeInfo)),
+	diffReport *diff.Diff,
+	operationsSources *diff.OperationsSourcesMap,
+	config *Config,
+	ids deprecation.Ids,
+) Changes {
 	result := make(Changes, 0)
 
-	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
+	walk(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		op := info.operationItem.Revision
 
 		days, ok := deprecationDays(config, op.Extensions)
@@ -43,7 +77,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 				return
 			}
 
-			stage := deprecation.Announce(p.propertyDiff.DeprecatedDiff, p.propertyDiff.Revision.Extensions, days, responsePropertyDeprecationIds)
+			stage := deprecation.Announce(p.propertyDiff.DeprecatedDiff, p.propertyDiff.Revision.Extensions, days, ids)
 
 			field := "deprecated"
 			if stage.AtSunset {
@@ -59,7 +93,7 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 			// The stability level describes the deprecation, so it is left off
 			// a finding about the sunset date, and off a reactivation. The
 			// media type stays on every change, as newChange put it there.
-			if stage.Id == ResponsePropertyDeprecatedId || stage.Id == ResponsePropertyDeprecatedWithSunsetId {
+			if stage.Id == ids.Deprecated || stage.Id == ids.WithSunset {
 				change = change.WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails))
 			}
 
