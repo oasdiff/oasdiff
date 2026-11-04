@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -43,13 +44,13 @@ func formatDeprecationDetailsWithSunset(sunset civil.Date, extensions map[string
 	return "(" + strings.Join(parts, ", ") + ")"
 }
 
-var apiDeprecationIds = deprecationIds{
-	reactivated:    EndpointReactivatedId,
-	deprecated:     EndpointDeprecatedId,
-	withSunset:     EndpointDeprecatedWithSunsetId,
-	sunsetMissing:  APIDeprecatedSunsetMissingId,
-	sunsetParse:    APIDeprecatedSunsetParseId,
-	sunsetTooSmall: APISunsetDateTooSmallId,
+var apiDeprecationIds = deprecation.Ids{
+	Reactivated:    EndpointReactivatedId,
+	Deprecated:     EndpointDeprecatedId,
+	WithSunset:     EndpointDeprecatedWithSunsetId,
+	SunsetMissing:  APIDeprecatedSunsetMissingId,
+	SunsetParse:    APIDeprecatedSunsetParseId,
+	SunsetTooSmall: APISunsetDateTooSmallId,
 }
 
 func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -70,15 +71,15 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 			op := pathItem.Revision.GetOperation(operation)
 
 			days, ok := deprecationDays(config, op.Extensions)
-			if !ok && nowDeprecated(operationDiff.DeprecatedDiff) {
+			if !ok && deprecation.NowDeprecated(operationDiff.DeprecatedDiff) {
 				// handled in CheckBackwardCompatibility
 				continue
 			}
 
-			stage := deprecationId(operationDiff.DeprecatedDiff, op.Extensions, days, apiDeprecationIds)
+			stage := deprecation.Announce(operationDiff.DeprecatedDiff, op.Extensions, days, apiDeprecationIds)
 
 			field := "deprecated"
-			if stage.atSunset {
+			if stage.AtSunset {
 				// A finding about the sunset date points at x-sunset, not at deprecated.
 				field = diff.SunsetExtension
 			}
@@ -87,12 +88,12 @@ func APIDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.Operatio
 			// The details describe the deprecation, so they are left off a
 			// finding about the sunset date.
 			details := ""
-			switch stage.id {
+			switch stage.Id {
 			case EndpointReactivatedId, EndpointDeprecatedId, EndpointDeprecatedWithSunsetId:
 				details = formatDeprecationDetails(op.Extensions)
 			}
 
-			result = append(result, newOpInfo(config, op, operationsSources, operation, path).NewApiChange(stage.id, stage.args, "").
+			result = append(result, newOpInfo(config, op, operationsSources, operation, path).NewApiChange(stage.Id, stage.Args, "").
 				WithSources(baseSource, revisionSource).WithDetails(details))
 		}
 	}

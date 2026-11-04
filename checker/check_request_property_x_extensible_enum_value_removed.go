@@ -3,6 +3,7 @@ package checker
 import (
 	"slices"
 
+	"github.com/oasdiff/oasdiff/checker/internal/extension"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -37,12 +38,12 @@ func RequestPropertyXExtensibleEnumValueRemovedCheck(diffReport *diff.Diff, oper
 
 			fromSlice := make([]string, len(from))
 			for i, item := range from {
-				fromSlice[i] = extensionValueText(item)
+				fromSlice[i] = extension.ValueText(item)
 			}
 
 			toSlice := make([]string, len(to))
 			for i, item := range to {
-				toSlice[i] = extensionValueText(item)
+				toSlice[i] = extension.ValueText(item)
 			}
 
 			deletedVals := make([]string, 0)
