@@ -14,6 +14,7 @@ import (
 func cloneDiffForCheck(d *diff.Diff) *diff.Diff {
 	cloned := *d
 	cloned.SecurityContext = cloneSecurityContext(d.SecurityContext)
+	cloned.ParametersContext = cloneParametersContext(d.ParametersContext)
 	cloned.PathsDiff = clonePathsDiff(d.PathsDiff)
 	return &cloned
 }
@@ -26,6 +27,19 @@ func cloneSecurityContext(securityContext *diff.SecurityContext) *diff.SecurityC
 	}
 	cloned := *securityContext
 	cloned.Operations = slices.Clone(securityContext.Operations)
+	return &cloned
+}
+
+// cloneParametersContext copies the slices, which
+// filterParametersContextBelowStabilityThreshold deletes operations from in
+// place.
+func cloneParametersContext(parametersContext *diff.ParametersContext) *diff.ParametersContext {
+	if parametersContext == nil {
+		return nil
+	}
+	cloned := *parametersContext
+	cloned.Operations = slices.Clone(parametersContext.Operations)
+	cloned.Webhooks = slices.Clone(parametersContext.Webhooks)
 	return &cloned
 }
 

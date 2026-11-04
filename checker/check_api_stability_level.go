@@ -18,6 +18,7 @@ const (
 // applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
 func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources *diff.OperationsSourcesMap) Changes {
 	filterSecurityContextBelowStabilityThreshold(config, diffReport)
+	filterParametersContextBelowStabilityThreshold(config, diffReport)
 	if diffReport.PathsDiff == nil {
 		return result
 	}
@@ -199,6 +200,17 @@ func filterSecurityContextBelowStabilityThreshold(config *Config, diffReport *di
 	diffReport.SecurityContext.Operations = slices.DeleteFunc(diffReport.SecurityContext.Operations, func(pair diff.OperationPair) bool {
 		return belowStabilityThreshold(config, pair.Revision)
 	})
+}
+
+func filterParametersContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
+	if config == nil || diffReport.ParametersContext == nil {
+		return
+	}
+	below := func(operation diff.OperationParameters) bool {
+		return belowStabilityThreshold(config, operation.Revision)
+	}
+	diffReport.ParametersContext.Operations = slices.DeleteFunc(diffReport.ParametersContext.Operations, below)
+	diffReport.ParametersContext.Webhooks = slices.DeleteFunc(diffReport.ParametersContext.Webhooks, below)
 }
 
 // An operation whose stability level does not parse counts as in scope.

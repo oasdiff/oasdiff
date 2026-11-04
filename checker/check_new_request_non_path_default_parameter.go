@@ -1,8 +1,6 @@
 package checker
 
 import (
-	"slices"
-
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -12,49 +10,33 @@ const (
 	NewOptionalRequestDefaultParameterToExistingPathId = "new-optional-request-default-parameter-to-existing-path"
 )
 
+// NewRequestNonPathDefaultParameterCheck reports a parameter added to a path
+// item at each operation that didn't have it before.
 func NewRequestNonPathDefaultParameterCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	if diffReport.PathsDiff == nil || len(diffReport.PathsDiff.Modified) == 0 {
-		return result
-	}
-	for path, pathItem := range diffReport.PathsDiff.Modified {
-		if pathItem.ParametersDiff == nil || pathItem.Revision == nil || len(pathItem.Revision.Operations()) == 0 {
-			continue
-		}
-
-		for paramLoc, paramNameList := range pathItem.ParametersDiff.Added {
-			if paramLoc == "path" {
+	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
+		for paramLocation, paramItems := range o.ParametersDiff.Added {
+			if paramLocation == "path" {
 				continue
 			}
-
-			for _, param := range pathItem.Revision.Parameters {
-				if !slices.Contains(paramNameList, param.Value.Name) {
+			for _, paramName := range paramItems {
+				// the operation's own parameter is reported by NewRequestNonPathParameterCheck
+				if o.Revision.Parameters.GetByInAndName(paramLocation, paramName) != nil {
 					continue
 				}
+				param := o.RevisionParameters.GetByInAndName(paramLocation, paramName)
 				id := NewRequiredRequestDefaultParameterToExistingPathId
-				if !param.Value.Required {
+				if !param.Required {
 					id = NewOptionalRequestDefaultParameterToExistingPathId
 				}
-
-				for operation, operationItem := range pathItem.Revision.Operations() {
-
-					// TODO: if base operation had this param individually (not through the path) - continue
-
-					revisionSource := location.ParameterSource(operationsSources, operationItem, param.Value)
-
-					result = append(result, NewApiChange(
-						id,
-						config,
-						[]any{paramLoc, param.Value.Name},
-						"",
-						operationsSources,
-						operationItem,
-						operation,
-						path,
-					).WithSources(nil, revisionSource))
-				}
+				revisionSource := location.ParameterSource(operationsSources, o.Revision, param)
+				result = append(result, o.opInfo.NewApiChange(
+					id,
+					[]any{paramLocation, paramName},
+					"",
+				).WithSources(nil, revisionSource))
 			}
 		}
-	}
+	})
 	return result
 }
