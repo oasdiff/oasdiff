@@ -1,9 +1,6 @@
 package checker
 
 import (
-	"time"
-
-	"cloud.google.com/go/civil"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -18,6 +15,15 @@ const (
 	RequestPropertySunsetDateTooSmallId      = "request-property-sunset-date-too-small"
 )
 
+var requestPropertyDeprecationIds = deprecationIds{
+	reactivated:    RequestPropertyReactivatedId,
+	deprecated:     RequestPropertyDeprecatedId,
+	withSunset:     RequestPropertyDeprecatedWithSunsetId,
+	sunsetMissing:  RequestPropertyDeprecatedSunsetMissingId,
+	sunsetParse:    RequestPropertyDeprecatedInvalidId,
+	sunsetTooSmall: RequestPropertySunsetDateTooSmallId,
+}
+
 // RequestPropertyDeprecationCheck detects deprecated properties in request bodies
 func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
@@ -25,83 +31,38 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		op := info.operationItem.Revision
 
-		stability, err := getStabilityLevel(op.Extensions)
-		if err != nil {
+		days, ok := deprecationDays(config, op.Extensions)
+		if !ok {
 			// handled in CheckBackwardCompatibility
 			return
 		}
 
-		deprecationDays := getDeprecationDays(config, stability)
-
 		info.walkProperties(func(p propertyInfo) {
-			// Check if deprecation status changed
 			if p.propertyDiff.DeprecatedDiff == nil {
 				return
 			}
 
+			stage := deprecationId(p.propertyDiff.DeprecatedDiff, p.propertyDiff.Revision.Extensions, days, requestPropertyDeprecationIds)
+
+			field := "deprecated"
+			if stage.atSunset {
+				// A finding about the sunset date points at x-sunset, not at deprecated.
+				field = diff.SunsetExtension
+			}
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, field)
+
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "deprecated")
-			// A finding about the sunset date points at x-sunset, not at deprecated.
-			sunsetBaseSource, sunsetRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, diff.SunsetExtension)
+			change := p.newChange(stage.id, append([]any{propName}, stage.args...), "").
+				WithSources(baseSource, revisionSource)
 
-			// Check if property was reactivated (un-deprecated)
-			if p.propertyDiff.DeprecatedDiff.To == nil || p.propertyDiff.DeprecatedDiff.To == false {
-				result = append(result, p.newChange(
-					RequestPropertyReactivatedId,
-					[]any{propName},
-					"",
-				).WithSources(propBaseSource, propRevisionSource))
-				return
+			// The stability level describes the deprecation, so it is left off
+			// a finding about the sunset date, and off a reactivation. The
+			// media type stays on every change, as newChange put it there.
+			if stage.id == RequestPropertyDeprecatedId || stage.id == RequestPropertyDeprecatedWithSunsetId {
+				change = change.WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails))
 			}
 
-			// Property was newly deprecated (To=true means deprecated now)
-			sunset, ok := getSunset(p.propertyDiff.Revision.Extensions)
-			if !ok {
-				// if deprecation policy is defined and sunset is missing, it's a breaking change
-				if deprecationDays > 0 {
-					result = append(result, p.newChange(
-						RequestPropertyDeprecatedSunsetMissingId,
-						[]any{propName},
-						"",
-					).WithSources(propBaseSource, propRevisionSource))
-				} else {
-					// no policy, report deprecation without sunset as INFO
-					result = append(result, p.newChange(
-						RequestPropertyDeprecatedId,
-						[]any{propName},
-						"",
-					).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails)))
-				}
-				return
-			}
-
-			date, err := getSunsetDate(sunset)
-			if err != nil {
-				result = append(result, p.newChange(
-					RequestPropertyDeprecatedInvalidId,
-					[]any{propName, err},
-					"",
-				).WithSources(sunsetBaseSource, sunsetRevisionSource))
-				return
-			}
-
-			days := date.DaysSince(civil.DateOf(time.Now()))
-
-			if days < int(deprecationDays) {
-				result = append(result, p.newChange(
-					RequestPropertySunsetDateTooSmallId,
-					[]any{propName, date, deprecationDays},
-					"",
-				).WithSources(sunsetBaseSource, sunsetRevisionSource))
-				return
-			}
-
-			// Report property deprecated with sunset date (always show, regardless of policy)
-			result = append(result, p.newChange(
-				RequestPropertyDeprecatedWithSunsetId,
-				[]any{propName, date},
-				"",
-			).WithSources(propBaseSource, propRevisionSource).WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails)))
+			result = append(result, change)
 		})
 	})
 
