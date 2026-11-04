@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/internal/extension"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -244,7 +245,7 @@ func getStabilityLevel(i map[string]any) (string, error) {
 
 	stabilityLevel, ok := value.(string)
 	if !ok {
-		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %s", StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable, extensionValueText(value))
+		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %s", StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable, extension.ValueText(value))
 	}
 
 	if stabilityLevel != StabilityDraft &&

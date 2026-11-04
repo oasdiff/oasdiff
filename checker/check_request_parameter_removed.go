@@ -2,6 +2,7 @@ package checker
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -50,11 +51,11 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 }
 
 func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) (ApiChange, bool) {
-	id, extra, ok := removalId(param.Deprecated, param.Extensions, removalIds{
-		removed:         RequestParameterRemovedId,
-		withDeprecation: RequestParameterRemovedWithDeprecationId,
-		beforeSunset:    ParameterRemovedBeforeSunsetId,
-		sunsetParse:     RequestParameterSunsetParseId,
+	id, extra, ok := deprecation.Removal(param.Deprecated, param.Extensions, deprecation.RemovalIds{
+		Removed:         RequestParameterRemovedId,
+		WithDeprecation: RequestParameterRemovedWithDeprecationId,
+		BeforeSunset:    ParameterRemovedBeforeSunsetId,
+		SunsetParse:     RequestParameterSunsetParseId,
 	})
 	if !ok {
 		return ApiChange{}, false

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -73,11 +74,11 @@ func checkRemovedOperations(pathsDiff *diff.PathsDiff, operationsSources *diff.O
 }
 
 func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
-	id, extra, ok := removalId(opInfo.operation.Deprecated, opInfo.operation.Extensions, removalIds{
-		removed:         getWithoutDeprecationId(isPath),
-		withDeprecation: getWithDeprecationId(isPath),
-		beforeSunset:    getBeforeSunsetId(isPath),
-		sunsetParse:     APIPathSunsetParseId,
+	id, extra, ok := deprecation.Removal(opInfo.operation.Deprecated, opInfo.operation.Extensions, deprecation.RemovalIds{
+		Removed:         getWithoutDeprecationId(isPath),
+		WithDeprecation: getWithDeprecationId(isPath),
+		BeforeSunset:    getBeforeSunsetId(isPath),
+		SunsetParse:     APIPathSunsetParseId,
 	})
 	if !ok {
 		return nil

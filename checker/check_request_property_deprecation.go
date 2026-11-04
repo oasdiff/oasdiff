@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -15,13 +16,13 @@ const (
 	RequestPropertySunsetDateTooSmallId      = "request-property-sunset-date-too-small"
 )
 
-var requestPropertyDeprecationIds = deprecationIds{
-	reactivated:    RequestPropertyReactivatedId,
-	deprecated:     RequestPropertyDeprecatedId,
-	withSunset:     RequestPropertyDeprecatedWithSunsetId,
-	sunsetMissing:  RequestPropertyDeprecatedSunsetMissingId,
-	sunsetParse:    RequestPropertyDeprecatedInvalidId,
-	sunsetTooSmall: RequestPropertySunsetDateTooSmallId,
+var requestPropertyDeprecationIds = deprecation.Ids{
+	Reactivated:    RequestPropertyReactivatedId,
+	Deprecated:     RequestPropertyDeprecatedId,
+	WithSunset:     RequestPropertyDeprecatedWithSunsetId,
+	SunsetMissing:  RequestPropertyDeprecatedSunsetMissingId,
+	SunsetParse:    RequestPropertyDeprecatedInvalidId,
+	SunsetTooSmall: RequestPropertySunsetDateTooSmallId,
 }
 
 // RequestPropertyDeprecationCheck detects deprecated properties in request bodies
@@ -42,23 +43,23 @@ func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *d
 				return
 			}
 
-			stage := deprecationId(p.propertyDiff.DeprecatedDiff, p.propertyDiff.Revision.Extensions, days, requestPropertyDeprecationIds)
+			stage := deprecation.Announce(p.propertyDiff.DeprecatedDiff, p.propertyDiff.Revision.Extensions, days, requestPropertyDeprecationIds)
 
 			field := "deprecated"
-			if stage.atSunset {
+			if stage.AtSunset {
 				// A finding about the sunset date points at x-sunset, not at deprecated.
 				field = diff.SunsetExtension
 			}
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, field)
 
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
-			change := p.newChange(stage.id, append([]any{propName}, stage.args...), "").
+			change := p.newChange(stage.Id, append([]any{propName}, stage.Args...), "").
 				WithSources(baseSource, revisionSource)
 
 			// The stability level describes the deprecation, so it is left off
 			// a finding about the sunset date, and off a reactivation. The
 			// media type stays on every change, as newChange put it there.
-			if stage.id == RequestPropertyDeprecatedId || stage.id == RequestPropertyDeprecatedWithSunsetId {
+			if stage.Id == RequestPropertyDeprecatedId || stage.Id == RequestPropertyDeprecatedWithSunsetId {
 				change = change.WithDetails(combineDetails(formatDeprecationDetails(op.Extensions), info.mediaTypeDetails))
 			}
 

@@ -4,6 +4,7 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/checker/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -72,10 +73,10 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					return
 				}
 
-				id, extra, ok := removalId(propertyItem.Deprecated, propertyItem.Extensions, removalIds{
-					removed:         RequestPropertyRemovedId,
-					withDeprecation: RequestPropertyRemovedWithDeprecationId,
-					beforeSunset:    RequestPropertyRemovedBeforeSunsetId,
+				id, extra, ok := deprecation.Removal(propertyItem.Deprecated, propertyItem.Extensions, deprecation.RemovalIds{
+					Removed:         RequestPropertyRemovedId,
+					WithDeprecation: RequestPropertyRemovedWithDeprecationId,
+					BeforeSunset:    RequestPropertyRemovedBeforeSunsetId,
 				})
 				if !ok {
 					return

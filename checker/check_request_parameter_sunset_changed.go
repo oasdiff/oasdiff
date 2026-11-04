@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/civil"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
 	"github.com/oasdiff/oasdiff/checker/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -44,13 +45,13 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 			return
 		}
 
-		date, err := getSunsetDate(paramRevision.Extensions[diff.SunsetExtension])
+		date, err := deprecation.SunsetDate(paramRevision.Extensions[diff.SunsetExtension])
 		if err != nil {
 			result = append(result, getRequestParameterSunsetParse(p.opInfo, paramRevision, err).WithSources(nil, revisionSource))
 			return
 		}
 
-		baseDate, err := getSunsetDate(paramBase.Extensions[diff.SunsetExtension])
+		baseDate, err := deprecation.SunsetDate(paramBase.Extensions[diff.SunsetExtension])
 		if err != nil {
 			opInfo := newOpInfo(config, p.opInfo.methodDiff.Base, operationsSources, p.opInfo.method, p.opInfo.path)
 			result = append(result, getRequestParameterSunsetParse(opInfo, paramBase, err).WithSources(baseSource, nil))
