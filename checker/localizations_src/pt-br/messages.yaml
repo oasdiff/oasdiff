@@ -125,6 +125,8 @@ request-property-deprecated-sunset-missing: "propriedade de requisição %s depr
 request-property-deprecated-sunset-invalid: "propriedade de requisição %s depreciada com data de expiração inválida: %s"
 request-property-reactivated: "propriedade de requisição %s reativada"
 request-property-sunset-date-too-small: "a data de expiração %s da propriedade de requisição %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
+request-property-sunset-deleted: "a data de expiração da propriedade de requisição %s foi excluída, mas deprecated=true foi mantido"
+request-property-sunset-date-changed-too-small: "a data de expiração da propriedade de requisição %s foi alterada para uma data anterior, de %s para %s, a nova data não deve ser anterior a %s e deve ser pelo menos %s dias a partir de agora"
 request-property-became-required: a propriedade de requisição %s tornou-se obrigatória
 request-property-became-required-with-default: a propriedade de requisição %s com um valor padrão tornou-se obrigatória
 request-property-became-optional: a propriedade de requisição %s tornou-se opcional
@@ -202,6 +204,8 @@ response-property-deprecated-sunset-missing: "propriedade de resposta %s depreci
 response-property-deprecated-sunset-invalid: "propriedade de resposta %s depreciada com data de expiração inválida: %s"
 response-property-reactivated: "propriedade de resposta %s reativada"
 response-property-sunset-date-too-small: "a data de expiração %s da propriedade de resposta %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
+response-property-sunset-deleted: "a data de expiração da propriedade de resposta %s foi excluída, mas deprecated=true foi mantido"
+response-property-sunset-date-changed-too-small: "a data de expiração da propriedade de resposta %s foi alterada para uma data anterior, de %s para %s, a nova data não deve ser anterior a %s e deve ser pelo menos %s dias a partir de agora"
 response-property-became-optional: a propriedade de resposta %s tornou-se opcional para o status %s
 response-property-became-nullable: a propriedade de resposta %s tornou-se anulável para o status %s
 response-body-became-nullable: o corpo da resposta tornou-se anulável
@@ -1078,6 +1082,8 @@ request-property-deprecated-sunset-missing-description: propriedade de requisiç
 request-property-deprecated-with-sunset-description: propriedade de requisição depreciada com data de expiração
 request-property-reactivated-description: propriedade de requisição reativada (depreciação definida como falsa)
 request-property-sunset-date-too-small-description: propriedade de requisição depreciada antes do número mínimo de dias exigidos
+request-property-sunset-deleted-description: data de expiração da propriedade de requisição removida enquanto ainda depreciada
+request-property-sunset-date-changed-too-small-description: a data de expiração modificada da propriedade de requisição não atende ao número mínimo de dias exigidos
 response-media-type-name-changed-description: tipo de mídia da resposta alterado
 response-media-type-name-generalized-description: tipo de mídia da resposta alterado para um tipo mais geral
 response-media-type-name-specialized-description: tipo de mídia da resposta alterado para um tipo mais específico
@@ -1087,6 +1093,8 @@ response-property-deprecated-sunset-missing-description: propriedade de resposta
 response-property-deprecated-with-sunset-description: propriedade de resposta depreciada com data de expiração
 response-property-reactivated-description: propriedade de resposta reativada (depreciação definida como falsa)
 response-property-sunset-date-too-small-description: propriedade de resposta depreciada antes do número mínimo de dias exigidos
+response-property-sunset-deleted-description: data de expiração da propriedade de resposta removida enquanto ainda depreciada
+response-property-sunset-date-changed-too-small-description: a data de expiração modificada da propriedade de resposta não atende ao número mínimo de dias exigidos
 # media type schema existence (#1050)
 request-body-media-type-schema-added: um esquema foi adicionado ao tipo de mídia %s do corpo da requisição
 request-body-media-type-schema-removed: o esquema foi removido do tipo de mídia %s do corpo da requisição

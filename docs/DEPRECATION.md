@@ -73,4 +73,3 @@ At the sunset date or later, the removal isn't reported at all.
 Notes:
 1. An `x-sunset` date which doesn't conform with RFC3339 is reported as `api-path-sunset-parse` for paths and endpoints, and as `request-parameter-sunset-parse` for parameters. For properties it is reported with the plain removal id, since the deprecation checks already report the invalid date.
 2. Removing an optional response property is reported as `response-optional-property-removed` whether or not it was deprecated, since that removal is not breaking either way.
-3. Two property-level checks are still missing: shortening a sunset date and deleting one. See [#858](https://github.com/oasdiff/oasdiff/issues/858).
