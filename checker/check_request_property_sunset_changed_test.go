@@ -63,7 +63,7 @@ func TestRequestPropertySunsetChanged_TooSmall(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("request property `oldField` sunset date changed to an earlier date, from `2099-12-31` to `%s`, new sunset date must be not earlier than `2099-12-31` and at least `10` days from now", sunsetDate), change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
-// changing the sunset date of a deprecated request property to an invalid date is breaking; the change points at the x-sunset field in each spec
+// changing the sunset date of a deprecated request property to an invalid date is breaking; the change points at the revision's x-sunset field only
 func TestRequestPropertySunsetChanged_ToInvalid(t *testing.T) {
 	s1, err := open(deprecationFile("property_deprecated_future.yaml"), newLoaderWithOriginTracking())
 	require.NoError(t, err)
@@ -77,8 +77,7 @@ func TestRequestPropertySunsetChanged_ToInvalid(t *testing.T) {
 	change := requireSingleChange(t, errs, checker.RequestPropertyDeprecatedInvalidId)
 	require.Equal(t, checker.ERR, change.GetLevel())
 	require.Equal(t, "request property `oldField` deprecated with invalid sunset date: `sunset date doesn't conform with RFC3339: invalid-date-format`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, deprecationFile("property_deprecated_future.yaml"), change.GetBaseSource().File)
-	require.Equal(t, 36, change.GetBaseSource().Line)
+	require.Nil(t, change.GetBaseSource(), "the revision's sunset date failed to parse, so the base is not part of this finding")
 	require.Equal(t, deprecationFile("property_deprecated_invalid_sunset.yaml"), change.GetRevisionSource().File)
 	require.Equal(t, 36, change.GetRevisionSource().Line)
 }

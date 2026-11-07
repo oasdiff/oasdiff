@@ -72,6 +72,11 @@ func propertySunsetChangedCheck(
 			args := append([]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, extra...)
 
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, diff.SunsetExtension)
+			if id == ids.SunsetParse {
+				// the revision's value is the one that failed to parse, so the base
+				// is not part of this finding
+				baseSource = nil
+			}
 			result = append(result, p.newChange(id, args, "").WithSources(baseSource, revisionSource))
 		})
 	})
