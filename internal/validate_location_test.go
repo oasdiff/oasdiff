@@ -23,6 +23,9 @@ import (
 // under data/validate that triggers the rule and asserting the expected line,
 // the way Test_ValidateCmd_FieldVersionMismatch_LicenseIdentifier does.
 //
+// A rule whose finding carries no location at all is listed too; shrinking its
+// entry means first giving the finding a location to pin.
+//
 // A kin release that adds a validation code walks the existing chain first
 // (TestRuleIDs_MatchKinCatalog, then TestRuleDescriptions_CoverEveryRuleID) and
 // then fails here, unpinned and unlisted, so whoever adds the code has to
@@ -30,6 +33,7 @@ import (
 var locationUnpinned = []string{
 	"additional-operations-field-for-3-2-plus",
 	"additional-properties-both-forms-exclusive",
+	"allof-subschemas-conflict",
 	"ambiguous-parameter-serialization",
 	"anchor-field-for-3-1-plus",
 	"authorization-url-forbidden",

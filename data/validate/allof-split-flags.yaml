@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: split flags
+  version: "1"
+paths: {}
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        name:
+          allOf:
+            - type: string
+              readOnly: true
+            - writeOnly: true

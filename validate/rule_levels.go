@@ -37,7 +37,12 @@ var ruleLevels = map[string]checker.Level{
 	// the spec; the author's intent is lost, not the document.
 	"extra-sibling-fields": checker.WARN,
 	"conflicting-paths":    checker.WARN,
-	"duplicate-parameter":  checker.WARN,
+	// A merge that fails says the subschemas conflict, which is a real defect
+	// when no payload can satisfy them all, and a gap in the merge when the
+	// combination is one it has no rule for. Warning covers both, since the
+	// merge cannot tell which it hit.
+	"allof-subschemas-conflict": checker.WARN,
+	"duplicate-parameter":       checker.WARN,
 	// http methods are case-sensitive, so an additionalOperations key `Post`
 	// is a method of its own, which the spec allows, but it is easily mistaken
 	// for the POST operation.
