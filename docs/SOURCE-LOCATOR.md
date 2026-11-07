@@ -22,6 +22,10 @@ When a spec uses `$ref` to import schemas from other files, source locations poi
 
 JSON and YAML specs both carry source locations. A JSON spec reports the line and column of the changed field like a YAML one, including fields on a single line, where the column is what tells them apart.
 
+### JSON written on a single line
+
+Positions are only as fine-grained as the document's line breaks. A JSON spec written one element per line reports each change on the element's own line, like a YAML spec. A compact spec, the whole document on one line, reports every change on line 1 with a column that is still exact, so GitHub Actions annotations all land on the first line and a side-by-side review shows the whole document as the block for every change. Run the spec through `jq .` before comparing it to get positions you can navigate.
+
 ### Changes with no line to report
 
 Some changes are about the document rather than about an element in it, so there is no line to point at. `api-version-not-bumped` is the clearest case: it compares the two documents, and both `baseSource` and `revisionSource` are omitted.
