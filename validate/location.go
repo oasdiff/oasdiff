@@ -62,6 +62,11 @@ func locationForKinError(err error) *openapi3.Location {
 		// — the per-field key under the schema where the value lives.
 		return fieldLoc(sve.Origin, sve.ValueKind)
 	}
+	if mop, ok := errors.AsType[*openapi3.SchemaMultipleOfNotPositiveError](err); ok && mop.Origin != nil {
+		// The error names no field, since the schema is the offender, but the
+		// keyword that broke the MUST is the line to report.
+		return fieldLoc(mop.Origin, "multipleOf")
+	}
 	if mef, ok := errors.AsType[*openapi3.MutuallyExclusiveFieldsError](err); ok && mef.Origin != nil {
 		// Prefer Field1's location; either offender pins the finding to
 		// the right object. We don't carry both since a single Source
