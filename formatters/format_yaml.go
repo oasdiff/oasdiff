@@ -46,6 +46,10 @@ func (f YAMLFormatter) RenderChecks(checks Checks, opts RenderOpts) ([]byte, err
 	return printYAML(checks)
 }
 
+func (f YAMLFormatter) RenderExplain(explanation Explanation, opts RenderOpts) ([]byte, error) {
+	return printYAML(&explanation)
+}
+
 func (f YAMLFormatter) RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error) {
 	return printYAML(spec)
 }
@@ -55,7 +59,7 @@ func (f YAMLFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 }
 
 func (f YAMLFormatter) SupportedOutputs() []Output {
-	return []Output{OutputDiff, OutputSummary, OutputChangelog, OutputChecks, OutputFlatten, OutputValidate}
+	return []Output{OutputDiff, OutputSummary, OutputChangelog, OutputChecks, OutputExplain, OutputFlatten, OutputValidate}
 }
 
 func printYAML(output any) ([]byte, error) {

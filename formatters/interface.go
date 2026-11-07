@@ -17,6 +17,7 @@ type Formatter interface {
 	RenderSummary(diff *diff.Diff, opts RenderOpts) ([]byte, error)
 	RenderChangelog(changes checker.Changes, opts RenderOpts) ([]byte, error)
 	RenderChecks(checks Checks, opts RenderOpts) ([]byte, error)
+	RenderExplain(explanation Explanation, opts RenderOpts) ([]byte, error)
 	RenderCoverage(edits []coverage.Edit, opts RenderOpts) ([]byte, error)
 	RenderCoveragePatterns(patterns []coverage.Pattern, opts RenderOpts) ([]byte, error)
 	RenderFlatten(spec *openapi3.T, opts RenderOpts) ([]byte, error)
