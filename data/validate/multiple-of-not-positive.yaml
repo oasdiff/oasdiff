@@ -1,0 +1,15 @@
+openapi: 3.0.3
+info:
+  title: t
+  version: "1"
+paths:
+  /things:
+    get:
+      responses:
+        '200':
+          description: ok
+components:
+  schemas:
+    Measure:
+      type: number
+      multipleOf: 0

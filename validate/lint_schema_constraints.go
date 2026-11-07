@@ -17,9 +17,6 @@ import (
 // combination the spec does not forbid outright but that no value can satisfy
 // (or a SHOULD) is a warning.
 const (
-	// MultipleOfNotPositiveID: JSON Schema validation, "multipleOf" MUST be a
-	// number strictly greater than 0.
-	MultipleOfNotPositiveID = "multiple-of-not-positive"
 	// SubschemasEmptyID: allOf / anyOf / oneOf MUST be a non-empty array.
 	SubschemasEmptyID = "subschemas-empty"
 
@@ -57,11 +54,6 @@ func schemaConstraintFindings(s *openapi3.Schema, section, source string) format
 	var findings formatters.Findings
 	add := func(id string, level checker.Level, field, text string, args ...any) {
 		findings = append(findings, newSchemaConstraintFinding(s, id, level, field, text, section, source, args))
-	}
-
-	if s.MultipleOf != nil && *s.MultipleOf <= 0 {
-		add(MultipleOfNotPositiveID, checker.ERR, "multipleOf",
-			fmt.Sprintf("multipleOf must be greater than 0, got %v", *s.MultipleOf), *s.MultipleOf)
 	}
 
 	// An explicitly empty allOf / anyOf / oneOf. A nil one is simply absent, so
