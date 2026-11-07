@@ -369,7 +369,7 @@ request-property-all-of-added: added %s to the %s request property `allOf` list
 request-property-all-of-removed: removed %s from the %s request property `allOf` list
 response-body-all-of-added: added %s to the response body `allOf` list for the response status %s
 response-body-all-of-removed: removed %s from the response body `allOf` list for the response status %s
-all-of-not-flattened-comment: "This compared the `allOf` branches one at a time, so another branch may still guarantee what this one dropped. Run with --flatten-allof to merge the branches and compare what they describe together."
+all-of-not-flattened-comment: "This compared the `allOf` branches one at a time, so another branch may already describe what changed here, leaving the merged schema the same. Run with --flatten-allof to merge the branches and compare what they describe together."
 read-only-comment: "The property is read-only, so it never appears in requests and this change cannot invalidate one."
 write-only-comment: "The property is write-only, so it never appears in responses and this change cannot invalidate one."
 required-in-requests-comment: "In OpenAPI 3.1 and later, required applies to a read-only property in requests too, so clients already send it and this change cannot invalidate a request."
