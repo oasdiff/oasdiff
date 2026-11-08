@@ -197,3 +197,20 @@ func TestSunsetChanged_Later(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISunsetChangedCheck), d, osm, checker.INFO))
 }
+
+// the earlier-date finding carries the reason, since a provider with no
+// deprecation policy would not expect it
+func TestSunsetChanged_EarlierCarriesTheReason(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+	s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(100).String())
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck, checker.WithDeprecation(0, 10)), d, osm)
+	change := requireSingleChange(t, errs, checker.APISunsetDateChangedEarlierId)
+	require.Contains(t, change.GetComment(checker.NewDefaultLocalizer()), "treats a published x-sunset date as a commitment")
+}

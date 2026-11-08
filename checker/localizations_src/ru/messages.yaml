@@ -1625,3 +1625,4 @@ request-property-sunset-date-changed-earlier: "дата прекращения �
 request-property-sunset-date-changed-earlier-description: "дата прекращения действия поля запроса перенесена на более раннюю, чем обещанная клиентам"
 response-property-sunset-date-changed-earlier: "дата прекращения действия поля ответа %s изменена на более раннюю дату с %s на %s"
 response-property-sunset-date-changed-earlier-description: "дата прекращения действия поля ответа перенесена на более раннюю, чем обещанная клиентам"
+sunset-date-changed-earlier-comment: "Дата, которую получили клиенты, отозвана. oasdiff считает опубликованную дату x-sunset обязательством, независимо от настроенной политики устаревания, поскольку клиенты планируют по ней переход. Понизьте уровень этой проверки с помощью --severity-levels, если перенос объявленной даты допустим в вашем процессе."

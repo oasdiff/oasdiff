@@ -1623,3 +1623,4 @@ request-property-sunset-date-changed-earlier: "a data de expiração da propried
 request-property-sunset-date-changed-earlier-description: "a data de expiração da propriedade de requisição foi movida para antes da que os clientes receberam"
 response-property-sunset-date-changed-earlier: "a data de expiração da propriedade de resposta %s foi alterada para uma data anterior, de %s para %s"
 response-property-sunset-date-changed-earlier-description: "a data de expiração da propriedade de resposta foi movida para antes da que os clientes receberam"
+sunset-date-changed-earlier-comment: "A data que os clientes receberam foi retirada. O oasdiff trata uma data x-sunset publicada como um compromisso, com ou sem uma política de depreciação configurada, porque os clientes planejam a migração com base nela. Reduza o nível desta verificação com --severity-levels se remarcar uma expiração anunciada for aceitável no seu processo."

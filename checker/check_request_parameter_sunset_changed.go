@@ -13,10 +13,11 @@ const (
 )
 
 var requestParameterSunsetChangeIds = deprecation.SunsetChangeIds{
-	Deleted:         RequestParameterSunsetDeletedId,
-	SunsetParse:     RequestParameterSunsetParseId,
-	ChangedEarlier:  RequestParameterSunsetDateChangedEarlierId,
-	ChangedTooSmall: RequestParameterSunsetDateChangedTooSmallId,
+	Deleted:               RequestParameterSunsetDeletedId,
+	SunsetParse:           RequestParameterSunsetParseId,
+	ChangedEarlier:        RequestParameterSunsetDateChangedEarlierId,
+	ChangedEarlierComment: SunsetDateChangedEarlierCommentId,
+	ChangedTooSmall:       RequestParameterSunsetDateChangedTooSmallId,
 }
 
 func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -31,7 +32,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 		// and only the grace period depends on it
 		days, daysKnown := deprecationDays(config, p.opInfo.operation.Extensions)
 
-		id, extra, ok := deprecation.SunsetChange(p.paramDiff.ExtensionsDiff, p.paramDiff.Base.Extensions, p.paramDiff.Revision.Extensions, days, daysKnown, requestParameterSunsetChangeIds)
+		id, extra, comment, ok := deprecation.SunsetChange(p.paramDiff.ExtensionsDiff, p.paramDiff.Base.Extensions, p.paramDiff.Revision.Extensions, days, daysKnown, requestParameterSunsetChangeIds)
 		if !ok {
 			return
 		}
@@ -43,7 +44,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 			// is not part of this finding
 			baseSource = nil
 		}
-		result = append(result, p.opInfo.NewApiChange(id, args, "").WithSources(baseSource, revisionSource))
+		result = append(result, p.opInfo.NewApiChange(id, args, comment).WithSources(baseSource, revisionSource))
 	})
 
 	return result
