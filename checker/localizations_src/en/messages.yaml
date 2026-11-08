@@ -68,7 +68,7 @@ new-required-request-parameter: added the new required %s request parameter %s
 new-optional-request-parameter: added the new optional %s request parameter %s
 new-required-request-property: added the new required request property %s
 new-required-request-property-with-default: added the new required request property %s with a default value
-required-request-property-with-default-error-comment: A request that omits this required property is invalid under the new contract, even though the property has a default. The default is a server-side fallback, it does not make the omitted property valid. Downgrade this check with --severity-levels if omitting the property is safe for your clients.
+required-request-property-with-default-error-comment: A request that omits this required property is invalid under the new contract, even though the property has a default. The default is a server-side fallback, it does not make the omitted property valid.
 new-optional-request-property: added the new optional request property %s
 new-required-request-header-property: added the new required %s request header's property %s
 request-body-became-required: request body became required
@@ -1257,7 +1257,7 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
-bound-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+bound-set-comment: Setting a bound rejects values the previous contract accepted, unless your clients are known to stay within the new limit.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-exclusive-max-unset: the request's body exclusiveMaximum was unset from %s

@@ -52,7 +52,7 @@ new-required-request-parameter: agregado el nuevo parámetro %s de solicitud req
 new-optional-request-parameter: agregado el nuevo parámetro %s de solicitud opcional %s
 new-required-request-property: agregada la nueva propiedad de solicitud requerida %s
 new-required-request-property-with-default: agregada la nueva propiedad de solicitud requerida %s con un valor por defecto
-required-request-property-with-default-error-comment: "Una solicitud que omite esta propiedad obligatoria es inválida según el nuevo contrato, aunque la propiedad tenga un valor por defecto. El valor por defecto es un mecanismo del servidor, no hace que la propiedad omitida sea válida. Reduce la severidad de esta verificación con --severity-levels si omitir la propiedad es seguro para tus clientes."
+required-request-property-with-default-error-comment: "Una solicitud que omite esta propiedad obligatoria es inválida según el nuevo contrato, aunque la propiedad tenga un valor por defecto. El valor por defecto es un mecanismo del servidor, no hace que la propiedad omitida sea válida."
 new-optional-request-property: agregada la nueva propiedad de solicitud opcional %s
 new-required-request-header-property: agregada la nueva propiedad %s requerida del encabezado de solicitud %s
 request-body-became-required: el cuerpo de solicitud se volvió requerido
@@ -1246,7 +1246,7 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
-bound-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
+bound-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba, salvo que sus clientes se mantengan dentro del nuevo límite.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-exclusive-max-unset: el valor exclusiveMaximum del cuerpo de solicitud fue removido de %s
