@@ -51,11 +51,9 @@ func propertySunsetChangedCheck(
 	result := make(Changes, 0)
 
 	walk(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		days, ok := deprecationDays(config, info.operationItem.Revision.Extensions)
-		if !ok {
-			// handled in CheckBackwardCompatibility
-			return
-		}
+		// an unparseable stability level is reported in CheckBackwardCompatibility,
+		// and only the grace period depends on it
+		days, daysKnown := deprecationDays(config, info.operationItem.Revision.Extensions)
 
 		info.walkProperties(func(p propertyInfo) {
 			// a property deprecated or reactivated in this change is reported by
@@ -65,7 +63,7 @@ func propertySunsetChangedCheck(
 				return
 			}
 
-			id, extra, ok := deprecation.SunsetChange(p.propertyDiff.ExtensionsDiff, p.propertyDiff.Base.Extensions, p.propertyDiff.Revision.Extensions, days, ids)
+			id, extra, ok := deprecation.SunsetChange(p.propertyDiff.ExtensionsDiff, p.propertyDiff.Base.Extensions, p.propertyDiff.Revision.Extensions, days, daysKnown, ids)
 			if !ok {
 				return
 			}

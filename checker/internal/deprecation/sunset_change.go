@@ -17,9 +17,10 @@ type SunsetChangeIds struct {
 
 // SunsetChange follows a change to the sunset date of an element that stays
 // deprecated: the change and the sunset grace period decide which id reports
-// it, and which arguments that id takes beyond the ones naming the element. ok
-// is false when the change is not reported.
-func SunsetChange(extensionsDiff *diff.ExtensionsDiff, base, revision map[string]any, days uint, ids SunsetChangeIds) (string, []any, bool) {
+// it, and which arguments that id takes beyond the ones naming the element.
+// daysKnown is false when the stability level does not resolve to a grace
+// period. ok is false when the change is not reported.
+func SunsetChange(extensionsDiff *diff.ExtensionsDiff, base, revision map[string]any, days uint, daysKnown bool, ids SunsetChangeIds) (string, []any, bool) {
 	if extensionsDiff == nil {
 		return "", nil, false
 	}
@@ -40,6 +41,12 @@ func SunsetChange(extensionsDiff *diff.ExtensionsDiff, base, revision map[string
 	baseDate, err := SunsetDate(base[diff.SunsetExtension])
 	if err != nil {
 		// an unparseable base date gave clients no date to rely on, so replacing it is not reported
+		return "", nil, false
+	}
+
+	if !daysKnown {
+		// the grace period is what the comparison below needs, and the cases
+		// above do not, so there is nothing left to report
 		return "", nil, false
 	}
 
