@@ -1,14 +1,9 @@
 package checker
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
 	"slices"
-	"strconv"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/internal/extension"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -214,35 +209,6 @@ func belowStabilityThreshold(config *Config, operation *openapi3.Operation) bool
 }
 
 // normalizedStability returns StabilityStable for an empty label, otherwise the label itself.
-func normalizedStability(label string) string {
-	if label == "" {
-		return StabilityStable
-	}
-	return label
-}
-
-// invalidStabilityLevel reports an x-stability-level value that is not one of
-// the levels oasdiff knows.
-type invalidStabilityLevel struct {
-	// Value is the value the message reports, quoted when it is a string, so
-	// that an empty or space-padded level is visible in every output format.
-	Value string
-}
-
-func (e *invalidStabilityLevel) Error() string {
-	return fmt.Sprintf("stability level %s is not one of %s, %s, %s or %s",
-		e.Value, StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable)
-}
-
-// stabilityValue is the message argument for an error getStabilityLevel
-// returned: the value it refused, so that the localized message holds the
-// sentence and the argument holds only the value.
-func stabilityValue(err error) string {
-	if invalid, ok := errors.AsType[*invalidStabilityLevel](err); ok {
-		return invalid.Value
-	}
-	return err.Error()
-}
 
 func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method string, path string, err error) ApiChange {
 	return NewApiChange(
@@ -255,32 +221,4 @@ func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, 
 		method,
 		path,
 	)
-}
-
-func getStabilityLevel(i map[string]any) (string, error) {
-	if i == nil || i[diff.XStabilityLevelExtension] == nil {
-		return "", nil
-	}
-	value := i[diff.XStabilityLevelExtension]
-	if jsonStabilityRaw, ok := value.(json.RawMessage); ok {
-		if err := json.Unmarshal(jsonStabilityRaw, &value); err != nil {
-			// bytes that are not valid json are not a level either, and the value
-			// is what the message has to report
-			return "", &invalidStabilityLevel{Value: strconv.Quote(string(jsonStabilityRaw))}
-		}
-	}
-
-	stabilityLevel, ok := value.(string)
-	if !ok {
-		return "", &invalidStabilityLevel{Value: extension.ValueText(value)}
-	}
-
-	if stabilityLevel != StabilityDraft &&
-		stabilityLevel != StabilityAlpha &&
-		stabilityLevel != StabilityBeta &&
-		stabilityLevel != StabilityStable {
-		return "", &invalidStabilityLevel{Value: strconv.Quote(stabilityLevel)}
-	}
-
-	return stabilityLevel, nil
 }
