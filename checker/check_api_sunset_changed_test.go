@@ -27,16 +27,7 @@ func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 
 // the sunset change points at the x-sunset field in the base spec
 func TestBreaking_SunsetDeleted_WithSources(t *testing.T) {
-
-	s1, err := open(deprecationFile("deprecated-with-sunset.yaml"), newLoaderWithOriginTracking())
-	require.NoError(t, err)
-
-	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"), newLoaderWithOriginTracking())
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
+	errs := checkChangesWithOrigins(t, checker.APISunsetChangedCheck, deprecationFile("deprecated-with-sunset.yaml"), deprecationFile("deprecated-no-sunset.yaml"))
 	require.Len(t, errs, 1)
 
 	require.Equal(t, checker.APISunsetDeletedId, errs[0].GetId())
