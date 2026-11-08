@@ -45,3 +45,11 @@ func TestSunsetDate_Parsed(t *testing.T) {
 		require.Equal(t, "2099-12-31", date.String())
 	}
 }
+
+// bytes that are not valid json report the bytes, not a json error
+func TestSunsetDate_InvalidJson(t *testing.T) {
+	_, err := deprecation.SunsetDate(json.RawMessage(`{"unterminated":`))
+	invalid, ok := errors.AsType[*deprecation.InvalidSunsetDate](err)
+	require.True(t, ok, "expected an InvalidSunsetDate, got %v", err)
+	require.Equal(t, `"{\"unterminated\":"`, invalid.Value)
+}

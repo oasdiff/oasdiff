@@ -43,7 +43,9 @@ func sunsetValue(err error) string {
 func SunsetDate(sunset any) (civil.Date, error) {
 	if sunsetJson, ok := sunset.(json.RawMessage); ok {
 		if err := json.Unmarshal(sunsetJson, &sunset); err != nil {
-			return civil.Date{}, fmt.Errorf("failed to unmarshal sunset json: %w", err)
+			// bytes that are not valid json are not a date either, and the value
+			// is what the message has to report
+			return civil.Date{}, &InvalidSunsetDate{Value: strconv.Quote(string(sunsetJson))}
 		}
 	}
 
