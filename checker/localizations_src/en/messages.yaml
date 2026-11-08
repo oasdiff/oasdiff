@@ -1633,4 +1633,4 @@ request-property-sunset-date-changed-earlier: "request property %s sunset date c
 request-property-sunset-date-changed-earlier-description: "request property sunset date moved earlier than the one clients were given"
 response-property-sunset-date-changed-earlier: "response property %s sunset date changed to an earlier date, from %s to %s"
 response-property-sunset-date-changed-earlier-description: "response property sunset date moved earlier than the one clients were given"
-sunset-date-changed-earlier-comment: "The date clients were given has been withdrawn. oasdiff treats a published x-sunset date as a commitment, whether or not a deprecation policy is configured, because clients schedule their migration against it. Downgrade this check with --severity-levels if rescheduling an announced sunset is acceptable in your process."
+sunset-date-changed-earlier-comment: "The date clients were given has been withdrawn. oasdiff treats a published x-sunset date as a commitment, whether or not a deprecation policy is configured, because clients schedule their migration against it."
