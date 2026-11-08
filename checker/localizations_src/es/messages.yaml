@@ -28,7 +28,7 @@ request-property-stability-decreased: "nivel de estabilidad de la propiedad de s
 request-property-stability-increased: "nivel de estabilidad de la propiedad de solicitud %s aumentado de %s a %s"
 response-property-stability-decreased: "nivel de estabilidad de la propiedad de respuesta %s disminuido de %s a %s"
 response-property-stability-increased: "nivel de estabilidad de la propiedad de respuesta %s aumentado de %s a %s"
-api-invalid-stability-level: "fallo al parsear el nivel de estabilidad: %v"
+api-invalid-stability-level: "el nivel de estabilidad %s no es uno de %s, %s, %s o %s"
 api-deprecated-sunset-missing: "fecha de expiración faltante para la API deprecada"
 api-sunset-date-too-small: "fecha de expiración %s es demasiado pequeña, debe ser al menos %s días desde ahora"
 endpoint-added: endpoint agregado

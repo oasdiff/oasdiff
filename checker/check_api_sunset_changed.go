@@ -64,36 +64,3 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 
 	return result
 }
-
-const (
-	StabilityDraft  = "draft"
-	StabilityAlpha  = "alpha"
-	StabilityBeta   = "beta"
-	StabilityStable = "stable"
-)
-
-const (
-	// Deprecated: use StabilityDraft.
-	STABILITY_DRAFT = StabilityDraft
-	// Deprecated: use StabilityAlpha.
-	STABILITY_ALPHA = StabilityAlpha
-	// Deprecated: use StabilityBeta.
-	STABILITY_BETA = StabilityBeta
-	// Deprecated: use StabilityStable.
-	STABILITY_STABLE = StabilityStable
-)
-
-func getDeprecationDays(config *Config, stability string) uint {
-	switch stability {
-	case StabilityDraft:
-		return 0
-	case StabilityAlpha:
-		return 0
-	case StabilityBeta:
-		return config.MinSunsetBetaDays
-	case StabilityStable:
-		return config.MinSunsetStableDays
-	default:
-		return config.MinSunsetStableDays
-	}
-}

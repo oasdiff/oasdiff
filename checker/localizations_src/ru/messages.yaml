@@ -24,7 +24,7 @@ request-property-stability-decreased: "уровень стабильности �
 request-property-stability-increased: "уровень стабильности свойства запроса %s увеличен с %s до %s"
 response-property-stability-decreased: "уровень стабильности свойства ответа %s уменьшен с %s до %s"
 response-property-stability-increased: "уровень стабильности свойства ответа %s увеличен с %s до %s"
-api-invalid-stability-level: "не удалось разобрать уровень стабильности: %v"
+api-invalid-stability-level: "уровень стабильности %s не является одним из %s, %s, %s или %s"
 api-deprecated-sunset-missing: "API устарел без даты прекращения действия"
 api-sunset-date-too-small: дата API sunset date %s слишком ранняя, должно быть как минимум %s дней от текущего дня
 api-path-added: API path добавлено
