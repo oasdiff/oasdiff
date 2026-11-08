@@ -26,7 +26,7 @@ func TestBreaking_ParameterDeprecationWithInvalidSunset(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `sunset date doesn't conform with RFC3339: invalid-date`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `\"invalid-date\"`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // deprecating a parameter without a deprecation policy but without specifying sunset date is not breaking

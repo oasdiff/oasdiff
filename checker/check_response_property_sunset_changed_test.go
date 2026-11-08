@@ -42,7 +42,7 @@ func TestResponsePropertySunsetChanged_ToInvalid(t *testing.T) {
 	errs := checkChanges(t, checker.ResponsePropertySunsetChangedCheck, deprecationFile("property_deprecated_future.yaml"), deprecationFile("property_deprecated_invalid_sunset.yaml"))
 	change := requireSingleChange(t, errs, checker.ResponsePropertyDeprecatedInvalidId)
 	require.Equal(t, checker.ERR, change.GetLevel())
-	require.Equal(t, "response property `legacyField` deprecated with invalid sunset date: `sunset date doesn't conform with RFC3339: invalid-date-format`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "response property `legacyField` deprecated with invalid sunset date: `\"invalid-date-format\"`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing the sunset date of a deprecated response property to a later date is not breaking, even if the deprecation policy asks for more
