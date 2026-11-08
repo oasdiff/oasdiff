@@ -60,7 +60,8 @@ func TestResponsePropertySunsetChanged_Later(t *testing.T) {
 	require.Empty(t, checker.CheckBackwardCompatibility(singleCheckConfig(checker.ResponsePropertySunsetChangedCheck, checker.WithDeprecation(0, 10)), d, osm))
 }
 
-// a sunset date change under an invalid stability level is skipped (handled in CheckBackwardCompatibility)
+// deleting the sunset date of a deprecated property is reported even when the
+// stability level does not parse, which only the grace period needs
 func TestResponsePropertySunsetChanged_WithInvalidStability(t *testing.T) {
 	s1, err := open(deprecationFile("property_deprecated_future.yaml"))
 	require.NoError(t, err)
@@ -71,5 +72,6 @@ func TestResponsePropertySunsetChanged_WithInvalidStability(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
-	require.Empty(t, checker.ResponsePropertySunsetChangedCheck(d, osm, checker.NewConfig(nil)))
+	errs := checker.ResponsePropertySunsetChangedCheck(d, osm, checker.NewConfig(nil))
+	requireSingleChange(t, errs, checker.ResponsePropertySunsetDeletedId)
 }

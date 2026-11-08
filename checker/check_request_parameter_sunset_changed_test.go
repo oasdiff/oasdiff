@@ -78,21 +78,10 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedParameter(t *testing.T) {
 }
 
 // changing sunset from an invalid date for a deprecated parameter is breaking
+// changing an invalid sunset date of a deprecated parameter to a valid one is
+// not reported, as clients had no date to rely on
 func TestBreaking_SunsetModifiedFromInvalidForDeprecatedParameter(t *testing.T) {
-
-	s1, err := open(paramDeprecationFile("deprecated-invalid.yaml"))
-	require.NoError(t, err)
-
-	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck), d, osm)
-	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `sunset date doesn't conform with RFC3339: invalid-date`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/param-deprecation/deprecated-invalid.yaml", errs[0].GetSource())
+	require.Empty(t, checkChanges(t, checker.RequestParameterSunsetChangedCheck, paramDeprecationFile("deprecated-invalid.yaml"), paramDeprecationFile("deprecated-future.yaml")))
 }
 
 // deleting other extension (not sunset) header for a deprecated parameter is not breaking
