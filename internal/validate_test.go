@@ -421,6 +421,20 @@ func Test_ValidateCmd_SchemaMultipleOfNotPositive(t *testing.T) {
 	require.Equal(t, float64(7), source["column"])
 }
 
+func Test_ValidateCmd_RequiredPropertyForbidden(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json --fail-on INFO ../data/validate/required-property-forbidden.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1, "name is declared, so only parts is reported")
+	require.Equal(t, "required-property-forbidden", findings[0]["id"])
+	require.Equal(t, "required property parts is not declared in properties, and additionalProperties is false, so no object can validate", findings[0]["text"])
+	source := findings[0]["source"].(map[string]any)
+	require.Equal(t, float64(19), source["line"], "should pin to the required: line, not the schema")
+	require.Equal(t, float64(7), source["column"])
+}
+
 // --color only affects the text output, so pairing it with a non-text
 // format is rejected rather than silently ignored (matching changelog).
 func Test_ValidateCmd_ColorWithNonTextFormatRejected(t *testing.T) {
