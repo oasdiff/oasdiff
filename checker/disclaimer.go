@@ -9,8 +9,8 @@ type Disclaimer int
 
 const (
 	// DisclaimerAllOfNotFlattened marks a change found inside an allOf branch
-	// that was compared branch by branch. A sibling branch can require what
-	// this one dropped, so the change may have no effect on the merged schema.
+	// that was compared branch by branch. A sibling branch may already describe
+	// what changed here, so the change may have no effect on the merged schema.
 	DisclaimerAllOfNotFlattened Disclaimer = iota + 1
 )
 
