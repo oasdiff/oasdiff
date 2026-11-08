@@ -68,7 +68,7 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedEndpoint(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse sunset date: `\"invalid-date\"`", requireChange(t, errs, checker.APIPathSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "sunset date doesn't conform with RFC3339: `\"invalid-date\"`", requireChange(t, errs, checker.APIPathSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing sunset from an invalid date for a deprecated endpoint is breaking

@@ -13,8 +13,8 @@ request-property-pattern-added: добавлен pattern %s у поля запр
 request-property-pattern-removed: удалён pattern %s у поля запроса %s
 request-property-pattern-changed: изменён pattern у поля запроса %s со значения %s на значение %s
 request-property-pattern-generalized: изменил шаблон поля запроса %s со значения %s на более общее значение %s
-api-deprecated-sunset-parse: "не удалось проанализировать дату заката: %v"
-api-path-sunset-parse: "не удалось проанализировать дату заката: %v"
+api-deprecated-sunset-parse: "дата заката не соответствует RFC3339: %v"
+api-path-sunset-parse: "дата заката не соответствует RFC3339: %v"
 api-version-not-bumped: "обнаружено обратно несовместимое изменение, но версия осталась %s"
 api-version-decreased: "обнаружено обратно несовместимое изменение, но версия уменьшилась с %s до %s"
 api-major-version-not-bumped: "обнаружено обратно несовместимое изменение, но мажорная версия не увеличилась, с %s до %s"
@@ -115,7 +115,7 @@ new-request-path-parameter: добален новый path параметр за
 request-property-deprecated: "поле запроса %s устарело"
 request-property-deprecated-with-sunset: "поле запроса %s устарело с датой прекращения %s"
 request-property-deprecated-sunset-missing: "поле запроса %s устарело без даты прекращения"
-request-property-deprecated-sunset-invalid: "поле запроса %s устарело с недействительной датой прекращения: %s"
+request-property-deprecated-sunset-invalid: "поле запроса %s устарело с датой прекращения, не соответствующей RFC3339: %s"
 request-property-reactivated: "поле запроса %s реактивировано"
 request-property-sunset-date-too-small: "дата прекращения %s поля запроса %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
 request-property-sunset-deleted: "дата прекращения действия поля запроса %s удалена, но deprecated=true сохранено"
@@ -194,7 +194,7 @@ response-optional-property-removed: удалено необязательное 
 response-property-deprecated: "поле ответа %s устарело"
 response-property-deprecated-with-sunset: "поле ответа %s устарело с датой прекращения %s"
 response-property-deprecated-sunset-missing: "поле ответа %s устарело без даты прекращения"
-response-property-deprecated-sunset-invalid: "поле ответа %s устарело с недействительной датой прекращения: %s"
+response-property-deprecated-sunset-invalid: "поле ответа %s устарело с датой прекращения, не соответствующей RFC3339: %s"
 response-property-reactivated: "поле ответа %s реактивировано"
 response-property-sunset-date-too-small: "дата прекращения %s поля ответа %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
 response-property-sunset-deleted: "дата прекращения действия поля ответа %s удалена, но deprecated=true сохранено"
@@ -566,7 +566,7 @@ request-parameter-removed-with-deprecation: удален %s параметр з�
 request-parameter-sunset-date-changed-too-small: дата прекращения действия %s параметра запроса %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента
 request-parameter-sunset-date-too-small: "дата прекращения действия %s параметра запроса %s %s слишком ранняя, должно быть минимум %s дней от текущего момента"
 request-parameter-sunset-deleted: "дата прекращения действия %s параметра запроса %s удалена, но deprecated=true сохранено"
-request-parameter-sunset-parse: "не удалось проанализировать дату прекращения действия для %s параметра запроса %s: %v"
+request-parameter-sunset-parse: "дата прекращения действия %s параметра запроса %s не соответствует RFC3339: %v"
 request-parameter-type-changed-description: изменен тип параметра запроса
 request-parameter-type-generalized-description: обобщен тип параметра запроса
 request-parameter-x-extensible-enum-value-removed-description: удалено x-extensible-enum значение параметра запроса

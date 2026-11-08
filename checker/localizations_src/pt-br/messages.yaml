@@ -5,7 +5,7 @@ request-body-added-optional: corpo da requisição opcional adicionado
 request-parameter-removed: parâmetro de requisição do tipo %s e nome %s removido
 request-parameter-removed-comment: "Este é um aviso porque alguns aplicativos podem retornar um erro ao receber um parâmetro que não esperam. Recomenda-se depreciar o parâmetro primeiro."
 request-parameter-removed-with-deprecation: parâmetro de requisição do tipo %s e nome %s removido com depreciação
-request-parameter-sunset-parse: "falha ao analisar a data de expiração no parâmetro de requisição do tipo %s e nome %s: %v"
+request-parameter-sunset-parse: "a data de expiração no parâmetro de requisição do tipo %s e nome %s não está em conformidade com RFC3339: %v"
 request-parameter-removed-before-sunset: parâmetro de requisição do tipo %s e nome %s removido antes da data de expiração %s
 total-errors: "%d alterações críticas: %d %s, %d %s\\n"
 total-changes: "%d alterações: %d %s, %d %s, %d %s\\n"
@@ -17,8 +17,8 @@ request-property-pattern-added: "adicionado o padrão %s à propriedade de requi
 request-property-pattern-removed: "removido o padrão %s da propriedade de requisição %s"
 request-property-pattern-changed: "alterado o padrão da propriedade de requisição %s de %s para %s"
 request-property-pattern-generalized: "alterado o padrão da propriedade de requisição %s de %s para um padrão mais geral %s"
-api-deprecated-sunset-parse: "falha ao analisar a data de depreciação: %v"
-api-path-sunset-parse: "falha ao analisar a data de depreciação: %v"
+api-deprecated-sunset-parse: "a data de depreciação não está em conformidade com RFC3339: %v"
+api-path-sunset-parse: "a data de depreciação não está em conformidade com RFC3339: %v"
 api-version-not-bumped: "uma mudança incompatível foi detectada mas a versão continua sendo %s"
 api-version-decreased: "uma mudança incompatível foi detectada mas a versão diminuiu de %s para %s"
 api-major-version-not-bumped: "uma mudança incompatível foi detectada mas a versão maior não aumentou, de %s para %s"
@@ -122,7 +122,7 @@ new-request-path-parameter: adicionado o novo parâmetro de caminho da requisiç
 request-property-deprecated: "propriedade de requisição %s depreciada"
 request-property-deprecated-with-sunset: "propriedade de requisição %s depreciada com data de expiração %s"
 request-property-deprecated-sunset-missing: "propriedade de requisição %s depreciada sem data de expiração"
-request-property-deprecated-sunset-invalid: "propriedade de requisição %s depreciada com data de expiração inválida: %s"
+request-property-deprecated-sunset-invalid: "propriedade de requisição %s depreciada com uma data de expiração que não está em conformidade com RFC3339: %s"
 request-property-reactivated: "propriedade de requisição %s reativada"
 request-property-sunset-date-too-small: "a data de expiração %s da propriedade de requisição %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
 request-property-sunset-deleted: "a data de expiração da propriedade de requisição %s foi excluída, mas deprecated=true foi mantido"
@@ -201,7 +201,7 @@ response-optional-property-removed: a propriedade opcional %s foi removida da re
 response-property-deprecated: "propriedade de resposta %s depreciada"
 response-property-deprecated-with-sunset: "propriedade de resposta %s depreciada com data de expiração %s"
 response-property-deprecated-sunset-missing: "propriedade de resposta %s depreciada sem data de expiração"
-response-property-deprecated-sunset-invalid: "propriedade de resposta %s depreciada com data de expiração inválida: %s"
+response-property-deprecated-sunset-invalid: "propriedade de resposta %s depreciada com uma data de expiração que não está em conformidade com RFC3339: %s"
 response-property-reactivated: "propriedade de resposta %s reativada"
 response-property-sunset-date-too-small: "a data de expiração %s da propriedade de resposta %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
 response-property-sunset-deleted: "a data de expiração da propriedade de resposta %s foi excluída, mas deprecated=true foi mantido"

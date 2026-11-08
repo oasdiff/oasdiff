@@ -73,7 +73,7 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedParameter(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse sunset date for the `query` request parameter `id`: `\"invalid-date\"`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "sunset date of the `query` request parameter `id` doesn't conform with RFC3339: `\"invalid-date\"`", requireChange(t, errs, checker.RequestParameterSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/param-deprecation/deprecated-invalid.yaml", errs[0].GetSource())
 }
 

@@ -5,7 +5,7 @@ request-body-added-optional: added optional request body
 request-parameter-removed: deleted the %s request parameter %s
 request-parameter-removed-comment: "This is a warning because some clients may return an error when receiving an unexpected parameter. It is recommended to deprecate the parameter first."
 request-parameter-removed-with-deprecation: deleted the %s request parameter %s with deprecation
-request-parameter-sunset-parse: "failed to parse sunset date for the %s request parameter %s: %v"
+request-parameter-sunset-parse: "sunset date of the %s request parameter %s doesn't conform with RFC3339: %v"
 request-parameter-removed-before-sunset: deleted the %s request parameter %s before the sunset date %s
 total-errors: "%d breaking changes: %d %s, %d %s\\n"
 total-changes: "%d changes: %d %s, %d %s, %d %s\\n"
@@ -17,8 +17,8 @@ request-property-pattern-added: "added the pattern %s to the request property %s
 request-property-pattern-removed: "removed the pattern %s from the request property %s"
 request-property-pattern-changed: "changed the pattern of the request property %s from %s to %s"
 request-property-pattern-generalized: "changed the pattern of the request property %s from %s to a more general pattern %s"
-api-deprecated-sunset-parse: "failed to parse sunset date: %v"
-api-path-sunset-parse: "failed to parse sunset date: %v"
+api-deprecated-sunset-parse: "sunset date doesn't conform with RFC3339: %v"
+api-path-sunset-parse: "sunset date doesn't conform with RFC3339: %v"
 api-version-not-bumped: "a breaking change was detected but the version is still %s"
 api-version-decreased: "a breaking change was detected but the version decreased from %s to %s"
 api-major-version-not-bumped: "a breaking change was detected but the major version did not increase, from %s to %s"
@@ -38,7 +38,7 @@ endpoint-reactivated: endpoint reactivated
 request-property-deprecated: "request property %s deprecated"
 request-property-deprecated-with-sunset: "request property %s deprecated with sunset date %s"
 request-property-deprecated-sunset-missing: "request property %s deprecated without sunset date"
-request-property-deprecated-sunset-invalid: "request property %s deprecated with invalid sunset date: %s"
+request-property-deprecated-sunset-invalid: "request property %s deprecated with a sunset date that doesn't conform with RFC3339: %s"
 request-property-reactivated: "request property %s reactivated"
 request-property-sunset-date-too-small: "request property %s sunset date %s is too small, must be at least %s days from now"
 request-property-sunset-deleted: "request property %s sunset date deleted, but deprecated=true kept"
@@ -46,7 +46,7 @@ request-property-sunset-date-changed-too-small: "request property %s sunset date
 response-property-deprecated: "response property %s deprecated"
 response-property-deprecated-with-sunset: "response property %s deprecated with sunset date %s"
 response-property-deprecated-sunset-missing: "response property %s deprecated without sunset date"
-response-property-deprecated-sunset-invalid: "response property %s deprecated with invalid sunset date: %s"
+response-property-deprecated-sunset-invalid: "response property %s deprecated with a sunset date that doesn't conform with RFC3339: %s"
 response-property-reactivated: "response property %s reactivated"
 response-property-sunset-date-too-small: "response property %s sunset date %s is too small, must be at least %s days from now"
 response-property-sunset-deleted: "response property %s sunset date deleted, but deprecated=true kept"

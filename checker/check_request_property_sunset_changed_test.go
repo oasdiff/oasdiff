@@ -76,7 +76,7 @@ func TestRequestPropertySunsetChanged_ToInvalid(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestPropertySunsetChangedCheck), d, osm)
 	change := requireSingleChange(t, errs, checker.RequestPropertyDeprecatedInvalidId)
 	require.Equal(t, checker.ERR, change.GetLevel())
-	require.Equal(t, "request property `oldField` deprecated with invalid sunset date: `\"invalid-date-format\"`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "request property `oldField` deprecated with a sunset date that doesn't conform with RFC3339: `\"invalid-date-format\"`", change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Nil(t, change.GetBaseSource(), "the revision's sunset date failed to parse, so the base is not part of this finding")
 	require.Equal(t, deprecationFile("property_deprecated_invalid_sunset.yaml"), change.GetRevisionSource().File)
 	require.Equal(t, 36, change.GetRevisionSource().Line)
