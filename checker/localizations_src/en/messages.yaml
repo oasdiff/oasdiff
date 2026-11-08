@@ -28,7 +28,7 @@ request-property-stability-decreased: "request property %s stability level decre
 request-property-stability-increased: "request property %s stability level increased from %s to %s"
 response-property-stability-decreased: "response property %s stability level decreased from %s to %s"
 response-property-stability-increased: "response property %s stability level increased from %s to %s"
-api-invalid-stability-level: "failed to parse stability level: %v"
+api-invalid-stability-level: "stability level %s is not one of %s, %s, %s or %s"
 api-deprecated-sunset-missing: "sunset date is missing for deprecated API"
 api-sunset-date-too-small: "sunset date %s is too small, must be at least %s days from now"
 endpoint-added: endpoint added
