@@ -47,7 +47,7 @@ api-tag-removed: tag da api %s removida
 api-tag-added: tag da api %s adicionada
 api-schema-removed: esquema %s removido
 sunset-deleted: data de expiração da api excluída, mas deprecated=true mantido
-api-sunset-date-changed-too-small: data de expiração da api alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora
+api-sunset-date-changed-too-small: "data de expiração da api alterada para uma data anterior, de %s para %s, a nova data não deve ser anterior a %s e deve ser pelo menos %s dias a partir de agora"
 new-required-request-parameter: adicionado o novo parâmetro de requisição obrigatório %s %s
 new-optional-request-parameter: adicionado o novo parâmetro de requisição opcional %s %s
 new-required-request-property: adicionada a nova propriedade de requisição obrigatória %s
@@ -117,7 +117,7 @@ request-parameter-deprecated-sunset-missing: "o parâmetro de requisição do ti
 request-parameter-sunset-date-too-small: "a data de expiração %s do parâmetro de requisição do tipo %s e nome %s é muito próxima, deve ser pelo menos %s dias a partir de agora"
 request-parameter-deprecated: "o parâmetro de requisição do tipo %s e nome %s foi depreciado"
 request-parameter-sunset-deleted: "a data de expiração do parâmetro de requisição do tipo %s e nome %s foi excluída, mas deprecated=true foi mantido"
-request-parameter-sunset-date-changed-too-small: "a data de expiração do parâmetro de requisição do tipo %s e nome %s foi alterada para uma data anterior, de %s para %s, a nova data deve ser pelo menos %s dias a partir de agora"
+request-parameter-sunset-date-changed-too-small: "a data de expiração do parâmetro de requisição do tipo %s e nome %s foi alterada para uma data anterior, de %s para %s, a nova data não deve ser anterior a %s e deve ser pelo menos %s dias a partir de agora"
 new-request-path-parameter: adicionado o novo parâmetro de caminho da requisição %s
 request-property-deprecated: "propriedade de requisição %s depreciada"
 request-property-deprecated-with-sunset: "propriedade de requisição %s depreciada com data de expiração %s"
@@ -326,15 +326,15 @@ response-property-pattern-removed: o padrão %s foi removido da propriedade de r
 response-property-default-value-added: o valor padrão %s foi adicionado à propriedade de resposta %s para o status %s
 response-property-default-value-changed: o valor padrão da propriedade de resposta %s foi alterado de %s para %s para o status %s
 response-property-default-value-removed: o valor padrão %s foi removido da propriedade de resposta %s para o status %s
-response-body-default-value-added: o valor padrão %s foi adicionado ao corpo da resposta para o status %s
+response-body-default-value-added: "o valor padrão %[2]s foi adicionado ao corpo da resposta %[1]s para o status %[3]s"
 response-body-default-value-changed: o valor padrão do corpo da resposta %s foi alterado de %s para %s para o status %s
-response-body-default-value-removed: o valor padrão %s foi removido do corpo da resposta para o status %s
+response-body-default-value-removed: "o valor padrão %[2]s foi removido do corpo da resposta %[1]s para o status %[3]s"
 request-property-default-value-added: o valor padrão %s foi adicionado à propriedade de requisição %s
 request-property-default-value-changed: o valor padrão da propriedade de requisição %s foi alterado de %s para %s
 request-property-default-value-removed: o valor padrão %s foi removido da propriedade de requisição %s
-request-body-default-value-added: o valor padrão %s foi adicionado ao corpo da requisição
+request-body-default-value-added: "o valor padrão %[2]s foi adicionado ao corpo da requisição %[1]s"
 request-body-default-value-changed: o valor padrão do corpo da requisição %s foi alterado de %s para %s
-request-body-default-value-removed: o valor padrão %s foi removido do corpo da requisição
+request-body-default-value-removed: "o valor padrão %[2]s foi removido do corpo da requisição %[1]s"
 request-body-any-of-added: "%s foi  à lista `anyOf` do corpo da requisição"
 request-body-any-of-removed: "%s foi removido da lista `anyOf` do corpo da requisição"
 request-property-any-of-added: "%s foi adicionado à lista `anyOf` da propriedade de requisição %s"
@@ -400,8 +400,8 @@ request-optional-property-became-not-write-only: a propriedade opcional de requi
 request-optional-property-became-not-read-only: a propriedade opcional de requisição %s deixou de ser somente leitura
 request-required-property-became-write-only: a propriedade obrigatória de requisição %s tornou-se somente escrita
 request-required-property-became-not-write-only: a propriedade obrigatória de requisição %s deixou de ser somente escrita
-new-required-request-default-parameter-to-existing-path: o novo parâmetro obrigatório de requisição %s foi adicionado a todas as operações do caminho
-new-optional-request-default-parameter-to-existing-path: o novo parâmetro opcional de requisição %s foi adicionado a todas as operações do caminho
+new-required-request-default-parameter-to-existing-path: "o novo parâmetro obrigatório de requisição do tipo %s e nome %s foi adicionado a todas as operações do caminho"
+new-optional-request-default-parameter-to-existing-path: "o novo parâmetro opcional de requisição do tipo %s e nome %s foi adicionado a todas as operações do caminho"
 # descrições
 request-body-added-required-description: corpo de requisição obrigatório adicionado
 request-body-added-optional-description: corpo de requisição opcional adicionado
