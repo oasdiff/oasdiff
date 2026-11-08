@@ -35,19 +35,19 @@ endpoint-added: endpoint agregado
 endpoint-deprecated: endpoint deprecado
 endpoint-deprecated-with-sunset: "endpoint deprecado con fecha de expiración %s"
 endpoint-reactivated: endpoint reactivado
-api-path-removed-without-deprecation: ruta de api removida sin deprecación
-api-path-removed-with-deprecation: ruta de api removida con deprecación
-api-path-removed-before-sunset: ruta de api removida antes de la fecha de expiración %s
-api-removed-without-deprecation: api removida sin deprecación
-api-removed-with-deprecation: api removida con deprecación
-api-removed-before-sunset: api removida antes de la fecha de expiración %s
-api-operation-id-removed: id de operación de api %s removido y reemplazado por %s
-api-operation-id-added: id de operación de api %s fue agregado
-api-tag-removed: etiqueta de api %s removida
-api-tag-added: etiqueta de api %s agregada
+api-path-removed-without-deprecation: ruta de API removida sin deprecación
+api-path-removed-with-deprecation: ruta de API removida con deprecación
+api-path-removed-before-sunset: ruta de API removida antes de la fecha de expiración %s
+api-removed-without-deprecation: API removida sin deprecación
+api-removed-with-deprecation: API removida con deprecación
+api-removed-before-sunset: API removida antes de la fecha de expiración %s
+api-operation-id-removed: id de operación de API %s removido y reemplazado por %s
+api-operation-id-added: id de operación de API %s fue agregado
+api-tag-removed: etiqueta de API %s removida
+api-tag-added: etiqueta de API %s agregada
 api-schema-removed: removido el esquema %s
-sunset-deleted: fecha de expiración de api eliminada, pero deprecated=true mantenido
-api-sunset-date-changed-too-small: fecha de expiración de api cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora
+sunset-deleted: fecha de expiración de API eliminada, pero deprecated=true mantenido
+api-sunset-date-changed-too-small: fecha de expiración de API cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora
 new-required-request-parameter: agregado el nuevo parámetro %s de solicitud requerido %s
 new-optional-request-parameter: agregado el nuevo parámetro %s de solicitud opcional %s
 new-required-request-property: agregada la nueva propiedad de solicitud requerida %s
@@ -276,11 +276,11 @@ response-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de r
 response-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 response-body-exclusive-min-decreased: el valor exclusiveMinimum del cuerpo de respuesta fue disminuido de %s a %s
 response-property-exclusive-min-decreased: el valor exclusiveMinimum de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s
-api-security-added: el esquema de seguridad %s fue agregado al endpoint de la api
-api-security-removed: el esquema de seguridad %s fue removido del endpoint de la api
+api-security-added: el esquema de seguridad %s fue agregado al endpoint de la API
+api-security-removed: el esquema de seguridad %s fue removido del endpoint de la API
 api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
-api-global-security-added: el esquema de seguridad %s fue agregado a la api
-api-global-security-removed: el esquema de seguridad %s fue removido de la api
+api-global-security-added: el esquema de seguridad %s fue agregado a la API
+api-global-security-removed: el esquema de seguridad %s fue removido de la API
 api-global-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad global %s
 api-security-anonymous-access-removed: el endpoint ya no permite acceso anónimo y ahora solo acepta %s
 api-security-anonymous-access-added: el endpoint ahora permite acceso anónimo
@@ -1614,7 +1614,7 @@ shared-schema-detail-also-cyclic: "también en %s y más"
 shared-schema-detail-also-more: "también en %s y %d más"
 shared-schema-detail-name: "esquema compartido: %s"
 security-scheme-url-changed-warn-comment: "Esta es una advertencia porque la especificación no indica si las credenciales obtenidas a través de la URL anterior siguen siendo aceptadas."
-api-sunset-date-changed-earlier: "fecha de expiración de api cambiada a una fecha anterior, de %s a %s"
+api-sunset-date-changed-earlier: "fecha de expiración de API cambiada a una fecha anterior, de %s a %s"
 api-sunset-date-changed-earlier-description: "la fecha de expiración se movió antes de la que recibieron los clientes"
 request-parameter-sunset-date-changed-earlier: "la fecha de expiración del parámetro %s de solicitud %s cambió a una fecha anterior, de %s a %s"
 request-parameter-sunset-date-changed-earlier-description: "la fecha de expiración del parámetro de solicitud se movió antes de la que recibieron los clientes"

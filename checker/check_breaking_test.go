@@ -238,7 +238,7 @@ func TestBreaking_OperationIdRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireSingleChange(t, errs, checker.APIOperationIdRemovedId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
-	require.Equal(t, "api operation id `GetSecurityScores` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API operation id `GetSecurityScores` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing a value from a request body enum is breaking by default: it rejects
@@ -296,7 +296,7 @@ func TestBreaking_TagRemoved(t *testing.T) {
 	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	c := requireChange(t, errs, checker.APITagRemovedId)
 	require.Equal(t, checker.INFO, c.GetLevel())
-	require.Equal(t, "api tag `security` removed", c.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API tag `security` removed", c.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing an enum value from a response media type is informational (it narrows the server's output), reported in the changelog

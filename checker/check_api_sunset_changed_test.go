@@ -25,7 +25,7 @@ func TestBreaking_SunsetDeletedForDeprecatedEndpoint(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "api sunset date deleted, but deprecated=true kept", requireChange(t, errs, checker.APISunsetDeletedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API sunset date deleted, but deprecated=true kept", requireChange(t, errs, checker.APISunsetDeletedId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // the sunset change points at the x-sunset field in the base spec
@@ -54,7 +54,7 @@ func TestBreaking_SunsetModifiedForDeprecatedEndpoint(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck, checker.WithDeprecation(31, 180)), d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "api sunset date changed to an earlier date, from `9999-08-10` to `2022-08-10`, new sunset date must be not earlier than `9999-08-10` and at least `180` days from now", requireChange(t, errs, checker.APISunsetDateChangedTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API sunset date changed to an earlier date, from `9999-08-10` to `2022-08-10`, new sunset date must be not earlier than `9999-08-10` and at least `180` days from now", requireChange(t, errs, checker.APISunsetDateChangedTooSmallId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing sunset to an invalid date for a deprecated endpoint is breaking
@@ -164,7 +164,7 @@ func TestSunsetChanged_Earlier(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck, checker.WithDeprecation(0, 10)), d, osm)
 	change := requireSingleChange(t, errs, checker.APISunsetDateChangedEarlierId)
 	require.Equal(t, checker.ERR, change.GetLevel())
-	require.Equal(t, fmt.Sprintf("api sunset date changed to an earlier date, from `9999-08-10` to `%s`", earlier), change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, fmt.Sprintf("API sunset date changed to an earlier date, from `9999-08-10` to `%s`", earlier), change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // a sunset date moved earlier is reported even when the stability level does

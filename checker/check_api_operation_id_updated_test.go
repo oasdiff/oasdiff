@@ -52,7 +52,7 @@ func TestOperationIdUpdated(t *testing.T) {
 		OperationId: "createOneGroup",
 	}, errs)
 
-	require.Equal(t, "api operation id `createOneGroup` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API operation id `createOneGroup` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing an existing operation id with source tracking
@@ -98,5 +98,5 @@ func TestOperationIdAdded(t *testing.T) {
 		OperationId: "NewOperationId",
 	}, errs)
 
-	require.Equal(t, "api operation id `NewOperationId` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API operation id `NewOperationId` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
