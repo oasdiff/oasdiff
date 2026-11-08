@@ -68,17 +68,6 @@ const (
 	StabilityStable = "stable"
 )
 
-const (
-	// Deprecated: use StabilityDraft.
-	STABILITY_DRAFT = StabilityDraft
-	// Deprecated: use StabilityAlpha.
-	STABILITY_ALPHA = StabilityAlpha
-	// Deprecated: use StabilityBeta.
-	STABILITY_BETA = StabilityBeta
-	// Deprecated: use StabilityStable.
-	STABILITY_STABLE = StabilityStable
-)
-
 func getStabilityLevel(i map[string]any) (string, error) {
 	if i == nil || i[diff.XStabilityLevelExtension] == nil {
 		return "", nil
