@@ -29,7 +29,7 @@ func TestTagAdded(t *testing.T) {
 		Source:      load.NewSource("../data/checker/tag_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
-	require.Equal(t, "api tag `newTag` added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API tag `newTag` added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing an existing tag
@@ -53,7 +53,7 @@ func TestTagRemoved(t *testing.T) {
 		Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
-	require.Equal(t, "api tag `Test` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API tag `Test` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 }
 

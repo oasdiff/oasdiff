@@ -51,24 +51,24 @@ response-property-reactivated: "response property %s reactivated"
 response-property-sunset-date-too-small: "response property %s sunset date %s is too small, must be at least %s days from now"
 response-property-sunset-deleted: "response property %s sunset date deleted, but deprecated=true kept"
 response-property-sunset-date-changed-too-small: "response property %s sunset date changed to an earlier date, from %s to %s, new sunset date must be not earlier than %s and at least %s days from now"
-api-path-removed-without-deprecation: api path removed without deprecation
-api-path-removed-with-deprecation: api path removed with deprecation
-api-path-removed-before-sunset: api path removed before the sunset date %s
-api-removed-without-deprecation: api removed without deprecation
-api-removed-with-deprecation: api removed with deprecation
-api-removed-before-sunset: api removed before the sunset date %s
-api-operation-id-removed: api operation id %s removed and replaced with %s
-api-operation-id-added: api operation id %s was added
-api-tag-removed: api tag %s removed
-api-tag-added: api tag %s added
+api-path-removed-without-deprecation: API path removed without deprecation
+api-path-removed-with-deprecation: API path removed with deprecation
+api-path-removed-before-sunset: API path removed before the sunset date %s
+api-removed-without-deprecation: API removed without deprecation
+api-removed-with-deprecation: API removed with deprecation
+api-removed-before-sunset: API removed before the sunset date %s
+api-operation-id-removed: API operation id %s removed and replaced with %s
+api-operation-id-added: API operation id %s was added
+api-tag-removed: API tag %s removed
+api-tag-added: API tag %s added
 api-schema-removed: removed the schema %s
-sunset-deleted: api sunset date deleted, but deprecated=true kept
-api-sunset-date-changed-too-small: api sunset date changed to an earlier date, from %s to %s, new sunset date must be not earlier than %s and at least %s days from now
+sunset-deleted: API sunset date deleted, but deprecated=true kept
+api-sunset-date-changed-too-small: API sunset date changed to an earlier date, from %s to %s, new sunset date must be not earlier than %s and at least %s days from now
 new-required-request-parameter: added the new required %s request parameter %s
 new-optional-request-parameter: added the new optional %s request parameter %s
 new-required-request-property: added the new required request property %s
 new-required-request-property-with-default: added the new required request property %s with a default value
-required-request-property-with-default-error-comment: A request that omits this required property is invalid under the new contract, even though the property has a default. The default is a server-side fallback, it does not make the omitted property valid. Downgrade this check with --severity-levels if omitting the property is safe for your clients.
+required-request-property-with-default-error-comment: A request that omits this required property is invalid under the new contract, even though the property has a default. The default is a server-side fallback, it does not make the omitted property valid.
 new-optional-request-property: added the new optional request property %s
 new-required-request-header-property: added the new required %s request header's property %s
 request-body-became-required: request body became required
@@ -307,8 +307,8 @@ api-security-component-removed: the component security scheme %s was removed
 api-security-component-oauth-scope-added: the component security scheme %s oauth %s flow scope %s was added
 api-security-component-oauth-scope-removed: the component security scheme %s oauth %s flow scope %s was removed
 api-security-component-oauth-scope-changed: the component security scheme %s oauth %s flow scope %s was updated from %s to %s
-api-security-component-api-key-name-changed: the component security scheme %s api key name changed from %s to %s
-api-security-component-api-key-in-changed: the component security scheme %s api key location changed from %s to %s
+api-security-component-api-key-name-changed: the component security scheme %s API key name changed from %s to %s
+api-security-component-api-key-in-changed: the component security scheme %s API key location changed from %s to %s
 api-security-component-http-scheme-changed: the component security scheme %s http scheme changed from %s to %s
 api-security-component-bearer-format-changed: the component security scheme %s bearer format changed from %s to %s
 api-security-component-openid-connect-url-changed: the component security scheme %s OpenID Connect url changed from %s to %s
@@ -1257,7 +1257,7 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
-bound-set-comment: Setting a bound rejects values the previous contract accepted. If your clients are known to stay within the new limit, lower this check with --severity-levels.
+bound-set-comment: Setting a bound rejects values the previous contract accepted, unless your clients are known to stay within the new limit.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-exclusive-max-unset: the request's body exclusiveMaximum was unset from %s
@@ -1625,3 +1625,12 @@ shared-schema-detail-also-cyclic: "also at %s and more"
 shared-schema-detail-also-more: "also at %s and %d more"
 shared-schema-detail-name: "shared schema: %s"
 security-scheme-url-changed-warn-comment: "This is a warning because the spec does not say whether credentials obtained through the previous URL are still accepted."
+api-sunset-date-changed-earlier: "API sunset date changed to an earlier date, from %s to %s"
+api-sunset-date-changed-earlier-description: "sunset date moved earlier than the one clients were given"
+request-parameter-sunset-date-changed-earlier: "%s request parameter %s sunset date changed to an earlier date, from %s to %s"
+request-parameter-sunset-date-changed-earlier-description: "request parameter sunset date moved earlier than the one clients were given"
+request-property-sunset-date-changed-earlier: "request property %s sunset date changed to an earlier date, from %s to %s"
+request-property-sunset-date-changed-earlier-description: "request property sunset date moved earlier than the one clients were given"
+response-property-sunset-date-changed-earlier: "response property %s sunset date changed to an earlier date, from %s to %s"
+response-property-sunset-date-changed-earlier-description: "response property sunset date moved earlier than the one clients were given"
+sunset-date-changed-earlier-comment: "The date clients were given has been withdrawn. oasdiff treats a published x-sunset date as a commitment, whether or not a deprecation policy is configured, because clients schedule their migration against it."

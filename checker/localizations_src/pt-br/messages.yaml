@@ -29,30 +29,30 @@ request-property-stability-increased: "nível de estabilidade da propriedade de 
 response-property-stability-decreased: "nível de estabilidade da propriedade de resposta %s reduzido de %s para %s"
 response-property-stability-increased: "nível de estabilidade da propriedade de resposta %s aumentado de %s para %s"
 api-invalid-stability-level: "o nível de estabilidade %s não é um de %s, %s, %s ou %s"
-api-deprecated-sunset-missing: "data de expiração ausente para api depreciada"
+api-deprecated-sunset-missing: "data de expiração ausente para API depreciada"
 api-sunset-date-too-small: "data de expiração %s muito próxima, deve ser pelo menos %s dias a partir de agora"
 endpoint-added: endpoint adicionado
 endpoint-deprecated: endpoint depreciado
 endpoint-deprecated-with-sunset: "endpoint depreciado com data de expiração %s"
 endpoint-reactivated: endpoint reativado
-api-path-removed-without-deprecation: caminho da api removido sem depreciação
-api-path-removed-with-deprecation: caminho da api removido com depreciação
-api-path-removed-before-sunset: caminho da api removido antes da data de expiração %s
-api-removed-without-deprecation: api removida sem depreciação
-api-removed-with-deprecation: api removida com depreciação
-api-removed-before-sunset: api removida antes da data de expiração %s
-api-operation-id-removed: id de operação da api %s removido e substituído por %s
-api-operation-id-added: id de operação da api %s adicionado
-api-tag-removed: tag da api %s removida
-api-tag-added: tag da api %s adicionada
+api-path-removed-without-deprecation: caminho da API removido sem depreciação
+api-path-removed-with-deprecation: caminho da API removido com depreciação
+api-path-removed-before-sunset: caminho da API removido antes da data de expiração %s
+api-removed-without-deprecation: API removida sem depreciação
+api-removed-with-deprecation: API removida com depreciação
+api-removed-before-sunset: API removida antes da data de expiração %s
+api-operation-id-removed: id de operação da API %s removido e substituído por %s
+api-operation-id-added: id de operação da API %s adicionado
+api-tag-removed: tag da API %s removida
+api-tag-added: tag da API %s adicionada
 api-schema-removed: esquema %s removido
-sunset-deleted: data de expiração da api excluída, mas deprecated=true mantido
-api-sunset-date-changed-too-small: "data de expiração da api alterada para uma data anterior, de %s para %s, a nova data não deve ser anterior a %s e deve ser pelo menos %s dias a partir de agora"
+sunset-deleted: data de expiração da API excluída, mas deprecated=true mantido
+api-sunset-date-changed-too-small: "data de expiração da API alterada para uma data anterior, de %s para %s, a nova data não deve ser anterior a %s e deve ser pelo menos %s dias a partir de agora"
 new-required-request-parameter: adicionado o novo parâmetro de requisição obrigatório %s %s
 new-optional-request-parameter: adicionado o novo parâmetro de requisição opcional %s %s
 new-required-request-property: adicionada a nova propriedade de requisição obrigatória %s
 new-required-request-property-with-default: adicionada a nova propriedade de requisição obrigatória %s com valor padrão
-required-request-property-with-default-error-comment: "Uma requisição que omite esta propriedade obrigatória é inválida sob o novo contrato, mesmo que a propriedade tenha um valor padrão. O valor padrão é um recurso do servidor, ele não torna a propriedade omitida válida. Reduza a severidade desta verificação com --severity-levels se omitir a propriedade for seguro para os seus clientes."
+required-request-property-with-default-error-comment: "Uma requisição que omite esta propriedade obrigatória é inválida sob o novo contrato, mesmo que a propriedade tenha um valor padrão. O valor padrão é um recurso do servidor, ele não torna a propriedade omitida válida."
 new-optional-request-property: adicionada a nova propriedade de requisição opcional %s
 new-required-request-header-property: adicionada a nova propriedade obrigatória do cabeçalho de requisição %s %s
 request-body-became-required: o corpo da requisição tornou-se obrigatório
@@ -266,11 +266,11 @@ response-body-exclusive-max-increased: o valor exclusiveMaximum do corpo da resp
 response-property-exclusive-max-increased: o valor exclusiveMaximum da propriedade de resposta %s foi aumentado de %s para %s para o status %s
 response-body-exclusive-min-decreased: o valor exclusiveMinimum do corpo da resposta foi reduzido de %s para %s
 response-property-exclusive-min-decreased: o valor exclusiveMinimum da propriedade de resposta %s foi reduzido de %s para %s para o status %s
-api-security-added: o esquema de segurança %s foi adicionado ao endpoint da api
-api-security-removed: o esquema de segurança %s foi removido do endpoint da api
+api-security-added: o esquema de segurança %s foi adicionado ao endpoint da API
+api-security-removed: o esquema de segurança %s foi removido do endpoint da API
 api-security-updated: o esquema de segurança %s foi atualizado de %s para %s
-api-global-security-added: o esquema de segurança %s foi adicionado à api
-api-global-security-removed: o esquema de segurança %s foi removido da api
+api-global-security-added: o esquema de segurança %s foi adicionado à API
+api-global-security-removed: o esquema de segurança %s foi removido da API
 api-global-security-scope-removed: o escopo de segurança %s foi removido do esquema de segurança global %s
 api-security-anonymous-access-removed: o endpoint não permite mais acesso anônimo e agora só aceita %s
 api-security-anonymous-access-added: o endpoint agora permite acesso anônimo
@@ -1247,7 +1247,7 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
-bound-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava. Se seus clientes comprovadamente respeitam o novo limite, reduza a severidade desta verificação com --severity-levels.
+bound-set-comment: Definir um limite rejeita valores que o contrato anterior aceitava, a menos que seus clientes respeitem o novo limite.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-exclusive-max-unset: o valor exclusiveMaximum do corpo da requisição foi removido de %s
@@ -1615,3 +1615,12 @@ shared-schema-detail-also-cyclic: "também em %s e mais"
 shared-schema-detail-also-more: "também em %s e mais %d"
 shared-schema-detail-name: "schema compartilhado: %s"
 security-scheme-url-changed-warn-comment: "Este é um aviso porque a especificação não diz se as credenciais obtidas pela url anterior ainda são aceitas."
+api-sunset-date-changed-earlier: "data de expiração da API alterada para uma data anterior, de %s para %s"
+api-sunset-date-changed-earlier-description: "a data de expiração foi movida para antes da que os clientes receberam"
+request-parameter-sunset-date-changed-earlier: "a data de expiração do parâmetro de requisição do tipo %s e nome %s foi alterada para uma data anterior, de %s para %s"
+request-parameter-sunset-date-changed-earlier-description: "a data de expiração do parâmetro de requisição foi movida para antes da que os clientes receberam"
+request-property-sunset-date-changed-earlier: "a data de expiração da propriedade de requisição %s foi alterada para uma data anterior, de %s para %s"
+request-property-sunset-date-changed-earlier-description: "a data de expiração da propriedade de requisição foi movida para antes da que os clientes receberam"
+response-property-sunset-date-changed-earlier: "a data de expiração da propriedade de resposta %s foi alterada para uma data anterior, de %s para %s"
+response-property-sunset-date-changed-earlier-description: "a data de expiração da propriedade de resposta foi movida para antes da que os clientes receberam"
+sunset-date-changed-earlier-comment: "A data que os clientes receberam foi retirada. O oasdiff trata uma data x-sunset publicada como um compromisso, com ou sem uma política de depreciação configurada, porque os clientes planejam a migração com base nela."

@@ -8,13 +8,20 @@ import (
 
 const (
 	APISunsetDeletedId             = "sunset-deleted"
+	APISunsetDateChangedEarlierId  = "api-sunset-date-changed-earlier"
 	APISunsetDateChangedTooSmallId = "api-sunset-date-changed-too-small"
 )
 
+// SunsetDateChangedEarlierCommentId explains a verdict a provider with no
+// deprecation policy would not expect: the date itself is the commitment.
+const SunsetDateChangedEarlierCommentId = "sunset-date-changed-earlier-comment"
+
 var apiSunsetChangeIds = deprecation.SunsetChangeIds{
-	Deleted:         APISunsetDeletedId,
-	SunsetParse:     APIPathSunsetParseId,
-	ChangedTooSmall: APISunsetDateChangedTooSmallId,
+	Deleted:               APISunsetDeletedId,
+	SunsetParse:           APIPathSunsetParseId,
+	ChangedEarlier:        APISunsetDateChangedEarlierId,
+	ChangedEarlierComment: SunsetDateChangedEarlierCommentId,
+	ChangedTooSmall:       APISunsetDateChangedTooSmallId,
 }
 
 func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
@@ -38,7 +45,7 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 			days, daysKnown := deprecationDays(config, opRevision.Extensions)
 			opBase := pathItem.Base.GetOperation(operation)
 
-			id, args, ok := deprecation.SunsetChange(operationDiff.ExtensionsDiff, opBase.Extensions, opRevision.Extensions, days, daysKnown, apiSunsetChangeIds)
+			id, args, comment, ok := deprecation.SunsetChange(operationDiff.ExtensionsDiff, opBase.Extensions, opRevision.Extensions, days, daysKnown, apiSunsetChangeIds)
 			if !ok {
 				continue
 			}
@@ -53,7 +60,7 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 				id,
 				config,
 				args,
-				"",
+				comment,
 				operationsSources,
 				opRevision,
 				operation,

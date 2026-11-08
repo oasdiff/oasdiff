@@ -9,22 +9,28 @@ import (
 
 const (
 	RequestPropertySunsetDeletedId             = "request-property-sunset-deleted"
+	RequestPropertySunsetDateChangedEarlierId  = "request-property-sunset-date-changed-earlier"
 	RequestPropertySunsetDateChangedTooSmallId = "request-property-sunset-date-changed-too-small"
 
 	ResponsePropertySunsetDeletedId             = "response-property-sunset-deleted"
+	ResponsePropertySunsetDateChangedEarlierId  = "response-property-sunset-date-changed-earlier"
 	ResponsePropertySunsetDateChangedTooSmallId = "response-property-sunset-date-changed-too-small"
 )
 
 var requestPropertySunsetChangeIds = deprecation.SunsetChangeIds{
-	Deleted:         RequestPropertySunsetDeletedId,
-	SunsetParse:     RequestPropertyDeprecatedInvalidId,
-	ChangedTooSmall: RequestPropertySunsetDateChangedTooSmallId,
+	Deleted:               RequestPropertySunsetDeletedId,
+	SunsetParse:           RequestPropertyDeprecatedInvalidId,
+	ChangedEarlier:        RequestPropertySunsetDateChangedEarlierId,
+	ChangedEarlierComment: SunsetDateChangedEarlierCommentId,
+	ChangedTooSmall:       RequestPropertySunsetDateChangedTooSmallId,
 }
 
 var responsePropertySunsetChangeIds = deprecation.SunsetChangeIds{
-	Deleted:         ResponsePropertySunsetDeletedId,
-	SunsetParse:     ResponsePropertyDeprecatedInvalidId,
-	ChangedTooSmall: ResponsePropertySunsetDateChangedTooSmallId,
+	Deleted:               ResponsePropertySunsetDeletedId,
+	SunsetParse:           ResponsePropertyDeprecatedInvalidId,
+	ChangedEarlier:        ResponsePropertySunsetDateChangedEarlierId,
+	ChangedEarlierComment: SunsetDateChangedEarlierCommentId,
+	ChangedTooSmall:       ResponsePropertySunsetDateChangedTooSmallId,
 }
 
 // RequestPropertySunsetChangedCheck detects changed sunset dates of deprecated properties in request bodies
@@ -63,7 +69,7 @@ func propertySunsetChangedCheck(
 				return
 			}
 
-			id, extra, ok := deprecation.SunsetChange(p.propertyDiff.ExtensionsDiff, p.propertyDiff.Base.Extensions, p.propertyDiff.Revision.Extensions, days, daysKnown, ids)
+			id, extra, comment, ok := deprecation.SunsetChange(p.propertyDiff.ExtensionsDiff, p.propertyDiff.Base.Extensions, p.propertyDiff.Revision.Extensions, days, daysKnown, ids)
 			if !ok {
 				return
 			}
@@ -75,7 +81,7 @@ func propertySunsetChangedCheck(
 				// is not part of this finding
 				baseSource = nil
 			}
-			result = append(result, p.newChange(id, args, "").WithSources(baseSource, revisionSource))
+			result = append(result, p.newChange(id, args, comment).WithSources(baseSource, revisionSource))
 		})
 	})
 

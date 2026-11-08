@@ -1,8 +1,11 @@
 package checker_test
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
+	"cloud.google.com/go/civil"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
@@ -112,4 +115,23 @@ func TestBreaking_NoChangeToSunsetDeprecatedParameter(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck), d, osm)
 	require.Empty(t, errs)
+}
+
+// moving a parameter's sunset date earlier is breaking even when the new date
+// still respects the deprecation policy
+func TestRequestParameterSunsetChanged_Earlier(t *testing.T) {
+	s1, err := open(paramDeprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(paramDeprecationFile("deprecated-future.yaml"))
+	require.NoError(t, err)
+	earlier := civil.DateOf(time.Now()).AddDays(100).String()
+	s2.Spec.Paths.Value("/api/test").Get.Parameters.GetByInAndName("query", "id").Extensions[diff.SunsetExtension] = toJson(t, earlier)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestParameterSunsetChangedCheck, checker.WithDeprecation(0, 10)), d, osm)
+	change := requireSingleChange(t, errs, checker.RequestParameterSunsetDateChangedEarlierId)
+	require.Equal(t, checker.ERR, change.GetLevel())
+	require.Equal(t, fmt.Sprintf("`query` request parameter `id` sunset date changed to an earlier date, from `9999-08-10` to `%s`", earlier), change.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

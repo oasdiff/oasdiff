@@ -130,6 +130,7 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// RequestPropertySunsetChangedCheck
 		newBackwardCompatibilityRule(RequestPropertySunsetDeletedId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:remove"),
 		newBackwardCompatibilityRule(RequestPropertySunsetDateChangedTooSmallId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
+		newBackwardCompatibilityRule(RequestPropertySunsetDateChangedEarlierId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
 		// Response property deprecation checks
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set"),
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedWithSunsetId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set"),
@@ -140,6 +141,7 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// ResponsePropertySunsetChangedCheck
 		newBackwardCompatibilityRule(ResponsePropertySunsetDeletedId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:remove"),
 		newBackwardCompatibilityRule(ResponsePropertySunsetDateChangedTooSmallId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:change"),
+		newBackwardCompatibilityRule(ResponsePropertySunsetDateChangedEarlierId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:change"),
 		// APIAddedCheck
 		newBackwardCompatibilityRule(EndpointAddedId, INFO, APIAddedCheck, DirectionNone, AreaPaths, KindExistence, EffectWidens, nil, "paths.*:add", "paths.*.*:add"),
 		// APIComponentsSecurityUpdatedCheck
@@ -206,9 +208,11 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// APISunsetChangedCheck
 		newBackwardCompatibilityRule(APISunsetDeletedId, ERR, APISunsetChangedCheck, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:remove"),
 		newBackwardCompatibilityRule(APISunsetDateChangedTooSmallId, ERR, APISunsetChangedCheck, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:change"),
+		newBackwardCompatibilityRule(APISunsetDateChangedEarlierId, ERR, APISunsetChangedCheck, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:change"),
 		// RequestParameterSunsetChangedCheck
 		newBackwardCompatibilityRule(RequestParameterSunsetDeletedId, ERR, RequestParameterSunsetChangedCheck, DirectionRequest, AreaParameters, KindLifecycle, EffectViolation, nil, "paths.*.*.parameters.*.x-*:remove"),
 		newBackwardCompatibilityRule(RequestParameterSunsetDateChangedTooSmallId, ERR, RequestParameterSunsetChangedCheck, DirectionRequest, AreaParameters, KindLifecycle, EffectViolation, nil, "paths.*.*.parameters.*.x-*:change"),
+		newBackwardCompatibilityRule(RequestParameterSunsetDateChangedEarlierId, ERR, RequestParameterSunsetChangedCheck, DirectionRequest, AreaParameters, KindLifecycle, EffectViolation, nil, "paths.*.*.parameters.*.x-*:change"),
 		// AddedRequiredRequestBodyCheck
 		newBackwardCompatibilityRule(AddedRequiredRequestBodyId, ERR, AddedRequestBodyCheck, DirectionRequest, AreaRequestBody, KindExistence, EffectNarrows, nil, "paths.*.*.requestBody:set"),
 		newBackwardCompatibilityRule(AddedOptionalRequestBodyId, INFO, AddedRequestBodyCheck, DirectionRequest, AreaRequestBody, KindExistence, EffectNone, nil, "paths.*.*.requestBody:set"),
