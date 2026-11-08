@@ -37,9 +37,9 @@ func SunsetChange(extensionsDiff *diff.ExtensionsDiff, base, revision map[string
 		return ids.SunsetParse, []any{err}, true
 	}
 
-	// an invalid base date gave clients no date to rely on, so replacing it is a fix
 	baseDate, err := SunsetDate(base[diff.SunsetExtension])
 	if err != nil {
+		// an unparseable base date gave clients no date to rely on, so replacing it is not reported
 		return "", nil, false
 	}
 
