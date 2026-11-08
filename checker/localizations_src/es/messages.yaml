@@ -88,9 +88,9 @@ request-parameter-x-extensible-enum-value-removed: removido el valor x-extensibl
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
 request-parameter-max-decreased: para el parámetro %s de solicitud %s, el máximo fue disminuido de %s a %s
 request-parameter-max-increased: para el parámetro %s de solicitud %s, el máximo fue aumentado de %s a %s
-request-parameter-default-value-added: agregado valor por defecto %s para el parámetro de solicitud %s
-request-parameter-default-value-changed: valor por defecto para el parámetro de solicitud %s cambiado de %s a %s
-request-parameter-default-value-removed: removido valor por defecto %s para el parámetro de solicitud %s
+request-parameter-default-value-added: "agregado el valor por defecto %[3]s para el parámetro %[1]s de solicitud %[2]s"
+request-parameter-default-value-changed: "valor por defecto para el parámetro %s de solicitud %s cambiado de %s a %s"
+request-parameter-default-value-removed: "removido el valor por defecto %[3]s para el parámetro %[1]s de solicitud %[2]s"
 request-parameter-max-length-decreased: para el parámetro %s de solicitud %s, maxLength fue disminuido de %s a %s
 request-parameter-max-length-increased: para el parámetro %s de solicitud %s, maxLength fue aumentado de %s a %s
 request-parameter-min-length-increased: para el parámetro %s de solicitud %s, minLength fue aumentado de %s a %s
@@ -113,12 +113,12 @@ request-parameter-type-form-explode-array-comment: "Este parámetro usa la seria
 request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue ampliado de %s a %s
 request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue reducido de %s a %s
 new-request-path-parameter: agregado nuevo parámetro de ruta de solicitud %s
-request-parameter-deprecated: parámetro de solicitud deprecado
-request-parameter-deprecated-sunset-missing: parámetro de solicitud deprecado sin fecha de expiración
-request-parameter-reactivated: parámetro de solicitud reactivado
-request-parameter-sunset-deleted: fecha de expiración del parámetro de solicitud eliminada
-request-parameter-sunset-date-too-small: fecha de expiración del parámetro de solicitud demasiado pequeña
-request-parameter-sunset-date-changed-too-small: fecha de expiración del parámetro de solicitud cambiada demasiado pequeña
+request-parameter-deprecated: "el parámetro %s de solicitud %s fue deprecado"
+request-parameter-deprecated-sunset-missing: "el parámetro %s de solicitud %s fue deprecado sin fecha de expiración"
+request-parameter-reactivated: "el parámetro %s de solicitud %s fue reactivado"
+request-parameter-sunset-deleted: "la fecha de expiración del parámetro %s de solicitud %s fue eliminada, pero deprecated=true se mantuvo"
+request-parameter-sunset-date-too-small: "la fecha de expiración %[3]s del parámetro %[1]s de solicitud %[2]s es demasiado próxima, debe ser al menos %[4]s días a partir de ahora"
+request-parameter-sunset-date-changed-too-small: "la fecha de expiración del parámetro %s de solicitud %s cambió a una fecha anterior, de %s a %s, la nueva fecha no debe ser anterior a %s y al menos %s días a partir de ahora"
 request-property-deprecated: "propiedad de solicitud %s deprecada"
 request-property-deprecated-with-sunset: "propiedad de solicitud %s deprecada con fecha de expiración %s"
 request-property-deprecated-sunset-missing: "propiedad de solicitud %s deprecada sin fecha de expiración"
@@ -336,15 +336,15 @@ response-property-pattern-removed: el patrón %s fue removido de la propiedad de
 response-property-default-value-added: el valor por defecto %s fue agregado a la propiedad de respuesta %s para el estado %s
 response-property-default-value-changed: el valor por defecto de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
 response-property-default-value-removed: el valor por defecto %s fue removido de la propiedad de respuesta %s para el estado %s
-response-body-default-value-added: el valor por defecto %s fue agregado al cuerpo de respuesta para el estado %s
-response-body-default-value-changed: el valor por defecto del cuerpo de respuesta fue cambiado de %s a %s para el estado %s
-response-body-default-value-removed: el valor por defecto %s fue removido del cuerpo de respuesta para el estado %s
+response-body-default-value-added: "el valor por defecto %[2]s fue agregado al cuerpo de respuesta %[1]s para el estado %[3]s"
+response-body-default-value-changed: "el valor por defecto del cuerpo de respuesta %s fue cambiado de %s a %s para el estado %s"
+response-body-default-value-removed: "el valor por defecto %[2]s fue removido del cuerpo de respuesta %[1]s para el estado %[3]s"
 request-property-default-value-added: el valor por defecto %s fue agregado a la propiedad de solicitud %s
 request-property-default-value-changed: el valor por defecto de la propiedad de solicitud %s fue cambiado de %s a %s
 request-property-default-value-removed: el valor por defecto %s fue removido de la propiedad de solicitud %s
-request-body-default-value-added: el valor por defecto %s fue agregado al cuerpo de solicitud
-request-body-default-value-changed: el valor por defecto del cuerpo de solicitud fue cambiado de %s a %s
-request-body-default-value-removed: el valor por defecto %s fue removido del cuerpo de solicitud
+request-body-default-value-added: "el valor por defecto %[2]s fue agregado al cuerpo de solicitud %[1]s"
+request-body-default-value-changed: "el valor por defecto del cuerpo de solicitud %s fue cambiado de %s a %s"
+request-body-default-value-removed: "el valor por defecto %[2]s fue removido del cuerpo de solicitud %[1]s"
 request-body-removed: removido el cuerpo de solicitud
 request-body-any-of-added: "%s fue agregado a la lista `anyOf` del cuerpo de solicitud"
 request-body-any-of-removed: "%s fue removido de la lista `anyOf` del cuerpo de solicitud"

@@ -87,9 +87,9 @@ request-parameter-x-extensible-enum-value-removed: удалено из x-extensi
 pattern-added-error-comment: Это критическое изменение, потому что добавление ограничения шаблона к ранее неограниченному параметру отклонит значения, которые ранее принимались, сломав существующих клиентов
 request-parameter-max-decreased: в %s параметре запроса %s, max уменьшен с %s до %s
 request-parameter-max-increased: в %s параметре запроса %s, max увеличен с %s до %s
-request-parameter-default-value-added: для параметра запроса %s добавлено значение по умолчанию %s
-request-parameter-default-value-changed: для параметра запроса %s значение по умолчанию изменено с %s на %s
-request-parameter-default-value-removed: для параметра запроса %s удалено значение по умолчанию %s
+request-parameter-default-value-added: "для %[1]s параметра запроса %[2]s добавлено значение по умолчанию %[3]s"
+request-parameter-default-value-changed: "для %s параметра запроса %s значение по умолчанию изменено с %s на %s"
+request-parameter-default-value-removed: "для %[1]s параметра запроса %[2]s удалено значение по умолчанию %[3]s"
 request-parameter-max-length-decreased: в %s параметре запроса %s, maxLength уменьшен с %s до %s
 request-parameter-max-length-increased: в %s параметре запроса %s, maxLength увеличен с %s до %s
 request-parameter-min-length-increased: в %s параметре запроса %s, minLength увеличен с %s до %s
@@ -310,14 +310,14 @@ response-property-pattern-removed: у свойства %s для ответа с
 response-property-default-value-added: добавлено значение по умолчанию %s для свойства ответа %s для статуса %s
 response-property-default-value-changed: значение по умолчанию для свойства ответа %s изменено с %s на %s для статуса %s
 response-property-default-value-removed: удалено значение по умолчанию %s для свойства ответа %s для статуса %s
-response-body-default-value-added: добавлено значение по умолчанию %s для тела ответа для статуса %s
+response-body-default-value-added: "добавлено значение по умолчанию %[2]s для тела ответа %[1]s для статуса %[3]s"
 response-body-default-value-changed: значение по умолчанию для тела ответа %s изменено с %s на %s для статуса %s
-response-body-default-value-removed: удалено значение по умолчанию %s для тела ответа для статуса %s
+response-body-default-value-removed: "удалено значение по умолчанию %[2]s для тела ответа %[1]s для статуса %[3]s"
 request-property-default-value-added: добавлено значение по умолчанию %s для свойства запроса %s
 request-property-default-value-changed: значение по умолчанию для свойства запроса %s изменено с %s на %s
 request-property-default-value-removed: удалено значение по умолчанию %s для свойства запроса %s
-request-body-default-value-added: добавлено значение по умолчанию %s для тела запроса
-request-body-default-value-changed: значение по умолчанию для тела запроса изменено с %s на %s
+request-body-default-value-added: "добавлено значение по умолчанию %[2]s для тела запроса %[1]s"
+request-body-default-value-changed: "значение по умолчанию для тела запроса %s изменено с %s на %s"
 request-body-default-value-removed: удалено значение по умолчанию %s для тела запроса %s
 request-body-any-of-added: добавлено %s в список `anyOf` тела запроса
 request-body-any-of-removed: удалён %s из списка `anyOf` тела запроса
