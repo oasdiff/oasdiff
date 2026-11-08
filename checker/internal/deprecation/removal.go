@@ -35,7 +35,7 @@ func Removal(deprecated bool, extensions map[string]any, ids RemovalIds) (string
 		if ids.SunsetParse == "" {
 			return ids.Removed, nil, true
 		}
-		return ids.SunsetParse, []any{err}, true
+		return ids.SunsetParse, []any{sunsetValue(err)}, true
 	}
 
 	if civil.DateOf(time.Now()).Before(date) {

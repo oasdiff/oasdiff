@@ -35,7 +35,7 @@ func SunsetChange(extensionsDiff *diff.ExtensionsDiff, base, revision map[string
 
 	date, err := SunsetDate(revision[diff.SunsetExtension])
 	if err != nil {
-		return ids.SunsetParse, []any{err}, true
+		return ids.SunsetParse, []any{sunsetValue(err)}, true
 	}
 
 	baseDate, err := SunsetDate(base[diff.SunsetExtension])

@@ -5,7 +5,7 @@ request-body-added-optional: agregado cuerpo de solicitud opcional
 request-parameter-removed: eliminado el parámetro %s de solicitud %s
 request-parameter-removed-comment: "Esto es una advertencia porque algunas aplicaciones pueden devolver un error al recibir un parámetro que no esperan. Se recomienda deprecar el parámetro primero."
 request-parameter-removed-with-deprecation: eliminado el parámetro %s de solicitud %s con deprecación
-request-parameter-sunset-parse: "fallo al parsear la fecha de expiración para el parámetro %s de solicitud %s: %v"
+request-parameter-sunset-parse: "la fecha de expiración del parámetro %s de solicitud %s no cumple con RFC3339: %v"
 request-parameter-removed-before-sunset: eliminado el parámetro %s de solicitud %s antes de la fecha de expiración %s
 total-errors: "%d cambios críticos: %d %s, %d %s\\n"
 total-changes: "%d cambios: %d %s, %d %s, %d %s\\n"
@@ -17,8 +17,8 @@ request-property-pattern-added: "agregado el patrón %s a la propiedad de solici
 request-property-pattern-removed: "removido el patrón %s de la propiedad de solicitud %s"
 request-property-pattern-changed: "cambiado el patrón de la propiedad de solicitud %s de %s a %s"
 request-property-pattern-generalized: "cambiado el patrón de la propiedad de solicitud %s de %s a un patrón más general %s"
-api-deprecated-sunset-parse: "fallo al parsear la fecha de expiración: %v"
-api-path-sunset-parse: "fallo al parsear la fecha de expiración: %v"
+api-deprecated-sunset-parse: "la fecha de expiración no cumple con RFC3339: %v"
+api-path-sunset-parse: "la fecha de expiración no cumple con RFC3339: %v"
 api-version-not-bumped: "se detectó un cambio incompatible pero la versión sigue siendo %s"
 api-version-decreased: "se detectó un cambio incompatible pero la versión disminuyó de %s a %s"
 api-major-version-not-bumped: "se detectó un cambio incompatible pero la versión mayor no aumentó, de %s a %s"
@@ -122,7 +122,7 @@ request-parameter-sunset-date-changed-too-small: fecha de expiración del parám
 request-property-deprecated: "propiedad de solicitud %s deprecada"
 request-property-deprecated-with-sunset: "propiedad de solicitud %s deprecada con fecha de expiración %s"
 request-property-deprecated-sunset-missing: "propiedad de solicitud %s deprecada sin fecha de expiración"
-request-property-deprecated-sunset-invalid: "propiedad de solicitud %s deprecada con fecha de expiración inválida: %s"
+request-property-deprecated-sunset-invalid: "propiedad de solicitud %s deprecada con una fecha de expiración que no cumple con RFC3339: %s"
 request-property-reactivated: "propiedad de solicitud %s reactivada"
 request-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de solicitud %s es demasiado pequeña, debe ser al menos %s días desde ahora"
 request-property-sunset-deleted: "fecha de expiración de la propiedad de solicitud %s eliminada, pero deprecated=true mantenido"
@@ -211,7 +211,7 @@ response-optional-property-removed: removida la propiedad opcional %s de la resp
 response-property-deprecated: "propiedad de respuesta %s deprecada"
 response-property-deprecated-with-sunset: "propiedad de respuesta %s deprecada con fecha de expiración %s"
 response-property-deprecated-sunset-missing: "propiedad de respuesta %s deprecada sin fecha de expiración"
-response-property-deprecated-sunset-invalid: "propiedad de respuesta %s deprecada con fecha de expiración inválida: %s"
+response-property-deprecated-sunset-invalid: "propiedad de respuesta %s deprecada con una fecha de expiración que no cumple con RFC3339: %s"
 response-property-reactivated: "propiedad de respuesta %s reactivada"
 response-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de respuesta %s es demasiado pequeña, debe ser al menos %s días desde ahora"
 response-property-sunset-deleted: "fecha de expiración de la propiedad de respuesta %s eliminada, pero deprecated=true mantenido"

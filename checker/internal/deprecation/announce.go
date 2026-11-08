@@ -53,7 +53,7 @@ func Announce(deprecatedDiff *diff.ValueDiff, extensions map[string]any, days ui
 
 	date, err := SunsetDate(sunset)
 	if err != nil {
-		return Stage{Id: ids.SunsetParse, Args: []any{err}, AtSunset: true}
+		return Stage{Id: ids.SunsetParse, Args: []any{sunsetValue(err)}, AtSunset: true}
 	}
 
 	if date.DaysSince(civil.DateOf(time.Now())) < int(days) {
