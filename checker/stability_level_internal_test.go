@@ -14,7 +14,7 @@ import (
 // only from a caller that builds the extensions itself.
 func TestGetStabilityLevel_InvalidJson(t *testing.T) {
 	_, err := getStabilityLevel(map[string]any{diff.XStabilityLevelExtension: json.RawMessage(`{"unterminated":`)})
-	invalid, ok := errors.AsType[*InvalidStabilityLevel](err)
-	require.True(t, ok, "expected an InvalidStabilityLevel, got %v", err)
+	invalid, ok := errors.AsType[*invalidStabilityLevel](err)
+	require.True(t, ok, "expected an invalidStabilityLevel, got %v", err)
 	require.Equal(t, `"{\"unterminated\":"`, invalid.Value)
 }

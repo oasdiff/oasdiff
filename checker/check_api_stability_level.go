@@ -221,15 +221,15 @@ func normalizedStability(label string) string {
 	return label
 }
 
-// InvalidStabilityLevel reports an x-stability-level value that is not one of
+// invalidStabilityLevel reports an x-stability-level value that is not one of
 // the levels oasdiff knows.
-type InvalidStabilityLevel struct {
+type invalidStabilityLevel struct {
 	// Value is the value the message reports, quoted when it is a string, so
 	// that an empty or space-padded level is visible in every output format.
 	Value string
 }
 
-func (e *InvalidStabilityLevel) Error() string {
+func (e *invalidStabilityLevel) Error() string {
 	return fmt.Sprintf("stability level %s is not one of %s, %s, %s or %s",
 		e.Value, StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable)
 }
@@ -238,7 +238,7 @@ func (e *InvalidStabilityLevel) Error() string {
 // returned: the value it refused, so that the localized message holds the
 // sentence and the argument holds only the value.
 func stabilityValue(err error) string {
-	if invalid, ok := errors.AsType[*InvalidStabilityLevel](err); ok {
+	if invalid, ok := errors.AsType[*invalidStabilityLevel](err); ok {
 		return invalid.Value
 	}
 	return err.Error()
@@ -266,20 +266,20 @@ func getStabilityLevel(i map[string]any) (string, error) {
 		if err := json.Unmarshal(jsonStabilityRaw, &value); err != nil {
 			// bytes that are not valid json are not a level either, and the value
 			// is what the message has to report
-			return "", &InvalidStabilityLevel{Value: strconv.Quote(string(jsonStabilityRaw))}
+			return "", &invalidStabilityLevel{Value: strconv.Quote(string(jsonStabilityRaw))}
 		}
 	}
 
 	stabilityLevel, ok := value.(string)
 	if !ok {
-		return "", &InvalidStabilityLevel{Value: extension.ValueText(value)}
+		return "", &invalidStabilityLevel{Value: extension.ValueText(value)}
 	}
 
 	if stabilityLevel != StabilityDraft &&
 		stabilityLevel != StabilityAlpha &&
 		stabilityLevel != StabilityBeta &&
 		stabilityLevel != StabilityStable {
-		return "", &InvalidStabilityLevel{Value: strconv.Quote(stabilityLevel)}
+		return "", &invalidStabilityLevel{Value: strconv.Quote(stabilityLevel)}
 	}
 
 	return stabilityLevel, nil
