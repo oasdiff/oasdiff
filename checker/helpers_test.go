@@ -223,9 +223,23 @@ const (
 // checkChanges runs a single check over the two specs and returns every change it reports.
 func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
 	t.Helper()
-	s1, err := open(base)
+	return checkChangesWith(t, openapi3.NewLoader, check, base, revision, opts...)
+}
+
+// checkChangesWithOrigins is checkChanges with origin tracking, so that the
+// changes it returns carry a source location to assert on.
+func checkChangesWithOrigins(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
+	t.Helper()
+	return checkChangesWith(t, newLoaderWithOriginTracking, check, base, revision, opts...)
+}
+
+// checkChangesWith loads each spec with its own loader from newLoader, as the
+// loader holds the state of one decode.
+func checkChangesWith(t *testing.T, newLoader func() *openapi3.Loader, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
+	t.Helper()
+	s1, err := open(base, newLoader())
 	require.NoError(t, err)
-	s2, err := open(revision)
+	s2, err := open(revision, newLoader())
 	require.NoError(t, err)
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
