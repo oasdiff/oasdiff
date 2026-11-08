@@ -90,6 +90,7 @@ var ruleDescriptions = map[string]string{
 	"min-contains-exceeds-max-contains":     "minContains is greater than maxContains, so no array can validate",
 	"enum-empty":                            "enum is empty, so no value can validate",
 	"const-not-in-enum":                     "const is not one of the enum values, so no value can validate",
+	"required-property-forbidden":           "a required property is not declared in properties, and additionalProperties is false, so no object can validate",
 	"duplicate-enum-value":                  "enum lists the same value more than once",
 	"type-format-mismatch":                  "format belongs to a different type and is ignored",
 	"read-only-property-only-in-requests":   "a readOnly property is only reachable from the request side, where it never appears",

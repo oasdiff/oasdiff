@@ -60,6 +60,7 @@ var ruleLevels = map[string]checker.Level{
 	MinContainsExceedsMaxContainsID: checker.WARN,
 	EnumEmptyID:                     checker.WARN,
 	ConstNotInEnumID:                checker.WARN,
+	RequiredPropertyForbiddenID:     checker.WARN,
 }
 
 // RuleLevel returns the severity of a validate rule.

@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -63,7 +64,21 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 	return result
 }
 
+// spike: a property declared by an allOf branch rather than by the schema itself
+func inAllOf(schema *openapi3.Schema, name string) bool {
+	for _, branch := range schema.AllOf {
+		if branch != nil && branch.Value != nil && branch.Value.Properties[name] != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func changedRequiredPropertyRelevant(schemaDiff *diff.SchemaDiff, changedRequiredPropertyName string) bool {
+	if schemaDiff.Base.Properties[changedRequiredPropertyName] == nil && inAllOf(schemaDiff.Base, changedRequiredPropertyName) {
+		// the property is declared by an allOf branch, so it is not new
+		return true
+	}
 	if schemaDiff.Base.Properties[changedRequiredPropertyName] == nil {
 		// it is a new property, checked by the new-required-request-property check
 		return false

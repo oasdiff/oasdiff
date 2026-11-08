@@ -33,6 +33,10 @@ const (
 	// ConstNotInEnumID: "const" and "enum" together restrict to their
 	// intersection, so a const outside the enum accepts nothing.
 	ConstNotInEnumID = "const-not-in-enum"
+	// RequiredPropertyForbiddenID: "additionalProperties: false" allows only the
+	// properties the schema declares, so requiring one it does not declare
+	// accepts nothing.
+	RequiredPropertyForbiddenID = "required-property-forbidden"
 )
 
 // lintSchemaConstraints reports every schema whose constraints contradict each
@@ -101,6 +105,18 @@ func schemaConstraintFindings(s *openapi3.Schema, section, source string) format
 	if s.Const != nil && len(s.Enum) > 0 && !enumContains(s.Enum, s.Const) {
 		add(ConstNotInEnumID, "const",
 			fmt.Sprintf("const %s is not one of the enum values, so no value can validate", displayEnum(s.Const)), displayEnum(s.Const))
+	}
+
+	// additionalProperties as a schema allows an undeclared property that
+	// validates against it, and a patternProperties entry may allow one too, so
+	// only a plain false with no patterns forbids every undeclared property.
+	if s.AdditionalProperties.Has != nil && !*s.AdditionalProperties.Has && len(s.PatternProperties) == 0 {
+		for _, name := range s.Required {
+			if s.Properties[name] == nil {
+				add(RequiredPropertyForbiddenID, "required",
+					fmt.Sprintf("required property %s is not declared in properties, and additionalProperties is false, so no object can validate", name), name)
+			}
+		}
 	}
 
 	return findings
