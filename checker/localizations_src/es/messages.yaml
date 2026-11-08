@@ -125,6 +125,8 @@ request-property-deprecated-sunset-missing: "propiedad de solicitud %s deprecada
 request-property-deprecated-sunset-invalid: "propiedad de solicitud %s deprecada con fecha de expiración inválida: %s"
 request-property-reactivated: "propiedad de solicitud %s reactivada"
 request-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de solicitud %s es demasiado pequeña, debe ser al menos %s días desde ahora"
+request-property-sunset-deleted: "fecha de expiración de la propiedad de solicitud %s eliminada, pero deprecated=true mantenido"
+request-property-sunset-date-changed-too-small: "fecha de expiración de la propiedad de solicitud %s cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora"
 request-property-became-required: la propiedad de solicitud %s se volvió requerida
 request-property-became-required-with-default: la propiedad de solicitud %s se volvió requerida con valor por defecto
 request-property-became-optional: la propiedad de solicitud %s se volvió opcional
@@ -212,6 +214,8 @@ response-property-deprecated-sunset-missing: "propiedad de respuesta %s deprecad
 response-property-deprecated-sunset-invalid: "propiedad de respuesta %s deprecada con fecha de expiración inválida: %s"
 response-property-reactivated: "propiedad de respuesta %s reactivada"
 response-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de respuesta %s es demasiado pequeña, debe ser al menos %s días desde ahora"
+response-property-sunset-deleted: "fecha de expiración de la propiedad de respuesta %s eliminada, pero deprecated=true mantenido"
+response-property-sunset-date-changed-too-small: "fecha de expiración de la propiedad de respuesta %s cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora"
 response-property-became-optional: la propiedad de respuesta %s se volvió opcional para el estado %s
 response-property-became-nullable: la propiedad de respuesta %s se volvió nulable para el estado %s
 response-body-became-nullable: el cuerpo de respuesta se volvió nulable
@@ -1077,6 +1081,8 @@ request-property-deprecated-sunset-missing-description: propiedad de solicitud d
 request-property-deprecated-with-sunset-description: propiedad de solicitud deprecada con fecha de expiración
 request-property-reactivated-description: propiedad de solicitud reactivada (deprecación establecida como falsa)
 request-property-sunset-date-too-small-description: propiedad de solicitud deprecada antes del número mínimo de días requeridos
+request-property-sunset-deleted-description: fecha de expiración de la propiedad de solicitud removida estando aún deprecada
+request-property-sunset-date-changed-too-small-description: la fecha de expiración modificada de la propiedad de solicitud no cumple el número mínimo de días requeridos
 response-media-type-name-changed-description: tipo de media de respuesta cambiado
 response-media-type-name-generalized-description: tipo de media de respuesta cambiado a un tipo más general
 response-media-type-name-specialized-description: tipo de media de respuesta cambiado a un tipo más específico
@@ -1086,6 +1092,8 @@ response-property-deprecated-sunset-missing-description: propiedad de respuesta 
 response-property-deprecated-with-sunset-description: propiedad de respuesta deprecada con fecha de expiración
 response-property-reactivated-description: propiedad de respuesta reactivada (deprecación establecida como falsa)
 response-property-sunset-date-too-small-description: propiedad de respuesta deprecada antes del número mínimo de días requeridos
+response-property-sunset-deleted-description: fecha de expiración de la propiedad de respuesta removida estando aún deprecada
+response-property-sunset-date-changed-too-small-description: la fecha de expiración modificada de la propiedad de respuesta no cumple el número mínimo de días requeridos
 # media type schema existence (#1050)
 request-body-media-type-schema-added: agregado un esquema al tipo de media %s del cuerpo de solicitud
 request-body-media-type-schema-removed: removido el esquema del tipo de media %s del cuerpo de solicitud
