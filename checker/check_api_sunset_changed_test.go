@@ -72,21 +72,10 @@ func TestBreaking_SunsetModifiedToInvalidForDeprecatedEndpoint(t *testing.T) {
 }
 
 // changing sunset from an invalid date for a deprecated endpoint is breaking
+// changing an invalid sunset date of a deprecated endpoint to a valid one is
+// not reported, as clients had no date to rely on
 func TestBreaking_SunsetModifiedFromInvalidForDeprecatedEndpoint(t *testing.T) {
-
-	s1, err := open(deprecationFile("deprecated-invalid.yaml"))
-	require.NoError(t, err)
-
-	s2, err := open(deprecationFile("deprecated-future.yaml"))
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
-	require.NotEmpty(t, errs)
-	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: invalid-date`", requireChange(t, errs, checker.APIPathSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/deprecated-invalid.yaml", errs[0].GetSource())
+	require.Empty(t, checkChanges(t, checker.APISunsetChangedCheck, deprecationFile("deprecated-invalid.yaml"), deprecationFile("deprecated-future.yaml")))
 }
 
 // deleting other extension (not sunset) header for a deprecated endpoint is not breaking
@@ -124,10 +113,10 @@ func TestBreaking_NoChangeToSunsetDeprecatedEndpoint(t *testing.T) {
 func TestSunsetChanged_ParseFailureIsOneSided(t *testing.T) {
 	loader := newLoaderWithOriginTracking()
 
-	s1, err := open(deprecationFile("deprecated-invalid.yaml"), loader)
+	s1, err := open(deprecationFile("deprecated-future.yaml"), loader)
 	require.NoError(t, err)
 
-	s2, err := open(deprecationFile("deprecated-future.yaml"), loader)
+	s2, err := open(deprecationFile("deprecated-invalid.yaml"), loader)
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -135,7 +124,23 @@ func TestSunsetChanged_ParseFailureIsOneSided(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.APISunsetChangedCheck), d, osm)
 
 	change := requireChange(t, errs, checker.APIPathSunsetParseId)
-	require.NotNil(t, change.GetBaseSource())
-	require.Equal(t, 13, change.GetBaseSource().Line) // the base's x-sunset, which is the unparseable one
-	require.Nil(t, change.GetRevisionSource(), "the revision's sunset date parsed, so it is not part of this finding")
+	require.Nil(t, change.GetBaseSource(), "the base's sunset date parsed, so it is not part of this finding")
+	require.NotNil(t, change.GetRevisionSource())
+	require.Equal(t, 13, change.GetRevisionSource().Line) // the revision's x-sunset, which is the unparseable one
+}
+
+// deleting the sunset date of a deprecated endpoint is reported even when the
+// stability level does not parse, which only the grace period needs
+func TestSunsetChanged_DeletedWithInvalidStability(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-with-sunset.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("deprecated-no-sunset.yaml"))
+	require.NoError(t, err)
+	s2.Spec.Paths.Value("/api/test").Get.Extensions = map[string]any{diff.XStabilityLevelExtension: toJson(t, "invalid-stability")}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.APISunsetChangedCheck(d, osm, checker.NewConfig(nil))
+	requireSingleChange(t, errs, checker.APISunsetDeletedId)
 }

@@ -67,11 +67,3 @@ func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) (ApiChange,
 	}
 	return opInfo.NewApiChange(id, append([]any{param.In, param.Name}, extra...), comment), true
 }
-
-func getRequestParameterSunsetParse(opInfo opInfo, param *openapi3.Parameter, err error) ApiChange {
-	return opInfo.NewApiChange(
-		RequestParameterSunsetParseId,
-		[]any{param.In, param.Name, err},
-		"",
-	)
-}

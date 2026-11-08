@@ -88,14 +88,6 @@ func checkAPIRemoval(opInfo opInfo, isPath bool) Change {
 	return opInfo.NewApiChange(id, extra, "").WithSources(baseSource, location.NewEmptySource())
 }
 
-func getAPIPathSunsetParse(opInfo opInfo, err error) ApiChange {
-	return opInfo.NewApiChange(
-		APIPathSunsetParseId,
-		[]any{err},
-		"",
-	)
-}
-
 func getWithDeprecationId(isPath bool) string {
 	if isPath {
 		return APIPathRemovedWithDeprecationId
