@@ -12,6 +12,7 @@ import (
 type SunsetChangeIds struct {
 	Deleted         string
 	SunsetParse     string
+	ChangedEarlier  string
 	ChangedTooSmall string
 }
 
@@ -44,14 +45,15 @@ func SunsetChange(extensionsDiff *diff.ExtensionsDiff, base, revision map[string
 		return "", nil, false
 	}
 
-	if !daysKnown {
-		// the grace period is what the comparison below needs, and the cases
-		// above do not, so there is nothing left to report
+	if !baseDate.After(date) {
 		return "", nil, false
 	}
 
-	if baseDate.After(date) && date.DaysSince(civil.DateOf(time.Now())) < int(days) {
+	// the date moved earlier than the one clients were given, which is the
+	// breaking change; the grace period only decides which id reports it, so a
+	// stability level that does not resolve to one still reports the move
+	if daysKnown && date.DaysSince(civil.DateOf(time.Now())) < int(days) {
 		return ids.ChangedTooSmall, []any{baseDate, date, baseDate, days}, true
 	}
-	return "", nil, false
+	return ids.ChangedEarlier, []any{baseDate, date}, true
 }

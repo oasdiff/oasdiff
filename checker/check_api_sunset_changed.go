@@ -8,12 +8,14 @@ import (
 
 const (
 	APISunsetDeletedId             = "sunset-deleted"
+	APISunsetDateChangedEarlierId  = "api-sunset-date-changed-earlier"
 	APISunsetDateChangedTooSmallId = "api-sunset-date-changed-too-small"
 )
 
 var apiSunsetChangeIds = deprecation.SunsetChangeIds{
 	Deleted:         APISunsetDeletedId,
 	SunsetParse:     APIPathSunsetParseId,
+	ChangedEarlier:  APISunsetDateChangedEarlierId,
 	ChangedTooSmall: APISunsetDateChangedTooSmallId,
 }
 

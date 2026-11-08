@@ -8,12 +8,14 @@ import (
 
 const (
 	RequestParameterSunsetDeletedId             = "request-parameter-sunset-deleted"
+	RequestParameterSunsetDateChangedEarlierId  = "request-parameter-sunset-date-changed-earlier"
 	RequestParameterSunsetDateChangedTooSmallId = "request-parameter-sunset-date-changed-too-small"
 )
 
 var requestParameterSunsetChangeIds = deprecation.SunsetChangeIds{
 	Deleted:         RequestParameterSunsetDeletedId,
 	SunsetParse:     RequestParameterSunsetParseId,
+	ChangedEarlier:  RequestParameterSunsetDateChangedEarlierId,
 	ChangedTooSmall: RequestParameterSunsetDateChangedTooSmallId,
 }
 

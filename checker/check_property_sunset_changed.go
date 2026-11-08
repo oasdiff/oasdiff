@@ -9,21 +9,25 @@ import (
 
 const (
 	RequestPropertySunsetDeletedId             = "request-property-sunset-deleted"
+	RequestPropertySunsetDateChangedEarlierId  = "request-property-sunset-date-changed-earlier"
 	RequestPropertySunsetDateChangedTooSmallId = "request-property-sunset-date-changed-too-small"
 
 	ResponsePropertySunsetDeletedId             = "response-property-sunset-deleted"
+	ResponsePropertySunsetDateChangedEarlierId  = "response-property-sunset-date-changed-earlier"
 	ResponsePropertySunsetDateChangedTooSmallId = "response-property-sunset-date-changed-too-small"
 )
 
 var requestPropertySunsetChangeIds = deprecation.SunsetChangeIds{
 	Deleted:         RequestPropertySunsetDeletedId,
 	SunsetParse:     RequestPropertyDeprecatedInvalidId,
+	ChangedEarlier:  RequestPropertySunsetDateChangedEarlierId,
 	ChangedTooSmall: RequestPropertySunsetDateChangedTooSmallId,
 }
 
 var responsePropertySunsetChangeIds = deprecation.SunsetChangeIds{
 	Deleted:         ResponsePropertySunsetDeletedId,
 	SunsetParse:     ResponsePropertyDeprecatedInvalidId,
+	ChangedEarlier:  ResponsePropertySunsetDateChangedEarlierId,
 	ChangedTooSmall: ResponsePropertySunsetDateChangedTooSmallId,
 }
 

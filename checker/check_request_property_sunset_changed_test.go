@@ -112,3 +112,22 @@ func TestRequestPropertySunsetChanged_WithInvalidStability(t *testing.T) {
 	errs := checker.RequestPropertySunsetChangedCheck(d, osm, checker.NewConfig(nil))
 	requireSingleChange(t, errs, checker.RequestPropertySunsetDeletedId)
 }
+
+// moving a request property's sunset date earlier is breaking even when the new
+// date still respects the deprecation policy
+func TestRequestPropertySunsetChanged_Earlier(t *testing.T) {
+	s1, err := open(deprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("property_deprecated_future.yaml"))
+	require.NoError(t, err)
+	earlier := civil.DateOf(time.Now()).AddDays(100).String()
+	s2.Spec.Components.Schemas["TestRequest"].Value.Properties["oldField"].Value.Extensions[diff.SunsetExtension] = toJson(t, earlier)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestPropertySunsetChangedCheck, checker.WithDeprecation(0, 10)), d, osm)
+	change := requireSingleChange(t, errs, checker.RequestPropertySunsetDateChangedEarlierId)
+	require.Equal(t, checker.ERR, change.GetLevel())
+	require.Equal(t, fmt.Sprintf("request property `oldField` sunset date changed to an earlier date, from `2099-12-31` to `%s`", earlier), change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
