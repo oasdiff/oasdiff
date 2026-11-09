@@ -240,3 +240,46 @@ components:
 `)
 	require.Empty(t, lintMutabilityReachability(spec, "spec.yaml"))
 }
+
+// A callback whose operation carries the callback that reached it would mark
+// the same path item forever. The readOnly property inside the callback is
+// still reported, so the walk reaches through the cycle rather than stopping
+// at it.
+func TestLint_ReadOnlyInsideCallbackCycle(t *testing.T) {
+	findings := lintMutabilityReachability(mustLoad(t, `
+openapi: 3.0.3
+info: { title: t, version: "1" }
+paths:
+  /x:
+    post:
+      responses: { "200": { description: ok } }
+      callbacks:
+        cb:
+          $ref: '#/components/callbacks/cb'
+components:
+  callbacks:
+    cb:
+      '{$request.body#/u}':
+        post:
+          requestBody:
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Item'
+          responses: { "200": { description: ok } }
+          callbacks:
+            cb:
+              $ref: '#/components/callbacks/cb'
+  schemas:
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+`), "spec.yaml")
+
+	require.Len(t, findings, 1)
+	require.Equal(t, ReadOnlyOnlyInRequestsID, findings[0].Id)
+	require.Contains(t, findings[0].Text, `"id"`)
+}
