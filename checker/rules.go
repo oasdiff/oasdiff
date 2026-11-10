@@ -170,6 +170,7 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectWidens, nil, "security.*.*:remove"),
 		newBackwardCompatibilityRule(APISecurityAnonymousAccessRemovedId, ERR, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectNarrows, nil, "paths.*.*.security.*:add,remove"),
 		newBackwardCompatibilityRule(APISecurityAnonymousAccessAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectWidens, nil, "paths.*.*.security.*:add,remove"),
+		newBackwardCompatibilityRule(APIVersionChangedId, INFO, APIVersionUpdatedCheck, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
 		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:add,change"),
 		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, AreaPaths, KindLifecycle, EffectNone, nil, "paths.*.*.x-*:add,change"),

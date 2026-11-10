@@ -19,9 +19,7 @@ request-property-pattern-changed: "cambiado el patrón de la propiedad de solici
 request-property-pattern-generalized: "cambiado el patrón de la propiedad de solicitud %s de %s a un patrón más general %s"
 api-deprecated-sunset-parse: "la fecha de expiración no cumple con RFC3339: %v"
 api-path-sunset-parse: "la fecha de expiración no cumple con RFC3339: %v"
-api-version-not-bumped: "se detectó un cambio incompatible pero la versión sigue siendo %s"
-api-version-decreased: "se detectó un cambio incompatible pero la versión disminuyó de %s a %s"
-api-major-version-not-bumped: "se detectó un cambio incompatible pero la versión mayor no aumentó, de %s a %s"
+api-version-changed: "la versión de la API cambió de %s a %s"
 api-stability-decreased: "nivel de estabilidad del endpoint disminuido de %s a %s"
 api-stability-increased: "nivel de estabilidad del endpoint aumentado de %s a %s"
 request-property-stability-decreased: "nivel de estabilidad de la propiedad de solicitud %s disminuido de %s a %s"
@@ -288,9 +286,7 @@ api-security-inherited-comment: "Este endpoint hereda los requisitos de segurida
 api-global-security-not-inherited-comment: "Ningún endpoint hereda los requisitos de seguridad de nivel superior de la API, por lo que este cambio no afecta a ningún cliente."
 api-global-security-scope-added: el alcance de seguridad %s fue agregado al esquema de seguridad global %s
 api-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad del endpoint %s
-api-version-not-bumped-description: se detectó un cambio incompatible pero la versión no fue incrementada
-api-version-decreased-description: se detectó un cambio incompatible pero la versión disminuyó
-api-major-version-not-bumped-description: se detectó un cambio incompatible pero la versión mayor no aumentó
+api-version-changed-description: la versión de la API cambió
 api-stability-decreased-description: el nivel de estabilidad del endpoint fue disminuido
 api-stability-increased-description: el nivel de estabilidad del endpoint fue aumentado
 request-property-stability-decreased-description: el nivel de estabilidad de la propiedad de solicitud fue disminuido

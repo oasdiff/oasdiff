@@ -30,6 +30,17 @@ There are three ways to violate the policy, and the verdict names the one that a
 | `api-version-decreased` | `info.version` moved backwards, for example `2.0.0` to `1.0.0` |
 | `api-major-version-not-bumped` | `info.version` moved, but the major version did not increase, for example `1.0.0` to `1.1.0` |
 
+## The version change itself
+Any change to `info.version` is reported in the changelog as `api-version-changed`, at `INFO`:
+
+```
+info    [api-version-changed]
+        in info
+                the API version changed from `1.0.0` to `2.0.0`
+```
+
+It is reported whatever the versioning scheme is, and whether or not anything breaking came with it, so a release's changelog says which version it is. Whether the change was the right one is the policy's question, and the policy's answer is the verdict above.
+
 ## What it does to `--fail-on`
 A major version increase licenses the breaking changes, so with the policy satisfied, errors no longer fail the run on their own. Anything below error still answers to `--fail-on`: with `--enforce-version-bump --fail-on WARN`, a warning fails the run whatever the version did, because oasdiff is not sure a warning is breaking and a major bump is not a declaration about it.
 
@@ -50,7 +61,7 @@ Below `1.0.0`, semver gives the minor version the major's role, so `0.1.0` to `0
 - Any versioning scheme other than semver, including version numbers in the URL path.
 
 ## Upgrading from the version checks
-`api-version-not-bumped`, `api-version-decreased` and `api-major-version-not-bumped` used to be checks: reported at `INFO` by default, and raised to `err` with `--severity-levels` to enforce the policy. They are no longer checks, because the verdict is about the release rather than about the API. It named no endpoint, it was counted in the change totals, and raising it to an error turned it into a finding a reviewer had to approve like any other. The three names survive as the reasons printed with a violation.
+`api-version-not-bumped`, `api-version-decreased` and `api-major-version-not-bumped` used to be checks: reported at `INFO` by default, and raised to `err` with `--severity-levels` to enforce the policy. They are no longer checks, because a verdict about the release should not be a change in the API. The three names survive as the reasons printed with a violation, and `api-version-changed` reports the version change itself.
 
 A `--severity-levels` file that still sets a level for one of them keeps working, so an upgrade does not fail on it. The level has no effect, and oasdiff says so:
 
