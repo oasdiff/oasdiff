@@ -169,20 +169,22 @@ func TestAnyOf_IncludeDescriptions(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	anyOfDiff := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+
+	// The third branch is the only one that was added. The first differs from
+	// the base's first in a property description, which leaves the branch the
+	// same subschema, so it is reported as modified and the description change
+	// is reported inside it.
 	require.ElementsMatch(t, diff.Subschemas{
-		{
-			Index: 0,
-		},
 		{
 			Index: 2,
 		},
 	}, anyOfDiff.Added)
-	require.ElementsMatch(t, diff.Subschemas{
-		{
-			Index: 0,
-		},
-	}, anyOfDiff.Deleted)
-	require.Empty(t, anyOfDiff.Modified)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t, diff.Subschema{Index: 0}, anyOfDiff.Modified[0].Base)
+	require.Equal(t, diff.Subschema{Index: 0}, anyOfDiff.Modified[0].Revision)
+	require.Equal(t, &diff.ValueDiff{From: "Some description", To: "Other description"},
+		anyOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
 }
 
 func TestAnyOf_ExcludeDescriptions(t *testing.T) {

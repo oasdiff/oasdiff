@@ -111,3 +111,19 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 			OperationId: "listPets",
 		}}, errs)
 }
+
+// A description edit inside two untitled oneOf branches is not a change to
+// the oneOf list: the branches are paired by their validation contract, so
+// neither is reported as removed or added (oasdiff #1403).
+func TestResponsePropertyOneOf_DescriptionOnlyIsNotAdded(t *testing.T) {
+	s1, err := open("../data/checker/response_property_one_of_description_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/response_property_one_of_description_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}

@@ -1,0 +1,39 @@
+openapi: 3.0.3
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    oneOf:
+                      - type: array
+                        items:
+                          $ref: "#/components/schemas/Pet"
+                      - type: array
+                        minItems: 1
+                        items:
+                          $ref: "#/components/schemas/RescuePet"
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        shelter_id:
+          type: string
+          description: The shelter that registered the pet, if any.
+    RescuePet:
+      type: object
+      properties:
+        shelter_id:
+          type: string
+          description: The shelter that registered the pet, if any.
