@@ -58,6 +58,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	if returnErr != nil {
 		return false, returnErr
 	}
+	warnRetiredSeverityLevels(flags.getStderr(), dropRetiredSeverityLevels(severityLevels), flags.getSeverityLevelsFile())
 
 	bcConfig := checker.NewConfig(
 		checker.GetAllChecks(),
@@ -93,6 +94,14 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 			// json/yaml output) and continue.
 			_, _ = fmt.Fprintf(os.Stderr, "warning: could not open the side-by-side review: %v\n", err)
 		}
+	}
+
+	if flags.getEnforceVersionBump() {
+		verdict := checker.CheckVersioningPolicy(diffResult.diffReport, errs)
+		// stderr, not stdout: the verdict is not a change, and stdout carries
+		// the report, which may be a json or yaml document.
+		_, _ = fmt.Fprintln(flags.getStderr(), versioningPolicyLine(verdict))
+		return failOnVersionBump(flags, errs, verdict)
 	}
 
 	if flags.getFailOn() != "" {

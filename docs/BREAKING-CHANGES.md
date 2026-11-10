@@ -107,7 +107,7 @@ Before deleting an endpoint, it is recommended to give consumers a heads-up in t
 Oasdiff allows you to [deprecate APIs gracefully](DEPRECATION.md) without triggering a breaking-change error.
 
 ## Version Bumps
-If you use semantic versioning, oasdiff can report a breaking change that was released without a major version bump.
+If you use semantic versioning, `--enforce-version-bump` fails the run when a breaking change was released without a major version bump, and passes it when the major version was raised.
 See [Version Bumps and Breaking Changes](VERSIONING.md).
 
 ## Nullability Changes

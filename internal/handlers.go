@@ -71,6 +71,8 @@ func getRun(runner runner) cobra.PositionalArgs {
 		// by now flags have been parsed successfully so we don't need to show usage on any errors
 		cmd.Root().SilenceUsage = true
 
+		flags.setStderr(cmd.ErrOrStderr())
+
 		failEmpty, err := runner(flags, cmd.OutOrStdout())
 		if err != nil {
 			setReturnValue(cmd, err.Code)

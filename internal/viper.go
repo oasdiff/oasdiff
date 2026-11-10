@@ -194,6 +194,7 @@ type Config struct {
 	Level                  string   `mapstructure:"level"`
 	FailOnDiff             bool     `mapstructure:"fail-on-diff"`
 	SeverityLevels         string   `mapstructure:"severity-levels"`
+	EnforceVersionBump     bool     `mapstructure:"enforce-version-bump"`
 	StabilityLevel         string   `mapstructure:"stability-level"`
 	ExcludeElements        []string `mapstructure:"exclude-elements"`
 	ExcludeExtensions      []string `mapstructure:"exclude-extensions"`

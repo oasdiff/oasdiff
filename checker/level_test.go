@@ -71,3 +71,17 @@ func TestGetSeverityLevels_ReadError(t *testing.T) {
 	require.Nil(t, m)
 	require.EqualError(t, err, "read failed")
 }
+
+// A severity-levels file that sets a level for an id which is no longer a rule
+// still loads, so a config written against an earlier version doesn't fail the
+// run; the level has no effect, and RetiredRuleIdsIn says which ids to report.
+func TestGetSeverityLevels_RetiredRuleId(t *testing.T) {
+	m, err := checker.GetSeverityLevels(strings.NewReader("api-major-version-not-bumped err\nrequest-parameter-enum-value-added warn"))
+	require.NoError(t, err)
+	require.Len(t, m, 2)
+	require.Equal(t, []string{checker.APIMajorVersionNotBumpedId}, checker.RetiredRuleIdsIn(m))
+}
+
+func TestRetiredRuleIdsIn_None(t *testing.T) {
+	require.Empty(t, checker.RetiredRuleIdsIn(map[string]checker.Level{"request-parameter-enum-value-added": checker.WARN}))
+}

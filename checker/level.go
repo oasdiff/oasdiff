@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker/rules"
@@ -38,6 +39,28 @@ func ProcessSeverityLevels(file string) (map[string]Level, error) {
 	return GetSeverityLevels(f)
 }
 
+// retiredRuleIds are no longer rules, so a level set for one has no effect. A
+// severity-levels file that names one still loads, and RetiredRuleIdsIn tells
+// the caller which ones to report.
+var retiredRuleIds = utils.StringSetFromSlice([]string{
+	APIVersionNotBumpedId,
+	APIVersionDecreasedId,
+	APIMajorVersionNotBumpedId,
+})
+
+// RetiredRuleIdsIn returns the retired ids present in a severity-levels map,
+// sorted.
+func RetiredRuleIdsIn(severityLevels map[string]Level) []string {
+	result := []string{}
+	for id := range severityLevels {
+		if retiredRuleIds.Contains(id) {
+			result = append(result, id)
+		}
+	}
+	slices.Sort(result)
+	return result
+}
+
 // GetSeverityLevels reads severity levels from a reader and returns a map of severity levels
 func GetSeverityLevels(source io.Reader) (map[string]Level, error) {
 
@@ -58,7 +81,7 @@ func GetSeverityLevels(source io.Reader) (map[string]Level, error) {
 		}
 
 		id := frags[0]
-		if !validIds.Contains(id) {
+		if !validIds.Contains(id) && !retiredRuleIds.Contains(id) {
 			return nil, fmt.Errorf("invalid rule id %q on line %d", id, lineNum)
 		}
 

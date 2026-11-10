@@ -74,6 +74,8 @@ func runBreakingFiles(cmd *cobra.Command, args []string) error {
 	// flags parsed successfully, so don't show usage on comparison errors
 	cmd.Root().SilenceUsage = true
 
+	flags.setStderr(cmd.ErrOrStderr())
+
 	base, _ := cmd.Flags().GetString("base")
 
 	failed := false

@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Versioning policy test
+  version: 1.0.0
+paths:
+  /a:
+    get:
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /b:
+    get:
+      responses:
+        '200':
+          description: OK

@@ -15,11 +15,37 @@ const (
 	APIMajorVersionNotBumpedId = "api-major-version-not-bumped"
 )
 
+// VersioningPolicyStatus is the verdict on one comparison.
+type VersioningPolicyStatus int
+
+const (
+	// VersioningPolicyNotApplicable: no breaking change, so no version
+	// increase is required.
+	VersioningPolicyNotApplicable VersioningPolicyStatus = iota
+	// VersioningPolicyUndecidable: a breaking change, but the two versions
+	// don't define what a major increase is.
+	VersioningPolicyUndecidable
+	VersioningPolicySatisfied
+	VersioningPolicyViolated
+)
+
+// VersioningVerdict answers whether info.version carries the breaking changes
+// a comparison found. Reason names the violation, and is empty for every other
+// status.
+type VersioningVerdict struct {
+	Status          VersioningPolicyStatus
+	Reason          string
+	BaseVersion     string
+	RevisionVersion string
+	BreakingChanges int
+}
+
 // semverPattern is the official semver.org grammar, anchored, with an
-// optional leading "v". Versions that don't match are not judged at all (see
-// applyVersioningPolicy), so the pattern must not accept anything looser: a
-// date, or a bare "v1" read as 1.0.0, would produce confident findings about a
-// versioning scheme oasdiff was never told to enforce.
+// optional leading "v". Versions that don't match leave the policy with no
+// definition of a major increase (see CheckVersioningPolicy), so the pattern
+// must not accept anything looser: a date, or a bare "v1" read as 1.0.0, would
+// produce a confident verdict about a versioning scheme oasdiff was never told
+// to enforce.
 var semverPattern = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`)
 
 type semver struct {
@@ -45,57 +71,57 @@ func parseSemver(version string) (semver, bool) {
 	return semver{major, minor, patch}, true
 }
 
-// applyVersioningPolicy reports a breaking change that was released without
-// the major version increase semver requires, whether the version stayed put,
-// moved backwards, or moved by too little. It runs after the checks because
-// its input is their output, and before the level filter so it sees changes of
-// every level.
+// CheckVersioningPolicy judges info.version against the breaking changes in
+// changes: whether the version stayed put, moved backwards, moved by too
+// little, or carried them correctly.
 //
-// It speaks only when a breaking change is present and both versions parse as
-// semver: nothing else defines what a major bump is, so a spec versioned by
-// date or by a bare "v1" is left alone rather than guessed at. Teams that want
-// the policy enforced raise these ids with --severity-levels and gate with
-// --fail-on, like any other rule.
-func applyVersioningPolicy(config *Config, diffReport *diff.Diff, result Changes) Changes {
-	if diffReport.BaseInfo == nil || diffReport.RevisionInfo == nil {
-		return result
+// It is not a check, and adds nothing to changes. The caller decides what a
+// verdict is worth, which for the CLI is --enforce-version-bump.
+func CheckVersioningPolicy(diffReport *diff.Diff, changes Changes) VersioningVerdict {
+	breaking := countBreakingChanges(changes)
+	if breaking == 0 {
+		return VersioningVerdict{Status: VersioningPolicyNotApplicable}
 	}
-	baseVersion, revisionVersion := diffReport.BaseInfo.Version, diffReport.RevisionInfo.Version
 
-	base, baseOk := parseSemver(baseVersion)
-	revision, revisionOk := parseSemver(revisionVersion)
+	verdict := VersioningVerdict{
+		Status:          VersioningPolicyUndecidable,
+		BreakingChanges: breaking,
+	}
+
+	if diffReport == nil || diffReport.BaseInfo == nil || diffReport.RevisionInfo == nil {
+		return verdict
+	}
+	verdict.BaseVersion = diffReport.BaseInfo.Version
+	verdict.RevisionVersion = diffReport.RevisionInfo.Version
+
+	base, baseOk := parseSemver(verdict.BaseVersion)
+	revision, revisionOk := parseSemver(verdict.RevisionVersion)
 	if !baseOk || !revisionOk {
-		return result
+		return verdict
 	}
 
-	if !hasBreakingChange(result) {
-		return result
+	if reason := versioningViolation(verdict.BaseVersion, verdict.RevisionVersion, base, revision); reason != "" {
+		verdict.Status = VersioningPolicyViolated
+		verdict.Reason = reason
+		return verdict
 	}
 
-	id, args := versioningViolation(baseVersion, revisionVersion, base, revision)
-	if id == "" {
-		return result
-	}
-
-	return append(result, InfoChange{
-		Id:    id,
-		Level: config.getLogLevel(id),
-		Args:  args,
-	})
+	verdict.Status = VersioningPolicySatisfied
+	return verdict
 }
 
 // versioningViolation names how this version pair fails to carry a breaking
-// change, or returns an empty id when it carries one correctly.
-func versioningViolation(baseVersion, revisionVersion string, base, revision semver) (string, []any) {
+// change, or returns an empty string when it carries one correctly.
+func versioningViolation(baseVersion, revisionVersion string, base, revision semver) string {
 	switch {
 	case baseVersion == revisionVersion:
-		return APIVersionNotBumpedId, []any{revisionVersion}
+		return APIVersionNotBumpedId
 	case !increased(base, revision):
-		return APIVersionDecreasedId, []any{baseVersion, revisionVersion}
+		return APIVersionDecreasedId
 	case !majorBumped(base, revision):
-		return APIMajorVersionNotBumpedId, []any{baseVersion, revisionVersion}
+		return APIMajorVersionNotBumpedId
 	}
-	return "", nil
+	return ""
 }
 
 // increased reports whether revision comes after base in semver precedence.
@@ -123,13 +149,14 @@ func majorBumped(base, revision semver) bool {
 	return revision.major > base.major
 }
 
-// A change counts at the level it is reported at, which an override or a
-// disclaimer may have moved.
-func hasBreakingChange(result Changes) bool {
-	for _, change := range result {
+// A change counts at the level it is reported at, which an override, a
+// disclaimer or an ignore file may have moved.
+func countBreakingChanges(changes Changes) int {
+	count := 0
+	for _, change := range changes {
 		if change.GetLevel() >= ERR {
-			return true
+			count++
 		}
 	}
-	return false
+	return count
 }
