@@ -148,7 +148,7 @@ The diff reports no change for the `anyOf` list because the union of accepted pa
 
 To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
-Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
+Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is treated as no-change. Anonymous inline branches with annotation-only differences are paired as modifications, so `diff` reports the annotations without reporting branch additions or removals.
 
 The matching is pair-based: each deleted branch matches at most one added branch. An added `$ref` that happens to be equivalent to an inline branch already present on the base (a standalone addition that overlaps an existing branch, rather than a refactor) is still reported as added.
 

@@ -169,20 +169,12 @@ func TestAnyOf_IncludeDescriptions(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	anyOfDiff := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
-	require.ElementsMatch(t, diff.Subschemas{
-		{
-			Index: 0,
-		},
-		{
-			Index: 2,
-		},
-	}, anyOfDiff.Added)
-	require.ElementsMatch(t, diff.Subschemas{
-		{
-			Index: 0,
-		},
-	}, anyOfDiff.Deleted)
-	require.Empty(t, anyOfDiff.Modified)
+	require.Equal(t, diff.Subschemas{{Index: 2}}, anyOfDiff.Added)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t, 0, anyOfDiff.Modified[0].Base.Index)
+	require.Equal(t, 0, anyOfDiff.Modified[0].Revision.Index)
+	require.NotNil(t, anyOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
 }
 
 func TestAnyOf_ExcludeDescriptions(t *testing.T) {

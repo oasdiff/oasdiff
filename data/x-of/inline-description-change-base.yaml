@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: oneOf description reproduction
+  version: 1.0.0
+paths:
+  /apps:
+    get:
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Collection"
+components:
+  schemas:
+    App:
+      type: object
+      properties:
+        origin_worker_id:
+          type: string
+          description: Worker origins support TCP.
+    PaygoApp:
+      type: object
+      properties:
+        origin_worker_id:
+          type: string
+          description: Worker origins support TCP.
+    Collection:
+      allOf:
+        - type: object
+          properties:
+            success:
+              type: boolean
+        - type: object
+          properties:
+            result:
+              oneOf:
+                - type: array
+                  items:
+                    $ref: "#/components/schemas/App"
+                - type: array
+                  minItems: 1
+                  items:
+                    $ref: "#/components/schemas/PaygoApp"
