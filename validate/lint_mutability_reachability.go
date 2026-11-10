@@ -31,14 +31,15 @@ const (
 func lintMutabilityReachability(spec *openapi3.T, source string) formatters.Findings {
 	requestReachable := map[*openapi3.Schema]bool{}
 	responseReachable := map[*openapi3.Schema]bool{}
+	marked := map[*openapi3.PathItem]bool{}
 
 	if spec.Paths != nil {
 		for _, pathItem := range spec.Paths.Map() {
-			markPathItem(pathItem, requestReachable, responseReachable)
+			markPathItem(pathItem, marked, requestReachable, responseReachable)
 		}
 	}
 	for _, pathItem := range spec.Webhooks {
-		markPathItem(pathItem, requestReachable, responseReachable)
+		markPathItem(pathItem, marked, requestReachable, responseReachable)
 	}
 
 	var findings formatters.Findings
@@ -66,19 +67,24 @@ func lintMutabilityReachability(spec *openapi3.T, source string) formatters.Find
 	return findings
 }
 
-func markPathItem(pathItem *openapi3.PathItem, request, response map[*openapi3.Schema]bool) {
-	if pathItem == nil {
+// markPathItem marks the schemas the path item reaches. marked records the
+// path items already marked, since an operation's callback can hold the path
+// item the callback was reached from.
+func markPathItem(pathItem *openapi3.PathItem, marked map[*openapi3.PathItem]bool, request, response map[*openapi3.Schema]bool) {
+	if pathItem == nil || marked[pathItem] {
 		return
 	}
+	marked[pathItem] = true
+
 	for _, param := range pathItem.Parameters {
 		markParameter(param, request)
 	}
 	for _, op := range pathItem.Operations() {
-		markOperation(op, request, response)
+		markOperation(op, marked, request, response)
 	}
 }
 
-func markOperation(op *openapi3.Operation, request, response map[*openapi3.Schema]bool) {
+func markOperation(op *openapi3.Operation, marked map[*openapi3.PathItem]bool, request, response map[*openapi3.Schema]bool) {
 	if op == nil {
 		return
 	}
@@ -108,7 +114,7 @@ func markOperation(op *openapi3.Operation, request, response map[*openapi3.Schem
 			continue
 		}
 		for _, pathItem := range callback.Value.Map() {
-			markPathItem(pathItem, request, response)
+			markPathItem(pathItem, marked, request, response)
 		}
 	}
 }
