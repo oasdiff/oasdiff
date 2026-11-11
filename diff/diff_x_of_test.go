@@ -174,7 +174,9 @@ func TestAnyOf_IncludeDescriptions(t *testing.T) {
 	require.Len(t, anyOfDiff.Modified, 1)
 	require.Equal(t, 0, anyOfDiff.Modified[0].Base.Index)
 	require.Equal(t, 0, anyOfDiff.Modified[0].Revision.Index)
-	require.NotNil(t, anyOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
+	require.Equal(t,
+		&diff.ValueDiff{From: "Some description", To: "Other description"},
+		anyOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
 }
 
 func TestAnyOf_ExcludeDescriptions(t *testing.T) {
@@ -223,11 +225,46 @@ func TestAllOf_AnnotationOnlyChanges(t *testing.T) {
 
 	require.Equal(t, 0, allOfDiff.Modified[0].Base.Index)
 	require.Equal(t, 0, allOfDiff.Modified[0].Revision.Index)
-	require.NotNil(t, allOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
+	require.Equal(t,
+		&diff.ValueDiff{From: "First description", To: "First description changed"},
+		allOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
 
 	require.Equal(t, 1, allOfDiff.Modified[1].Base.Index)
 	require.Equal(t, 1, allOfDiff.Modified[1].Revision.Index)
-	require.NotNil(t, allOfDiff.Modified[1].Diff.PropertiesDiff.Modified["prop2"].DescriptionDiff)
+	require.Equal(t,
+		&diff.ValueDiff{From: "Second description", To: "Second description changed"},
+		allOfDiff.Modified[1].Diff.PropertiesDiff.Modified["prop2"].DescriptionDiff)
+}
+
+// The pairing pass is validation-equivalence-based: a change that affects
+// what each branch accepts (here, swapping `type: array` for `type: object`
+// and dropping `items`) is beyond what annotation suppression can look past,
+// so each base branch stays deleted and each revision branch stays added.
+func TestOneOf_ValidationChangeDoesNotPair(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-description-change-base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := loader.LoadFromFile(getXOfFile("inline-description-change-revision.yaml"))
+	require.NoError(t, err)
+
+	// Rewrite both revision branches to accept objects instead of arrays. No
+	// annotation comparison can bridge that, so the pairing pass must leave
+	// the branches on the added/deleted sides.
+	oneOf := s2.Components.Schemas["Collection"].Value.AllOf[1].Value.Properties["result"].Value.OneOf
+	for _, subschema := range oneOf {
+		subschema.Value.Type = &openapi3.Types{"object"}
+		subschema.Value.Items = nil
+	}
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	oneOfDiff := dd.PathsDiff.Modified["/apps"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Modified["result"].OneOfDiff
+	require.NotNil(t, oneOfDiff)
+	require.Len(t, oneOfDiff.Added, 2)
+	require.Len(t, oneOfDiff.Deleted, 2)
+	require.Empty(t, oneOfDiff.Modified)
 }
 
 // Inline -> $ref refactor of an equivalent component is not reported by
