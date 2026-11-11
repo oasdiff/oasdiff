@@ -87,7 +87,7 @@ func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "stability level `\"invalid\"` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
 }
 
@@ -103,7 +103,7 @@ func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "stability level `\"invalid\"` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
 }
 
@@ -119,7 +119,7 @@ func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: 1`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "stability level `1` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 	require.Equal(t, "../data/deprecation/base-invalid-stability-2.yaml", errs[0].GetSource())
 }
 
@@ -151,4 +151,30 @@ func TestEndpointStability_BetaLevel_StableToDraftDetected(t *testing.T) {
 func TestEndpointStability_StableLevel_DraftToStableNotDetected(t *testing.T) {
 	errs := stabilityChanges(t, "revision-endpoint-draft.yaml", "base-endpoint-stable.yaml", checker.StabilityLevelStable)
 	requireNoChange(t, errs, checker.APIStabilityIncreasedId)
+}
+
+// an x-stability-level value is reported quoted, so that a value which is empty
+// or space-padded is visible, and the valid levels come from the constants
+func TestStabilityLevel_InvalidValueIsQuoted(t *testing.T) {
+	for _, test := range []struct {
+		value any
+		want  string
+	}{
+		{value: "ga", want: `"ga"`},
+		{value: "", want: `""`},
+		{value: " beta", want: `" beta"`},
+		{value: 1, want: "1"},
+	} {
+		s1, err := open(stabilityFile("base-endpoint-stable.yaml"))
+		require.NoError(t, err)
+		s2, err := open(stabilityFile("base-endpoint-stable.yaml"))
+		require.NoError(t, err)
+		s2.Spec.Paths.Value("/test").Get.Extensions[diff.XStabilityLevelExtension] = test.value
+
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+		change := requireChange(t, errs, checker.APIInvalidStabilityLevelId)
+		require.Contains(t, change.GetUncolorizedText(checker.NewDefaultLocalizer()), "stability level `"+test.want+"` is not one of")
+	}
 }

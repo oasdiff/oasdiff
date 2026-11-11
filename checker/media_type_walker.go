@@ -3,7 +3,7 @@ package checker
 import (
 	"github.com/getkin/kin-openapi/openapi3"
 
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -41,14 +41,21 @@ func (info mediaTypeInfo) newChange(id string, args []any, comment string) ApiCh
 		info.method,
 		info.path,
 	).WithSchema(info.schemaDiff, info.schemaDiff, "").WithDetails(info.mediaTypeDetails).
-		WithDisclaimers(allOfDisclaimers(false, info.schemaDiff))
+		WithAllOfDisclaimers(false, info.schemaDiff)
 }
 
 // allOfDisclaimers determines whether a change is under an allOf branch or has an allOf itself, and returns the appropriate disclaimers.
 // Two ways underAllOf is true:
 //  1. The walk is under an allOf branch, so the change is in a sub-schema that is not flattened.
 //  2. The schema itself has an allOf
-func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer {
+//
+// Changes whose ID is in allOfDisclaimerSkipIds never get a disclaimer. The
+// four removed allOf ids are not in the map, so they keep it through the
+// schemaHasAllOf test.
+func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff, changeID string) []Disclaimer {
+	if allOfDisclaimerSkipIds[changeID] {
+		return nil
+	}
 	if schemaDiff != nil && (schemaHasAllOf(schemaDiff.Base) || schemaHasAllOf(schemaDiff.Revision)) {
 		underAllOf = true
 	}
@@ -56,6 +63,26 @@ func allOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) []Disclaimer
 		return nil
 	}
 	return []Disclaimer{DisclaimerAllOfNotFlattened}
+}
+
+// allOfDisclaimerSkipIds are the allOf branch changes that never carry
+// DisclaimerAllOfNotFlattened. The disclaimer says a sibling branch may still
+// guarantee what this branch dropped, which only holds when a constraining
+// branch is removed: an added branch drops nothing, and an annotation-only
+// branch never constrained anything.
+var allOfDisclaimerSkipIds = map[string]bool{
+	RequestBodyAllOfAddedId:                      true,
+	RequestPropertyAllOfAddedId:                  true,
+	ResponseBodyAllOfAddedId:                     true,
+	ResponsePropertyAllOfAddedId:                 true,
+	RequestBodyAllOfAddedAnnotationOnlyId:        true,
+	RequestBodyAllOfRemovedAnnotationOnlyId:      true,
+	RequestPropertyAllOfAddedAnnotationOnlyId:    true,
+	RequestPropertyAllOfRemovedAnnotationOnlyId:  true,
+	ResponseBodyAllOfAddedAnnotationOnlyId:       true,
+	ResponseBodyAllOfRemovedAnnotationOnlyId:     true,
+	ResponsePropertyAllOfAddedAnnotationOnlyId:   true,
+	ResponsePropertyAllOfRemovedAnnotationOnlyId: true,
 }
 
 func schemaHasAllOf(schema *openapi3.Schema) bool {
@@ -103,7 +130,7 @@ type propertyInfo struct {
 // call replaces the first.
 func (p propertyInfo) newChange(id string, args []any, comment string) ApiChange {
 	return p.mediaTypeInfo.newChange(id, args, comment).WithSchema(p.schemaDiff, p.propertyDiff, schemawalk.PropertyFullName(p.propertyPath, p.propertyName)).
-		WithDisclaimers(allOfDisclaimers(p.underAllOf, p.propertyDiff)).
+		WithAllOfDisclaimers(p.underAllOf, p.propertyDiff).
 		WithGuards(propertyGuards(p.propertyDiff))
 }
 

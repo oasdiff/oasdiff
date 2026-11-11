@@ -54,6 +54,18 @@ var ruleLevels = map[string]checker.Level{
 	AmbiguousParameterSerializationID: checker.WARN,
 	RequiredWithDefaultID:             checker.WARN,
 	TypeFormatMismatchID:              checker.WARN,
+
+	// The schema-coherence lints: the document parses and violates no MUST, so
+	// kin accepts it, but no instance can satisfy the schema. SubschemasEmptyID
+	// is absent because an empty allOf is a MUST violation and stays an error.
+	MinimumExceedsMaximumID:         checker.WARN,
+	MinLengthExceedsMaxLengthID:     checker.WARN,
+	MinItemsExceedsMaxItemsID:       checker.WARN,
+	MinPropertiesExceedsMaxPropsID:  checker.WARN,
+	MinContainsExceedsMaxContainsID: checker.WARN,
+	EnumEmptyID:                     checker.WARN,
+	ConstNotInEnumID:                checker.WARN,
+	RequiredPropertyForbiddenID:     checker.WARN,
 }
 
 // RuleLevel returns the severity of a validate rule.

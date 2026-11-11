@@ -4,8 +4,8 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -47,7 +47,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(baseSource, nil))
 			})
 
 		schemawalk.AddedProperties(
@@ -66,7 +66,7 @@ func ResponseOptionalPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 			})
 	})
 

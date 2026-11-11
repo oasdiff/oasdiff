@@ -13,8 +13,8 @@ request-property-pattern-added: добавлен pattern %s у поля запр
 request-property-pattern-removed: удалён pattern %s у поля запроса %s
 request-property-pattern-changed: изменён pattern у поля запроса %s со значения %s на значение %s
 request-property-pattern-generalized: изменил шаблон поля запроса %s со значения %s на более общее значение %s
-api-deprecated-sunset-parse: "не удалось проанализировать дату заката: %v"
-api-path-sunset-parse: "не удалось проанализировать дату заката: %v"
+api-deprecated-sunset-parse: "дата заката не соответствует RFC3339: %v"
+api-path-sunset-parse: "дата заката не соответствует RFC3339: %v"
 api-version-not-bumped: "обнаружено обратно несовместимое изменение, но версия осталась %s"
 api-version-decreased: "обнаружено обратно несовместимое изменение, но версия уменьшилась с %s до %s"
 api-major-version-not-bumped: "обнаружено обратно несовместимое изменение, но мажорная версия не увеличилась, с %s до %s"
@@ -24,7 +24,7 @@ request-property-stability-decreased: "уровень стабильности �
 request-property-stability-increased: "уровень стабильности свойства запроса %s увеличен с %s до %s"
 response-property-stability-decreased: "уровень стабильности свойства ответа %s уменьшен с %s до %s"
 response-property-stability-increased: "уровень стабильности свойства ответа %s увеличен с %s до %s"
-api-invalid-stability-level: "не удалось разобрать уровень стабильности: %v"
+api-invalid-stability-level: "уровень стабильности %s не является одним из %s, %s, %s или %s"
 api-deprecated-sunset-missing: "API устарел без даты прекращения действия"
 api-sunset-date-too-small: дата API sunset date %s слишком ранняя, должно быть как минимум %s дней от текущего дня
 api-path-added: API path добавлено
@@ -51,7 +51,7 @@ new-required-request-parameter: добавлен новый обязательн
 new-optional-request-parameter: добавлен новый необязательный %s параметр зароса %s
 new-required-request-property: добавлено новое обязательное поле запроса %s
 new-required-request-property-with-default: добавлено новое обязательное поле запроса %s со значением по умолчанию
-required-request-property-with-default-error-comment: Запрос, в котором отсутствует это обязательное поле, недопустим согласно новому контракту, даже если у поля есть значение по умолчанию. Значение по умолчанию — это механизм на стороне сервера, оно не делает пропущенное поле допустимым. Понизьте уровень этой проверки через --severity-levels, если пропуск поля безопасен для ваших клиентов.
+required-request-property-with-default-error-comment: Запрос, в котором отсутствует это обязательное поле, недопустим согласно новому контракту, даже если у поля есть значение по умолчанию. Значение по умолчанию — это механизм на стороне сервера, оно не делает пропущенное поле допустимым.
 new-optional-request-property: добавлено новое необязательное поле запроса %s
 new-required-request-header-property: в заголовке запроса %s добавлено новое обязательное поле %s
 request-body-became-required: тело запроса стало обязательным
@@ -87,9 +87,9 @@ request-parameter-x-extensible-enum-value-removed: удалено из x-extensi
 pattern-added-error-comment: Это критическое изменение, потому что добавление ограничения шаблона к ранее неограниченному параметру отклонит значения, которые ранее принимались, сломав существующих клиентов
 request-parameter-max-decreased: в %s параметре запроса %s, max уменьшен с %s до %s
 request-parameter-max-increased: в %s параметре запроса %s, max увеличен с %s до %s
-request-parameter-default-value-added: для параметра запроса %s добавлено значение по умолчанию %s
-request-parameter-default-value-changed: для параметра запроса %s значение по умолчанию изменено с %s на %s
-request-parameter-default-value-removed: для параметра запроса %s удалено значение по умолчанию %s
+request-parameter-default-value-added: "для %[1]s параметра запроса %[2]s добавлено значение по умолчанию %[3]s"
+request-parameter-default-value-changed: "для %s параметра запроса %s значение по умолчанию изменено с %s на %s"
+request-parameter-default-value-removed: "для %[1]s параметра запроса %[2]s удалено значение по умолчанию %[3]s"
 request-parameter-max-length-decreased: в %s параметре запроса %s, maxLength уменьшен с %s до %s
 request-parameter-max-length-increased: в %s параметре запроса %s, maxLength увеличен с %s до %s
 request-parameter-min-length-increased: в %s параметре запроса %s, minLength увеличен с %s до %s
@@ -115,9 +115,11 @@ new-request-path-parameter: добален новый path параметр за
 request-property-deprecated: "поле запроса %s устарело"
 request-property-deprecated-with-sunset: "поле запроса %s устарело с датой прекращения %s"
 request-property-deprecated-sunset-missing: "поле запроса %s устарело без даты прекращения"
-request-property-deprecated-sunset-invalid: "поле запроса %s устарело с недействительной датой прекращения: %s"
+request-property-deprecated-sunset-invalid: "поле запроса %s устарело с датой прекращения, не соответствующей RFC3339: %s"
 request-property-reactivated: "поле запроса %s реактивировано"
 request-property-sunset-date-too-small: "дата прекращения %s поля запроса %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
+request-property-sunset-deleted: "дата прекращения действия поля запроса %s удалена, но deprecated=true сохранено"
+request-property-sunset-date-changed-too-small: "дата прекращения действия поля запроса %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента"
 request-property-became-required: поле запроса %s стало обязательным
 request-property-became-required-with-default: свойство запроса %s стало обязательным со значением по умолчанию
 request-property-became-optional: поле запроса %s стало необязательным
@@ -192,9 +194,11 @@ response-optional-property-removed: удалено необязательное 
 response-property-deprecated: "поле ответа %s устарело"
 response-property-deprecated-with-sunset: "поле ответа %s устарело с датой прекращения %s"
 response-property-deprecated-sunset-missing: "поле ответа %s устарело без даты прекращения"
-response-property-deprecated-sunset-invalid: "поле ответа %s устарело с недействительной датой прекращения: %s"
+response-property-deprecated-sunset-invalid: "поле ответа %s устарело с датой прекращения, не соответствующей RFC3339: %s"
 response-property-reactivated: "поле ответа %s реактивировано"
 response-property-sunset-date-too-small: "дата прекращения %s поля ответа %s слишком ранняя, должно быть как минимум %s дней от текущего дня"
+response-property-sunset-deleted: "дата прекращения действия поля ответа %s удалена, но deprecated=true сохранено"
+response-property-sunset-date-changed-too-small: "дата прекращения действия поля ответа %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента"
 response-property-became-optional: поле ответа %s стало необязательным для ответа со статусом %s
 response-property-became-nullable: поле ответа %s стало обнуляемым для ответа со статусом %s
 response-body-became-nullable: у тела ответа стало обнуляемым
@@ -306,14 +310,14 @@ response-property-pattern-removed: у свойства %s для ответа с
 response-property-default-value-added: добавлено значение по умолчанию %s для свойства ответа %s для статуса %s
 response-property-default-value-changed: значение по умолчанию для свойства ответа %s изменено с %s на %s для статуса %s
 response-property-default-value-removed: удалено значение по умолчанию %s для свойства ответа %s для статуса %s
-response-body-default-value-added: добавлено значение по умолчанию %s для тела ответа для статуса %s
+response-body-default-value-added: "добавлено значение по умолчанию %[2]s для тела ответа %[1]s для статуса %[3]s"
 response-body-default-value-changed: значение по умолчанию для тела ответа %s изменено с %s на %s для статуса %s
-response-body-default-value-removed: удалено значение по умолчанию %s для тела ответа для статуса %s
+response-body-default-value-removed: "удалено значение по умолчанию %[2]s для тела ответа %[1]s для статуса %[3]s"
 request-property-default-value-added: добавлено значение по умолчанию %s для свойства запроса %s
 request-property-default-value-changed: значение по умолчанию для свойства запроса %s изменено с %s на %s
 request-property-default-value-removed: удалено значение по умолчанию %s для свойства запроса %s
-request-body-default-value-added: добавлено значение по умолчанию %s для тела запроса
-request-body-default-value-changed: значение по умолчанию для тела запроса изменено с %s на %s
+request-body-default-value-added: "добавлено значение по умолчанию %[2]s для тела запроса %[1]s"
+request-body-default-value-changed: "значение по умолчанию для тела запроса %s изменено с %s на %s"
 request-body-default-value-removed: удалено значение по умолчанию %s для тела запроса %s
 request-body-any-of-added: добавлено %s в список `anyOf` тела запроса
 request-body-any-of-removed: удалён %s из списка `anyOf` тела запроса
@@ -341,7 +345,7 @@ request-property-all-of-added: добавлено %s в список `allOf` с�
 request-property-all-of-removed: удалён %s из списка `allOf` свойства запроса %s
 response-body-all-of-added: добавлено %s в список `allOf` тела ответа для статуса ответа %s
 response-body-all-of-removed: удалён %s из списка `allOf` тела ответа для статуса ответа %s
-all-of-not-flattened-comment: "Ветви `allOf` сравнивались по отдельности, поэтому другая ветвь может по-прежнему гарантировать то, что утрачено в этой. Запустите с --flatten-allof, чтобы объединить ветви и сравнить то, что они описывают вместе."
+all-of-not-flattened-comment: "Ветви `allOf` сравнивались по отдельности, поэтому другая ветвь может уже описывать то, что здесь изменилось, и объединённая схема останется той же. Запустите с --flatten-allof, чтобы объединить ветви и сравнить то, что они описывают вместе."
 read-only-comment: "Свойство доступно только для чтения, поэтому оно не встречается в запросах, и это изменение не может сделать запрос недействительным."
 write-only-comment: "Свойство доступно только для записи, поэтому оно не встречается в ответах, и это изменение не может сделать ответ недействительным."
 required-in-requests-comment: "В OpenAPI 3.1 и более поздних версиях required применяется к свойству только для чтения и в запросах, поэтому клиенты уже его отправляют, и это изменение не может сделать запрос недействительным."
@@ -562,7 +566,7 @@ request-parameter-removed-with-deprecation: удален %s параметр з�
 request-parameter-sunset-date-changed-too-small: дата прекращения действия %s параметра запроса %s изменена на более раннюю дату с %s на %s, новая дата прекращения действия должна быть не раньше %s и минимум %s дней от текущего момента
 request-parameter-sunset-date-too-small: "дата прекращения действия %s параметра запроса %s %s слишком ранняя, должно быть минимум %s дней от текущего момента"
 request-parameter-sunset-deleted: "дата прекращения действия %s параметра запроса %s удалена, но deprecated=true сохранено"
-request-parameter-sunset-parse: "не удалось проанализировать дату прекращения действия для %s параметра запроса %s: %v"
+request-parameter-sunset-parse: "дата прекращения действия %s параметра запроса %s не соответствует RFC3339: %v"
 request-parameter-type-changed-description: изменен тип параметра запроса
 request-parameter-type-generalized-description: обобщен тип параметра запроса
 request-parameter-x-extensible-enum-value-removed-description: удалено x-extensible-enum значение параметра запроса
@@ -1080,6 +1084,8 @@ request-property-deprecated-sunset-missing-description: свойство зап�
 request-property-deprecated-with-sunset-description: свойство запроса устарело с датой прекращения действия
 request-property-reactivated-description: свойство запроса реактивировано (устаревание установлено в false)
 request-property-sunset-date-too-small-description: свойство запроса устарело до минимального требуемого количества дней устаревания
+request-property-sunset-deleted-description: дата прекращения действия свойства запроса удалена, но свойство остается устаревшим
+request-property-sunset-date-changed-too-small-description: измененная дата прекращения действия свойства запроса не соответствует минимальному требуемому количеству дней устаревания
 response-media-type-name-changed-description: изменен медиа-тип ответа
 response-media-type-name-generalized-description: медиа-тип ответа изменен на более общий
 response-media-type-name-specialized-description: медиа-тип ответа изменен на более конкретный
@@ -1089,6 +1095,8 @@ response-property-deprecated-sunset-missing-description: свойство отв
 response-property-deprecated-with-sunset-description: свойство ответа устарело с датой прекращения действия
 response-property-reactivated-description: свойство ответа реактивировано (устаревание установлено в false)
 response-property-sunset-date-too-small-description: свойство ответа устарело до минимального требуемого количества дней устаревания
+response-property-sunset-deleted-description: дата прекращения действия свойства ответа удалена, но свойство остается устаревшим
+response-property-sunset-date-changed-too-small-description: измененная дата прекращения действия свойства ответа не соответствует минимальному требуемому количеству дней устаревания
 # media type schema existence (#1050)
 request-body-media-type-schema-added: схема добавлена к типу медиа %s тела запроса
 request-body-media-type-schema-removed: схема удалена из типа медиа %s тела запроса
@@ -1241,7 +1249,7 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
-bound-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт. Если известно, что клиенты укладываются в новое ограничение, понизьте уровень этой проверки с помощью --severity-levels.
+bound-set-comment: Установка ограничения отклоняет значения, которые принимал прежний контракт, если только клиенты не укладываются в новое ограничение.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-exclusive-max-unset: значение exclusiveMaximum у тела запроса удалено, предыдущее значение - %s
@@ -1609,3 +1617,12 @@ shared-schema-detail-also-cyclic: "также в %s и других"
 shared-schema-detail-also-more: "также в %s и ещё %d"
 shared-schema-detail-name: "общая схема: %s"
 security-scheme-url-changed-warn-comment: "Это предупреждение, потому что спецификация не указывает, принимаются ли учетные данные, полученные через прежний URL."
+api-sunset-date-changed-earlier: "дата sunset у API изменена на более раннюю с %s на %s"
+api-sunset-date-changed-earlier-description: "дата прекращения действия перенесена на более раннюю, чем обещанная клиентам"
+request-parameter-sunset-date-changed-earlier: "дата прекращения действия %s параметра запроса %s изменена на более раннюю дату с %s на %s"
+request-parameter-sunset-date-changed-earlier-description: "дата прекращения действия параметра запроса перенесена на более раннюю, чем обещанная клиентам"
+request-property-sunset-date-changed-earlier: "дата прекращения действия поля запроса %s изменена на более раннюю дату с %s на %s"
+request-property-sunset-date-changed-earlier-description: "дата прекращения действия поля запроса перенесена на более раннюю, чем обещанная клиентам"
+response-property-sunset-date-changed-earlier: "дата прекращения действия поля ответа %s изменена на более раннюю дату с %s на %s"
+response-property-sunset-date-changed-earlier-description: "дата прекращения действия поля ответа перенесена на более раннюю, чем обещанная клиентам"
+sunset-date-changed-earlier-comment: "Дата, которую получили клиенты, отозвана. oasdiff считает опубликованную дату x-sunset обязательством, независимо от настроенной политики устаревания, поскольку клиенты планируют по ней переход."

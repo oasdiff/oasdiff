@@ -16,9 +16,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - name: Run shellcheck
-        uses: ludeeus/action-shellcheck@2.0.0
-        with:
-          check_together: 'yes'
+        run: shellcheck install.sh .githooks/pre-commit
   actionlint:
     name: actionlint
     runs-on: ubuntu-latest

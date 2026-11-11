@@ -1,11 +1,9 @@
 package checker
 
 import (
-	"time"
-
-	"cloud.google.com/go/civil"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -53,43 +51,19 @@ func RequestParameterRemovedCheck(diffReport *diff.Diff, operationsSources *diff
 }
 
 func checkParameterRemoval(opInfo opInfo, param *openapi3.Parameter) (ApiChange, bool) {
-
-	if !param.Deprecated {
-		return opInfo.NewApiChange(
-			RequestParameterRemovedId,
-			[]any{param.In, param.Name},
-			commentId(RequestParameterRemovedId),
-		), true
-	}
-
-	sunset, ok := getSunset(param.Extensions)
+	id, extra, ok := deprecation.Removal(param.Deprecated, param.Extensions, deprecation.RemovalIds{
+		Removed:         RequestParameterRemovedId,
+		WithDeprecation: RequestParameterRemovedWithDeprecationId,
+		BeforeSunset:    ParameterRemovedBeforeSunsetId,
+		SunsetParse:     RequestParameterSunsetParseId,
+	})
 	if !ok {
-		return opInfo.NewApiChange(
-			RequestParameterRemovedWithDeprecationId,
-			[]any{param.In, param.Name},
-			"",
-		), true
+		return ApiChange{}, false
 	}
 
-	date, err := getSunsetDate(sunset)
-	if err != nil {
-		return getRequestParameterSunsetParse(opInfo, param, err), true
+	comment := ""
+	if id == RequestParameterRemovedId {
+		comment = commentId(RequestParameterRemovedId)
 	}
-
-	if civil.DateOf(time.Now()).Before(date) {
-		return opInfo.NewApiChange(
-			ParameterRemovedBeforeSunsetId,
-			[]any{param.In, param.Name, date},
-			"",
-		), true
-	}
-	return ApiChange{}, false
-}
-
-func getRequestParameterSunsetParse(opInfo opInfo, param *openapi3.Parameter, err error) ApiChange {
-	return opInfo.NewApiChange(
-		RequestParameterSunsetParseId,
-		[]any{param.In, param.Name, err},
-		"",
-	)
+	return opInfo.NewApiChange(id, append([]any{param.In, param.Name}, extra...), comment), true
 }

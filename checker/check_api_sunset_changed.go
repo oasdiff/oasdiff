@@ -1,18 +1,28 @@
 package checker
 
 import (
-	"slices"
-	"time"
-
-	"cloud.google.com/go/civil"
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
 	APISunsetDeletedId             = "sunset-deleted"
+	APISunsetDateChangedEarlierId  = "api-sunset-date-changed-earlier"
 	APISunsetDateChangedTooSmallId = "api-sunset-date-changed-too-small"
 )
+
+// SunsetDateChangedEarlierCommentId explains a verdict a provider with no
+// deprecation policy would not expect: the date itself is the commitment.
+const SunsetDateChangedEarlierCommentId = "sunset-date-changed-earlier-comment"
+
+var apiSunsetChangeIds = deprecation.SunsetChangeIds{
+	Deleted:               APISunsetDeletedId,
+	SunsetParse:           APIPathSunsetParseId,
+	ChangedEarlier:        APISunsetDateChangedEarlierId,
+	ChangedEarlierComment: SunsetDateChangedEarlierCommentId,
+	ChangedTooSmall:       APISunsetDateChangedTooSmallId,
+}
 
 func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
@@ -26,116 +36,38 @@ func APISunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.Operat
 		}
 		for operation, operationDiff := range pathItem.OperationsDiff.Modified {
 			opRevision := pathItem.Revision.GetOperation(operation)
-			opBase := pathItem.Base.GetOperation(operation)
-			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationDiff, diff.SunsetExtension)
-
 			if !opRevision.Deprecated {
 				continue
 			}
 
-			if operationDiff.ExtensionsDiff == nil {
+			// an unparseable stability level is reported in CheckBackwardCompatibility,
+			// and only the grace period depends on it
+			days, daysKnown := deprecationDays(config, opRevision.Extensions)
+			opBase := pathItem.Base.GetOperation(operation)
+
+			id, args, comment, ok := deprecation.SunsetChange(operationDiff.ExtensionsDiff, opBase.Extensions, opRevision.Extensions, days, daysKnown, apiSunsetChangeIds)
+			if !ok {
 				continue
 			}
 
-			if slices.Contains(operationDiff.ExtensionsDiff.Deleted, diff.SunsetExtension) {
-				result = append(result, NewApiChange(
-					APISunsetDeletedId,
-					config,
-					nil,
-					"",
-					operationsSources,
-					opRevision,
-					operation,
-					path,
-				).WithSources(baseSource, revisionSource))
-				continue
+			baseSource, revisionSource := location.OperationFieldSources(operationsSources, operationDiff, diff.SunsetExtension)
+			if id == APIPathSunsetParseId {
+				// the revision's value is the one that failed to parse, so the base
+				// is not part of this finding
+				baseSource = nil
 			}
-
-			if _, ok := operationDiff.ExtensionsDiff.Modified[diff.SunsetExtension]; !ok {
-				continue
-			}
-
-			date, err := getSunsetDate(opRevision.Extensions[diff.SunsetExtension])
-			if err != nil {
-				opInfo := newOpInfo(config, opRevision, operationsSources, operation, path)
-				// The revision's value is the one that failed to parse, so the
-				// base, which parsed, is not part of this finding.
-				result = append(result, getAPIPathSunsetParse(opInfo, err).WithSources(nil, revisionSource))
-				continue
-			}
-
-			baseDate, err := getSunsetDate(opBase.Extensions[diff.SunsetExtension])
-			if err != nil {
-				opInfo := newOpInfo(config, opBase, operationsSources, operation, path)
-				result = append(result, getAPIPathSunsetParse(opInfo, err).WithSources(baseSource, nil))
-				continue
-			}
-
-			days := date.DaysSince(civil.DateOf(time.Now()))
-
-			stability, err := getStabilityLevel(opRevision.Extensions)
-			if err != nil {
-				// handled in CheckBackwardCompatibility
-				continue
-			}
-
-			deprecationDays := getDeprecationDays(config, stability)
-
-			if baseDate.After(date) && days < int(deprecationDays) {
-				result = append(result, NewApiChange(
-					APISunsetDateChangedTooSmallId,
-					config,
-					[]any{baseDate, date, baseDate, deprecationDays},
-					"",
-					operationsSources,
-					opRevision,
-					operation,
-					path,
-				).WithSources(baseSource, revisionSource))
-			}
+			result = append(result, NewApiChange(
+				id,
+				config,
+				args,
+				comment,
+				operationsSources,
+				opRevision,
+				operation,
+				path,
+			).WithSources(baseSource, revisionSource))
 		}
 	}
 
 	return result
-}
-
-const (
-	StabilityDraft  = "draft"
-	StabilityAlpha  = "alpha"
-	StabilityBeta   = "beta"
-	StabilityStable = "stable"
-)
-
-const (
-	// Deprecated: use StabilityDraft.
-	STABILITY_DRAFT = StabilityDraft
-	// Deprecated: use StabilityAlpha.
-	STABILITY_ALPHA = StabilityAlpha
-	// Deprecated: use StabilityBeta.
-	STABILITY_BETA = StabilityBeta
-	// Deprecated: use StabilityStable.
-	STABILITY_STABLE = StabilityStable
-)
-
-func getDeprecationDays(config *Config, stability string) uint {
-	switch stability {
-	case StabilityDraft:
-		return 0
-	case StabilityAlpha:
-		return 0
-	case StabilityBeta:
-		return config.MinSunsetBetaDays
-	case StabilityStable:
-		return config.MinSunsetStableDays
-	default:
-		return config.MinSunsetStableDays
-	}
-}
-
-func getAPIDeprecatedSunsetMissing(opInfo opInfo) ApiChange {
-	return opInfo.NewApiChange(
-		APIDeprecatedSunsetMissingId,
-		nil,
-		"",
-	)
 }

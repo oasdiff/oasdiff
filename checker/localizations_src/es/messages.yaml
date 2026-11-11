@@ -5,7 +5,7 @@ request-body-added-optional: agregado cuerpo de solicitud opcional
 request-parameter-removed: eliminado el parámetro %s de solicitud %s
 request-parameter-removed-comment: "Esto es una advertencia porque algunas aplicaciones pueden devolver un error al recibir un parámetro que no esperan. Se recomienda deprecar el parámetro primero."
 request-parameter-removed-with-deprecation: eliminado el parámetro %s de solicitud %s con deprecación
-request-parameter-sunset-parse: "fallo al parsear la fecha de expiración para el parámetro %s de solicitud %s: %v"
+request-parameter-sunset-parse: "la fecha de expiración del parámetro %s de solicitud %s no cumple con RFC3339: %v"
 request-parameter-removed-before-sunset: eliminado el parámetro %s de solicitud %s antes de la fecha de expiración %s
 total-errors: "%d cambios críticos: %d %s, %d %s\\n"
 total-changes: "%d cambios: %d %s, %d %s, %d %s\\n"
@@ -17,8 +17,8 @@ request-property-pattern-added: "agregado el patrón %s a la propiedad de solici
 request-property-pattern-removed: "removido el patrón %s de la propiedad de solicitud %s"
 request-property-pattern-changed: "cambiado el patrón de la propiedad de solicitud %s de %s a %s"
 request-property-pattern-generalized: "cambiado el patrón de la propiedad de solicitud %s de %s a un patrón más general %s"
-api-deprecated-sunset-parse: "fallo al parsear la fecha de expiración: %v"
-api-path-sunset-parse: "fallo al parsear la fecha de expiración: %v"
+api-deprecated-sunset-parse: "la fecha de expiración no cumple con RFC3339: %v"
+api-path-sunset-parse: "la fecha de expiración no cumple con RFC3339: %v"
 api-version-not-bumped: "se detectó un cambio incompatible pero la versión sigue siendo %s"
 api-version-decreased: "se detectó un cambio incompatible pero la versión disminuyó de %s a %s"
 api-major-version-not-bumped: "se detectó un cambio incompatible pero la versión mayor no aumentó, de %s a %s"
@@ -28,31 +28,31 @@ request-property-stability-decreased: "nivel de estabilidad de la propiedad de s
 request-property-stability-increased: "nivel de estabilidad de la propiedad de solicitud %s aumentado de %s a %s"
 response-property-stability-decreased: "nivel de estabilidad de la propiedad de respuesta %s disminuido de %s a %s"
 response-property-stability-increased: "nivel de estabilidad de la propiedad de respuesta %s aumentado de %s a %s"
-api-invalid-stability-level: "fallo al parsear el nivel de estabilidad: %v"
+api-invalid-stability-level: "el nivel de estabilidad %s no es uno de %s, %s, %s o %s"
 api-deprecated-sunset-missing: "fecha de expiración faltante para la API deprecada"
 api-sunset-date-too-small: "fecha de expiración %s es demasiado pequeña, debe ser al menos %s días desde ahora"
 endpoint-added: endpoint agregado
 endpoint-deprecated: endpoint deprecado
 endpoint-deprecated-with-sunset: "endpoint deprecado con fecha de expiración %s"
 endpoint-reactivated: endpoint reactivado
-api-path-removed-without-deprecation: ruta de api removida sin deprecación
-api-path-removed-with-deprecation: ruta de api removida con deprecación
-api-path-removed-before-sunset: ruta de api removida antes de la fecha de expiración %s
-api-removed-without-deprecation: api removida sin deprecación
-api-removed-with-deprecation: api removida con deprecación
-api-removed-before-sunset: api removida antes de la fecha de expiración %s
-api-operation-id-removed: id de operación de api %s removido y reemplazado por %s
-api-operation-id-added: id de operación de api %s fue agregado
-api-tag-removed: etiqueta de api %s removida
-api-tag-added: etiqueta de api %s agregada
+api-path-removed-without-deprecation: ruta de API removida sin deprecación
+api-path-removed-with-deprecation: ruta de API removida con deprecación
+api-path-removed-before-sunset: ruta de API removida antes de la fecha de expiración %s
+api-removed-without-deprecation: API removida sin deprecación
+api-removed-with-deprecation: API removida con deprecación
+api-removed-before-sunset: API removida antes de la fecha de expiración %s
+api-operation-id-removed: id de operación de API %s removido y reemplazado por %s
+api-operation-id-added: id de operación de API %s fue agregado
+api-tag-removed: etiqueta de API %s removida
+api-tag-added: etiqueta de API %s agregada
 api-schema-removed: removido el esquema %s
-sunset-deleted: fecha de expiración de api eliminada, pero deprecated=true mantenido
-api-sunset-date-changed-too-small: fecha de expiración de api cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora
+sunset-deleted: fecha de expiración de API eliminada, pero deprecated=true mantenido
+api-sunset-date-changed-too-small: fecha de expiración de API cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora
 new-required-request-parameter: agregado el nuevo parámetro %s de solicitud requerido %s
 new-optional-request-parameter: agregado el nuevo parámetro %s de solicitud opcional %s
 new-required-request-property: agregada la nueva propiedad de solicitud requerida %s
 new-required-request-property-with-default: agregada la nueva propiedad de solicitud requerida %s con un valor por defecto
-required-request-property-with-default-error-comment: "Una solicitud que omite esta propiedad obligatoria es inválida según el nuevo contrato, aunque la propiedad tenga un valor por defecto. El valor por defecto es un mecanismo del servidor, no hace que la propiedad omitida sea válida. Reduce la severidad de esta verificación con --severity-levels si omitir la propiedad es seguro para tus clientes."
+required-request-property-with-default-error-comment: "Una solicitud que omite esta propiedad obligatoria es inválida según el nuevo contrato, aunque la propiedad tenga un valor por defecto. El valor por defecto es un mecanismo del servidor, no hace que la propiedad omitida sea válida."
 new-optional-request-property: agregada la nueva propiedad de solicitud opcional %s
 new-required-request-header-property: agregada la nueva propiedad %s requerida del encabezado de solicitud %s
 request-body-became-required: el cuerpo de solicitud se volvió requerido
@@ -88,9 +88,9 @@ request-parameter-x-extensible-enum-value-removed: removido el valor x-extensibl
 pattern-added-error-comment: "Este es un cambio crítico porque agregar una restricción de patrón a un parámetro previamente sin restricciones rechazará valores que anteriormente eran aceptados, rompiendo clientes existentes"
 request-parameter-max-decreased: para el parámetro %s de solicitud %s, el máximo fue disminuido de %s a %s
 request-parameter-max-increased: para el parámetro %s de solicitud %s, el máximo fue aumentado de %s a %s
-request-parameter-default-value-added: agregado valor por defecto %s para el parámetro de solicitud %s
-request-parameter-default-value-changed: valor por defecto para el parámetro de solicitud %s cambiado de %s a %s
-request-parameter-default-value-removed: removido valor por defecto %s para el parámetro de solicitud %s
+request-parameter-default-value-added: "agregado el valor por defecto %[3]s para el parámetro %[1]s de solicitud %[2]s"
+request-parameter-default-value-changed: "valor por defecto para el parámetro %s de solicitud %s cambiado de %s a %s"
+request-parameter-default-value-removed: "removido el valor por defecto %[3]s para el parámetro %[1]s de solicitud %[2]s"
 request-parameter-max-length-decreased: para el parámetro %s de solicitud %s, maxLength fue disminuido de %s a %s
 request-parameter-max-length-increased: para el parámetro %s de solicitud %s, maxLength fue aumentado de %s a %s
 request-parameter-min-length-increased: para el parámetro %s de solicitud %s, minLength fue aumentado de %s a %s
@@ -113,18 +113,20 @@ request-parameter-type-form-explode-array-comment: "Este parámetro usa la seria
 request-parameter-property-type-generalized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue ampliado de %s a %s
 request-parameter-property-type-specialized: para el parámetro %s de solicitud %s, el %s de la propiedad %s fue reducido de %s a %s
 new-request-path-parameter: agregado nuevo parámetro de ruta de solicitud %s
-request-parameter-deprecated: parámetro de solicitud deprecado
-request-parameter-deprecated-sunset-missing: parámetro de solicitud deprecado sin fecha de expiración
-request-parameter-reactivated: parámetro de solicitud reactivado
-request-parameter-sunset-deleted: fecha de expiración del parámetro de solicitud eliminada
-request-parameter-sunset-date-too-small: fecha de expiración del parámetro de solicitud demasiado pequeña
-request-parameter-sunset-date-changed-too-small: fecha de expiración del parámetro de solicitud cambiada demasiado pequeña
+request-parameter-deprecated: "el parámetro %s de solicitud %s fue deprecado"
+request-parameter-deprecated-sunset-missing: "el parámetro %s de solicitud %s fue deprecado sin fecha de expiración"
+request-parameter-reactivated: "el parámetro %s de solicitud %s fue reactivado"
+request-parameter-sunset-deleted: "la fecha de expiración del parámetro %s de solicitud %s fue eliminada, pero deprecated=true se mantuvo"
+request-parameter-sunset-date-too-small: "la fecha de expiración %[3]s del parámetro %[1]s de solicitud %[2]s es demasiado próxima, debe ser al menos %[4]s días a partir de ahora"
+request-parameter-sunset-date-changed-too-small: "la fecha de expiración del parámetro %s de solicitud %s cambió a una fecha anterior, de %s a %s, la nueva fecha no debe ser anterior a %s y al menos %s días a partir de ahora"
 request-property-deprecated: "propiedad de solicitud %s deprecada"
 request-property-deprecated-with-sunset: "propiedad de solicitud %s deprecada con fecha de expiración %s"
 request-property-deprecated-sunset-missing: "propiedad de solicitud %s deprecada sin fecha de expiración"
-request-property-deprecated-sunset-invalid: "propiedad de solicitud %s deprecada con fecha de expiración inválida: %s"
+request-property-deprecated-sunset-invalid: "propiedad de solicitud %s deprecada con una fecha de expiración que no cumple con RFC3339: %s"
 request-property-reactivated: "propiedad de solicitud %s reactivada"
 request-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de solicitud %s es demasiado pequeña, debe ser al menos %s días desde ahora"
+request-property-sunset-deleted: "fecha de expiración de la propiedad de solicitud %s eliminada, pero deprecated=true mantenido"
+request-property-sunset-date-changed-too-small: "fecha de expiración de la propiedad de solicitud %s cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora"
 request-property-became-required: la propiedad de solicitud %s se volvió requerida
 request-property-became-required-with-default: la propiedad de solicitud %s se volvió requerida con valor por defecto
 request-property-became-optional: la propiedad de solicitud %s se volvió opcional
@@ -209,9 +211,11 @@ response-optional-property-removed: removida la propiedad opcional %s de la resp
 response-property-deprecated: "propiedad de respuesta %s deprecada"
 response-property-deprecated-with-sunset: "propiedad de respuesta %s deprecada con fecha de expiración %s"
 response-property-deprecated-sunset-missing: "propiedad de respuesta %s deprecada sin fecha de expiración"
-response-property-deprecated-sunset-invalid: "propiedad de respuesta %s deprecada con fecha de expiración inválida: %s"
+response-property-deprecated-sunset-invalid: "propiedad de respuesta %s deprecada con una fecha de expiración que no cumple con RFC3339: %s"
 response-property-reactivated: "propiedad de respuesta %s reactivada"
 response-property-sunset-date-too-small: "la fecha de expiración %s de la propiedad de respuesta %s es demasiado pequeña, debe ser al menos %s días desde ahora"
+response-property-sunset-deleted: "fecha de expiración de la propiedad de respuesta %s eliminada, pero deprecated=true mantenido"
+response-property-sunset-date-changed-too-small: "fecha de expiración de la propiedad de respuesta %s cambiada a una fecha anterior, de %s a %s, la nueva fecha de expiración debe ser no anterior a %s y al menos %s días desde ahora"
 response-property-became-optional: la propiedad de respuesta %s se volvió opcional para el estado %s
 response-property-became-nullable: la propiedad de respuesta %s se volvió nulable para el estado %s
 response-body-became-nullable: el cuerpo de respuesta se volvió nulable
@@ -272,11 +276,11 @@ response-body-exclusive-max-increased: el valor exclusiveMaximum del cuerpo de r
 response-property-exclusive-max-increased: el valor exclusiveMaximum de la propiedad de respuesta %s fue aumentado de %s a %s para el estado %s
 response-body-exclusive-min-decreased: el valor exclusiveMinimum del cuerpo de respuesta fue disminuido de %s a %s
 response-property-exclusive-min-decreased: el valor exclusiveMinimum de la propiedad de respuesta %s fue disminuido de %s a %s para el estado %s
-api-security-added: el esquema de seguridad %s fue agregado al endpoint de la api
-api-security-removed: el esquema de seguridad %s fue removido del endpoint de la api
+api-security-added: el esquema de seguridad %s fue agregado al endpoint de la API
+api-security-removed: el esquema de seguridad %s fue removido del endpoint de la API
 api-security-updated: el esquema de seguridad %s fue actualizado de %s a %s
-api-global-security-added: el esquema de seguridad %s fue agregado a la api
-api-global-security-removed: el esquema de seguridad %s fue removido de la api
+api-global-security-added: el esquema de seguridad %s fue agregado a la API
+api-global-security-removed: el esquema de seguridad %s fue removido de la API
 api-global-security-scope-removed: el alcance de seguridad %s fue removido del esquema de seguridad global %s
 api-security-anonymous-access-removed: el endpoint ya no permite acceso anónimo y ahora solo acepta %s
 api-security-anonymous-access-added: el endpoint ahora permite acceso anónimo
@@ -332,15 +336,15 @@ response-property-pattern-removed: el patrón %s fue removido de la propiedad de
 response-property-default-value-added: el valor por defecto %s fue agregado a la propiedad de respuesta %s para el estado %s
 response-property-default-value-changed: el valor por defecto de la propiedad de respuesta %s fue cambiado de %s a %s para el estado %s
 response-property-default-value-removed: el valor por defecto %s fue removido de la propiedad de respuesta %s para el estado %s
-response-body-default-value-added: el valor por defecto %s fue agregado al cuerpo de respuesta para el estado %s
-response-body-default-value-changed: el valor por defecto del cuerpo de respuesta fue cambiado de %s a %s para el estado %s
-response-body-default-value-removed: el valor por defecto %s fue removido del cuerpo de respuesta para el estado %s
+response-body-default-value-added: "el valor por defecto %[2]s fue agregado al cuerpo de respuesta %[1]s para el estado %[3]s"
+response-body-default-value-changed: "el valor por defecto del cuerpo de respuesta %s fue cambiado de %s a %s para el estado %s"
+response-body-default-value-removed: "el valor por defecto %[2]s fue removido del cuerpo de respuesta %[1]s para el estado %[3]s"
 request-property-default-value-added: el valor por defecto %s fue agregado a la propiedad de solicitud %s
 request-property-default-value-changed: el valor por defecto de la propiedad de solicitud %s fue cambiado de %s a %s
 request-property-default-value-removed: el valor por defecto %s fue removido de la propiedad de solicitud %s
-request-body-default-value-added: el valor por defecto %s fue agregado al cuerpo de solicitud
-request-body-default-value-changed: el valor por defecto del cuerpo de solicitud fue cambiado de %s a %s
-request-body-default-value-removed: el valor por defecto %s fue removido del cuerpo de solicitud
+request-body-default-value-added: "el valor por defecto %[2]s fue agregado al cuerpo de solicitud %[1]s"
+request-body-default-value-changed: "el valor por defecto del cuerpo de solicitud %s fue cambiado de %s a %s"
+request-body-default-value-removed: "el valor por defecto %[2]s fue removido del cuerpo de solicitud %[1]s"
 request-body-removed: removido el cuerpo de solicitud
 request-body-any-of-added: "%s fue agregado a la lista `anyOf` del cuerpo de solicitud"
 request-body-any-of-removed: "%s fue removido de la lista `anyOf` del cuerpo de solicitud"
@@ -368,7 +372,7 @@ request-property-all-of-added: "%s fue agregado a la lista `allOf` de la propied
 request-property-all-of-removed: "%s fue removido de la lista `allOf` de la propiedad de solicitud %s"
 response-body-all-of-added: "%s fue agregado a la lista `allOf` del cuerpo de respuesta para el estado %s"
 response-body-all-of-removed: "%s fue removido de la lista `allOf` del cuerpo de respuesta para el estado %s"
-all-of-not-flattened-comment: "Esto comparó las ramas de `allOf` una por una, así que otra rama todavía puede garantizar lo que esta perdió. Ejecute con --flatten-allof para fusionar las ramas y comparar lo que describen en conjunto."
+all-of-not-flattened-comment: "Esto comparó las ramas de `allOf` una por una, así que otra rama ya puede describir lo que cambió aquí, dejando igual el esquema fusionado. Ejecute con --flatten-allof para fusionar las ramas y comparar lo que describen en conjunto."
 read-only-comment: "La propiedad es de solo lectura, por lo que nunca aparece en las solicitudes y este cambio no puede invalidar ninguna."
 write-only-comment: "La propiedad es de solo escritura, por lo que nunca aparece en las respuestas y este cambio no puede invalidar ninguna."
 required-in-requests-comment: "En OpenAPI 3.1 y posteriores, required se aplica también en las solicitudes a una propiedad de solo lectura, así que los clientes ya la envían y este cambio no puede invalidar una solicitud."
@@ -1077,6 +1081,8 @@ request-property-deprecated-sunset-missing-description: propiedad de solicitud d
 request-property-deprecated-with-sunset-description: propiedad de solicitud deprecada con fecha de expiración
 request-property-reactivated-description: propiedad de solicitud reactivada (deprecación establecida como falsa)
 request-property-sunset-date-too-small-description: propiedad de solicitud deprecada antes del número mínimo de días requeridos
+request-property-sunset-deleted-description: fecha de expiración de la propiedad de solicitud removida estando aún deprecada
+request-property-sunset-date-changed-too-small-description: la fecha de expiración modificada de la propiedad de solicitud no cumple el número mínimo de días requeridos
 response-media-type-name-changed-description: tipo de media de respuesta cambiado
 response-media-type-name-generalized-description: tipo de media de respuesta cambiado a un tipo más general
 response-media-type-name-specialized-description: tipo de media de respuesta cambiado a un tipo más específico
@@ -1086,6 +1092,8 @@ response-property-deprecated-sunset-missing-description: propiedad de respuesta 
 response-property-deprecated-with-sunset-description: propiedad de respuesta deprecada con fecha de expiración
 response-property-reactivated-description: propiedad de respuesta reactivada (deprecación establecida como falsa)
 response-property-sunset-date-too-small-description: propiedad de respuesta deprecada antes del número mínimo de días requeridos
+response-property-sunset-deleted-description: fecha de expiración de la propiedad de respuesta removida estando aún deprecada
+response-property-sunset-date-changed-too-small-description: la fecha de expiración modificada de la propiedad de respuesta no cumple el número mínimo de días requeridos
 # media type schema existence (#1050)
 request-body-media-type-schema-added: agregado un esquema al tipo de media %s del cuerpo de solicitud
 request-body-media-type-schema-removed: removido el esquema del tipo de media %s del cuerpo de solicitud
@@ -1238,7 +1246,7 @@ request-parameter-property-schema-became-false-description: "request parameter p
 request-parameter-property-schema-became-not-false-description: "request parameter property schema is no longer the boolean `false`"
 response-header-schema-became-false-description: "response header schema became the boolean `false`"
 response-header-schema-became-not-false-description: "response header schema is no longer the boolean `false`"
-bound-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba. Si sabe que sus clientes se mantienen dentro del nuevo límite, reduzca la severidad de esta verificación con --severity-levels.
+bound-set-comment: Establecer un límite rechaza valores que el contrato anterior aceptaba, salvo que sus clientes se mantengan dentro del nuevo límite.
 
 # generated bound-rule messages: edit the templates in checker/bound_messages_test.go and run 'make bound-messages'; do not edit these entries by hand
 request-body-exclusive-max-unset: el valor exclusiveMaximum del cuerpo de solicitud fue removido de %s
@@ -1606,3 +1614,12 @@ shared-schema-detail-also-cyclic: "también en %s y más"
 shared-schema-detail-also-more: "también en %s y %d más"
 shared-schema-detail-name: "esquema compartido: %s"
 security-scheme-url-changed-warn-comment: "Esta es una advertencia porque la especificación no indica si las credenciales obtenidas a través de la URL anterior siguen siendo aceptadas."
+api-sunset-date-changed-earlier: "fecha de expiración de API cambiada a una fecha anterior, de %s a %s"
+api-sunset-date-changed-earlier-description: "la fecha de expiración se movió antes de la que recibieron los clientes"
+request-parameter-sunset-date-changed-earlier: "la fecha de expiración del parámetro %s de solicitud %s cambió a una fecha anterior, de %s a %s"
+request-parameter-sunset-date-changed-earlier-description: "la fecha de expiración del parámetro de solicitud se movió antes de la que recibieron los clientes"
+request-property-sunset-date-changed-earlier: "fecha de expiración de la propiedad de solicitud %s cambiada a una fecha anterior, de %s a %s"
+request-property-sunset-date-changed-earlier-description: "la fecha de expiración de la propiedad de solicitud se movió antes de la que recibieron los clientes"
+response-property-sunset-date-changed-earlier: "fecha de expiración de la propiedad de respuesta %s cambiada a una fecha anterior, de %s a %s"
+response-property-sunset-date-changed-earlier-description: "la fecha de expiración de la propiedad de respuesta se movió antes de la que recibieron los clientes"
+sunset-date-changed-earlier-comment: "La fecha que recibieron los clientes fue retirada. oasdiff considera una fecha x-sunset publicada como un compromiso, con o sin una política de deprecación configurada, porque los clientes planifican su migración con ella."

@@ -79,7 +79,6 @@ var locationUnpinned = []string{
 	"min-length-exceeds-max-length",
 	"min-properties-exceeds-max-properties",
 	"minimum-exceeds-maximum",
-	"multiple-of-not-positive",
 	"name-forbidden",
 	"oauth-flow-authorization-url-required",
 	"oauth-flow-scopes-required",

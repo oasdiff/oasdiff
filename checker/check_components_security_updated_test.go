@@ -231,7 +231,7 @@ func TestComponentSecurityApiKeyNameUpdated(t *testing.T) {
 		Level:     checker.ERR,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `api_key` api key name changed from `X-API-Key` to `X-Token`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `api_key` API key name changed from `X-API-Key` to `X-Token`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing the apiKey location moves the key, e.g. from a header to the query
@@ -246,7 +246,7 @@ func TestComponentSecurityApiKeyInUpdated(t *testing.T) {
 		Level:     checker.ERR,
 		Component: checker.ComponentSecuritySchemes,
 	}, errs[0])
-	require.Equal(t, "the component security scheme `api_key` api key location changed from `header` to `query`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "the component security scheme `api_key` API key location changed from `header` to `query`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // changing the http scheme changes the Authorization header format

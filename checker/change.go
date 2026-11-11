@@ -1,6 +1,6 @@
 package checker
 
-import "github.com/oasdiff/oasdiff/checker/location"
+import "github.com/oasdiff/oasdiff/checker/internal/location"
 
 // Source is where a change is in a spec. It is defined with the functions
 // that find it, and named here because the change types hold it.

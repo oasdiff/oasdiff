@@ -1,11 +1,8 @@
 package checker
 
 import (
-	"time"
-
-	"cloud.google.com/go/civil"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,88 +13,52 @@ const (
 	RequestParameterDeprecatedId              = "request-parameter-deprecated"
 )
 
+// withSunset is empty: a parameter deprecated with a sunset date is reported as
+// request-parameter-deprecated, with the date in the details.
+var requestParameterDeprecationIds = deprecation.Ids{
+	Reactivated:    RequestParameterReactivatedId,
+	Deprecated:     RequestParameterDeprecatedId,
+	SunsetMissing:  RequestParameterDeprecatedSunsetMissingId,
+	SunsetParse:    RequestParameterSunsetParseId,
+	SunsetTooSmall: RequestParameterSunsetDateTooSmallId,
+}
+
 func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
-
 		if p.paramDiff.DeprecatedDiff == nil {
 			return
 		}
-		// deprecated is a field of the Parameter Object, not of its schema.
-		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "deprecated")
 
-		param := p.paramDiff.Revision
-
-		if p.paramDiff.DeprecatedDiff.To == nil || p.paramDiff.DeprecatedDiff.To == false {
-			// not breaking changes
-			result = append(result, p.opInfo.NewApiChange(
-				RequestParameterReactivatedId,
-				[]any{p.location, p.name},
-				"",
-			).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(p.opInfo.operation.Extensions)))
-			return
-		}
-
-		stability, err := getStabilityLevel(p.opInfo.operation.Extensions)
-		if err != nil {
+		days, ok := deprecationDays(config, p.opInfo.operation.Extensions)
+		if !ok && deprecation.NowDeprecated(p.paramDiff.DeprecatedDiff) {
 			// handled in CheckBackwardCompatibility
 			return
 		}
 
-		deprecationDays := getDeprecationDays(config, stability)
+		stage := deprecation.Announce(p.paramDiff.DeprecatedDiff, p.paramDiff.Revision.Extensions, days, requestParameterDeprecationIds)
 
-		sunset, ok := getSunset(param.Extensions)
-		if !ok {
-			// if deprecation policy is defined and sunset is missing, it's a breaking change
-			if deprecationDays > 0 {
-				result = append(result, getParameterDeprecatedSunsetMissing(p.opInfo, param).WithSources(baseSource, revisionSource))
+		// Every stage points at the deprecated field, the sunset ones included.
+		// deprecated is a field of the Parameter Object, not of its schema.
+		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "deprecated")
+
+		// The details describe the deprecation, so they are left off a finding
+		// about the sunset date.
+		details := ""
+		switch stage.Id {
+		case RequestParameterReactivatedId:
+			details = formatDeprecationDetails(p.opInfo.operation.Extensions)
+		case RequestParameterDeprecatedId:
+			if stage.Sunset.IsValid() {
+				details = formatDeprecationDetailsWithSunset(stage.Sunset, p.opInfo.operation.Extensions)
 			} else {
-				// no policy, report deprecation without sunset as INFO
-				result = append(result, p.opInfo.NewApiChange(
-					RequestParameterDeprecatedId,
-					[]any{p.location, p.name},
-					"",
-				).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetails(p.opInfo.operation.Extensions)))
+				details = formatDeprecationDetails(p.opInfo.operation.Extensions)
 			}
-			return
 		}
 
-		date, err := getSunsetDate(sunset)
-		if err != nil {
-			result = append(result, p.opInfo.NewApiChange(
-				RequestParameterSunsetParseId,
-				[]any{param.In, param.Name, err},
-				"",
-			).WithSources(baseSource, revisionSource))
-			return
-		}
-
-		days := date.DaysSince(civil.DateOf(time.Now()))
-
-		if days < int(deprecationDays) {
-			result = append(result, p.opInfo.NewApiChange(
-				RequestParameterSunsetDateTooSmallId,
-				[]any{param.In, param.Name, date, deprecationDays},
-				"",
-			).WithSources(baseSource, revisionSource))
-			return
-		}
-
-		// not breaking changes
-		result = append(result, p.opInfo.NewApiChange(
-			RequestParameterDeprecatedId,
-			[]any{p.location, p.name},
-			"",
-		).WithSources(baseSource, revisionSource).WithDetails(formatDeprecationDetailsWithSunset(date, p.opInfo.operation.Extensions)))
+		result = append(result, p.opInfo.NewApiChange(stage.Id, append([]any{p.location, p.name}, stage.Args...), "").
+			WithSources(baseSource, revisionSource).WithDetails(details))
 	})
 
 	return result
-}
-
-func getParameterDeprecatedSunsetMissing(opInfo opInfo, param *openapi3.Parameter) ApiChange {
-	return opInfo.NewApiChange(
-		RequestParameterDeprecatedSunsetMissingId,
-		[]any{param.In, param.Name},
-		"",
-	)
 }

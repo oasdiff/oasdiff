@@ -4,8 +4,9 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -69,11 +70,15 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 				args := []any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus}
 				// A writeOnly property is not in responses, so its deprecation doesn't matter here.
 				if !propertyItem.WriteOnly {
-					id, args = propertyRemovalId(propertyItem, args,
-						ResponseRequiredPropertyRemovedId, ResponseRequiredPropertyRemovedWithDeprecationId, ResponseRequiredPropertyRemovedBeforeSunsetId)
-					if id == "" {
+					stageId, extra, ok := deprecation.Removal(propertyItem.Deprecated, propertyItem.Extensions, deprecation.RemovalIds{
+						Removed:         ResponseRequiredPropertyRemovedId,
+						WithDeprecation: ResponseRequiredPropertyRemovedWithDeprecationId,
+						BeforeSunset:    ResponseRequiredPropertyRemovedBeforeSunsetId,
+					})
+					if !ok {
 						return
 					}
+					id, args = stageId, append(args, extra...)
 				}
 
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
@@ -81,7 +86,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					args,
 					"",
-				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(baseSource, nil))
 			})
 		schemawalk.AddedProperties(
 			info.schemaDiff,
@@ -100,7 +105,7 @@ func ResponseRequiredPropertyUpdatedCheck(diffReport *diff.Diff, operationsSourc
 					id,
 					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), info.responseStatus},
 					"",
-				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 			})
 	})
 

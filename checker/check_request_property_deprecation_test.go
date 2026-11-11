@@ -171,6 +171,38 @@ func TestRequestPropertyDeprecation_DetectsReactivated(t *testing.T) {
 	require.Contains(t, e0.GetUncolorizedText(checker.NewDefaultLocalizer()), "request property `oldField` reactivated")
 }
 
+// a body with several media types names the one each change was found in, on
+// the stages that report nothing about the stability level too
+func TestRequestPropertyDeprecation_EveryStageNamesTheMediaType(t *testing.T) {
+	for _, test := range []struct {
+		name     string
+		base     string
+		revision string
+		id       string
+	}{
+		{name: "deprecated with a sunset date", base: "request_property_deprecation_allof_base.yaml", revision: "request_property_deprecation_allof_spec.yaml", id: checker.RequestPropertyDeprecatedWithSunsetId},
+		{name: "reactivated", base: "request_property_deprecation_allof_spec.yaml", revision: "request_property_deprecation_allof_base.yaml", id: checker.RequestPropertyReactivatedId},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			s1, err := open(deprecationFile(test.base))
+			require.NoError(t, err)
+
+			s2, err := open(deprecationFile(test.revision))
+			require.NoError(t, err)
+
+			d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+			require.NoError(t, err)
+
+			errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyDeprecationCheck), d, osm, checker.INFO)
+			require.NotEmpty(t, errs)
+			for _, e := range errs {
+				require.Equal(t, test.id, e.GetId())
+				require.Contains(t, e.(checker.ApiChange).Details, "media type: ")
+			}
+		})
+	}
+}
+
 // deprecating a property with an invalid sunset date format is breaking
 func TestRequestPropertyDeprecation_WithInvalidSunset(t *testing.T) {
 	s1, err := open(deprecationFile("property_base_stable.yaml"))

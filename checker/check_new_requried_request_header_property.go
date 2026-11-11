@@ -4,8 +4,8 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -34,7 +34,7 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 					NewRequiredRequestHeaderPropertyId,
 					[]any{p.name, schemawalk.PropertyFullName(propertyPath, newPropertyName)},
 					"",
-				).WithSchema(p.paramDiff.SchemaDiff, parent, schemawalk.PropertyFullName(propertyPath, newPropertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, revisionSource))
+				).WithSchema(p.paramDiff.SchemaDiff, parent, schemawalk.PropertyFullName(propertyPath, newPropertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(baseSource, revisionSource))
 			})
 	})
 	return result
