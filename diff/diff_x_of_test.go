@@ -198,6 +198,38 @@ func TestAnyOf_ExcludeDescriptions(t *testing.T) {
 	require.Empty(t, anyOfDiff.Modified)
 }
 
+// Annotation-only edits inside multiple untitled inline allOf branches are
+// paired as modifications rather than reported as wholesale additions and
+// deletions. This exercises the same pairing pass that handles anyOf and
+// oneOf, applied to allOf: on main both branches would surface as 2 added +
+// 2 deleted because neither branch has a title and neither is byte-identical
+// across revisions.
+func TestAllOf_AnnotationOnlyChanges(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("allof-annotation-only-base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := loader.LoadFromFile(getXOfFile("allof-annotation-only-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	allOfDiff := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AllOfDiff
+	require.NotNil(t, allOfDiff)
+	require.Empty(t, allOfDiff.Added)
+	require.Empty(t, allOfDiff.Deleted)
+	require.Len(t, allOfDiff.Modified, 2)
+
+	require.Equal(t, 0, allOfDiff.Modified[0].Base.Index)
+	require.Equal(t, 0, allOfDiff.Modified[0].Revision.Index)
+	require.NotNil(t, allOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
+
+	require.Equal(t, 1, allOfDiff.Modified[1].Base.Index)
+	require.Equal(t, 1, allOfDiff.Modified[1].Revision.Index)
+	require.NotNil(t, allOfDiff.Modified[1].Diff.PropertiesDiff.Modified["prop2"].DescriptionDiff)
+}
+
 // Inline -> $ref refactor of an equivalent component is not reported by
 // default (MatchInlineRefs=true). The Added/Deleted pair is paired up in the
 // subschema matcher and removed.
