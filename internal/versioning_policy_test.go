@@ -99,10 +99,10 @@ func Test_EnforceVersionBump_JSONOutputIsUnaffected(t *testing.T) {
 	require.Equal(t, "api-path-removed-without-deprecation", changes[0].Id)
 }
 
-// A severity-levels file naming one of the retired ids still loads, so a
-// config written for an earlier version doesn't fail the run, and the message
-// points at the flag that replaced it.
-func Test_RetiredSeverityLevelIsReported(t *testing.T) {
+// The three ids are no longer checks, so a severity-levels file naming one of
+// them is rejected like any other unknown id rather than silently having no
+// effect.
+func Test_RetiredSeverityLevelIsRejected(t *testing.T) {
 	levels := filepath.Join(t.TempDir(), "levels.txt")
 	require.NoError(t, os.WriteFile(levels, []byte("api-version-not-bumped err\n"), 0644))
 
@@ -111,6 +111,6 @@ func Test_RetiredSeverityLevelIsReported(t *testing.T) {
 		cmdToArgs("oasdiff breaking ../data/versioning/base.yaml ../data/versioning/revision_major_bump.yaml --severity-levels "+levels),
 		io.Discard, &stderr)
 
-	require.Zero(t, code)
-	require.Contains(t, stderr.String(), "warning: api-version-not-bumped is no longer a check, so the level set in "+levels+" has no effect. Use --enforce-version-bump to require a major version increase for breaking changes.")
+	require.Equal(t, 106, code)
+	require.Contains(t, stderr.String(), `invalid rule id "api-version-not-bumped" on line 1`)
 }

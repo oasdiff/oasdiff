@@ -2,8 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"io"
-	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
 )
@@ -82,30 +80,4 @@ func hasLevelBelowErr(errs checker.Changes, level checker.Level) bool {
 		}
 	}
 	return false
-}
-
-// dropRetiredSeverityLevels removes the ids that are no longer checks from
-// severityLevels, and returns them sorted. The checker config accepts a level
-// only for an id it knows, so these have to go before it is built.
-func dropRetiredSeverityLevels(severityLevels map[string]checker.Level) []string {
-	retired := checker.RetiredRuleIdsIn(severityLevels)
-	for _, id := range retired {
-		delete(severityLevels, id)
-	}
-	return retired
-}
-
-// warnRetiredSeverityLevels says that a level set for a retired id has no
-// effect, and names the flag that replaced it.
-func warnRetiredSeverityLevels(w io.Writer, retired []string, file string) {
-	if len(retired) == 0 {
-		return
-	}
-
-	subject := retired[0] + " is no longer a check"
-	if len(retired) > 1 {
-		subject = strings.Join(retired, ", ") + " are no longer checks"
-	}
-
-	_, _ = fmt.Fprintf(w, "warning: %s, so the level set in %s has no effect. Use --enforce-version-bump to require a major version increase for breaking changes.\n", subject, file)
 }

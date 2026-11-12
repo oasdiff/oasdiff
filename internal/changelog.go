@@ -58,7 +58,6 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	if returnErr != nil {
 		return false, returnErr
 	}
-	warnRetiredSeverityLevels(flags.getStderr(), dropRetiredSeverityLevels(severityLevels), flags.getSeverityLevelsFile())
 
 	bcConfig := checker.NewConfig(
 		checker.GetAllChecks(),
