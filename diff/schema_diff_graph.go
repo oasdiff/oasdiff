@@ -56,15 +56,11 @@ func newSchemaGraph() schemaGraph {
 	}
 }
 
-// getSchemaDiffFromGraph returns the diff of a pair of schemas through the
-// graph: a pair reached while the graph is being built gets its node, a pair
-// reached from outside gets that node unrolled, and a pair with no schema on
-// one side has no node and is compared directly.
+// getSchemaDiffFromGraph returns the diff of a pair of schemas that both have
+// a value, which is the pair a node is keyed by: reached while the graph is
+// being built it gets its node, reached from outside it gets that node
+// unrolled.
 func getSchemaDiffFromGraph(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
-
-	if schema1 == nil || schema2 == nil || schema1.Value == nil || schema2.Value == nil {
-		return getSchemaDiffInternal(config, state, schema1, schema2)
-	}
 
 	node, err := getSchemaDiffNode(config, state, schema1, schema2)
 	if err != nil {
