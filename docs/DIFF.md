@@ -127,7 +127,18 @@ This is useful when you have extensions that are only used internally or for too
 
 ## Matching Subschemas
 
-Under `allOf`, `anyOf` and `oneOf`, oasdiff matches a subschema in the base with a subschema in the revision by their validation contract. Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) do not stop a match, and are reported inside the pair that matched. Differences that affect validation, `deprecated` included, stop it.
+A subschema under `allOf`, `anyOf` or `oneOf` has no name to match on, so oasdiff pairs the base and revision lists in steps, each one over whatever the earlier steps left unmatched:
+
+1. **By `$ref`** - two subschemas that reference the same component.
+2. **By identical content** - two inline subschemas with no difference at all between them, annotations included.
+3. **By title** - two inline subschemas with the same non-empty `title`.
+4. **By validation contract** - two untitled inline subschemas that accept the same payloads.
+5. **By elimination** - one untitled inline subschema left on each side, paired whatever their contracts, on the assumption that one was edited into the other.
+6. **Across the inline/`$ref` boundary** - an inline subschema and a `$ref` to a component that accept the same payloads. `anyOf` and `oneOf` only, and `--match-inline-refs=false` turns it off.
+
+Whatever differs inside a matched pair is reported as a modified subschema. Anything left unmatched is reported as added or deleted. So an edit confined to annotations, a `description` inside several branches at once for instance, is reported where it happened rather than as branches removed and added.
+
+Steps 4 and 6 compare validation contracts: annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) do not prevent the match and are reported inside the pair. Differences that affect validation, `deprecated` included, prevent it.
 
 ### Inline and `$ref` Subschemas
 
@@ -172,12 +183,6 @@ anyOf:
 To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
 Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is matched this way.
-
-### Untitled Inline Subschemas
-
-Under all three keywords, two untitled inline subschemas with the same validation contract are reported as one modified subschema carrying the annotation change, rather than as a removal and an addition. So an edit to a `description` inside several branches at once is reported where it happened, and `breaking` no longer reports the branches as removed and added.
-
-A title is the subschema's identity, so titled subschemas are matched by title instead. This matching always runs; `--match-inline-refs` does not affect it.
 
 ## Usage Examples
 
