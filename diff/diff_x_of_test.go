@@ -267,9 +267,10 @@ func TestOneOf_ValidationChangeDoesNotPair(t *testing.T) {
 	require.Empty(t, oneOfDiff.Modified)
 }
 
-// Inline -> $ref refactor of an equivalent component is not reported by
-// default (MatchInlineRefs=true). The Added/Deleted pair is paired up in the
-// subschema matcher and removed.
+// Inline -> $ref refactor of an equivalent component is one modified branch
+// by default (MatchInlineRefs=true), not a removal and an addition. The
+// component the tool extracted here also carries a title the inline branch
+// did not, and that title is the whole content of the modification.
 func TestAnyOf_InlineRefRefactor_MatchedByDefault(t *testing.T) {
 	loader := openapi3.NewLoader()
 
@@ -281,25 +282,38 @@ func TestAnyOf_InlineRefRefactor_MatchedByDefault(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	// The refactor reconciles away the only structural change. The whole
-	// PathsDiff (or the AnyOfDiff inside it) should be absent.
-	if dd.PathsDiff == nil {
-		return
-	}
-	pathDiff, ok := dd.PathsDiff.Modified["/pets"]
-	if !ok || pathDiff.OperationsDiff == nil {
-		return
-	}
-	opDiff, ok := pathDiff.OperationsDiff.Modified["POST"]
-	if !ok || opDiff.RequestBodyDiff == nil || opDiff.RequestBodyDiff.ContentDiff == nil {
-		return
-	}
-	mediaTypeDiff, ok := opDiff.RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"]
-	if !ok || mediaTypeDiff.SchemaDiff == nil {
-		return
-	}
-	require.Nil(t, mediaTypeDiff.SchemaDiff.AnyOfDiff,
-		"inline-to-$ref refactor of an equivalent component must not produce an AnyOfDiff")
+	anyOfDiff := dd.PathsDiff.Modified["/pets"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+	require.NotNil(t, anyOfDiff)
+	require.Empty(t, anyOfDiff.Added)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t, "UserRole", anyOfDiff.Modified[0].Revision.Component)
+	require.Equal(t, &diff.ValueDiff{From: "", To: "UserRole"}, anyOfDiff.Modified[0].Diff.TitleDiff)
+}
+
+// The pair's own diff is reported, so an annotation the refactor changed on
+// the way into the component is still visible. The component is in both specs
+// here, so the modified branch is the only change in the diff.
+func TestAnyOf_InlineRefRefactor_AnnotationChange(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-ref-annotation-change-base.yaml"))
+	require.NoError(t, err)
+	s2, err := loader.LoadFromFile(getXOfFile("inline-ref-annotation-change-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Nil(t, dd.ComponentsDiff, "the component is in both specs, so the modified branch is the only change")
+
+	anyOfDiff := dd.PathsDiff.Modified["/pets"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+	require.NotNil(t, anyOfDiff)
+	require.Empty(t, anyOfDiff.Added)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t,
+		&diff.ValueDiff{From: "the caller's role", To: "the role the caller acts under"},
+		anyOfDiff.Modified[0].Diff.DescriptionDiff)
 }
 
 // With --match-inline-refs=false (WithMatchInlineRefs(false)) the matcher
