@@ -95,23 +95,24 @@ func getChangelog(flags *Flags, stdout, stderr io.Writer, level checker.Level, i
 		}
 	}
 
+	failOn, returnErr := flags.failOnLevel()
+	if returnErr != nil {
+		return false, returnErr
+	}
+
 	if flags.getEnforceVersionBump() {
 		verdict := versioning.Check(diffResult.diffReport, errs)
 		// stderr, not stdout: the verdict is not a change, and stdout carries
 		// the report, which may be a json or yaml document.
 		_, _ = fmt.Fprintln(stderr, versioningPolicyLine(verdict))
-		return failOnVersionBump(flags, errs, verdict)
+		return failOnVersionBump(failOn, errs, verdict), nil
 	}
 
-	if flags.getFailOn() != "" {
-		level, returnErr := flags.failOnLevel()
-		if returnErr != nil {
-			return false, returnErr
-		}
-		return errs.HasLevelOrHigher(level), nil
+	if failOn == checker.NONE {
+		return false, nil
 	}
 
-	return false, nil
+	return errs.HasLevelOrHigher(failOn), nil
 }
 
 func filterIgnored(errs checker.Changes, warnIgnoreFile string, errIgnoreFile string, l checker.Localizer) (checker.Changes, *ReturnError) {

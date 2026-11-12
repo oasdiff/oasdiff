@@ -38,32 +38,28 @@ func versionMovement(verdict versioning.Verdict) string {
 }
 
 // failOnVersionBump decides the exit code under --enforce-version-bump: the
-// policy answers for errors, and --fail-on still answers for findings below
-// error, which a major version increase does not license.
-func failOnVersionBump(flags *Flags, errs checker.Changes, verdict versioning.Verdict) (bool, *ReturnError) {
+// policy answers for errors, and failOn, the --fail-on level, still answers
+// for findings below error, which a major version increase does not license.
+// NONE means the caller asked about nothing else.
+func failOnVersionBump(failOn checker.Level, errs checker.Changes, verdict versioning.Verdict) bool {
 	switch verdict.Status {
 	case versioning.Violated:
-		return true, nil
+		return true
 	case versioning.Undecidable:
 		// Enforcement was asked for and the versions don't allow a verdict, so
 		// fail rather than pass a release the policy never judged.
-		return true, nil
+		return true
 	}
 
-	if flags.getFailOn() == "" {
-		return false, nil
-	}
-
-	level, returnErr := flags.failOnLevel()
-	if returnErr != nil {
-		return false, returnErr
+	if failOn == checker.NONE {
+		return false
 	}
 
 	if verdict.Status == versioning.NotApplicable {
-		return errs.HasLevelOrHigher(level), nil
+		return errs.HasLevelOrHigher(failOn)
 	}
 
-	return hasLevelBelowErr(errs, level), nil
+	return hasLevelBelowErr(errs, failOn)
 }
 
 func hasLevelBelowErr(errs checker.Changes, level checker.Level) bool {
