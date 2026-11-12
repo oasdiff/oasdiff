@@ -8,12 +8,21 @@ import (
 	"github.com/oasdiff/oasdiff/diff"
 )
 
-// The versioning policy is one statement: a breaking change requires a major
-// version increase. These are the three ways to violate it.
+// Reason names how a version pair fails to carry a breaking change. The
+// policy is one statement, a breaking change requires a major version
+// increase, and these are the three ways to violate it.
+type Reason int
+
 const (
-	ReasonNotBumped      = "api-version-not-bumped"
-	ReasonDecreased      = "api-version-decreased"
-	ReasonMajorNotBumped = "api-major-version-not-bumped"
+	// NoReason: nothing was violated.
+	NoReason Reason = iota
+	// NotBumped: info.version is unchanged.
+	NotBumped
+	// Decreased: info.version moved backwards.
+	Decreased
+	// MajorNotBumped: info.version moved, but the major version did not
+	// increase.
+	MajorNotBumped
 )
 
 // Status is the verdict on one comparison.
@@ -30,11 +39,11 @@ const (
 )
 
 // Verdict answers whether info.version carries the breaking changes a
-// comparison found. Reason names the violation, and is empty for every other
-// status.
+// comparison found. Reason names the violation, and is NoReason for every
+// other status.
 type Verdict struct {
 	Status          Status
-	Reason          string
+	Reason          Reason
 	BaseVersion     string
 	RevisionVersion string
 	BreakingChanges int
@@ -98,7 +107,7 @@ func Check(diffReport *diff.Diff, changes checker.Changes) Verdict {
 		return verdict
 	}
 
-	if reason := versioningViolation(verdict.BaseVersion, verdict.RevisionVersion, base, revision); reason != "" {
+	if reason := versioningViolation(verdict.BaseVersion, verdict.RevisionVersion, base, revision); reason != NoReason {
 		verdict.Status = Violated
 		verdict.Reason = reason
 		return verdict
@@ -109,17 +118,17 @@ func Check(diffReport *diff.Diff, changes checker.Changes) Verdict {
 }
 
 // versioningViolation names how this version pair fails to carry a breaking
-// change, or returns an empty string when it carries one correctly.
-func versioningViolation(baseVersion, revisionVersion string, base, revision semver) string {
+// change, or returns NoReason when it carries one correctly.
+func versioningViolation(baseVersion, revisionVersion string, base, revision semver) Reason {
 	switch {
 	case baseVersion == revisionVersion:
-		return ReasonNotBumped
+		return NotBumped
 	case !increased(base, revision):
-		return ReasonDecreased
+		return Decreased
 	case !majorBumped(base, revision):
-		return ReasonMajorNotBumped
+		return MajorNotBumped
 	}
-	return ""
+	return NoReason
 }
 
 // increased reports whether revision comes after base in semver precedence.

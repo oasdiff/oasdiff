@@ -71,5 +71,5 @@ func TestAPIVersionChanged_IsNotTheVerdict(t *testing.T) {
 	requireChange(t, changes, checker.APIVersionChangedId)
 	verdict := versioning.Check(d, changes)
 	require.Equal(t, versioning.Violated, verdict.Status)
-	require.Equal(t, versioning.ReasonMajorNotBumped, verdict.Reason)
+	require.Equal(t, versioning.MajorNotBumped, verdict.Reason)
 }

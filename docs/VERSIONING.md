@@ -16,19 +16,19 @@ The report itself is unchanged: every change is still listed, at its own severit
 | Verdict | Exit code | Line on standard error |
 | ------------- | ------------- | ------------- |
 | Satisfied | 0 | `versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the breaking changes.` |
-| Violated | 1 | `versioning policy: violated (api-version-not-bumped). info.version is still 1.0.0.` |
+| Violated | 1 | `versioning policy: violated. info.version is still 1.0.0.` |
 | Nothing to judge | follows `--fail-on` | `versioning policy: not applicable. No breaking changes, so no version increase is required.` |
 | Cannot be judged | 1 | `versioning policy: cannot be evaluated. info.version must be a semantic version in both specs (base "1.0.0", revision "2026-06-01").` |
 
 The line goes to standard error, never to standard output, so it does not corrupt a piped `--format json` or `--format yaml` report.
 
-There are three ways to violate the policy, and the verdict names the one that applies:
+There are three ways to violate the policy, and the verdict says which one applies:
 
-| Reason | Violated because |
+| Violated because | The verdict says |
 | ------------- | ------------- |
-| `api-version-not-bumped` | `info.version` is unchanged |
-| `api-version-decreased` | `info.version` moved backwards, for example `2.0.0` to `1.0.0` |
-| `api-major-version-not-bumped` | `info.version` moved, but the major version did not increase, for example `1.0.0` to `1.1.0` |
+| `info.version` is unchanged | `info.version is still 1.0.0` |
+| `info.version` moved backwards | `info.version decreased from 2.0.0 to 1.0.0` |
+| `info.version` moved, but the major version did not increase | `info.version moved from 1.0.0 to 1.1.0 without a major version increase` |
 
 ## The version change itself
 Any change to `info.version` is reported in the changelog as `api-version-changed`, at `INFO`:
@@ -61,7 +61,7 @@ Below `1.0.0`, semver gives the minor version the major's role, so `0.1.0` to `0
 - Any versioning scheme other than semver, including version numbers in the URL path.
 
 ## Upgrading from the version checks
-`api-version-not-bumped`, `api-version-decreased` and `api-major-version-not-bumped` used to be checks: reported at `INFO` by default, and raised to `err` with `--severity-levels` to enforce the policy. They are no longer checks, because a verdict about the release should not be a change in the API. The three names survive as the reasons printed with a violation, and `api-version-changed` reports the version change itself.
+`api-version-not-bumped`, `api-version-decreased` and `api-major-version-not-bumped` used to be checks: reported at `INFO` by default, and raised to `err` with `--severity-levels` to enforce the policy. They are no longer checks, because a verdict about the release should not be a change in the API. The verdict line says which of the three applies in words, and `api-version-changed` reports the version change itself.
 
 A `--severity-levels` file that still sets a level for one of them fails to load, like any other unknown id, so remove those lines when you upgrade:
 

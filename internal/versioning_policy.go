@@ -16,7 +16,7 @@ func versioningPolicyLine(verdict versioning.Verdict) string {
 		return fmt.Sprintf("versioning policy: satisfied. info.version moved from %s to %s, which allows the breaking changes.",
 			verdict.BaseVersion, verdict.RevisionVersion)
 	case versioning.Violated:
-		return fmt.Sprintf("versioning policy: violated (%s). %s.", verdict.Reason, versionMovement(verdict))
+		return fmt.Sprintf("versioning policy: violated. %s.", versionMovement(verdict))
 	case versioning.Undecidable:
 		return fmt.Sprintf("versioning policy: cannot be evaluated. info.version must be a semantic version in both specs (base %q, revision %q).",
 			verdict.BaseVersion, verdict.RevisionVersion)
@@ -28,9 +28,9 @@ func versioningPolicyLine(verdict versioning.Verdict) string {
 // breaking changes.
 func versionMovement(verdict versioning.Verdict) string {
 	switch verdict.Reason {
-	case versioning.ReasonNotBumped:
+	case versioning.NotBumped:
 		return fmt.Sprintf("info.version is still %s", verdict.RevisionVersion)
-	case versioning.ReasonDecreased:
+	case versioning.Decreased:
 		return fmt.Sprintf("info.version decreased from %s to %s", verdict.BaseVersion, verdict.RevisionVersion)
 	}
 	return fmt.Sprintf("info.version moved from %s to %s without a major version increase",
