@@ -3,6 +3,7 @@ package checker_test
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
@@ -110,4 +111,17 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
+}
+
+func TestResponsePropertyOneOfDescriptionOnlyChange(t *testing.T) {
+	s1, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/x-of/inline-description-change-base.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+	s2, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/x-of/inline-description-change-revision.yaml"), load.WithFlattenAllOf())
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	changes := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponsePropertyOneOfUpdated), d, osm, checker.INFO)
+
+	require.Empty(t, changes)
 }

@@ -11,7 +11,7 @@ oasdiff applies a few opt-out defaults so its diff matches what most users expec
 
 | Flag | Default | What it does | Detail |
 |---|---|---|---|
-| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Matching Inline and `$ref` Subschemas](#matching-inline-and-ref-subschemas) |
+| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Inline and `$ref` Subschemas](#inline-and-ref-subschemas) |
 | `--case-insensitive-headers` | `true` | Compare header names case-insensitively. `Content-Type` and `content-type` are the same header per RFC 7230 / 9110. | [HEADER-DIFF.md](HEADER-DIFF.md) |
 | `--allow-external-refs` | `true` | Allow the parser to resolve external `$ref`s when loading specs. Disable when processing untrusted specs to prevent SSRF. | (CLI help) |
 
@@ -125,7 +125,22 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
-## Matching Inline and `$ref` Subschemas
+## Matching Subschemas
+
+A subschema under `allOf`, `anyOf` or `oneOf` has no name to match on, so oasdiff pairs the base and revision lists in steps, each one over whatever the earlier steps left unmatched:
+
+1. **By `$ref`** - two subschemas that reference the same component.
+2. **By identical content** - two inline subschemas with no difference at all between them, annotations included.
+3. **By title** - two inline subschemas with the same non-empty `title`.
+4. **By validation contract** - two untitled inline subschemas that accept the same payloads.
+5. **By elimination** - one untitled inline subschema left on each side, paired whatever their contracts, on the assumption that one was edited into the other.
+6. **Across the inline/`$ref` boundary** - an inline subschema and a `$ref` to a component that accept the same payloads. `anyOf` and `oneOf` only, and `--match-inline-refs=false` turns it off.
+
+Whatever differs inside a matched pair is reported as a modified subschema. Anything left unmatched is reported as added or deleted. So an edit confined to annotations, a `description` inside several branches at once for instance, is reported where it happened rather than as branches removed and added.
+
+Steps 4 and 6 compare validation contracts: annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) do not prevent the match and are reported inside the pair. Differences that affect validation, `deprecated` included, prevent it.
+
+### Inline and `$ref` Subschemas
 
 Under `anyOf` and `oneOf`, oasdiff treats an inline subschema and a `$ref` to a validation-equivalent component as the same branch by default. This catches a common codegen pattern where a tool extracts an inline schema (often an enum) into a named component without changing the accepted payloads:
 
@@ -148,9 +163,7 @@ The diff reports no change for the `anyOf` list because the union of accepted pa
 
 To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
-Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
-
-The matching is pair-based: each deleted branch matches at most one added branch. An added `$ref` that happens to be equivalent to an inline branch already present on the base (a standalone addition that overlaps an existing branch, rather than a refactor) is still reported as added.
+Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is matched this way.
 
 ## Usage Examples
 

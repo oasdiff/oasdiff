@@ -169,20 +169,14 @@ func TestAnyOf_IncludeDescriptions(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 	anyOfDiff := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
-	require.ElementsMatch(t, diff.Subschemas{
-		{
-			Index: 0,
-		},
-		{
-			Index: 2,
-		},
-	}, anyOfDiff.Added)
-	require.ElementsMatch(t, diff.Subschemas{
-		{
-			Index: 0,
-		},
-	}, anyOfDiff.Deleted)
-	require.Empty(t, anyOfDiff.Modified)
+	require.Equal(t, diff.Subschemas{{Index: 2}}, anyOfDiff.Added)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t, 0, anyOfDiff.Modified[0].Base.Index)
+	require.Equal(t, 0, anyOfDiff.Modified[0].Revision.Index)
+	require.Equal(t,
+		&diff.ValueDiff{From: "Some description", To: "Other description"},
+		anyOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
 }
 
 func TestAnyOf_ExcludeDescriptions(t *testing.T) {
@@ -206,9 +200,77 @@ func TestAnyOf_ExcludeDescriptions(t *testing.T) {
 	require.Empty(t, anyOfDiff.Modified)
 }
 
-// Inline -> $ref refactor of an equivalent component is not reported by
-// default (MatchInlineRefs=true). The Added/Deleted pair is paired up in the
-// subschema matcher and removed.
+// Annotation-only edits inside multiple untitled inline allOf branches are
+// paired as modifications rather than reported as wholesale additions and
+// deletions. This exercises the same pairing pass that handles anyOf and
+// oneOf, applied to allOf: on main both branches would surface as 2 added +
+// 2 deleted because neither branch has a title and neither is byte-identical
+// across revisions.
+func TestAllOf_AnnotationOnlyChanges(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("allof-annotation-only-base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := loader.LoadFromFile(getXOfFile("allof-annotation-only-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	allOfDiff := dd.PathsDiff.Modified["/test"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AllOfDiff
+	require.NotNil(t, allOfDiff)
+	require.Empty(t, allOfDiff.Added)
+	require.Empty(t, allOfDiff.Deleted)
+	require.Len(t, allOfDiff.Modified, 2)
+
+	require.Equal(t, 0, allOfDiff.Modified[0].Base.Index)
+	require.Equal(t, 0, allOfDiff.Modified[0].Revision.Index)
+	require.Equal(t,
+		&diff.ValueDiff{From: "First description", To: "First description changed"},
+		allOfDiff.Modified[0].Diff.PropertiesDiff.Modified["prop1"].DescriptionDiff)
+
+	require.Equal(t, 1, allOfDiff.Modified[1].Base.Index)
+	require.Equal(t, 1, allOfDiff.Modified[1].Revision.Index)
+	require.Equal(t,
+		&diff.ValueDiff{From: "Second description", To: "Second description changed"},
+		allOfDiff.Modified[1].Diff.PropertiesDiff.Modified["prop2"].DescriptionDiff)
+}
+
+// The pairing pass is validation-equivalence-based: a change that affects
+// what each branch accepts (here, swapping `type: array` for `type: object`
+// and dropping `items`) is beyond what annotation suppression can look past,
+// so each base branch stays deleted and each revision branch stays added.
+func TestOneOf_ValidationChangeDoesNotPair(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-description-change-base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := loader.LoadFromFile(getXOfFile("inline-description-change-revision.yaml"))
+	require.NoError(t, err)
+
+	// Rewrite both revision branches to accept objects instead of arrays. No
+	// annotation comparison can bridge that, so the pairing pass must leave
+	// the branches on the added/deleted sides.
+	oneOf := s2.Components.Schemas["Collection"].Value.AllOf[1].Value.Properties["result"].Value.OneOf
+	for _, subschema := range oneOf {
+		subschema.Value.Type = &openapi3.Types{"object"}
+		subschema.Value.Items = nil
+	}
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	oneOfDiff := dd.PathsDiff.Modified["/apps"].OperationsDiff.Modified["GET"].ResponsesDiff.Modified["200"].ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AllOfDiff.Modified[0].Diff.PropertiesDiff.Modified["result"].OneOfDiff
+	require.NotNil(t, oneOfDiff)
+	require.Len(t, oneOfDiff.Added, 2)
+	require.Len(t, oneOfDiff.Deleted, 2)
+	require.Empty(t, oneOfDiff.Modified)
+}
+
+// Inline -> $ref refactor of an equivalent component is one modified branch
+// by default (MatchInlineRefs=true), not a removal and an addition. The
+// component the tool extracted here also carries a title the inline branch
+// did not, and that title is the whole content of the modification.
 func TestAnyOf_InlineRefRefactor_MatchedByDefault(t *testing.T) {
 	loader := openapi3.NewLoader()
 
@@ -220,25 +282,38 @@ func TestAnyOf_InlineRefRefactor_MatchedByDefault(t *testing.T) {
 	dd, err := diff.Get(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)
 
-	// The refactor reconciles away the only structural change. The whole
-	// PathsDiff (or the AnyOfDiff inside it) should be absent.
-	if dd.PathsDiff == nil {
-		return
-	}
-	pathDiff, ok := dd.PathsDiff.Modified["/pets"]
-	if !ok || pathDiff.OperationsDiff == nil {
-		return
-	}
-	opDiff, ok := pathDiff.OperationsDiff.Modified["POST"]
-	if !ok || opDiff.RequestBodyDiff == nil || opDiff.RequestBodyDiff.ContentDiff == nil {
-		return
-	}
-	mediaTypeDiff, ok := opDiff.RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"]
-	if !ok || mediaTypeDiff.SchemaDiff == nil {
-		return
-	}
-	require.Nil(t, mediaTypeDiff.SchemaDiff.AnyOfDiff,
-		"inline-to-$ref refactor of an equivalent component must not produce an AnyOfDiff")
+	anyOfDiff := dd.PathsDiff.Modified["/pets"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+	require.NotNil(t, anyOfDiff)
+	require.Empty(t, anyOfDiff.Added)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t, "UserRole", anyOfDiff.Modified[0].Revision.Component)
+	require.Equal(t, &diff.ValueDiff{From: "", To: "UserRole"}, anyOfDiff.Modified[0].Diff.TitleDiff)
+}
+
+// The pair's own diff is reported, so an annotation the refactor changed on
+// the way into the component is still visible. The component is in both specs
+// here, so the modified branch is the only change in the diff.
+func TestAnyOf_InlineRefRefactor_AnnotationChange(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := loader.LoadFromFile(getXOfFile("inline-ref-annotation-change-base.yaml"))
+	require.NoError(t, err)
+	s2, err := loader.LoadFromFile(getXOfFile("inline-ref-annotation-change-revision.yaml"))
+	require.NoError(t, err)
+
+	dd, err := diff.Get(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Nil(t, dd.ComponentsDiff, "the component is in both specs, so the modified branch is the only change")
+
+	anyOfDiff := dd.PathsDiff.Modified["/pets"].OperationsDiff.Modified["POST"].RequestBodyDiff.ContentDiff.MediaTypeModified["application/json"].SchemaDiff.AnyOfDiff
+	require.NotNil(t, anyOfDiff)
+	require.Empty(t, anyOfDiff.Added)
+	require.Empty(t, anyOfDiff.Deleted)
+	require.Len(t, anyOfDiff.Modified, 1)
+	require.Equal(t,
+		&diff.ValueDiff{From: "the caller's role", To: "the role the caller acts under"},
+		anyOfDiff.Modified[0].Diff.DescriptionDiff)
 }
 
 // With --match-inline-refs=false (WithMatchInlineRefs(false)) the matcher

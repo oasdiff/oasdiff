@@ -21,6 +21,7 @@ SubschemasDiff is a combination of three diffs:
     Unlike referenced schemas, inline schemas cannot be matched by a unique name and are therefor compared by their content.
     - syntactically identical schemas across base and revision are considered unmodified
     - schemas with the same title across base and revision are compared to each other and based on the result are considered as modified or unmodified
+    - remaining untitled schemas with the same validation contract are compared to each other and considered modified
     - other schemas are considered added/deleted
 
  3. Reconciliation of inline/$ref refactors (AnyOf and OneOf only, when Config.MatchInlineRefs is true):
@@ -121,9 +122,15 @@ func (diff *SubschemasDiff) combine(other SubschemasDiff) *SubschemasDiff {
 
 // reconcileInlineRefRefactors pairs unmatched Added and Deleted entries that
 // cross the inline/$ref boundary and are validation-equivalent under the
-// caller's config, then removes both members of each pair. Each Deleted
-// matches at most one Added (first-fit), so a standalone addition that
-// happens to duplicate an existing still-present branch is preserved.
+// caller's config, and reports each pair as one modified subschema instead of
+// a removal and an addition. Each Deleted matches at most one Added
+// (first-fit), so a standalone addition that happens to duplicate an existing
+// still-present branch is preserved.
+//
+// The pair's own diff is kept, so an annotation the refactor changed along the
+// way, a title the tool gave the new component for instance, is still
+// reported. A pair whose annotations are identical has no diff and is reported
+// as nothing at all.
 //
 // Gated on config.MatchInlineRefs; default true.
 func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
@@ -136,6 +143,7 @@ func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRe
 
 	matchedAdded := map[int]bool{}
 	matchedDeleted := map[int]bool{}
+	paired := ModifiedSubschemas{}
 
 	for di, deletedSubschema := range combined.Deleted {
 		// Defensive: Subschema.Index is set from a walk over schemaRefs1 by the
@@ -168,6 +176,13 @@ func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRe
 				continue
 			}
 
+			var err error
+			paired, err = paired.addUnrolled(u, deletedRef, addedRef, deletedSubschema.Index, addedSubschema.Index)
+			if err != nil {
+				u.fail(err)
+				return combined
+			}
+
 			matchedAdded[ai] = true
 			matchedDeleted[di] = true
 			break
@@ -181,7 +196,7 @@ func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRe
 	result := &SubschemasDiff{
 		Added:    make(Subschemas, 0, len(combined.Added)-len(matchedAdded)),
 		Deleted:  make(Subschemas, 0, len(combined.Deleted)-len(matchedDeleted)),
-		Modified: combined.Modified,
+		Modified: append(combined.Modified, paired...),
 	}
 	for ai, addedSubschema := range combined.Added {
 		if matchedAdded[ai] {
@@ -264,6 +279,13 @@ func getSubschemasInlineDiff(u *unroller, schemaRefs1, schemaRefs2 openapi3.Sche
 		return SubschemasDiff{}, err
 	}
 
+	// match schemas by validation contract
+	addedIdx, deletedIdx, equivalentSchemas, err := compareByValidationContract(u, addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
+	if err != nil {
+		return SubschemasDiff{}, err
+	}
+	modifiedSchemas = append(modifiedSchemas, equivalentSchemas...)
+
 	// special case: single modified schema with no title
 	if isSingleModifiedCase(schemaRefs1, schemaRefs2, addedIdx, deletedIdx) {
 		var err error
@@ -280,6 +302,49 @@ func getSubschemasInlineDiff(u *unroller, schemaRefs1, schemaRefs2 openapi3.Sche
 		Deleted:  getSubschemas(deletedIdx, schemaRefs1),
 		Modified: modifiedSchemas,
 	}, nil
+}
+
+// compareByValidationContract pairs an untitled schema on each side when the
+// two have the same validation contract, so a pair differing only in
+// annotations is reported as one modified subschema rather than as a removal
+// and an addition. The pair's own diff is kept, so a description edit inside a
+// branch is still reported, in place.
+//
+// Titled schemas are skipped: compareByTitle was already offered every such
+// pair, and there a title is the schema's identity, so a changed title is a
+// change rather than an annotation to look past.
+//
+// Each schema pairs at most once, first fit, so a branch that was genuinely
+// added alongside an edited one stays added.
+func compareByValidationContract(u *unroller, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, []int, ModifiedSubschemas, error) {
+	addedMatched := map[int]int{}
+	deletedMatched := map[int]int{}
+	modifiedSchemas := ModifiedSubschemas{}
+
+	for _, addedId := range addedIdx {
+		for _, deletedId := range deletedIdx {
+			if _, found := deletedMatched[deletedId]; found {
+				continue
+			}
+			if schemaValue(schemaRefs1[deletedId]).Title != "" || schemaValue(schemaRefs2[addedId]).Title != "" {
+				continue
+			}
+			if !u.equivalent(schemaRefs1[deletedId], schemaRefs2[addedId]) {
+				continue
+			}
+
+			var err error
+			modifiedSchemas, err = modifiedSchemas.addUnrolled(u, schemaRefs1[deletedId], schemaRefs2[addedId], deletedId, addedId)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			addedMatched[addedId] = deletedId
+			deletedMatched[deletedId] = addedId
+			break
+		}
+	}
+
+	return deleteMatched(addedIdx, addedMatched), deleteMatched(deletedIdx, deletedMatched), modifiedSchemas, nil
 }
 
 func isSingleModifiedCase(schemaRefs1, schemaRefs2 openapi3.SchemaRefs, addedIdx, deletedIdx []int) bool {
