@@ -122,9 +122,15 @@ func (diff *SubschemasDiff) combine(other SubschemasDiff) *SubschemasDiff {
 
 // reconcileInlineRefRefactors pairs unmatched Added and Deleted entries that
 // cross the inline/$ref boundary and are validation-equivalent under the
-// caller's config, then removes both members of each pair. Each Deleted
-// matches at most one Added (first-fit), so a standalone addition that
-// happens to duplicate an existing still-present branch is preserved.
+// caller's config, and reports each pair as one modified subschema instead of
+// a removal and an addition. Each Deleted matches at most one Added
+// (first-fit), so a standalone addition that happens to duplicate an existing
+// still-present branch is preserved.
+//
+// The pair's own diff is kept, so an annotation the refactor changed along the
+// way, a title the tool gave the new component for instance, is still
+// reported. A pair whose annotations are identical has no diff and is reported
+// as nothing at all.
 //
 // Gated on config.MatchInlineRefs; default true.
 func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) *SubschemasDiff {
@@ -137,6 +143,7 @@ func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRe
 
 	matchedAdded := map[int]bool{}
 	matchedDeleted := map[int]bool{}
+	paired := ModifiedSubschemas{}
 
 	for di, deletedSubschema := range combined.Deleted {
 		// Defensive: Subschema.Index is set from a walk over schemaRefs1 by the
@@ -169,6 +176,13 @@ func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRe
 				continue
 			}
 
+			var err error
+			paired, err = paired.addUnrolled(u, deletedRef, addedRef, deletedSubschema.Index, addedSubschema.Index)
+			if err != nil {
+				u.fail(err)
+				return combined
+			}
+
 			matchedAdded[ai] = true
 			matchedDeleted[di] = true
 			break
@@ -182,7 +196,7 @@ func reconcileInlineRefRefactors(u *unroller, combined *SubschemasDiff, schemaRe
 	result := &SubschemasDiff{
 		Added:    make(Subschemas, 0, len(combined.Added)-len(matchedAdded)),
 		Deleted:  make(Subschemas, 0, len(combined.Deleted)-len(matchedDeleted)),
-		Modified: combined.Modified,
+		Modified: append(combined.Modified, paired...),
 	}
 	for ai, addedSubschema := range combined.Added {
 		if matchedAdded[ai] {
