@@ -4,20 +4,21 @@ import (
 	"fmt"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/versioning"
 )
 
 // versioningPolicyLine states the verdict and the reason for it. A pass needs
 // the reason as much as a failure does: an exit code of 0 with breaking
 // changes on screen reads as a bug without one.
-func versioningPolicyLine(verdict checker.VersioningVerdict) string {
+func versioningPolicyLine(verdict versioning.Verdict) string {
 	switch verdict.Status {
-	case checker.VersioningPolicySatisfied:
+	case versioning.Satisfied:
 		return fmt.Sprintf("versioning policy: satisfied. info.version moved from %s to %s, which allows the %s.",
 			verdict.BaseVersion, verdict.RevisionVersion, breakingChanges(verdict.BreakingChanges))
-	case checker.VersioningPolicyViolated:
+	case versioning.Violated:
 		return fmt.Sprintf("versioning policy: violated (%s). %s, and %s.",
 			verdict.Reason, breakingChanges(verdict.BreakingChanges), versionMovement(verdict))
-	case checker.VersioningPolicyUndecidable:
+	case versioning.Undecidable:
 		return fmt.Sprintf("versioning policy: cannot be evaluated. info.version must be a semantic version in both specs (base %q, revision %q).",
 			verdict.BaseVersion, verdict.RevisionVersion)
 	}
@@ -33,11 +34,11 @@ func breakingChanges(count int) string {
 
 // versionMovement describes what info.version did instead of carrying the
 // breaking changes.
-func versionMovement(verdict checker.VersioningVerdict) string {
+func versionMovement(verdict versioning.Verdict) string {
 	switch verdict.Reason {
-	case checker.APIVersionNotBumpedId:
+	case versioning.ReasonNotBumped:
 		return fmt.Sprintf("info.version is still %s", verdict.RevisionVersion)
-	case checker.APIVersionDecreasedId:
+	case versioning.ReasonDecreased:
 		return fmt.Sprintf("info.version decreased from %s to %s", verdict.BaseVersion, verdict.RevisionVersion)
 	}
 	return fmt.Sprintf("info.version moved from %s to %s without a major version increase",
@@ -47,11 +48,11 @@ func versionMovement(verdict checker.VersioningVerdict) string {
 // failOnVersionBump decides the exit code under --enforce-version-bump: the
 // policy answers for errors, and --fail-on still answers for findings below
 // error, which a major version increase does not license.
-func failOnVersionBump(flags *Flags, errs checker.Changes, verdict checker.VersioningVerdict) (bool, *ReturnError) {
+func failOnVersionBump(flags *Flags, errs checker.Changes, verdict versioning.Verdict) (bool, *ReturnError) {
 	switch verdict.Status {
-	case checker.VersioningPolicyViolated:
+	case versioning.Violated:
 		return true, nil
-	case checker.VersioningPolicyUndecidable:
+	case versioning.Undecidable:
 		// Enforcement was asked for and the versions don't allow a verdict, so
 		// fail rather than pass a release the policy never judged.
 		return true, nil
@@ -66,7 +67,7 @@ func failOnVersionBump(flags *Flags, errs checker.Changes, verdict checker.Versi
 		return false, returnErr
 	}
 
-	if verdict.Status == checker.VersioningPolicyNotApplicable {
+	if verdict.Status == versioning.NotApplicable {
 		return errs.HasLevelOrHigher(level), nil
 	}
 

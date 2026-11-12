@@ -1,17 +1,50 @@
-package checker_test
+package versioning_test
 
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
+	"github.com/oasdiff/oasdiff/versioning"
 	"github.com/stretchr/testify/require"
 )
+
+func open(file string) (*load.SpecInfo, error) {
+	return load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(file))
+}
+
+func singleCheckConfig(c checker.BackwardCompatibilityCheck) *checker.Config {
+	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, checker.WithSingleCheck(c))
+}
+
+func allChecksConfig() *checker.Config {
+	return checker.NewConfig(checker.GetAllChecks())
+}
+
+func requireChange(t *testing.T, changes checker.Changes, id string) checker.Change {
+	t.Helper()
+	for _, change := range changes {
+		if change.GetId() == id {
+			return change
+		}
+	}
+	require.FailNowf(t, "change not found", "expected a change with id %q", id)
+	return nil
+}
+
+func requireNoChange(t *testing.T, changes checker.Changes, id string) {
+	t.Helper()
+	for _, change := range changes {
+		require.NotEqual(t, id, change.GetId(), "unexpected change with id %q", id)
+	}
+}
 
 // versioningVerdict compares a pair of specs carrying one breaking change (a
 // request property became required) under the given versions, and returns the
 // policy's verdict on them.
-func versioningVerdict(t *testing.T, baseVersion, revisionVersion string) checker.VersioningVerdict {
+func versioningVerdict(t *testing.T, baseVersion, revisionVersion string) versioning.Verdict {
 	t.Helper()
 
 	s1, err := open("../data/checker/request_property_became_required_base.yaml")
@@ -30,13 +63,13 @@ func versioningVerdict(t *testing.T, baseVersion, revisionVersion string) checke
 	changes := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(check), d, osm, checker.INFO)
 	requireChange(t, changes, checker.RequestPropertyBecameRequiredId)
 
-	return checker.CheckVersioningPolicy(d, changes)
+	return versioning.Check(d, changes)
 }
 
 func requireViolation(t *testing.T, baseVersion, revisionVersion, reason string) {
 	t.Helper()
 	verdict := versioningVerdict(t, baseVersion, revisionVersion)
-	require.Equal(t, checker.VersioningPolicyViolated, verdict.Status,
+	require.Equal(t, versioning.Violated, verdict.Status,
 		"expected a violation for %q -> %q", baseVersion, revisionVersion)
 	require.Equal(t, reason, verdict.Reason)
 	require.Equal(t, baseVersion, verdict.BaseVersion)
@@ -47,7 +80,7 @@ func requireViolation(t *testing.T, baseVersion, revisionVersion, reason string)
 func requireSatisfied(t *testing.T, baseVersion, revisionVersion string) {
 	t.Helper()
 	verdict := versioningVerdict(t, baseVersion, revisionVersion)
-	require.Equal(t, checker.VersioningPolicySatisfied, verdict.Status,
+	require.Equal(t, versioning.Satisfied, verdict.Status,
 		"expected a pass for %q -> %q, got %v", baseVersion, revisionVersion, verdict)
 	require.Empty(t, verdict.Reason)
 	require.Equal(t, 1, verdict.BreakingChanges)
@@ -56,28 +89,28 @@ func requireSatisfied(t *testing.T, baseVersion, revisionVersion string) {
 func requireUndecidable(t *testing.T, baseVersion, revisionVersion string) {
 	t.Helper()
 	verdict := versioningVerdict(t, baseVersion, revisionVersion)
-	require.Equal(t, checker.VersioningPolicyUndecidable, verdict.Status,
+	require.Equal(t, versioning.Undecidable, verdict.Status,
 		"expected no verdict for %q -> %q", baseVersion, revisionVersion)
 	require.Empty(t, verdict.Reason)
 }
 
 func TestVersioningPolicy_BreakingChangeWithoutMajorBump(t *testing.T) {
-	requireViolation(t, "1.0.0", "1.1.0", checker.APIMajorVersionNotBumpedId)
-	requireViolation(t, "1.0.0", "1.0.1", checker.APIMajorVersionNotBumpedId)
-	requireViolation(t, "v1.0.0", "v1.1.0", checker.APIMajorVersionNotBumpedId)
+	requireViolation(t, "1.0.0", "1.1.0", versioning.ReasonMajorNotBumped)
+	requireViolation(t, "1.0.0", "1.0.1", versioning.ReasonMajorNotBumped)
+	requireViolation(t, "v1.0.0", "v1.1.0", versioning.ReasonMajorNotBumped)
 }
 
 // The worst violation of the policy: shipping a breaking change under the same
 // version the previous release used.
 func TestVersioningPolicy_BreakingChangeWithoutAnyBump(t *testing.T) {
-	requireViolation(t, "1.0.0", "1.0.0", checker.APIVersionNotBumpedId)
-	requireViolation(t, "0.3.1", "0.3.1", checker.APIVersionNotBumpedId)
+	requireViolation(t, "1.0.0", "1.0.0", versioning.ReasonNotBumped)
+	requireViolation(t, "0.3.1", "0.3.1", versioning.ReasonNotBumped)
 }
 
 func TestVersioningPolicy_BreakingChangeWithVersionDecrease(t *testing.T) {
-	requireViolation(t, "2.0.0", "1.0.0", checker.APIVersionDecreasedId)
-	requireViolation(t, "1.2.0", "1.1.0", checker.APIVersionDecreasedId)
-	requireViolation(t, "1.0.1", "1.0.0", checker.APIVersionDecreasedId)
+	requireViolation(t, "2.0.0", "1.0.0", versioning.ReasonDecreased)
+	requireViolation(t, "1.2.0", "1.1.0", versioning.ReasonDecreased)
+	requireViolation(t, "1.0.1", "1.0.0", versioning.ReasonDecreased)
 }
 
 func TestVersioningPolicy_MajorBumpIsSatisfied(t *testing.T) {
@@ -104,12 +137,12 @@ func TestVersioningPolicy_NonSemverHasNoVerdict(t *testing.T) {
 // a breaking change and a patch bump does not.
 func TestVersioningPolicy_PreOneZero(t *testing.T) {
 	requireSatisfied(t, "0.1.0", "0.2.0")
-	requireViolation(t, "0.1.0", "0.1.1", checker.APIMajorVersionNotBumpedId)
+	requireViolation(t, "0.1.0", "0.1.1", versioning.ReasonMajorNotBumped)
 }
 
 // Prerelease and build metadata don't decide which number was bumped.
 func TestVersioningPolicy_PrereleaseAndBuildMetadata(t *testing.T) {
-	requireViolation(t, "1.0.0", "1.1.0-rc.1", checker.APIMajorVersionNotBumpedId)
+	requireViolation(t, "1.0.0", "1.1.0-rc.1", versioning.ReasonMajorNotBumped)
 	requireSatisfied(t, "1.0.0", "2.0.0+build.5")
 }
 
@@ -129,7 +162,7 @@ func TestVersioningPolicy_IsNotAChange(t *testing.T) {
 	require.NoError(t, err)
 
 	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
-	require.Equal(t, checker.VersioningPolicyViolated, checker.CheckVersioningPolicy(d, changes).Status)
+	require.Equal(t, versioning.Violated, versioning.Check(d, changes).Status)
 
 	for _, id := range versioningIds {
 		requireNoChange(t, changes, id)
@@ -138,9 +171,9 @@ func TestVersioningPolicy_IsNotAChange(t *testing.T) {
 }
 
 var versioningIds = []string{
-	checker.APIVersionNotBumpedId,
-	checker.APIVersionDecreasedId,
-	checker.APIMajorVersionNotBumpedId,
+	versioning.ReasonNotBumped,
+	versioning.ReasonDecreased,
+	versioning.ReasonMajorNotBumped,
 }
 
 // Only a breaking change demands a major bump; a non-breaking release under a
@@ -159,8 +192,8 @@ func TestVersioningPolicy_NonBreakingChangeIsNotApplicable(t *testing.T) {
 	require.NoError(t, err)
 
 	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
-	verdict := checker.CheckVersioningPolicy(d, changes)
-	require.Equal(t, checker.VersioningPolicyNotApplicable, verdict.Status)
+	verdict := versioning.Check(d, changes)
+	require.Equal(t, versioning.NotApplicable, verdict.Status)
 	require.Zero(t, verdict.BreakingChanges)
 }
 
@@ -185,7 +218,7 @@ func TestVersioningPolicy_IgnoresAChangeADisclaimerLowered(t *testing.T) {
 	change := requireChange(t, changes, checker.ResponsePropertyBecameOptionalId)
 	require.Equal(t, checker.WARN, change.GetLevel(), "the disclaimer lowered it, which is what makes this case interesting")
 
-	require.Equal(t, checker.VersioningPolicyNotApplicable, checker.CheckVersioningPolicy(d, changes).Status)
+	require.Equal(t, versioning.NotApplicable, versioning.Check(d, changes).Status)
 }
 
 // The other half: a change that reaches error still demands the bump, so the
@@ -203,16 +236,16 @@ func TestVersioningPolicy_CountsAChangeNoDisclaimerLowered(t *testing.T) {
 	require.NoError(t, err)
 	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 
-	verdict := checker.CheckVersioningPolicy(d, changes)
-	require.Equal(t, checker.VersioningPolicyViolated, verdict.Status)
-	require.Equal(t, checker.APIVersionNotBumpedId, verdict.Reason)
+	verdict := versioning.Check(d, changes)
+	require.Equal(t, versioning.Violated, verdict.Status)
+	require.Equal(t, versioning.ReasonNotBumped, verdict.Reason)
 }
 
 // A spec with no info section at all, which is the other way the versions
 // cannot be compared.
 func TestVersioningPolicy_NoDiffReport(t *testing.T) {
 	changes := checker.Changes{checker.ApiChange{Id: "any", Level: checker.ERR}}
-	verdict := checker.CheckVersioningPolicy(nil, changes)
-	require.Equal(t, checker.VersioningPolicyUndecidable, verdict.Status)
+	verdict := versioning.Check(nil, changes)
+	require.Equal(t, versioning.Undecidable, verdict.Status)
 	require.Equal(t, 1, verdict.BreakingChanges)
 }

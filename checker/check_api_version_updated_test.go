@@ -5,6 +5,7 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/versioning"
 	"github.com/stretchr/testify/require"
 )
 
@@ -68,7 +69,7 @@ func TestAPIVersionChanged_IsNotTheVerdict(t *testing.T) {
 	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 
 	requireChange(t, changes, checker.APIVersionChangedId)
-	verdict := checker.CheckVersioningPolicy(d, changes)
-	require.Equal(t, checker.VersioningPolicyViolated, verdict.Status)
-	require.Equal(t, checker.APIMajorVersionNotBumpedId, verdict.Reason)
+	verdict := versioning.Check(d, changes)
+	require.Equal(t, versioning.Violated, verdict.Status)
+	require.Equal(t, versioning.ReasonMajorNotBumped, verdict.Reason)
 }

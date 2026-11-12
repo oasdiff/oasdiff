@@ -8,6 +8,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
+	"github.com/oasdiff/oasdiff/versioning"
 	"github.com/spf13/cobra"
 )
 
@@ -96,7 +97,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getEnforceVersionBump() {
-		verdict := checker.CheckVersioningPolicy(diffResult.diffReport, errs)
+		verdict := versioning.Check(diffResult.diffReport, errs)
 		// stderr, not stdout: the verdict is not a change, and stdout carries
 		// the report, which may be a json or yaml document.
 		_, _ = fmt.Fprintln(flags.getStderr(), versioningPolicyLine(verdict))
