@@ -148,9 +148,15 @@ The diff reports no change for the `anyOf` list because the union of accepted pa
 
 To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
-Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
+Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
 
 The matching is pair-based: each deleted branch matches at most one added branch. An added `$ref` that happens to be equivalent to an inline branch already present on the base (a standalone addition that overlaps an existing branch, rather than a refactor) is still reported as added.
+
+## Pairing Anonymous Inline Branches with Annotation-Only Differences
+
+Under `allOf`, `anyOf`, and `oneOf`, oasdiff also pairs untitled inline subschemas across base and revision when their validation contracts are equivalent, so that an edit confined to annotations (`description`, `example`, etc.) inside two or more inline branches is reported as modifications rather than as wholesale branch additions and removals. Without this pass, each edited branch fails the syntactic-identity check, has no title to match on, and lands on both the added and deleted side; `breaking` then flags spurious branch additions for what is only a documentation change.
+
+The same equivalence rules as the inline/`$ref` matcher above apply (annotations ignored, validation-affecting fields including `deprecated` respected), and matching is pair-based. This pass is not controlled by `--match-inline-refs`: it runs for all three composition keywords and cannot be opted out of.
 
 ## Usage Examples
 

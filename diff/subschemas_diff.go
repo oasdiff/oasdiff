@@ -21,6 +21,7 @@ SubschemasDiff is a combination of three diffs:
     Unlike referenced schemas, inline schemas cannot be matched by a unique name and are therefor compared by their content.
     - syntactically identical schemas across base and revision are considered unmodified
     - schemas with the same title across base and revision are compared to each other and based on the result are considered as modified or unmodified
+    - remaining anonymous schemas with the same validation contract are compared to each other, preserving annotation-only changes as modifications
     - other schemas are considered added/deleted
 
  3. Reconciliation of inline/$ref refactors (AnyOf and OneOf only, when Config.MatchInlineRefs is true):
@@ -264,6 +265,15 @@ func getSubschemasInlineDiff(u *unroller, schemaRefs1, schemaRefs2 openapi3.Sche
 		return SubschemasDiff{}, err
 	}
 
+	// Match anonymous inline branches whose validation contract is unchanged.
+	// This keeps annotation-only edits inside two or more branches from being
+	// represented as wholesale additions and deletions.
+	addedIdx, deletedIdx, equivalentSchemas, err := compareAnonymousValidationEquivalent(u, addedIdx, deletedIdx, schemaRefs1, schemaRefs2)
+	if err != nil {
+		return SubschemasDiff{}, err
+	}
+	modifiedSchemas = append(modifiedSchemas, equivalentSchemas...)
+
 	// special case: single modified schema with no title
 	if isSingleModifiedCase(schemaRefs1, schemaRefs2, addedIdx, deletedIdx) {
 		var err error
@@ -280,6 +290,37 @@ func getSubschemasInlineDiff(u *unroller, schemaRefs1, schemaRefs2 openapi3.Sche
 		Deleted:  getSubschemas(deletedIdx, schemaRefs1),
 		Modified: modifiedSchemas,
 	}, nil
+}
+
+func compareAnonymousValidationEquivalent(u *unroller, addedIdx, deletedIdx []int, schemaRefs1, schemaRefs2 openapi3.SchemaRefs) ([]int, []int, ModifiedSubschemas, error) {
+	addedMatched := map[int]int{}
+	deletedMatched := map[int]int{}
+	modifiedSchemas := ModifiedSubschemas{}
+
+	for _, addedId := range addedIdx {
+		for _, deletedId := range deletedIdx {
+			if _, found := deletedMatched[deletedId]; found {
+				continue
+			}
+			if schemaValue(schemaRefs1[deletedId]).Title != "" || schemaValue(schemaRefs2[addedId]).Title != "" {
+				continue
+			}
+			if !u.equivalent(schemaRefs1[deletedId], schemaRefs2[addedId]) {
+				continue
+			}
+
+			var err error
+			modifiedSchemas, err = modifiedSchemas.addUnrolled(u, schemaRefs1[deletedId], schemaRefs2[addedId], deletedId, addedId)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			addedMatched[addedId] = deletedId
+			deletedMatched[deletedId] = addedId
+			break
+		}
+	}
+
+	return deleteMatched(addedIdx, addedMatched), deleteMatched(deletedIdx, deletedMatched), modifiedSchemas, nil
 }
 
 func isSingleModifiedCase(schemaRefs1, schemaRefs2 openapi3.SchemaRefs, addedIdx, deletedIdx []int) bool {
