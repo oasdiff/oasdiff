@@ -99,6 +99,38 @@ func Test_EnforceVersionBump_JSONOutputIsUnaffected(t *testing.T) {
 	require.Equal(t, "api-path-removed-without-deprecation", changes[0].Id)
 }
 
+// Without --fail-on there is nothing left to answer for once the policy is
+// satisfied, so a warning in the report does not fail the run.
+func Test_EnforceVersionBump_SatisfiedWithoutFailOn(t *testing.T) {
+	code, stdout, stderr := runVersioning(t, "revision_major_bump_with_warning.yaml", "--enforce-version-bump")
+	require.Zero(t, code)
+	require.Contains(t, stdout, "api-path-removed-without-deprecation")
+	require.Contains(t, stderr, "versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the 1 breaking change.")
+}
+
+// More than one breaking change, and a version that moved without the major
+// increase they need.
+func Test_EnforceVersionBump_CountsEveryBreakingChange(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := internal.Run(
+		cmdToArgs("oasdiff breaking ../data/openapi-test1.yaml ../data/openapi-test3.yaml --enforce-version-bump"),
+		&stdout, &stderr)
+
+	require.Equal(t, 1, code)
+	require.Contains(t, stderr.String(), "versioning policy: violated (api-major-version-not-bumped). 4 breaking changes, and info.version moved from 1.0.0 to 1.0.1 without a major version increase.")
+}
+
+// The same pair the other way round, where info.version went backwards.
+func Test_EnforceVersionBump_VersionDecreased(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := internal.Run(
+		cmdToArgs("oasdiff breaking ../data/openapi-test3.yaml ../data/openapi-test1.yaml --enforce-version-bump"),
+		&stdout, &stderr)
+
+	require.Equal(t, 1, code)
+	require.Contains(t, stderr.String(), "versioning policy: violated (api-version-decreased). 7 breaking changes, and info.version decreased from 1.0.1 to 1.0.0.")
+}
+
 // The three ids are no longer checks, so a severity-levels file naming one of
 // them is rejected like any other unknown id rather than silently having no
 // effect.
