@@ -15,8 +15,8 @@ The report itself is unchanged: every change is still listed, at its own severit
 
 | Verdict | Exit code | Line on standard error |
 | ------------- | ------------- | ------------- |
-| Satisfied | 0 | `versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the 3 breaking changes.` |
-| Violated | 1 | `versioning policy: violated (api-version-not-bumped). 3 breaking changes, and info.version is still 1.0.0.` |
+| Satisfied | 0 | `versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the breaking changes.` |
+| Violated | 1 | `versioning policy: violated (api-version-not-bumped). info.version is still 1.0.0.` |
 | Nothing to judge | follows `--fail-on` | `versioning policy: not applicable. No breaking changes, so no version increase is required.` |
 | Cannot be judged | 1 | `versioning policy: cannot be evaluated. info.version must be a semantic version in both specs (base "1.0.0", revision "2026-06-01").` |
 

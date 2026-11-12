@@ -32,20 +32,20 @@ func Test_EnforceVersionBump_MajorBumpPasses(t *testing.T) {
 	code, stdout, stderr := runVersioning(t, "revision_major_bump.yaml", "--enforce-version-bump --fail-on ERR")
 	require.Zero(t, code)
 	require.Contains(t, stdout, "api-path-removed-without-deprecation")
-	require.Contains(t, stderr, "versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the 1 breaking change.")
+	require.Contains(t, stderr, "versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the breaking changes.")
 }
 
 func Test_EnforceVersionBump_SameVersionFails(t *testing.T) {
 	code, stdout, stderr := runVersioning(t, "revision_same_version.yaml", "--enforce-version-bump")
 	require.Equal(t, 1, code)
 	require.Contains(t, stdout, "api-path-removed-without-deprecation")
-	require.Contains(t, stderr, "versioning policy: violated (api-version-not-bumped). 1 breaking change, and info.version is still 1.0.0.")
+	require.Contains(t, stderr, "versioning policy: violated (api-version-not-bumped). info.version is still 1.0.0.")
 }
 
 func Test_EnforceVersionBump_MinorBumpFails(t *testing.T) {
 	code, _, stderr := runVersioning(t, "revision_minor_bump.yaml", "--enforce-version-bump")
 	require.Equal(t, 1, code)
-	require.Contains(t, stderr, "versioning policy: violated (api-major-version-not-bumped). 1 breaking change, and info.version moved from 1.0.0 to 1.1.0 without a major version increase.")
+	require.Contains(t, stderr, "versioning policy: violated (api-major-version-not-bumped). info.version moved from 1.0.0 to 1.1.0 without a major version increase.")
 }
 
 // Enforcement was asked for and the versions don't define a major increase, so
@@ -105,7 +105,7 @@ func Test_EnforceVersionBump_SatisfiedWithoutFailOn(t *testing.T) {
 	code, stdout, stderr := runVersioning(t, "revision_major_bump_with_warning.yaml", "--enforce-version-bump")
 	require.Zero(t, code)
 	require.Contains(t, stdout, "api-path-removed-without-deprecation")
-	require.Contains(t, stderr, "versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the 1 breaking change.")
+	require.Contains(t, stderr, "versioning policy: satisfied. info.version moved from 1.0.0 to 2.0.0, which allows the breaking changes.")
 }
 
 // More than one breaking change, and a version that moved without the major
@@ -117,7 +117,7 @@ func Test_EnforceVersionBump_CountsEveryBreakingChange(t *testing.T) {
 		&stdout, &stderr)
 
 	require.Equal(t, 1, code)
-	require.Contains(t, stderr.String(), "versioning policy: violated (api-major-version-not-bumped). 4 breaking changes, and info.version moved from 1.0.0 to 1.0.1 without a major version increase.")
+	require.Contains(t, stderr.String(), "versioning policy: violated (api-major-version-not-bumped). info.version moved from 1.0.0 to 1.0.1 without a major version increase.")
 }
 
 // The same pair the other way round, where info.version went backwards.
@@ -128,7 +128,7 @@ func Test_EnforceVersionBump_VersionDecreased(t *testing.T) {
 		&stdout, &stderr)
 
 	require.Equal(t, 1, code)
-	require.Contains(t, stderr.String(), "versioning policy: violated (api-version-decreased). 7 breaking changes, and info.version decreased from 1.0.1 to 1.0.0.")
+	require.Contains(t, stderr.String(), "versioning policy: violated (api-version-decreased). info.version decreased from 1.0.1 to 1.0.0.")
 }
 
 // The three ids are no longer checks, so a severity-levels file naming one of
