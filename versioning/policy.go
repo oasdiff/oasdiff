@@ -20,18 +20,17 @@ const (
 type Status int
 
 const (
-	// NotApplicable: no breaking change, so no version
-	// increase is required.
+	// NotApplicable: no breaking change, so no version increase is required.
 	NotApplicable Status = iota
-	// Undecidable: a breaking change, but the two versions
-	// don't define what a major increase is.
+	// Undecidable: a breaking change, but the two versions don't define what
+	// a major increase is.
 	Undecidable
 	Satisfied
 	Violated
 )
 
-// Verdict answers whether info.version carries the breaking changes
-// a comparison found. Reason names the violation, and is empty for every other
+// Verdict answers whether info.version carries the breaking changes a
+// comparison found. Reason names the violation, and is empty for every other
 // status.
 type Verdict struct {
 	Status          Status
@@ -43,10 +42,10 @@ type Verdict struct {
 
 // semverPattern is the official semver.org grammar, anchored, with an
 // optional leading "v". Versions that don't match leave the policy with no
-// definition of a major increase (see Check), so the pattern
-// must not accept anything looser: a date, or a bare "v1" read as 1.0.0, would
-// produce a confident verdict about a versioning scheme oasdiff was never told
-// to enforce.
+// definition of a major increase (see Check), so the pattern must not accept
+// anything looser: a date, or a bare "v1" read as 1.0.0, would produce a
+// confident verdict about a versioning scheme oasdiff was never told to
+// enforce.
 var semverPattern = regexp.MustCompile(`^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$`)
 
 type semver struct {
@@ -72,12 +71,10 @@ func parseSemver(version string) (semver, bool) {
 	return semver{major, minor, patch}, true
 }
 
-// Check judges info.version against the breaking changes in
-// changes: whether the version stayed put, moved backwards, moved by too
-// little, or carried them correctly.
-//
-// It is not a check, and adds nothing to changes. The caller decides what a
-// verdict is worth, which for the CLI is --enforce-version-bump.
+// Check judges info.version against the breaking changes in changes: whether
+// the version stayed put, moved backwards, moved by too little, or carried
+// them correctly. The caller decides what the verdict is worth, which for the
+// CLI is --enforce-version-bump.
 func Check(diffReport *diff.Diff, changes checker.Changes) Verdict {
 	breaking := countBreakingChanges(changes)
 	if breaking == 0 {
