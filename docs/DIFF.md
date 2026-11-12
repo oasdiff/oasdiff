@@ -11,7 +11,7 @@ oasdiff applies a few opt-out defaults so its diff matches what most users expec
 
 | Flag | Default | What it does | Detail |
 |---|---|---|---|
-| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Matching Inline and `$ref` Subschemas](#matching-inline-and-ref-subschemas) |
+| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Inline and `$ref` Subschemas](#inline-and-ref-subschemas) |
 | `--case-insensitive-headers` | `true` | Compare header names case-insensitively. `Content-Type` and `content-type` are the same header per RFC 7230 / 9110. | [HEADER-DIFF.md](HEADER-DIFF.md) |
 | `--allow-external-refs` | `true` | Allow the parser to resolve external `$ref`s when loading specs. Disable when processing untrusted specs to prevent SSRF. | (CLI help) |
 
@@ -125,7 +125,11 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
-## Matching Inline and `$ref` Subschemas
+## Matching Subschemas
+
+Under `allOf`, `anyOf` and `oneOf`, oasdiff matches a subschema in the base with a subschema in the revision by their validation contract. Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored. Differences that affect validation, `deprecated` included, are not.
+
+### Inline and `$ref` Subschemas
 
 Under `anyOf` and `oneOf`, oasdiff treats an inline subschema and a `$ref` to a validation-equivalent component as the same branch by default. This catches a common codegen pattern where a tool extracts an inline schema (often an enum) into a named component without changing the accepted payloads:
 
@@ -148,15 +152,13 @@ The diff reports no change for the `anyOf` list because the union of accepted pa
 
 To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
-Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
+Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
 
-The matching is pair-based: each deleted branch matches at most one added branch. An added `$ref` that happens to be equivalent to an inline branch already present on the base (a standalone addition that overlaps an existing branch, rather than a refactor) is still reported as added.
+### Untitled Inline Subschemas
 
-## Pairing Anonymous Inline Branches with Annotation-Only Differences
+Under all three keywords, two untitled inline subschemas with the same validation contract are reported as one modified subschema carrying the annotation change, rather than as a removal and an addition. So an edit to a `description` inside several branches at once is reported where it happened, and `breaking` no longer reports the branches as removed and added.
 
-Under `allOf`, `anyOf`, and `oneOf`, oasdiff also pairs untitled inline subschemas across base and revision when their validation contracts are equivalent, so that an edit confined to annotations (`description`, `example`, etc.) inside two or more inline branches is reported as modifications rather than as wholesale branch additions and removals. Without this pass, each edited branch fails the syntactic-identity check, has no title to match on, and lands on both the added and deleted side; `breaking` then flags spurious branch additions for what is only a documentation change.
-
-The same equivalence rules as the inline/`$ref` matcher above apply (annotations ignored, validation-affecting fields including `deprecated` respected), and matching is pair-based. This pass is not controlled by `--match-inline-refs`: it runs for all three composition keywords and cannot be opted out of.
+A title is the subschema's identity, so titled subschemas are matched by title instead. This matching always runs; `--match-inline-refs` does not affect it.
 
 ## Usage Examples
 
