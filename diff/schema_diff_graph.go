@@ -134,12 +134,7 @@ func getSchemaDiffNode(config *Config, state *state, schema1, schema2 *openapi3.
 // (each side against the other side's oneOf branches).
 func getCandidates(config *Config, state *state, node *SchemaDiff) ([]*SchemaDiff, error) {
 	var pairs [][2]*openapi3.SchemaRef
-	fields := reflect.ValueOf(node).Elem()
-	for _, index := range childFields {
-		subschemas, ok := fields.Field(index).Interface().(*SubschemasDiff)
-		if !ok || subschemas == nil || !subschemas.pending {
-			continue
-		}
+	for _, subschemas := range node.pendingSubschemas() {
 		for _, schemaRef1 := range subschemas.base {
 			for _, schemaRef2 := range subschemas.revision {
 				if isSchemaInline(schemaRef1) && isSchemaInline(schemaRef2) {
@@ -174,29 +169,7 @@ func getCandidates(config *Config, state *state, node *SchemaDiff) ([]*SchemaDif
 
 // children returns the nodes an unroll of the node can reach directly.
 func (graph *schemaGraph) children(node *SchemaDiff) []*SchemaDiff {
-	children := slices.Clone(graph.candidates[node])
-	fields := reflect.ValueOf(node).Elem()
-	for _, index := range childFields {
-		switch child := fields.Field(index).Interface().(type) {
-		case *SchemaDiff:
-			if child != nil {
-				children = append(children, child)
-			}
-		case *SchemasDiff:
-			if child != nil {
-				for _, node := range child.Modified {
-					children = append(children, node)
-				}
-			}
-		case *SubschemasDiff:
-			if child != nil {
-				for _, modified := range child.Modified {
-					children = append(children, modified.Diff)
-				}
-			}
-		}
-	}
-	return children
+	return append(slices.Clone(graph.candidates[node]), node.children()...)
 }
 
 // assignComponents numbers the strongly connected components of the nodes
@@ -346,19 +319,7 @@ func (u *unroller) cutKey(node *SchemaDiff) string {
 }
 
 func (u *unroller) copy(node *SchemaDiff) *SchemaDiff {
-	unrolled := *node
-	fields := reflect.ValueOf(&unrolled).Elem()
-	for _, index := range childFields {
-		field := fields.Field(index)
-		switch child := field.Interface().(type) {
-		case *SchemaDiff:
-			field.Set(reflect.ValueOf(u.unroll(child)))
-		case *SchemasDiff:
-			field.Set(reflect.ValueOf(u.schemas(child)))
-		case *SubschemasDiff:
-			field.Set(reflect.ValueOf(u.subschemas(child)))
-		}
-	}
+	unrolled := node.withChildren(u)
 	// recognizing a wrapping compares schema pairs that can cycle back to
 	// this node, so it is decided here, with the path known
 	unrolled.OneOfWrappingDiff = getOneOfWrappingDiff(u, node.Base, node.Revision)
@@ -367,23 +328,6 @@ func (u *unroller) copy(node *SchemaDiff) *SchemaDiff {
 		return nil
 	}
 	return &unrolled
-}
-
-// childFields indexes the fields of SchemaDiff that hold schema diffs, found
-// by type so that a new such field is unrolled without being listed here.
-// TestUnroll_CutsEveryChildField fails for a field that holds schema diffs in
-// a form the unroll does not follow.
-var childFields = findChildFields()
-
-func findChildFields() []int {
-	var fields []int
-	for field := range reflect.TypeFor[SchemaDiff]().Fields() {
-		switch field.Type {
-		case reflect.TypeFor[*SchemaDiff](), reflect.TypeFor[*SchemasDiff](), reflect.TypeFor[*SubschemasDiff]():
-			fields = append(fields, field.Index[0])
-		}
-	}
-	return fields
 }
 
 func (u *unroller) schemas(diff *SchemasDiff) *SchemasDiff {
