@@ -66,7 +66,7 @@ func checkPatternsWithoutEditFilters(cmd *cobra.Command) error {
 	return nil
 }
 
-func runChecksCoverage(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runChecksCoverage(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
 	format := flags.getFormat()
 

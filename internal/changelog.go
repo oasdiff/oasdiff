@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
@@ -38,17 +37,17 @@ func enumWithOptions(cmd *cobra.Command, value enumVal, name, shorthand, usage s
 	cmd.PersistentFlags().VarP(value, name, shorthand, usage+": "+value.listOf())
 }
 
-func runChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runChangelog(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError) {
 
 	level, err := checker.NewLevel(flags.getLevel())
 	if err != nil {
 		return false, getErrInvalidFlags(fmt.Errorf("invalid level value: %q", flags.getLevel()))
 	}
 
-	return getChangelog(flags, stdout, level, false)
+	return getChangelog(flags, stdout, stderr, level, false)
 }
 
-func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
+func getChangelog(flags *Flags, stdout, stderr io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
 
 	diffResult, returnErr := calcDiff(flags)
 	if returnErr != nil {
@@ -87,12 +86,12 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getOpen() {
-		if err := uploadAndOpen(flags, os.Stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty()); err != nil {
+		if err := uploadAndOpen(flags, stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty()); err != nil {
 			// --open is additive: an upload error, unsupported source, or
 			// composed mode must not change the exit code or pre-empt --fail-on.
 			// Warn to stderr (not stdout, so it never corrupts piped --format
 			// json/yaml output) and continue.
-			_, _ = fmt.Fprintf(os.Stderr, "warning: could not open the side-by-side review: %v\n", err)
+			_, _ = fmt.Fprintf(stderr, "warning: could not open the side-by-side review: %v\n", err)
 		}
 	}
 
@@ -100,7 +99,7 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 		verdict := versioning.Check(diffResult.diffReport, errs)
 		// stderr, not stdout: the verdict is not a change, and stdout carries
 		// the report, which may be a json or yaml document.
-		_, _ = fmt.Fprintln(flags.getStderr(), versioningPolicyLine(verdict))
+		_, _ = fmt.Fprintln(stderr, versioningPolicyLine(verdict))
 		return failOnVersionBump(flags, errs, verdict)
 	}
 

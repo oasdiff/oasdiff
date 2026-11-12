@@ -26,6 +26,6 @@ func getBreakingChangesCmd() *cobra.Command {
 	return &cmd
 }
 
-func runBreakingChanges(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
-	return getChangelog(flags, stdout, checker.WARN, true)
+func runBreakingChanges(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError) {
+	return getChangelog(flags, stdout, stderr, checker.WARN, true)
 }

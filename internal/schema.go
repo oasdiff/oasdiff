@@ -27,7 +27,7 @@ The "--format yaml" output has the same structure.`,
 	return &cmd
 }
 
-func runSchema(_ *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runSchema(_ *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 	return false, outputSchema(stdout)
 }
 

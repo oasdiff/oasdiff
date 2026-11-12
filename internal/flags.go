@@ -2,8 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"io"
-	"os"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
@@ -15,9 +13,6 @@ type Flags struct {
 	v        *viper.Viper
 	base     *load.Source
 	revision *load.Source
-	// stderr carries messages that are not part of the report, so they never
-	// corrupt piped json or yaml output.
-	stderr io.Writer
 }
 
 func NewFlags() *Flags {
@@ -46,17 +41,6 @@ func (flags *Flags) toConfig() *diff.Config {
 
 func (flags *Flags) getViper() *viper.Viper {
 	return flags.v
-}
-
-func (flags *Flags) setStderr(w io.Writer) {
-	flags.stderr = w
-}
-
-func (flags *Flags) getStderr() io.Writer {
-	if flags.stderr == nil {
-		return os.Stderr
-	}
-	return flags.stderr
 }
 
 func (flags *Flags) getAttributes() []string {

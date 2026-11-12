@@ -74,8 +74,6 @@ func runBreakingFiles(cmd *cobra.Command, args []string) error {
 	// flags parsed successfully, so don't show usage on comparison errors
 	cmd.Root().SilenceUsage = true
 
-	flags.setStderr(cmd.ErrOrStderr())
-
 	base, _ := cmd.Flags().GetString("base")
 
 	failed := false
@@ -92,7 +90,7 @@ func runBreakingFiles(cmd *cobra.Command, args []string) error {
 		revSource.Fetch = flags.getFetch()
 		flags.setRevision(revSource)
 
-		failOn, err := runBreakingChanges(flags, cmd.OutOrStdout())
+		failOn, err := runBreakingChanges(flags, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			// A spec in the working tree but not in the base ref is newly added,
 			// and a new API cannot contain breaking changes, so skip it and keep

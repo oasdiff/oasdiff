@@ -30,7 +30,7 @@ func getSummaryCmd() *cobra.Command {
 	return &cmd
 }
 
-func runSummary(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runSummary(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
 	diffResult, err := calcDiff(flags)
 	if err != nil {

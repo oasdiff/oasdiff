@@ -32,7 +32,7 @@ func getDiffCmd() *cobra.Command {
 	return &cmd
 }
 
-func runDiff(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runDiff(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
 	if flags.getFormat() == string(formatters.FormatJSON) {
 		flags.addExcludeElements(diff.ExcludeEndpointsOption)
