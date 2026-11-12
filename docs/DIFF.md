@@ -161,25 +161,6 @@ role:
 
 The diff reports no change for the `anyOf` list because the union of accepted payloads is identical. The same behaviour applies to `breaking` and `changelog`, which run on the same diff engine.
 
-A refactor that also changes an annotation, a `title` the tool gives the new component for instance, reports the branch as modified and carries that annotation change. The branch is still neither added nor removed (output trimmed to the `anyOf` list):
-
-```
-oasdiff diff data/x-of/inline-ref-annotation-change-base.yaml data/x-of/inline-ref-annotation-change-revision.yaml
-```
-```yaml
-anyOf:
-    modified:
-        - base:
-            index: 0
-          revision:
-            index: 0
-            component: UserRole
-          diff:
-            description:
-                from: the caller's role
-                to: the role the caller acts under
-```
-
 To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
 
 Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) are out of scope by design: only the inline-to-`$ref` form change is matched this way.
