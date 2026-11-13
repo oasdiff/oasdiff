@@ -41,8 +41,10 @@ info    [api-version-changed]
 
 It is reported whatever the versioning scheme is, and whether or not anything breaking came with it, so a release's changelog says which version it is. Whether the change was the right one is the policy's question, and the policy's answer is the verdict above.
 
-## What it does to `--fail-on`
-A major version increase is what the policy asks for, so once it is there, errors no longer fail the run on their own. Anything below error still answers to `--fail-on`: with `--enforce-version-bump --fail-on WARN`, a warning fails the run whatever the version did, because oasdiff is not sure a warning is breaking, and a major increase says nothing about it.
+## Using `--enforce-version-bump` with `--fail-on`
+On its own, `--enforce-version-bump` exits with 1 when there are breaking changes but the major version isn't increased.
+
+Adding `--fail-on` keeps its answer for the findings the policy does not judge. The policy judges errors, so once the major version increased, errors no longer fail the run. Anything below error still answers to `--fail-on`: with `--enforce-version-bump --fail-on WARN`, a warning fails the run whatever the version did, because oasdiff is not sure a warning is breaking, and a major increase says nothing about it.
 
 When there are no breaking changes at all, the policy has nothing to judge and `--fail-on` behaves as it does without the flag.
 
