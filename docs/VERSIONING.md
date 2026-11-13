@@ -3,13 +3,13 @@ If you version your API with [semantic versioning](https://semver.org), a breaki
 Oasdiff can fail the build when it didn't, because it already knows both halves: the severity of each change, and `info.version` on each side.
 
 ## The flag
-`--enforce-version-bump` changes what the exit code means. Instead of "are there changes at this level", it answers "were the breaking changes carried by a major version increase":
+`--enforce-version-bump` fails the run when a breaking change was found and `info.version` did not get a major version increase, and passes it when the increase is there:
 
 ```
 oasdiff breaking base.yaml revision.yaml --enforce-version-bump
 ```
 
-It is available on `breaking`, `changelog` and `breaking-files`, and is off by default.
+It answers on its own, with or without `--fail-on`. It is available on `breaking`, `changelog` and `breaking-files`, and is off by default.
 
 The report itself is unchanged: every change is still listed, at its own severity. What the flag adds is the exit code and one line on standard error saying how the version was judged:
 
@@ -42,7 +42,7 @@ info    [api-version-changed]
 It is reported whatever the versioning scheme is, and whether or not anything breaking came with it, so a release's changelog says which version it is. Whether the change was the right one is the policy's question, and the policy's answer is the verdict above.
 
 ## What it does to `--fail-on`
-A major version increase licenses the breaking changes, so with the policy satisfied, errors no longer fail the run on their own. Anything below error still answers to `--fail-on`: with `--enforce-version-bump --fail-on WARN`, a warning fails the run whatever the version did, because oasdiff is not sure a warning is breaking and a major bump is not a declaration about it.
+A major version increase is what the policy asks for, so once it is there, errors no longer fail the run on their own. Anything below error still answers to `--fail-on`: with `--enforce-version-bump --fail-on WARN`, a warning fails the run whatever the version did, because oasdiff is not sure a warning is breaking, and a major increase says nothing about it.
 
 When there are no breaking changes at all, the policy has nothing to judge and `--fail-on` behaves as it does without the flag.
 

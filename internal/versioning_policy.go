@@ -39,8 +39,8 @@ func versionMovement(verdict versioning.Verdict) string {
 
 // failOnVersionBump decides the exit code under --enforce-version-bump: the
 // policy answers for errors, and failOn, the --fail-on level, still answers
-// for findings below error, which a major version increase does not license.
-// NONE means the caller asked about nothing else.
+// for findings below error, which a major version increase says nothing
+// about. NONE means the caller asked about nothing else.
 func failOnVersionBump(failOn checker.Level, errs checker.Changes, verdict versioning.Verdict) bool {
 	switch verdict.Status {
 	case versioning.Violated:

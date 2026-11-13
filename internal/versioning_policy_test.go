@@ -56,7 +56,7 @@ func Test_EnforceVersionBump_NonSemverFails(t *testing.T) {
 	require.Contains(t, stderr, `versioning policy: cannot be evaluated. info.version must be a semantic version in both specs (base "1.0.0", revision "2026-01-01").`)
 }
 
-// A major version increase licenses the errors, not the warnings: --fail-on
+// A major version increase answers for the errors, not the warnings: --fail-on
 // still answers for everything below error.
 func Test_EnforceVersionBump_WarningStillFails(t *testing.T) {
 	code, _, stderr := runVersioning(t, "revision_major_bump_with_warning.yaml", "--enforce-version-bump --fail-on WARN")
