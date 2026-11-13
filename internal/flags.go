@@ -47,10 +47,6 @@ func (flags *Flags) getAttributes() []string {
 	return flags.v.GetStringSlice("attributes")
 }
 
-func (flags *Flags) getEnforceVersionBump() bool {
-	return flags.v.GetBool("enforce-version-bump")
-}
-
 func (flags *Flags) getComposed() bool {
 	return flags.v.GetBool("composed")
 }

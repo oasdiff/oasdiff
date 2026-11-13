@@ -101,7 +101,6 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	enumWithOptions(cmd, newEnumValue(checker.GetSupportedColorValues(), "auto"), "color", "", "when to colorize textual output")
 	enumWithOptions(cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChangelog), string(formatters.FormatText)), "format", "f", "output format")
 	cmd.PersistentFlags().String("severity-levels", "", "configuration file for custom severity levels")
-	cmd.PersistentFlags().Bool("enforce-version-bump", false, "exit with return code 1 when breaking changes aren't accompanied by a major version increase in info.version, and with 0 when they are")
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
 	enumWithOptions(cmd, newEnumValue(checker.GetSupportedStabilityLevels(), ""), "stability-level", "", "minimum stability level to include")

@@ -13,7 +13,7 @@ const (
 // APIVersionUpdatedCheck reports a change to info.version. It says nothing
 // about whether the change was the right one: that is the versioning policy's
 // question (see versioning_policy.go), which the exit code can enforce with
-// --enforce-version-bump.
+// --fail-on MISSING-VERSION-BUMP.
 func APIVersionUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 

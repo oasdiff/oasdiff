@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 
-	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/versioning"
 )
 
@@ -37,11 +36,10 @@ func versionMovement(verdict versioning.Verdict) string {
 		verdict.BaseVersion, verdict.RevisionVersion)
 }
 
-// failOnVersionBump decides the exit code under --enforce-version-bump: the
-// policy answers for errors, and failOn, the --fail-on level, still answers
-// for findings below error, which a major version increase says nothing
-// about. NONE means the caller asked about nothing else.
-func failOnVersionBump(failOn checker.Level, errs checker.Changes, verdict versioning.Verdict) bool {
+// failOnVersionBump decides the exit code when --fail-on asks for the
+// versioning policy. The policy is the whole answer: a release that carries
+// its breaking changes passes, whatever else the report lists.
+func failOnVersionBump(verdict versioning.Verdict) bool {
 	switch verdict.Status {
 	case versioning.Violated:
 		return true
@@ -51,22 +49,5 @@ func failOnVersionBump(failOn checker.Level, errs checker.Changes, verdict versi
 		return true
 	}
 
-	if failOn == checker.NONE {
-		return false
-	}
-
-	if verdict.Status == versioning.NotApplicable {
-		return errs.HasLevelOrHigher(failOn)
-	}
-
-	return hasLevelBelowErr(errs, failOn)
-}
-
-func hasLevelBelowErr(errs checker.Changes, level checker.Level) bool {
-	for _, change := range errs {
-		if changeLevel := change.GetLevel(); changeLevel >= level && changeLevel < checker.ERR {
-			return true
-		}
-	}
 	return false
 }

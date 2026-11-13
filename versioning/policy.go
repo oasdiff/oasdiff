@@ -83,7 +83,7 @@ func parseSemver(version string) (semver, bool) {
 // Check judges info.version against the breaking changes in changes: whether
 // the version stayed put, moved backwards, moved by too little, or carried
 // them correctly. The caller decides what the verdict is worth, which for the
-// CLI is --enforce-version-bump.
+// CLI is --fail-on MISSING-VERSION-BUMP.
 func Check(diffReport *diff.Diff, changes checker.Changes) Verdict {
 	breaking := countBreakingChanges(changes)
 	if breaking == 0 {

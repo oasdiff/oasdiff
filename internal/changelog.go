@@ -26,7 +26,7 @@ func getChangelogCmd() *cobra.Command {
 	addCommonDiffFlags(&cmd)
 	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
-	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
+	enumWithOptions(&cmd, newEnumValue(GetFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), LevelInfo), "level", "", "output errors with this level or higher")
 	addOpenFlags(&cmd, "changelog")
 
@@ -95,17 +95,19 @@ func getChangelog(flags *Flags, stdout, stderr io.Writer, level checker.Level, i
 		}
 	}
 
-	failOn, returnErr := flags.failOnLevel()
-	if returnErr != nil {
-		return false, returnErr
-	}
-
-	if flags.getEnforceVersionBump() {
+	// the policy and a severity are two values of --fail-on, so the caller asked
+	// for one or the other, never both
+	if flags.getFailOn() == FailOnMissingVersionBump {
 		verdict := versioning.Check(diffResult.diffReport, errs)
 		// stderr, not stdout: the verdict is not a change, and stdout carries
 		// the report, which may be a json or yaml document.
 		_, _ = fmt.Fprintln(stderr, versioningPolicyLine(verdict))
-		return failOnVersionBump(failOn, errs, verdict), nil
+		return failOnVersionBump(verdict), nil
+	}
+
+	failOn, returnErr := flags.failOnLevel()
+	if returnErr != nil {
+		return false, returnErr
 	}
 
 	if failOn == checker.NONE {

@@ -31,7 +31,7 @@ is rendered once per spec rather than producing a single combined document.`,
 
 	addCommonDiffFlags(&cmd)
 	addCommonBreakingFlags(&cmd)
-	enumWithOptions(&cmd, newEnumValue(GetBreakingLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
+	enumWithOptions(&cmd, newEnumValue(GetBreakingFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")
 	cmd.PersistentFlags().String("base", "", "git ref holding the version to compare each spec against (e.g. origin/main)")
 
 	return &cmd
