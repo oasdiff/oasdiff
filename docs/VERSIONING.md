@@ -19,7 +19,7 @@ oasdiff breaking base.yaml revision.yaml --fail-on MISSING-VERSION-BUMP
 
 `MISSING-VERSION-BUMP` is available on `breaking`, `changelog` and `breaking-files`. The rest of this page is about it.
 
-The report itself is unchanged: every change is still listed, at its own severity. What the policy adds is the exit code and one line on standard error saying how the version was judged:
+The report lists every change at its own severity, whatever the verdict. The verdict is one line on standard error, with the exit code it carries:
 
 | Verdict | Exit code | Line on standard error |
 | ------------- | ------------- | ------------- |
