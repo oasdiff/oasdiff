@@ -94,13 +94,13 @@ func noSubcommandArgs(cmd *cobra.Command, args []string) error {
 
 // addChecksFormatFlags registers the output format flag every listing needs.
 func addChecksFormatFlags(cmd *cobra.Command) {
-	enumWithOptions(cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChecks), string(formatters.FormatText)), "format", "f", "output format")
+	localEnumWithOptions(cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputChecks), string(formatters.FormatText)), "format", "f", "output format")
 }
 
 // addChecksSeverityFlag registers --severity, which both listings support now
 // that a validate rule has a severity of its own.
 func addChecksSeverityFlag(cmd *cobra.Command) {
-	enumWithOptions(cmd, newEnumSliceValue([]string{"info", "warn", "error"}, nil), "severity", "s", "include only checks with any of specified severities")
+	localEnumWithOptions(cmd, newEnumSliceValue([]string{"info", "warn", "error"}, nil), "severity", "s", "include only checks with any of specified severities")
 }
 
 // matchSeverity reports whether level passes the --severity filter. An empty
