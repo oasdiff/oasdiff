@@ -49,8 +49,8 @@ info    [api-version-changed]
 
 It is reported whatever the versioning scheme is, and whether or not anything breaking came with it, so a release's changelog says which version it is. Whether the change was the right one is the policy's question, and the policy's answer is the verdict above.
 
-## When the policy has nothing to judge
-A release is asked for a major version increase only when a breaking change was found, at the severity levels you configured. If you have downgraded a check below error with [custom severity levels](BREAKING-CHANGES.md#customizing-severity-levels), or ignored it with an ignore file, it is not breaking here either, and the verdict line says so.
+## What counts as a breaking change
+The policy asks for a major version increase only when the run reports an error, so a warning never asks for one. Errors are what your own configuration makes them: a check you downgraded with [custom severity levels](BREAKING-CHANGES.md#customizing-severity-levels), or dropped with an ignore file, is not an error here either.
 
 ## Which versions can be compared
 Both versions have to be semantic versions. `1.0`, `v1`, `2026-06-01` and other schemes have no major version to compare, so oasdiff reaches no verdict rather than guessing. A leading `v` is accepted (`v1.2.3`). Prerelease and build metadata are accepted and ignored, so `1.1.0-rc.1` is a minor bump.
