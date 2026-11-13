@@ -44,7 +44,7 @@ It is reported whatever the versioning scheme is, and whether or not anything br
 ## Using `--enforce-version-bump` with `--fail-on`
 On its own, `--enforce-version-bump` exits with 1 when there are breaking changes but the major version isn't increased.
 
-Adding `--fail-on` doesn't change that answer, it only adds findings the policy doesn't judge. The policy judges errors. `--fail-on WARN` also fails the run on a warning, and `--fail-on INFO` on a warning or an info finding, even when the major version was increased, because oasdiff is not sure those are breaking. `--fail-on ERR` adds nothing, since errors are what the policy already answers for.
+Adding `--fail-on` doesn't change that answer, it only adds findings the policy doesn't judge. The policy judges errors, so `--fail-on ERR` adds nothing. A lower level does: `changelog --enforce-version-bump --fail-on INFO` also fails the run on a warning or an info finding, even when the major version was increased, because oasdiff is not sure those are breaking.
 
 When there are no breaking changes at all, the policy has nothing to judge and `--fail-on` behaves as it does without the flag.
 
