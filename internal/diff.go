@@ -100,6 +100,13 @@ func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoP
 	}
 }
 
+// specsTransformed reports whether any load-time transformation rewrites the
+// documents before comparison. Keep in sync with the options normalDiff and
+// composedDiff apply.
+func specsTransformed(flags *Flags) bool {
+	return flags.getFlattenAllOf() || flags.getFlattenParams() || flags.getCaseInsensitiveHeaders() || flags.getAutoUpgrade()
+}
+
 // loaderForOpen returns the capturing loader variant when --open is set, and the
 // plain one otherwise. --open renders a side-by-side review whose blocks are
 // sliced from source text, so it needs every contributing file (root + $ref'd)
