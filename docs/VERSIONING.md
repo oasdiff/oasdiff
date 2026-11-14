@@ -63,11 +63,3 @@ Below `1.0.0`, semver gives the minor version the major's role, so `0.1.0` to `0
 - Which version bump a non-breaking change deserves. Only breaking changes are judged.
 - Any versioning scheme other than semver, including version numbers in the URL path.
 
-## Upgrading from the version checks
-`api-version-not-bumped`, `api-version-decreased` and `api-major-version-not-bumped` used to be checks: reported at `INFO` by default, and raised to `err` with `--severity-levels` to enforce the policy. They are no longer checks, because a verdict about the release should not be a change in the API. The verdict line says which of the three applies in words, and `api-version-changed` reports the version change itself.
-
-A `--severity-levels` file that still sets a level for one of them fails to load, like any other unknown id, so remove those lines when you upgrade:
-
-```
-Error: failed to load custom severity levels from oasdiff-levels.txt: invalid rule id "api-version-not-bumped" on line 1
-```
