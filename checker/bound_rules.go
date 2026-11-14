@@ -243,7 +243,7 @@ func classifyBound(spec boundSpec, d *diff.SchemaDiff) (boundAction, []any, bool
 // every keyword in boundSpecs, at body, property, parameter, and
 // response-header level. Parameter and header root schemas attach no guards:
 // readOnly and writeOnly are property-scoped, so there they declare nothing.
-func BoundCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func BoundCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -269,7 +269,7 @@ func BoundCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSources
 // boundChanges reports the body-level and property-level cells of one media
 // type; properties go through p.newChange, so the read-only and write-only
 // guards attach as for every property check.
-func boundChanges(info mediaTypeInfo, direction Direction, operationsSources *diff.OperationsSourcesMap) Changes {
+func boundChanges(info mediaTypeInfo, direction Direction, operationsSources diff.OperationsSourcesMap) Changes {
 	result := boundSchemaChanges(info.schemaDiff, direction, "body", operationsSources, info.operationItem,
 		func(values []any) []any { return values },
 		info.newChange)
@@ -296,7 +296,7 @@ func boundSchemaChanges(
 	schemaDiff *diff.SchemaDiff,
 	direction Direction,
 	scope string,
-	operationsSources *diff.OperationsSourcesMap,
+	operationsSources diff.OperationsSourcesMap,
 	methodDiff *diff.MethodDiff,
 	args func(values []any) []any,
 	newChange func(id string, args []any, comment string) ApiChange,

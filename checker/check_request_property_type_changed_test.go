@@ -228,7 +228,7 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 func TestRequestPropertyTypeChangedNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -244,7 +244,7 @@ func TestRequestPropertyTypeChangedNoOperationsDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -266,7 +266,7 @@ func TestRequestPropertyTypeChangedNoRequestBodyDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -296,7 +296,7 @@ func TestRequestPropertyTypeChangedNoSchemaDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyTypeChangedCheck(d, osm, config)
 	require.Len(t, errs, 0)

@@ -81,7 +81,7 @@ func falseSchemaComment(id string) string {
 	return ""
 }
 
-func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -120,7 +120,7 @@ func RequestPropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSour
 	return result
 }
 
-func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -159,7 +159,7 @@ func ResponsePropertySchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 	return result
 }
 
-func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
@@ -193,7 +193,7 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 	return result
 }
 
-func ResponseHeaderSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseHeaderSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {

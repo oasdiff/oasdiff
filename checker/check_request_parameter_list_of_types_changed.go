@@ -12,7 +12,7 @@ const (
 	RequestParameterPropertyListOfTypesNarrowedId = "request-parameter-property-list-of-types-narrowed"
 )
 
-func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterListOfTypesChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		param := p.paramDiff.Revision

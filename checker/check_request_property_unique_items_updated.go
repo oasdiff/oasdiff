@@ -13,7 +13,7 @@ const (
 	RequestPropertyUniqueItemsUnsetId = "request-property-unique-items-unset"
 )
 
-func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyUniqueItemsUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

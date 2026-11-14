@@ -12,7 +12,7 @@ const (
 // ResponseHeaderAddedCheck reports a response header that was added. Adding a
 // response header is non-breaking, so it is reported at INFO. It is the mirror
 // of ResponseHeaderRemovedCheck (see #1033).
-func ResponseHeaderAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseHeaderAddedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
 		return result

@@ -84,7 +84,7 @@ func calcDiff(flags *Flags) (*diffResult, *ReturnError) {
 
 type diffResult struct {
 	diffReport        *diff.Diff
-	operationsSources *diff.OperationsSourcesMap
+	operationsSources diff.OperationsSourcesMap
 	specInfoPair      *load.SpecInfoPair
 	// The spec sets per side (one for a normal diff, N for composed); on the
 	// --open path each SpecInfo.Sources carries its captured file texts.
@@ -92,7 +92,7 @@ type diffResult struct {
 	revSpecs  []*load.SpecInfo
 }
 
-func newDiffResult(d *diff.Diff, o *diff.OperationsSourcesMap, s *load.SpecInfoPair) *diffResult {
+func newDiffResult(d *diff.Diff, o diff.OperationsSourcesMap, s *load.SpecInfoPair) *diffResult {
 	return &diffResult{
 		diffReport:        d,
 		operationsSources: o,

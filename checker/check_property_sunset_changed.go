@@ -34,12 +34,12 @@ var responsePropertySunsetChangeIds = deprecation.SunsetChangeIds{
 }
 
 // RequestPropertySunsetChangedCheck detects changed sunset dates of deprecated properties in request bodies
-func RequestPropertySunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertySunsetChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	return propertySunsetChangedCheck(walkModifiedRequestBodySchemas, diffReport, operationsSources, config, requestPropertySunsetChangeIds)
 }
 
 // ResponsePropertySunsetChangedCheck detects changed sunset dates of deprecated properties in response bodies
-func ResponsePropertySunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertySunsetChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	return propertySunsetChangedCheck(walkModifiedResponseSchemas, diffReport, operationsSources, config, responsePropertySunsetChangeIds)
 }
 
@@ -48,9 +48,9 @@ func ResponsePropertySunsetChangedCheck(diffReport *diff.Diff, operationsSources
 // reports, request or response, so the two checks differ only in their walker
 // and ids.
 func propertySunsetChangedCheck(
-	walk func(*diff.Diff, *diff.OperationsSourcesMap, *Config, func(mediaTypeInfo)),
+	walk func(*diff.Diff, diff.OperationsSourcesMap, *Config, func(mediaTypeInfo)),
 	diffReport *diff.Diff,
-	operationsSources *diff.OperationsSourcesMap,
+	operationsSources diff.OperationsSourcesMap,
 	config *Config,
 	ids deprecation.SunsetChangeIds,
 ) Changes {

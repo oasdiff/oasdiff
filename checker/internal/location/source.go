@@ -9,8 +9,8 @@ import (
 // specFile names the spec an operation was loaded from, for a location that
 // origin data does not place in a file. A spec read from stdin has no file to
 // name, so it gets none.
-func specFile(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation) string {
-	source := (*operationsSources)[operation]
+func specFile(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation) string {
+	source := operationsSources.Source(operation)
 	if source.IsStdin() {
 		return ""
 	}
@@ -48,7 +48,7 @@ func (s *Source) WithEnd(endLine, endColumn int) *Source {
 	return s
 }
 
-func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin) *Source {
+func NewSourceFromOrigin(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin) *Source {
 	if origin == nil || origin.Key == nil {
 		return &Source{File: specFile(operationsSources, operation)}
 	}
@@ -67,7 +67,7 @@ func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation
 	}
 }
 
-func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string) *Source {
+func NewSourceFromField(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string) *Source {
 	if origin == nil {
 		return nil
 	}
@@ -91,7 +91,7 @@ func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation 
 
 // operationSources returns the base and revision source locations for a modified operation pair.
 // Returns nil, nil when origin tracking is not enabled (no useful line/column data available).
-func operationSources(operationsSources *diff.OperationsSourcesMap, base, revision *openapi3.Operation) (*Source, *Source) {
+func operationSources(operationsSources diff.OperationsSourcesMap, base, revision *openapi3.Operation) (*Source, *Source) {
 	// Only populate sources when at least one operation has origin data
 	hasOrigin := (base != nil && base.Origin != nil) || (revision != nil && revision.Origin != nil)
 	if !hasOrigin {
@@ -112,7 +112,7 @@ func operationSources(operationsSources *diff.OperationsSourcesMap, base, revisi
 // in a sequence-valued field (e.g. type: [string, null]).
 // It looks up the item by value in Origin.Sequences[field].
 // If multiple items share the same value, it returns the first match.
-func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string, value string) *Source {
+func NewSourceFromSequenceItem(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin, field string, value string) *Source {
 	if origin == nil || origin.Sequences == nil {
 		return nil
 	}
@@ -143,7 +143,7 @@ func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, ope
 
 // SequenceItemSource is NewSourceFromSequenceItem with a fallback: the item's
 // location, or fallback when op or the item's origin is missing.
-func SequenceItemSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, field, value string, fallback *Source) *Source {
+func SequenceItemSource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, field, value string, fallback *Source) *Source {
 	if op != nil {
 		if s := NewSourceFromSequenceItem(operationsSources, op, op.Origin, field, value); s != nil {
 			return s
@@ -154,7 +154,7 @@ func SequenceItemSource(operationsSources *diff.OperationsSourcesMap, op *openap
 
 // OperationFieldSources returns source locations from a specific field within operation Origins.
 // Falls back to operation-level sources when the field is not found in origin data.
-func OperationFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {
+func OperationFieldSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {
 	hasOrigin := (operationItem.Base != nil && operationItem.Base.Origin != nil) ||
 		(operationItem.Revision != nil && operationItem.Revision.Origin != nil)
 	if !hasOrigin {
@@ -173,7 +173,7 @@ func OperationFieldSources(operationsSources *diff.OperationsSourcesMap, operati
 
 // ParameterFieldSources returns source locations from a specific field within parameter Origins.
 // Falls back to parameter-level sources when the field is not found in origin data.
-func ParameterFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, paramDiff *diff.ParameterDiff, field string) (*Source, *Source) {
+func ParameterFieldSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, paramDiff *diff.ParameterDiff, field string) (*Source, *Source) {
 	if paramDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -196,7 +196,7 @@ func ParameterFieldSources(operationsSources *diff.OperationsSourcesMap, operati
 
 // schemaSources returns source locations from schema Origins.
 // Falls back to operation-level sources when schema origin data is unavailable.
-func SchemaSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff) (*Source, *Source) {
+func SchemaSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff) (*Source, *Source) {
 	if schemaDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -219,7 +219,7 @@ func SchemaSources(operationsSources *diff.OperationsSourcesMap, operationItem *
 
 // parameterSources returns source locations from parameter Origins.
 // Falls back to operation-level sources when parameter origin data is unavailable.
-func ParameterSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, paramDiff *diff.ParameterDiff) (*Source, *Source) {
+func ParameterSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, paramDiff *diff.ParameterDiff) (*Source, *Source) {
 	if paramDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -242,7 +242,7 @@ func ParameterSources(operationsSources *diff.OperationsSourcesMap, operationIte
 
 // responseSources returns source locations from response Origins.
 // Falls back to operation-level sources when response origin data is unavailable.
-func ResponseSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff) (*Source, *Source) {
+func ResponseSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff) (*Source, *Source) {
 	if responseDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -265,7 +265,7 @@ func ResponseSources(operationsSources *diff.OperationsSourcesMap, operationItem
 
 // schemaFieldSources returns source locations from a specific field within schema Origins.
 // Falls back to schema-level sources when the field is not found in origin data.
-func SchemaFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string) (*Source, *Source) {
+func SchemaFieldSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string) (*Source, *Source) {
 	if schemaDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -288,7 +288,7 @@ func SchemaFieldSources(operationsSources *diff.OperationsSourcesMap, operationI
 
 // SchemaDeletedItemSources returns source locations for a deleted sequence item.
 // Base source points to the specific deleted item, revision source is nil.
-func SchemaDeletedItemSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
+func SchemaDeletedItemSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
 	if schemaDiff == nil || schemaDiff.Base == nil || operationItem.Base == nil {
 		return nil, nil
 	}
@@ -298,7 +298,7 @@ func SchemaDeletedItemSources(operationsSources *diff.OperationsSourcesMap, oper
 
 // SchemaAddedItemSources returns source locations for an added sequence item.
 // Base source is nil, revision source points to the specific added item.
-func SchemaAddedItemSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
+func SchemaAddedItemSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
 	if schemaDiff == nil || schemaDiff.Revision == nil || operationItem.Revision == nil {
 		return nil, nil
 	}
@@ -309,7 +309,7 @@ func SchemaAddedItemSources(operationsSources *diff.OperationsSourcesMap, operat
 // SchemaMapItemSource returns the source location for a named schema within a Schemas map
 // (e.g., a specific key in dependentSchemas, patternProperties, or properties).
 // It uses the schema's own Origin rather than the parent field's origin.
-func SchemaMapItemSource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, schemas openapi3.Schemas, name string) *Source {
+func SchemaMapItemSource(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, schemas openapi3.Schemas, name string) *Source {
 	if schemas == nil {
 		return nil
 	}
@@ -322,7 +322,7 @@ func SchemaMapItemSource(operationsSources *diff.OperationsSourcesMap, operation
 
 // SubschemaSources returns source locations for a specific subschema within an allOf/oneOf/anyOf array.
 // For added subschemas, baseIndex should be -1; for deleted subschemas, revisionIndex should be -1.
-func SubschemaSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, baseIndex, revisionIndex int) (*Source, *Source) {
+func SubschemaSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string, baseIndex, revisionIndex int) (*Source, *Source) {
 	if schemaDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
 	}
@@ -345,7 +345,7 @@ func SubschemaSources(operationsSources *diff.OperationsSourcesMap, operationIte
 }
 
 // subschemaSource extracts the source location from a specific subschema in an allOf/oneOf/anyOf array.
-func subschemaSource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, schema *openapi3.Schema, field string, index int) *Source {
+func subschemaSource(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, schema *openapi3.Schema, field string, index int) *Source {
 	var refs openapi3.SchemaRefs
 	switch field {
 	case "allOf":
@@ -391,7 +391,7 @@ func subschemaSource(operationsSources *diff.OperationsSourcesMap, operation *op
 
 // ParameterSource returns the source location of a specific parameter.
 // Returns nil when the parameter has no origin data.
-func ParameterSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, param *openapi3.Parameter) *Source {
+func ParameterSource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, param *openapi3.Parameter) *Source {
 	if op == nil || param == nil || param.Origin == nil {
 		return nil
 	}
@@ -399,7 +399,7 @@ func ParameterSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.
 }
 
 // RequestBodyFieldSources returns source locations from a specific field within request body Origins.
-func RequestBodyFieldSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {
+func RequestBodyFieldSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, field string) (*Source, *Source) {
 	var baseOrigin, revisionOrigin *openapi3.Origin
 	if operationItem.Base != nil && operationItem.Base.RequestBody != nil && operationItem.Base.RequestBody.Value != nil {
 		baseOrigin = operationItem.Base.RequestBody.Value.Origin
@@ -424,7 +424,7 @@ func RequestBodyFieldSources(operationsSources *diff.OperationsSourcesMap, opera
 
 // RequestBodySource returns the source location of the request body of an operation.
 // Returns nil when the request body has no origin data.
-func RequestBodySource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation) *Source {
+func RequestBodySource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation) *Source {
 	if op == nil || op.RequestBody == nil || op.RequestBody.Value == nil || op.RequestBody.Value.Origin == nil {
 		return nil
 	}
@@ -433,7 +433,7 @@ func RequestBodySource(operationsSources *diff.OperationsSourcesMap, op *openapi
 
 // RequestBodyMediaTypeSource returns the source location of a specific media type within a request body.
 // Returns nil when the media type has no origin data.
-func RequestBodyMediaTypeSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, mediaType string) *Source {
+func RequestBodyMediaTypeSource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, mediaType string) *Source {
 	if op == nil || op.RequestBody == nil || op.RequestBody.Value == nil || op.RequestBody.Value.Content == nil {
 		return nil
 	}
@@ -445,7 +445,7 @@ func RequestBodyMediaTypeSource(operationsSources *diff.OperationsSourcesMap, op
 
 // MediaTypeSource returns the source location of a specific media type within a response.
 // Returns nil when the media type has no origin data.
-func MediaTypeSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, response *openapi3.Response, mediaType string) *Source {
+func MediaTypeSource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, response *openapi3.Response, mediaType string) *Source {
 	if op == nil || response == nil || response.Content == nil {
 		return nil
 	}
@@ -458,7 +458,7 @@ func MediaTypeSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.
 // ResponseMediaTypeNameSources returns source locations for a renamed media type within a response.
 // It points to the old media-type line in the base and the new media-type line in the revision.
 // Falls back to response-level sources when media type origin data is unavailable.
-func ResponseMediaTypeNameSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff, fromMediaType, toMediaType string) (*Source, *Source) {
+func ResponseMediaTypeNameSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff, fromMediaType, toMediaType string) (*Source, *Source) {
 	baseSource := MediaTypeSource(operationsSources, operationItem.Base, responseDiff.Base, fromMediaType)
 	revisionSource := MediaTypeSource(operationsSources, operationItem.Revision, responseDiff.Revision, toMediaType)
 	if baseSource == nil && revisionSource == nil {
@@ -469,7 +469,7 @@ func ResponseMediaTypeNameSources(operationsSources *diff.OperationsSourcesMap, 
 
 // HeaderSources returns source locations from the base and revision headers within a response.
 // Falls back to response-level sources when header origin data is unavailable.
-func HeaderSources(operationsSources *diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff, headerName string) (*Source, *Source) {
+func HeaderSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, responseDiff *diff.ResponseDiff, headerName string) (*Source, *Source) {
 	var baseOrigin, revisionOrigin *openapi3.Origin
 	if responseDiff.Base != nil {
 		if h := responseDiff.Base.Headers[headerName]; h != nil && h.Value != nil {
@@ -499,7 +499,7 @@ func HeaderSources(operationsSources *diff.OperationsSourcesMap, operationItem *
 
 // PropertySource returns the source location of a specific property schema.
 // Returns nil when the schema has no origin data.
-func PropertySource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, schema *openapi3.Schema) *Source {
+func PropertySource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, schema *openapi3.Schema) *Source {
 	if op == nil || schema == nil || schema.Origin == nil {
 		return nil
 	}
@@ -524,7 +524,7 @@ func SourceFromOrigin(origin *openapi3.Origin) *Source {
 // SecuritySource returns the location of an operation's "security" field,
 // falling back to the operation's own location. Returns nil when the operation
 // has no origin data.
-func SecuritySource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation) *Source {
+func SecuritySource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation) *Source {
 	if op == nil || op.Origin == nil {
 		return nil
 	}
@@ -566,7 +566,7 @@ func InfoFieldSource(info *openapi3.Info, field string) *Source {
 // falling back to the element's own location. op supplies the file for the
 // fallback when the field location carries none. Returns nil without origin
 // data.
-func StabilityFieldSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, origin *openapi3.Origin) *Source {
+func StabilityFieldSource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, origin *openapi3.Origin) *Source {
 	if origin == nil {
 		return nil
 	}
@@ -582,7 +582,7 @@ func NewEmptySource() *Source {
 
 // ResponseSource returns a Source for a specific response status code within an operation.
 // Falls back to the "responses" field location if the specific status has no origin data.
-func ResponseSource(operationsSources *diff.OperationsSourcesMap, op *openapi3.Operation, responseStatus string) *Source {
+func ResponseSource(operationsSources diff.OperationsSourcesMap, op *openapi3.Operation, responseStatus string) *Source {
 	if op == nil {
 		return nil
 	}

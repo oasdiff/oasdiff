@@ -589,7 +589,7 @@ func TestListOfTypesSpecificPaths(t *testing.T) {
 		// Run all checkers to exercise as many code paths as possible
 		checkers := []struct {
 			name    string
-			checker func(*diff.Diff, *diff.OperationsSourcesMap, *checker.Config) checker.Changes
+			checker func(*diff.Diff, diff.OperationsSourcesMap, *checker.Config) checker.Changes
 		}{
 			{"RequestProperty", checker.RequestPropertyListOfTypesChangedCheck},
 			{"ResponseProperty", checker.ResponsePropertyListOfTypesChangedCheck},
@@ -780,7 +780,7 @@ func TestListOfTypesUncoveredPaths(t *testing.T) {
 		testCases := []struct {
 			base     string
 			revision string
-			checker  func(*diff.Diff, *diff.OperationsSourcesMap, *checker.Config) checker.Changes
+			checker  func(*diff.Diff, diff.OperationsSourcesMap, *checker.Config) checker.Changes
 		}{
 			// This should generate changes with multiple types (exercises comma logic)
 			{"../data/list-of-types/list-to-single-base.yaml", "../data/list-of-types/list-to-single-revision.yaml", checker.RequestPropertyListOfTypesChangedCheck},

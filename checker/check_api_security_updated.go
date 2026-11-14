@@ -83,7 +83,7 @@ func checkGlobalSecurity(diffReport *diff.Diff, config *Config) Changes {
 	return result
 }
 
-func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	result = append(result, checkGlobalSecurity(diffReport, config)...)
@@ -119,7 +119,7 @@ func APISecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Oper
 // least one side, from the document-root list. It returns the endpoints it
 // reported on, so the caller skips their own security diff, which does not
 // account for the inherited list.
-func checkInheritedSecurity(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) (Changes, map[diff.Endpoint]bool) {
+func checkInheritedSecurity(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) (Changes, map[diff.Endpoint]bool) {
 	result := make(Changes, 0)
 	handled := map[diff.Endpoint]bool{}
 
@@ -162,7 +162,7 @@ func inheritsRootSecurity(operations []diff.OperationPair) bool {
 
 // inheritedSecuritySource points at the operation's own list, or at the root
 // list when the operation inherits it.
-func inheritedSecuritySource(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, rootDiff *diff.SecurityRequirementsDiff, base bool) *Source {
+func inheritedSecuritySource(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, rootDiff *diff.SecurityRequirementsDiff, base bool) *Source {
 	if operation.Security != nil || rootDiff == nil {
 		return location.SecuritySource(operationsSources, operation)
 	}

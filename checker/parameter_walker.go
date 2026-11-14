@@ -14,7 +14,7 @@ type paramInfo struct {
 
 // walkModifiedParameters invokes processor for every modified parameter of
 // every modified operation.
-func walkModifiedParameters(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(p paramInfo)) {
+func walkModifiedParameters(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config, processor func(p paramInfo)) {
 	if diffReport.PathsDiff == nil {
 		return
 	}
@@ -52,7 +52,7 @@ type headerInfo struct {
 
 // walkModifiedResponseHeaders invokes processor for every modified header of
 // every modified response of every modified operation.
-func walkModifiedResponseHeaders(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(h headerInfo)) {
+func walkModifiedResponseHeaders(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config, processor func(h headerInfo)) {
 	if diffReport.PathsDiff == nil {
 		return
 	}

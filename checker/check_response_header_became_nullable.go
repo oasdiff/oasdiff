@@ -15,7 +15,7 @@ const (
 // A response header becoming nullable means a client that never expected a null
 // value can now receive one (breaking); becoming not-nullable narrows the
 // server's output and is safe (info).
-func ResponseHeaderBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseHeaderBecameNullableCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
 		if id := nullabilityChangeId(h.headerDiff.SchemaDiff, ResponseHeaderBecameNullableId, ResponseHeaderBecameNotNullableId); id != "" {

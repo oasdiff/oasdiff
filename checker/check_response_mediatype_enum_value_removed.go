@@ -11,7 +11,7 @@ const (
 	ResponseMediaTypeEnumValueRemovedId = "response-mediatype-enum-value-removed"
 )
 
-func ResponseMediaTypeEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseMediaTypeEnumValueRemovedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

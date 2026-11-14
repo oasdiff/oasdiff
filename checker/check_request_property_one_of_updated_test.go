@@ -100,7 +100,7 @@ func TestRequestPropertyOneOfRemoved(t *testing.T) {
 func TestRequestPropertyOneOfNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyOneOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -116,7 +116,7 @@ func TestRequestPropertyOneOfNoOperationsDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyOneOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -138,7 +138,7 @@ func TestRequestPropertyOneOfNoRequestBodyDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyOneOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -168,7 +168,7 @@ func TestRequestPropertyOneOfNoSchemaDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyOneOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)

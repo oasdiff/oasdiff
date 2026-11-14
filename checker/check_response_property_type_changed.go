@@ -41,7 +41,7 @@ func responseTypeChangeId(typeDiff *diff.StringsDiff, formatDiff *diff.ValueDiff
 	return specializedId, ""
 }
 
-func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyTypeChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

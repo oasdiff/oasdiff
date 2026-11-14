@@ -11,7 +11,7 @@ const (
 	RequestPropertyMaxItemsSetId = "request-property-max-items-set"
 )
 
-func RequestPropertyMaxItemsSetCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyMaxItemsSetCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

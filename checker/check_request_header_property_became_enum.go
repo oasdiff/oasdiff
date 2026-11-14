@@ -10,7 +10,7 @@ const (
 	RequestHeaderPropertyBecameEnumId = "request-header-property-became-enum"
 )
 
-func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestHeaderPropertyBecameEnumCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		if p.location != "header" {

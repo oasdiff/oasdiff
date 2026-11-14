@@ -16,14 +16,14 @@ const (
 	APIRemovedBeforeSunsetId           = "api-removed-before-sunset"
 )
 
-func APIRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func APIRemovedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	return append(
 		checkRemovedPaths(diffReport.PathsDiff, operationsSources, config),
 		checkRemovedOperations(diffReport.PathsDiff, operationsSources, config)...,
 	)
 }
 
-func checkRemovedPaths(pathsDiff *diff.PathsDiff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func checkRemovedPaths(pathsDiff *diff.PathsDiff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 
 	if pathsDiff == nil {
 		return nil
@@ -51,7 +51,7 @@ func checkRemovedPaths(pathsDiff *diff.PathsDiff, operationsSources *diff.Operat
 	return result
 }
 
-func checkRemovedOperations(pathsDiff *diff.PathsDiff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func checkRemovedOperations(pathsDiff *diff.PathsDiff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	if pathsDiff == nil {
 		return nil
 	}

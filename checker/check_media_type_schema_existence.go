@@ -44,7 +44,7 @@ const (
 // boolean `false` accepts nothing, so a body schema arriving as `false`
 // withdraws the media type's payload and is reported as schema-became-false.
 // The itemSchema variants are still classified by shape alone (#1196).
-func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func MediaTypeSchemaExistenceCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
 		return result

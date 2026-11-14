@@ -17,7 +17,7 @@ const (
 	ResponsePropertyDependentRequiredChangedId = "response-property-dependent-required-changed"
 )
 
-func ResponsePropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyDependentRequiredChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

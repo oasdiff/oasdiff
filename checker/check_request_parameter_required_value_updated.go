@@ -10,7 +10,7 @@ const (
 	RequestParameterBecomeOptionalId = "request-parameter-became-optional"
 )
 
-func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterRequiredValueUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		requiredDiff := p.paramDiff.RequiredDiff

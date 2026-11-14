@@ -113,7 +113,7 @@ func checkOAuthFlowUpdates(flowDiff *diff.OAuthFlowDiff, updatedSecurityName, fl
 	return result
 }
 
-func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	if diffReport.ComponentsDiff == nil {
