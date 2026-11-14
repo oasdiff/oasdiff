@@ -3,6 +3,8 @@ package checker
 import (
 	"fmt"
 
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -25,5 +27,17 @@ func APIVersionUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.Opera
 		Id:    APIVersionChangedId,
 		Level: config.getLogLevel(APIVersionChangedId),
 		Args:  []any{fmt.Sprintf("%v", diffReport.InfoDiff.VersionDiff.From), fmt.Sprintf("%v", diffReport.InfoDiff.VersionDiff.To)},
-	})
+	}.WithSources(
+		infoVersionSource(diffReport.BaseInfo),
+		infoVersionSource(diffReport.RevisionInfo),
+	))
+}
+
+// infoVersionSource is the location of the version field in one spec's info
+// object; nil when the spec was loaded without origin tracking.
+func infoVersionSource(info *openapi3.Info) *Source {
+	if info == nil {
+		return nil
+	}
+	return location.SourceFromField(info.Origin, "version")
 }

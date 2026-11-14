@@ -3,19 +3,28 @@ package checker_test
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/versioning"
 	"github.com/stretchr/testify/require"
 )
 
+const versionSpec = "../data/checker/request_property_became_required_base.yaml"
+
 // versionChanges compares a pair of specs that differ only in info.version.
-func versionChanges(t *testing.T, baseVersion, revisionVersion string) checker.Changes {
+// Each spec gets its own loader, as the loader holds the state of one decode.
+func versionChanges(t *testing.T, baseVersion, revisionVersion string, newLoaders ...func() *openapi3.Loader) checker.Changes {
 	t.Helper()
 
-	s1, err := open("../data/checker/request_property_became_required_base.yaml")
+	newLoader := openapi3.NewLoader
+	if len(newLoaders) > 0 {
+		newLoader = newLoaders[0]
+	}
+
+	s1, err := open(versionSpec, newLoader())
 	require.NoError(t, err)
-	s2, err := open("../data/checker/request_property_became_required_base.yaml")
+	s2, err := open(versionSpec, newLoader())
 	require.NoError(t, err)
 
 	s1.Spec.Info.Version = baseVersion
@@ -45,6 +54,20 @@ func TestAPIVersionChanged(t *testing.T) {
 		require.Equal(t,
 			"the API version changed from `"+versions[0]+"` to `"+versions[1]+"`",
 			change.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	}
+}
+
+// The change points at the version field of each spec.
+func TestAPIVersionChanged_WithSources(t *testing.T) {
+	change := requireChange(t,
+		versionChanges(t, "1.0.0", "2.0.0", newLoaderWithOriginTracking),
+		checker.APIVersionChangedId)
+
+	for _, source := range []*checker.Source{change.GetBaseSource(), change.GetRevisionSource()} {
+		require.NotNil(t, source)
+		require.Equal(t, versionSpec, source.File)
+		require.Equal(t, 4, source.Line)
+		require.Equal(t, 3, source.Column)
 	}
 }
 
