@@ -97,18 +97,6 @@ func versioningViolation(baseVersion, revisionVersion string, base, revision sem
 	return NoReason
 }
 
-// majorBumped reports whether the version moved by enough to carry a breaking
-// change. Below 1.0.0 semver gives the minor the major's role ("anything may
-// change at any time"), so a minor bump satisfies the policy there; demanding
-// that every breaking change take a 0.x spec to 1.0.0 would flag most
-// pre-release specs on every change.
-func majorBumped(base, revision semver) bool {
-	if base.major == 0 && revision.major == 0 {
-		return revision.minor > base.minor
-	}
-	return revision.major > base.major
-}
-
 // A change counts at the level it is reported at, which an override, a
 // disclaimer or an ignore file may have moved.
 func countBreakingChanges(changes checker.Changes) int {
