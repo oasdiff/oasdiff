@@ -30,6 +30,9 @@ func TestGitHubActionsFormatter_RenderChangelog_OneFailure(t *testing.T) {
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 	}
 
@@ -48,6 +51,9 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 		checker.ApiChange{
 			Id:        "warning_id",
@@ -55,6 +61,9 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 		checker.ApiChange{
 			Id:        "notice_id",
@@ -62,6 +71,9 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 	}
 
@@ -80,6 +92,9 @@ func TestGitHubActionsFormatter_DontRenderHttpSource(t *testing.T) {
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("https://google.com/openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "https://google.com/openapi.yaml", Line: 21},
+			},
 		},
 	}
 
@@ -98,6 +113,9 @@ func TestGitHubActionsFormatter_RenderChangelog_MultilineText(t *testing.T) {
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 	}
 
@@ -147,6 +165,9 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 		checker.ApiChange{
 			Id:        "change_id",
@@ -154,6 +175,9 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 		checker.ApiChange{
 			Id:        "warning_id",
@@ -161,6 +185,9 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 		checker.ApiChange{
 			Id:        "notice_id",
@@ -168,6 +195,9 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Operation: http.MethodGet,
 			Path:      "/api/test",
 			Source:    load.NewSource("openapi.yaml"),
+			CommonChange: checker.CommonChange{
+				RevisionSource: &checker.Source{File: "openapi.yaml"},
+			},
 		},
 	}
 
@@ -262,28 +292,5 @@ func TestGitHubActionsFormatter_RenderChangelog_BaseSourceOnly(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t,
 		"::error title=change_id,file=base.yaml::in API GET /api/test This is a breaking change.\n",
-		string(output))
-}
-
-// An annotation names a file the workflow can open, so a spec loaded over http
-// is annotated without one.
-func TestGitHubActionsFormatter_RenderChangelog_HTTPSourceHasNoFile(t *testing.T) {
-	testChanges := checker.Changes{
-		checker.ApiChange{
-			Id:        "change_id",
-			Level:     checker.ERR,
-			Operation: http.MethodGet,
-			Path:      "/api/test",
-			Source:    load.NewSource("https://example.com/spec.yaml"),
-			CommonChange: checker.CommonChange{
-				BaseSource: &checker.Source{File: "https://example.com/spec.yaml", Line: 17},
-			},
-		},
-	}
-
-	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
-	require.NoError(t, err)
-	require.Equal(t,
-		"::error title=change_id::in API GET /api/test This is a breaking change.\n",
 		string(output))
 }

@@ -53,8 +53,11 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 			if rev.Column != 0 {
 				params = append(params, "col="+strconv.Itoa(rev.Column))
 			}
-		} else if file := baseFile(change); file != "" {
-			params = append(params, "file="+escapeProperty(file))
+		} else if base := change.GetBaseSource(); base != nil && base.File != "" && !isHTTPSource(base.File) {
+			// A change the revision does not have, such as a removal. The
+			// position is left out: those line numbers are the base spec's,
+			// and the annotation renders against the revision.
+			params = append(params, "file="+escapeProperty(base.File))
 		}
 
 		fmt.Fprintf(&buf, "::%s %s::%s\n", githubActionsSeverity[change.GetLevel()], strings.Join(params, ","), getMessage(change, f.Localizer))
@@ -137,20 +140,6 @@ func getFindingMessage(finding Finding) string {
 
 func (f GitHubActionsFormatter) SupportedOutputs() []Output {
 	return []Output{OutputChangelog, OutputValidate}
-}
-
-// baseFile names the spec a change with no revision-side location is in,
-// which is a change the revision does not have, such as a removal. The
-// position is left out: those line numbers are the base spec's, and the
-// annotation renders against the revision.
-func baseFile(change checker.Change) string {
-	if base := change.GetBaseSource(); base != nil && base.File != "" && !isHTTPSource(base.File) {
-		return base.File
-	}
-	if source := change.GetSource(); source != "" && !isHTTPSource(source) {
-		return source
-	}
-	return ""
 }
 
 func isHTTPSource(file string) bool {
