@@ -140,6 +140,18 @@ func Test_FailOnMissingVersionBump_NotAvailableOnValidate(t *testing.T) {
 	require.Contains(t, stderr.String(), "MISSING-VERSION-BUMP is not one of the allowed values: ERR, WARN, or INFO")
 }
 
+// The version change carries the location of info.version all the way to the
+// text output.
+func Test_APIVersionChanged_TextOutputCarriesTheSource(t *testing.T) {
+	var stdout bytes.Buffer
+	code := internal.Run(
+		cmdToArgs("oasdiff changelog ../data/versioning/base.yaml ../data/versioning/revision_major_bump.yaml"),
+		&stdout, io.Discard)
+
+	require.Zero(t, code)
+	require.Contains(t, stdout.String(), "[api-version-changed] at ../data/versioning/revision_major_bump.yaml")
+}
+
 // The three ids are no longer checks, so a severity-levels file naming one of
 // them is rejected like any other unknown id rather than silently having no
 // effect.
