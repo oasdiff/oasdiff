@@ -27,7 +27,7 @@ const (
 // change (the value "123" is still valid text a string client reads), while
 // dropping a format a client parses -- the motivating case, Retry-After
 // string/date-time -> integer -- is breaking on the format axis.
-func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
 		// Only the simple schema serialization (the common case), where

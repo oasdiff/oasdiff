@@ -11,7 +11,7 @@ const (
 	ResponsePropertyMinPropertiesDecreasedId = "response-property-min-properties-decreased"
 )
 
-func ResponsePropertyMinPropertiesDecreasedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyMinPropertiesDecreasedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

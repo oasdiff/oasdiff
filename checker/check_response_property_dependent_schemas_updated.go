@@ -13,7 +13,7 @@ const (
 	ResponsePropertyDependentSchemaRemovedId = "response-property-dependent-schema-removed"
 )
 
-func ResponsePropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyDependentSchemasUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

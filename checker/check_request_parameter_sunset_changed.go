@@ -20,7 +20,7 @@ var requestParameterSunsetChangeIds = deprecation.SunsetChangeIds{
 	ChangedTooSmall:       RequestParameterSunsetDateChangedTooSmallId,
 }
 
-func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {

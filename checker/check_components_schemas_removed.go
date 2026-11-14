@@ -10,7 +10,7 @@ const (
 	ComponentSchemas    = "schemas"
 )
 
-func APIComponentsSchemaRemovedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func APIComponentsSchemaRemovedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	if diffReport.ComponentsDiff == nil {

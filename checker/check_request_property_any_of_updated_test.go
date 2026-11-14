@@ -155,7 +155,7 @@ func TestRequestBodyAnyOfMultiMediaTypeDetails(t *testing.T) {
 func TestRequestPropertyAnyOfNoPathsDiff(t *testing.T) {
 	config := &checker.Config{}
 	d := &diff.Diff{}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -171,7 +171,7 @@ func TestRequestPropertyAnyOfNoOperationsDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -193,7 +193,7 @@ func TestRequestPropertyAnyOfNoRequestBodyDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)
@@ -223,7 +223,7 @@ func TestRequestPropertyAnyOfNoSchemaDiff(t *testing.T) {
 			},
 		},
 	}
-	osm := &diff.OperationsSourcesMap{}
+	osm := diff.OperationsSourcesMap{}
 
 	errs := checker.RequestPropertyAnyOfUpdatedCheck(d, osm, config)
 	require.Len(t, errs, 0)

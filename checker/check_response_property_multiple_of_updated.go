@@ -15,7 +15,7 @@ const (
 	ResponsePropertyMultipleOfSpecializedId = "response-property-multiple-of-specialized"
 )
 
-func ResponsePropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

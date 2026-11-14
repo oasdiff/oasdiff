@@ -49,7 +49,7 @@ type ApiChange struct {
 }
 
 // NewApiChange creates a new ApiChange
-func NewApiChange(id string, config *Config, args []any, comment string, operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string) ApiChange {
+func NewApiChange(id string, config *Config, args []any, comment string, operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string) ApiChange {
 	return ApiChange{
 		Id:          id,
 		Level:       config.getLogLevel(id),
@@ -58,7 +58,7 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 		OperationId: operation.OperationID,
 		Operation:   method,
 		Path:        path,
-		Source:      (*operationsSources)[operation],
+		Source:      operationsSources.Source(operation),
 		CommonChange: CommonChange{
 			Attributes: getAttributes(config, operation),
 		},

@@ -60,11 +60,6 @@ type Diff struct {
 	SecurityContext *SecurityContext `json:"-" yaml:"-"`
 }
 
-// OperationsSourcesMap maps OpenAPI operations to the spec each was loaded
-// from. The value is the source itself, not its name, so a consumer can tell
-// a file from a url, a git revision or stdin.
-type OperationsSourcesMap map[*openapi3.Operation]*load.Source
-
 func newDiff() *Diff {
 	return &Diff{}
 }
@@ -96,7 +91,7 @@ Note that GetWithOperationsSourcesMap expects OpenAPI References (https://swagge
 References are normally resolved automatically when you load the spec.
 In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
-func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, *OperationsSourcesMap, error) {
+func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, OperationsSourcesMap, error) {
 	diff, err := getDiff(config, newState(), s1.Spec, s2.Spec)
 	if err != nil {
 		return nil, nil, err
@@ -111,10 +106,10 @@ func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, 
 		return nil, nil, err
 	}
 
-	operationsSources := *operationsSources1
-	maps.Copy(operationsSources, *operationsSources2)
+	operationsSources := operationsSources1
+	maps.Copy(operationsSources, operationsSources2)
 
-	return diff, &operationsSources, nil
+	return diff, operationsSources, nil
 }
 
 /*
@@ -130,7 +125,7 @@ Note that Get expects OpenAPI References (https://swagger.io/docs/specification/
 References are normally resolved automatically when you load the spec.
 In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
-func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSourcesMap, error) {
+func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, OperationsSourcesMap, error) {
 	state := newState()
 	result := newDiff()
 	var err error
@@ -155,9 +150,9 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSo
 		return nil, nil, nil
 	}
 
-	operationsSources := *operationsSources1
-	maps.Copy(operationsSources, *operationsSources2)
-	return result, &operationsSources, nil
+	operationsSources := operationsSources1
+	maps.Copy(operationsSources, operationsSources2)
+	return result, operationsSources, nil
 }
 
 // pathKey returns the key under which mergedPaths matches path: the path
@@ -170,7 +165,7 @@ func pathKey(path string, includePathParams bool) string {
 	return normalized
 }
 
-func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, *OperationsSourcesMap, error) {
+func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, OperationsSourcesMap, error) {
 	result := openapi3.NewPaths()
 	// Looking each path up in result with Paths.Find would scan every path
 	// added so far, which is quadratic in the number of paths.
@@ -227,7 +222,7 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 			}
 		}
 	}
-	return result, &operationsSources, nil
+	return result, operationsSources, nil
 }
 
 // copyPathItem returns a shallow copy of the path item.

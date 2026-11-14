@@ -21,7 +21,7 @@ type mediaTypeInfo struct {
 	schemaDiff       *diff.SchemaDiff
 
 	config            *Config
-	operationsSources *diff.OperationsSourcesMap
+	operationsSources diff.OperationsSourcesMap
 }
 
 // newChange returns an ApiChange with info's plumbing pre-filled, for the
@@ -171,7 +171,7 @@ func walkMediaTypeSchemas(mediaTypeDiff *diff.MediaTypeDiff, info mediaTypeInfo,
 // request-body media type.
 func walkModifiedRequestBodySchemas(
 	diffReport *diff.Diff,
-	operationsSources *diff.OperationsSourcesMap,
+	operationsSources diff.OperationsSourcesMap,
 	config *Config,
 	processor func(info mediaTypeInfo),
 ) {
@@ -209,7 +209,7 @@ func walkModifiedRequestBodySchemas(
 // response bodies, setting responseStatus on the info it passes.
 func walkModifiedResponseSchemas(
 	diffReport *diff.Diff,
-	operationsSources *diff.OperationsSourcesMap,
+	operationsSources diff.OperationsSourcesMap,
 	config *Config,
 	processor func(info mediaTypeInfo),
 ) {

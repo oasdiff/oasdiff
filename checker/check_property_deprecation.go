@@ -42,12 +42,12 @@ var responsePropertyDeprecationIds = deprecation.Ids{
 }
 
 // RequestPropertyDeprecationCheck detects deprecated properties in request bodies
-func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyDeprecationCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	return propertyDeprecationCheck(walkModifiedRequestBodySchemas, diffReport, operationsSources, config, requestPropertyDeprecationIds)
 }
 
 // ResponsePropertyDeprecationCheck detects deprecated properties in response bodies
-func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	return propertyDeprecationCheck(walkModifiedResponseSchemas, diffReport, operationsSources, config, responsePropertyDeprecationIds)
 }
 
@@ -55,9 +55,9 @@ func ResponsePropertyDeprecationCheck(diffReport *diff.Diff, operationsSources *
 // stands in the deprecation process. The ids decide which side it reports,
 // request or response, so the two checks differ only in their walker and ids.
 func propertyDeprecationCheck(
-	walk func(*diff.Diff, *diff.OperationsSourcesMap, *Config, func(mediaTypeInfo)),
+	walk func(*diff.Diff, diff.OperationsSourcesMap, *Config, func(mediaTypeInfo)),
 	diffReport *diff.Diff,
-	operationsSources *diff.OperationsSourcesMap,
+	operationsSources diff.OperationsSourcesMap,
 	config *Config,
 	ids deprecation.Ids,
 ) Changes {

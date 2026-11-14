@@ -21,7 +21,7 @@ const (
 	ResponsePropertyDiscriminatorMappingChangedId      = "response-property-discriminator-mapping-changed"
 )
 
-func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseDiscriminatorUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

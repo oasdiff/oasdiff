@@ -15,7 +15,7 @@ const (
 	ResponseNonSuccessStatusAddedId   = "response-non-success-status-added"
 )
 
-func ResponseSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	success := func(status int) bool {
 		return status >= 200 && status <= 299
 	}
@@ -23,7 +23,7 @@ func ResponseSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSources 
 	return responseStatusUpdated(diffReport, operationsSources, config, success, ResponseSuccessStatusRemovedId)
 }
 
-func ResponseNonSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseNonSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	notSuccess := func(status int) bool {
 		return status < 200 || status > 299
 	}
@@ -31,7 +31,7 @@ func ResponseNonSuccessStatusUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	return responseStatusUpdated(diffReport, operationsSources, config, notSuccess, ResponseNonSuccessStatusRemovedId)
 }
 
-func responseStatusUpdated(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, filter func(int) bool, id string) Changes {
+func responseStatusUpdated(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config, filter func(int) bool, id string) Changes {
 	result := make(Changes, 0)
 	if diffReport.PathsDiff == nil {
 		return result

@@ -9,7 +9,7 @@ import (
 
 // CheckBackwardCompatibility runs the checks and returns the changes with
 // level WARN or ERR; see CheckBackwardCompatibilityUntilLevel.
-func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
+func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap) Changes {
 	return CheckBackwardCompatibilityUntilLevel(config, diffReport, operationsSources, WARN)
 }
 
@@ -18,7 +18,7 @@ func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operation
 // recognized schema transition are dropped, so each transition is reported
 // only by its own finding (see transition_claims.go).
 // It does not mutate the caller's diffReport; cloneDiffForCheck isolates the pipeline's mutation surface.
-func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, level Level) Changes {
+func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, level Level) Changes {
 	result := make(Changes, 0)
 
 	if diffReport == nil {

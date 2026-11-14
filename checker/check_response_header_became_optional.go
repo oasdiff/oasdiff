@@ -9,7 +9,7 @@ const (
 	ResponseHeaderBecameOptionalId = "response-header-became-optional"
 )
 
-func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
 		requiredDiff := h.headerDiff.RequiredDiff

@@ -11,7 +11,7 @@ const (
 	RequestBodyEnumValueAddedId = "request-body-enum-value-added"
 )
 
-func RequestBodyEnumValueAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestBodyEnumValueAddedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

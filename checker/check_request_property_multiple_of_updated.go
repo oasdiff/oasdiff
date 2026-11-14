@@ -37,7 +37,7 @@ func isIntegerMultiple(a, b float64) bool {
 	return new(big.Rat).Quo(ratioA, ratioB).IsInt()
 }
 
-func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyMultipleOfUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
