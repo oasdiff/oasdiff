@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +16,6 @@ func TestRequestParameterBecameNotEnum(t *testing.T) {
 			Args:        []any{"query", "status"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource(enumRemovedEntirelyRevision),
 			OperationId: "listPets",
 		},
 		{
@@ -25,7 +23,6 @@ func TestRequestParameterBecameNotEnum(t *testing.T) {
 			Args:        []any{"origin", "query", "filter"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource(enumRemovedEntirelyRevision),
 			OperationId: "listPets",
 		},
 	}, changes)

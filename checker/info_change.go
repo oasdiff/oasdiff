@@ -78,33 +78,6 @@ func (InfoChange) GetPath() string {
 	return ""
 }
 
-// source is where the change is reported. A side that does not have the
-// element has no location, so the order decides only a change that is in both,
-// and there the revision is the side being reviewed.
-func (c InfoChange) source() *Source {
-	if c.RevisionSource != nil {
-		return c.RevisionSource
-	}
-	return c.BaseSource
-}
-
-func (c InfoChange) GetSource() string {
-	if source := c.source(); source != nil {
-		return source.File
-	}
-	return ""
-}
-
-// at renders the "at <file>" segment of an error line, empty when the change
-// has no location.
-func (c InfoChange) at(l Localizer) string {
-	file := c.GetSource()
-	if file == "" {
-		return ""
-	}
-	return fmt.Sprintf(" %s %s", l("at"), file)
-}
-
 func (c InfoChange) SingleLineError(l Localizer, colorMode ColorMode) string {
 	const format = "%s%s, %s info %s [%s]. %s"
 

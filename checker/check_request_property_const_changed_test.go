@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequestBodyConstChanged(t *testing.T) {
 		Args:        []any{"text/plain", "FixedValue", "NewFixedValue"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_body_const_changed_revision.yaml"),
 		OperationId: "createProduct",
 	}, errs)
 }
@@ -46,7 +44,6 @@ func TestRequestPropertyConstChanged(t *testing.T) {
 		Args:        []any{"status", "active", "inactive"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_body_const_changed_base.yaml"),
 		OperationId: "createProduct",
 	}, errs)
 }
@@ -69,7 +66,6 @@ func TestRequestBodyConstAdded(t *testing.T) {
 		Args:        []any{"text/plain", "FixedValue"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_body_const_changed_base.yaml"),
 		OperationId: "createProduct",
 		Details:     "(media type: text/plain)",
 	}, {
@@ -77,7 +73,6 @@ func TestRequestBodyConstAdded(t *testing.T) {
 		Args:        []any{"status", "active"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_body_const_changed_base.yaml"),
 		OperationId: "createProduct",
 		Details:     "(media type: application/json)",
 	}}, errs)
@@ -101,7 +96,6 @@ func TestRequestBodyConstRemoved(t *testing.T) {
 		Args:        []any{"text/plain", "FixedValue"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_body_const_changed_base.yaml"),
 		OperationId: "createProduct",
 		Details:     "(media type: text/plain)",
 	}, {
@@ -109,7 +103,6 @@ func TestRequestBodyConstRemoved(t *testing.T) {
 		Args:        []any{"status", "active"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_body_const_changed_base.yaml"),
 		OperationId: "createProduct",
 		Details:     "(media type: application/json)",
 	}}, errs)

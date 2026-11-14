@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +24,6 @@ func TestRequestBodyMinItemsIncreased(t *testing.T) {
 		Args:        []any{uint64(20)},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_min_items_increased_revision.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }

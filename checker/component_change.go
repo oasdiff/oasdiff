@@ -78,10 +78,6 @@ func (ComponentChange) GetPath() string {
 	return ""
 }
 
-func (c ComponentChange) GetSource() string {
-	return ""
-}
-
 func (c ComponentChange) SingleLineError(l Localizer, colorMode ColorMode) string {
 	const format = "%s, %s components/%s %s [%s]. %s"
 

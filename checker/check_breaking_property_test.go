@@ -6,7 +6,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -383,7 +382,6 @@ func TestBreaking_ReqBodyDeleteRequiredProperty2(t *testing.T) {
 		Args:      []any{"roleAssignments/items/role"},
 		Operation: "POST",
 		Path:      "/api/roleMappings",
-		Source:    load.NewSource("../data/required-properties/request-property-items-2.yaml"),
 	}, requireChange(t, errs, checker.RequestPropertyRemovedId))
 }
 

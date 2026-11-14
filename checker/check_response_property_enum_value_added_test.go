@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestResponsePropertyEnumValueAdded(t *testing.T) {
 		Comment:     checker.ResponsePropertyEnumValueAddedId + "-comment",
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
@@ -51,7 +49,6 @@ func TestResponseWriteOnlyPropertyEnumValueAdded(t *testing.T) {
 		Args:        []any{"Test", "data/writeOnlyEnum", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +24,6 @@ func TestRequestParameterMinLengthIncreasedCheck(t *testing.T) {
 		Args:        []any{"query", "name", uint64(3), uint64(5)},
 		Operation:   "POST",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_min_length_increased_revision.yaml"),
 		OperationId: "createTest",
 	}, errs)
 }
@@ -46,7 +44,6 @@ func TestRequestParameterMinLengthDecreasedCheck(t *testing.T) {
 		Args:        []any{"query", "name", uint64(5), uint64(3)},
 		Operation:   "POST",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_min_length_increased_base.yaml"),
 		OperationId: "createTest",
 	}, errs)
 }

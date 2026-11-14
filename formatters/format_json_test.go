@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -110,8 +109,7 @@ func TestJsonFormatter_RenderChangelog_WithSources(t *testing.T) {
 			Id:        "change_id", // Use ID that MockLocalizer recognizes
 			Level:     checker.ERR,
 			Operation: "GET",
-			Path:      "/test",
-			Source:    &load.Source{}, // Need this to avoid nil pointer dereference
+			Path:      "/test", // Need this to avoid nil pointer dereference
 			CommonChange: checker.CommonChange{
 				BaseSource:     &checker.Source{File: "base.yaml", Line: 10, Column: 5},
 				RevisionSource: nil, // the API was removed, so it has no revision source

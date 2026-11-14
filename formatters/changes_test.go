@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestNewChanges_FingerprintFormat(t *testing.T) {
 		Level:     checker.ERR,
 		Operation: "GET",
 		Path:      "/users",
-		Source:    &load.Source{},
 		Args:      []any{"name", 42},
 	})
 	require.Equal(t, "39d9aa2ed55d", got)
@@ -39,12 +37,10 @@ func TestNewChanges_FingerprintFormat(t *testing.T) {
 // same operation with different parameters must not collide.
 func TestNewChanges_FingerprintDistinguishesArgs(t *testing.T) {
 	a := fingerprintOf(checker.ApiChange{
-		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
-		Source: &load.Source{}, Args: []any{"alpha"},
+		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u", Args: []any{"alpha"},
 	})
 	b := fingerprintOf(checker.ApiChange{
-		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
-		Source: &load.Source{}, Args: []any{"beta"},
+		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u", Args: []any{"beta"},
 	})
 	require.NotEqual(t, a, b)
 }
@@ -60,8 +56,7 @@ func TestNewChanges_FingerprintDistinguishesArgs(t *testing.T) {
 // Localizer gives us a tighter, locale-only test.
 func TestNewChanges_FingerprintIndependentOfLocale(t *testing.T) {
 	change := checker.ApiChange{
-		Id: "change_id", Level: checker.ERR, Operation: "POST", Path: "/x",
-		Source: &load.Source{}, Args: []any{"v1"},
+		Id: "change_id", Level: checker.ERR, Operation: "POST", Path: "/x", Args: []any{"v1"},
 	}
 	english := formatters.NewChanges(checker.Changes{change}, MockLocalizer)[0]
 	other := formatters.NewChanges(checker.Changes{change}, func(originalKey string, args ...any) string {
@@ -78,15 +73,13 @@ func TestNewChanges_FingerprintIndependentOfLocale(t *testing.T) {
 // (the carry-forward use case in oasdiff-service/internal/pr_comment.go).
 func TestNewChanges_FingerprintIndependentOfSourceLocation(t *testing.T) {
 	a := fingerprintOf(checker.ApiChange{
-		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
-		Source: &load.Source{}, Args: []any{"p"},
+		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u", Args: []any{"p"},
 		CommonChange: checker.CommonChange{
 			BaseSource: &checker.Source{File: "base.yaml", Line: 10, Column: 5},
 		},
 	})
 	b := fingerprintOf(checker.ApiChange{
-		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
-		Source: &load.Source{}, Args: []any{"p"},
+		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u", Args: []any{"p"},
 		CommonChange: checker.CommonChange{
 			BaseSource: &checker.Source{File: "base.yaml", Line: 99, Column: 5},
 		},
@@ -98,7 +91,6 @@ func TestNewChanges_FingerprintIndependentOfSourceLocation(t *testing.T) {
 func TestNewChanges_FingerprintNoArgs(t *testing.T) {
 	got := fingerprintOf(checker.ApiChange{
 		Id: "change_id", Level: checker.ERR, Operation: "GET", Path: "/u",
-		Source: &load.Source{},
 	})
 	require.Len(t, got, 12)
 }
@@ -107,7 +99,7 @@ func TestNewChanges_FingerprintNoArgs(t *testing.T) {
 // without parsing the text.
 func TestNewChanges_SharedSchema(t *testing.T) {
 	shared := &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "userId"}}
-	change := checker.ApiChange{Id: "change_id", Level: checker.INFO, Operation: "GET", Path: "/orders", Source: &load.Source{}}
+	change := checker.ApiChange{Id: "change_id", Level: checker.INFO, Operation: "GET", Path: "/orders"}
 
 	changes := formatters.NewChanges(checker.Changes{change.WithSharedSchema(shared), change}, MockLocalizer)
 
@@ -118,7 +110,7 @@ func TestNewChanges_SharedSchema(t *testing.T) {
 // The shared schema is context for the reader, not part of the change's
 // identity, so attaching it leaves stored approvals matching.
 func TestNewChanges_SharedSchemaKeepsFingerprint(t *testing.T) {
-	change := checker.ApiChange{Id: "change_id", Level: checker.INFO, Operation: "GET", Path: "/orders", Source: &load.Source{}, Args: []any{"customerId"}}
+	change := checker.ApiChange{Id: "change_id", Level: checker.INFO, Operation: "GET", Path: "/orders", Args: []any{"customerId"}}
 	shared := &checker.SharedSchema{Name: "Id", Properties: []string{"customerId", "userId"}}
 
 	require.Equal(t, fingerprintOf(change), fingerprintOf(change.WithSharedSchema(shared)))

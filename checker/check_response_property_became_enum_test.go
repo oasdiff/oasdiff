@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +16,6 @@ func TestResponsePropertyBecameEnum(t *testing.T) {
 			Args:        []any{"status", "200"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource(enumRemovedEntirelyBase),
 			OperationId: "createPet",
 		},
 		{
@@ -25,7 +23,6 @@ func TestResponsePropertyBecameEnum(t *testing.T) {
 			Args:        []any{"secret", "200"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource(enumRemovedEntirelyBase),
 			OperationId: "createPet",
 		},
 	}, changes)

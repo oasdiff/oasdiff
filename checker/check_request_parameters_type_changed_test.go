@@ -6,7 +6,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestRequestPathParamTypeChanged(t *testing.T) {
 		Args:        []any{"path", "groupId", "type", "string", "integer"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -49,7 +47,6 @@ func TestRequestQueryParamTypeChanged(t *testing.T) {
 		Args:        []any{"query", "token", "type", "string", "integer"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -71,7 +68,6 @@ func TestRequestQueryHeaderTypeChanged(t *testing.T) {
 		Args:        []any{"header", "X-Request-ID", "type", "string", "integer"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -93,7 +89,6 @@ func TestRequestPathParamFormatChanged(t *testing.T) {
 		Args:        []any{"path", "groupId", "format", "none", "uuid"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -115,7 +110,6 @@ func TestRequestQueryParamFormatChanged(t *testing.T) {
 		Args:        []any{"query", "token", "format", "uuid", "uri"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -137,7 +131,6 @@ func TestRequestQueryHeaderFormatChanged(t *testing.T) {
 		Args:        []any{"header", "X-Request-ID", "format", "uuid", "uri"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -160,7 +153,6 @@ func TestRequestPathParamTypeAddString(t *testing.T) {
 		Args:        []any{"path", "groupId", "type", "integer", "integer, string"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -183,7 +175,6 @@ func TestRequestPathParamTypeIntegerToNumber(t *testing.T) {
 		Args:        []any{"path", "groupId", "type", "integer, string", "number, string"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -332,7 +323,6 @@ func TestRequestPathParamFormatRemoved(t *testing.T) {
 		Args:        []any{"path", "groupId", "format", "uuid", "none"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_type_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

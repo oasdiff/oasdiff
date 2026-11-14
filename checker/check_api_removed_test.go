@@ -242,7 +242,7 @@ func TestBreaking_RemoveEndpointWithInvalidSunset(t *testing.T) {
 	require.NotEmpty(t, errs)
 	requireSingleChange(t, errs, checker.APIPathSunsetParseId)
 	require.Equal(t, "sunset date doesn't conform with RFC3339: `\"invalid-date\"`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/deprecated-invalid.yaml", errs[0].GetSource())
+	require.Equal(t, "../data/deprecation/deprecated-invalid.yaml", errs[0].GetBaseSource().File)
 	require.Equal(t, location.NewSource("../data/deprecation/deprecated-invalid.yaml", 11, 5).WithEnd(16, 26), errs[0].GetBaseSource())
 	require.Empty(t, errs[0].GetRevisionSource())
 }
