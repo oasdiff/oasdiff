@@ -26,10 +26,6 @@ JSON and YAML specs both carry source locations. A JSON spec reports the line an
 
 Positions are only as fine-grained as the document's line breaks. A pretty-printed JSON spec, one element per line, reports each change on the element's own line, like a YAML spec. A minified spec, the whole document on one line, reports every change on line 1 with a column that is still exact, so GitHub Actions annotations all land on the first line and a side-by-side review shows the whole document as the block for every change. Run the spec through `jq .` before comparing it, which is the pretty-printed form.
 
-### Changes with no line to report
-
-Some changes are about the document rather than about an element in it, so there is no line to point at. `api-version-not-bumped` is the clearest case: it compares the two documents, and both `baseSource` and `revisionSource` are omitted.
-
 ### Changes located at the enclosing element
 
 A change oasdiff cannot tie to one field reports the nearest enclosing element that has a location, which is the schema, parameter or operation containing it. The line is then the start of that element rather than the line that changed.

@@ -170,13 +170,7 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectWidens, nil, "security.*.*:remove"),
 		newBackwardCompatibilityRule(APISecurityAnonymousAccessRemovedId, ERR, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectNarrows, nil, "paths.*.*.security.*:add,remove"),
 		newBackwardCompatibilityRule(APISecurityAnonymousAccessAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectWidens, nil, "paths.*.*.security.*:add,remove"),
-		// Versioning policy: run as part of CheckBackwardCompatibility, after
-		// the checks, since it judges info.version against what they found.
-		// INFO by default so it is quiet for teams that don't version with
-		// semver; raise with --severity-levels to enforce.
-		newBackwardCompatibilityRule(APIVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
-		newBackwardCompatibilityRule(APIVersionDecreasedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
-		newBackwardCompatibilityRule(APIMajorVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
+		newBackwardCompatibilityRule(APIVersionChangedId, INFO, APIVersionUpdatedCheck, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
 		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:add,change"),
 		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, AreaPaths, KindLifecycle, EffectNone, nil, "paths.*.*.x-*:add,change"),

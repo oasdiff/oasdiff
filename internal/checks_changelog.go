@@ -75,7 +75,7 @@ func checkKnownId(cmd *cobra.Command) error {
 	return nil
 }
 
-func runChecksChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runChecksChangelog(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 	return false, outputChangelogRules(stdout, flags, checker.GetAllRules())
 }
 

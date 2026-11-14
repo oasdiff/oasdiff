@@ -540,6 +540,16 @@ func SourceFromField(origin *openapi3.Origin, field string) *Source {
 	return nil
 }
 
+// InfoFieldSource returns the location of a named field of the info object,
+// where a change to the document's own metadata is reported. Returns nil
+// without origin data.
+func InfoFieldSource(info *openapi3.Info, field string) *Source {
+	if info == nil {
+		return nil
+	}
+	return SourceFromField(info.Origin, field)
+}
+
 // StabilityFieldSource returns the location of the x-stability-level field on
 // the element whose origin is given (an operation or a property schema),
 // falling back to the element's own location. op supplies the file for the

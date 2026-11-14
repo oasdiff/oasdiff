@@ -3,11 +3,11 @@ package internal
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
+	"github.com/oasdiff/oasdiff/versioning"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +26,7 @@ func getChangelogCmd() *cobra.Command {
 	addCommonDiffFlags(&cmd)
 	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
-	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
+	enumWithOptions(&cmd, newEnumValue(GetFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), LevelInfo), "level", "", "output errors with this level or higher")
 	addOpenFlags(&cmd, "changelog")
 
@@ -37,17 +37,17 @@ func enumWithOptions(cmd *cobra.Command, value enumVal, name, shorthand, usage s
 	cmd.PersistentFlags().VarP(value, name, shorthand, usage+": "+value.listOf())
 }
 
-func runChangelog(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runChangelog(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError) {
 
 	level, err := checker.NewLevel(flags.getLevel())
 	if err != nil {
 		return false, getErrInvalidFlags(fmt.Errorf("invalid level value: %q", flags.getLevel()))
 	}
 
-	return getChangelog(flags, stdout, level, false)
+	return getChangelog(flags, stdout, stderr, level, false)
 }
 
-func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
+func getChangelog(flags *Flags, stdout, stderr io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
 
 	diffResult, returnErr := calcDiff(flags)
 	if returnErr != nil {
@@ -86,24 +86,35 @@ func getChangelog(flags *Flags, stdout io.Writer, level checker.Level, isBreakin
 	}
 
 	if flags.getOpen() {
-		if err := uploadAndOpen(flags, os.Stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty()); err != nil {
+		if err := uploadAndOpen(flags, stderr, isBreaking, errs, diffResult.baseSpecs, diffResult.revSpecs, diffResult.diffReport.Empty()); err != nil {
 			// --open is additive: an upload error, unsupported source, or
 			// composed mode must not change the exit code or pre-empt --fail-on.
 			// Warn to stderr (not stdout, so it never corrupts piped --format
 			// json/yaml output) and continue.
-			_, _ = fmt.Fprintf(os.Stderr, "warning: could not open the side-by-side review: %v\n", err)
+			_, _ = fmt.Fprintf(stderr, "warning: could not open the side-by-side review: %v\n", err)
 		}
 	}
 
-	if flags.getFailOn() != "" {
-		level, returnErr := flags.failOnLevel()
-		if returnErr != nil {
-			return false, returnErr
-		}
-		return errs.HasLevelOrHigher(level), nil
+	// the policy and a severity are two values of --fail-on, so the caller asked
+	// for one or the other, never both
+	if flags.getFailOn() == FailOnMissingVersionBump {
+		verdict := versioning.Check(diffResult.diffReport, errs)
+		// stderr, not stdout: the verdict is not a change, and stdout carries
+		// the report, which may be a json or yaml document.
+		_, _ = fmt.Fprintln(stderr, versioningPolicyLine(verdict))
+		return failOnVersionBump(verdict), nil
 	}
 
-	return false, nil
+	failOn, returnErr := flags.failOnLevel()
+	if returnErr != nil {
+		return false, returnErr
+	}
+
+	if failOn == checker.NONE {
+		return false, nil
+	}
+
+	return errs.HasLevelOrHigher(failOn), nil
 }
 
 func filterIgnored(errs checker.Changes, warnIgnoreFile string, errIgnoreFile string, l checker.Localizer) (checker.Changes, *ReturnError) {

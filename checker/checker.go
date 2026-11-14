@@ -47,11 +47,6 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	result = capByGuards(config, result)
 	result = capByDisclaimers(config, result)
 
-	// The versioning policy judges info.version against what the checks found,
-	// so it runs after them, and before the level filter so it sees changes of
-	// every level.
-	result = applyVersioningPolicy(config, diffReport, result)
-
 	filteredResult := make(Changes, 0)
 	for _, change := range result {
 		if change.GetLevel() >= level {

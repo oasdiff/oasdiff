@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/TwiN/go-color"
+	"github.com/oasdiff/oasdiff/load"
 )
 
 // InfoChange represents a change in the Info Section: https://swagger.io/specification/#info-object
@@ -78,45 +79,84 @@ func (InfoChange) GetPath() string {
 	return ""
 }
 
-func (InfoChange) GetSource() string {
+// source is where the change is reported. A side that does not have the
+// element has no location, so the order decides only a change that is in both,
+// and there the revision is the side being reviewed.
+func (c InfoChange) source() *Source {
+	if c.RevisionSource != nil {
+		return c.RevisionSource
+	}
+	return c.BaseSource
+}
+
+func (c InfoChange) GetSource() string {
+	if source := c.source(); source != nil {
+		return source.File
+	}
 	return ""
 }
 
-func (InfoChange) GetSourceFile() string {
-	return ""
+func (c InfoChange) GetSourceFile() string {
+	file := c.GetSource()
+	if file == "" || !load.NewSource(file).IsFile() {
+		return ""
+	}
+	return file
 }
 
-func (InfoChange) GetSourceLine() int {
+func (c InfoChange) GetSourceLine() int {
+	if source := c.source(); source != nil {
+		return source.Line
+	}
 	return 0
 }
 
-func (InfoChange) GetSourceLineEnd() int {
+func (c InfoChange) GetSourceLineEnd() int {
+	if source := c.source(); source != nil {
+		return source.EndLine
+	}
 	return 0
 }
 
-func (InfoChange) GetSourceColumn() int {
+func (c InfoChange) GetSourceColumn() int {
+	if source := c.source(); source != nil {
+		return source.Column
+	}
 	return 0
 }
 
-func (InfoChange) GetSourceColumnEnd() int {
+func (c InfoChange) GetSourceColumnEnd() int {
+	if source := c.source(); source != nil {
+		return source.EndColumn
+	}
 	return 0
+}
+
+// at renders the "at <file>" segment of an error line, empty when the change
+// has no location.
+func (c InfoChange) at(l Localizer) string {
+	file := c.GetSource()
+	if file == "" {
+		return ""
+	}
+	return fmt.Sprintf(" %s %s", l("at"), file)
 }
 
 func (c InfoChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s, %s info %s [%s]. %s"
+	const format = "%s%s, %s info %s [%s]. %s"
 
 	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), l("in"), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
+		return fmt.Sprintf(format, c.Level.PrettyString(), c.at(l), l("in"), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
 	}
-	return fmt.Sprintf(format, c.Level.String(), l("in"), c.GetUncolorizedText(l), c.Id, c.GetComment(l))
+	return fmt.Sprintf(format, c.Level.String(), c.at(l), l("in"), c.GetUncolorizedText(l), c.Id, c.GetComment(l))
 }
 
 func (c InfoChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s]\n\t%s info\n\t\t%s%s"
+	const format = "%s\t[%s]%s\n\t%s info\n\t\t%s%s"
 
 	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("in"), c.GetText(l), multiLineComment(c.GetComment(l)))
+		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), c.at(l), l("in"), c.GetText(l), multiLineComment(c.GetComment(l)))
 	}
 
-	return fmt.Sprintf(format, c.Level.String(), c.Id, l("in"), c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
+	return fmt.Sprintf(format, c.Level.String(), c.Id, c.at(l), l("in"), c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
 }

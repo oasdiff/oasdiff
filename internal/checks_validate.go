@@ -44,7 +44,7 @@ func addChecksValidateFlags(cmd *cobra.Command) {
 	addChecksSeverityFlag(cmd)
 }
 
-func runChecksValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runChecksValidate(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 	return false, outputValidateRules(stdout, flags)
 }
 

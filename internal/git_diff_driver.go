@@ -92,7 +92,7 @@ func runGitDiffDriver(cmd *cobra.Command, args []string) error {
 
 	cmd.Root().SilenceUsage = true
 
-	if _, returnErr := runChangelog(flags, cmd.OutOrStdout()); returnErr != nil {
+	if _, returnErr := runChangelog(flags, cmd.OutOrStdout(), cmd.ErrOrStderr()); returnErr != nil {
 		// Same exit-code-zero discipline as above. Print the error in-line so
 		// the user sees it as part of git's diff output.
 		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "oasdiff: %s\n", returnErr)

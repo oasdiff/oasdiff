@@ -98,7 +98,7 @@ func TestViper_InvalidFailOn(t *testing.T) {
 
 	cmd := cobra.Command{}
 
-	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid fail-on \"invalid\", allowed values: ERR, WARN, INFO")
+	require.EqualError(t, internal.RunViper(&cmd, v), "failed to load config file: invalid fail-on \"invalid\", allowed values: ERR, WARN, INFO, MISSING-VERSION-BUMP")
 }
 
 func TestViper_InvalidLevel(t *testing.T) {

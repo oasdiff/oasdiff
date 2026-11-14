@@ -235,7 +235,7 @@ func validateViperConfig(v IViper) error {
 		return err
 	}
 
-	if err := validateString(GetSupportedLevels(), config.FailOn, "fail-on"); err != nil {
+	if err := validateString(GetFailOnValues(), config.FailOn, "fail-on"); err != nil {
 		return err
 	}
 
