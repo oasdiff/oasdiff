@@ -6,6 +6,17 @@ import (
 	"github.com/oasdiff/oasdiff/load"
 )
 
+// specFile names the spec an operation was loaded from, for a location that
+// origin data does not place in a file. A spec read from stdin has no file to
+// name, so it gets none.
+func specFile(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation) string {
+	source := (*operationsSources)[operation]
+	if source.IsStdin() {
+		return ""
+	}
+	return source.DisplayPath()
+}
+
 // displayFilePath strips any git revision prefix from a file path.
 // e.g. "HEAD:openapi.yaml" → "openapi.yaml", "openapi.yaml" → "openapi.yaml"
 func displayFilePath(file string) string {
@@ -39,12 +50,12 @@ func (s *Source) WithEnd(endLine, endColumn int) *Source {
 
 func NewSourceFromOrigin(operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, origin *openapi3.Origin) *Source {
 	if origin == nil || origin.Key == nil {
-		return &Source{File: (*operationsSources)[operation]}
+		return &Source{File: specFile(operationsSources, operation)}
 	}
 
 	file := displayFilePath(origin.Key.File)
 	if file == "" {
-		file = (*operationsSources)[operation]
+		file = specFile(operationsSources, operation)
 	}
 
 	return &Source{
@@ -64,7 +75,7 @@ func NewSourceFromField(operationsSources *diff.OperationsSourcesMap, operation 
 	if location, ok := origin.Fields.Lookup(field); ok {
 		file := displayFilePath(location.File)
 		if file == "" {
-			file = (*operationsSources)[operation]
+			file = specFile(operationsSources, operation)
 		}
 		return &Source{
 			File:      file,
@@ -115,7 +126,7 @@ func NewSourceFromSequenceItem(operationsSources *diff.OperationsSourcesMap, ope
 		if item.Name == value {
 			file := displayFilePath(item.File)
 			if file == "" {
-				file = (*operationsSources)[operation]
+				file = specFile(operationsSources, operation)
 			}
 			return &Source{
 				File:      file,
@@ -366,7 +377,7 @@ func subschemaSource(operationsSources *diff.OperationsSourcesMap, operation *op
 
 	file := displayFilePath(origin.Key.File)
 	if file == "" {
-		file = (*operationsSources)[operation]
+		file = specFile(operationsSources, operation)
 	}
 
 	return &Source{

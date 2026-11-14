@@ -6,6 +6,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,7 @@ func TestSchemaSources(t *testing.T) {
 			Key: &openapi3.Location{File: "spec.yaml", Line: 1, Column: 1},
 		},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	baseSchema := &openapi3.Schema{
@@ -52,7 +53,7 @@ func TestSchemaSources_NoOrigin_FallsBackToOperation(t *testing.T) {
 			Key: &openapi3.Location{File: "revision.yaml", Line: 5, Column: 1},
 		},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// Schema without origin data
@@ -76,7 +77,7 @@ func TestSchemaSources_NilDiff_FallsBackToOperation(t *testing.T) {
 			Key: &openapi3.Location{File: "revision.yaml", Line: 5, Column: 1},
 		},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	baseSource, revisionSource := location.SchemaSources(&sources, operationItem, nil)
@@ -93,7 +94,7 @@ func TestParameterSources(t *testing.T) {
 			Key: &openapi3.Location{File: "spec.yaml", Line: 1, Column: 1},
 		},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	baseParam := &openapi3.Parameter{
@@ -124,7 +125,7 @@ func TestResponseSources(t *testing.T) {
 			Key: &openapi3.Location{File: "spec.yaml", Line: 1, Column: 1},
 		},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	baseResp := &openapi3.Response{
@@ -155,7 +156,7 @@ func TestSchemaFieldSources(t *testing.T) {
 			Key: &openapi3.Location{File: "spec.yaml", Line: 1, Column: 1},
 		},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	baseSchema := &openapi3.Schema{
@@ -188,9 +189,19 @@ func TestSchemaFieldSources(t *testing.T) {
 	require.Nil(t, revisionSource)
 }
 
+// A spec read from stdin has no file, so a location that falls back to the
+// spec gets no file name rather than the word oasdiff displays for stdin.
+func TestNewSourceFromOrigin_StdinHasNoFile(t *testing.T) {
+	op := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{op: load.NewSource("-")}
+
+	source := location.NewSourceFromOrigin(&sources, op, nil)
+	require.Empty(t, source.File)
+}
+
 func TestNewSourceFromOrigin_StripsGitRevisionPrefix(t *testing.T) {
 	op := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
+	sources := diff.OperationsSourcesMap{op: load.NewFileSource("openapi.yaml")}
 	origin := &openapi3.Origin{
 		Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 10, Column: 5},
 	}
@@ -203,7 +214,7 @@ func TestNewSourceFromOrigin_StripsGitRevisionPrefix(t *testing.T) {
 
 func TestNewSourceFromField_StripsGitRevisionPrefix(t *testing.T) {
 	op := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
+	sources := diff.OperationsSourcesMap{op: load.NewFileSource("openapi.yaml")}
 	origin := &openapi3.Origin{
 		Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 1, Column: 1},
 		Fields: openapi3.FieldLocations{
@@ -239,7 +250,7 @@ func TestInfoFieldSource(t *testing.T) {
 
 func TestNewSourceFromSequenceItem_StripsGitRevisionPrefix(t *testing.T) {
 	op := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
+	sources := diff.OperationsSourcesMap{op: load.NewFileSource("openapi.yaml")}
 	origin := &openapi3.Origin{
 		Sequences: map[string][]openapi3.Location{
 			"type": {{File: "HEAD:openapi.yaml", Line: 4, Column: 11, Name: "string"}},
@@ -255,7 +266,7 @@ func TestNewSourceFromSequenceItem_StripsGitRevisionPrefix(t *testing.T) {
 func TestSubschemaSources_AllOf_Added_Inline(t *testing.T) {
 	baseOp := &openapi3.Operation{}
 	revisionOp := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// Inline subschemas: SchemaRef.Origin points to the inline definition
@@ -295,7 +306,7 @@ func TestSubschemaSources_AllOf_Added_Inline(t *testing.T) {
 func TestSubschemaSources_AllOf_Added_Ref(t *testing.T) {
 	baseOp := &openapi3.Operation{}
 	revisionOp := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// $ref subschemas: SchemaRef.Origin points to the $ref line in the allOf array;
@@ -356,7 +367,7 @@ func TestSubschemaSources_AllOf_Added_Ref(t *testing.T) {
 func TestSubschemaSources_OneOf_Deleted(t *testing.T) {
 	baseOp := &openapi3.Operation{}
 	revisionOp := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// Base schema has 3 oneOf subschemas; the 3rd is deleted
@@ -396,7 +407,7 @@ func TestSubschemaSources_OneOf_Deleted(t *testing.T) {
 func TestSubschemaSources_AnyOf_NoOrigin_FallsBack(t *testing.T) {
 	baseOp := &openapi3.Operation{}
 	revisionOp := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// Subschemas have no Origin — should fall back to field-level source
@@ -438,7 +449,7 @@ func TestSubschemaSources_NilSchemaDiff(t *testing.T) {
 	revisionOp := &openapi3.Operation{
 		Origin: &openapi3.Origin{Key: &openapi3.Location{File: "revision.yaml", Line: 5, Column: 1}},
 	}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	// Nil schemaDiff falls back to operation sources
@@ -452,7 +463,7 @@ func TestSubschemaSources_NilSchemaDiff(t *testing.T) {
 func TestSubschemaSources_InvalidField(t *testing.T) {
 	baseOp := &openapi3.Operation{}
 	revisionOp := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	revisionSchema := &openapi3.Schema{
@@ -480,7 +491,7 @@ func TestSubschemaSources_InvalidField(t *testing.T) {
 func TestSubschemaSources_IndexOutOfRange(t *testing.T) {
 	baseOp := &openapi3.Operation{}
 	revisionOp := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{baseOp: "base.yaml", revisionOp: "revision.yaml"}
+	sources := diff.OperationsSourcesMap{baseOp: load.NewFileSource("base.yaml"), revisionOp: load.NewFileSource("revision.yaml")}
 	operationItem := &diff.MethodDiff{Base: baseOp, Revision: revisionOp}
 
 	revisionSchema := &openapi3.Schema{
@@ -511,7 +522,7 @@ func TestSubschemaSources_IndexOutOfRange(t *testing.T) {
 
 func TestNewSourceFromSequenceItem(t *testing.T) {
 	op := &openapi3.Operation{}
-	sources := diff.OperationsSourcesMap{op: "spec.yaml"}
+	sources := diff.OperationsSourcesMap{op: load.NewFileSource("spec.yaml")}
 
 	origin := &openapi3.Origin{
 		Sequences: map[string][]openapi3.Location{

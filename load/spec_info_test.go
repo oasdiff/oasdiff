@@ -150,7 +150,7 @@ func TestSpecInfo_FromData(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, specInfo.Spec)
 	// The provided name is the source label, not a temp path.
-	require.Equal(t, "myspec.yaml", specInfo.Url)
+	require.Equal(t, "myspec.yaml", specInfo.Source.DisplayPath())
 	require.Equal(t, specInfo.Spec.Info.Version, specInfo.GetVersion())
 }
 

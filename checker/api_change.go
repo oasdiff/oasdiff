@@ -58,7 +58,7 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 		OperationId: operation.OperationID,
 		Operation:   method,
 		Path:        path,
-		Source:      load.NewSource((*operationsSources)[operation]),
+		Source:      (*operationsSources)[operation],
 		CommonChange: CommonChange{
 			Attributes: getAttributes(config, operation),
 		},

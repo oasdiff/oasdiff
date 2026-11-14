@@ -49,7 +49,7 @@ func loadCrossFileSpec(t *testing.T) (*load.SpecInfo, string, span) {
 // The schema $ref'd from another file is indexed at that file, not the root.
 func TestBuildIndex_CrossFileSchemaIndexedInExternalFile(t *testing.T) {
 	si, _, userSpan := loadCrossFileSpec(t)
-	require.Equal(t, filepath.Join(filepath.Dir(si.Url), "other.yaml"), userSpan.file)
+	require.Equal(t, filepath.Join(filepath.Dir(si.Source.DisplayPath()), "other.yaml"), userSpan.file)
 }
 
 // A change inside a schema $ref'd from another file cards to a block keyed by
@@ -259,7 +259,7 @@ func TestExtract_ComposedSameBasenameCrossSideLookup(t *testing.T) {
 	for _, si := range rev {
 		revDocs = append(revDocs, si.Spec)
 		maps.Copy(revTexts, si.Sources)
-		if strings.Contains(si.Url, "svc-b") {
+		if strings.Contains(si.Source.DisplayPath(), "svc-b") {
 			for _, sp := range buildIndex(si.Spec).byKey["components/schemas/User"] {
 				revUserSpan = sp
 			}

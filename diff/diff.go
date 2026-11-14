@@ -60,8 +60,10 @@ type Diff struct {
 	SecurityContext *SecurityContext `json:"-" yaml:"-"`
 }
 
-// OperationsSourcesMap maps OpenAPI operations to their source file paths
-type OperationsSourcesMap map[*openapi3.Operation]string
+// OperationsSourcesMap maps OpenAPI operations to the spec each was loaded
+// from. The value is the source itself, not its name, so a consumer can tell
+// a file from a url, a git revision or stdin.
+type OperationsSourcesMap map[*openapi3.Operation]*load.Source
 
 func newDiff() *Diff {
 	return &Diff{}
@@ -188,7 +190,7 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				result.Set(path, p)
 				byKey[key] = p
 				for _, opItem := range pathItem.Operations() {
-					operationsSources[opItem] = s.Url
+					operationsSources[opItem] = s.Source
 					operationPaths[opItem] = path
 				}
 				continue
@@ -200,27 +202,27 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				oldOperation := p.GetOperation(op)
 				if oldOperation == nil {
 					p.SetOperation(op, opItem)
-					operationsSources[opItem] = s.Url
+					operationsSources[opItem] = s.Source
 					operationPaths[opItem] = path
 					continue
 				}
 
 				oldSince, err := sinceDateFrom(*p, *oldOperation)
 				if err != nil {
-					return nil, nil, invalidSinceDateError(operationsSources[oldOperation], op, operationPaths[oldOperation], err)
+					return nil, nil, invalidSinceDateError(operationsSources[oldOperation].DisplayPath(), op, operationPaths[oldOperation], err)
 				}
 				newSince, err := sinceDateFrom(*pathItem, *opItem)
 				if err != nil {
-					return nil, nil, invalidSinceDateError(s.Url, op, path, err)
+					return nil, nil, invalidSinceDateError(s.Source.DisplayPath(), op, path, err)
 				}
 				if newSince.After(oldSince) {
 					p.SetOperation(op, opItem)
-					operationsSources[opItem] = s.Url
+					operationsSources[opItem] = s.Source
 					operationPaths[opItem] = path
 				}
 
 				if newSince == oldSince {
-					return nil, nil, &DuplicateEndpointError{Method: op, Path1: operationPaths[oldOperation], Source1: operationsSources[oldOperation], Path2: path, Source2: s.Url}
+					return nil, nil, &DuplicateEndpointError{Method: op, Path1: operationPaths[oldOperation], Source1: operationsSources[oldOperation].DisplayPath(), Path2: path, Source2: s.Source.DisplayPath()}
 				}
 			}
 		}
