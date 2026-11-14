@@ -10,8 +10,11 @@ type Change interface {
 	GetSection() string
 	IsBreaking() bool
 	GetId() string
-	GetText(l Localizer) string
 	GetArgs() []any
+
+	// Text is the change's message, with each argument set apart by format.
+	// GetUncolorizedText is the plain form of it.
+	Text(l Localizer, format ArgFormat) string
 	GetUncolorizedText(l Localizer) string
 	GetComment(l Localizer) string
 	GetLevel() Level
@@ -20,12 +23,15 @@ type Change interface {
 	GetOperation() string
 	GetOperationId() string
 	GetPath() string
+
+	// Subject is what the change is about: the section it is in, and the
+	// element within it, which a report may set apart. The element is empty
+	// for a change about a section as a whole.
+	Subject() (section, element string)
 	GetAttributes() map[string]any
 
 	// Location tracking methods
 	GetBaseSource() *Source
 	GetRevisionSource() *Source
 	MatchIgnore(ignorePath, ignoreLine string, l Localizer) bool
-	SingleLineError(l Localizer, colorMode ColorMode) string
-	MultiLineError(l Localizer, colorMode ColorMode) string
 }

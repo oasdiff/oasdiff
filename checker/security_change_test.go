@@ -19,17 +19,8 @@ func TestSecurityChange(t *testing.T) {
 	require.Equal(t, "comment", securityChange.GetComment(MockLocalizer))
 	require.Equal(t, "", securityChange.GetOperationId())
 	require.Equal(t, []any{1}, securityChange.GetArgs())
-	require.Equal(t, "error, in security This is a breaking change. [change_id]. comment", securityChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }
 
 func TestSecurityChange_MatchIgnore(t *testing.T) {
 	require.True(t, securityChange.MatchIgnore("", "error, in security this is a breaking change. [change_id]. comment", MockLocalizer))
-}
-
-func TestSecurityChange_SingleLineError(t *testing.T) {
-	require.Equal(t, "error, in security This is a breaking change. [change_id]. comment", securityChange.SingleLineError(MockLocalizer, checker.ColorNever))
-}
-
-func TestSecurityChange_MultiLineError_NoColor(t *testing.T) {
-	require.Equal(t, "error\t[change_id]\n\tin security\n\t\tThis is a breaking change.\n\t\tcomment", securityChange.MultiLineError(MockLocalizer, checker.ColorNever))
 }

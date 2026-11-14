@@ -54,7 +54,7 @@ func TestSharedSchemaDetail(t *testing.T) {
 		{"no name", SharedSchema{Properties: []string{"a", "b"}, Count: 2}, "(also at `b`)"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, tc.want, tc.shared.detail(l, quotedValues))
+			require.Equal(t, tc.want, tc.shared.detail(l, Quoted))
 		})
 	}
 }

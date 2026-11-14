@@ -1,10 +1,7 @@
 package checker
 
 import (
-	"fmt"
 	"strings"
-
-	"github.com/TwiN/go-color"
 )
 
 // ComponentChange represnts a change in the Components Section: https://swagger.io/docs/specification/components/
@@ -42,16 +39,17 @@ func (c ComponentChange) GetId() string {
 	return c.Id
 }
 
-func (c ComponentChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...)
-}
-
 func (c ComponentChange) GetArgs() []any {
 	return c.Args
 }
 
+// Text is the change's message, with each argument set apart by format.
+func (c ComponentChange) Text(l Localizer, format ArgFormat) string {
+	return l(c.Id, formattedValues(c.Args, format)...)
+}
+
 func (c ComponentChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...)
+	return c.Text(l, Quoted)
 }
 
 func (c ComponentChange) GetComment(l Localizer) string {
@@ -74,24 +72,11 @@ func (ComponentChange) GetOperationId() string {
 	return ""
 }
 
+// Subject is the kind of component the change was found in.
+func (c ComponentChange) Subject() (section, element string) {
+	return "components/" + c.Component, ""
+}
+
 func (ComponentChange) GetPath() string {
 	return ""
-}
-
-func (c ComponentChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s, %s components/%s %s [%s]. %s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), l("in"), c.Component, c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
-	}
-	return fmt.Sprintf(format, c.Level.String(), l("in"), c.Component, c.GetUncolorizedText(l), c.Id, c.GetComment(l))
-}
-
-func (c ComponentChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s]\n\t%s components/%s\n\t\t%s%s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("in"), c.Component, c.GetText(l), multiLineComment(c.GetComment(l)))
-	}
-	return fmt.Sprintf(format, c.Level.String(), c.Id, l("in"), c.Component, c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
 }
