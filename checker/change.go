@@ -26,13 +26,6 @@ type Change interface {
 	// Location tracking methods
 	GetBaseSource() *Source
 	GetRevisionSource() *Source
-
-	// DEPRECATED: Will be removed after GitHubActionsFormatter migration
-	GetSourceFile() string
-	GetSourceLine() int
-	GetSourceLineEnd() int
-	GetSourceColumn() int
-	GetSourceColumnEnd() int
 	MatchIgnore(ignorePath, ignoreLine string, l Localizer) bool
 	SingleLineError(l Localizer, colorMode ColorMode) string
 	MultiLineError(l Localizer, colorMode ColorMode) string

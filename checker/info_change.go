@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/TwiN/go-color"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 // InfoChange represents a change in the Info Section: https://swagger.io/specification/#info-object
@@ -94,42 +93,6 @@ func (c InfoChange) GetSource() string {
 		return source.File
 	}
 	return ""
-}
-
-func (c InfoChange) GetSourceFile() string {
-	file := c.GetSource()
-	if file == "" || !load.NewSource(file).IsFile() {
-		return ""
-	}
-	return file
-}
-
-func (c InfoChange) GetSourceLine() int {
-	if source := c.source(); source != nil {
-		return source.Line
-	}
-	return 0
-}
-
-func (c InfoChange) GetSourceLineEnd() int {
-	if source := c.source(); source != nil {
-		return source.EndLine
-	}
-	return 0
-}
-
-func (c InfoChange) GetSourceColumn() int {
-	if source := c.source(); source != nil {
-		return source.Column
-	}
-	return 0
-}
-
-func (c InfoChange) GetSourceColumnEnd() int {
-	if source := c.source(); source != nil {
-		return source.EndColumn
-	}
-	return 0
 }
 
 // at renders the "at <file>" segment of an error line, empty when the change

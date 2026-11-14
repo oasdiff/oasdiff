@@ -8,15 +8,10 @@ import (
 )
 
 var securityChange = checker.SecurityChange{
-	Id:              "change_id",
-	Comment:         "comment",
-	Level:           checker.ERR,
-	Args:            []any{1},
-	SourceFile:      "sourceFile",
-	SourceLine:      1,
-	SourceLineEnd:   2,
-	SourceColumn:    3,
-	SourceColumnEnd: 4,
+	Id:      "change_id",
+	Comment: "comment",
+	Level:   checker.ERR,
+	Args:    []any{1},
 }
 
 func TestSecurityChange(t *testing.T) {
@@ -25,11 +20,6 @@ func TestSecurityChange(t *testing.T) {
 	require.Equal(t, "", securityChange.GetOperationId())
 	require.Equal(t, "", securityChange.GetSource())
 	require.Equal(t, []any{1}, securityChange.GetArgs())
-	require.Equal(t, "sourceFile", securityChange.GetSourceFile())
-	require.Equal(t, 1, securityChange.GetSourceLine())
-	require.Equal(t, 2, securityChange.GetSourceLineEnd())
-	require.Equal(t, 3, securityChange.GetSourceColumn())
-	require.Equal(t, 4, securityChange.GetSourceColumnEnd())
 	require.Equal(t, "error, in security This is a breaking change. [change_id]. comment", securityChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }
 

@@ -16,6 +16,12 @@ const (
 	SourceTypeGitRevision
 )
 
+// StdinPath is the display name of a spec read from stdin. A Source built
+// from it is categorized as a file, since the string is indistinguishable
+// from a relative path, so code that needs a file in the working tree has to
+// exclude it by name.
+const StdinPath = "stdin"
+
 type Source struct {
 	Path string
 	Uri  *url.URL
@@ -48,7 +54,7 @@ type Source struct {
 func NewSource(path string) *Source {
 	if path == "-" {
 		return &Source{
-			Path: "stdin",
+			Path: StdinPath,
 			Type: SourceTypeStdin,
 		}
 	}
