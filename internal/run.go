@@ -35,7 +35,7 @@ func Run(args []string, stdout io.Writer, stderr io.Writer) int {
 	rootCmd.SetArgs(args[1:])
 	rootCmd.SetOut(stdout)
 	rootCmd.SetErr(stderr)
-	rootCmd.Version = build.Version
+	rootCmd.Version = build.String()
 
 	// --config is a persistent flag on the root command so every subcommand
 	// inherits it. Lookup order is documented in internal/viper.go's
