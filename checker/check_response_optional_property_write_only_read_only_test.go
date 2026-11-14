@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestResponseOptionalPropertyBecameWriteOnly(t *testing.T) {
 		Args:        []any{"data/name", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -50,7 +48,6 @@ func TestResponseOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 		Args:        []any{"data/writeOnlyName", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -73,7 +70,6 @@ func TestResponseOptionalPropertyBecameReadOnly(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -97,7 +93,6 @@ func TestResponseOptionalPropertyBecameNonReadOnly(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

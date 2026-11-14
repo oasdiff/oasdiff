@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,6 @@ func TestRequestPropertyMinLengthDecreased(t *testing.T) {
 		Args:        []any{"name", uint64(3), uint64(2)},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -48,7 +46,6 @@ func TestRequestPropertyMinLengthIncreased(t *testing.T) {
 		Args:        []any{"name", uint64(3), uint64(5)},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -70,7 +67,6 @@ func TestRequestBodyMinLengthIncreased(t *testing.T) {
 		Args:        []any{uint64(10), uint64(100)},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -92,7 +88,6 @@ func TestRequestBodyMinLengthDecreased(t *testing.T) {
 		Args:        []any{uint64(10), uint64(1)},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_min_length_decreased_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }

@@ -168,8 +168,34 @@ func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checke
 }
 
 // normalizeApiChange clears fields that are not part of a change's test identity.
+func requireComponentChange(t *testing.T, expected checker.ComponentChange, actual checker.Change) {
+	t.Helper()
+	cc, ok := actual.(checker.ComponentChange)
+	require.True(t, ok, "expected a checker.ComponentChange, got %T", actual)
+	require.Equal(t, expected, normalizeComponentChange(cc))
+}
+
+func requireComponentChanges(t *testing.T, expected []checker.ComponentChange, actual checker.Changes) {
+	t.Helper()
+	got := make([]checker.ComponentChange, 0, len(actual))
+	for _, c := range actual {
+		cc, ok := c.(checker.ComponentChange)
+		require.True(t, ok, "expected a checker.ComponentChange, got %T", c)
+		got = append(got, normalizeComponentChange(cc))
+	}
+	require.ElementsMatch(t, expected, got)
+}
+
+func normalizeComponentChange(c checker.ComponentChange) checker.ComponentChange {
+	c.BaseSource, c.RevisionSource = nil, nil
+	return c
+}
+
 func normalizeApiChange(c checker.ApiChange) checker.ApiChange {
 	c.Level = 0 // derived from the id via the rule registry, not part of test identity
+	// Locations come from origin data; the tests that are about them read the
+	// sources directly rather than comparing a whole change.
+	c.BaseSource, c.RevisionSource = nil, nil
 	return c.WithoutSchemaDiffs()
 }
 

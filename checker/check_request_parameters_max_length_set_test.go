@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,6 +24,5 @@ func TestRequestParameterMaxLengthSetCheck(t *testing.T) {
 		Comment:   "bound-set-comment",
 		Operation: "POST",
 		Path:      "/test",
-		Source:    load.NewSource("../data/checker/request_parameter_max_length_set_revision.yaml"),
 	}, errs)
 }

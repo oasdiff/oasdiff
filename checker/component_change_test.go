@@ -18,7 +18,6 @@ func TestComponentChange(t *testing.T) {
 	require.Equal(t, "components", componentChange.GetSection())
 	require.Equal(t, "comment", componentChange.GetComment(MockLocalizer))
 	require.Equal(t, "", componentChange.GetOperationId())
-	require.Equal(t, "", componentChange.GetSource())
 	require.Equal(t, "error, in components/component This is a breaking change. [change_id]. comment", componentChange.SingleLineError(MockLocalizer, checker.ColorNever))
 	require.Equal(t, "error, in components/component This is a breaking change. [change_id]. comment", componentChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }

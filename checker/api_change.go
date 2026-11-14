@@ -8,7 +8,6 @@ import (
 	"github.com/TwiN/go-color"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 // ApiChange represnts a change in the Paths Section of an OpenAPI spec
@@ -24,7 +23,6 @@ type ApiChange struct {
 	Operation   string
 	OperationId string
 	Path        string
-	Source      *load.Source
 
 	// schema is the node the change was computed from, kept so that a
 	// recognized transition there can claim the change (see
@@ -58,7 +56,6 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 		OperationId: operation.OperationID,
 		Operation:   method,
 		Path:        path,
-		Source:      operationsSources.Source(operation),
 		CommonChange: CommonChange{
 			Attributes: getAttributes(config, operation),
 		},
@@ -233,29 +230,25 @@ func (c ApiChange) GetPath() string {
 	return c.Path
 }
 
-func (c ApiChange) GetSource() string {
-	return c.Source.DisplayPath()
-}
-
 func (c ApiChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s %s %s, %s API %s %s %s [%s]. %s"
+	const format = "%s%s, %s API %s %s %s [%s]. %s"
 
 	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), l("at"), c.GetSource(), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
+		return fmt.Sprintf(format, c.Level.PrettyString(), c.at(l), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
 	}
 
-	return fmt.Sprintf(format, c.Level.String(), l("at"), c.GetSource(), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), c.Id, c.GetComment(l))
+	return fmt.Sprintf(format, c.Level.String(), c.at(l), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), c.Id, c.GetComment(l))
 
 }
 
 func (c ApiChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s] %s %s\n\t%s API %s %s\n\t\t%s%s"
+	const format = "%s\t[%s]%s\n\t%s API %s %s\n\t\t%s%s"
 
 	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("at"), c.GetSource(), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), multiLineComment(c.GetComment(l)))
+		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), c.at(l), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), multiLineComment(c.GetComment(l)))
 	}
 
-	return fmt.Sprintf(format, c.Level.String(), c.Id, l("at"), c.GetSource(), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
+	return fmt.Sprintf(format, c.Level.String(), c.Id, c.at(l), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
 }
 
 func multiLineComment(comment string) string {

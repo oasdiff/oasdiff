@@ -24,13 +24,12 @@ func TestResponsePropertyBecameOptionalCheck(t *testing.T) {
 		Args:        []any{"data/name", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_became_optional_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
 
 // changing required response property to optional — schema defined in an external $ref file.
-// Verifies that source tracking (base source) points to the correct line in the $ref'd file.
+// Verifies that revision.yaml tracking (base source) points to the correct line in the $ref'd file.
 // This exercises the yaml3 root-mapping origin fix: previously, schemas loaded from $ref'd files
 // had Origin==nil because document() in yaml3 never injected __origin__ for the root mapping.
 func TestResponsePropertyBecameOptionalCheck_ExternalRef(t *testing.T) {
@@ -85,7 +84,6 @@ func TestResponseWriteOnlyPropertyBecameOptionalCheck(t *testing.T) {
 		Args:        []any{"data/name", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_became_optional_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

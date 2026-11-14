@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequestBodyMediaTypeAdded(t *testing.T) {
 		Args:        []any{"application/json"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_body_media_type_updated_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -44,7 +42,6 @@ func TestRequestBodyMediaTypeRemoved(t *testing.T) {
 		Args:        []any{"application/json"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_body_media_type_updated_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

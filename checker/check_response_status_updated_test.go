@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestResponseSuccessStatusAdded(t *testing.T) {
 		Args:        []any{"201"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -50,7 +48,6 @@ func TestResponseNonSuccessStatusAdded(t *testing.T) {
 		Args:        []any{"400"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -73,7 +70,6 @@ func TestResponseNonSuccessStatusRemoved(t *testing.T) {
 		Args:        []any{"409"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -96,7 +92,6 @@ func TestResponseSuccessStatusRemoved(t *testing.T) {
 		Args:        []any{"200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_status_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

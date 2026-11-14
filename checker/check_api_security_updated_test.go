@@ -120,7 +120,6 @@ func TestAPISecurityAdded(t *testing.T) {
 		Args:      []any{[]string{"petstore_auth: [read:pets, write:pets]"}},
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_added_revision.yaml"),
 	}, removed)
 	require.Equal(t, "the endpoint no longer allows anonymous access and now only accepts `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -147,7 +146,6 @@ func TestAPISecurityDeleted(t *testing.T) {
 		Id:        checker.APISecurityAnonymousAccessAddedId,
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_added_base.yaml"),
 	}, errs)
 	require.Equal(t, "the endpoint now allows anonymous access", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -167,7 +165,6 @@ func TestAPISecurityScopeRemoved(t *testing.T) {
 		Args:      []any{"read:pets", "petstore_auth"},
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_updated_revision.yaml"),
 	}, errs)
 	require.Equal(t, "the security scope `read:pets` was removed from the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -187,7 +184,6 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 		Args:      []any{"read:pets", "petstore_auth"},
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_updated_base.yaml"),
 	}, errs)
 	require.Equal(t, "the security scope `read:pets` was added to the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

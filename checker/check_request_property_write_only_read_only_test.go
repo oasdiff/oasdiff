@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestRequestOptionalPropertyBecameWriteOnly(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -50,7 +48,6 @@ func TestRequestOptionalPropertyBecameNotWriteOnly(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -74,7 +71,6 @@ func TestRequestOptionalPropertyBecameReadOnly(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
@@ -98,7 +94,6 @@ func TestRequestOptionalPropertyBecameNonReadOnly(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
@@ -122,7 +117,6 @@ func TestRequestRequiredPropertyBecameWriteOnly(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -145,7 +139,6 @@ func TestRequestRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -169,7 +162,6 @@ func TestRequestRequiredPropertyBecameReadOnly(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_optional_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.WARN, errs[0].GetLevel())
@@ -191,7 +183,6 @@ func TestRequestRequiredPropertyBecameNonReadOnly(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_required_property_not_read_only_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
@@ -214,7 +205,6 @@ func TestRequestRequiredPropertyBecameNonReadOnlyAndOptional(t *testing.T) {
 		Args:        []any{"id"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_property_not_read_only_optional_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())

@@ -77,10 +77,6 @@ func (SecurityChange) GetPath() string {
 	return ""
 }
 
-func (c SecurityChange) GetSource() string {
-	return ""
-}
-
 func (c SecurityChange) SingleLineError(l Localizer, colorMode ColorMode) string {
 	const format = "%s, %s security %s [%s]. %s"
 

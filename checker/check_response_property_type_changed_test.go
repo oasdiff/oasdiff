@@ -25,7 +25,6 @@ func TestResponseSchemaTypeChangedCheck(t *testing.T) {
 		Args:        []any{"type", "string", "object", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_schema_type_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -47,7 +46,6 @@ func TestResponsePropertyTypeChangedCheck(t *testing.T) {
 		Args:        []any{"data/name", "type", "string", "integer", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_schema_type_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -69,7 +67,6 @@ func TestResponsePropertyFormatChangedCheck(t *testing.T) {
 		Args:        []any{"data/name", "format", "hostname", "uuid", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_schema_format_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -91,7 +88,6 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 			Args:        []any{"anyOf[#/components/schemas/Dog]/breed/anyOf[#/components/schemas/Breed2]/name", "type", "string", "number", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_complex_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -99,7 +95,6 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 			Args:        []any{"anyOf[subschema #3: Rabbit]", "type", "string", "number", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_complex_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -107,7 +102,6 @@ func TestResponsePropertyAnyOfModified(t *testing.T) {
 			Args:        []any{"anyOf[subschema #4 -> subschema #5]", "type", "string", "number", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_complex_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }
@@ -129,7 +123,6 @@ func TestResponseSchemaTypeMultiCheck(t *testing.T) {
 		Args:        []any{"data/name", "type", "string", "integer, string", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_schema_type_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -149,7 +142,6 @@ func TestResponseAdditionalPropertyTypeChangedCheck(t *testing.T) {
 		Args:        []any{"additionalProperties/property1", "type", "integer", "string", "200"},
 		Operation:   "GET",
 		Path:        "/value",
-		Source:      load.NewSource("../data/additional-properties/revision.yaml"),
 		OperationId: "get_value",
 	}, errs)
 }
@@ -169,7 +161,6 @@ func TestResponseEmbeddedAdditionalPropertyTypeChangedCheck(t *testing.T) {
 		Args:        []any{"composite-property/additionalProperties/property1", "type", "integer", "string", "200"},
 		Operation:   "GET",
 		Path:        "/value",
-		Source:      load.NewSource("../data/additional-properties/embedded-revision.yaml"),
 		OperationId: "get_value",
 	}, errs)
 }
@@ -312,7 +303,6 @@ func TestResponseBodyTypeLooselyTypedCompatible(t *testing.T) {
 		Comment:     checker.TypeChangeLooselyTypedCommentId,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_xml_type_compatible_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, "the response's body `type` changed from `string` to `object` for status `200` (backward compatible)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))

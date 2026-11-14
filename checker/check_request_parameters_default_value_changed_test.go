@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequestParameterDefaultValueChanged(t *testing.T) {
 		Args:        []any{"query", "category", "default_category", "updated_category"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -44,7 +42,6 @@ func TestRequestParameterDefaultValueChangedAndRenamedParameter(t *testing.T) {
 		Args:        []any{"path", "group_id", "2", "1"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups/{group_id}",
-		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_revision_renamed.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -66,7 +63,6 @@ func TestRequestParameterDefaultValueAdded(t *testing.T) {
 		Args:        []any{"query", "category", "default_category"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -88,7 +84,6 @@ func TestRequestParameterDefaultValueRemoved(t *testing.T) {
 		Args:        []any{"query", "category", "default_category"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

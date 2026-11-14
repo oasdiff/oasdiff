@@ -22,7 +22,7 @@ func TestComponentSecurityOauthURLUpdated(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityComponentOauthUrlUpdatedId,
 		Args:      []any{"petstore_auth", "implicit", "http://example.org/api/oauth/dialog", "http://example.new.org/api/oauth/dialog"},
 		Level:     checker.WARN,
@@ -45,7 +45,7 @@ func TestComponentSecurityOauthTokenUpdated(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityOauthTokenUrlUpdatedId,
 		Args:      []any{"petstore_auth", "implicit", "", "http://example.new.org/api/oauth/dialog"},
 		Level:     checker.WARN,
@@ -68,7 +68,7 @@ func TestComponentSecurityTypeUpdated(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityTypeUpdatedId,
 		Args:      []any{"petstore_auth", "oauth2", "http"},
 		Level:     checker.ERR,
@@ -88,7 +88,7 @@ func TestComponentSecurityAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityAddedId,
 		Args:      []any{"BasicAuth"},
 		Level:     checker.INFO,
@@ -108,7 +108,7 @@ func TestComponentSecurityRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityRemovedId,
 		Args:      []any{"BasicAuth"},
 		Level:     checker.INFO,
@@ -130,7 +130,7 @@ func TestComponentSecurityOauthScopeAdded(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentSecurityOauthScopeAddedId,
 		Args:      []any{"petstore_auth", "implicit", "admin:pets"},
 		Level:     checker.INFO,
@@ -174,7 +174,7 @@ func TestComponentSecurityOauthScopeRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        "api-security-component-oauth-scope-removed",
 		Args:      []any{"petstore_auth", "implicit", "admin:pets"},
 		Level:     checker.INFO,
@@ -196,7 +196,7 @@ func TestComponentSecurityOauthScopeUpdated(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        "api-security-component-oauth-scope-changed",
 		Args:      []any{"petstore_auth", "implicit", "read:pets", "read your pets", "grants access to pets (deprecated)"},
 		Level:     checker.INFO,
@@ -225,7 +225,7 @@ func TestComponentSecurityApiKeyNameUpdated(t *testing.T) {
 		schemes["api_key"].Value.Name = "X-Token"
 	})
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityApiKeyNameUpdatedId,
 		Args:      []any{"api_key", "X-API-Key", "X-Token"},
 		Level:     checker.ERR,
@@ -240,7 +240,7 @@ func TestComponentSecurityApiKeyInUpdated(t *testing.T) {
 		schemes["api_key"].Value.In = "query"
 	})
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityApiKeyInUpdatedId,
 		Args:      []any{"api_key", "header", "query"},
 		Level:     checker.ERR,
@@ -255,7 +255,7 @@ func TestComponentSecurityHttpSchemeUpdated(t *testing.T) {
 		schemes["basic_auth"].Value.Scheme = "bearer"
 	})
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityHttpSchemeUpdatedId,
 		Args:      []any{"basic_auth", "basic", "bearer"},
 		Level:     checker.ERR,
@@ -277,7 +277,7 @@ func TestComponentSecurityBearerFormatUpdated(t *testing.T) {
 		schemes["bearer_auth"].Value.BearerFormat = "opaque"
 	})
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityBearerFormatUpdatedId,
 		Args:      []any{"bearer_auth", "JWT", "opaque"},
 		Level:     checker.INFO,
@@ -291,7 +291,7 @@ func TestComponentSecurityOpenIdConnectUrlUpdated(t *testing.T) {
 		schemes["oidc"].Value.OpenIdConnectUrl = "https://auth.example.com/.well-known/openid-configuration"
 	})
 	require.Len(t, errs, 1)
-	require.Equal(t, checker.ComponentChange{
+	requireComponentChange(t, checker.ComponentChange{
 		Id:        checker.APIComponentsSecurityOpenIdConnectUrlUpdatedId,
 		Args:      []any{"oidc", "https://example.com/.well-known/openid-configuration", "https://auth.example.com/.well-known/openid-configuration"},
 		Level:     checker.WARN,

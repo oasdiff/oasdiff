@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,6 @@ func TestResponsePropertyEnumValueRemoved(t *testing.T) {
 		Args:        []any{"TYPE2", "data/typeEnum", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -48,7 +46,6 @@ func TestResponseWriteOnlyPropertyEnumValueRemoved(t *testing.T) {
 		Args:        []any{"TYPE2", "data/writeOnlyEnum", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_enum_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

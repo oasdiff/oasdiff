@@ -152,7 +152,6 @@ func TestBreaking_HeaderParamRequiredEnabled(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: "GET",
 			Path:      "/api/{domain}/{project}/install-command",
-			Source:    load.NewSource("../data/openapi-test1.yaml"),
 		}, errs[0])
 	require.Equal(t, "the `header` request parameter `network-policies` became required", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

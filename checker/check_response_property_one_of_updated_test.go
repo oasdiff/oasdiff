@@ -29,7 +29,6 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_one_of_added_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -37,7 +36,6 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_one_of_added_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -45,7 +43,6 @@ func TestResponsePropertyOneOfAdded(t *testing.T) {
 			Args:        []any{"subschema #2: Dark brown types", "oneOf[#/components/schemas/Fox]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_one_of_added_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }
@@ -92,7 +89,6 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -100,7 +96,6 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -108,7 +103,6 @@ func TestResponsePropertyOneOfRemoved(t *testing.T) {
 			Args:        []any{"subschema #2: Dark brown types", "oneOf[#/components/schemas/Fox]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_one_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }

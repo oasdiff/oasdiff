@@ -7,7 +7,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +28,6 @@ func TestGitHubActionsFormatter_RenderChangelog_OneFailure(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -50,7 +48,6 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -60,7 +57,6 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 			Level:     checker.WARN,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -70,7 +66,6 @@ func TestGitHubActionsFormatter_RenderChangelog_MultipleLevels(t *testing.T) {
 			Level:     checker.INFO,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -91,7 +86,6 @@ func TestGitHubActionsFormatter_DontRenderHttpSource(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("https://google.com/openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "https://google.com/openapi.yaml", Line: 21},
 			},
@@ -112,7 +106,6 @@ func TestGitHubActionsFormatter_RenderChangelog_MultilineText(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -133,7 +126,6 @@ func TestGitHubActionsFormatter_RenderChangelog_FileLocation(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{
 					File:   "openapi.json",
@@ -164,7 +156,6 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -174,7 +165,6 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -184,7 +174,6 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Level:     checker.WARN,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -194,7 +183,6 @@ func TestGitHubActionsFormatter_RenderChangelog_JobOutputParameters(t *testing.T
 			Level:     checker.INFO,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "openapi.yaml"},
 			},
@@ -226,7 +214,6 @@ func TestGitHubActionsFormatter_RenderChangelog_EscapesProperties(t *testing.T) 
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("openapi.yaml"),
 			CommonChange: checker.CommonChange{
 				RevisionSource: &checker.Source{File: "main:spec,v2.yaml", Line: 1, Column: 1},
 			},
@@ -281,7 +268,6 @@ func TestGitHubActionsFormatter_RenderChangelog_BaseSourceOnly(t *testing.T) {
 			Level:     checker.ERR,
 			Operation: http.MethodGet,
 			Path:      "/api/test",
-			Source:    load.NewSource("base.yaml"),
 			CommonChange: checker.CommonChange{
 				BaseSource: &checker.Source{File: "base.yaml", Line: 17, Column: 5},
 			},

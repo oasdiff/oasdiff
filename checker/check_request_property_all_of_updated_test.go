@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +27,6 @@ func TestRequestPropertyAllOfAdded(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_added_revision.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -36,7 +34,6 @@ func TestRequestPropertyAllOfAdded(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_added_revision.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }
@@ -106,7 +103,6 @@ func TestRequestPropertyAllOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_removed_revision.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -115,7 +111,6 @@ func TestRequestPropertyAllOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_removed_revision.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }

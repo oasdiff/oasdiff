@@ -18,7 +18,6 @@ func TestSecurityChange(t *testing.T) {
 	require.Equal(t, "security", securityChange.GetSection())
 	require.Equal(t, "comment", securityChange.GetComment(MockLocalizer))
 	require.Equal(t, "", securityChange.GetOperationId())
-	require.Equal(t, "", securityChange.GetSource())
 	require.Equal(t, []any{1}, securityChange.GetArgs())
 	require.Equal(t, "error, in security This is a breaking change. [change_id]. comment", securityChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }

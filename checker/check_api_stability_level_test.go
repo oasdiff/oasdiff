@@ -88,7 +88,7 @@ func TestBreaking_InvalidStabilityLevelInRevision(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, "stability level `\"invalid\"` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
+	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetRevisionSource().File)
 }
 
 // specifying an invalid stability level in base is breaking
@@ -104,7 +104,7 @@ func TestBreaking_InvalidStabilityLevelInBase(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, "stability level `\"invalid\"` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetSource())
+	require.Equal(t, "../data/deprecation/base-invalid-stability.yaml", errs[0].GetBaseSource().File)
 }
 
 // specifying a non-text, not-json stability level in base is breaking
@@ -120,7 +120,7 @@ func TestBreaking_InvalidNonJsonStabilityLevel(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
 	require.Len(t, errs, 1)
 	require.Equal(t, "stability level `1` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/base-invalid-stability-2.yaml", errs[0].GetSource())
+	require.Equal(t, "../data/deprecation/base-invalid-stability-2.yaml", errs[0].GetRevisionSource().File)
 }
 
 // -------------------------------------------------------

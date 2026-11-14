@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,14 +22,12 @@ func TestResponsePropertyConstChanged(t *testing.T) {
 		Args:        []any{"status", "ok", "success", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_const_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, {
 		Id:          checker.ResponseBodyConstChangedId,
 		Args:        []any{"text/plain", "NotFound", "Error", "404"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_const_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}}, errs)
 }
@@ -53,14 +50,12 @@ func TestResponsePropertyConstAdded(t *testing.T) {
 		Args:        []any{"text/plain", "NotFound", "404"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_const_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, {
 		Id:          checker.ResponsePropertyConstAddedId,
 		Args:        []any{"status", "ok", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_const_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}}, errs)
 }
@@ -83,14 +78,12 @@ func TestResponsePropertyConstRemoved(t *testing.T) {
 		Args:        []any{"text/plain", "NotFound", "404"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_const_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, {
 		Id:          checker.ResponsePropertyConstRemovedId,
 		Args:        []any{"status", "ok", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_const_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}}, errs)
 }

@@ -23,14 +23,16 @@ func TestInfoChange_SourceIsTheRevision(t *testing.T) {
 		&checker.Source{File: "revision.yaml", Line: 9, Column: 5, EndLine: 9, EndColumn: 20},
 	)
 
-	require.Equal(t, "revision.yaml", change.GetSource())
+	require.Equal(t, "info\t[api-version-changed] at revision.yaml\n\tin info\n\t\tthe API version changed from `1.0.0` to `2.0.0`",
+		change.MultiLineError(checker.NewDefaultLocalizer(), checker.ColorNever))
 }
 
 // A change only the base has a location for is reported against the base.
 func TestInfoChange_FallsBackToTheBase(t *testing.T) {
 	change := infoChange(&checker.Source{File: "base.yaml", Line: 4, Column: 3}, nil)
 
-	require.Equal(t, "base.yaml", change.GetSource())
+	require.Equal(t, "info\t[api-version-changed] at base.yaml\n\tin info\n\t\tthe API version changed from `1.0.0` to `2.0.0`",
+		change.MultiLineError(checker.NewDefaultLocalizer(), checker.ColorNever))
 }
 
 // Without origin tracking there is no location, and the error lines carry no
@@ -39,7 +41,6 @@ func TestInfoChange_WithoutSources(t *testing.T) {
 	change := infoChange(nil, nil)
 	l := checker.NewDefaultLocalizer()
 
-	require.Empty(t, change.GetSource())
 	require.Equal(t, "info\t[api-version-changed]\n\tin info\n\t\tthe API version changed from `1.0.0` to `2.0.0`",
 		change.MultiLineError(l, checker.ColorNever))
 	require.Equal(t, "info, in info the API version changed from `1.0.0` to `2.0.0` [api-version-changed]. ",

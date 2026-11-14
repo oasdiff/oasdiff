@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,14 +22,12 @@ func TestResponsePropertyDefaultValueUpdatedCheck(t *testing.T) {
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "2020-02-01T00:00:00Z", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, {
 		Id:          checker.ResponsePropertyDefaultValueChangedId,
 		Args:        []any{"enabled", false, true, "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}}, errs)
 }
@@ -51,7 +48,6 @@ func TestResponseSchemaDefaultValueUpdatedCheck(t *testing.T) {
 		Args:        []any{"text/plain", "Error", "new default value", "404"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -74,14 +70,12 @@ func TestResponsePropertyDefaultValueAddedCheck(t *testing.T) {
 		Args:        []any{"text/plain", "Error", "404"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, {
 		Id:          checker.ResponsePropertyDefaultValueAddedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}}, errs)
 }
@@ -104,14 +98,12 @@ func TestResponsePropertyDefaultValueRemovedCheck(t *testing.T) {
 		Args:        []any{"text/plain", "Error", "404"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, {
 		Id:          checker.ResponsePropertyDefaultValueRemovedId,
 		Args:        []any{"created", "2020-01-01T00:00:00Z", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_default_value_changed_base.yaml"),
 		OperationId: "createOneGroup",
 	}}, errs)
 }

@@ -28,7 +28,6 @@ func TestRequestBodyTypeChangedCheck(t *testing.T) {
 		Args:        []any{"type", "object", "array"},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -51,7 +50,6 @@ func TestRequestBodyFormatChangedCheck(t *testing.T) {
 		Args:        []any{"format", "none", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -72,7 +70,6 @@ func TestRequestPropertyTypeChangedCheck(t *testing.T) {
 		Args:        []any{"age", "type/format", "integer/int32", "string/string"},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_revision.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -132,7 +129,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 			Args:        []any{"colors", "type", "array<integer>", "object"},
 			Operation:   "POST",
 			Path:        "/dogs",
-			Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
 			OperationId: "addDog",
 		},
 		{
@@ -140,7 +136,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckArrayToObject(t *testing.T) {
 			Args:        []any{"type", "array<object>", "object"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_type_changed_revision_array_to_object.yaml"),
 			OperationId: "addPet",
 		},
 	}, errs)
@@ -163,7 +158,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 			Args:        []any{"colors", "type", "object", "array<integer>"},
 			Operation:   "POST",
 			Path:        "/dogs",
-			Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
 			OperationId: "addDog",
 		},
 		{
@@ -171,7 +165,6 @@ func TestRequestBodyAndPropertyTypesChangedCheckObjectToArray(t *testing.T) {
 			Args:        []any{"type", "object", "array<object>"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_type_changed_base_array_to_object.yaml"),
 			OperationId: "addPet",
 		},
 	}, errs)
@@ -195,7 +188,6 @@ func TestRequestPropertyFormatChangedCheck(t *testing.T) {
 		Args:        []any{"age", "format", "int32", "uuid"},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -219,7 +211,6 @@ func TestRequestPropertyFormatChangedCheckNonBreaking(t *testing.T) {
 		Args:        []any{"age", "type", "integer", "number"},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_type_changed_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -439,7 +430,6 @@ func TestRequestBodyTypeLooselyTypedCompatible(t *testing.T) {
 		Comment:     checker.TypeChangeLooselyTypedCommentId,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_xml_type_compatible_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, "the request's body `type` changed from `object` to `string` (backward compatible)", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
