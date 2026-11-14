@@ -145,9 +145,9 @@ func (f GitHubActionsFormatter) SupportedOutputs() []Output {
 
 // annotatable reports whether a location names a file in the working tree,
 // which is the only thing an annotation can point at. A spec fetched over
-// http and one read from stdin both have locations that are not files there.
+// http has a location that is not one.
 func annotatable(file string) bool {
-	return file != "" && file != load.StdinPath && !load.NewSource(file).IsURL()
+	return file != "" && !load.NewSource(file).IsURL()
 }
 
 // writeGitHubActionsJobOutputParameters publishes key=value pairs as GitHub Actions

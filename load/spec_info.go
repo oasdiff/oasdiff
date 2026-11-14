@@ -11,7 +11,11 @@ import (
 
 // SpecInfo contains information about an OpenAPI spec and its metadata
 type SpecInfo struct {
-	Url     string
+	// Source is where the spec was loaded from, and what kind of place that
+	// is. Consumers that need the name alone call Source.DisplayPath; keeping
+	// the Source rather than its name lets them tell a file from a url, a git
+	// revision or stdin without categorizing a string again.
+	Source  *Source
 	Spec    *openapi3.T
 	Version string
 	// Sources holds the raw text of every file that contributed to Spec, keyed
@@ -26,10 +30,10 @@ func (specInfo *SpecInfo) GetVersion() string {
 	return specInfo.Version
 }
 
-func newSpecInfo(spec *openapi3.T, path string) *SpecInfo {
+func newSpecInfo(spec *openapi3.T, source *Source) *SpecInfo {
 	return &SpecInfo{
 		Spec:    spec,
-		Url:     path,
+		Source:  source,
 		Version: getVersion(spec),
 	}
 }
@@ -119,7 +123,7 @@ func NewSpecInfoFromData(loader *openapi3.Loader, data []byte, name string, opti
 		return nil, err
 	}
 
-	specInfos := []*SpecInfo{newSpecInfo(spec, name)}
+	specInfos := []*SpecInfo{newSpecInfo(spec, NewFileSource(name))}
 	for _, option := range options {
 		if specInfos, err = option(loader, specInfos); err != nil {
 			return nil, err
@@ -133,7 +137,7 @@ func loadSpecInfo(loader *openapi3.Loader, source *Source, capture *sourceCaptur
 	if err != nil {
 		return nil, err
 	}
-	return newSpecInfo(s, source.DisplayPath()), nil
+	return newSpecInfo(s, source), nil
 }
 
 func fromGlob(loader *openapi3.Loader, glob string, capture bool) ([]*SpecInfo, error) {
@@ -159,7 +163,7 @@ func fromGlob(loader *openapi3.Loader, glob string, capture bool) ([]*SpecInfo, 
 		if err != nil {
 			return nil, fmt.Errorf("failed to load %q: %w", file, err)
 		}
-		si := &SpecInfo{Url: file, Spec: spec}
+		si := &SpecInfo{Source: NewFileSource(file), Spec: spec}
 		if cap != nil {
 			si.Sources = cap.asStrings()
 		}

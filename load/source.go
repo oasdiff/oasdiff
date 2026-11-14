@@ -22,6 +22,17 @@ const (
 // exclude it by name.
 const StdinPath = "stdin"
 
+// NewFileSource names a path that is known to be a local file, without
+// categorizing it. NewSource would misread some real names: a file called
+// "main:openapi.yaml" parses as a git revision, and one called "stdin" is
+// indistinguishable from the display name of a spec read from stdin.
+func NewFileSource(path string) *Source {
+	return &Source{
+		Path: path,
+		Type: SourceTypeFile,
+	}
+}
+
 type Source struct {
 	Path string
 	Uri  *url.URL
@@ -96,6 +107,9 @@ func isGitRevision(path string) bool {
 }
 
 func (source *Source) String() string {
+	if source == nil {
+		return ""
+	}
 	return source.Path
 }
 
@@ -107,24 +121,27 @@ func (source *Source) Out() string {
 }
 
 func (source *Source) IsStdin() bool {
-	return source.Type == SourceTypeStdin
+	return source != nil && source.Type == SourceTypeStdin
 }
 
 func (source *Source) IsFile() bool {
-	return source.Type == SourceTypeFile
+	return source != nil && source.Type == SourceTypeFile
 }
 
 func (source *Source) IsGitRevision() bool {
-	return source.Type == SourceTypeGitRevision
+	return source != nil && source.Type == SourceTypeGitRevision
 }
 
 func (source *Source) IsURL() bool {
-	return source.Type == SourceTypeURL
+	return source != nil && source.Type == SourceTypeURL
 }
 
 // DisplayPath returns the path suitable for display and source-location reporting.
 // For git revisions it strips the ref prefix (e.g. "origin/main:openapi.yaml" → "openapi.yaml").
 func (source *Source) DisplayPath() string {
+	if source == nil {
+		return ""
+	}
 	if source.Type != SourceTypeGitRevision {
 		return source.Path
 	}
