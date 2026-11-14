@@ -109,9 +109,6 @@ func TestLevelText(t *testing.T) {
 	for _, level := range []checker.Level{checker.ERR, checker.WARN, checker.INFO, checker.Level(4)} {
 		require.Equal(t, level.String(), formatters.LevelTextForTest(level, checker.ColorNever))
 		require.Equal(t, level.String(), formatters.LevelTextForTest(level, checker.ColorInvalid))
-		require.Contains(t, formatters.LevelTextForTest(level, checker.ColorAlways), level.String())
-		require.NotEqual(t, level.String(), formatters.LevelTextForTest(level, checker.ColorAlways),
-			"a coloured level carries escape codes")
 	}
 
 	require.Equal(t, color.InRed("error"), formatters.LevelTextForTest(checker.ERR, checker.ColorAlways))

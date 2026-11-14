@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
@@ -233,11 +232,4 @@ func (c ApiChange) Subject() (section, element string) {
 
 func (c ApiChange) GetPath() string {
 	return c.Path
-}
-
-func multiLineComment(comment string) string {
-	if comment == "" {
-		return ""
-	}
-	return fmt.Sprintf("\n\t\t%s", comment)
 }
