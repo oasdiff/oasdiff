@@ -16,13 +16,6 @@ type ComponentChange struct {
 	Comment   string
 	Level     Level
 	Component string
-
-	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
-	SourceFile      string
-	SourceLine      int
-	SourceLineEnd   int
-	SourceColumn    int
-	SourceColumnEnd int
 }
 
 // WithSources returns a copy of the ComponentChange with BaseSource and RevisionSource populated
@@ -87,26 +80,6 @@ func (ComponentChange) GetPath() string {
 
 func (c ComponentChange) GetSource() string {
 	return ""
-}
-
-func (c ComponentChange) GetSourceFile() string {
-	return c.SourceFile
-}
-
-func (c ComponentChange) GetSourceLine() int {
-	return c.SourceLine
-}
-
-func (c ComponentChange) GetSourceLineEnd() int {
-	return c.SourceLineEnd
-}
-
-func (c ComponentChange) GetSourceColumn() int {
-	return c.SourceColumn
-}
-
-func (c ComponentChange) GetSourceColumnEnd() int {
-	return c.SourceColumnEnd
 }
 
 func (c ComponentChange) SingleLineError(l Localizer, colorMode ColorMode) string {

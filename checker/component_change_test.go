@@ -8,15 +8,10 @@ import (
 )
 
 var componentChange = checker.ComponentChange{
-	Id:              "change_id",
-	Comment:         "comment",
-	Level:           checker.ERR,
-	Component:       "component",
-	SourceFile:      "sourceFile",
-	SourceLine:      1,
-	SourceLineEnd:   2,
-	SourceColumn:    3,
-	SourceColumnEnd: 4,
+	Id:        "change_id",
+	Comment:   "comment",
+	Level:     checker.ERR,
+	Component: "component",
 }
 
 func TestComponentChange(t *testing.T) {
@@ -24,11 +19,6 @@ func TestComponentChange(t *testing.T) {
 	require.Equal(t, "comment", componentChange.GetComment(MockLocalizer))
 	require.Equal(t, "", componentChange.GetOperationId())
 	require.Equal(t, "", componentChange.GetSource())
-	require.Equal(t, "sourceFile", componentChange.GetSourceFile())
-	require.Equal(t, 1, componentChange.GetSourceLine())
-	require.Equal(t, 2, componentChange.GetSourceLineEnd())
-	require.Equal(t, 3, componentChange.GetSourceColumn())
-	require.Equal(t, 4, componentChange.GetSourceColumnEnd())
 	require.Equal(t, "error, in components/component This is a breaking change. [change_id]. comment", componentChange.SingleLineError(MockLocalizer, checker.ColorNever))
 	require.Equal(t, "error, in components/component This is a breaking change. [change_id]. comment", componentChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }

@@ -46,13 +46,6 @@ type ApiChange struct {
 	// from them and keeps only the ones that changed it, which GetComment
 	// then explains.
 	guards []Guard
-
-	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
-	SourceFile      string
-	SourceLine      int
-	SourceLineEnd   int
-	SourceColumn    int
-	SourceColumnEnd int
 }
 
 // NewApiChange creates a new ApiChange
@@ -242,34 +235,6 @@ func (c ApiChange) GetPath() string {
 
 func (c ApiChange) GetSource() string {
 	return c.Source.DisplayPath()
-}
-
-func (c ApiChange) GetSourceFile() string {
-	if c.SourceFile != "" {
-		return c.SourceFile
-	}
-
-	if c.Source.IsFile() {
-		return c.Source.String()
-	}
-
-	return ""
-}
-
-func (c ApiChange) GetSourceLine() int {
-	return c.SourceLine
-}
-
-func (c ApiChange) GetSourceLineEnd() int {
-	return c.SourceLineEnd
-}
-
-func (c ApiChange) GetSourceColumn() int {
-	return c.SourceColumn
-}
-
-func (c ApiChange) GetSourceColumnEnd() int {
-	return c.SourceColumnEnd
 }
 
 func (c ApiChange) SingleLineError(l Localizer, colorMode ColorMode) string {

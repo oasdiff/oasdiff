@@ -15,13 +15,6 @@ type SecurityChange struct {
 	Args    []any
 	Comment string
 	Level   Level
-
-	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
-	SourceFile      string
-	SourceLine      int
-	SourceLineEnd   int
-	SourceColumn    int
-	SourceColumnEnd int
 }
 
 // WithSources returns a copy of the SecurityChange with BaseSource and RevisionSource populated
@@ -86,26 +79,6 @@ func (SecurityChange) GetPath() string {
 
 func (c SecurityChange) GetSource() string {
 	return ""
-}
-
-func (c SecurityChange) GetSourceFile() string {
-	return c.SourceFile
-}
-
-func (c SecurityChange) GetSourceLine() int {
-	return c.SourceLine
-}
-
-func (c SecurityChange) GetSourceLineEnd() int {
-	return c.SourceLineEnd
-}
-
-func (c SecurityChange) GetSourceColumn() int {
-	return c.SourceColumn
-}
-
-func (c SecurityChange) GetSourceColumnEnd() int {
-	return c.SourceColumnEnd
 }
 
 func (c SecurityChange) SingleLineError(l Localizer, colorMode ColorMode) string {

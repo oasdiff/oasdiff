@@ -22,11 +22,6 @@ var apiChange = checker.ApiChange{
 		BaseSource:     location.NewSource("base.yaml", 10, 5),
 		RevisionSource: location.NewSource("revision.yaml", 12, 7),
 	},
-	SourceFile:      "sourceFile",
-	SourceLine:      1,
-	SourceLineEnd:   2,
-	SourceColumn:    3,
-	SourceColumnEnd: 4,
 }
 
 func TestApiChange(t *testing.T) {
@@ -38,11 +33,6 @@ func TestApiChange(t *testing.T) {
 	require.Equal(t, "123", apiChange.GetOperationId())
 	require.Equal(t, "/test", apiChange.GetPath())
 	require.Equal(t, "source", apiChange.GetSource())
-	require.Equal(t, "sourceFile", apiChange.GetSourceFile())
-	require.Equal(t, 1, apiChange.GetSourceLine())
-	require.Equal(t, 2, apiChange.GetSourceLineEnd())
-	require.Equal(t, 3, apiChange.GetSourceColumn())
-	require.Equal(t, 4, apiChange.GetSourceColumnEnd())
 
 	// Test new BaseSource and RevisionSource methods
 	baseSource := apiChange.GetBaseSource()
@@ -85,22 +75,6 @@ func TestApiChange_MultiLineError_NoComment(t *testing.T) {
 	apiChangeNoComment.Comment = ""
 
 	require.Equal(t, "error\t[change_id] at source\n\tin API GET /test\n\t\tThis is a breaking change.", apiChangeNoComment.MultiLineError(MockLocalizer, checker.ColorNever))
-}
-
-func TestApiChange_SourceFile(t *testing.T) {
-	apiChangeSourceFile := apiChange
-	apiChangeSourceFile.SourceFile = ""
-	apiChangeSourceFile.Source = load.NewSource("spec.yaml")
-
-	require.Equal(t, "spec.yaml", apiChangeSourceFile.GetSourceFile())
-}
-
-func TestApiChange_SourceUrl(t *testing.T) {
-	apiChangeSourceFile := apiChange
-	apiChangeSourceFile.SourceFile = ""
-	apiChangeSourceFile.Source = load.NewSource("http://google.com/spec.yaml")
-
-	require.Equal(t, "", apiChangeSourceFile.GetSourceFile())
 }
 
 func TestApiChangeWithSources_DirectConstruction(t *testing.T) {
