@@ -217,6 +217,26 @@ func TestNewSourceFromField_StripsGitRevisionPrefix(t *testing.T) {
 	require.Equal(t, 14, source.Column)
 }
 
+func TestInfoFieldSource(t *testing.T) {
+	info := &openapi3.Info{
+		Origin: &openapi3.Origin{
+			Key: &openapi3.Location{File: "HEAD:openapi.yaml", Line: 2, Column: 1},
+			Fields: openapi3.FieldLocations{
+				{Name: "version", File: "HEAD:openapi.yaml", Line: 4, Column: 3},
+			},
+		},
+	}
+
+	source := location.InfoFieldSource(info, "version")
+	require.Equal(t, "openapi.yaml", source.File)
+	require.Equal(t, 4, source.Line)
+	require.Equal(t, 3, source.Column)
+
+	require.Nil(t, location.InfoFieldSource(info, "title"))
+	require.Nil(t, location.InfoFieldSource(&openapi3.Info{}, "version"))
+	require.Nil(t, location.InfoFieldSource(nil, "version"))
+}
+
 func TestNewSourceFromSequenceItem_StripsGitRevisionPrefix(t *testing.T) {
 	op := &openapi3.Operation{}
 	sources := diff.OperationsSourcesMap{op: "openapi.yaml"}
