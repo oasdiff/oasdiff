@@ -8,6 +8,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 )
 
@@ -53,18 +54,28 @@ func ExampleCheckBackwardCompatibility() {
 		return
 	}
 
-	// pretty print breaking changes errors
+	// render the breaking changes, which is the formatters package's job
 	if len(errs) > 0 {
-		localizer := checker.NewDefaultLocalizer()
-		count := errs.GetLevelCount()
-		fmt.Print(localizer("total-errors", len(errs), count[checker.ERR], "error", count[checker.WARN], "warning"))
-		for _, bcerr := range errs {
-			fmt.Printf("%s\n\n", strings.TrimRight(bcerr.SingleLineError(localizer, checker.ColorNever), " "))
+		formatter, err := formatters.Lookup(string(formatters.FormatSingleLine), formatters.DefaultFormatterOpts())
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to look up the formatter: %v", err)
+			return
 		}
+
+		opts := formatters.NewRenderOpts()
+		opts.ColorMode = checker.ColorNever
+		report, err := formatter.RenderChangelog(errs, opts)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "failed to render the report: %v", err)
+			return
+		}
+		// a change with no comment ends in a space, which this example's
+		// expected output cannot carry
+		fmt.Print(strings.ReplaceAll(string(report), " \n", "\n"))
 	}
 
 	// Output:
-	// 6 breaking changes: 3 error, 3 warning
+	// 6 changes: 3 error, 3 warning, 0 info
 	// error at ../data/openapi-test1.yaml, in API GET /api/{domain}/{project}/badges/security-score removed the success response with the status `201` [response-success-status-removed].
 	//
 	// error at ../data/openapi-test1.yaml, in API POST /register the endpoint scheme security `bearerAuth` was removed from the API [api-security-removed].

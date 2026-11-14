@@ -1,10 +1,7 @@
 package checker
 
 import (
-	"fmt"
 	"strings"
-
-	"github.com/TwiN/go-color"
 )
 
 // InfoChange represents a change in the Info Section: https://swagger.io/specification/#info-object
@@ -42,16 +39,17 @@ func (c InfoChange) GetId() string {
 	return c.Id
 }
 
-func (c InfoChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...)
-}
-
 func (c InfoChange) GetArgs() []any {
 	return c.Args
 }
 
+// Text is the change's message, with each argument set apart by format.
+func (c InfoChange) Text(l Localizer, format ArgFormat) string {
+	return l(c.Id, formattedValues(c.Args, format)...)
+}
+
 func (c InfoChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...)
+	return c.Text(l, Quoted)
 }
 
 func (c InfoChange) GetComment(l Localizer) string {
@@ -74,25 +72,11 @@ func (InfoChange) GetOperationId() string {
 	return ""
 }
 
+// Subject is the info object, which a change there is about as a whole.
+func (c InfoChange) Subject() (section, element string) {
+	return "info", ""
+}
+
 func (InfoChange) GetPath() string {
 	return ""
-}
-
-func (c InfoChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s%s, %s info %s [%s]. %s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), c.at(l), l("in"), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
-	}
-	return fmt.Sprintf(format, c.Level.String(), c.at(l), l("in"), c.GetUncolorizedText(l), c.Id, c.GetComment(l))
-}
-
-func (c InfoChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s]%s\n\t%s info\n\t\t%s%s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), c.at(l), l("in"), c.GetText(l), multiLineComment(c.GetComment(l)))
-	}
-
-	return fmt.Sprintf(format, c.Level.String(), c.Id, c.at(l), l("in"), c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
 }

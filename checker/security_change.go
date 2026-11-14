@@ -1,10 +1,7 @@
 package checker
 
 import (
-	"fmt"
 	"strings"
-
-	"github.com/TwiN/go-color"
 )
 
 // SecurityChange represents a change in the Security Section (not to be confised with components/securitySchemes)
@@ -41,16 +38,17 @@ func (c SecurityChange) GetId() string {
 	return c.Id
 }
 
-func (c SecurityChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...)
-}
-
 func (c SecurityChange) GetArgs() []any {
 	return c.Args
 }
 
+// Text is the change's message, with each argument set apart by format.
+func (c SecurityChange) Text(l Localizer, format ArgFormat) string {
+	return l(c.Id, formattedValues(c.Args, format)...)
+}
+
 func (c SecurityChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...)
+	return c.Text(l, Quoted)
 }
 
 func (c SecurityChange) GetComment(l Localizer) string {
@@ -73,25 +71,11 @@ func (SecurityChange) GetOperationId() string {
 	return ""
 }
 
+// Subject is the security section, which a change there is about as a whole.
+func (c SecurityChange) Subject() (section, element string) {
+	return "security", ""
+}
+
 func (SecurityChange) GetPath() string {
 	return ""
-}
-
-func (c SecurityChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s, %s security %s [%s]. %s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), l("in"), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
-	}
-	return fmt.Sprintf(format, c.Level.String(), l("in"), c.GetUncolorizedText(l), c.Id, c.GetComment(l))
-}
-
-func (c SecurityChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s]\n\t%s security\n\t\t%s%s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("in"), c.GetText(l), multiLineComment(c.GetComment(l)))
-	}
-
-	return fmt.Sprintf(format, c.Level.String(), c.Id, l("in"), c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
 }

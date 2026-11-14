@@ -37,18 +37,18 @@ type SharedSchema struct {
 
 // detail renders the shared schema as a message detail: the other properties
 // it lists, and how many more there are.
-func (s *SharedSchema) detail(l Localizer, format func([]any) []any) string {
+func (s *SharedSchema) detail(l Localizer, format ArgFormat) string {
 	if s == nil {
 		return ""
 	}
 
 	parts := []string{}
 	if s.Name != "" {
-		parts = append(parts, l(SharedSchemaDetailNameId, format([]any{s.Name})...))
+		parts = append(parts, l(SharedSchemaDetailNameId, formattedValues([]any{s.Name}, format)...))
 	}
 	if others := s.Properties[1:]; len(others) > 0 {
 		listed := make([]string, len(others))
-		for i, other := range format(toAny(others)) {
+		for i, other := range formattedValues(toAny(others), format) {
 			listed[i] = interfaceToString(other)
 		}
 		list := strings.Join(listed, ", ")

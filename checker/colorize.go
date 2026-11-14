@@ -3,8 +3,6 @@ package checker
 import (
 	"fmt"
 
-	"github.com/TwiN/go-color"
-
 	"github.com/oasdiff/oasdiff/colorize"
 )
 
@@ -34,22 +32,24 @@ func IsColorEnabled(colorMode ColorMode) bool {
 	return colorize.IsColorEnabled(colorMode)
 }
 
-func isColorEnabled(colorMode ColorMode) bool {
-	return colorize.IsColorEnabled(colorMode)
+// ArgFormat sets a message argument apart from the words around it. The
+// reports pass their own: backticks for a plain one, bold quotes for a
+// coloured one.
+type ArgFormat func(arg string) string
+
+// Quoted is the plain ArgFormat, and the default when a caller passes none.
+func Quoted(arg string) string {
+	return fmt.Sprintf("`%s`", arg)
 }
 
-func colorizedValues(args []any) []any {
-	result := make([]any, len(args))
-	for i, arg := range args {
-		result[i] = color.InBold(fmt.Sprintf("'%s'", interfaceToString(arg)))
+func formattedValues(args []any, format ArgFormat) []any {
+	if format == nil {
+		format = Quoted
 	}
-	return result
-}
 
-func quotedValues(args []any) []any {
 	result := make([]any, len(args))
 	for i, arg := range args {
-		result[i] = fmt.Sprintf("`%s`", interfaceToString(arg))
+		result[i] = format(interfaceToString(arg))
 	}
 	return result
 }

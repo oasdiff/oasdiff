@@ -1,12 +1,6 @@
 package rules
 
-import (
-	"fmt"
-
-	"github.com/TwiN/go-color"
-
-	"github.com/oasdiff/oasdiff/colorize"
-)
+import "fmt"
 
 type Level int
 
@@ -32,13 +26,6 @@ func NewLevel(level string) (Level, error) {
 	return INVALID, fmt.Errorf("invalid level %s", level)
 }
 
-func (level Level) StringCond(colorMode colorize.ColorMode) string {
-	if colorize.IsColorEnabled(colorMode) {
-		return level.PrettyString()
-	}
-	return level.String()
-}
-
 func (level Level) String() string {
 	switch level {
 	case ERR:
@@ -49,20 +36,6 @@ func (level Level) String() string {
 		return "info"
 	default:
 		return "issue"
-	}
-}
-
-func (level Level) PrettyString() string {
-	levelName := level.String()
-	switch level {
-	case ERR:
-		return color.InRed(levelName)
-	case WARN:
-		return color.InPurple(levelName)
-	case INFO:
-		return color.InCyan(levelName)
-	default:
-		return color.InGray(levelName)
 	}
 }
 

@@ -44,7 +44,6 @@ func TestApiChange(t *testing.T) {
 	require.Equal(t, 7, revisionSource.Column)
 	require.NotEmpty(t, revisionSource)
 
-	require.Equal(t, "error at revision.yaml, in API GET /test This is a breaking change. [change_id]. comment", apiChange.SingleLineError(MockLocalizer, checker.ColorNever))
 }
 
 func MockLocalizer(originalKey string, args ...any) string {
@@ -61,17 +60,6 @@ func MockLocalizer(originalKey string, args ...any) string {
 
 func TestApiChange_MatchIgnore(t *testing.T) {
 	require.True(t, apiChange.MatchIgnore("/test", "error at revision.yaml, in api get /test this is a breaking change. [change_id]. comment", MockLocalizer))
-}
-
-func TestApiChange_MultiLineError(t *testing.T) {
-	require.Equal(t, "error\t[change_id] at revision.yaml\n\tin API GET /test\n\t\tThis is a breaking change.\n\t\tcomment", apiChange.MultiLineError(MockLocalizer, checker.ColorNever))
-}
-
-func TestApiChange_MultiLineError_NoComment(t *testing.T) {
-	apiChangeNoComment := apiChange
-	apiChangeNoComment.Comment = ""
-
-	require.Equal(t, "error\t[change_id] at revision.yaml\n\tin API GET /test\n\t\tThis is a breaking change.", apiChangeNoComment.MultiLineError(MockLocalizer, checker.ColorNever))
 }
 
 func TestApiChangeWithSources_DirectConstruction(t *testing.T) {

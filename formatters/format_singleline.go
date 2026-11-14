@@ -35,7 +35,7 @@ func (f SingleLineFormatter) RenderChangelog(changes checker.Changes, opts Rende
 	_, _ = fmt.Fprint(result, getChangelogTitle(changes, f.Localizer, opts.ColorMode))
 
 	for _, c := range changes {
-		_, _ = fmt.Fprintf(result, "%s\n\n", c.SingleLineError(f.Localizer, opts.ColorMode))
+		_, _ = fmt.Fprintf(result, "%s\n\n", singleLineError(c, f.Localizer, opts.ColorMode))
 	}
 
 	return result.Bytes(), nil
@@ -51,10 +51,10 @@ func getChangelogTitle(changes checker.Changes, l checker.Localizer, colorMode c
 		"total-changes",
 		len(changes),
 		count[checker.ERR],
-		checker.ERR.StringCond(colorMode),
+		levelText(checker.ERR, colorMode),
 		count[checker.WARN],
-		checker.WARN.StringCond(colorMode),
+		levelText(checker.WARN, colorMode),
 		count[checker.INFO],
-		checker.INFO.StringCond(colorMode),
+		levelText(checker.INFO, colorMode),
 	)
 }

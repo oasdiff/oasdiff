@@ -5,7 +5,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/TwiN/go-color"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -174,16 +173,17 @@ func (c ApiChange) GetId() string {
 	return c.Id
 }
 
-func (c ApiChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...) + c.getDetailsSuffix(l, colorizedValues)
-}
-
 func (c ApiChange) GetArgs() []any {
 	return c.Args
 }
 
+// Text is the change's message, with each argument set apart by format.
+func (c ApiChange) Text(l Localizer, format ArgFormat) string {
+	return l(c.Id, formattedValues(c.Args, format)...) + c.getDetailsSuffix(l, format)
+}
+
 func (c ApiChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix(l, quotedValues)
+	return c.Text(l, Quoted)
 }
 
 func (c ApiChange) GetComment(l Localizer) string {
@@ -200,9 +200,9 @@ func (c ApiChange) GetComment(l Localizer) string {
 	return strings.Join(parts, " ")
 }
 
-// getDetailsSuffix takes the formatter applied to the message arguments, so a
+// getDetailsSuffix takes the format applied to the message arguments, so a
 // value in the details looks the same as one in the message.
-func (c ApiChange) getDetailsSuffix(l Localizer, format func([]any) []any) string {
+func (c ApiChange) getDetailsSuffix(l Localizer, format ArgFormat) string {
 	details := combineDetails(c.Details, c.sharedSchema.detail(l, format))
 	if details == "" {
 		return ""
@@ -226,29 +226,13 @@ func (c ApiChange) GetOperationId() string {
 	return c.OperationId
 }
 
+// Subject is the API the change was found on.
+func (c ApiChange) Subject() (section, element string) {
+	return "API", c.Operation + " " + c.Path
+}
+
 func (c ApiChange) GetPath() string {
 	return c.Path
-}
-
-func (c ApiChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s%s, %s API %s %s %s [%s]. %s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), c.at(l), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
-	}
-
-	return fmt.Sprintf(format, c.Level.String(), c.at(l), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), c.Id, c.GetComment(l))
-
-}
-
-func (c ApiChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s]%s\n\t%s API %s %s\n\t\t%s%s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), c.at(l), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), multiLineComment(c.GetComment(l)))
-	}
-
-	return fmt.Sprintf(format, c.Level.String(), c.Id, c.at(l), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
 }
 
 func multiLineComment(comment string) string {
