@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/load"
 )
 
 var githubActionsSeverity = map[checker.Level]string{
@@ -45,7 +46,7 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 		var params = []string{
 			"title=" + escapeProperty(change.GetId()),
 		}
-		if rev := change.GetRevisionSource(); rev != nil && rev.File != "" && !isHTTPSource(rev.File) {
+		if rev := change.GetRevisionSource(); rev != nil && annotatable(rev.File) {
 			params = append(params, "file="+escapeProperty(rev.File))
 			if rev.Line != 0 {
 				params = append(params, "line="+strconv.Itoa(rev.Line))
@@ -53,7 +54,7 @@ func (f GitHubActionsFormatter) RenderChangelog(changes checker.Changes, opts Re
 			if rev.Column != 0 {
 				params = append(params, "col="+strconv.Itoa(rev.Column))
 			}
-		} else if base := change.GetBaseSource(); base != nil && base.File != "" && !isHTTPSource(base.File) {
+		} else if base := change.GetBaseSource(); base != nil && annotatable(base.File) {
 			// A change the revision does not have, such as a removal. The
 			// position is left out: those line numbers are the base spec's,
 			// and the annotation renders against the revision.
@@ -110,7 +111,7 @@ func (f GitHubActionsFormatter) RenderValidate(findings Findings, opts RenderOpt
 
 	for _, finding := range findings {
 		params := []string{"title=" + escapeProperty(finding.Id)}
-		if finding.Source.File != "" && !isHTTPSource(finding.Source.File) {
+		if annotatable(finding.Source.File) {
 			params = append(params, "file="+escapeProperty(finding.Source.File))
 			if finding.Source.Line != 0 {
 				params = append(params, "line="+strconv.Itoa(finding.Source.Line))
@@ -142,8 +143,11 @@ func (f GitHubActionsFormatter) SupportedOutputs() []Output {
 	return []Output{OutputChangelog, OutputValidate}
 }
 
-func isHTTPSource(file string) bool {
-	return strings.HasPrefix(file, "http://") || strings.HasPrefix(file, "https://")
+// annotatable reports whether a location names a file in the working tree,
+// which is the only thing an annotation can point at. A spec fetched over
+// http and one read from stdin both have locations that are not files there.
+func annotatable(file string) bool {
+	return file != "" && file != load.StdinPath && !load.NewSource(file).IsURL()
 }
 
 // writeGitHubActionsJobOutputParameters publishes key=value pairs as GitHub Actions

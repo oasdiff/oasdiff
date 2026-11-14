@@ -294,3 +294,26 @@ func TestGitHubActionsFormatter_RenderChangelog_BaseSourceOnly(t *testing.T) {
 		"::error title=change_id,file=base.yaml::in API GET /api/test This is a breaking change.\n",
 		string(output))
 }
+
+// A spec read from stdin has a location, but the name in it is not a file in
+// the working tree, so there is nothing to annotate.
+func TestGitHubActionsFormatter_RenderChangelog_StdinHasNoFile(t *testing.T) {
+	testChanges := checker.Changes{
+		checker.ApiChange{
+			Id:        "change_id",
+			Level:     checker.ERR,
+			Operation: http.MethodGet,
+			Path:      "/api/test",
+			Source:    load.NewSource("-"),
+			CommonChange: checker.CommonChange{
+				BaseSource: &checker.Source{File: "stdin", Line: 17, Column: 5},
+			},
+		},
+	}
+
+	output, err := gitHubFormatter.RenderChangelog(testChanges, formatters.NewRenderOpts())
+	require.NoError(t, err)
+	require.Equal(t,
+		"::error title=change_id::in API GET /api/test This is a breaking change.\n",
+		string(output))
+}
