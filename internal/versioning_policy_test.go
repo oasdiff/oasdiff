@@ -67,6 +67,15 @@ func Test_FailOnMissingVersionBump_NotApplicable(t *testing.T) {
 	require.Contains(t, stderr.String(), "versioning policy: not applicable. No breaking changes, so no version increase is required.")
 }
 
+// breaking reports a warning as a breaking change, so a warning on its own
+// demands the major version increase.
+func Test_FailOnMissingVersionBump_WarningFails(t *testing.T) {
+	code, stdout, stderr := runVersioning(t, "revision_warning_only.yaml", "--fail-on MISSING-VERSION-BUMP")
+	require.Equal(t, 1, code)
+	require.Contains(t, stdout, "request-parameter-removed")
+	require.Contains(t, stderr, "versioning policy: violated. info.version is still 1.0.0.")
+}
+
 // A severity asks a different question, so a major version increase changes
 // nothing and the breaking change fails the run.
 func Test_FailOnSeverity_IgnoresTheVersion(t *testing.T) {

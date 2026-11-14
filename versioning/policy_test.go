@@ -74,7 +74,6 @@ func requireViolation(t *testing.T, baseVersion, revisionVersion string, reason 
 	require.Equal(t, reason, verdict.Reason)
 	require.Equal(t, baseVersion, verdict.BaseVersion)
 	require.Equal(t, revisionVersion, verdict.RevisionVersion)
-	require.Equal(t, 1, verdict.BreakingChanges)
 }
 
 func requireSatisfied(t *testing.T, baseVersion, revisionVersion string) {
@@ -83,7 +82,6 @@ func requireSatisfied(t *testing.T, baseVersion, revisionVersion string) {
 	require.Equal(t, versioning.Satisfied, verdict.Status,
 		"expected a pass for %q -> %q, got %v", baseVersion, revisionVersion, verdict)
 	require.Equal(t, versioning.NoReason, verdict.Reason)
-	require.Equal(t, 1, verdict.BreakingChanges)
 }
 
 func requireUndecidable(t *testing.T, baseVersion, revisionVersion string) {
@@ -196,18 +194,14 @@ func TestVersioningPolicy_NonBreakingChangeIsNotApplicable(t *testing.T) {
 	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	verdict := versioning.Check(d, changes)
 	require.Equal(t, versioning.NotApplicable, verdict.Status)
-	require.Zero(t, verdict.BreakingChanges)
 }
 
-// The policy counts a change at the level it is reported at, not the level its
-// rule declares. A disclaimer that lowers a change below error therefore also
-// stops it demanding a bump: reporting that oasdiff cannot tell whether the
-// change is breaking, and then requiring the major version to be raised for
-// it, would contradict itself.
-//
-// Both specs here are 1.0.0, so an uncounted change is the only reason the
-// policy has nothing to judge.
-func TestVersioningPolicy_IgnoresAChangeADisclaimerLowered(t *testing.T) {
+// A warning demands the bump too: the commands that offer the policy report
+// warnings as breaking changes, so a warning that did not count would leave
+// the verdict contradicting the report above it. This one was lowered to a
+// warning by a disclaimer, which is the level a change is reported at rather
+// than the level its rule declares.
+func TestVersioningPolicy_CountsAWarning(t *testing.T) {
 	s1, err := open("../data/checker/disclaimer_allof_base.yaml")
 	require.NoError(t, err)
 	s2, err := open("../data/checker/disclaimer_allof_revision.yaml")
@@ -220,27 +214,18 @@ func TestVersioningPolicy_IgnoresAChangeADisclaimerLowered(t *testing.T) {
 	change := requireChange(t, changes, checker.ResponsePropertyBecameOptionalId)
 	require.Equal(t, checker.WARN, change.GetLevel(), "the disclaimer lowered it, which is what makes this case interesting")
 
-	require.Equal(t, versioning.NotApplicable, versioning.Check(d, changes).Status)
-}
-
-// The other half: a change that reaches error still demands the bump, so the
-// test above cannot be satisfied by a policy that never speaks.
-func TestVersioningPolicy_CountsAChangeNoDisclaimerLowered(t *testing.T) {
-	s1, err := open("../data/checker/disclaimer_allof_base.yaml")
-	require.NoError(t, err)
-	s2, err := open("../data/checker/disclaimer_allof_revision.yaml")
-	require.NoError(t, err)
-
-	// A removed path is an error no disclaimer lowers.
-	s2.Spec.Paths.Delete("/x")
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	changes := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
-
+	// Both specs are 1.0.0, so the warning is the only thing that can demand
+	// a bump.
 	verdict := versioning.Check(d, changes)
 	require.Equal(t, versioning.Violated, verdict.Status)
 	require.Equal(t, versioning.NotBumped, verdict.Reason)
+}
+
+// Below a warning there is nothing to carry, so an info change leaves the
+// policy with nothing to judge.
+func TestVersioningPolicy_IgnoresAnInfoChange(t *testing.T) {
+	changes := checker.Changes{checker.ApiChange{Id: "any", Level: checker.INFO}}
+	require.Equal(t, versioning.NotApplicable, versioning.Check(nil, changes).Status)
 }
 
 // A spec with no info section at all, which is the other way the versions
@@ -249,5 +234,4 @@ func TestVersioningPolicy_NoDiffReport(t *testing.T) {
 	changes := checker.Changes{checker.ApiChange{Id: "any", Level: checker.ERR}}
 	verdict := versioning.Check(nil, changes)
 	require.Equal(t, versioning.Undecidable, verdict.Status)
-	require.Equal(t, 1, verdict.BreakingChanges)
 }

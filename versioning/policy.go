@@ -43,23 +43,27 @@ type Verdict struct {
 	Reason          Reason
 	BaseVersion     string
 	RevisionVersion string
-	BreakingChanges int
 }
+
+// breakingLevel is the level from which a change demands a major version
+// increase. It is WARN, not ERR, because that is where the commands that
+// report breaking changes start reporting: a warning oasdiff prints as a
+// breaking change and the policy then declares no breaking change would
+// contradict itself on screen.
+const breakingLevel = checker.WARN
 
 // Check judges info.version against the breaking changes in changes: whether
 // the version stayed put, moved backwards, moved by too little, or carried
 // them correctly. The caller decides what the verdict is worth, which for the
 // CLI is --fail-on MISSING-VERSION-BUMP.
 func Check(diffReport *diff.Diff, changes checker.Changes) Verdict {
-	breaking := countBreakingChanges(changes)
-	if breaking == 0 {
+	// A change counts at the level it is reported at, which an override, a
+	// disclaimer or an ignore file may have moved.
+	if !changes.HasLevelOrHigher(breakingLevel) {
 		return Verdict{Status: NotApplicable}
 	}
 
-	verdict := Verdict{
-		Status:          Undecidable,
-		BreakingChanges: breaking,
-	}
+	verdict := Verdict{Status: Undecidable}
 
 	if diffReport == nil || diffReport.BaseInfo == nil || diffReport.RevisionInfo == nil {
 		return verdict
@@ -95,16 +99,4 @@ func versioningViolation(baseVersion, revisionVersion string, base, revision sem
 		return MajorNotBumped
 	}
 	return NoReason
-}
-
-// A change counts at the level it is reported at, which an override, a
-// disclaimer or an ignore file may have moved.
-func countBreakingChanges(changes checker.Changes) int {
-	count := 0
-	for _, change := range changes {
-		if change.GetLevel() >= checker.ERR {
-			count++
-		}
-	}
-	return count
 }
