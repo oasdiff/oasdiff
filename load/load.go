@@ -13,6 +13,8 @@ import (
 // root and each $ref'd file) into it; stdin ignores it, since the review
 // bundle (the capture's only consumer) does not accept stdin sources.
 func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*openapi3.T, error) {
+	loader = trackOrigin(loader)
+
 	switch source.Type {
 	case SourceTypeStdin:
 		return loader.LoadFromStdin()
@@ -23,6 +25,16 @@ func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*ope
 	default:
 		return withCapture(loader, capture, source.Path).LoadFromFile(source.Path)
 	}
+}
+
+// trackOrigin records where each element of the document came from. Every
+// spec loaded here gets it, rather than the caller choosing: a change whose
+// file, line and column are unknown cannot be reported anywhere a reader can
+// act on it, and the two commands that only transform a spec pay about a
+// tenth of a second for it on a large one.
+func trackOrigin(loader *openapi3.Loader) *openapi3.Loader {
+	loader.IncludeOrigin = true
+	return loader
 }
 
 // withCapture records the files a load reads and refuses any $ref to a document
