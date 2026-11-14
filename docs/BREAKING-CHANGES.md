@@ -61,7 +61,7 @@ A common way to use oasdiff is by running it as a step the CI/CD pipeline to det
 In order to prevent changes, oasdiff can be configured to return an error if changes above a certain level are found.
 - To exit with return code 1 if ERR-level changes are found, add the `--fail-on ERR` flag.  
 - To exit with return code 1 if ERR-level or WARN-level changes are found, add the `--fail-on WARN` flag.
-- To exit with return code 1 if any changes are found, add the `--fail-on INFO` flag. This is a `changelog` value; `breaking` reports WARN and above.
+- To exit with return code 1 if any changes are found, add the `--fail-on INFO` flag to `changelog`. `breaking` doesn't accept `INFO`, because it reports `WARN` and above.
 - To exit with return code 1 only when breaking changes aren't accompanied by a major version increase in `info.version`, add the `--fail-on MISSING-VERSION-BUMP` flag, described in [Version Bumps and Breaking Changes](VERSIONING.md).
 
 For example:
