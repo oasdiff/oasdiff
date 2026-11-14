@@ -79,8 +79,9 @@ func (InfoChange) GetPath() string {
 	return ""
 }
 
-// source is where the change is reported: the revision spec, or the base when
-// only the base has a location.
+// source is where the change is reported. A side that does not have the
+// element has no location, so the order decides only a change that is in both,
+// and there the revision is the side being reviewed.
 func (c InfoChange) source() *Source {
 	if c.RevisionSource != nil {
 		return c.RevisionSource
