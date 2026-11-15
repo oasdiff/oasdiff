@@ -1620,3 +1620,4 @@ request-property-sunset-date-changed-earlier-description: "a data de expiração
 response-property-sunset-date-changed-earlier: "a data de expiração da propriedade de resposta %s foi alterada para uma data anterior, de %s para %s"
 response-property-sunset-date-changed-earlier-description: "a data de expiração da propriedade de resposta foi movida para antes da que os clientes receberam"
 sunset-date-changed-earlier-comment: "A data que os clientes receberam foi retirada. O oasdiff trata uma data x-sunset publicada como um compromisso, com ou sem uma política de depreciação configurada, porque os clientes planejam a migração com base nela."
+composed-nullability-one-of-comment: "Um `oneOf` corresponde apenas quando exatamente uma de suas ramificações corresponde, portanto ele aceita null somente enquanto exatamente uma ramificação o aceita. Adicionar null a uma segunda ramificação retira null da composição, e removê-lo de uma de duas o devolve."

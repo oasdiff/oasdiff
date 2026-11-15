@@ -65,48 +65,56 @@ const (
 	becameNotNullable
 )
 
-// nullabilityChangeId returns the rule id reporting the schema diff's
-// nullability transition, or "" when nullability did not change.
-func nullabilityChangeId(d *diff.SchemaDiff, nullableId, notNullableId string) string {
-	switch nullabilityChange(d) {
-	case becameNullable:
-		return nullableId
-	case becameNotNullable:
-		return notNullableId
+// nullabilityChangeId returns the rule id and comment reporting the schema
+// diff's nullability transition, or "" when nullability did not change.
+// parent is the schema diff d sits under, or nil at the root of a walk.
+func nullabilityChangeId(parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId, notNullableId string) (string, string) {
+	if branchOfComposition(parent, d) {
+		return "", ""
 	}
-	return ""
+	transition, comment := nullabilityChange(d)
+	switch transition {
+	case becameNullable:
+		return nullableId, comment
+	case becameNotNullable:
+		return notNullableId, comment
+	}
+	return "", comment
 }
 
-// nullabilityChange recognizes a nullability transition in any of its three
+// nullabilityChange recognizes a nullability transition in any of its four
 // equivalent forms: the nullable keyword (OpenAPI 3.0), a "null" entry in the
-// type array (OpenAPI 3.1), and the nullable oneOf wrapping
-// (oneOf: [{type: "null"}, <equivalent schema>]).
-func nullabilityChange(d *diff.SchemaDiff) nullability {
+// type array (OpenAPI 3.1), the nullable oneOf wrapping
+// (oneOf: [{type: "null"}, <equivalent schema>]), and a oneOf or anyOf whose
+// branches decide whether the schema accepts null (composedNullability). It
+// returns the comment to report the transition with, which only the composed
+// form has.
+func nullabilityChange(d *diff.SchemaDiff) (nullability, string) {
 	// A schema present on one side only is not a nullability transition (and
 	// the type-array checks below read both sides).
 	if d == nil || d.Base == nil || d.Revision == nil {
-		return nullabilityUnchanged
+		return nullabilityUnchanged, ""
 	}
 	if d.NullableDiff != nil {
 		if d.NullableDiff.From == true {
-			return becameNotNullable
+			return becameNotNullable, ""
 		}
 		if d.NullableDiff.To == true {
-			return becameNullable
+			return becameNullable, ""
 		}
-		return nullabilityUnchanged
+		return nullabilityUnchanged, ""
 	}
 	if nullRemovedFromTypeArray(d.TypeDiff, d.Revision.Type) {
-		return becameNotNullable
+		return becameNotNullable, ""
 	}
 	if nullAddedToTypeArray(d.TypeDiff, d.Base.Type) {
-		return becameNullable
+		return becameNullable, ""
 	}
 	if isNullableWrapping(d) {
-		return becameNullable
+		return becameNullable, ""
 	}
 	if isNullableUnwrapping(d) {
-		return becameNotNullable
+		return becameNotNullable, ""
 	}
-	return nullabilityUnchanged
+	return composedNullability(d)
 }

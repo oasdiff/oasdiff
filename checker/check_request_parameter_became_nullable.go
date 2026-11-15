@@ -20,12 +20,12 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 			return
 		}
 
-		if id := nullabilityChangeId(p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
+		if id, comment := nullabilityChangeId(nil, p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "nullable")
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
-				"",
+				comment,
 			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
@@ -35,12 +35,12 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 				if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
 					return
 				}
-				if id := nullabilityChangeId(propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
+				if id, comment := nullabilityChangeId(parent, propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
 					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
 						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
-						"",
+						comment,
 					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 				}
 			})
