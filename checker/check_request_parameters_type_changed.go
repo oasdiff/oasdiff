@@ -5,6 +5,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 const (
@@ -37,8 +38,8 @@ func isParameterScalarToFormExplodeArray(paramDiff *diff.ParameterDiff, typeDiff
 	// nullability around the widening stays in scope (a nullable scalar is
 	// ["string","null"], a nullable array ["array","null"]). A base that is
 	// untyped or already an array is out of scope and stays on the breaking path.
-	addedSansNull := withoutNull(typeDiff.Added)
-	baseTypes := withoutNull(paramDiff.SchemaDiff.Base.Type.Slice())
+	addedSansNull := nullability.WithoutNull(typeDiff.Added)
+	baseTypes := nullability.WithoutNull(paramDiff.SchemaDiff.Base.Type.Slice())
 	if len(addedSansNull) != 1 || addedSansNull[0] != "array" || len(baseTypes) == 0 {
 		return false
 	}
@@ -78,7 +79,7 @@ func itemAcceptsBaseScalarValues(base, item *openapi3.Schema) bool {
 		return false
 	}
 
-	if !isTypeContained(withoutNull(item.Type.Slice()), withoutNull(base.Type.Slice()), false) {
+	if !isTypeContained(nullability.WithoutNull(item.Type.Slice()), nullability.WithoutNull(base.Type.Slice()), false) {
 		return false
 	}
 
@@ -90,19 +91,6 @@ func itemAcceptsBaseScalarValues(base, item *openapi3.Schema) bool {
 	baseValue.Nullable, itemValue.Nullable = false, false
 	return diff.SchemaRefsValidationEquivalent(diff.NewConfig(),
 		&openapi3.SchemaRef{Value: &baseValue}, &openapi3.SchemaRef{Value: &itemValue})
-}
-
-// withoutNull returns the type list with the JSON-Schema "null" type removed,
-// so OpenAPI 3.1 nullable types (e.g. ["string","null"]) compare by their
-// non-null type.
-func withoutNull(types []string) []string {
-	out := make([]string, 0, len(types))
-	for _, t := range types {
-		if t != "null" {
-			out = append(out, t)
-		}
-	}
-	return out
 }
 
 func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {

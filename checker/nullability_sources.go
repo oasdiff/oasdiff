@@ -6,6 +6,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 // nullabilitySources locates a nullability transition in the base and the
@@ -79,7 +80,7 @@ func branchThatChangedNullability(d *diff.SchemaDiff) *diff.SchemaDiff {
 			if modified == nil {
 				continue
 			}
-			if transition, _ := nullabilityChange(modified.Diff); transition == nullabilityUnchanged {
+			if transition, _ := nullabilityChange(modified.Diff); transition == nullability.Unchanged {
 				continue
 			}
 			if result != nil {

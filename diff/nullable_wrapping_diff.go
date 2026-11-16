@@ -1,9 +1,8 @@
 package diff
 
 import (
-	"slices"
-
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 // NullableWrappingDiff marks that a schema was made nullable by wrapping it in
@@ -66,7 +65,7 @@ func isNullableWrap(u *unroller, plain, wrapped *openapi3.Schema, reversed bool)
 	if len(plain.OneOf) > 0 || len(plain.AnyOf) > 0 || len(plain.AllOf) > 0 || plain.Not != nil {
 		return false
 	}
-	if SchemaAcceptsNull(plain) {
+	if nullability.TypeAccepts(plain) {
 		return false
 	}
 	// The wrapped side must be a bare wrapper: exactly a two-branch oneOf,
@@ -90,15 +89,6 @@ func isNullableWrap(u *unroller, plain, wrapped *openapi3.Schema, reversed bool)
 		return u.equivalent(payload, &openapi3.SchemaRef{Value: plain})
 	}
 	return u.equivalent(&openapi3.SchemaRef{Value: plain}, payload)
-}
-
-// SchemaAcceptsNull reports whether the schema accepts a null value via the
-// nullable keyword (3.0) or a "null" entry in its type set (3.1).
-func SchemaAcceptsNull(schema *openapi3.Schema) bool {
-	if schema.Nullable {
-		return true
-	}
-	return slices.Contains(schema.Type.Slice(), "null")
 }
 
 // constrainsNothingBeyondOneOf reports whether the schema, with its oneOf
