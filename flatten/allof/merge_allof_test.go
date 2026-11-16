@@ -341,8 +341,9 @@ func TestMerge_NullableIsSetToTrue(t *testing.T) {
 	require.Equal(t, true, merged.Nullable)
 }
 
-// verify that if there exists a nullable field which is false, then the nullable field in the merged schema is false.
-func TestMerge_NullableIsSetToFalse(t *testing.T) {
+// nullable: true on the schema holding the allOf makes the merged schema
+// nullable, whatever the members say.
+func TestMerge_NullableOnTheSchemaHoldingTheAllOf(t *testing.T) {
 	merged, err := allof.Merge(
 		openapi3.SchemaRef{
 			Value: &openapi3.Schema{
@@ -364,7 +365,39 @@ func TestMerge_NullableIsSetToFalse(t *testing.T) {
 			}})
 	require.NoError(t, err)
 	require.Nil(t, merged.AllOf)
+	require.Equal(t, true, merged.Nullable)
+}
+
+// One member that is not nullable keeps null out when the schema holding the
+// allOf does not say nullable itself.
+func TestMerge_NullableIsSetToFalse(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}, Nullable: false}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"object"}, Nullable: true}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.AllOf)
 	require.Equal(t, false, merged.Nullable)
+}
+
+// Members that are all nullable make the merged schema nullable, although the
+// schema holding the allOf does not say so.
+func TestMerge_NullableWhenEveryMemberIs(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.AllOf)
+	require.Equal(t, true, merged.Nullable)
 }
 
 func TestMerge_NestedAllOfInProperties(t *testing.T) {
