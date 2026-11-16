@@ -8,15 +8,6 @@ import (
 
 const nullType = "null"
 
-// Transition is how a schema's acceptance of null changed.
-type Transition int
-
-const (
-	Unchanged Transition = iota
-	BecameNullable
-	BecameNotNullable
-)
-
 // TypeAccepts reports whether the schema names null as an accepted type: the
 // nullable keyword (OpenAPI 3.0) or a "null" entry in its type array
 // (OpenAPI 3.1).
@@ -47,7 +38,8 @@ func OwnKeywordsAccept(schema *openapi3.Schema) bool {
 // ComposedAccepts reports whether a schema accepts null, for a schema whose
 // oneOf or anyOf decides that, and whether it could be decided. It is not
 // decided for a schema with neither, or with an allOf, a not or an if, which
-// constrain the instance alongside the composition.
+// constrain the instance alongside the composition. A schema with
+// nullable: true accepts null whatever its branches do.
 func ComposedAccepts(schema *openapi3.Schema) (accepts bool, decided bool) {
 	if schema == nil {
 		return false, false
@@ -57,6 +49,12 @@ func ComposedAccepts(schema *openapi3.Schema) (accepts bool, decided bool) {
 	}
 	if len(schema.AllOf) > 0 || schema.Not != nil || schema.If != nil {
 		return false, false
+	}
+	// OpenAPI 3.0 ties the nullable keyword to a type in the same schema, so
+	// beside a oneOf or anyOf it strictly does nothing. It is still how a 3.0
+	// document says the composition is nullable, and it is read that way.
+	if schema.Nullable {
+		return true, true
 	}
 
 	accepts = OwnKeywordsAccept(schema)
@@ -97,54 +95,24 @@ func NullableBranches(branches openapi3.SchemaRefs) (count int, decided bool) {
 	return count, true
 }
 
-// ComposedChange compares what ComposedAccepts says of the two versions of a
-// schema. It is Unchanged when either cannot be decided.
-func ComposedChange(base, revision *openapi3.Schema) Transition {
-	before, beforeDecided := ComposedAccepts(base)
-	after, afterDecided := ComposedAccepts(revision)
-	switch {
-	case !beforeDecided || !afterDecided || before == after:
-		return Unchanged
-	case after:
-		return BecameNullable
-	default:
-		return BecameNotNullable
+// Composed reports whether the schema has a oneOf or an anyOf.
+func Composed(schema *openapi3.Schema) bool {
+	return schema != nil && (len(schema.OneOf) > 0 || len(schema.AnyOf) > 0)
+}
+
+// Accepts reports whether a schema accepts null, and whether it could be
+// decided: by its oneOf or anyOf when it has one (see ComposedAccepts), and
+// by its own keywords otherwise. It is not decided for a schema with an
+// allOf, a not or an if.
+func Accepts(schema *openapi3.Schema) (accepts bool, decided bool) {
+	if schema == nil {
+		return false, false
 	}
-}
-
-// AddedToTypes reports whether "null" was added to a type array that already
-// constrained the type. A schema with no type keyword accepted every value,
-// null included, so giving it a type array that contains null does not make
-// it newly nullable.
-func AddedToTypes(added []string, baseTypes []string) bool {
-	return len(baseTypes) > 0 && slices.Contains(added, nullType)
-}
-
-// RemovedFromTypes reports whether "null" was removed from a type array that
-// still constrains the type. A schema whose type keyword was dropped accepts
-// every value, null included, so it did not become non-nullable.
-func RemovedFromTypes(deleted []string, revisionTypes []string) bool {
-	return len(revisionTypes) > 0 && slices.Contains(deleted, nullType)
-}
-
-// OnlyNullChanged reports whether adding or removing "null" is the only
-// change to a type array, given the types added and deleted.
-func OnlyNullChanged(added, deleted []string) bool {
-	return onlyNull(added) && onlyNull(deleted)
-}
-
-func onlyNull(types []string) bool {
-	return !slices.ContainsFunc(types, func(t string) bool { return t != nullType })
-}
-
-// WithoutNull returns the types with "null" removed, so that a nullable type
-// such as ["string", "null"] compares by its non-null types.
-func WithoutNull(types []string) []string {
-	out := make([]string, 0, len(types))
-	for _, t := range types {
-		if t != nullType {
-			out = append(out, t)
-		}
+	if Composed(schema) {
+		return ComposedAccepts(schema)
 	}
-	return out
+	if len(schema.AllOf) > 0 || schema.Not != nil || schema.If != nil {
+		return false, false
+	}
+	return OwnKeywordsAccept(schema), true
 }

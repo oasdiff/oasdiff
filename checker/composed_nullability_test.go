@@ -199,13 +199,20 @@ var requestPropertyStoppedAcceptingNull = checker.ApiChange{
 	OperationId: "addProduct",
 }
 
+// untypedBranch is the change carrying the comment for a oneOf that rejects
+// null because a branch has no type.
+func untypedBranch(change checker.ApiChange) checker.ApiChange {
+	change.Comment = checker.ComposedNullabilityUntypedBranchCommentId
+	return change
+}
+
 // A branch with no type accepts any value, null included, so dropping the
 // type from the second branch makes null match both branches.
 func TestOneOfNullBranch_UntypedBranchAcceptsNull(t *testing.T) {
 	errs := requestNullabilityAfter(t, func(branch *openapi3.Schema) {
 		branch.Type = nil
 	})
-	requireSingleApiChange(t, requestPropertyStoppedAcceptingNull, errs)
+	requireSingleApiChange(t, untypedBranch(requestPropertyStoppedAcceptingNull), errs)
 }
 
 // An enum decides for an untyped branch: null matches it only when null is
@@ -220,7 +227,7 @@ func TestOneOfNullBranch_UntypedEnumBranch(t *testing.T) {
 		branch.Type = nil
 		branch.Enum = []any{"home", nil}
 	})
-	requireSingleApiChange(t, requestPropertyStoppedAcceptingNull, errs)
+	requireSingleApiChange(t, untypedBranch(requestPropertyStoppedAcceptingNull), errs)
 }
 
 // A const other than null keeps null out of an untyped branch.
