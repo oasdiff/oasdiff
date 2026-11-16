@@ -17,16 +17,16 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if id := nullabilityChangeId(info.schemaDiff, RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId); id != "" {
+		if id, comment := nullabilityChangeId(nil, info.schemaDiff, RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId); id != "" {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
-			result = append(result, info.newChange(id, nil, "").
+			result = append(result, info.newChange(id, nil, comment).
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			if id := nullabilityChangeId(p.propertyDiff, RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId); id != "" {
+			if id, comment := nullabilityChangeId(p.parent, p.propertyDiff, RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId); id != "" {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
-				result = append(result, p.newChange(id, []any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, "").
+				result = append(result, p.newChange(id, []any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, comment).
 					WithSources(propBaseSource, propRevisionSource))
 			}
 		})

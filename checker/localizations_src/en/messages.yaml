@@ -1630,3 +1630,4 @@ request-property-sunset-date-changed-earlier-description: "request property suns
 response-property-sunset-date-changed-earlier: "response property %s sunset date changed to an earlier date, from %s to %s"
 response-property-sunset-date-changed-earlier-description: "response property sunset date moved earlier than the one clients were given"
 sunset-date-changed-earlier-comment: "The date clients were given has been withdrawn. oasdiff treats a published x-sunset date as a commitment, whether or not a deprecation policy is configured, because clients schedule their migration against it."
+composed-nullability-one-of-comment: "A `oneOf` matches only when exactly one of its branches matches, so it accepts null only while exactly one branch does. Adding null to a second branch takes null out of the composition, and removing it from one of two puts it back."

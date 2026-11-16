@@ -66,7 +66,7 @@ func isNullableWrap(u *unroller, plain, wrapped *openapi3.Schema, reversed bool)
 	if len(plain.OneOf) > 0 || len(plain.AnyOf) > 0 || len(plain.AllOf) > 0 || plain.Not != nil {
 		return false
 	}
-	if schemaAcceptsNull(plain) {
+	if SchemaAcceptsNull(plain) {
 		return false
 	}
 	// The wrapped side must be a bare wrapper: exactly a two-branch oneOf,
@@ -92,9 +92,9 @@ func isNullableWrap(u *unroller, plain, wrapped *openapi3.Schema, reversed bool)
 	return u.equivalent(&openapi3.SchemaRef{Value: plain}, payload)
 }
 
-// schemaAcceptsNull reports whether the schema accepts a null value via the
+// SchemaAcceptsNull reports whether the schema accepts a null value via the
 // nullable keyword (3.0) or a "null" entry in its type set (3.1).
-func schemaAcceptsNull(schema *openapi3.Schema) bool {
+func SchemaAcceptsNull(schema *openapi3.Schema) bool {
 	if schema.Nullable {
 		return true
 	}
