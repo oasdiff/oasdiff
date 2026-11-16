@@ -1,6 +1,8 @@
 package checker
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
@@ -49,23 +51,18 @@ func hasOrigin(schema *openapi3.Schema) bool {
 	return schema != nil && schema.Origin != nil
 }
 
-// nullabilitySource locates the first of the keywords the schema has, falling
-// back to the schema itself.
+// nullabilitySource locates the first of the keywords the schema has, and for
+// type, the "null" entry of the type array when there is one.
 func nullabilitySource(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, schema *openapi3.Schema, keywords []string) *Source {
 	if operation == nil || !hasOrigin(schema) {
 		return nil
 	}
-	for _, keyword := range keywords {
-		if keyword == "type" {
-			if source := location.NewSourceFromSequenceItem(operationsSources, operation, schema.Origin, "type", "null"); source != nil {
-				return source
-			}
-		}
-		if source := location.NewSourceFromField(operationsSources, operation, schema.Origin, keyword); source != nil {
+	if slices.Contains(keywords, "type") {
+		if source := location.NewSourceFromSequenceItem(operationsSources, operation, schema.Origin, "type", "null"); source != nil {
 			return source
 		}
 	}
-	return location.NewSourceFromOrigin(operationsSources, operation, schema.Origin)
+	return location.SchemaKeywordSource(operationsSources, operation, schema, keywords...)
 }
 
 // branchThatChangedNullability returns the oneOf or anyOf branch whose own

@@ -556,3 +556,25 @@ func TestNewSourceFromSequenceItem(t *testing.T) {
 	source = location.NewSourceFromSequenceItem(sources, op, nil, "type", "string")
 	require.Nil(t, source)
 }
+
+func TestSchemaKeywordSource(t *testing.T) {
+	op := &openapi3.Operation{}
+	sources := diff.OperationsSourcesMap{op: load.NewFileSource("spec.yaml")}
+	schema := &openapi3.Schema{
+		Origin: &openapi3.Origin{
+			Key: &openapi3.Location{File: "spec.yaml", Line: 10, Column: 5},
+			Fields: openapi3.FieldLocations{
+				{File: "spec.yaml", Line: 11, Column: 7, Name: "type"},
+				{File: "spec.yaml", Line: 12, Column: 7, Name: "oneOf"},
+			},
+		},
+	}
+
+	// the first keyword the schema has, in the order asked for
+	require.Equal(t, 12, location.SchemaKeywordSource(sources, op, schema, "nullable", "oneOf", "type").Line)
+	// the schema itself when it has none of them
+	require.Equal(t, 10, location.SchemaKeywordSource(sources, op, schema, "nullable").Line)
+	// nothing to locate without origin data
+	require.Nil(t, location.SchemaKeywordSource(sources, op, &openapi3.Schema{}, "type"))
+	require.Nil(t, location.SchemaKeywordSource(sources, op, nil, "type"))
+}
