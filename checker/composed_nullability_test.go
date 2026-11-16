@@ -173,3 +173,80 @@ func TestOneOfNullBranch_AllOfLeavesTheBranchReporting(t *testing.T) {
 	require.Equal(t, checker.RequestPropertyBecomeNullableId, errs[0].GetId())
 	require.Equal(t, "address/oneOf[#/components/schemas/RequestAddress]", errs[0].(checker.ApiChange).Args[0])
 }
+
+// requestNullabilityAfter compares the base fixture with a copy of it whose
+// second oneOf branch, the referenced schema, was edited, and returns what
+// the request nullability check reports.
+func requestNullabilityAfter(t *testing.T, edit func(branch *openapi3.Schema)) checker.Changes {
+	t.Helper()
+	base, err := open(oneOfNullBranchBase)
+	require.NoError(t, err)
+	revision, err := open(oneOfNullBranchBase)
+	require.NoError(t, err)
+	edit(addressSchemas(revision)[0].OneOf[1].Value)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	return checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
+}
+
+var requestPropertyStoppedAcceptingNull = checker.ApiChange{
+	Id:          checker.RequestPropertyBecomeNotNullableId,
+	Args:        []any{"address"},
+	Comment:     checker.ComposedNullabilityOneOfCommentId,
+	Operation:   "POST",
+	Path:        "/products",
+	OperationId: "addProduct",
+}
+
+// A branch with no type accepts any value, null included, so dropping the
+// type from the second branch makes null match both branches.
+func TestOneOfNullBranch_UntypedBranchAcceptsNull(t *testing.T) {
+	errs := requestNullabilityAfter(t, func(branch *openapi3.Schema) {
+		branch.Type = nil
+	})
+	requireSingleApiChange(t, requestPropertyStoppedAcceptingNull, errs)
+}
+
+// An enum decides for an untyped branch: null matches it only when null is
+// one of the values.
+func TestOneOfNullBranch_UntypedEnumBranch(t *testing.T) {
+	require.Empty(t, requestNullabilityAfter(t, func(branch *openapi3.Schema) {
+		branch.Type = nil
+		branch.Enum = []any{"home"}
+	}))
+
+	errs := requestNullabilityAfter(t, func(branch *openapi3.Schema) {
+		branch.Type = nil
+		branch.Enum = []any{"home", nil}
+	})
+	requireSingleApiChange(t, requestPropertyStoppedAcceptingNull, errs)
+}
+
+// A const other than null keeps null out of an untyped branch.
+func TestOneOfNullBranch_UntypedConstBranch(t *testing.T) {
+	require.Empty(t, requestNullabilityAfter(t, func(branch *openapi3.Schema) {
+		branch.Type = nil
+		branch.Const = "home"
+	}))
+}
+
+// An enum without null keeps null out of a branch whose type allows it.
+func TestOneOfNullBranch_EnumOverridesNullableType(t *testing.T) {
+	require.Empty(t, requestNullabilityAfter(t, func(branch *openapi3.Schema) {
+		branch.Type = &openapi3.Types{"string", "null"}
+		branch.Enum = []any{"home"}
+	}))
+}
+
+// What a branch with if/then/else accepts is not decided here, so the oneOf
+// reports nothing about the property.
+func TestOneOfNullBranch_ConditionalBranchIsNotDecided(t *testing.T) {
+	errs := requestNullabilityAfter(t, func(branch *openapi3.Schema) {
+		branch.Type = nil
+		branch.If = &openapi3.SchemaRef{Value: openapi3.NewObjectSchema()}
+	})
+	for _, err := range errs {
+		require.NotEqual(t, "address", err.(checker.ApiChange).Args[0])
+	}
+}
