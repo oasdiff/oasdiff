@@ -66,7 +66,7 @@ func TestExtract_CrossFileSchemaSlicedFromExternalFile(t *testing.T) {
 		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: userSpan.file, Line: userSpan.end}},
 	}
 	blocks := Extract(checker.Changes{c}, docs(si.Spec), docs(si.Spec), si.Sources, si.Sources)
-	require.Len(t, blocks, 1)
+	require.Len(t, blocks, 2)
 	require.Equal(t, userKey, blocks[0].Key, "cards to the external block, not the operation")
 	require.Equal(t, "other.yaml", blocks[0].RevFile, "the block reports the file it was sliced from")
 	require.Contains(t, blocks[0].RevText, "User:")
@@ -137,7 +137,7 @@ func TestExtract_CrossFileRefStyleDiffersBetweenSides(t *testing.T) {
 		},
 	}
 	blocks := Extract(checker.Changes{c}, docs(baseSI.Spec), docs(revSI.Spec), baseSI.Sources, revSI.Sources)
-	require.Len(t, blocks, 1, "the two sides pair into one block")
+	require.Len(t, blocks, 2, "the two sides pair into one block, next to the endpoint")
 	require.NotEmpty(t, blocks[0].BaseText, "base side sliced (paired, not delete + add)")
 	require.NotEmpty(t, blocks[0].RevText, "revision side sliced")
 }
@@ -180,7 +180,7 @@ paths:
 	require.Len(t, changes, 1)
 
 	blocks := Extract(changes, docs(baseSI.Spec), docs(revSI.Spec), baseSI.Sources, revSI.Sources)
-	require.Len(t, blocks, 1)
+	require.Len(t, blocks, 2)
 	require.Equal(t, "schemas.yaml", blocks[0].RevFile, "the block slices from the file the schema lives in")
 	require.Contains(t, blocks[0].RevText, "User:")
 	require.NotContains(t, blocks[0].RevText, "/users:", "sliced from schemas.yaml, not the root spec")
@@ -274,7 +274,8 @@ func TestExtract_ComposedSameBasenameCrossSideLookup(t *testing.T) {
 		CommonChange: checker.CommonChange{RevisionSource: &checker.Source{File: revUserSpan.file, Line: revUserSpan.end}},
 	}
 	blocks := Extract(checker.Changes{c}, baseDocs, revDocs, baseTexts, revTexts)
-	require.Len(t, blocks, 1)
+	require.Len(t, blocks, 2)
+	require.Equal(t, "GET /b", blocks[1].Title, "the endpoint that refers to the component")
 	require.Contains(t, blocks[0].BaseText, "id:", "base sliced from svc-b's file")
 	require.NotContains(t, blocks[0].BaseText, "name:", "not svc-a's same-named schema")
 }

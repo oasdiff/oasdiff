@@ -52,16 +52,29 @@ const otherChangesKey = "__other__"
 // that side has no sliceable source (e.g. an added or removed block, or a
 // location that did not resolve to a block).
 type Block struct {
-	Key           string   `json:"key" yaml:"key"`                                 // stable identity, e.g. "POST /users" or "components/schemas/User"
-	Title         string   `json:"title" yaml:"title"`                             // human header
-	ChangeIDs     []string `json:"change_ids" yaml:"change_ids"`                   // rule ids of the changes in this block (for display/debug)
-	Fingerprints  []string `json:"fingerprints" yaml:"fingerprints"`               // per-change fingerprints, aligned with ChangeIDs; the stable key a consumer joins each change to its block on
-	BaseFile      string   `json:"base_file,omitempty" yaml:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
-	BaseText      string   `json:"base_text" yaml:"base_text"`                     // source slice on the base side ("" if absent)
-	BaseLineStart int      `json:"base_line_start" yaml:"base_line_start"`         // 1-based first line of BaseText in the base spec
-	RevFile       string   `json:"rev_file,omitempty" yaml:"rev_file,omitempty"`   // basename of the revision slice's source file
-	RevText       string   `json:"rev_text" yaml:"rev_text"`                       // source slice on the revision side ("" if absent)
-	RevLineStart  int      `json:"rev_line_start" yaml:"rev_line_start"`           // 1-based first line of RevText in the revision spec
+	Key          string   `json:"key" yaml:"key"`                   // stable identity, e.g. "POST /users" or "components/schemas/User"
+	Title        string   `json:"title" yaml:"title"`               // human header
+	ChangeIDs    []string `json:"change_ids" yaml:"change_ids"`     // rule ids of the changes in this block (for display/debug)
+	Fingerprints []string `json:"fingerprints" yaml:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the stable key a consumer joins each change to its block on
+	// References are the changes to this endpoint that are located in another
+	// block, a component the endpoint refers to. A block extracted only for
+	// them has no ChangeIDs.
+	References    []Reference `json:"references,omitempty" yaml:"references,omitempty"`
+	BaseFile      string      `json:"base_file,omitempty" yaml:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
+	BaseText      string      `json:"base_text" yaml:"base_text"`                     // source slice on the base side ("" if absent)
+	BaseLineStart int         `json:"base_line_start" yaml:"base_line_start"`         // 1-based first line of BaseText in the base spec
+	RevFile       string      `json:"rev_file,omitempty" yaml:"rev_file,omitempty"`   // basename of the revision slice's source file
+	RevText       string      `json:"rev_text" yaml:"rev_text"`                       // source slice on the revision side ("" if absent)
+	RevLineStart  int         `json:"rev_line_start" yaml:"rev_line_start"`           // 1-based first line of RevText in the revision spec
+}
+
+// Reference ties a change located in a component to the endpoint it changes:
+// the line of the $ref in the endpoint that leads to the component, directly
+// or through other components. A line is 0 on a side that has no such $ref.
+type Reference struct {
+	Fingerprint string `json:"fingerprint" yaml:"fingerprint"`
+	BaseLine    int    `json:"base_line,omitempty" yaml:"base_line,omitempty"`
+	RevLine     int    `json:"rev_line,omitempty" yaml:"rev_line,omitempty"`
 }
 
 // Extract groups changes by their enclosing structural block and slices each
@@ -76,8 +89,7 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 	byKey := map[string]*Block{}
 	spansByKey := map[string]resolution{}
 	var order []string
-	for _, c := range changes {
-		r := resolve(c, baseIdx, revIdx)
+	block := func(r resolution) *Block {
 		b := byKey[r.key]
 		if b == nil {
 			b = &Block{Key: r.key, Title: r.title}
@@ -85,8 +97,19 @@ func Extract(changes checker.Changes, baseDocs, revDocs []*openapi3.T, baseTexts
 			spansByKey[r.key] = r
 			order = append(order, r.key)
 		}
+		return b
+	}
+	references := newReferenceFinder(baseDocs, revDocs, baseIdx, revIdx)
+	for _, c := range changes {
+		r := resolve(c, baseIdx, revIdx)
+		b := block(r)
 		b.ChangeIDs = append(b.ChangeIDs, c.GetId())
 		b.Fingerprints = append(b.Fingerprints, checker.Fingerprint(c))
+
+		if endpoint, reference, ok := references.find(c, r); ok {
+			b := block(endpoint)
+			b.References = append(b.References, reference)
+		}
 	}
 
 	// Text is a direct lookup by origin file: capture keys are the origin.Key.File

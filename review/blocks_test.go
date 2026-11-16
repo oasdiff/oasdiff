@@ -173,7 +173,7 @@ func TestExtract_RefdComponentFollowsSourceLine(t *testing.T) {
 	}
 
 	blocks := Extract(checker.Changes{c}, docs(doc), docs(doc), oneFile("", refdComponentSpec), oneFile("", refdComponentSpec))
-	require.Len(t, blocks, 1)
+	require.Len(t, blocks, 2)
 	b := blocks[0]
 
 	require.Equal(t, "components/schemas/User", b.Key) // the component, not "POST /users"
@@ -563,7 +563,7 @@ func TestExtract_ComponentResponseBlock(t *testing.T) {
 		},
 	}
 	blocks := Extract(checker.Changes{c}, docs(doc), docs(doc), oneFile("", namedComponentsSpec), oneFile("", namedComponentsSpec))
-	require.Len(t, blocks, 1)
+	require.Len(t, blocks, 2)
 	require.Equal(t, "components/responses/NotFound", blocks[0].Key)
 	require.Contains(t, blocks[0].BaseText, "NotFound:")
 	require.NotContains(t, blocks[0].BaseText, "/users:", "not the operation block")
