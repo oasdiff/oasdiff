@@ -14,7 +14,7 @@ func TestChange(t *testing.T) {
 	two := &openapi3.Schema{OneOf: refs(null, nullableObject)}
 
 	change := func(base, revision *openapi3.Schema) (nullability.Transition, bool) {
-		return nullability.Change(base, revision)
+		return nullability.Change(base, revision, nullability.Dialects{Base: nullability.OpenAPI31, Revision: nullability.OpenAPI31})
 	}
 	for name, tc := range map[string]struct {
 		base, revision *openapi3.Schema
@@ -40,4 +40,21 @@ func TestChange(t *testing.T) {
 			require.Equal(t, tc.decided, decided)
 		})
 	}
+}
+
+// Each side is read in its own document's dialect, so a schema that moved
+// from the OpenAPI 3.0 way of saying nullable to the 3.1 way did not change.
+func TestChange_AcrossDialects(t *testing.T) {
+	migration := nullability.Dialects{Base: nullability.OpenAPI30, Revision: nullability.OpenAPI31}
+	nullableString30 := &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}
+	untyped := &openapi3.Schema{}
+
+	got, decided := nullability.Change(nullableString30, typed("string", "null"), migration)
+	require.True(t, decided)
+	require.Equal(t, nullability.Unchanged, got)
+
+	// the same schema with no type accepts null only once it is read as 3.1
+	got, decided = nullability.Change(untyped, untyped, migration)
+	require.True(t, decided)
+	require.Equal(t, nullability.BecameNullable, got)
 }

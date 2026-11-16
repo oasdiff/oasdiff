@@ -45,7 +45,7 @@ func TestOwnKeywordsAccept(t *testing.T) {
 		"a type without null and an enum": {&openapi3.Schema{Type: &openapi3.Types{"string"}, Enum: []any{nil}}, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			require.Equal(t, tc.want, nullability.OwnKeywordsAccept(tc.schema))
+			require.Equal(t, tc.want, nullability.OwnKeywordsAccept(tc.schema, nullability.OpenAPI31))
 		})
 	}
 }
@@ -77,7 +77,7 @@ func TestComposedAccepts(t *testing.T) {
 		"an undecided anyOf beside the oneOf": {&openapi3.Schema{OneOf: refs(null, object), AnyOf: openapi3.SchemaRefs{nil}}, false, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accepts, decided := nullability.ComposedAccepts(tc.schema)
+			accepts, decided := nullability.ComposedAccepts(tc.schema, nullability.OpenAPI31)
 			require.Equal(t, tc.accepts, accepts)
 			require.Equal(t, tc.decided, decided)
 		})
@@ -104,7 +104,47 @@ func TestAccepts(t *testing.T) {
 		"a oneOf with no null in it": {&openapi3.Schema{OneOf: refs(object, typed("string"))}, false, true},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accepts, decided := nullability.Accepts(tc.schema)
+			accepts, decided := nullability.Accepts(tc.schema, nullability.OpenAPI31)
+			require.Equal(t, tc.accepts, accepts)
+			require.Equal(t, tc.decided, decided)
+		})
+	}
+}
+
+func TestDialectOf(t *testing.T) {
+	require.Equal(t, nullability.OpenAPI30, nullability.DialectOf("3.0.3"))
+	require.Equal(t, nullability.OpenAPI31, nullability.DialectOf("3.1.0"))
+	require.Equal(t, nullability.OpenAPI31, nullability.DialectOf("3.2.0"))
+	require.Equal(t, nullability.OpenAPI30, nullability.DialectOf(""))
+}
+
+// Under OpenAPI 3.0 null is accepted only where nullable: true says so, so a
+// schema with no type does not accept it, as a plain schema or as a branch.
+func TestAccepts_OpenAPI30(t *testing.T) {
+	object := typed("object")
+	nullableString := &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}
+	untyped := &openapi3.Schema{Properties: openapi3.Schemas{"a": {Value: typed("string")}}}
+
+	for name, tc := range map[string]struct {
+		schema  *openapi3.Schema
+		accepts bool
+		decided bool
+	}{
+		"no type":                              {untyped, false, true},
+		"no type, nullable":                    {&openapi3.Schema{Nullable: true}, true, true},
+		"a type without nullable":              {object, false, true},
+		"a type with nullable":                 {nullableString, true, true},
+		"nullable with an enum without null":   {&openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true, Enum: []any{"a"}}, false, true},
+		"oneOf with a nullable and an untyped": {&openapi3.Schema{OneOf: refs(nullableString, untyped)}, true, true},
+		"oneOf with two nullable branches":     {&openapi3.Schema{OneOf: refs(nullableString, nullableString)}, false, true},
+		"oneOf with no nullable branch":        {&openapi3.Schema{OneOf: refs(object, untyped)}, false, true},
+		"nullable beside a oneOf":              {&openapi3.Schema{Nullable: true, OneOf: refs(object, typed("string"))}, true, true},
+		"a type without nullable over a oneOf": {&openapi3.Schema{Type: &openapi3.Types{"string"}, OneOf: refs(nullableString)}, false, true},
+		"anyOf with a nullable branch":         {&openapi3.Schema{AnyOf: refs(untyped, nullableString)}, true, true},
+		"an allOf is not decided":              {&openapi3.Schema{AllOf: refs(object)}, false, false},
+	} {
+		t.Run(name, func(t *testing.T) {
+			accepts, decided := nullability.Accepts(tc.schema, nullability.OpenAPI30)
 			require.Equal(t, tc.accepts, accepts)
 			require.Equal(t, tc.decided, decided)
 		})

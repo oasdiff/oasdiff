@@ -14,13 +14,14 @@ const (
 
 func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
+	dialects := dialectsOf(diffReport)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
 
-		if id, comment := nullabilityChangeId(nil, p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
-			baseSource, revisionSource := nullabilitySources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff)
+		if id, comment := nullabilityChangeId(dialects, nil, p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
+			baseSource, revisionSource := nullabilitySources(dialects, operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff)
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
@@ -34,8 +35,8 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 				if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
 					return
 				}
-				if id, comment := nullabilityChangeId(parent, propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
-					baseSource, revisionSource := nullabilitySources(operationsSources, p.opInfo.methodDiff, propertyDiff)
+				if id, comment := nullabilityChangeId(dialects, parent, propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
+					baseSource, revisionSource := nullabilitySources(dialects, operationsSources, p.opInfo.methodDiff, propertyDiff)
 					result = append(result, p.opInfo.NewApiChange(
 						id,
 						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},

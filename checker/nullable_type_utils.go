@@ -28,11 +28,11 @@ func nullRemovedFromTypeArray(typeDiff *diff.StringsDiff, revisionType *openapi3
 // nullabilityChangeId returns the rule id and comment reporting the schema
 // diff's nullability transition, or "" when nullability did not change.
 // parent is the schema diff d sits under, or nil at the root of a walk.
-func nullabilityChangeId(parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId, notNullableId string) (string, string) {
-	if branchOfComposition(parent, d) {
+func nullabilityChangeId(dialects nullability.Dialects, parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId, notNullableId string) (string, string) {
+	if branchOfComposition(dialects, parent, d) {
 		return "", ""
 	}
-	transition, comment := nullabilityChange(d)
+	transition, comment := nullabilityChange(dialects, d)
 	switch transition {
 	case nullability.BecameNullable:
 		return nullableId, comment
@@ -48,7 +48,7 @@ func nullabilityChangeId(parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId
 // A schema with a oneOf or anyOf on either side, which includes one wrapped in
 // oneOf: [{type: "null"}, <schema>], is decided by whether it accepted null
 // before and after (composedNullability).
-func nullabilityChange(d *diff.SchemaDiff) (nullability.Transition, string) {
+func nullabilityChange(dialects nullability.Dialects, d *diff.SchemaDiff) (nullability.Transition, string) {
 	// A schema present on one side only is not a nullability transition (and
 	// the type-array checks below read both sides).
 	if d == nil || d.Base == nil || d.Revision == nil {
@@ -69,7 +69,7 @@ func nullabilityChange(d *diff.SchemaDiff) (nullability.Transition, string) {
 	if nullAddedToTypeArray(d.TypeDiff, d.Base.Type) {
 		return nullability.BecameNullable, ""
 	}
-	if transition, comment, decided := composedNullability(d); decided {
+	if transition, comment, decided := composedNullability(dialects, d); decided {
 		return transition, comment
 	}
 	// What one of the sides accepts is not decided, as when the wrapped schema
@@ -81,4 +81,12 @@ func nullabilityChange(d *diff.SchemaDiff) (nullability.Transition, string) {
 		return nullability.BecameNotNullable, ""
 	}
 	return nullability.Unchanged, ""
+}
+
+// dialectsOf returns the dialects of the two documents the diff compares.
+func dialectsOf(diffReport *diff.Diff) nullability.Dialects {
+	return nullability.Dialects{
+		Base:     nullability.DialectOf(diffReport.BaseOpenAPI),
+		Revision: nullability.DialectOf(diffReport.RevisionOpenAPI),
+	}
 }

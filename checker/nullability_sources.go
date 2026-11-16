@@ -22,7 +22,7 @@ import (
 //     keyword when no single branch changed
 //
 // A side that does not have the keyword is located at the schema itself.
-func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
+func nullabilitySources(dialects nullability.Dialects, operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
 	if d == nil || !hasOrigin(d.Base) && !hasOrigin(d.Revision) {
 		return location.SchemaFieldSources(operationsSources, operationItem, d, "nullable")
 	}
@@ -38,8 +38,8 @@ func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationIt
 		isNullableUnwrapping(d):
 		keywords = []string{"type", "oneOf"}
 	default:
-		if branch := branchThatChangedNullability(d); branch != nil {
-			return nullabilitySources(operationsSources, operationItem, branch)
+		if branch := branchThatChangedNullability(dialects, d); branch != nil {
+			return nullabilitySources(dialects, operationsSources, operationItem, branch)
 		}
 		keywords = []string{"oneOf", "anyOf"}
 	}
@@ -70,7 +70,7 @@ func nullabilitySource(operationsSources diff.OperationsSourcesMap, operation *o
 // nullability changed, or nil when there is not exactly one: the composition's
 // nullability then moved because branches were added or removed, or because
 // several changed at once.
-func branchThatChangedNullability(d *diff.SchemaDiff) *diff.SchemaDiff {
+func branchThatChangedNullability(dialects nullability.Dialects, d *diff.SchemaDiff) *diff.SchemaDiff {
 	var result *diff.SchemaDiff
 	for _, subschemas := range []*diff.SubschemasDiff{d.OneOfDiff, d.AnyOfDiff} {
 		if subschemas == nil {
@@ -80,7 +80,7 @@ func branchThatChangedNullability(d *diff.SchemaDiff) *diff.SchemaDiff {
 			if modified == nil {
 				continue
 			}
-			if transition, _ := nullabilityChange(modified.Diff); transition == nullability.Unchanged {
+			if transition, _ := nullabilityChange(dialects, modified.Diff); transition == nullability.Unchanged {
 				continue
 			}
 			if result != nil {

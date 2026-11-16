@@ -11,11 +11,18 @@ const (
 	BecameNotNullable
 )
 
-// Change compares what Accepts says of the two versions of a schema, and
-// reports whether both could be decided.
-func Change(base, revision *openapi3.Schema) (transition Transition, decided bool) {
-	before, beforeDecided := Accepts(base)
-	after, afterDecided := Accepts(revision)
+// Dialects are the dialects of the two documents being compared. They differ
+// when a document moved from OpenAPI 3.0 to 3.1 between the two versions.
+type Dialects struct {
+	Base, Revision Dialect
+}
+
+// Change compares what Accepts says of the two versions of a schema, each
+// read in its own document's dialect, and reports whether both could be
+// decided.
+func Change(base, revision *openapi3.Schema, dialects Dialects) (transition Transition, decided bool) {
+	before, beforeDecided := Accepts(base, dialects.Base)
+	after, afterDecided := Accepts(revision, dialects.Revision)
 	switch {
 	case !beforeDecided || !afterDecided:
 		return Unchanged, false
