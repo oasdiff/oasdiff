@@ -84,32 +84,29 @@ func TestComposedAccepts(t *testing.T) {
 	}
 }
 
-func TestComposedChange(t *testing.T) {
-	null, object, nullableObject := typed("null"), typed("object"), typed("object", "null")
-	one := &openapi3.Schema{OneOf: refs(null, object)}
-	two := &openapi3.Schema{OneOf: refs(null, nullableObject)}
+func TestAccepts(t *testing.T) {
+	null, object := typed("null"), typed("object")
 
-	require.Equal(t, nullability.BecameNotNullable, nullability.ComposedChange(one, two))
-	require.Equal(t, nullability.BecameNullable, nullability.ComposedChange(two, one))
-	require.Equal(t, nullability.Unchanged, nullability.ComposedChange(one, one))
-	// one side cannot be decided
-	require.Equal(t, nullability.Unchanged, nullability.ComposedChange(object, one))
-}
-
-func TestTypeArrayChanges(t *testing.T) {
-	require.True(t, nullability.AddedToTypes([]string{"null"}, []string{"string"}))
-	require.False(t, nullability.AddedToTypes([]string{"string", "null"}, nil), "the base had no type, so it already accepted null")
-	require.False(t, nullability.AddedToTypes([]string{"integer"}, []string{"string"}))
-
-	require.True(t, nullability.RemovedFromTypes([]string{"null"}, []string{"string"}))
-	require.False(t, nullability.RemovedFromTypes([]string{"string", "null"}, nil), "the revision has no type, so it still accepts null")
-
-	require.True(t, nullability.OnlyNullChanged([]string{"null"}, nil))
-	require.True(t, nullability.OnlyNullChanged(nil, []string{"null"}))
-	require.False(t, nullability.OnlyNullChanged([]string{"null", "integer"}, nil))
-}
-
-func TestWithoutNull(t *testing.T) {
-	require.Equal(t, []string{"string"}, nullability.WithoutNull([]string{"string", "null"}))
-	require.Empty(t, nullability.WithoutNull([]string{"null"}))
+	for name, tc := range map[string]struct {
+		schema  *openapi3.Schema
+		accepts bool
+		decided bool
+	}{
+		"nil":                        {nil, false, false},
+		"a type without null":        {object, false, true},
+		"no type":                    {&openapi3.Schema{}, true, true},
+		"a oneOf decides":            {&openapi3.Schema{OneOf: refs(null, object)}, true, true},
+		"an allOf is not decided":    {&openapi3.Schema{AllOf: refs(object)}, false, false},
+		"a not is not decided":       {&openapi3.Schema{Not: &openapi3.SchemaRef{Value: object}}, false, false},
+		"an if is not decided":       {&openapi3.Schema{If: &openapi3.SchemaRef{Value: object}}, false, false},
+		"nullable beside a oneOf":    {&openapi3.Schema{Nullable: true, OneOf: refs(object, typed("string"))}, true, true},
+		"nullable beside an allOf":   {&openapi3.Schema{Nullable: true, OneOf: refs(object), AllOf: refs(object)}, false, false},
+		"a oneOf with no null in it": {&openapi3.Schema{OneOf: refs(object, typed("string"))}, false, true},
+	} {
+		t.Run(name, func(t *testing.T) {
+			accepts, decided := nullability.Accepts(tc.schema)
+			require.Equal(t, tc.accepts, accepts)
+			require.Equal(t, tc.decided, decided)
+		})
+	}
 }

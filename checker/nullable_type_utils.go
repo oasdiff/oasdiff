@@ -42,13 +42,12 @@ func nullabilityChangeId(parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId
 	return "", comment
 }
 
-// nullabilityChange recognizes a nullability transition in any of its four
-// equivalent forms: the nullable keyword (OpenAPI 3.0), a "null" entry in the
-// type array (OpenAPI 3.1), the nullable oneOf wrapping
-// (oneOf: [{type: "null"}, <equivalent schema>]), and a oneOf or anyOf whose
-// branches decide whether the schema accepts null (composedNullability). It
-// returns the comment to report the transition with, which only the composed
-// form has.
+// nullabilityChange reports a schema's nullability transition and the comment
+// to report it with. The nullable keyword (OpenAPI 3.0) and a "null" entry
+// added to or removed from the type array (OpenAPI 3.1) are read as written.
+// A schema with a oneOf or anyOf on either side, which includes one wrapped in
+// oneOf: [{type: "null"}, <schema>], is decided by whether it accepted null
+// before and after (composedNullability).
 func nullabilityChange(d *diff.SchemaDiff) (nullability.Transition, string) {
 	// A schema present on one side only is not a nullability transition (and
 	// the type-array checks below read both sides).
@@ -70,11 +69,16 @@ func nullabilityChange(d *diff.SchemaDiff) (nullability.Transition, string) {
 	if nullAddedToTypeArray(d.TypeDiff, d.Base.Type) {
 		return nullability.BecameNullable, ""
 	}
+	if transition, comment, decided := composedNullability(d); decided {
+		return transition, comment
+	}
+	// What one of the sides accepts is not decided, as when the wrapped schema
+	// has an if: the wrapping itself is still recognized.
 	if isNullableWrapping(d) {
 		return nullability.BecameNullable, ""
 	}
 	if isNullableUnwrapping(d) {
 		return nullability.BecameNotNullable, ""
 	}
-	return composedNullability(d)
+	return nullability.Unchanged, ""
 }
