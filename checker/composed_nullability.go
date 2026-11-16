@@ -88,13 +88,13 @@ func composedAcceptsNull(schema *openapi3.Schema) (bool, bool) {
 	if len(schema.OneOf) == 0 && len(schema.AnyOf) == 0 {
 		return false, false
 	}
-	// allOf and not constrain the instance alongside the composition, and
+	// allOf, not and if constrain the instance alongside the composition, and
 	// what they accept is not decided here.
-	if len(schema.AllOf) > 0 || schema.Not != nil {
+	if len(schema.AllOf) > 0 || schema.Not != nil || schema.If != nil {
 		return false, false
 	}
 
-	accepts := typePermitsNull(schema)
+	accepts := ownKeywordsAcceptNull(schema)
 	if len(schema.OneOf) > 0 {
 		nullable, ok := nullableBranches(schema.OneOf)
 		if !ok {
@@ -113,8 +113,9 @@ func composedAcceptsNull(schema *openapi3.Schema) (bool, bool) {
 }
 
 // nullableBranches counts the branches that accept null, and reports whether
-// every branch could be decided: a branch that composes further is not,
-// because diff.SchemaAcceptsNull reads a schema's own type and nullable.
+// every branch could be decided: a branch that composes further, or has a not
+// or an if, is not, because ownKeywordsAcceptNull reads only the keywords that
+// decide on their own.
 func nullableBranches(branches openapi3.SchemaRefs) (int, bool) {
 	count := 0
 	for _, branch := range branches {
@@ -122,25 +123,26 @@ func nullableBranches(branches openapi3.SchemaRefs) (int, bool) {
 			return 0, false
 		}
 		schema := branch.Value
-		if len(schema.OneOf) > 0 || len(schema.AnyOf) > 0 || len(schema.AllOf) > 0 || schema.Not != nil {
+		if len(schema.OneOf) > 0 || len(schema.AnyOf) > 0 || len(schema.AllOf) > 0 || schema.Not != nil || schema.If != nil {
 			return 0, false
 		}
-		if diff.SchemaAcceptsNull(schema) {
+		if ownKeywordsAcceptNull(schema) {
 			count++
 		}
 	}
 	return count, true
 }
 
-// typePermitsNull reports whether a schema's own keywords let null through. A
-// schema with no type keyword constrains nothing, so it does.
-func typePermitsNull(schema *openapi3.Schema) bool {
-	if schema.Nullable {
-		return true
+// ownKeywordsAcceptNull reports whether the type, nullable, enum and const of
+// a schema let null through. A schema with no type keyword accepts every type,
+// null included. An enum lets null through only when null is one of its
+// values, and a const only when it is null.
+func ownKeywordsAcceptNull(schema *openapi3.Schema) bool {
+	if len(schema.Type.Slice()) > 0 && !diff.SchemaAcceptsNull(schema) {
+		return false
 	}
-	types := schema.Type.Slice()
-	if len(types) == 0 {
-		return true
+	if len(schema.Enum) > 0 && !slices.ContainsFunc(schema.Enum, func(value any) bool { return value == nil }) {
+		return false
 	}
-	return slices.Contains(types, "null")
+	return schema.Const == nil
 }
