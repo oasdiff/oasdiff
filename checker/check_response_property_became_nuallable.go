@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -18,14 +17,14 @@ func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSource
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		if id, comment := nullabilityChangeId(nil, info.schemaDiff, ResponseBodyBecameNullableId, ResponseBodyBecameNotNullableId); id != "" {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
+			baseSource, revisionSource := nullabilitySources(operationsSources, info.operationItem, info.schemaDiff)
 			result = append(result, info.newChange(id, nil, comment).
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
 			if id, comment := nullabilityChangeId(p.parent, p.propertyDiff, ResponsePropertyBecameNullableId, ResponsePropertyBecameNotNullableId); id != "" {
-				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
+				propBaseSource, propRevisionSource := nullabilitySources(operationsSources, info.operationItem, p.propertyDiff)
 				result = append(result, p.newChange(
 					id,
 					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},
