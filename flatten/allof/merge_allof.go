@@ -170,12 +170,12 @@ func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
 
 	schemaRefs := openapi3.SchemaRefs{baseSchemaRef}
 	schemaRefs = append(schemaRefs, baseSchemaRef.Value.AllOf...)
-	merged, nullable := baseSchemaRef.Value, baseSchemaRef.Value.Nullable
+	merged, holder := baseSchemaRef.Value, *baseSchemaRef.Value
 	err := flattenSchemas(state, baseSchemaRef, schemaRefs)
 	if err != nil {
 		return err
 	}
-	setNullable(baseSchemaRef, merged, nullable, allOfCopy)
+	setNullable(baseSchemaRef, merged, &holder, allOfCopy)
 	baseSchemaRef.Value.AllOf = nil
 	pruneOneOf(state, baseSchemaRef, allOfCopy)
 	pruneAnyOf(baseSchemaRef)
@@ -391,7 +391,7 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	if err != nil {
 		return nil, err
 	}
-	setNullable(result, merged, base.Value.Nullable, allOf)
+	setNullable(result, merged, base.Value, allOf)
 
 	return result, nil
 }
@@ -656,17 +656,18 @@ func hasTrue(values []bool) bool {
 }
 
 // setNullable sets the OpenAPI 3.0 nullable keyword of a schema merged with
-// its allOf members. Such a schema accepts null when it says nullable: true
-// itself, the usual way of making a $ref nullable, or when every member does.
-// Its own nullable being false does not take null out, since the keyword is
-// absent far more often than it is meant.
+// its allOf members. holder is the schema that held the allOf, as it was
+// before the merge. The merged schema accepts null when holder says
+// nullable: true, the usual way of making a $ref nullable, or when holder has
+// no type of its own and every member is nullable. A holder with a type and
+// no nullable rejects null whatever its members say.
 //
 // merged is the schema the merge was writing into. When result no longer
 // points at it, the merge stood another schema in for the result (see
 // anchorInFlight), and that schema is not this one's to change.
-func setNullable(result *openapi3.SchemaRef, merged *openapi3.Schema, nullable bool, members openapi3.SchemaRefs) {
+func setNullable(result *openapi3.SchemaRef, merged *openapi3.Schema, holder *openapi3.Schema, members openapi3.SchemaRefs) {
 	if result.Value == merged {
-		merged.Nullable = nullable || allNullable(members)
+		merged.Nullable = holder.Nullable || len(holder.Type.Slice()) == 0 && allNullable(members)
 	}
 }
 

@@ -400,6 +400,22 @@ func TestMerge_NullableWhenEveryMemberIs(t *testing.T) {
 	require.Equal(t, true, merged.Nullable)
 }
 
+// A type without nullable on the schema holding the allOf keeps null out,
+// although every member is nullable.
+func TestMerge_NotNullableUnderATypedSchema(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				Type: &openapi3.Types{"string"},
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.AllOf)
+	require.Equal(t, false, merged.Nullable)
+}
+
 func TestMerge_NestedAllOfInProperties(t *testing.T) {
 	merged, err := allof.Merge(
 		openapi3.SchemaRef{
