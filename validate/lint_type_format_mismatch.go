@@ -8,6 +8,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/formatters"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 // TypeFormatMismatchID flags a schema whose `format` is a known format defined
@@ -73,7 +74,7 @@ func mismatchedFormatOwner(s *openapi3.Schema) (string, bool) {
 		return "", false
 	}
 
-	types := withoutNullType(s.Type.Slice())
+	types := nullability.WithoutNull(s.Type.Slice())
 	if len(types) == 0 {
 		return "", false
 	}
@@ -106,20 +107,8 @@ func invertFormatsByType() map[string]string {
 	return owners
 }
 
-// withoutNullType drops the JSON Schema "null" type so an OpenAPI 3.1 nullable
-// type (e.g. ["string","null"]) is compared by its non-null type(s).
-func withoutNullType(types []string) []string {
-	out := make([]string, 0, len(types))
-	for _, t := range types {
-		if t != "null" {
-			out = append(out, t)
-		}
-	}
-	return out
-}
-
 func newTypeFormatMismatchFinding(s *openapi3.Schema, section, owner, source string) formatters.Finding {
-	declared := strings.Join(withoutNullType(s.Type.Slice()), ", ")
+	declared := strings.Join(nullability.WithoutNull(s.Type.Slice()), ", ")
 	line, column := schemaFieldLocation(s, "format")
 	f := formatters.Finding{
 		Id: TypeFormatMismatchID,
