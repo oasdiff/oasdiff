@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 const (
@@ -659,26 +660,41 @@ func hasTrue(values []bool) bool {
 // its allOf members. holder is the schema that held the allOf, as it was
 // before the merge. The merged schema accepts null when holder says
 // nullable: true, the usual way of making a $ref nullable, or when holder has
-// no type of its own and every member is nullable. A holder with a type and
-// no nullable rejects null whatever its members say.
+// no type of its own and its members accept null (see membersNeedNullable).
+// A holder with a type and no nullable rejects null whatever its members say.
 //
 // merged is the schema the merge was writing into. When result no longer
 // points at it, the merge stood another schema in for the result (see
 // anchorInFlight), and that schema is not this one's to change.
 func setNullable(result *openapi3.SchemaRef, merged *openapi3.Schema, holder *openapi3.Schema, members openapi3.SchemaRefs) {
 	if result.Value == merged {
-		merged.Nullable = holder.Nullable || len(holder.Type.Slice()) == 0 && allNullable(members)
+		merged.Nullable = holder.Nullable || len(holder.Type.Slice()) == 0 && membersNeedNullable(members)
 	}
 }
 
-// allNullable reports whether every allOf member has nullable: true.
-func allNullable(members openapi3.SchemaRefs) bool {
+// membersNeedNullable reports whether every allOf member accepts null and at
+// least one of them says so with nullable: true. A member accepts null with
+// nullable: true, or with no type and nothing else that keeps null out. When
+// no member says nullable: true none of them has a type that excludes null,
+// so the merged schema accepts null without the keyword.
+func membersNeedNullable(members openapi3.SchemaRefs) bool {
+	nullable := false
 	for _, member := range members {
-		if member == nil || member.Value == nil || !member.Value.Nullable {
+		if member == nil || member.Value == nil {
+			return false
+		}
+		if member.Value.Nullable {
+			nullable = true
+			continue
+		}
+		if len(member.Value.Type.Slice()) > 0 {
+			return false
+		}
+		if accepts, decided := nullability.Accepts(member.Value); !decided || !accepts {
 			return false
 		}
 	}
-	return len(members) > 0
+	return nullable
 }
 
 func hasFalse(values []bool) bool {

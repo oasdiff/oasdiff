@@ -400,6 +400,54 @@ func TestMerge_NullableWhenEveryMemberIs(t *testing.T) {
 	require.Equal(t, true, merged.Nullable)
 }
 
+// A member with no type accepts null, so beside a nullable member it leaves
+// the merged schema nullable.
+func TestMerge_NullableBesideAMemberWithNoType(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxLength: new(uint64(3))}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.AllOf)
+	require.Equal(t, true, merged.Nullable)
+}
+
+// A member with no type and an enum that does not list null keeps null out.
+func TestMerge_NotNullableBesideAMemberWhoseEnumExcludesNull(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{Enum: []any{"a", "b"}}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.AllOf)
+	require.Equal(t, false, merged.Nullable)
+}
+
+// Members that all have no type merge into a schema with no type, which
+// accepts null without the nullable keyword.
+func TestMerge_MembersWithNoTypeDoNotAddNullable(t *testing.T) {
+	merged, err := allof.Merge(
+		openapi3.SchemaRef{
+			Value: &openapi3.Schema{
+				AllOf: openapi3.SchemaRefs{
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxLength: new(uint64(3))}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MinLength: 1}},
+				},
+			}})
+	require.NoError(t, err)
+	require.Nil(t, merged.AllOf)
+	require.Nil(t, merged.Type)
+	require.Equal(t, false, merged.Nullable)
+}
+
 // A type without nullable on the schema holding the allOf keeps null out,
 // although every member is nullable.
 func TestMerge_NotNullableUnderATypedSchema(t *testing.T) {
