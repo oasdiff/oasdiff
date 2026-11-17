@@ -4,28 +4,10 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 )
 
 const nullType = "null"
-
-// Dialect is the reading of null a document's OpenAPI version gives its
-// schemas. The two differ on a schema with no type keyword: under OpenAPI 3.1
-// it is a JSON Schema that accepts every type, null included, while under
-// OpenAPI 3.0 null is accepted only where nullable: true says so.
-type Dialect int
-
-const (
-	OpenAPI30 Dialect = iota
-	OpenAPI31
-)
-
-// DialectOf returns the dialect of a document from its openapi version.
-func DialectOf(version string) Dialect {
-	if (&openapi3.T{OpenAPI: version}).IsOpenAPI31OrLater() {
-		return OpenAPI31
-	}
-	return OpenAPI30
-}
 
 // TypeAccepts reports whether the schema names null as an accepted type: the
 // nullable keyword (OpenAPI 3.0) or a "null" entry in its type array
@@ -39,8 +21,8 @@ func TypeAccepts(schema *openapi3.Schema) bool {
 // TypeAccepts). A schema with no type lets it through under OpenAPI 3.1, and
 // under OpenAPI 3.0 only with nullable: true. An enum lets null through only
 // when null is one of its values, and a const only when it is null.
-func OwnKeywordsAccept(schema *openapi3.Schema, dialect Dialect) bool {
-	return ownKeywordsAccept(schema, dialect == OpenAPI31)
+func OwnKeywordsAccept(schema *openapi3.Schema, dialect oasversion.Dialect) bool {
+	return ownKeywordsAccept(schema, dialect == oasversion.OpenAPI31)
 }
 
 func ownKeywordsAccept(schema *openapi3.Schema, untypedAccepts bool) bool {
@@ -65,7 +47,7 @@ func ownKeywordsAccept(schema *openapi3.Schema, untypedAccepts bool) bool {
 // decided for a schema with neither, or with an allOf, a not or an if, which
 // constrain the instance alongside the composition. A schema with
 // nullable: true accepts null whatever its branches do.
-func ComposedAccepts(schema *openapi3.Schema, dialect Dialect) (accepts bool, decided bool) {
+func ComposedAccepts(schema *openapi3.Schema, dialect oasversion.Dialect) (accepts bool, decided bool) {
 	if schema == nil {
 		return false, false
 	}
@@ -106,7 +88,7 @@ func ComposedAccepts(schema *openapi3.Schema, dialect Dialect) (accepts bool, de
 // every branch could be decided: a branch that composes further, or has a not
 // or an if, is not, because OwnKeywordsAccept reads only the keywords that
 // decide on their own.
-func NullableBranches(branches openapi3.SchemaRefs, dialect Dialect) (count int, decided bool) {
+func NullableBranches(branches openapi3.SchemaRefs, dialect oasversion.Dialect) (count int, decided bool) {
 	for _, branch := range branches {
 		if branch == nil || branch.Value == nil {
 			return 0, false
@@ -131,7 +113,7 @@ func Composed(schema *openapi3.Schema) bool {
 // decided: by its oneOf or anyOf when it has one (see ComposedAccepts), and
 // by its own keywords otherwise. It is not decided for a schema with an
 // allOf, a not or an if.
-func Accepts(schema *openapi3.Schema, dialect Dialect) (accepts bool, decided bool) {
+func Accepts(schema *openapi3.Schema, dialect oasversion.Dialect) (accepts bool, decided bool) {
 	if schema == nil {
 		return false, false
 	}

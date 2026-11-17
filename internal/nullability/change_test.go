@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/internal/nullability"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,7 +15,7 @@ func TestChange(t *testing.T) {
 	two := &openapi3.Schema{OneOf: refs(null, nullableObject)}
 
 	change := func(base, revision *openapi3.Schema) (nullability.Transition, bool) {
-		return nullability.Change(base, revision, nullability.Dialects{Base: nullability.OpenAPI31, Revision: nullability.OpenAPI31})
+		return nullability.Change(base, revision, oasversion.Dialects{Base: oasversion.OpenAPI31, Revision: oasversion.OpenAPI31})
 	}
 	for name, tc := range map[string]struct {
 		base, revision *openapi3.Schema
@@ -45,7 +46,7 @@ func TestChange(t *testing.T) {
 // Each side is read in its own document's dialect, so a schema that moved
 // from the OpenAPI 3.0 way of saying nullable to the 3.1 way did not change.
 func TestChange_AcrossDialects(t *testing.T) {
-	migration := nullability.Dialects{Base: nullability.OpenAPI30, Revision: nullability.OpenAPI31}
+	migration := oasversion.Dialects{Base: oasversion.OpenAPI30, Revision: oasversion.OpenAPI31}
 	nullableString30 := &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}
 	untyped := &openapi3.Schema{}
 

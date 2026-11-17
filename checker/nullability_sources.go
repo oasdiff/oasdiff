@@ -7,6 +7,7 @@ import (
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/internal/nullability"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 )
 
 // nullabilitySources locates a nullability transition in the base and the
@@ -22,7 +23,7 @@ import (
 //     keyword when no single branch changed
 //
 // A side that does not have the keyword is located at the schema itself.
-func nullabilitySources(dialects nullability.Dialects, operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
+func nullabilitySources(dialects oasversion.Dialects, operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
 	if d == nil || !hasOrigin(d.Base) && !hasOrigin(d.Revision) {
 		return location.SchemaFieldSources(operationsSources, operationItem, d, "nullable")
 	}
@@ -70,7 +71,7 @@ func nullabilitySource(operationsSources diff.OperationsSourcesMap, operation *o
 // nullability changed, or nil when there is not exactly one: the composition's
 // nullability then moved because branches were added or removed, or because
 // several changed at once.
-func branchThatChangedNullability(dialects nullability.Dialects, d *diff.SchemaDiff) *diff.SchemaDiff {
+func branchThatChangedNullability(dialects oasversion.Dialects, d *diff.SchemaDiff) *diff.SchemaDiff {
 	var result *diff.SchemaDiff
 	for _, subschemas := range []*diff.SubschemasDiff{d.OneOfDiff, d.AnyOfDiff} {
 		if subschemas == nil {

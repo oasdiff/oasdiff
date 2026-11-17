@@ -5,6 +5,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/internal/nullability"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 	"github.com/stretchr/testify/require"
 )
 
@@ -45,7 +46,7 @@ func TestOwnKeywordsAccept(t *testing.T) {
 		"a type without null and an enum": {&openapi3.Schema{Type: &openapi3.Types{"string"}, Enum: []any{nil}}, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			require.Equal(t, tc.want, nullability.OwnKeywordsAccept(tc.schema, nullability.OpenAPI31))
+			require.Equal(t, tc.want, nullability.OwnKeywordsAccept(tc.schema, oasversion.OpenAPI31))
 		})
 	}
 }
@@ -77,7 +78,7 @@ func TestComposedAccepts(t *testing.T) {
 		"an undecided anyOf beside the oneOf": {&openapi3.Schema{OneOf: refs(null, object), AnyOf: openapi3.SchemaRefs{nil}}, false, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accepts, decided := nullability.ComposedAccepts(tc.schema, nullability.OpenAPI31)
+			accepts, decided := nullability.ComposedAccepts(tc.schema, oasversion.OpenAPI31)
 			require.Equal(t, tc.accepts, accepts)
 			require.Equal(t, tc.decided, decided)
 		})
@@ -104,18 +105,11 @@ func TestAccepts(t *testing.T) {
 		"a oneOf with no null in it": {&openapi3.Schema{OneOf: refs(object, typed("string"))}, false, true},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accepts, decided := nullability.Accepts(tc.schema, nullability.OpenAPI31)
+			accepts, decided := nullability.Accepts(tc.schema, oasversion.OpenAPI31)
 			require.Equal(t, tc.accepts, accepts)
 			require.Equal(t, tc.decided, decided)
 		})
 	}
-}
-
-func TestDialectOf(t *testing.T) {
-	require.Equal(t, nullability.OpenAPI30, nullability.DialectOf("3.0.3"))
-	require.Equal(t, nullability.OpenAPI31, nullability.DialectOf("3.1.0"))
-	require.Equal(t, nullability.OpenAPI31, nullability.DialectOf("3.2.0"))
-	require.Equal(t, nullability.OpenAPI30, nullability.DialectOf(""))
 }
 
 // Under OpenAPI 3.0 null is accepted only where nullable: true says so, so a
@@ -144,7 +138,7 @@ func TestAccepts_OpenAPI30(t *testing.T) {
 		"an allOf is not decided":              {&openapi3.Schema{AllOf: refs(object)}, false, false},
 	} {
 		t.Run(name, func(t *testing.T) {
-			accepts, decided := nullability.Accepts(tc.schema, nullability.OpenAPI30)
+			accepts, decided := nullability.Accepts(tc.schema, oasversion.OpenAPI30)
 			require.Equal(t, tc.accepts, accepts)
 			require.Equal(t, tc.decided, decided)
 		})

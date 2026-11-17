@@ -1,6 +1,9 @@
 package nullability
 
-import "github.com/getkin/kin-openapi/openapi3"
+import (
+	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
+)
 
 // Transition is how a schema's acceptance of null changed.
 type Transition int
@@ -11,16 +14,10 @@ const (
 	BecameNotNullable
 )
 
-// Dialects are the dialects of the two documents being compared. They differ
-// when a document moved from OpenAPI 3.0 to 3.1 between the two versions.
-type Dialects struct {
-	Base, Revision Dialect
-}
-
 // Change compares what Accepts says of the two versions of a schema, each
 // read in its own document's dialect, and reports whether both could be
 // decided.
-func Change(base, revision *openapi3.Schema, dialects Dialects) (transition Transition, decided bool) {
+func Change(base, revision *openapi3.Schema, dialects oasversion.Dialects) (transition Transition, decided bool) {
 	before, beforeDecided := Accepts(base, dialects.Base)
 	after, afterDecided := Accepts(revision, dialects.Revision)
 	switch {

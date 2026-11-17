@@ -3,11 +3,10 @@ package checker
 import (
 	"slices"
 
-	"github.com/getkin/kin-openapi/openapi3"
-
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 )
 
 const (
@@ -76,7 +75,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				}
 				if readOnlyDiff.To == true {
 					comment = RequestPropertyBecameReadOnlyCommentId
-				} else if requiredOnBothSides && openAPI31OrLater(diffReport.BaseOpenAPI) {
+				} else if requiredOnBothSides && dialectsOf(diffReport).Base == oasversion.OpenAPI31 {
 					// 3.0 applies required to a readOnly property in responses
 					// only, 3.1 and later in requests too, so in 3.1 the
 					// property was already required in requests
@@ -95,8 +94,4 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 	})
 
 	return result
-}
-
-func openAPI31OrLater(version string) bool {
-	return (&openapi3.T{OpenAPI: version}).IsOpenAPI31OrLater()
 }

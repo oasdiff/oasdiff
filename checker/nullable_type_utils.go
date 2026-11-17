@@ -4,6 +4,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/internal/nullability"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 )
 
 // isNullTypeChange returns true if the only change in a type list is adding or removing "null"
@@ -28,7 +29,7 @@ func nullRemovedFromTypeArray(typeDiff *diff.StringsDiff, revisionType *openapi3
 // nullabilityChangeId returns the rule id and comment reporting the schema
 // diff's nullability transition, or "" when nullability did not change.
 // parent is the schema diff d sits under, or nil at the root of a walk.
-func nullabilityChangeId(dialects nullability.Dialects, parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId, notNullableId string) (string, string) {
+func nullabilityChangeId(dialects oasversion.Dialects, parent *diff.SchemaDiff, d *diff.SchemaDiff, nullableId, notNullableId string) (string, string) {
 	if branchOfComposition(dialects, parent, d) {
 		return "", ""
 	}
@@ -48,7 +49,7 @@ func nullabilityChangeId(dialects nullability.Dialects, parent *diff.SchemaDiff,
 // A schema with a oneOf or anyOf on either side, which includes one wrapped in
 // oneOf: [{type: "null"}, <schema>], is decided by whether it accepted null
 // before and after (composedNullability).
-func nullabilityChange(dialects nullability.Dialects, d *diff.SchemaDiff) (nullability.Transition, string) {
+func nullabilityChange(dialects oasversion.Dialects, d *diff.SchemaDiff) (nullability.Transition, string) {
 	// A schema present on one side only is not a nullability transition (and
 	// the type-array checks below read both sides).
 	if d == nil || d.Base == nil || d.Revision == nil {
@@ -81,12 +82,4 @@ func nullabilityChange(dialects nullability.Dialects, d *diff.SchemaDiff) (nulla
 		return nullability.BecameNotNullable, ""
 	}
 	return nullability.Unchanged, ""
-}
-
-// dialectsOf returns the dialects of the two documents the diff compares.
-func dialectsOf(diffReport *diff.Diff) nullability.Dialects {
-	return nullability.Dialects{
-		Base:     nullability.DialectOf(diffReport.BaseOpenAPI),
-		Revision: nullability.DialectOf(diffReport.RevisionOpenAPI),
-	}
 }
