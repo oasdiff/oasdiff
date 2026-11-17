@@ -408,7 +408,7 @@ func TestMerge_NullableBesideAMemberWithNoType(t *testing.T) {
 			Value: &openapi3.Schema{
 				AllOf: openapi3.SchemaRefs{
 					&openapi3.SchemaRef{Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}},
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxLength: openapi3.Ptr(uint64(3))}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxLength: new(uint64(3))}},
 				},
 			}})
 	require.NoError(t, err)
@@ -438,7 +438,7 @@ func TestMerge_MembersWithNoTypeDoNotAddNullable(t *testing.T) {
 		openapi3.SchemaRef{
 			Value: &openapi3.Schema{
 				AllOf: openapi3.SchemaRefs{
-					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxLength: openapi3.Ptr(uint64(3))}},
+					&openapi3.SchemaRef{Value: &openapi3.Schema{MaxLength: new(uint64(3))}},
 					&openapi3.SchemaRef{Value: &openapi3.Schema{MinLength: 1}},
 				},
 			}})
