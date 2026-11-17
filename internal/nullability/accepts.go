@@ -33,6 +33,9 @@ func ownKeywordsAccept(schema *openapi3.Schema, untypedAccepts bool) bool {
 	if len(schema.Enum) > 0 && !slices.ContainsFunc(schema.Enum, func(value any) bool { return value == nil }) {
 		return false
 	}
+	// A const allows one value, so null gets through it only when that value
+	// is null. The parser reads const: null and a missing const alike, as
+	// nil, and both let null through.
 	return schema.Const == nil
 }
 
