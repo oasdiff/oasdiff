@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestChange(t *testing.T) {
+func TestChange31(t *testing.T) {
 	null, object, nullableObject := typed("null"), typed("object"), typed("object", "null")
 	one := &openapi3.Schema{OneOf: refs(null, object)}
 	two := &openapi3.Schema{OneOf: refs(null, nullableObject)}

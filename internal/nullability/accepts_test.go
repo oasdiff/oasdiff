@@ -30,7 +30,7 @@ func TestTypeAccepts(t *testing.T) {
 	require.False(t, nullability.TypeAccepts(&openapi3.Schema{}))
 }
 
-func TestOwnKeywordsAccept(t *testing.T) {
+func TestOwnKeywordsAccept31(t *testing.T) {
 	for name, tc := range map[string]struct {
 		schema *openapi3.Schema
 		want   bool
@@ -51,7 +51,7 @@ func TestOwnKeywordsAccept(t *testing.T) {
 	}
 }
 
-func TestComposedAccepts(t *testing.T) {
+func TestComposedAccepts31(t *testing.T) {
 	null, object, nullableObject := typed("null"), typed("object"), typed("object", "null")
 
 	for name, tc := range map[string]struct {
@@ -85,7 +85,7 @@ func TestComposedAccepts(t *testing.T) {
 	}
 }
 
-func TestAccepts(t *testing.T) {
+func TestAccepts31(t *testing.T) {
 	null, object := typed("null"), typed("object")
 
 	for name, tc := range map[string]struct {
@@ -114,7 +114,7 @@ func TestAccepts(t *testing.T) {
 
 // Under OpenAPI 3.0 null is accepted only where nullable: true says so, so a
 // schema with no type does not accept it, as a plain schema or as a branch.
-func TestAccepts_OpenAPI30(t *testing.T) {
+func TestAccepts30(t *testing.T) {
 	object := typed("object")
 	nullableString := &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true}
 	untyped := &openapi3.Schema{Properties: openapi3.Schemas{"a": {Value: typed("string")}}}
