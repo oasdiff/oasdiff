@@ -170,10 +170,12 @@ func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
 
 	schemaRefs := openapi3.SchemaRefs{baseSchemaRef}
 	schemaRefs = append(schemaRefs, baseSchemaRef.Value.AllOf...)
+	merged, holder := baseSchemaRef.Value, *baseSchemaRef.Value
 	err := flattenSchemas(state, baseSchemaRef, schemaRefs)
 	if err != nil {
 		return err
 	}
+	setNullable(baseSchemaRef, merged, &holder, allOfCopy)
 	baseSchemaRef.Value.AllOf = nil
 	pruneOneOf(state, baseSchemaRef, allOfCopy)
 	pruneAnyOf(baseSchemaRef)
@@ -384,10 +386,12 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	// flatten merged schemas into a single equivalent schema
 	toFlatten := openapi3.SchemaRefs{result}
 	toFlatten = append(toFlatten, allOf...)
+	merged := result.Value
 	err = flattenSchemas(state, result, toFlatten)
 	if err != nil {
 		return nil, err
 	}
+	setNullable(result, merged, base.Value, allOf)
 
 	return result, nil
 }
@@ -649,6 +653,32 @@ func hasTrue(values []bool) bool {
 		}
 	}
 	return false
+}
+
+// setNullable sets the OpenAPI 3.0 nullable keyword of a schema merged with
+// its allOf members. holder is the schema that held the allOf, as it was
+// before the merge. The merged schema accepts null when holder says
+// nullable: true, the usual way of making a $ref nullable, or when holder has
+// no type of its own and every member is nullable. A holder with a type and
+// no nullable rejects null whatever its members say.
+//
+// merged is the schema the merge was writing into. When result no longer
+// points at it, the merge stood another schema in for the result (see
+// anchorInFlight), and that schema is not this one's to change.
+func setNullable(result *openapi3.SchemaRef, merged *openapi3.Schema, holder *openapi3.Schema, members openapi3.SchemaRefs) {
+	if result.Value == merged {
+		merged.Nullable = holder.Nullable || len(holder.Type.Slice()) == 0 && allNullable(members)
+	}
+}
+
+// allNullable reports whether every allOf member has nullable: true.
+func allNullable(members openapi3.SchemaRefs) bool {
+	for _, member := range members {
+		if member == nil || member.Value == nil || !member.Value.Nullable {
+			return false
+		}
+	}
+	return len(members) > 0
 }
 
 func hasFalse(values []bool) bool {

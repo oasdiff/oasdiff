@@ -62,6 +62,83 @@ paths:
 	validateConsistency(t, spec, tests)
 }
 
+// nullable: true next to an allOf over a $ref, the usual OpenAPI 3.0 way of
+// making a reference nullable, accepts null before and after the merge.
+func TestMerge_NullableBesideAllOfOverRef(t *testing.T) {
+	const spec = `
+openapi: 3.0.0
+info:
+  title: base schema merge test
+  version: '0.1'
+paths:
+  /sample:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  nullable: true
+                  allOf:
+                    - $ref: '#/components/schemas/Name'
+      responses:
+        '200':
+          description: Ok
+components:
+  schemas:
+    Name:
+      type: string
+`
+	validateConsistency(t, spec, []Test{
+		{[]byte(`{"id": "a"}`), false},
+		{[]byte(`{"id": null}`), false},
+		{[]byte(`{"id": 1}`), true},
+	})
+}
+
+// Members that are all nullable accept null before and after the merge,
+// although the schema holding the allOf does not say nullable.
+func TestMerge_NullableWhenEveryMemberIsNullable(t *testing.T) {
+	const spec = `
+openapi: 3.0.0
+info:
+  title: base schema merge test
+  version: '0.1'
+paths:
+  /sample:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  allOf:
+                    - type: string
+                      nullable: true
+                    - type: string
+                      nullable: true
+                      maxLength: 3
+      responses:
+        '200':
+          description: Ok
+components:
+  schemas:
+    Name:
+      type: string
+`
+	validateConsistency(t, spec, []Test{
+		{[]byte(`{"id": "a"}`), false},
+		{[]byte(`{"id": null}`), false},
+		{[]byte(`{"id": "abcd"}`), true},
+	})
+}
+
 // validate nullable fields are equivalent after merge, in case one of the values is false.
 func TestMerge_NullableIsFalse(t *testing.T) {
 	const spec = `
