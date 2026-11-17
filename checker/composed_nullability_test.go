@@ -258,11 +258,10 @@ func TestOneOfNullBranch_ConditionalBranchIsNotDecided(t *testing.T) {
 	}
 }
 
-// In an OpenAPI 3.0 document null is accepted only where nullable: true says
-// so, so a branch with no type does not accept it. A oneOf with a nullable
-// branch and a branch with no type accepts null, and stops when the first
+// A branch with no type accepts null in an OpenAPI 3.0 document too, so null
+// matches both branches of this oneOf and is rejected until the first branch
 // loses its nullable.
-func TestOneOfNullableBranch_OpenAPI30UntypedBranchRejectsNull(t *testing.T) {
+func TestOneOfNullableBranch_OpenAPI30UntypedBranchAcceptsNull(t *testing.T) {
 	base, err := open("../data/checker/one_of_nullable_branch_30_base.yaml")
 	require.NoError(t, err)
 	revision, err := open("../data/checker/one_of_nullable_branch_30_revision.yaml")
@@ -270,21 +269,11 @@ func TestOneOfNullableBranch_OpenAPI30UntypedBranchRejectsNull(t *testing.T) {
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
 	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm)
-	requireSingleApiChange(t, checker.ApiChange{
-		Id:          checker.RequestPropertyBecomeNotNullableId,
-		Args:        []any{"address"},
-		Operation:   "POST",
-		Path:        "/products",
-		OperationId: "addProduct",
-	}, errs)
-
-	d, osm, err = diff.GetWithOperationsSourcesMap(diff.NewConfig(), revision, base)
-	require.NoError(t, err)
-	errs = checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
 	requireSingleApiChange(t, checker.ApiChange{
 		Id:          checker.RequestPropertyBecomeNullableId,
 		Args:        []any{"address"},
+		Comment:     checker.ComposedNullabilityUntypedBranchCommentId,
 		Operation:   "POST",
 		Path:        "/products",
 		OperationId: "addProduct",

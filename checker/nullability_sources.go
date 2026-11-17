@@ -7,7 +7,6 @@ import (
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/internal/nullability"
-	"github.com/oasdiff/oasdiff/internal/oasversion"
 )
 
 // nullabilitySources locates a nullability transition in the base and the
@@ -23,7 +22,7 @@ import (
 //     keyword when no single branch changed
 //
 // A side that does not have the keyword is located at the schema itself.
-func nullabilitySources(dialects oasversion.Dialects, operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
+func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
 	if d == nil || !hasOrigin(d.Base) && !hasOrigin(d.Revision) {
 		return location.SchemaFieldSources(operationsSources, operationItem, d, "nullable")
 	}
@@ -39,8 +38,8 @@ func nullabilitySources(dialects oasversion.Dialects, operationsSources diff.Ope
 		isNullableUnwrapping(d):
 		keywords = []string{"type", "oneOf"}
 	default:
-		if branch := branchThatChangedNullability(dialects, d); branch != nil {
-			return nullabilitySources(dialects, operationsSources, operationItem, branch)
+		if branch := branchThatChangedNullability(d); branch != nil {
+			return nullabilitySources(operationsSources, operationItem, branch)
 		}
 		keywords = []string{"oneOf", "anyOf"}
 	}
@@ -71,7 +70,7 @@ func nullabilitySource(operationsSources diff.OperationsSourcesMap, operation *o
 // nullability changed, or nil when there is not exactly one: the composition's
 // nullability then moved because branches were added or removed, or because
 // several changed at once.
-func branchThatChangedNullability(dialects oasversion.Dialects, d *diff.SchemaDiff) *diff.SchemaDiff {
+func branchThatChangedNullability(d *diff.SchemaDiff) *diff.SchemaDiff {
 	var result *diff.SchemaDiff
 	for _, subschemas := range []*diff.SubschemasDiff{d.OneOfDiff, d.AnyOfDiff} {
 		if subschemas == nil {
@@ -81,7 +80,7 @@ func branchThatChangedNullability(dialects oasversion.Dialects, d *diff.SchemaDi
 			if modified == nil {
 				continue
 			}
-			if transition, _ := nullabilityChange(dialects, modified.Diff); transition == nullability.Unchanged {
+			if transition, _ := nullabilityChange(modified.Diff); transition == nullability.Unchanged {
 				continue
 			}
 			if result != nil {

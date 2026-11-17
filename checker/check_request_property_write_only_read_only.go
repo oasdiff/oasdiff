@@ -75,7 +75,7 @@ func RequestPropertyWriteOnlyReadOnlyCheck(diffReport *diff.Diff, operationsSour
 				}
 				if readOnlyDiff.To == true {
 					comment = RequestPropertyBecameReadOnlyCommentId
-				} else if requiredOnBothSides && dialectsOf(diffReport).Base == oasversion.OpenAPI31 {
+				} else if requiredOnBothSides && oasversion.Of(diffReport.BaseOpenAPI) == oasversion.OpenAPI31 {
 					// 3.0 applies required to a readOnly property in responses
 					// only, 3.1 and later in requests too, so in 3.1 the
 					// property was already required in requests

@@ -14,18 +14,17 @@ const (
 
 func ResponsePropertyBecameNullableCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
-	dialects := dialectsOf(diffReport)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if id, comment := nullabilityChangeId(dialects, nil, info.schemaDiff, ResponseBodyBecameNullableId, ResponseBodyBecameNotNullableId); id != "" {
-			baseSource, revisionSource := nullabilitySources(dialects, operationsSources, info.operationItem, info.schemaDiff)
+		if id, comment := nullabilityChangeId(nil, info.schemaDiff, ResponseBodyBecameNullableId, ResponseBodyBecameNotNullableId); id != "" {
+			baseSource, revisionSource := nullabilitySources(operationsSources, info.operationItem, info.schemaDiff)
 			result = append(result, info.newChange(id, nil, comment).
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			if id, comment := nullabilityChangeId(dialects, p.parent, p.propertyDiff, ResponsePropertyBecameNullableId, ResponsePropertyBecameNotNullableId); id != "" {
-				propBaseSource, propRevisionSource := nullabilitySources(dialects, operationsSources, info.operationItem, p.propertyDiff)
+			if id, comment := nullabilityChangeId(p.parent, p.propertyDiff, ResponsePropertyBecameNullableId, ResponsePropertyBecameNotNullableId); id != "" {
+				propBaseSource, propRevisionSource := nullabilitySources(operationsSources, info.operationItem, p.propertyDiff)
 				result = append(result, p.newChange(
 					id,
 					[]any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName), info.responseStatus},

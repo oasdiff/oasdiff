@@ -24,9 +24,3 @@ func Of(version string) Dialect {
 	}
 	return OpenAPI30
 }
-
-// Dialects are the dialects of the two documents being compared. They differ
-// when the revision moves to another OpenAPI version.
-type Dialects struct {
-	Base, Revision Dialect
-}
