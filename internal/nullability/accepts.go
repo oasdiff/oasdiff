@@ -16,10 +16,9 @@ func TypeAccepts(schema *openapi3.Schema) bool {
 }
 
 // OwnKeywordsAccept reports whether the type, nullable, enum and const of a
-// schema let null through. A schema with no type keyword accepts every type,
-// null included, in OpenAPI 3.0 as in 3.1: nullable: false does not prohibit
-// null, it leaves the type as written. An enum lets null through only when null is one of its
-// values, and a const only when it is null.
+// schema let null through. A schema with no type accepts every type, null
+// included, in OpenAPI 3.0 as in 3.1. An enum lets null through only when
+// null is one of its values, and a const only when it is null.
 func OwnKeywordsAccept(schema *openapi3.Schema) bool {
 	if len(schema.Type.Slice()) > 0 && !TypeAccepts(schema) {
 		return false
