@@ -1,7 +1,6 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -17,16 +16,16 @@ func RequestPropertyBecameNotNullableCheck(diffReport *diff.Diff, operationsSour
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if id := nullabilityChangeId(info.schemaDiff, RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId); id != "" {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "nullable")
-			result = append(result, info.newChange(id, nil, "").
+		if id, comment := nullabilityChangeId(nil, info.schemaDiff, RequestBodyBecomeNullableId, RequestBodyBecomeNotNullableId); id != "" {
+			baseSource, revisionSource := nullabilitySources(operationsSources, info.operationItem, info.schemaDiff)
+			result = append(result, info.newChange(id, nil, comment).
 				WithSources(baseSource, revisionSource))
 		}
 
 		info.walkProperties(func(p propertyInfo) {
-			if id := nullabilityChangeId(p.propertyDiff, RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId); id != "" {
-				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "nullable")
-				result = append(result, p.newChange(id, []any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, "").
+			if id, comment := nullabilityChangeId(p.parent, p.propertyDiff, RequestPropertyBecomeNullableId, RequestPropertyBecomeNotNullableId); id != "" {
+				propBaseSource, propRevisionSource := nullabilitySources(operationsSources, info.operationItem, p.propertyDiff)
+				result = append(result, p.newChange(id, []any{schemawalk.PropertyFullName(p.propertyPath, p.propertyName)}, comment).
 					WithSources(propBaseSource, propRevisionSource))
 			}
 		})

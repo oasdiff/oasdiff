@@ -263,8 +263,9 @@ func ResponseSources(operationsSources diff.OperationsSourcesMap, operationItem 
 	return baseSource, revisionSource
 }
 
-// schemaFieldSources returns source locations from a specific field within schema Origins.
-// Falls back to schema-level sources when the field is not found in origin data.
+// SchemaFieldSources returns source locations from a specific field within schema Origins.
+// A side whose schema does not have the field gets no source. Falls back to
+// operation-level sources when neither schema has origin data.
 func SchemaFieldSources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, schemaDiff *diff.SchemaDiff, field string) (*Source, *Source) {
 	if schemaDiff == nil {
 		return operationSources(operationsSources, operationItem.Base, operationItem.Revision)
@@ -284,6 +285,21 @@ func SchemaFieldSources(operationsSources diff.OperationsSourcesMap, operationIt
 		revisionSource = NewSourceFromField(operationsSources, operationItem.Revision, schemaDiff.Revision.Origin, field)
 	}
 	return baseSource, revisionSource
+}
+
+// SchemaKeywordSource locates the first of the keywords the schema has, or the
+// schema itself when it has none of them. It returns nil when the schema has
+// no origin data.
+func SchemaKeywordSource(operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, schema *openapi3.Schema, keywords ...string) *Source {
+	if schema == nil || schema.Origin == nil {
+		return nil
+	}
+	for _, keyword := range keywords {
+		if source := NewSourceFromField(operationsSources, operation, schema.Origin, keyword); source != nil {
+			return source
+		}
+	}
+	return NewSourceFromOrigin(operationsSources, operation, schema.Origin)
 }
 
 // SchemaDeletedItemSources returns source locations for a deleted sequence item.

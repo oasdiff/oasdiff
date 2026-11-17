@@ -3,6 +3,7 @@ package checker_test
 import (
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/stretchr/testify/require"
@@ -37,12 +38,12 @@ func TestNullableWrapping_RequestProperties(t *testing.T) {
 	}, ids)
 }
 
-// A wrap whose branch also narrows the enum is not a pure nullability change:
-// the removal keeps being reported.
+// A wrap whose branch also narrows the enum is two changes: the property
+// accepts null now, and the removal keeps being reported.
 func TestNullableWrapping_NarrowedEnumStillReported(t *testing.T) {
 	ids := nullableWrapChanges(t, "../data/checker/nullable_wrap_narrowed_base.yaml", "../data/checker/nullable_wrap_narrowed_revision.yaml")
 	require.Contains(t, ids, checker.RequestPropertyEnumValueRemovedId)
-	require.NotContains(t, ids, checker.RequestPropertyBecomeNullableId)
+	require.Contains(t, ids, checker.RequestPropertyBecomeNullableId)
 }
 
 func TestNullableWrapping_ResponseProperty(t *testing.T) {
@@ -128,4 +129,95 @@ func TestParameterTypeArrayNullability(t *testing.T) {
 			checker.RequestParameterPropertyBecameNullableId,
 		}, ids)
 	})
+}
+
+// wrappedRefChange compares the wrapping fixtures after an edit to each side,
+// and returns the nullability change reported for optionalRef, the property
+// that refers to SomeObject in the base and wraps it in the revision.
+func wrappedRefChange(t *testing.T, editBase, editRevision func(spec *openapi3.T)) *checker.ApiChange {
+	t.Helper()
+	s1, err := open("../data/checker/nullable_wrap_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/nullable_wrap_revision.yaml")
+	require.NoError(t, err)
+	editBase(s1.Spec)
+	editRevision(s2.Spec)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
+	for _, e := range errs {
+		if change := e.(checker.ApiChange); change.Args[0] == "optionalRef" {
+			return &change
+		}
+	}
+	return nil
+}
+
+func someObject(spec *openapi3.T) *openapi3.Schema {
+	return spec.Components.Schemas["SomeObject"].Value
+}
+
+func untyped(spec *openapi3.T) { someObject(spec).Type = nil }
+
+func unedited(*openapi3.T) {}
+
+// A schema with no type already accepts null, so wrapping it makes null match
+// both branches: the property stops accepting null, and the comment says why.
+func TestNullableWrapping_UntypedSchemaStopsAcceptingNull(t *testing.T) {
+	change := wrappedRefChange(t, untyped, untyped)
+	require.NotNil(t, change)
+	require.Equal(t, checker.RequestPropertyBecomeNotNullableId, change.Id)
+	require.Equal(t, checker.ComposedNullabilityUntypedBranchCommentId, change.Comment)
+}
+
+// Giving the wrapped schema a type afterwards is what makes the property
+// nullable: one branch accepts null now, where two did.
+func TestNullableWrapping_TypingTheBranchMakesItNullable(t *testing.T) {
+	wrapped := func(spec *openapi3.T) {
+		revision, err := open("../data/checker/nullable_wrap_revision.yaml")
+		require.NoError(t, err)
+		request := spec.Components.Schemas["TestRequest"].Value
+		request.Properties["optionalRef"] = &openapi3.SchemaRef{Value: &openapi3.Schema{OneOf: openapi3.SchemaRefs{
+			revision.Spec.Components.Schemas["TestRequest"].Value.Properties["optionalRef"].Value.OneOf[0],
+			{Ref: "#/components/schemas/SomeObject", Value: someObject(spec)},
+		}}}
+		untyped(spec)
+	}
+	change := wrappedRefChange(t, wrapped, unedited)
+	require.NotNil(t, change)
+	require.Equal(t, checker.RequestPropertyBecomeNullableId, change.Id)
+	require.Equal(t, checker.ComposedNullabilityUntypedBranchCommentId, change.Comment)
+}
+
+// What a wrapped schema with an if accepts is not decided, and the wrapping
+// itself is still recognized.
+func TestNullableWrapping_UndecidedSchemaStillRecognized(t *testing.T) {
+	withIf := func(spec *openapi3.T) {
+		someObject(spec).If = &openapi3.SchemaRef{Value: openapi3.NewObjectSchema()}
+	}
+	change := wrappedRefChange(t, withIf, withIf)
+	require.NotNil(t, change)
+	require.Equal(t, checker.RequestPropertyBecomeNullableId, change.Id)
+	require.Empty(t, change.Comment)
+}
+
+// The OpenAPI 3.0 way of saying a composition is nullable: nullable: true
+// beside a oneOf whose branches do not accept null. A nullable property that
+// becomes one keeps accepting null.
+func TestNullableKeywordBesideOneOf_StaysNullable(t *testing.T) {
+	nullableString := func(spec *openapi3.T) {
+		spec.Components.Schemas["TestRequest"].Value.Properties["optionalRef"] = &openapi3.SchemaRef{
+			Value: &openapi3.Schema{Type: &openapi3.Types{"string"}, Nullable: true},
+		}
+	}
+	nullableOneOf := func(spec *openapi3.T) {
+		spec.Components.Schemas["TestRequest"].Value.Properties["optionalRef"] = &openapi3.SchemaRef{
+			Value: &openapi3.Schema{Nullable: true, OneOf: openapi3.SchemaRefs{
+				{Value: openapi3.NewStringSchema()},
+				{Value: openapi3.NewObjectSchema()},
+			}},
+		}
+	}
+	require.Nil(t, wrappedRefChange(t, nullableString, nullableOneOf))
 }

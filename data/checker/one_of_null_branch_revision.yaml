@@ -1,0 +1,43 @@
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      operationId: addProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address:
+                  oneOf:
+                    - type: 'null'
+                    - $ref: '#/components/schemas/RequestAddress'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  address:
+                    oneOf:
+                      - type: 'null'
+                      - $ref: '#/components/schemas/ResponseAddress'
+components:
+  schemas:
+    RequestAddress:
+      type: [object, 'null']
+      properties:
+        street:
+          type: string
+    ResponseAddress:
+      type: [object, 'null']
+      properties:
+        street:
+          type: string
