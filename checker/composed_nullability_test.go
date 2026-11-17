@@ -257,3 +257,25 @@ func TestOneOfNullBranch_ConditionalBranchIsNotDecided(t *testing.T) {
 		require.NotEqual(t, "address", err.(checker.ApiChange).Args[0])
 	}
 }
+
+// A branch with no type accepts null in an OpenAPI 3.0 document too, so null
+// matches both branches of this oneOf and is rejected until the first branch
+// loses its nullable.
+func TestOneOfNullableBranch_OpenAPI30UntypedBranchAcceptsNull(t *testing.T) {
+	base, err := open("../data/checker/one_of_nullable_branch_30_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/one_of_nullable_branch_30_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
+	requireSingleApiChange(t, checker.ApiChange{
+		Id:          checker.RequestPropertyBecomeNullableId,
+		Args:        []any{"address"},
+		Comment:     checker.ComposedNullabilityUntypedBranchCommentId,
+		Operation:   "POST",
+		Path:        "/products",
+		OperationId: "addProduct",
+	}, errs)
+}

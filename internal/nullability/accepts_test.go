@@ -110,3 +110,26 @@ func TestAccepts(t *testing.T) {
 		})
 	}
 }
+
+// A const written as null in a document accepts null, and one with another
+// value does not.
+func TestOwnKeywordsAccept_ConstInDocument(t *testing.T) {
+	doc, err := openapi3.NewLoader().LoadFromData([]byte(`
+openapi: 3.1.0
+info:
+  title: test
+  version: 1.0.0
+paths: {}
+components:
+  schemas:
+    Nothing:
+      const: null
+    Home:
+      const: home
+`))
+	require.NoError(t, err)
+
+	schemas := doc.Components.Schemas
+	require.True(t, nullability.OwnKeywordsAccept(schemas["Nothing"].Value))
+	require.False(t, nullability.OwnKeywordsAccept(schemas["Home"].Value))
+}
