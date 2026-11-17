@@ -87,7 +87,7 @@ The top-level subcommands, grouped as in `oasdiff --help`.
 - [`checks changelog`](CHECKS.md) — list the rules `breaking` and `changelog` use to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
 - [`checks validate`](CHECKS.md#validate-checks) — list the rules `validate` reports
 - [`checks changelog coverage`](CHECKS.md#coverage-map) — list every possible edit of an OpenAPI document with the checks that cover it
-- [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
+- [`schema`](OUTPUT-FORMATS.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
 
 ### Inputs
 Where specs come from.
@@ -99,6 +99,9 @@ Where specs come from.
 How oasdiff pairs up base and revision and what counts as a difference.
 
 - [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
+- [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md) — judged against the contract, not against what a server accepts
+- [Schemas used in several places](SHARED-SCHEMAS.md) — a change to a shared schema is reported once
+- [Enum values](EXTENSIBLE-ENUM.md) — `x-extensible-enum`
 - [Nullability changes](NULLABILITY.md) — the three equivalent nullable forms and when changing them is breaking
 - [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
 - [Check many independent specs](BREAKING-FILES.md) — one comparison per spec, rather than merging them as composed mode does
@@ -122,6 +125,8 @@ Communicate intent across versions.
 ### Filtering changes
 Choose which kinds of differences are reported.
 
+- [Customize severity levels](SEVERITY-LEVELS.md) — raise, lower or disable a check
+- [Ignore specific breaking changes](IGNORING-CHANGES.md) — list the changes you accept in a file
 - [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes) — e.g. ignore description-only edits
 - [Track OpenAPI extensions](DIFF.md#openapi-extensions) — opt in to reporting changes in `x-*` fields
 - [Exclude specific extension names](DIFF.md#excluding-specific-extension-names) — when extensions are tracked, skip ones you don't care about
@@ -134,7 +139,8 @@ Shape and enrich the report.
 - [Source location tracking](SOURCE-LOCATOR.md)
 - [Change fingerprints](FINGERPRINT.md) — stable IDs across commits
 - [Error reporting](ERRORS.md)
-- Localization: en, ru, pt-br, es
+- [Output formats, color and localization](OUTPUT-FORMATS.md) for `breaking` and `changelog`
+- [Side-by-side review in your browser](SIDE-BY-SIDE-REVIEW.md) with `--open`
 
 ### How to run
 - [Docker](DOCKER.md)

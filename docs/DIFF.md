@@ -24,7 +24,7 @@ Additional formats can be generated using the `--format` flag:
 - json: includes all diff details
 - text: designed to be more user-friendly and provide only the most important parts of the diff (same as markdown)
 - markdown: designed to be more user-friendly and provide only the most important parts of the diff (same as text)
-- html: designed to be more user-friendly and provide only the most important parts of the diff (see also [changelog with html](BREAKING-CHANGES.md#output-formats))
+- html: designed to be more user-friendly and provide only the most important parts of the diff (see also [changelog with html](OUTPUT-FORMATS.md))
 
 Notes: 
 - an empty `yaml` or `json` result signifies that the diff is empty, or, in other words, there are no changes.  
