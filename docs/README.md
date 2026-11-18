@@ -99,6 +99,7 @@ Where specs come from.
 How oasdiff pairs up base and revision and what counts as a difference.
 
 - [Endpoint matching](MATCHING-ENDPOINTS.md): handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
+- [Subschema matching](MATCHING-SUBSCHEMAS.md): how `allOf`, `anyOf` and `oneOf` branches are paired, including an inline schema replaced by a `$ref`
 - [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md): judged against the contract, not against what a server accepts
 - [Schemas used in several places](SHARED-SCHEMAS.md): a change to a shared schema is reported once
 - [Nullability changes](NULLABILITY.md): the three equivalent nullable forms and when changing them is breaking

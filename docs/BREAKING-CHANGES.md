@@ -73,7 +73,7 @@ Both commands take two arguments, `base` and `revision`. Each can be:
 How oasdiff pairs up base and revision and what counts as a difference.
 
 - [Endpoint matching](MATCHING-ENDPOINTS.md): rename a path parameter without it counting as a new endpoint; this is the default, and `--include-path-params` turns it off
-- [Inline and `$ref` subschemas](DIFF.md#inline-and-ref-subschemas): move an inline schema into `components` without a false report; a `oneOf` or `anyOf` branch and the `$ref` that replaces it are matched as the same branch, and `--match-inline-refs=false` turns this off
+- [Subschema matching](MATCHING-SUBSCHEMAS.md): move an inline schema into `components` without a false report; a `oneOf` or `anyOf` branch and the `$ref` that replaces it are matched as the same branch, and `--match-inline-refs=false` turns this off
 - [Enum values](EXTENSIBLE-ENUM.md): add a value to an enum that clients receive without a breaking change, with `x-extensible-enum`
 
 ### Normalization
