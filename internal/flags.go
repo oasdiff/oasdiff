@@ -21,11 +21,11 @@ func NewFlags() *Flags {
 	}
 }
 
-func (flags *Flags) toConfig() *diff.Config {
-	config := diff.NewConfig(
+func (flags *Flags) toConfig(options ...diff.Option) *diff.Config {
+	config := diff.NewConfig(append([]diff.Option{
 		diff.WithExcludeElements(flags.getExcludeElements()),
 		diff.WithExcludeExtensions(flags.getExcludeExtensions()),
-	)
+	}, options...)...)
 	config.MatchPath = flags.v.GetString("match-path")
 	config.UnmatchPath = flags.v.GetString("unmatch-path")
 	config.FilterExtension = flags.v.GetString("filter-extension")

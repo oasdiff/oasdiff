@@ -9,7 +9,7 @@ func (diff *ExtensionsDiff) Empty() bool {
 }
 
 func getExtensionsDiff(config *Config, extensions1, extensions2 map[string]any) (*ExtensionsDiff, error) {
-	if config.IsExcludeExtensions() {
+	if config.IsExcludeExtensions() && len(config.KeptExtensions) == 0 {
 		return nil, nil
 	}
 
@@ -35,7 +35,7 @@ func getExtensionsDiffInternal(extensions1, extensions2 map[string]any) (*Interf
 
 // filterExtensions returns a copy of the extensions map with excluded extensions removed
 func filterExtensions(extensions map[string]any, config *Config) map[string]any {
-	if len(config.ExcludeExtensions) == 0 {
+	if len(config.ExcludeExtensions) == 0 && !config.IsExcludeExtensions() {
 		return extensions
 	}
 

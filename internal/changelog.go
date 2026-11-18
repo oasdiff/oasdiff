@@ -5,6 +5,7 @@ import (
 	"io"
 
 	"github.com/oasdiff/oasdiff/checker"
+	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/formatters"
 	"github.com/oasdiff/oasdiff/load"
 	"github.com/oasdiff/oasdiff/versioning"
@@ -49,7 +50,7 @@ func runChangelog(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError) {
 
 func getChangelog(flags *Flags, stdout, stderr io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
 
-	diffResult, returnErr := calcDiff(flags)
+	diffResult, returnErr := calcDiff(flags, diff.WithKeptExtensions(checker.Extensions()))
 	if returnErr != nil {
 		return false, returnErr
 	}

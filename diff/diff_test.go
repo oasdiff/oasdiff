@@ -1070,6 +1070,47 @@ func TestDiff_ExtensionsExcludeUnrelatedName(t *testing.T) {
 	require.Len(t, dd, 2)
 }
 
+// A kept extension is compared although its name is excluded, and although
+// every extension is.
+func TestDiff_ExtensionsKept(t *testing.T) {
+	const name = "x-amazon-apigateway-integration"
+
+	for _, exclude := range []diff.Option{
+		diff.WithExcludeExtensions([]string{name}),
+		diff.WithExcludeElements([]string{diff.ExcludeExtensionsOption}),
+	} {
+		loader := openapi3.NewLoader()
+
+		s1, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/base.yaml"))
+		require.NoError(t, err)
+
+		s2, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/revision.yaml"))
+		require.NoError(t, err)
+
+		d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(exclude, diff.WithKeptExtensions([]string{name})), s1, s2)
+		require.NoError(t, err)
+		require.Len(t, d.PathsDiff.Modified["/example/callback"].OperationsDiff.Modified["POST"].ExtensionsDiff.Modified[name], 2)
+	}
+}
+
+// Keeping one extension does not bring back the others that are excluded.
+func TestDiff_ExtensionsKeptLeavesOthersExcluded(t *testing.T) {
+	loader := openapi3.NewLoader()
+
+	s1, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/base.yaml"))
+	require.NoError(t, err)
+
+	s2, err := load.NewSpecInfo(loader, load.NewSource("../data/extensions/revision.yaml"))
+	require.NoError(t, err)
+
+	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(
+		diff.WithExcludeElements([]string{diff.ExcludeExtensionsOption}),
+		diff.WithKeptExtensions([]string{"x-unrelated"}),
+	), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, d)
+}
+
 func TestDiff_ExtensionsInvalid(t *testing.T) {
 	s1, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/extensions/base.yaml"))
 	require.NoError(t, err)

@@ -15,6 +15,7 @@ type Config struct {
 	PathStripPrefixRevision string
 	ExcludeElements         utils.StringSet
 	ExcludeExtensions       utils.StringSet
+	KeptExtensions          utils.StringSet
 	IncludePathParams       bool
 	MatchInlineRefs         bool
 }
@@ -80,11 +81,19 @@ func WithExcludeElements(excludeElements []string) Option {
 }
 
 // WithExcludeExtensions sets specific OpenAPI extension names to omit
-// from the diff (only takes effect when "extensions" is also in
-// ExcludeElements).
+// from the diff. Excluding the "extensions" element omits all of them.
 func WithExcludeExtensions(excludeExtensions []string) Option {
 	return func(c *Config) {
 		c.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)
+	}
+}
+
+// WithKeptExtensions names extensions that are compared whatever
+// ExcludeElements and ExcludeExtensions say. The checks pass the extensions
+// they read, so that excluding one from the diff does not turn its check off.
+func WithKeptExtensions(keptExtensions []string) Option {
+	return func(c *Config) {
+		c.KeptExtensions = utils.StringSetFromSlice(keptExtensions)
 	}
 }
 
@@ -118,7 +127,10 @@ func (config *Config) IsExcludeTags() bool {
 
 // IsExcludedExtension checks if a specific extension name should be excluded from diff
 func (config *Config) IsExcludedExtension(name string) bool {
-	return config.ExcludeExtensions.Contains(name)
+	if config.KeptExtensions.Contains(name) {
+		return false
+	}
+	return config.IsExcludeExtensions() || config.ExcludeExtensions.Contains(name)
 }
 
 const (
