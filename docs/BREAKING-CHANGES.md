@@ -1,12 +1,7 @@
 # Breaking Changes and Changelog
-As your API evolves, it undergoes changes. Some of these changes may be "breaking" while others are not.  
 The `oasdiff breaking` command displays the changes that break existing API clients.  
-The `oasdiff changelog` command displays the changes that can affect API consumers, both breaking and non-breaking. Documentation-only edits, such as descriptions and examples, are not included; use `oasdiff diff` to see every difference in the API definition.  
+The `oasdiff changelog` command displays the changes that can affect API consumers, both breaking and non-breaking.  
 These commands are typically used in the CI to report or prevent breaking changes.
-
-> **Note:** `breaking` and `changelog` run on the diff engine described in [DIFF.md](DIFF.md). The flags and concepts there — extension tracking, path matching, `allOf` flattening, the path-prefix family, header case, `--allow-external-refs`, `--fail-on-diff` — apply here too, in addition to the breaking-specific options below.
-
-> **For teams:** [oasdiff.com](https://www.oasdiff.com) wraps these commands with a per-change PR comment, one-click approve/reject buttons, and commit-status checks — so reviewers can act on each breaking change directly from the pull request.
 
 ## Example: display breaking changes
 ```
@@ -18,211 +13,118 @@ oasdiff breaking https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/ope
 oasdiff changelog https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
 ```
 
-## Side-by-side review in your browser (`--open`)
-Both `breaking` and `changelog` accept an `--open` flag. After printing the usual terminal output, the CLI uploads the comparison to [oasdiff.com](https://www.oasdiff.com) and opens the rendered side-by-side review in your browser, with the diff anchored at each change site. The approve/reject buttons are shown but disabled; they are enabled only with [oasdiff Pro](https://www.oasdiff.com/pricing).
-
-```
-oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
-```
-
-The comparison is encrypted on your machine before upload, with a one-time key that lives only in the review link (the part after the `#`) and is never sent to our servers, so what we store we cannot read. There is no sign-in and no account.
-
-The resulting URL works for 7 days. Paste it into a PR comment or Slack and reviewers can open the review without installing the CLI themselves. Anyone you give the full link to can open it (the part after the `#` is the decryption key), so treat it like a secret.
-
-## Checks
-Oasdiff supports hundreds of checks (run `oasdiff checks changelog` for the current list, or browse the full catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes)), categorized into three levels:  
-- `ERR` - Errors are definite breaking changes which should be avoided
-- `WARN` - Warnings are potential breaking changes which developers should be aware of, but cannot be confirmed programmatically as breaking
-- `INFO` - Non-breaking changes
-
-`oasdiff breaking` detects changes with level `ERR` and `WARN` only.  
-`oasdiff changelog` detects changes with levels that are greater or equal to the `--level` argument. The default level, `INFO`, includes all checks.
-
-To see the full list of checks and their descriptions, run:
-```
-oasdiff checks changelog
-```
-See also [Customizing Severity Levels](#customizing-severity-levels)
-
-## How oasdiff decides what is breaking
-oasdiff judges a change against the API contract your OpenAPI definition declares, not against what a particular server happens to accept. A change is breaking if a consumer that followed the old contract can stop working under the new one.
-
-This matters because an OpenAPI definition declares which requests and responses are valid, but most servers do not enforce it at runtime, and a server may quietly accept a request that the contract says is invalid. oasdiff still reports the change as breaking, because other consumers of the same contract do enforce it: API gateways and validators reject non-conforming requests, and generated client SDKs turn the contract into typed code that no longer compiles. Whether your own server is lenient is your choice to make; it does not mean the contract is unchanged.
-
-Two consequences worth knowing:
-
-- A change that makes a previously valid request invalid is breaking even if your server would still accept it. For example, adding a required request property is breaking: a request that omits it is invalid under the new contract, whether or not the property has a default. A default is a server-side fallback value; it does not make an omitted required property valid.
-- `WARN` is reserved for changes where the definition genuinely does not contain enough information to decide, such as a change to an object parameter whose serialization the definition leaves unspecified. It is not used for changes that break some setups and not others; those are errors.
-
-If a check's default severity does not match your API's compatibility policy, change it with [Customizing Severity Levels](#customizing-severity-levels).
-
-## Preventing Breaking Changes
-A common way to use oasdiff is by running it as a step the CI/CD pipeline to detect changes.  
-In order to prevent changes, oasdiff can be configured to return an error if changes above a certain level are found.
-- To exit with return code 1 if ERR-level changes are found, add the `--fail-on ERR` flag.  
-- To exit with return code 1 if ERR-level or WARN-level changes are found, add the `--fail-on WARN` flag.
-- To exit with return code 1 if any changes are found, add the `--fail-on INFO` flag to `changelog`. `breaking` doesn't accept `INFO`, because it reports `WARN` and above.
-- To exit with return code 1 only when breaking changes aren't accompanied by a major version increase in `info.version`, add the `--fail-on MISSING-VERSION-BUMP` flag, described in [Version Bumps and Breaking Changes](VERSIONING.md).
-
-For example:
+## Example: fail the build on a breaking change
 ```
 oasdiff breaking --fail-on ERR data/openapi-test1.yaml data/openapi-test3.yaml
 ```
+Every change has a level: `ERR` for a definite breaking change, `WARN` for one that cannot be confirmed from the spec, and `INFO` for a non-breaking change.  
+`--fail-on ERR` exits with return code 1 when there is an error, and `--fail-on WARN` when there is an error or a warning.  
+`breaking` reports `ERR` and `WARN`. `changelog` reports all three, accepts `--fail-on INFO`, and shows only the levels at or above `--level`.
 
-## Checking many specs at once
-To check a list of changed specs against their versions in a git ref, one comparison per spec, see [BREAKING-FILES.md](BREAKING-FILES.md). That is what the pre-commit hook uses.
-
-## Output Formats
-By default, oasdiff displays changes in a human-readable [colorized](#color) text format.  
-Additional formats can be generated using the `--format` flag:
-- json
-- yaml
-- githubactions: suitable for integration with github
-- junit: suitable for integration with gitlab
-- html: [see example](https://html-preview.github.io/?url=https://github.com/oasdiff/oasdiff/blob/main/examples/changelog.html)
-- markdown: [see example](../examples/changelog.md)
-- text: the default, human-readable, format
-- singleline: displays each change on a single line, this can be useful to prepare [ignore files](#ignoring-specific-breaking-changes)
-
-For example:
+## Example: review the changes side by side, and approve them
 ```
-oasdiff breaking -f yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test1.yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/data/openapi-test3.yaml
+oasdiff changelog HEAD~1:openapi.yaml HEAD:openapi.yaml --open
 ```
+`--open` prints the changes, then opens a review in your browser with the old and new spec side by side, positioned on each change. The link can be shared with reviewers, who need no install and no account. See [Side-by-side review](SIDE-BY-SIDE-REVIEW.md).  
+With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject each breaking change in that review, and a status check on the pull request blocks the merge until all are approved.
 
-### JSON Schema
-`oasdiff schema` prints a [JSON Schema](https://json-schema.org/) for the `json` output of `breaking` and `changelog` (the `yaml` output has the same structure):
-```
-oasdiff schema
-```
+## What you can do
+Grouped by what you're trying to do.
 
-## Color
-When outputting changes to a Unix terminal, oasdiff automatically adds colors with ANSI color escape sequences.  
-If output is piped into another process or redirected to a file, oasdiff disables color.  
-To control color manually, use the `--color` flag with `always` or `never`.
+### How to run
+Where and how the commands run.
 
-## API Stability Levels
-Assigning [stability levels](STABILITY.md) to APIs allows fine-grained control over how APIs are allowed to change based on their maturity.  
+- [Fail the build on a breaking change](#example-fail-the-build-on-a-breaking-change): stop a breaking change in the CI, with `--fail-on`
+- [Pre-commit hook](PRE-COMMIT-HOOK.md): stop a breaking change before it is committed
+- [Docker](DOCKER.md): run without installing anything
+- [Configuration file](CONFIG-FILES.md): keep the flags in one `.oasdiff.yaml` file, or name one with `--config`
+- [Color, pipes and redirects](COLOR.md): pipe or redirect the output, and control color with `--color`
 
-## Deprecating APIs
-Before deleting an endpoint, it is recommended to give consumers a heads-up in the form of "deprecation". 
-Oasdiff allows you to [deprecate APIs gracefully](DEPRECATION.md) without triggering a breaking-change error.
+### Git
+Compare what is in git.
 
-## Version Bumps
-If you use semantic versioning, `--fail-on MISSING-VERSION-BUMP` fails the run when a breaking change was released without a major version bump, and passes it when the major version was raised.
-See [Version Bumps and Breaking Changes](VERSIONING.md).
+- [Git revisions](GIT-REVISION.md): compare a branch, tag or commit without checking out files, with `--fetch` for a commit your clone lacks
+- [Check many independent specs](BREAKING-FILES.md): check each changed spec against its own previous version, with `oasdiff breaking-files`
 
-## Nullability Changes
-A schema can allow `null` in three equivalent ways, and whether a nullability change is breaking depends on whether it appears in a request or a response.
-See [Nullability Changes](NULLABILITY.md).
+### GitHub
+Report on pull requests.
 
-## Schemas Used in Several Places
+- [GitHub Action](https://github.com/oasdiff/oasdiff-action): check every pull request and comment on it with the changes
+- [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions): compare a pull request with its base branch
+- [GitHub Actions annotations](SOURCE-LOCATOR.md#github-actions-annotations): mark the changed lines in the "Files changed" tab, with `--format githubactions`
+- [Pull requests from forks](#security): the action does not load external `$ref`s unless you turn that on
+- [oasdiff Pro](https://www.oasdiff.com/pricing): block the merge until reviewers approve every breaking change
 
-A schema referenced from more than one property of the same payload is reported once per check, at one of the properties that reach it. The finding names the shared schema and lists the other properties the change is at:
+### GitLab
+Report on merge requests.
 
-```
-the `customerId` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: `Id`, also at `userId`)
-```
+- [Output formats](OUTPUT-FORMATS.md): show the changes in the merge request's test report, with `--format junit` and `artifacts:reports:junit`
 
-So the change is under `components/schemas/Id` and it affects both properties: `customerId` and `userId`. The same comparison always reports the change at the same property.
+### Security
+Run on specs you do not control.
 
-The text lists up to three properties and counts the rest. When shared schemas are nested, every combination counts. Say `Inner` has a property `id`, `Outer` references `Inner` from its properties `a` and `b`, and the payload references `Outer` from its properties `p` and `q`. A pattern added to `id` is at four properties, `p/a/id`, `q/a/id`, `p/b/id` and `q/b/id`:
+- [External `$ref`s](EXTERNAL-REFS.md): run on pull requests from people you do not trust, with `--allow-external-refs=false`
 
-```
-the `p/a/id` response's property pattern `^[0-9]+$` was added for the status `200` (shared schema: `Inner`, also at `q/a/id`, `p/b/id` and 1 more)
-```
+### Inputs
+Where specs come from.
 
-JSON and YAML output carry the same list and the full count:
+Both commands take two arguments, `base` and `revision`. Each can be:
+- a path to a file, in YAML or JSON: `openapi.yaml`
+- an http or https URL: `https://example.com/openapi.yaml`
+- a git ref and a path: `origin/main:openapi.yaml` (see [Git revisions](GIT-REVISION.md))
+- `-` to read the spec from standard input
+- a glob, with `--composed`: `"specs/*.yaml"` (see [Compare APIs split across multiple files](COMPOSED.md))
 
-```json
-"sharedSchema": {
-  "name": "Inner",
-  "properties": ["p/a/id", "q/a/id", "p/b/id"],
-  "count": 4
-}
-```
+- [Compare APIs split across multiple files](COMPOSED.md): check one API that is split across several files, with `--composed`
+- [Comparing across OpenAPI versions](OPENAPI-31.md#comparing-across-versions-with---auto-upgrade): compare a 3.0 spec with its 3.1 version, with `--auto-upgrade`
 
-Why one finding: the number of properties a change is at multiplies with each level of nesting. In the Microsoft Graph API description (v1.0, from the APIs.guru directory), a single schema is reached from 164,769 properties of one request or response body. A finding per property would make the changelog impossible to read and the comparison slow, so oasdiff reports the change once and counts the rest.
+### Comparison
+How oasdiff pairs up base and revision and what counts as a difference.
 
-When shared schemas are nested, the finding names the one closest to the change: a change to `id` names `Inner`, and a property added to `Outer` names `Outer`.
+- [Endpoint matching](MATCHING-ENDPOINTS.md): rename a path parameter without it counting as a new endpoint (`--include-path-params` turns this off)
+- [Subschema matching](MATCHING-SUBSCHEMAS.md): move an inline schema into `components` without a false report (`--match-inline-refs=false` turns this off)
+- [Enum values](EXTENSIBLE-ENUM.md): add a value to an enum that clients receive, with `x-extensible-enum`
 
-The shared schema does not change the change's fingerprint, which is computed from its arguments and not from its text.
+### Normalization
+Align each spec before comparing so equivalent things line up.
 
-Three things stay separate, and each still gets its own line:
+- [Merge `allOf` schemas](ALLOF.md): get exact results, not warnings, for schemas that use `allOf`, with `--flatten-allof`
+- [Merge common (path-level) parameters](COMMON-PARAMS.md): handle parameters declared once for a whole path, with `--flatten-params`
+- [Path prefix modification](PATH-PREFIX.md): compare an API that moved to a new base path, with `--prefix-base`, `--prefix-revision`, `--strip-prefix-base` and `--strip-prefix-revision`
+- [Case-insensitive header comparison](HEADER-DIFF.md): treat `Content-Type` and `content-type` as the same header (`--case-insensitive-headers=false` turns this off)
 
-- **Each check.** Every check reports on its own, so a shared schema that both added a property and gained a `pattern` produces one `response-optional-property-added` and one `response-property-pattern-added`.
-- **Each change.** Two properties added to the same shared schema are two changes, both reported at the same property.
-- **Each operation.** An operation is a separate contract, so an operation that reaches the same changed schema reports it too.
+### API lifecycle
+Communicate intent across versions.
 
-## Ignoring Specific Breaking Changes
-Sometimes, you want to allow certain breaking changes, for example, when your spec and service are out-of-sync and you need to correct the spec.  
-Oasdiff allows you define breaking changes that you want to ignore in a configuration file.  
-You can specify the configuration file name in the oasdiff command-line with the `--warn-ignore` flag for WARNINGS or the `--err-ignore` flag for ERRORS.  
-Each line in the configuration file should contain two parts:
-1. Method and path (the first field in the line beginning with slash) to ignore a change to an endpoint, or the keyword 'components' to ignore a change in components
-2. Description of the breaking change
+- [Deprecate APIs and parameters](DEPRECATION.md): remove an endpoint, parameter or property after giving clients time, set with `--deprecation-days-stable` and `--deprecation-days-beta`
+- [API stability levels](STABILITY.md): let draft, alpha and beta endpoints change freely, with `--stability-level`
+- [Version bumps](VERSIONING.md): allow breaking changes only in a new major version, with `--fail-on MISSING-VERSION-BUMP`
 
-For example:
-```
-GET /api/{domain}/{project}/badges/security-score removed the success response with the status '200'
-```
-Or, for a component change:
-```
-components removed the schema 'rules'
-```
+### Filtering changes
+Choose which changes are reported, and at which level.
 
-The required parts may appear in any order, in lower or upper case, and the configuration line may contain additional text, like this:
-```
- - 12.01.2023 In GET /api/{domain}/{project}/badges/security-score we removed the success response with the status '200'
- - 31.10.2023 Removed the schema 'network-policies' from components
-```
+- [Filter endpoints](FILTERING-ENDPOINTS.md): check only part of the API, with `--match-path`, `--unmatch-path` and `--filter-extension`
+- [Customize severity levels](SEVERITY-LEVELS.md): change how severe a change is, or turn a check off, with `--severity-levels`
+- [Ignore specific breaking changes](IGNORING-CHANGES.md): accept a breaking change you decided to make, with `--err-ignore` and `--warn-ignore`
+- [Custom checks](CUSTOMIZING-CHECKS.md): add a rule oasdiff does not have
 
-The configuration files can be of any text type, e.g., Markdown, so you can use them to document breaking changes and other important changes.
+### Output
+Shape and enrich the report.
 
-## Breaking Changes to Enum Values
-Oasdiff supports special rules for enum changes using the `x-extensible-enum` extension.  
-This method allows adding new entries to enums used in responses which is very usable in many cases but requires clients to support a fallback to default logic when they receive an unknown value.
-`x-extensible-enum` was introduced by [Zalando](https://opensource.zalando.com/restful-api-guidelines/#112) and picked up by the OpenAPI community. Technically, it could be replaced with anyOf+classical enum but the `x-extensible-enum` is a more explicit way to do it.  
-In most cases the `x-extensible-enum` is similar to enum values, except it allows adding new entries in messages sent to the client (responses or callbacks).
-If you don't use the `x-extensible-enum` in your OpenAPI specifications, nothing changes for you, but if you do, oasdiff will identify breaking changes related to `x-extensible-enum` parameters and properties.
+- [Output formats](OUTPUT-FORMATS.md): feed the changes to another tool, with `--format json` or `yaml`
+- [Customize HTML and Markdown changelog templates](CHANGELOG-TEMPLATE.md): publish a changelog for the people who use your API, with `--template`
+- [Source location tracking](SOURCE-LOCATOR.md): go from a change to the line that caused it
+- [Side-by-side review in your browser](SIDE-BY-SIDE-REVIEW.md): see the two specs side by side on the line of each change, with `--open`
+- [Add OpenAPI-extension attributes to changelog entries](ATTRIBUTES.md): show which team owns a changed endpoint, with `--attributes`
+- [Change fingerprints](FINGERPRINT.md): recognize the same change in a later run
+- [Localization](LOCALIZATION.md): show the changes in your team's language, with `--lang`
 
-## Localization
-To display changes in other languages, use the `--lang` flag.  
-Currently English, Russian and Brazilian Portuguese are supported.  
-[Please improve oasdiff by adding your own language](https://github.com/oasdiff/oasdiff/issues/383).
-
-## Customizing Severity Levels
-Oasdiff allows you to change the default severity levels according to your needs.  
-For example, the default severity level of the `api-security-scope-removed` check is `INFO`. You can verify this by running `oasdiff checks changelog`.  
-To change the `api-security-scope-removed` check's severity level to `ERR` use the following command:
-```
-oasdiff changelog data/checker/api_security_updated_base.yaml data/checker/api_security_updated_revision.yaml --severity-levels oasdiff-levels.txt
-```
-Where the file `oasdiff-levels.txt` contains a single line:
-```
-api-security-scope-removed    err
-```
-
-Checks can be customized with the following levels:
-| Custom Level  | Check Status |
-| ------------- | ------------- |
-| err  | Enabled with level ERR |
-| warn  | Enabled with level WARN |
-| info  | Enabled with level INFO |
-| none  | Disabled  |
-
-### When oasdiff reports a change below its check's level
-The level a check declares, which is what `oasdiff checks changelog` lists, is what the change means in general. For a specific change, oasdiff may report a lower level, with a comment explaining why. This happens for two reasons:
-
-- **The comparison was not exact.** A change inside an `allOf` is the common case: without [`--flatten-allof`](ALLOF.md) the branches are compared one at a time, so another branch may already describe what changed in one branch. Such a change is reported at `WARN` even where its check declares `ERR`, and the comment says why and what to run to get the exact answer.
-- **The spec shows the change cannot break anyone.** A property marked `readOnly` never appears in requests, so restricting it (adding a `pattern`, setting a `maximum`) cannot invalidate a request; the same holds for `writeOnly` properties in responses. Such a change is reported at `INFO` even where its check declares `ERR`, and the comment states the reason. The conditions a check recognizes are listed in its GUARDS column in `oasdiff checks changelog` (see [CHECKS.md](CHECKS.md#categorization)).
-
-**Setting a level yourself turns this off for that check.** The level you set is the level you get, whether or not one of the reasons above applies. This matters in both directions: pinning a check to `err` means it will report `ERR` even where oasdiff would otherwise have lowered it, and pinning one to the level it already has is enough to opt out.
-
-## Customizing Breaking Changes Checks
-If you encounter a change that isn't reported, you may:
-1. Run `oasdiff checks changelog` to see if the check is available, and [customize the level as needed](#customizing-severity-levels).  
-2. Add a [custom check](CUSTOMIZING-CHECKS.md)
+### Reference
+- [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md): a change is judged against the contract, not against what one server accepts
+- [Checks](CHECKS.md): every change oasdiff can detect, and its level
+- [Nullability changes](NULLABILITY.md): when making a property nullable breaks clients
+- [Schemas used in several places](SHARED-SCHEMAS.md): a change to a shared schema is reported once
 
 ## Known Limitations
-- no checks for `context` instead of `schema` for request parameters
+- no checks for request parameters that use `content` instead of `schema`
 - no checks for `callback`s

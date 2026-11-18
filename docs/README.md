@@ -66,65 +66,71 @@ The top-level subcommands, grouped as in `oasdiff --help`.
 
 **Compare two specs**
 
-- [`breaking`](BREAKING-CHANGES.md) — only the changes that break existing API clients
-- [`changelog`](BREAKING-CHANGES.md) — changes that can affect API consumers, breaking or not, in human-readable form
-- [`diff`](DIFF.md) — full diff of the API definition, including documentation-only edits (output: html, json, markdown, markup, text, or yaml — default yaml)
-- [`summary`](DIFF.md) — high-level count of changes between two specs (built on the diff engine; same shared options)
+- [`breaking`](BREAKING-CHANGES.md): only the changes that break existing API clients
+- [`changelog`](BREAKING-CHANGES.md): changes that can affect API consumers, breaking or not, in human-readable form
+- [`diff`](DIFF.md): full diff of the API definition, including documentation-only edits (output: html, json, markdown, markup, text, or yaml — default yaml)
+- [`summary`](DIFF.md): high-level count of changes between two specs (built on the diff engine; same shared options)
 
 **Process a single spec**
 
-- [`validate`](VALIDATE.md) — check a spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)
-- [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade) — canonicalize an OpenAPI 3.0 spec to the latest 3.x
-- [`flatten`](ALLOF.md) — replace `allOf` schemas with a merged equivalent
+- [`validate`](VALIDATE.md): check a spec for per-RFC violations (invalid types, missing required fields, bad regex, unresolved `$ref`s)
+- [`upgrade`](OPENAPI-31.md#converting-a-spec-with-oasdiff-upgrade): canonicalize an OpenAPI 3.0 spec to the latest 3.x
+- [`flatten`](ALLOF.md): replace `allOf` schemas with a merged equivalent
 
 **Git integration**
 
-- [`breaking-files`](BREAKING-FILES.md) — check a list of changed specs against their versions in a git ref, one comparison per spec; used by the [pre-commit hook](BREAKING-FILES.md#pre-commit-hook)
-- [`git-diff-driver`](GIT-DIFF-DRIVER.md) — run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
+- [`breaking-files`](BREAKING-FILES.md): check a list of changed specs against their versions in a git ref, one comparison per spec; used by the [pre-commit hook](PRE-COMMIT-HOOK.md)
+- [`git-diff-driver`](GIT-DIFF-DRIVER.md): run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
 
 **Reference**
 
-- [`checks changelog`](CHECKS.md) — list the rules `breaking` and `changelog` use to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
-- [`checks validate`](CHECKS.md#validate-checks) — list the rules `validate` reports
-- [`checks changelog coverage`](CHECKS.md#coverage-map) — list every possible edit of an OpenAPI document with the checks that cover it
-- [`schema`](BREAKING-CHANGES.md#json-schema) — print a JSON Schema for the `breaking`/`changelog` json output
+- [`checks changelog`](CHECKS.md): list the rules `breaking` and `changelog` use to classify changes ([customize them](CUSTOMIZING-CHECKS.md))
+- [`checks validate`](CHECKS.md#validate-checks): list the rules `validate` reports
+- [`checks changelog coverage`](CHECKS.md#coverage-map): list every possible edit of an OpenAPI document with the checks that cover it
+- [`schema`](OUTPUT-FORMATS.md#json-schema): print a JSON Schema for the `breaking`/`changelog` json output
 
 ### Inputs
 Where specs come from.
 
-- [Git revisions](GIT-REVISION.md) — compare against a branch, tag, or commit
-- Local files, http/s URLs, YAML or JSON — all handled transparently
+- [Git revisions](GIT-REVISION.md): compare against a branch, tag, or commit
+- Local files, http/s URLs, YAML or JSON: all handled transparently
 
 ### Comparison
 How oasdiff pairs up base and revision and what counts as a difference.
 
-- [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
-- [Nullability changes](NULLABILITY.md) — the three equivalent nullable forms and when changing them is breaking
-- [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
-- [Check many independent specs](BREAKING-FILES.md) — one comparison per spec, rather than merging them as composed mode does
-- [Filter endpoints](FILTERING-ENDPOINTS.md) — narrow the diff to a subset of endpoints
+- [Endpoint matching](MATCHING-ENDPOINTS.md): handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
+- [Subschema matching](MATCHING-SUBSCHEMAS.md): how `allOf`, `anyOf` and `oneOf` branches are paired, including an inline schema replaced by a `$ref`
+- [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md): judged against the contract, not against what a server accepts
+- [Schemas used in several places](SHARED-SCHEMAS.md): a change to a shared schema is reported once
+- [Nullability changes](NULLABILITY.md): the three equivalent nullable forms and when changing them is breaking
+- [Enum values](EXTENSIBLE-ENUM.md): `x-extensible-enum` lets a response enum gain values without a breaking change
+- [Compare APIs split across multiple files](COMPOSED.md): e.g. an API gateway with one spec per service
+- [Check many independent specs](BREAKING-FILES.md): one comparison per spec, rather than merging them as composed mode does
+- [Filter endpoints](FILTERING-ENDPOINTS.md): narrow the diff to a subset of endpoints
 
 ### Normalization
 Align each spec before diffing so equivalent things line up.
 
 - [Merge `allOf` schemas](ALLOF.md)
 - [Merge common (path-level) parameters](COMMON-PARAMS.md)
-- [Path prefix modification](PATH-PREFIX.md) — strip or add a prefix so a moved API still matches
-- [Case-insensitive header comparison](HEADER-DIFF.md) — treat `Content-Type` and `content-type` as the same header
+- [Path prefix modification](PATH-PREFIX.md): strip or add a prefix so a moved API still matches
+- [Case-insensitive header comparison](HEADER-DIFF.md): treat `Content-Type` and `content-type` as the same header
 
 ### API lifecycle
 Communicate intent across versions.
 
 - [Deprecate APIs and parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md) (draft / alpha / beta / stable)
-- [Version bumps](VERSIONING.md) — fail the build when a breaking change is released without a major version bump
+- [Version bumps](VERSIONING.md): fail the build when a breaking change is released without a major version bump
 
 ### Filtering changes
 Choose which kinds of differences are reported.
 
-- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes) — e.g. ignore description-only edits
-- [Track OpenAPI extensions](DIFF.md#openapi-extensions) — opt in to reporting changes in `x-*` fields
-- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names) — when extensions are tracked, skip ones you don't care about
+- [Customize severity levels](SEVERITY-LEVELS.md): raise, lower or disable a check
+- [Ignore specific breaking changes](IGNORING-CHANGES.md): list the changes you accept in a file
+- [Exclude certain kinds of changes](DIFF.md#excluding-specific-kinds-of-changes): e.g. ignore description-only edits
+- [Track OpenAPI extensions](DIFF.md#openapi-extensions): opt in to reporting changes in `x-*` fields
+- [Exclude specific extension names](DIFF.md#excluding-specific-extension-names): when extensions are tracked, skip ones you don't care about
 
 ### Output
 Shape and enrich the report.
@@ -132,21 +138,25 @@ Shape and enrich the report.
 - [Customize HTML and Markdown changelog templates](CHANGELOG-TEMPLATE.md)
 - [Add OpenAPI-extension attributes to changelog entries](ATTRIBUTES.md)
 - [Source location tracking](SOURCE-LOCATOR.md)
-- [Change fingerprints](FINGERPRINT.md) — stable IDs across commits
+- [Change fingerprints](FINGERPRINT.md): stable IDs across commits
 - [Error reporting](ERRORS.md)
-- Localization: en, ru, pt-br, es
+- [Output formats](OUTPUT-FORMATS.md) for `breaking` and `changelog`
+- [Localization](LOCALIZATION.md): show changes in another language
+- [Side-by-side review in your browser](SIDE-BY-SIDE-REVIEW.md) with `--open`
 
 ### How to run
 - [Docker](DOCKER.md)
+- [Pre-commit hook](PRE-COMMIT-HOOK.md): stop a breaking change before it is committed
+- [Color, pipes and redirects](COLOR.md): when the output is colored, and `--color`
 - [Configuration file](CONFIG-FILES.md)
 - [Embed in a Go program](GO.md)
-- [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI — and [oasdiff.com](https://www.oasdiff.com) for teams, which adds a per-change PR comment with approve/reject and commit-status checks
-- [MCP server](MCP.md) — call oasdiff from an AI assistant (Claude, Cursor, ...) via the hosted server at `https://api.oasdiff.com/mcp`
+- [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI: and [oasdiff.com](https://www.oasdiff.com) for teams, which adds a per-change PR comment with approve/reject and commit-status checks
+- [MCP server](MCP.md): call oasdiff from an AI assistant (Claude, Cursor, ...) via the hosted server at `https://api.oasdiff.com/mcp`
 
 ### Reference
-- [OpenAPI 3.1 and 3.2 support](OPENAPI-31.md) — what's supported
+- [OpenAPI 3.1 and 3.2 support](OPENAPI-31.md): what's supported
 - [External `$ref`s: control external loading to prevent SSRF](EXTERNAL-REFS.md)
-- [Usage examples](USAGE_EXAMPLES.md) — recipes for common scenarios
+- [Usage examples](USAGE_EXAMPLES.md): recipes for common scenarios
 - [Contributing](CONTRIB.md)
 
 ## Demo
