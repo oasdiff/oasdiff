@@ -72,9 +72,9 @@ Without `--ext-diff`, git falls back to the raw text diff. To make `--ext-diff` 
 
 ## Limitations
 
-- The `--ext-diff` flag is a git design choice — there's no way for the driver to opt-in automatically.
+- The `--ext-diff` flag is a git design choice: there's no way for the driver to opt-in automatically.
 
 ## See also
 
-- [Loading specs from git revisions](GIT-REVISION.md) — the `<ref>:<path>` syntax oasdiff supports generally, including blob hashes.
-- [Breaking changes and changelog](BREAKING-CHANGES.md) — the underlying command whose output the git diff driver renders.
+- [Loading specs from git revisions](GIT-REVISION.md): the `<ref>:<path>` syntax oasdiff supports generally, including blob hashes.
+- [Breaking changes and changelog](BREAKING-CHANGES.md): the underlying command whose output the git diff driver renders.

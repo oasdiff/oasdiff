@@ -3,7 +3,7 @@
 #
 # The hook runs `oasdiff breaking-files`, which compares each staged spec against
 # its own version in a git ref and fails the commit on a breaking change.
-# See https://github.com/oasdiff/oasdiff/blob/main/docs/BREAKING-FILES.md
+# See https://github.com/oasdiff/oasdiff/blob/main/docs/PRE-COMMIT-HOOK.md
 
 repos:
   - repo: https://github.com/oasdiff/oasdiff
