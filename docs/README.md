@@ -102,6 +102,7 @@ How oasdiff pairs up base and revision and what counts as a difference.
 - [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md): judged against the contract, not against what a server accepts
 - [Schemas used in several places](SHARED-SCHEMAS.md): a change to a shared schema is reported once
 - [Nullability changes](NULLABILITY.md): the three equivalent nullable forms and when changing them is breaking
+- [Enum values](EXTENSIBLE-ENUM.md): `x-extensible-enum` lets a response enum gain values without a breaking change
 - [Compare APIs split across multiple files](COMPOSED.md): e.g. an API gateway with one spec per service
 - [Check many independent specs](BREAKING-FILES.md): one comparison per spec, rather than merging them as composed mode does
 - [Filter endpoints](FILTERING-ENDPOINTS.md): narrow the diff to a subset of endpoints
@@ -119,7 +120,6 @@ Communicate intent across versions.
 
 - [Deprecate APIs and parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md) (draft / alpha / beta / stable)
-- [Enum values](EXTENSIBLE-ENUM.md): `x-extensible-enum` lets a response enum gain values without a breaking change
 - [Version bumps](VERSIONING.md): fail the build when a breaking change is released without a major version bump
 
 ### Filtering changes
