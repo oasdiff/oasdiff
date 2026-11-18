@@ -55,6 +55,11 @@ Report on pull requests.
 - [Pull requests from forks](#security): the action does not load external `$ref`s unless you turn that on
 - [oasdiff Pro](https://www.oasdiff.com/pricing): block the merge until reviewers approve every breaking change
 
+### GitLab
+Report on merge requests.
+
+- [Output formats](OUTPUT-FORMATS.md): show the changes in the merge request's test report, with `--format junit` and `artifacts:reports:junit`
+
 ### Security
 Run on specs you do not control.
 
@@ -106,7 +111,7 @@ Choose which changes are reported, and at which level.
 ### Output
 Shape and enrich the report.
 
-- [Output formats](OUTPUT-FORMATS.md): feed the changes to another tool or CI system, with `--format json`, `yaml` or `junit`
+- [Output formats](OUTPUT-FORMATS.md): feed the changes to another tool, with `--format json` or `yaml`
 - [Customize HTML and Markdown changelog templates](CHANGELOG-TEMPLATE.md): publish a changelog for the people who use your API, with `--template`
 - [Source location tracking](SOURCE-LOCATOR.md): go from a change to the line that caused it
 - [Side-by-side review in your browser](SIDE-BY-SIDE-REVIEW.md): see the two specs side by side on the line of each change, with `--open`
