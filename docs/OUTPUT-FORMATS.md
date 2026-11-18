@@ -1,5 +1,4 @@
 # Output Formats for Breaking Changes and Changelog
-## Formats
 By default, oasdiff displays changes in a human-readable [colorized](COLOR.md) text format.  
 Additional formats can be generated using the `--format` flag:
 - json

@@ -126,5 +126,5 @@ Shape and enrich the report.
 - [Schemas used in several places](SHARED-SCHEMAS.md): a change to a shared schema is reported once
 
 ## Known Limitations
-- no checks for `context` instead of `schema` for request parameters
+- no checks for request parameters that use `content` instead of `schema`
 - no checks for `callback`s
