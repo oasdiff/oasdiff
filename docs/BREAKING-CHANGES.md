@@ -31,11 +31,18 @@ With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject
 ## What you can do
 
 ### How to run
-- **Check every pull request on GitHub** with the [GitHub Action](https://github.com/oasdiff/oasdiff-action), which comments on the pull request with the changes.
 - **Stop a breaking change before it is committed.** See [Pre-commit hook](PRE-COMMIT-HOOK.md).
 - **Run without installing anything.** See [Docker](DOCKER.md).
 - **Keep the flags in one place** in an `.oasdiff.yaml` file, or point at one with `--config`. See [Configuration file](CONFIG-FILES.md).
 - **Pipe the output to another command, or redirect it to a file.** Color is turned off when the output is not a terminal, and `--color` forces it on or off. See [Color, pipes and redirects](COLOR.md).
+
+### GitHub
+- **Check every pull request** with the [GitHub Action](https://github.com/oasdiff/oasdiff-action). It comments on the pull request with the list of changes, each linked to its side-by-side diff.
+- **Compare the pull request with its base branch**, with no extra checkout: `base: 'origin/${{ github.base_ref }}:openapi.yaml'`. The checkout step needs `fetch-depth: 0`. See [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions).
+- **Mark the changed lines in the "Files changed" tab**: `--format githubactions` writes an annotation on the line of each change. The action does this for you. See [GitHub Actions annotations](SOURCE-LOCATOR.md#github-actions-annotations).
+- **Use the same settings locally and in the workflow**: the action reads `.oasdiff.yaml` from the repository. See [Using a configuration file with the GitHub Action](CONFIG-FILES.md#using-with-the-github-action).
+- **Accept pull requests from forks**: the action does not load external `$ref`s unless you turn that on, so a spec in a fork cannot make the runner fetch a URL or read a file. See [Security](#security).
+- **Block the merge until every breaking change is approved**: with [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject each change, and a status check on the pull request follows.
 
 ### Security
 - **Run on pull requests from people you do not trust**: `--allow-external-refs=false` stops a spec from making the runner fetch a URL or read a local file. See [External `$ref`s](EXTERNAL-REFS.md).
@@ -73,7 +80,7 @@ With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject
 - **Add a rule oasdiff does not have.** See [Custom checks](CUSTOMIZING-CHECKS.md).
 
 ### Output
-- **Mark the changed lines in a pull request** with `--format githubactions`, or produce a `junit` report for GitLab. See [Output formats](OUTPUT-FORMATS.md).
+- **Produce a JUnit report for GitLab or another CI system**: `--format junit`. See [Output formats](OUTPUT-FORMATS.md).
 - **Feed the changes to another tool**: `--format json` or `--format yaml`, and `oasdiff schema` for the JSON Schema of that output. See [Output formats](OUTPUT-FORMATS.md).
 - **Publish a changelog for the people who use your API**: `--format html` or `--format markdown`, with your own layout through `--template`. See [Customize HTML and Markdown changelog templates](CHANGELOG-TEMPLATE.md).
 - **Go from a change to the line that caused it.** Each change carries the file, line and column in both specs, and `--open` shows the two specs side by side on that line. See [Source location tracking](SOURCE-LOCATOR.md) and [Side-by-side review](SIDE-BY-SIDE-REVIEW.md).
