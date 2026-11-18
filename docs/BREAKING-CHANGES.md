@@ -37,7 +37,7 @@ Where and how the commands run.
 - [Fail the build on a breaking change](#example-fail-the-build-on-a-breaking-change): stop a breaking change in the CI, with `--fail-on`
 - [Pre-commit hook](PRE-COMMIT-HOOK.md): stop a breaking change before it is committed
 - [Docker](DOCKER.md): run without installing anything
-- [Configuration file](CONFIG-FILES.md): keep the flags in one place, in an `.oasdiff.yaml` file or one named with `--config`
+- [Configuration file](CONFIG-FILES.md): keep the flags in one place, in an `.oasdiff.yaml` file or one named with `--config`; the same file is used locally, in CI and by the [GitHub Action](CONFIG-FILES.md#using-with-the-github-action)
 - [Color, pipes and redirects](COLOR.md): pipe the output to another command or redirect it to a file; color turns off when the output is not a terminal, and `--color` forces it on or off
 
 ### Git and GitHub
@@ -48,7 +48,6 @@ Compare what is in git, and report on pull requests.
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action): check every pull request and comment on it with the list of changes, each linked to its side-by-side diff
 - [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions): compare a pull request with its base branch in a workflow, with `base: 'origin/${{ github.base_ref }}:openapi.yaml'` after a `git fetch --depth=1` of the base branch
 - [GitHub Actions annotations](SOURCE-LOCATOR.md#github-actions-annotations): mark the changed lines in the "Files changed" tab with `--format githubactions`, which the action does for you
-- [Configuration file with the GitHub Action](CONFIG-FILES.md#using-with-the-github-action): use the same settings locally and in the workflow; the action reads `.oasdiff.yaml` from the repository
 - [Pull requests from forks](#security): the action does not load external `$ref`s unless you turn that on, so a spec in a fork cannot make the runner fetch a URL or read a file
 - [oasdiff Pro](https://www.oasdiff.com/pricing): block the merge until reviewers approve every breaking change, with a status check on the pull request
 
