@@ -59,6 +59,13 @@ Run on specs you do not control.
 ### Inputs
 Where specs come from.
 
+Both commands take two arguments, `base` and `revision`. Each can be:
+- a path to a file, in YAML or JSON: `openapi.yaml`
+- an http or https URL: `https://example.com/openapi.yaml`
+- a git ref and a path: `origin/main:openapi.yaml` (see [Git revisions](GIT-REVISION.md))
+- `-` to read the spec from standard input
+- a glob, with `--composed`: `"specs/*.yaml"` (see [Compare APIs split across multiple files](COMPOSED.md))
+
 - [Compare APIs split across multiple files](COMPOSED.md): check one API that is split across several files, such as one spec per service behind a gateway; `--composed` merges the files into a single comparison
 - [Comparing across OpenAPI versions](OPENAPI-31.md#comparing-across-versions-with---auto-upgrade): compare an OpenAPI 3.0 spec with its 3.1 version without the migration itself showing up as changes, with `--auto-upgrade`
 
