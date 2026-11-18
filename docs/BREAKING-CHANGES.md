@@ -36,9 +36,11 @@ With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject
 - **Keep the flags in one place** in an `.oasdiff.yaml` file, or point at one with `--config`. See [Configuration file](CONFIG-FILES.md).
 - **Pipe the output to another command, or redirect it to a file.** Color is turned off when the output is not a terminal, and `--color` forces it on or off. See [Color, pipes and redirects](COLOR.md).
 
-### GitHub
+### Git and GitHub
+- **Compare by git refs**, a branch, tag or commit, without checking out files: `oasdiff breaking origin/main:openapi.yaml openapi.yaml`. Add `--fetch` when the commit is not in your clone. See [Git revisions](GIT-REVISION.md).
+- **Check each spec that changed against its own previous version**, when a repository holds several independent APIs: `oasdiff breaking-files --base origin/main` makes one comparison per spec. See [Check many independent specs](BREAKING-FILES.md).
 - **Check every pull request** with the [GitHub Action](https://github.com/oasdiff/oasdiff-action). It comments on the pull request with the list of changes, each linked to its side-by-side diff.
-- **Compare the pull request with its base branch**, with no extra checkout: `base: 'origin/${{ github.base_ref }}:openapi.yaml'`. The checkout step needs `fetch-depth: 0`. See [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions).
+- **Compare a pull request with its base branch** in a workflow: `base: 'origin/${{ github.base_ref }}:openapi.yaml'`. The checkout step needs `fetch-depth: 0`. See [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions).
 - **Mark the changed lines in the "Files changed" tab**: `--format githubactions` writes an annotation on the line of each change. The action does this for you. See [GitHub Actions annotations](SOURCE-LOCATOR.md#github-actions-annotations).
 - **Use the same settings locally and in the workflow**: the action reads `.oasdiff.yaml` from the repository. See [Using a configuration file with the GitHub Action](CONFIG-FILES.md#using-with-the-github-action).
 - **Accept pull requests from forks**: the action does not load external `$ref`s unless you turn that on, so a spec in a fork cannot make the runner fetch a URL or read a file. See [Security](#security).
@@ -48,8 +50,6 @@ With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject
 - **Run on pull requests from people you do not trust**: `--allow-external-refs=false` stops a spec from making the runner fetch a URL or read a local file. See [External `$ref`s](EXTERNAL-REFS.md).
 
 ### Inputs
-- **Compare your working copy with `main`, or any two commits**, without checking out files: `oasdiff breaking origin/main:openapi.yaml openapi.yaml`. Add `--fetch` when the commit is not in your clone. See [Git revisions](GIT-REVISION.md).
-- **Check each spec that changed against its own previous version**, when a repository holds several independent APIs: `oasdiff breaking-files --base origin/main` makes one comparison per spec. See [Check many independent specs](BREAKING-FILES.md).
 - **Check one API that is split across several files**, such as one spec per service behind a gateway: `--composed` merges the files into a single comparison. See [Compare APIs split across multiple files](COMPOSED.md).
 - **Compare an OpenAPI 3.0 spec with its 3.1 version** without the migration itself showing up as changes: `--auto-upgrade`. See [Comparing across versions](OPENAPI-31.md#comparing-across-versions-with---auto-upgrade).
 
