@@ -54,12 +54,8 @@ With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject
 - **Compare an OpenAPI 3.0 spec with its 3.1 version** without the migration itself showing up as changes: `--auto-upgrade`. See [Comparing across versions](OPENAPI-31.md#comparing-across-versions-with---auto-upgrade).
 
 ### Comparison
-- **Understand why a change is, or is not, breaking.** oasdiff judges a change against the contract the spec declares, not against what one server accepts. See [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md).
-- **See everything oasdiff can detect, and at which level**: `oasdiff checks changelog`, or the catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes). See [Checks](CHECKS.md).
 - **Rename a path parameter without it counting as a new endpoint.** This is the default, and `--include-path-params` turns it off. See [Endpoint matching](MATCHING-ENDPOINTS.md).
 - **Move an inline schema into `components` without a false report**: a `oneOf` or `anyOf` branch and the `$ref` that replaces it are matched as the same branch. `--match-inline-refs=false` turns this off. See [Inline and `$ref` subschemas](DIFF.md#inline-and-ref-subschemas).
-- **Know when making a property nullable breaks clients.** See [Nullability changes](NULLABILITY.md).
-- **Read a change to a schema that many properties use.** It is reported once, with the list of properties it affects. See [Schemas used in several places](SHARED-SCHEMAS.md).
 
 ### Normalization
 - **Get exact results for schemas that use `allOf`**: `--flatten-allof` merges the branches before comparing. Without it a change inside an `allOf` is reported as a warning, because another branch may already describe it. See [Merge `allOf` schemas](ALLOF.md).
@@ -87,6 +83,12 @@ With [oasdiff Pro](https://www.oasdiff.com/pricing), reviewers approve or reject
 - **Show which team owns a changed endpoint**: `--attributes` copies an extension such as `x-audience` from the spec into each change. See [Add OpenAPI-extension attributes to changelog entries](ATTRIBUTES.md).
 - **Recognize the same change in a later run**, for example to remember that it was approved. Each change has a stable id. See [Change fingerprints](FINGERPRINT.md).
 - **Show the changes in your team's language**: `--lang`. See [Localization](LOCALIZATION.md).
+
+### Reference
+- **How oasdiff decides what is breaking.** It judges a change against the contract the spec declares, not against what one server accepts. See [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md).
+- **Every change oasdiff can detect, and its level**: `oasdiff checks changelog`, or the catalog at [oasdiff.com/docs/breaking-changes](https://www.oasdiff.com/docs/breaking-changes). See [Checks](CHECKS.md).
+- **When making a property nullable breaks clients.** See [Nullability changes](NULLABILITY.md).
+- **A change to a schema that many properties use** is reported once, with the list of properties it affects. See [Schemas used in several places](SHARED-SCHEMAS.md).
 
 ## Known Limitations
 - no checks for `context` instead of `schema` for request parameters
