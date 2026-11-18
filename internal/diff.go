@@ -69,16 +69,16 @@ func outputDiff(stdout io.Writer, diffReport *diff.Diff, format string) *ReturnE
 	return nil
 }
 
-func calcDiff(flags *Flags) (*diffResult, *ReturnError) {
+func calcDiff(flags *Flags, options ...diff.Option) (*diffResult, *ReturnError) {
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
 
 	if flags.getComposed() {
-		return composedDiff(loader, flags)
+		return composedDiff(loader, flags, options...)
 	}
 
-	return normalDiff(loader, flags)
+	return normalDiff(loader, flags, options...)
 }
 
 type diffResult struct {
@@ -111,7 +111,7 @@ func loaderForOpen[F any](open bool, plain, capture F) F {
 	return plain
 }
 
-func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
+func normalDiff(loader *openapi3.Loader, flags *Flags, options ...diff.Option) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
@@ -140,7 +140,7 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 
 	autoUpgradeSpecs(flags.getAutoUpgrade(), s1, s2)
 
-	diffReport, operationsSources, err := diff.GetWithOperationsSourcesMap(flags.toConfig(), s1, s2)
+	diffReport, operationsSources, err := diff.GetWithOperationsSourcesMap(flags.toConfig(options...), s1, s2)
 	if err != nil {
 		return nil, getErrDiffFailed(err)
 	}
@@ -150,7 +150,7 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 	return r, nil
 }
 
-func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
+func composedDiff(loader *openapi3.Loader, flags *Flags, options ...diff.Option) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
@@ -173,7 +173,7 @@ func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnEr
 		autoUpgradeSpecs(true, s2...)
 	}
 
-	diffReport, operationsSources, err := diff.GetPathsDiff(flags.toConfig(), s1, s2)
+	diffReport, operationsSources, err := diff.GetPathsDiff(flags.toConfig(options...), s1, s2)
 	if err != nil {
 		return nil, getErrDiffFailed(err)
 	}

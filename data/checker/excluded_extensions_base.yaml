@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /stable:
+    get:
+      operationId: getStable
+      x-stability-level: stable
+      x-internal: one
+      responses:
+        "200":
+          description: OK
+  /sunset:
+    get:
+      operationId: getSunset
+      deprecated: true
+      x-sunset: "2040-12-31"
+      responses:
+        "200":
+          description: OK
+  /enum:
+    post:
+      operationId: postEnum
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                color:
+                  type: string
+                  x-extensible-enum:
+                    - red
+                    - green
+      responses:
+        "200":
+          description: OK

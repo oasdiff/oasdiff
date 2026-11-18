@@ -125,6 +125,8 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
+`breaking` and `changelog` do not report changes to extensions, except through the checks that read `x-stability-level`, `x-sunset` and `x-extensible-enum`. Those three are always compared for the checks, so excluding one does not turn its check off. To turn a check off, set its level to `none` with `--severity-levels`.
+
 ## Matching Subschemas
 
 A subschema under `allOf`, `anyOf` or `oneOf` has no name to match on, so oasdiff pairs the base and revision lists in steps, each one over whatever the earlier steps left unmatched:

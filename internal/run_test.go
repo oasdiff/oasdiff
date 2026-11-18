@@ -595,3 +595,28 @@ func Test_BreakingFiles_RequiresArgs(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files openapi.yaml"), io.Discard, &stderr))
 	require.Contains(t, stderr.String(), "please specify --base")
 }
+
+// Excluding an extension from the diff does not turn off the checks that read
+// it: the stability level, the sunset date and x-extensible-enum are still
+// compared by changelog and breaking.
+func Test_ExcludeExtensions_ChecksStillReadTheirExtensions(t *testing.T) {
+	for _, exclude := range []string{
+		"",
+		" --exclude-extensions x-stability-level,x-sunset,x-extensible-enum",
+		" --exclude-extensions x-internal,x-stability-level,x-sunset,x-extensible-enum",
+	} {
+		var stdout bytes.Buffer
+		require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/checker/excluded_extensions_base.yaml ../data/checker/excluded_extensions_revision.yaml --format json"+exclude), &stdout, io.Discard))
+		changes := formatters.Changes{}
+		require.NoError(t, json.Unmarshal(stdout.Bytes(), &changes))
+		ids := []string{}
+		for _, change := range changes {
+			ids = append(ids, change.Id)
+		}
+		require.ElementsMatch(t, []string{
+			"api-stability-decreased",
+			"api-sunset-date-changed-earlier",
+			"request-property-x-extensible-enum-value-removed",
+		}, ids, exclude)
+	}
+}
