@@ -89,4 +89,4 @@ jobs:
 
 ## See also
 
-- [Git Diff Driver](GIT-DIFF-DRIVER.md) — wire oasdiff into git as an external diff driver so `git log --patch` and `git diff` render a human-readable OpenAPI changelog inline.
+- [Git Diff Driver](GIT-DIFF-DRIVER.md): wire oasdiff into git as an external diff driver so `git log --patch` and `git diff` render a human-readable OpenAPI changelog inline.
