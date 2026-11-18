@@ -63,7 +63,7 @@ oasdiff changelog --fetch <base-sha>:openapi.yaml <revision-sha>:openapi.yaml
 
 ## GitHub Actions
 
-Git revision syntax is particularly useful in CI/CD. The following workflow detects breaking changes between the base branch and the PR branch without needing a separate checkout step or temp files:
+Git revision syntax is particularly useful in CI/CD. The following workflow detects breaking changes between the base branch and the PR branch without temp files:
 
 ```yaml
 name: API breaking changes
@@ -76,8 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0          # full history needed for git refs
+      - run: git fetch --depth=1 origin ${{ github.base_ref }}
 
       - uses: oasdiff/oasdiff-action/breaking@v0
         with:
@@ -85,7 +84,15 @@ jobs:
           revision: 'HEAD:openapi.yaml'
 ```
 
-> **Note:** `fetch-depth: 0` is required. The default shallow clone used by `actions/checkout` does not contain the history or remote refs that git revision syntax relies on.
+`actions/checkout` makes a shallow clone that holds only the pull request's commit, so the base branch has to be fetched before `origin/<branch>` resolves. Fetching that one branch is enough, and `fetch-depth: 0` is not required.
+
+When you run the CLI yourself in a workflow, [`--fetch`](#fetching-missing-commits---fetch) can do the fetch, given the base commit and not a branch name:
+
+```bash
+oasdiff breaking --fetch ${{ github.event.pull_request.base.sha }}:openapi.yaml openapi.yaml
+```
+
+`--fetch` runs `git fetch origin <ref>`, which downloads a commit or branch but does not create `origin/<branch>` in a shallow clone, so `origin/main:openapi.yaml` still fails with it.
 
 ## See also
 

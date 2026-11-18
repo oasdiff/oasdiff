@@ -46,7 +46,7 @@ Compare what is in git, and report on pull requests.
 - [Git revisions](GIT-REVISION.md): compare by git refs (a branch, tag or commit) without checking out files, as in `oasdiff breaking origin/main:openapi.yaml openapi.yaml`; add `--fetch` when the commit is not in your clone
 - [Check many independent specs](BREAKING-FILES.md): check each spec that changed against its own previous version, when a repository holds several independent APIs; `oasdiff breaking-files --base origin/main` makes one comparison per spec
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action): check every pull request and comment on it with the list of changes, each linked to its side-by-side diff
-- [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions): compare a pull request with its base branch in a workflow, with `base: 'origin/${{ github.base_ref }}:openapi.yaml'` and `fetch-depth: 0` on the checkout step
+- [Git revisions in GitHub Actions](GIT-REVISION.md#github-actions): compare a pull request with its base branch in a workflow, with `base: 'origin/${{ github.base_ref }}:openapi.yaml'` after a `git fetch --depth=1` of the base branch
 - [GitHub Actions annotations](SOURCE-LOCATOR.md#github-actions-annotations): mark the changed lines in the "Files changed" tab with `--format githubactions`, which the action does for you
 - [Configuration file with the GitHub Action](CONFIG-FILES.md#using-with-the-github-action): use the same settings locally and in the workflow; the action reads `.oasdiff.yaml` from the repository
 - [Pull requests from forks](#security): the action does not load external `$ref`s unless you turn that on, so a spec in a fork cannot make the runner fetch a URL or read a file
