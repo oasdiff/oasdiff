@@ -199,13 +199,20 @@ var requestPropertyStoppedAcceptingNull = checker.ApiChange{
 	OperationId: "addProduct",
 }
 
+// untypedBranch is the change carrying the comment for a oneOf that rejects
+// null because a branch has no type.
+func untypedBranch(change checker.ApiChange) checker.ApiChange {
+	change.Comment = checker.ComposedNullabilityUntypedBranchCommentId
+	return change
+}
+
 // A branch with no type accepts any value, null included, so dropping the
 // type from the second branch makes null match both branches.
 func TestOneOfNullBranch_UntypedBranchAcceptsNull(t *testing.T) {
 	errs := requestNullabilityAfter(t, func(branch *openapi3.Schema) {
 		branch.Type = nil
 	})
-	requireSingleApiChange(t, requestPropertyStoppedAcceptingNull, errs)
+	requireSingleApiChange(t, untypedBranch(requestPropertyStoppedAcceptingNull), errs)
 }
 
 // An enum decides for an untyped branch: null matches it only when null is
@@ -220,7 +227,7 @@ func TestOneOfNullBranch_UntypedEnumBranch(t *testing.T) {
 		branch.Type = nil
 		branch.Enum = []any{"home", nil}
 	})
-	requireSingleApiChange(t, requestPropertyStoppedAcceptingNull, errs)
+	requireSingleApiChange(t, untypedBranch(requestPropertyStoppedAcceptingNull), errs)
 }
 
 // A const other than null keeps null out of an untyped branch.
@@ -249,4 +256,26 @@ func TestOneOfNullBranch_ConditionalBranchIsNotDecided(t *testing.T) {
 	for _, err := range errs {
 		require.NotEqual(t, "address", err.(checker.ApiChange).Args[0])
 	}
+}
+
+// A branch with no type accepts null in an OpenAPI 3.0 document too, so null
+// matches both branches of this oneOf and is rejected until the first branch
+// loses its nullable.
+func TestOneOfNullableBranch_OpenAPI30UntypedBranchAcceptsNull(t *testing.T) {
+	base, err := open("../data/checker/one_of_nullable_branch_30_base.yaml")
+	require.NoError(t, err)
+	revision, err := open("../data/checker/one_of_nullable_branch_30_revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), base, revision)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestPropertyBecameNotNullableCheck), d, osm, checker.INFO)
+	requireSingleApiChange(t, checker.ApiChange{
+		Id:          checker.RequestPropertyBecomeNullableId,
+		Args:        []any{"address"},
+		Comment:     checker.ComposedNullabilityUntypedBranchCommentId,
+		Operation:   "POST",
+		Path:        "/products",
+		OperationId: "addProduct",
+	}, errs)
 }

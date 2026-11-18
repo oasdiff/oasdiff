@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 const (
@@ -170,10 +171,12 @@ func mergeCircularAllOf(state *state, baseSchemaRef *openapi3.SchemaRef) error {
 
 	schemaRefs := openapi3.SchemaRefs{baseSchemaRef}
 	schemaRefs = append(schemaRefs, baseSchemaRef.Value.AllOf...)
+	merged, holder := baseSchemaRef.Value, *baseSchemaRef.Value
 	err := flattenSchemas(state, baseSchemaRef, schemaRefs)
 	if err != nil {
 		return err
 	}
+	setNullable(baseSchemaRef, merged, &holder, allOfCopy)
 	baseSchemaRef.Value.AllOf = nil
 	pruneOneOf(state, baseSchemaRef, allOfCopy)
 	pruneAnyOf(baseSchemaRef)
@@ -384,10 +387,12 @@ func mergeInternal(state *state, base *openapi3.SchemaRef) (*openapi3.SchemaRef,
 	// flatten merged schemas into a single equivalent schema
 	toFlatten := openapi3.SchemaRefs{result}
 	toFlatten = append(toFlatten, allOf...)
+	merged := result.Value
 	err = flattenSchemas(state, result, toFlatten)
 	if err != nil {
 		return nil, err
 	}
+	setNullable(result, merged, base.Value, allOf)
 
 	return result, nil
 }
@@ -649,6 +654,47 @@ func hasTrue(values []bool) bool {
 		}
 	}
 	return false
+}
+
+// setNullable sets the OpenAPI 3.0 nullable keyword of a schema merged with
+// its allOf members. holder is the schema that held the allOf, as it was
+// before the merge. The merged schema accepts null when holder says
+// nullable: true, the usual way of making a $ref nullable, or when holder has
+// no type of its own and its members accept null (see membersNeedNullable).
+// A holder with a type and no nullable rejects null whatever its members say.
+//
+// merged is the schema the merge was writing into. When result no longer
+// points at it, the merge stood another schema in for the result (see
+// anchorInFlight), and that schema is not this one's to change.
+func setNullable(result *openapi3.SchemaRef, merged *openapi3.Schema, holder *openapi3.Schema, members openapi3.SchemaRefs) {
+	if result.Value == merged {
+		merged.Nullable = holder.Nullable || len(holder.Type.Slice()) == 0 && membersNeedNullable(members)
+	}
+}
+
+// membersNeedNullable reports whether every allOf member accepts null and at
+// least one of them says so with nullable: true. A member accepts null with
+// nullable: true, or with no type and nothing else that keeps null out. When
+// no member says nullable: true none of them has a type that excludes null,
+// so the merged schema accepts null without the keyword.
+func membersNeedNullable(members openapi3.SchemaRefs) bool {
+	nullable := false
+	for _, member := range members {
+		if member == nil || member.Value == nil {
+			return false
+		}
+		if member.Value.Nullable {
+			nullable = true
+			continue
+		}
+		if len(member.Value.Type.Slice()) > 0 {
+			return false
+		}
+		if accepts, decided := nullability.Accepts(member.Value); !decided || !accepts {
+			return false
+		}
+	}
+	return nullable
 }
 
 func hasFalse(values []bool) bool {

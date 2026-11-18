@@ -5,54 +5,70 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/internal/nullability"
 )
 
 // ComposedNullabilityOneOfCommentId explains a verdict the branch alone
 // contradicts: the branch gained null and the property stopped accepting it.
 const ComposedNullabilityOneOfCommentId = "composed-nullability-one-of-comment"
 
-// A oneOf matches an instance only when exactly one of its branches does, so a
-// oneOf accepts null only while exactly one of its branches accepts null:
-// making a second branch nullable takes null out of what the schema accepts,
-// and making one of two nullable branches non-nullable puts it back. An anyOf
-// accepts null when any branch does, so a branch's nullability matters there
-// only while it is the only nullable branch.
-//
-// Either way the branch does not decide on its own, so the schema holding the
-// composition is where the transition is reported (composedNullability), and
-// the branch's own transition is not (branchOfComposition).
+// ComposedNullabilityUntypedBranchCommentId explains a oneOf that rejects
+// null because one of its branches has no type.
+const ComposedNullabilityUntypedBranchCommentId = "composed-nullability-untyped-branch-comment"
 
-// composedNullability reports the nullability transition of a schema whose
-// oneOf or anyOf decides whether it accepts null, and the comment to report it
-// with. It returns nullabilityUnchanged when either side cannot be decided.
-func composedNullability(d *diff.SchemaDiff) (nullability, string) {
-	base, baseKnown := composedAcceptsNull(d.Base)
-	revision, revisionKnown := composedAcceptsNull(d.Revision)
-	if !baseKnown || !revisionKnown || base == revision {
-		return nullabilityUnchanged, ""
+// A oneOf or anyOf decides whether the schema holding it accepts null (see
+// nullability.ComposedAccepts), so that schema is where the transition is
+// reported (composedNullability), and a branch's own transition is not
+// (branchOfComposition).
+
+// composedNullability reports the nullability transition of a schema that has
+// a oneOf or anyOf on either side, by comparing whether it accepted null
+// before and after, and the comment to report it with. It reports whether
+// both sides could be decided.
+//
+// With a composition on one side only, this covers a schema wrapped in
+// oneOf: [{type: "null"}, X] or unwrapped from it, and decides it by what the
+// two sides accept: wrapping an X that already accepts null takes null out,
+// because null then matches both branches.
+func composedNullability(d *diff.SchemaDiff) (nullability.Transition, string, bool) {
+	if !nullability.Composed(d.Base) && !nullability.Composed(d.Revision) {
+		return nullability.Unchanged, "", false
 	}
-	comment := composedNullabilityComment(d.Base, d.Revision)
-	if revision {
-		return becameNullable, comment
+	transition, decided := nullability.Change(d.Base, d.Revision)
+	if transition == nullability.Unchanged {
+		return transition, "", decided
 	}
-	return becameNotNullable, comment
+	return transition, composedNullabilityComment(d.Base, d.Revision), true
 }
 
-// composedNullabilityComment explains a verdict that the changed branch alone
-// contradicts: a branch gained null and the oneOf stopped accepting it, or a
-// branch lost null and the oneOf started accepting it. That happens only when
-// the oneOf has another nullable branch on both sides; with none, the oneOf
-// follows the branch and there is nothing to explain.
+// composedNullabilityComment explains a verdict that the edit alone
+// contradicts: null was added to a branch, or a null branch was added, and
+// the oneOf stopped accepting null, or the reverse. That happens only when a
+// oneOf has more than one branch accepting null on one of the sides; with at
+// most one on both, the oneOf follows the edit and there is nothing to
+// explain.
 func composedNullabilityComment(base, revision *openapi3.Schema) string {
-	baseNullable, baseKnown := nullableBranches(base.OneOf)
-	revisionNullable, revisionKnown := nullableBranches(revision.OneOf)
-	if !baseKnown || !revisionKnown {
-		return ""
-	}
-	if baseNullable > 0 && revisionNullable > 0 {
+	for _, schema := range []*openapi3.Schema{revision, base} {
+		nullable, decided := nullability.NullableBranches(schema.OneOf)
+		if !decided || nullable < 2 {
+			continue
+		}
+		if hasUntypedBranch(schema.OneOf) {
+			return ComposedNullabilityUntypedBranchCommentId
+		}
 		return ComposedNullabilityOneOfCommentId
 	}
 	return ""
+}
+
+// hasUntypedBranch reports whether a branch accepts null by having no type
+// keyword, which is easy to miss when reading the oneOf.
+func hasUntypedBranch(branches openapi3.SchemaRefs) bool {
+	return slices.ContainsFunc(branches, func(branch *openapi3.SchemaRef) bool {
+		return branch != nil && branch.Value != nil &&
+			len(branch.Value.Type.Slice()) == 0 && !branch.Value.Nullable &&
+			nullability.OwnKeywordsAccept(branch.Value)
+	})
 }
 
 // branchOfComposition reports whether d is a branch of parent's oneOf or
@@ -61,10 +77,10 @@ func branchOfComposition(parent *diff.SchemaDiff, d *diff.SchemaDiff) bool {
 	if parent == nil || d == nil {
 		return false
 	}
-	if _, ok := composedAcceptsNull(parent.Base); !ok {
+	if _, ok := nullability.ComposedAccepts(parent.Base); !ok {
 		return false
 	}
-	if _, ok := composedAcceptsNull(parent.Revision); !ok {
+	if _, ok := nullability.ComposedAccepts(parent.Revision); !ok {
 		return false
 	}
 	return isBranch(parent.OneOfDiff, d) || isBranch(parent.AnyOfDiff, d)
@@ -77,72 +93,4 @@ func isBranch(subschemas *diff.SubschemasDiff, d *diff.SchemaDiff) bool {
 	return slices.ContainsFunc(subschemas.Modified, func(modified *diff.ModifiedSubschema) bool {
 		return modified != nil && modified.Diff == d
 	})
-}
-
-// composedAcceptsNull reports whether a schema accepts null, for a schema
-// whose oneOf or anyOf decides that, and whether it could be decided.
-func composedAcceptsNull(schema *openapi3.Schema) (bool, bool) {
-	if schema == nil {
-		return false, false
-	}
-	if len(schema.OneOf) == 0 && len(schema.AnyOf) == 0 {
-		return false, false
-	}
-	// allOf, not and if constrain the instance alongside the composition, and
-	// what they accept is not decided here.
-	if len(schema.AllOf) > 0 || schema.Not != nil || schema.If != nil {
-		return false, false
-	}
-
-	accepts := ownKeywordsAcceptNull(schema)
-	if len(schema.OneOf) > 0 {
-		nullable, ok := nullableBranches(schema.OneOf)
-		if !ok {
-			return false, false
-		}
-		accepts = accepts && nullable == 1
-	}
-	if len(schema.AnyOf) > 0 {
-		nullable, ok := nullableBranches(schema.AnyOf)
-		if !ok {
-			return false, false
-		}
-		accepts = accepts && nullable > 0
-	}
-	return accepts, true
-}
-
-// nullableBranches counts the branches that accept null, and reports whether
-// every branch could be decided: a branch that composes further, or has a not
-// or an if, is not, because ownKeywordsAcceptNull reads only the keywords that
-// decide on their own.
-func nullableBranches(branches openapi3.SchemaRefs) (int, bool) {
-	count := 0
-	for _, branch := range branches {
-		if branch == nil || branch.Value == nil {
-			return 0, false
-		}
-		schema := branch.Value
-		if len(schema.OneOf) > 0 || len(schema.AnyOf) > 0 || len(schema.AllOf) > 0 || schema.Not != nil || schema.If != nil {
-			return 0, false
-		}
-		if ownKeywordsAcceptNull(schema) {
-			count++
-		}
-	}
-	return count, true
-}
-
-// ownKeywordsAcceptNull reports whether the type, nullable, enum and const of
-// a schema let null through. A schema with no type keyword accepts every type,
-// null included. An enum lets null through only when null is one of its
-// values, and a const only when it is null.
-func ownKeywordsAcceptNull(schema *openapi3.Schema) bool {
-	if len(schema.Type.Slice()) > 0 && !diff.SchemaAcceptsNull(schema) {
-		return false
-	}
-	if len(schema.Enum) > 0 && !slices.ContainsFunc(schema.Enum, func(value any) bool { return value == nil }) {
-		return false
-	}
-	return schema.Const == nil
 }
