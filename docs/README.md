@@ -79,7 +79,7 @@ The top-level subcommands, grouped as in `oasdiff --help`.
 
 **Git integration**
 
-- [`breaking-files`](BREAKING-FILES.md) — check a list of changed specs against their versions in a git ref, one comparison per spec; used by the [pre-commit hook](BREAKING-FILES.md#pre-commit-hook)
+- [`breaking-files`](BREAKING-FILES.md) — check a list of changed specs against their versions in a git ref, one comparison per spec; used by the [pre-commit hook](PRE-COMMIT-HOOK.md)
 - [`git-diff-driver`](GIT-DIFF-DRIVER.md) — run as a git external diff driver so `git log --patch` renders an OpenAPI changelog inline
 
 **Reference**
@@ -101,7 +101,6 @@ How oasdiff pairs up base and revision and what counts as a difference.
 - [Endpoint matching](MATCHING-ENDPOINTS.md) — handles renamed path parameters and [duplicate endpoints](MATCHING-ENDPOINTS.md#duplicate-endpoints)
 - [How oasdiff decides what is breaking](WHAT-IS-BREAKING.md) — judged against the contract, not against what a server accepts
 - [Schemas used in several places](SHARED-SCHEMAS.md) — a change to a shared schema is reported once
-- [Enum values](EXTENSIBLE-ENUM.md) — `x-extensible-enum`
 - [Nullability changes](NULLABILITY.md) — the three equivalent nullable forms and when changing them is breaking
 - [Compare APIs split across multiple files](COMPOSED.md) — e.g. an API gateway with one spec per service
 - [Check many independent specs](BREAKING-FILES.md) — one comparison per spec, rather than merging them as composed mode does
@@ -120,6 +119,7 @@ Communicate intent across versions.
 
 - [Deprecate APIs and parameters](DEPRECATION.md)
 - [API stability levels](STABILITY.md) (draft / alpha / beta / stable)
+- [Enum values](EXTENSIBLE-ENUM.md) — `x-extensible-enum` lets a response enum gain values without a breaking change
 - [Version bumps](VERSIONING.md) — fail the build when a breaking change is released without a major version bump
 
 ### Filtering changes
@@ -139,11 +139,14 @@ Shape and enrich the report.
 - [Source location tracking](SOURCE-LOCATOR.md)
 - [Change fingerprints](FINGERPRINT.md) — stable IDs across commits
 - [Error reporting](ERRORS.md)
-- [Output formats, color and localization](OUTPUT-FORMATS.md) for `breaking` and `changelog`
+- [Output formats](OUTPUT-FORMATS.md) for `breaking` and `changelog`
+- [Localization](LOCALIZATION.md) — show changes in another language
 - [Side-by-side review in your browser](SIDE-BY-SIDE-REVIEW.md) with `--open`
 
 ### How to run
 - [Docker](DOCKER.md)
+- [Pre-commit hook](PRE-COMMIT-HOOK.md) — stop a breaking change before it is committed
+- [Color, pipes and redirects](COLOR.md) — when the output is colored, and `--color`
 - [Configuration file](CONFIG-FILES.md)
 - [Embed in a Go program](GO.md)
 - [GitHub Action](https://github.com/oasdiff/oasdiff-action) for CI — and [oasdiff.com](https://www.oasdiff.com) for teams, which adds a per-change PR comment with approve/reject and commit-status checks

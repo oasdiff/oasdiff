@@ -1,8 +1,6 @@
 # Output Formats for Breaking Changes and Changelog
-The `breaking` and `changelog` commands share these output options.
-
 ## Formats
-By default, oasdiff displays changes in a human-readable [colorized](#color) text format.  
+By default, oasdiff displays changes in a human-readable [colorized](COLOR.md) text format.  
 Additional formats can be generated using the `--format` flag:
 - json
 - yaml
@@ -23,13 +21,3 @@ oasdiff breaking -f yaml https://raw.githubusercontent.com/oasdiff/oasdiff/main/
 ```
 oasdiff schema
 ```
-
-## Color
-When outputting changes to a Unix terminal, oasdiff automatically adds colors with ANSI color escape sequences.  
-If output is piped into another process or redirected to a file, oasdiff disables color.  
-To control color manually, use the `--color` flag with `always` or `never`.
-
-## Localization
-To display changes in other languages, use the `--lang` flag.  
-Currently English, Russian and Brazilian Portuguese are supported.  
-[Please improve oasdiff by adding your own language](https://github.com/oasdiff/oasdiff/issues/383).
