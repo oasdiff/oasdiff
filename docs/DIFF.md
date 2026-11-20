@@ -12,8 +12,9 @@ oasdiff applies a few opt-out defaults so its diff matches what most users expec
 | Flag | Default | What it does | Detail |
 |---|---|---|---|
 | `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Inline and `$ref` Subschemas](MATCHING-SUBSCHEMAS.md#inline-and-ref-subschemas) |
-| `--case-insensitive-headers` | `true` | Compare header names case-insensitively. `Content-Type` and `content-type` are the same header per RFC 7230 / 9110. | [HEADER-DIFF.md](HEADER-DIFF.md) |
 | `--allow-external-refs` | `true` | Allow the parser to resolve external `$ref`s when loading specs. Disable when processing untrusted specs to prevent SSRF. | (CLI help) |
+
+`--case-insensitive-headers` is off for `diff` and `summary`, which report the document as written, and on for `breaking` and `changelog`. See [HEADER-DIFF.md](HEADER-DIFF.md).
 
 All other comparison-tuning flags (`--flatten-allof`, `--flatten-params`, `--include-path-params`, `--auto-upgrade`, ...) are opt-in (default `false`) because they transform the input or change matching semantics in ways that not every spec wants.
 

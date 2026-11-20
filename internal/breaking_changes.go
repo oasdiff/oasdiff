@@ -17,7 +17,7 @@ func getBreakingChangesCmd() *cobra.Command {
 		RunE:  getRun(runBreakingChanges),
 	}
 
-	addCommonDiffFlags(&cmd)
+	addCommonDiffFlags(&cmd, true)
 	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetBreakingFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")

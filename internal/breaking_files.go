@@ -29,7 +29,7 @@ is rendered once per spec rather than producing a single combined document.`,
 		RunE: runBreakingFiles,
 	}
 
-	addCommonDiffFlags(&cmd)
+	addCommonDiffFlags(&cmd, true)
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetBreakingFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")
 	cmd.PersistentFlags().String("base", "", "git ref holding the version to compare each spec against (e.g. origin/main)")

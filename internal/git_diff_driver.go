@@ -41,7 +41,7 @@ repository root.
 		RunE: runGitDiffDriver,
 	}
 
-	addCommonDiffFlags(&cmd)
+	addCommonDiffFlags(&cmd, true)
 	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetSupportedLevels(), ""), "fail-on", "o", "ignored in git-diff-driver mode (exit code must stay 0 to keep the diff pipeline alive)")
