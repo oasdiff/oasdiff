@@ -1,14 +1,11 @@
 package checker
 
 import (
-	"fmt"
 	"slices"
 	"strings"
 
-	"github.com/TwiN/go-color"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 )
 
 // ApiChange represnts a change in the Paths Section of an OpenAPI spec
@@ -24,7 +21,6 @@ type ApiChange struct {
 	Operation   string
 	OperationId string
 	Path        string
-	Source      *load.Source
 
 	// schema is the node the change was computed from, kept so that a
 	// recognized transition there can claim the change (see
@@ -46,17 +42,10 @@ type ApiChange struct {
 	// from them and keeps only the ones that changed it, which GetComment
 	// then explains.
 	guards []Guard
-
-	// DEPRECATED: Will be removed after migration to BaseSource/RevisionSource
-	SourceFile      string
-	SourceLine      int
-	SourceLineEnd   int
-	SourceColumn    int
-	SourceColumnEnd int
 }
 
 // NewApiChange creates a new ApiChange
-func NewApiChange(id string, config *Config, args []any, comment string, operationsSources *diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string) ApiChange {
+func NewApiChange(id string, config *Config, args []any, comment string, operationsSources diff.OperationsSourcesMap, operation *openapi3.Operation, method, path string) ApiChange {
 	return ApiChange{
 		Id:          id,
 		Level:       config.getLogLevel(id),
@@ -65,7 +54,6 @@ func NewApiChange(id string, config *Config, args []any, comment string, operati
 		OperationId: operation.OperationID,
 		Operation:   method,
 		Path:        path,
-		Source:      load.NewSource((*operationsSources)[operation]),
 		CommonChange: CommonChange{
 			Attributes: getAttributes(config, operation),
 		},
@@ -120,6 +108,12 @@ func (c ApiChange) WithDisclaimers(disclaimers []Disclaimer) ApiChange {
 		}
 	}
 	return c
+}
+
+// WithAllOfDisclaimers adds the allOf disclaimers for this change, taking the
+// change ID from c so it is written once at the call site.
+func (c ApiChange) WithAllOfDisclaimers(underAllOf bool, schemaDiff *diff.SchemaDiff) ApiChange {
+	return c.WithDisclaimers(allOfDisclaimers(underAllOf, schemaDiff, c.Id))
 }
 
 // WithDetails returns a copy of the ApiChange with Details set
@@ -178,16 +172,17 @@ func (c ApiChange) GetId() string {
 	return c.Id
 }
 
-func (c ApiChange) GetText(l Localizer) string {
-	return l(c.Id, colorizedValues(c.Args)...) + c.getDetailsSuffix(l, colorizedValues)
-}
-
 func (c ApiChange) GetArgs() []any {
 	return c.Args
 }
 
+// Text is the change's message, with each argument set apart by format.
+func (c ApiChange) Text(l Localizer, format ArgFormat) string {
+	return l(c.Id, formattedValues(c.Args, format)...) + c.getDetailsSuffix(l, format)
+}
+
 func (c ApiChange) GetUncolorizedText(l Localizer) string {
-	return l(c.Id, quotedValues(c.Args)...) + c.getDetailsSuffix(l, quotedValues)
+	return c.Text(l, Quoted)
 }
 
 func (c ApiChange) GetComment(l Localizer) string {
@@ -204,9 +199,9 @@ func (c ApiChange) GetComment(l Localizer) string {
 	return strings.Join(parts, " ")
 }
 
-// getDetailsSuffix takes the formatter applied to the message arguments, so a
+// getDetailsSuffix takes the format applied to the message arguments, so a
 // value in the details looks the same as one in the message.
-func (c ApiChange) getDetailsSuffix(l Localizer, format func([]any) []any) string {
+func (c ApiChange) getDetailsSuffix(l Localizer, format ArgFormat) string {
 	details := combineDetails(c.Details, c.sharedSchema.detail(l, format))
 	if details == "" {
 		return ""
@@ -230,66 +225,11 @@ func (c ApiChange) GetOperationId() string {
 	return c.OperationId
 }
 
+// Subject is the API the change was found on.
+func (c ApiChange) Subject() (section, element string) {
+	return "API", c.Operation + " " + c.Path
+}
+
 func (c ApiChange) GetPath() string {
 	return c.Path
-}
-
-func (c ApiChange) GetSource() string {
-	return c.Source.DisplayPath()
-}
-
-func (c ApiChange) GetSourceFile() string {
-	if c.SourceFile != "" {
-		return c.SourceFile
-	}
-
-	if c.Source.IsFile() {
-		return c.Source.String()
-	}
-
-	return ""
-}
-
-func (c ApiChange) GetSourceLine() int {
-	return c.SourceLine
-}
-
-func (c ApiChange) GetSourceLineEnd() int {
-	return c.SourceLineEnd
-}
-
-func (c ApiChange) GetSourceColumn() int {
-	return c.SourceColumn
-}
-
-func (c ApiChange) GetSourceColumnEnd() int {
-	return c.SourceColumnEnd
-}
-
-func (c ApiChange) SingleLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s %s %s, %s API %s %s %s [%s]. %s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), l("at"), c.GetSource(), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), color.InYellow(c.Id), c.GetComment(l))
-	}
-
-	return fmt.Sprintf(format, c.Level.String(), l("at"), c.GetSource(), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), c.Id, c.GetComment(l))
-
-}
-
-func (c ApiChange) MultiLineError(l Localizer, colorMode ColorMode) string {
-	const format = "%s\t[%s] %s %s\n\t%s API %s %s\n\t\t%s%s"
-
-	if isColorEnabled(colorMode) {
-		return fmt.Sprintf(format, c.Level.PrettyString(), color.InYellow(c.Id), l("at"), c.GetSource(), l("in"), color.InGreen(c.Operation), color.InGreen(c.Path), c.GetText(l), multiLineComment(c.GetComment(l)))
-	}
-
-	return fmt.Sprintf(format, c.Level.String(), c.Id, l("at"), c.GetSource(), l("in"), c.Operation, c.Path, c.GetUncolorizedText(l), multiLineComment(c.GetComment(l)))
-}
-
-func multiLineComment(comment string) string {
-	if comment == "" {
-		return ""
-	}
-	return fmt.Sprintf("\n\t\t%s", comment)
 }

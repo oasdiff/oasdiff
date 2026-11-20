@@ -17,7 +17,7 @@ func loadFrom(t *testing.T, prefix string, v int) *load.SpecInfo {
 	loader := openapi3.NewLoader()
 	oas, err := loader.LoadFromFile(path)
 	require.NoError(t, err)
-	return &load.SpecInfo{Spec: oas, Url: path}
+	return &load.SpecInfo{Spec: oas, Source: load.NewFileSource(path)}
 }
 
 func TestComposed_Empty(t *testing.T) {

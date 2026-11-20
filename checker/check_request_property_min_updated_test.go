@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +24,6 @@ func TestRequestPropertyMinIncreasedCheck(t *testing.T) {
 		Args:        []any{"age", 15.0},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_min_increased_revision.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -48,7 +46,6 @@ func TestRequestReadOnlyPropertyMinIncreasedCheck(t *testing.T) {
 		Args:        []any{"age", 15.0},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_min_increased_revision.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -69,7 +66,6 @@ func TestRequestPropertyMinDecreasedCheck(t *testing.T) {
 		Args:        []any{"age", 15.0, 10.0},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_property_min_increased_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }

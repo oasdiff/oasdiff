@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +16,6 @@ func TestResponseMediaTypeBecameNotEnum(t *testing.T) {
 		Comment:     checker.ResponseMediaTypeBecameNotEnumId + "-comment",
 		Operation:   "PUT",
 		Path:        "/mode",
-		Source:      load.NewSource(enumRemovedEntirelyRevision),
 		OperationId: "setMode",
 	}, changes)
 	require.Equal(t, checker.ERR, changes[0].GetLevel())

@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequestParameterMaxIncreased(t *testing.T) {
 		Args:        []any{"query", "category", 5.0, 10.0},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_max_updated_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -44,7 +42,6 @@ func TestRequestParameterMaxDecreased(t *testing.T) {
 		Args:        []any{"query", "category", 10.0, 5.0},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_max_updated_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

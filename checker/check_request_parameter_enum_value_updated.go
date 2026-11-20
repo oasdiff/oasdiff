@@ -3,8 +3,8 @@ package checker
 import (
 	"fmt"
 
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +15,7 @@ const (
 	RequestParameterPropertyEnumValueRemovedId = "request-parameter-property-enum-value-removed"
 )
 
-func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		if p.paramDiff.SchemaDiff == nil {

@@ -1,7 +1,7 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,15 +15,15 @@ const (
 // A response header becoming nullable means a client that never expected a null
 // value can now receive one (breaking); becoming not-nullable narrows the
 // server's output and is safe (info).
-func ResponseHeaderBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseHeaderBecameNullableCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
-		if id := nullabilityChangeId(h.headerDiff.SchemaDiff, ResponseHeaderBecameNullableId, ResponseHeaderBecameNotNullableId); id != "" {
+		if id, comment := nullabilityChangeId(nil, h.headerDiff.SchemaDiff, ResponseHeaderBecameNullableId, ResponseHeaderBecameNotNullableId); id != "" {
 			baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
 			result = append(result, h.opInfo.NewApiChange(
 				id,
 				[]any{h.name, h.responseStatus},
-				"",
+				comment,
 			).WithSources(baseSource, revisionSource))
 		}
 	})

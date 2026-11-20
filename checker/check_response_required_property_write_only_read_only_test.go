@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestResponseRequiredPropertyBecameWriteOnly(t *testing.T) {
 		Args:        []any{"data/name", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())
@@ -51,7 +49,6 @@ func TestResponseRequiredPropertyBecameNotWriteOnly(t *testing.T) {
 		Args:        []any{"data/writeOnlyName", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
@@ -76,7 +73,6 @@ func TestResponseRequiredPropertyBecameReadOnly(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -100,7 +96,6 @@ func TestResponseRequiredPropertyBecameNonReadOnly(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_write_only_read_only_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

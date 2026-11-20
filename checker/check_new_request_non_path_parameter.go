@@ -1,7 +1,7 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -10,7 +10,7 @@ const (
 	NewOptionalRequestParameterId = "new-optional-request-parameter"
 )
 
-func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func NewRequestNonPathParameterCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
 		for paramLocation, paramItems := range o.ParametersDiff.Added {

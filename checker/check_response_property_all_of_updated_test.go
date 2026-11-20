@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,20 +24,16 @@ func TestResponsePropertyAllOfAdded(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.ResponseBodyAllOfAddedId,
-			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_all_of_added_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
 			Id:          checker.ResponsePropertyAllOfAddedId,
-			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_all_of_added_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }
@@ -107,7 +102,6 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_all_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -116,7 +110,6 @@ func TestResponsePropertyAllOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_all_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }
@@ -140,6 +133,7 @@ func TestResponsePropertyAllOfAdded_AnnotationOnly_EmitsInfoWithDistinctId(t *te
 
 	requireSingleChange(t, errs, checker.ResponseBodyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Empty(t, errs[0].GetDisclaimers())
 	// Distinct from the original allOf-added INFO ID.
 	require.NotEqual(t, checker.ResponseBodyAllOfAddedId, errs[0].GetId())
 }

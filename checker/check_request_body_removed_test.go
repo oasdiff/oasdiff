@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +22,6 @@ func TestRequestBodyRemoved(t *testing.T) {
 		Id:          checker.RequestBodyRemovedId,
 		Operation:   "POST",
 		Path:        "/api/v1.0/test",
-		Source:      load.NewSource("../data/checker/request_body_removed_revision.yaml"),
 		OperationId: "testOp",
 	}, errs)
 }
@@ -46,7 +44,6 @@ func TestRequestBodyRemovedOptional(t *testing.T) {
 		Id:          checker.RequestBodyRemovedId,
 		Operation:   "POST",
 		Path:        "/api/v1.0/test",
-		Source:      load.NewSource("../data/checker/request_body_removed_revision.yaml"),
 		OperationId: "testOp",
 	}, errs)
 	require.Equal(t, checker.ERR, errs[0].GetLevel())

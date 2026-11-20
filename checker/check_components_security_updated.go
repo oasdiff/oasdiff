@@ -3,7 +3,7 @@ package checker
 import (
 	"strings"
 
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -113,7 +113,7 @@ func checkOAuthFlowUpdates(flowDiff *diff.OAuthFlowDiff, updatedSecurityName, fl
 	return result
 }
 
-func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	if diffReport.ComponentsDiff == nil {

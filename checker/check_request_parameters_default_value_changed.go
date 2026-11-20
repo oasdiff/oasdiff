@@ -1,7 +1,7 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -11,7 +11,7 @@ const (
 	RequestParameterDefaultValueRemovedId = "request-parameter-default-value-removed"
 )
 
-func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 

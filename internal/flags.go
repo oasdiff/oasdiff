@@ -198,14 +198,19 @@ func (flags *Flags) getStabilityLevel() string {
 }
 
 // failOnLevel converts the --fail-on value to the severity that fails the
-// command. The flag rejects anything outside GetSupportedLevels and the
-// config file does the same, so the error is unreachable for a value that
-// got this far, and is returned rather than dropped in case the two ever
-// disagree.
+// command, and NONE when the flag carries no value, which is not one the flag
+// accepts. The flag rejects anything outside GetSupportedLevels and the config
+// file does the same, so the error is unreachable for a value that got this
+// far, and is returned rather than dropped in case the two ever disagree.
 func (flags *Flags) failOnLevel() (checker.Level, *ReturnError) {
-	level, err := checker.NewLevel(flags.getFailOn())
+	failOn := flags.getFailOn()
+	if failOn == "" {
+		return checker.NONE, nil
+	}
+
+	level, err := checker.NewLevel(failOn)
 	if err != nil {
-		return checker.NONE, getErrInvalidFlags(fmt.Errorf("invalid fail-on value %q", flags.getFailOn()))
+		return checker.NONE, getErrInvalidFlags(fmt.Errorf("invalid fail-on value %q", failOn))
 	}
 	return level, nil
 }

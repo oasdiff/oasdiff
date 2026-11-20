@@ -67,6 +67,7 @@ var ruleDescriptions = map[string]string{
 	// Schemas
 	"schema-type-unsupported":                     "schema type is not a valid JSON Schema type",
 	"schema-items-required":                       "array schema is missing items",
+	"schema-multiple-of-not-positive":             "multipleOf is not greater than zero",
 	"schema-pattern-regex-invalid":                "pattern is not a valid regular expression",
 	"read-only-write-only-mutually-exclusive":     "schema is both readOnly and writeOnly",
 	"additional-properties-both-forms-exclusive":  "additionalProperties is given as both a boolean and a schema",
@@ -81,7 +82,6 @@ var ruleDescriptions = map[string]string{
 	"exclusive-bound-boolean-before-3-1":          "exclusiveMinimum or exclusiveMaximum is a boolean, which is only valid before OpenAPI 3.1",
 
 	// Schema constraint coherence (oasdiff-native)
-	"multiple-of-not-positive":              "multipleOf is not greater than zero",
 	"subschemas-empty":                      "allOf, anyOf or oneOf is empty",
 	"minimum-exceeds-maximum":               "minimum is greater than maximum, so no value can validate",
 	"min-length-exceeds-max-length":         "minLength is greater than maxLength, so no value can validate",
@@ -90,6 +90,7 @@ var ruleDescriptions = map[string]string{
 	"min-contains-exceeds-max-contains":     "minContains is greater than maxContains, so no array can validate",
 	"enum-empty":                            "enum is empty, so no value can validate",
 	"const-not-in-enum":                     "const is not one of the enum values, so no value can validate",
+	"required-property-forbidden":           "a required property is not declared in properties, and additionalProperties is false, so no object can validate",
 	"duplicate-enum-value":                  "enum lists the same value more than once",
 	"type-format-mismatch":                  "format belongs to a different type and is ignored",
 	"read-only-property-only-in-requests":   "a readOnly property is only reachable from the request side, where it never appears",

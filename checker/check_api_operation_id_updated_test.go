@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,6 @@ func TestOperationIdRemoved(t *testing.T) {
 		Args:        []any{"createOneGroup", ""},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/operation_id_removed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -48,11 +46,10 @@ func TestOperationIdUpdated(t *testing.T) {
 		Args:        []any{"createOneGroup", "newOperationId"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/operation_id_removed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 
-	require.Equal(t, "api operation id `createOneGroup` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API operation id `createOneGroup` removed and replaced with `newOperationId`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing an existing operation id with source tracking
@@ -94,9 +91,8 @@ func TestOperationIdAdded(t *testing.T) {
 		Args:        []any{"NewOperationId"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/operation_id_added_base.yaml"),
 		OperationId: "NewOperationId",
 	}, errs)
 
-	require.Equal(t, "api operation id `NewOperationId` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API operation id `NewOperationId` was added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }

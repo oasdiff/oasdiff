@@ -43,8 +43,11 @@ func (c *sourceCapture) asStrings() map[string]string {
 // its marsh.go), so a captured file is found by an element's origin File on
 // every platform. It is installed only when the load is given a capture;
 // ordinary loads install no recorder and pay nothing.
-func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture) openapi3.ReadFromURIFunc {
+func recordingReader(inner openapi3.ReadFromURIFunc, capture *sourceCapture, policy refPolicy) openapi3.ReadFromURIFunc {
 	return func(loader *openapi3.Loader, location *url.URL) ([]byte, error) {
+		if err := policy.checkLocation(loader, location); err != nil {
+			return nil, err
+		}
 		var (
 			data []byte
 			err  error

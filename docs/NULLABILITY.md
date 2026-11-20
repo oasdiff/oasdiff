@@ -30,6 +30,30 @@ info    [request-property-became-nullable]
                 the request property `optionalEnum` became nullable
 ```
 
+## A nullability change inside a `oneOf` branch
+
+When the `oneOf` is in both specs and one of its branches changes nullability, the branch does not decide what the schema around it accepts. A `oneOf` matches only when exactly one of its branches matches, so the schema accepts `null` only while exactly one branch does:
+
+```yaml
+address:
+  oneOf:
+    - type: "null"
+    - $ref: '#/components/schemas/Address'
+```
+
+Making `Address` nullable gives this property two branches that accept `null`, so a `null` value matches both and is rejected. The property stopped accepting `null`, the opposite of what the edited branch did, so oasdiff reports the property rather than the branch:
+
+```
+oasdiff changelog data/checker/one_of_null_branch_base.yaml data/checker/one_of_null_branch_revision.yaml
+
+error   [request-property-became-not-nullable]
+        in API POST /products
+                the request property `address` became not nullable
+                A `oneOf` matches only when exactly one of its branches matches, so it accepts null only while exactly one branch does. Adding null to a second branch takes null out of the composition, and removing it from one of two puts it back.
+```
+
+An `anyOf` matches when any of its branches matches, so a null branch keeps the schema nullable whatever the other branches do. A nullability change in one of them leaves the schema accepting `null` as before and is not reported.
+
 ## Breaking or not?
 Whether a nullability change is breaking depends on the direction of the data:
 
@@ -53,10 +77,12 @@ error   [request-property-became-not-nullable]
 
 Parameters follow the request column: `request-parameter-became-nullable` (info) and `request-parameter-became-not-nullable` (error), with `request-parameter-property-*` variants for properties of object parameters.
 
+Response headers follow the response column: `response-header-became-nullable` (error) and `response-header-became-not-nullable` (info).
+
 ## Limitations
 oasdiff recognizes the `oneOf` form only when it is a pure wrap: exactly two branches, one of them just `{type: "null"}`, and the other equivalent to the original schema. When the edit is more than a nullability change, oasdiff falls back to reporting the underlying changes, erring on the side of reporting too much rather than missing a breaking change:
 
 - **Wrapping an already-nullable schema** is not a nullability change. Under `oneOf`, a value must match exactly one branch; if the schema already allows `null`, a `null` value now matches two branches and is rejected.
 - **A wrap that also changes the schema**, for example removing an enum value while adding the wrapper, is reported by the underlying changes (the enum removal), not as a nullability change.
 - **Adding a null branch to a `oneOf` that already has several branches** is reported as a list-of-types change (for simple types) or a `oneOf` change (for objects), not as a nullability change.
-- **Response headers** are not yet checked for schema changes, including nullability ([#1094](https://github.com/oasdiff/oasdiff/issues/1094)). Request headers are parameters (`in: header`) and are covered by the parameter checks.
+- **A composition oasdiff cannot decide**: an `allOf` or a `not` alongside the `oneOf` or `anyOf` constrains the value too, and a branch that composes further has no nullability of its own. In both cases oasdiff cannot tell what the composition accepts, and reports the branch's own nullability change instead.

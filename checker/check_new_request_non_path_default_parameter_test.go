@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,14 +30,12 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test1",
-			Source:      load.NewSource("../data/request_params/required-request-params.yaml"),
 		},
 		{
 			Id:        checker.NewRequiredRequestDefaultParameterToExistingPathId,
 			Args:      []any{"query", "version"},
 			Operation: "POST",
 			Path:      "/api/test1",
-			Source:    load.NewSource("../data/request_params/required-request-params.yaml"),
 		},
 		{
 			Id:          checker.NewRequiredRequestDefaultParameterToExistingPathId,
@@ -46,7 +43,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test2",
-			Source:      load.NewSource("../data/request_params/required-request-params.yaml"),
 		},
 		{
 			Id:          checker.NewRequiredRequestDefaultParameterToExistingPathId,
@@ -54,7 +50,6 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test3",
-			Source:      load.NewSource("../data/request_params/required-request-params.yaml"),
 		},
 		{
 			Id:          checker.NewOptionalRequestDefaultParameterToExistingPathId,
@@ -62,14 +57,12 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test1",
-			Source:      load.NewSource("../data/request_params/required-request-params.yaml"),
 		},
 		{
 			Id:        checker.NewOptionalRequestDefaultParameterToExistingPathId,
 			Args:      []any{"query", "optionalQueryParam"},
 			Operation: "POST",
 			Path:      "/api/test1",
-			Source:    load.NewSource("../data/request_params/required-request-params.yaml"),
 		},
 		{
 			Id:          checker.NewOptionalRequestDefaultParameterToExistingPathId,
@@ -77,6 +70,5 @@ func TestNewRequestNonPathParameter_DetectsNewRequiredPathsAndNewOperations(t *t
 			Operation:   "GET",
 			OperationId: "getTest",
 			Path:        "/api/test2",
-			Source:      load.NewSource("../data/request_params/required-request-params.yaml"),
 		}}, errs)
 }

@@ -21,7 +21,7 @@ type operationParams struct {
 // walkOperationsParameters invokes processor for every operation whose
 // parameters changed, comparing the parameters each operation has, its own and
 // its path item's, rather than each list where it is written.
-func walkOperationsParameters(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(o operationParams)) {
+func walkOperationsParameters(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config, processor func(o operationParams)) {
 	parametersContext := diffReport.ParametersContext
 	if parametersContext == nil {
 		return
@@ -42,7 +42,7 @@ func walkOperationsParameters(diffReport *diff.Diff, operationsSources *diff.Ope
 
 // walkModifiedParameters invokes processor for every modified parameter of
 // every operation whose parameters changed.
-func walkModifiedParameters(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(p paramInfo)) {
+func walkModifiedParameters(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config, processor func(p paramInfo)) {
 	walkOperationsParameters(diffReport, operationsSources, config, func(o operationParams) {
 		for location, params := range o.ParametersDiff.Modified {
 			for name, paramDiff := range params {
@@ -68,7 +68,7 @@ type headerInfo struct {
 
 // walkModifiedResponseHeaders invokes processor for every modified header of
 // every modified response of every modified operation.
-func walkModifiedResponseHeaders(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config, processor func(h headerInfo)) {
+func walkModifiedResponseHeaders(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config, processor func(h headerInfo)) {
 	if diffReport.PathsDiff == nil {
 		return
 	}

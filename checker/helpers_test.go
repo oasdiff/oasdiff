@@ -93,26 +93,13 @@ func stabilityChanges(t *testing.T, baseFile, revisionFile string, sl checker.St
 	return checker.CheckBackwardCompatibilityUntilLevel(config, d, osm, checker.INFO)
 }
 
-// withoutVersioningPolicy switches off the versioning rules. They run on
-// whatever the checks found rather than on a spec element, so without this
-// they add a finding to every test whose fixture carries a breaking change
-// under an unbumped semver version, which is most of them. Tests that
-// exercise the policy build their own config; see versioning_policy_test.go.
-func withoutVersioningPolicy() checker.Option {
-	return checker.WithSeverityLevels(map[string]checker.Level{
-		checker.APIVersionNotBumpedId:      checker.NONE,
-		checker.APIVersionDecreasedId:      checker.NONE,
-		checker.APIMajorVersionNotBumpedId: checker.NONE,
-	})
-}
-
 func singleCheckConfig(c checker.BackwardCompatibilityCheck, opts ...checker.Option) *checker.Config {
-	opts = append([]checker.Option{checker.WithSingleCheck(c), withoutVersioningPolicy()}, opts...)
+	opts = append([]checker.Option{checker.WithSingleCheck(c)}, opts...)
 	return checker.NewConfig(checker.BackwardCompatibilityChecks{c}, opts...)
 }
 
 func allChecksConfig(opts ...checker.Option) *checker.Config {
-	return checker.NewConfig(checker.GetAllChecks(), append([]checker.Option{withoutVersioningPolicy()}, opts...)...)
+	return checker.NewConfig(checker.GetAllChecks(), opts...)
 }
 
 // findChange returns the first Change with the given id, or nil if none match.
@@ -181,8 +168,34 @@ func requireApiChanges(t *testing.T, expected []checker.ApiChange, actual checke
 }
 
 // normalizeApiChange clears fields that are not part of a change's test identity.
+func requireComponentChange(t *testing.T, expected checker.ComponentChange, actual checker.Change) {
+	t.Helper()
+	cc, ok := actual.(checker.ComponentChange)
+	require.True(t, ok, "expected a checker.ComponentChange, got %T", actual)
+	require.Equal(t, expected, normalizeComponentChange(cc))
+}
+
+func requireComponentChanges(t *testing.T, expected []checker.ComponentChange, actual checker.Changes) {
+	t.Helper()
+	got := make([]checker.ComponentChange, 0, len(actual))
+	for _, c := range actual {
+		cc, ok := c.(checker.ComponentChange)
+		require.True(t, ok, "expected a checker.ComponentChange, got %T", c)
+		got = append(got, normalizeComponentChange(cc))
+	}
+	require.ElementsMatch(t, expected, got)
+}
+
+func normalizeComponentChange(c checker.ComponentChange) checker.ComponentChange {
+	c.BaseSource, c.RevisionSource = nil, nil
+	return c
+}
+
 func normalizeApiChange(c checker.ApiChange) checker.ApiChange {
 	c.Level = 0 // derived from the id via the rule registry, not part of test identity
+	// Locations come from origin data; the tests that are about them read the
+	// sources directly rather than comparing a whole change.
+	c.BaseSource, c.RevisionSource = nil, nil
 	return c.WithoutSchemaDiffs()
 }
 
@@ -223,9 +236,23 @@ const (
 // checkChanges runs a single check over the two specs and returns every change it reports.
 func checkChanges(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
 	t.Helper()
-	s1, err := open(base)
+	return checkChangesWith(t, openapi3.NewLoader, check, base, revision, opts...)
+}
+
+// checkChangesWithOrigins is checkChanges with origin tracking, so that the
+// changes it returns carry a source location to assert on.
+func checkChangesWithOrigins(t *testing.T, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
+	t.Helper()
+	return checkChangesWith(t, newLoaderWithOriginTracking, check, base, revision, opts...)
+}
+
+// checkChangesWith loads each spec with its own loader from newLoader, as the
+// loader holds the state of one decode.
+func checkChangesWith(t *testing.T, newLoader func() *openapi3.Loader, check checker.BackwardCompatibilityCheck, base, revision string, opts ...checker.Option) checker.Changes {
+	t.Helper()
+	s1, err := open(base, newLoader())
 	require.NoError(t, err)
-	s2, err := open(revision)
+	s2, err := open(revision, newLoader())
 	require.NoError(t, err)
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
 	require.NoError(t, err)

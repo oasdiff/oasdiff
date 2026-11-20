@@ -9,7 +9,7 @@ import (
 
 // CheckBackwardCompatibility runs the checks and returns the changes with
 // level WARN or ERR; see CheckBackwardCompatibilityUntilLevel.
-func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
+func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap) Changes {
 	return CheckBackwardCompatibilityUntilLevel(config, diffReport, operationsSources, WARN)
 }
 
@@ -18,7 +18,7 @@ func CheckBackwardCompatibility(config *Config, diffReport *diff.Diff, operation
 // recognized schema transition are dropped, so each transition is reported
 // only by its own finding (see transition_claims.go).
 // It does not mutate the caller's diffReport; cloneDiffForCheck isolates the pipeline's mutation surface.
-func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, level Level) Changes {
+func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, level Level) Changes {
 	result := make(Changes, 0)
 
 	if diffReport == nil {
@@ -46,11 +46,6 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	// Runs before anything that reads a change's level.
 	result = capByGuards(config, result)
 	result = capByDisclaimers(config, result)
-
-	// The versioning policy judges info.version against what the checks found,
-	// so it runs after them, and before the level filter so it sees changes of
-	// every level.
-	result = applyVersioningPolicy(config, diffReport, result)
 
 	filteredResult := make(Changes, 0)
 	for _, change := range result {

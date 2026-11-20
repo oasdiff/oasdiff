@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,7 +28,6 @@ func TestRequestBodyMultipleOfSet(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -53,7 +51,6 @@ func TestRequestPropertyMultipleOfSet(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -76,7 +73,6 @@ func TestRequestBodyMultipleOfUnset(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -99,7 +95,6 @@ func TestRequestPropertyMultipleOfUnset(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -124,7 +119,6 @@ func TestRequestBodyMultipleOfChanged(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -149,7 +143,6 @@ func TestRequestPropertyMultipleOfChanged(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -175,7 +168,6 @@ func TestRequestBodyMultipleOfGeneralized(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -201,6 +193,5 @@ func TestRequestPropertyMultipleOfGeneralized(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }

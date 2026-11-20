@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,7 +29,6 @@ func TestRequestBodyMaxLengthDecreasedCheck(t *testing.T) {
 		Args:        []any{maxLength, newMaxLength},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -56,7 +54,6 @@ func TestRequestBodyMaxLengthIncreasedCheck(t *testing.T) {
 		Args:        []any{newMaxLength},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }
@@ -81,7 +78,6 @@ func TestRequestPropertyMaxLengthDecreasedCheck(t *testing.T) {
 		Args:        []any{"description", newMaxLength},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 	require.Equal(t, "the `description` request property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
@@ -109,7 +105,6 @@ func TestRequestReadOnlyPropertyMaxLengthDecreasedCheck(t *testing.T) {
 		Args:        []any{"description", newMaxLength},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 	require.Equal(t, "the `description` request read-only property's maxLength was decreased to `50`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
@@ -135,7 +130,6 @@ func TestRequestPropertyMaxLengthIncreasedCheck(t *testing.T) {
 		Args:        []any{"description", maxLength, newMaxLength},
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource("../data/checker/request_body_max_length_decreased_base.yaml"),
 		OperationId: "addPet",
 	}, errs)
 }

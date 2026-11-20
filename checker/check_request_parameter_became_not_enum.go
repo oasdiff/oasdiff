@@ -1,8 +1,8 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -11,7 +11,7 @@ const (
 	RequestParameterPropertyBecameNotEnumId = "request-parameter-property-became-not-enum"
 )
 
-func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		if p.paramDiff.SchemaDiff == nil {

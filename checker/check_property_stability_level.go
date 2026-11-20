@@ -1,8 +1,8 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -15,7 +15,7 @@ const (
 
 // RequestPropertyStabilityUpdatedCheck detects request properties where x-stability-level changed.
 // Only emits changes when the property's base stability meets the configured threshold.
-func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if config == nil {
 		return result
@@ -31,7 +31,7 @@ func RequestPropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSourc
 
 // ResponsePropertyStabilityUpdatedCheck detects response properties where x-stability-level changed.
 // Only emits changes when the property's base stability meets the configured threshold.
-func ResponsePropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponsePropertyStabilityUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	if config == nil {
 		return result

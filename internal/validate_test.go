@@ -339,36 +339,10 @@ func Test_ValidateCmd_DedupePreferringComponents(t *testing.T) {
 	require.Contains(t, out, "invalid example: value must be a number")
 }
 
-// A JSON spec has no line numbers, so the same defect in three components
-// must not collapse into one finding (#1304). Each finding names its
-// component and has its own fingerprint, and the path-rooted echo of A
-// through its $ref is still dropped.
-func Test_ValidateCmd_SameDefectInComponentsWithoutLines(t *testing.T) {
-	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/same-defect-in-components.json"), &stdout, io.Discard))
-	var findings []map[string]any
-	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
-
-	texts := make([]string, 0, len(findings))
-	fingerprints := map[any]bool{}
-	for _, f := range findings {
-		require.Equal(t, "schema-type-unsupported", f["id"])
-		texts = append(texts, f["text"].(string))
-		fingerprints[f["fingerprint"]] = true
-	}
-	require.ElementsMatch(t, []string{
-		`unsupported 'type' value "Bad" in schema "A"`,
-		`unsupported 'type' value "Bad" in schema "B"`,
-		`unsupported 'type' value "Bad" in schema "C"`,
-	}, texts)
-	require.Len(t, fingerprints, 3)
-}
-
-// A known limitation without lines: an operation's inline schema with the
-// same defect as a component is taken for the component's defect reached
-// through a $ref and dropped. With lines, as in YAML, both are reported, so
-// once JSON specs have lines the JSON case expects both too.
-func Test_ValidateCmd_InlineDefectSameAsComponentWithoutLines(t *testing.T) {
+// An operation's inline schema with the same defect as a component is a
+// second defect, not the component's reached through its $ref, and the
+// location is what tells them apart.
+func Test_ValidateCmd_InlineDefectSameAsComponent(t *testing.T) {
 	operations := func(spec string) []any {
 		var stdout bytes.Buffer
 		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
@@ -380,27 +354,29 @@ func Test_ValidateCmd_InlineDefectSameAsComponentWithoutLines(t *testing.T) {
 		}
 		return out
 	}
-	require.ElementsMatch(t, []any{nil}, operations("../data/validate/inline-defect-same-as-component.json"))
+	require.ElementsMatch(t, []any{nil, "GET"}, operations("../data/validate/inline-defect-same-as-component.json"))
 	require.ElementsMatch(t, []any{nil, "GET"}, operations("../data/validate/inline-defect-same-as-component.yaml"))
 }
 
-// When this fails, JSON specs have lines (#1128) and the handling of findings
-// without a line in dedupePreferringComponents can go.
-func Test_ValidateCmd_JSONFindingsHaveNoLine(t *testing.T) {
+// A JSON spec carries line and column like a YAML one (#1128).
+func Test_ValidateCmd_JSONFindingsHaveLines(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json ../data/validate/same-defect-in-components.json"), &stdout, io.Discard))
 	var findings []map[string]any
 	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
 	require.NotEmpty(t, findings)
 	for _, f := range findings {
-		require.NotContains(t, f["source"], "line", "JSON specs have lines now: remove the no-line handling in dedupePreferringComponents and this test")
+		source := f["source"].(map[string]any)
+		require.Equal(t, "../data/validate/same-defect-in-components.json", source["file"])
+		require.NotZero(t, source["line"])
+		require.NotZero(t, source["column"])
 	}
 }
 
-// With a line, as in YAML, the location tells the components apart, so the
-// text does not name them. The fingerprints have no location and match the
-// JSON ones, so they stay the same when JSON specs gain lines.
-func Test_ValidateCmd_SameDefectInComponentsWithLines(t *testing.T) {
+// The same defect in three components is three findings, told apart by their
+// location, so no text names its component. The fingerprints carry no
+// location, so they are the same in both formats.
+func Test_ValidateCmd_SameDefectInComponents(t *testing.T) {
 	run := func(spec string) []map[string]any {
 		var stdout bytes.Buffer
 		require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json "+spec), &stdout, io.Discard))
@@ -415,12 +391,48 @@ func Test_ValidateCmd_SameDefectInComponentsWithLines(t *testing.T) {
 		}
 		return out
 	}
-	withLines := run("../data/validate/same-defect-in-components.yaml")
-	require.Len(t, withLines, 3)
-	for _, f := range withLines {
+	yamlFindings := run("../data/validate/same-defect-in-components.yaml")
+	jsonFindings := run("../data/validate/same-defect-in-components.json")
+	require.Len(t, yamlFindings, 3)
+	require.Len(t, jsonFindings, 3)
+	for _, f := range append(append([]map[string]any{}, yamlFindings...), jsonFindings...) {
+		require.Equal(t, "schema-type-unsupported", f["id"])
 		require.Equal(t, `unsupported 'type' value "Bad"`, f["text"])
 	}
-	require.ElementsMatch(t, fingerprints(run("../data/validate/same-defect-in-components.json")), fingerprints(withLines))
+	require.ElementsMatch(t, fingerprints(jsonFindings), fingerprints(yamlFindings))
+	require.Len(t, fingerprints(yamlFindings), 3)
+}
+
+// multipleOf: 0 in a component schema -> kin returns
+// *SchemaMultipleOfNotPositiveError. Rule ID:
+// "schema-multiple-of-not-positive". The error names the schema, so the
+// location comes from the keyword that broke the MUST.
+func Test_ValidateCmd_SchemaMultipleOfNotPositive(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json --fail-on INFO ../data/validate/multiple-of-not-positive.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1)
+	require.Equal(t, "schema-multiple-of-not-positive", findings[0]["id"])
+	require.Equal(t, "multipleOf must be greater than zero, got 0", findings[0]["text"])
+	source := findings[0]["source"].(map[string]any)
+	require.Equal(t, float64(15), source["line"], "should pin to the multipleOf: line, not the schema")
+	require.Equal(t, float64(7), source["column"])
+}
+
+func Test_ValidateCmd_RequiredPropertyForbidden(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate -f json --fail-on INFO ../data/validate/required-property-forbidden.yaml"), &stdout, io.Discard))
+
+	var findings []map[string]any
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &findings))
+	require.Len(t, findings, 1, "name is declared, so only parts is reported")
+	require.Equal(t, "required-property-forbidden", findings[0]["id"])
+	require.Equal(t, "required property parts is not declared in properties, and additionalProperties is false, so no object can validate", findings[0]["text"])
+	source := findings[0]["source"].(map[string]any)
+	require.Equal(t, float64(19), source["line"], "should pin to the required: line, not the schema")
+	require.Equal(t, float64(7), source["column"])
 }
 
 // --color only affects the text output, so pairing it with a non-text
@@ -467,16 +479,20 @@ func Test_ValidateCmd_DuplicateOperationID(t *testing.T) {
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
 }
 
-// Fields appearing as siblings of $ref where the spec disallows them →
+// An object carrying a field that is neither known nor an x- extension →
 // kin returns *ExtraSiblingFieldsError{Fields:[...]} (added in #1187).
 // Rule ID: "extra-sibling-fields". Origin (also added in #1187) pins
-// to the parent object holding the unexpected siblings.
+// to the parent object holding the unexpected fields.
+//
+// A field beside a $ref no longer qualifies: the Reference Object says
+// added properties are ignored, so kin stopped reporting those in
+// v0.152.0 (getkin/kin-openapi#1371).
 func Test_ValidateCmd_ExtraSiblingFields(t *testing.T) {
 	var stdout bytes.Buffer
 	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/extra-sibling-fields.yaml"), &stdout, io.Discard))
 	out := stdout.String()
 	require.Contains(t, out, "[extra-sibling-fields]")
-	require.Contains(t, out, "extra sibling fields: [description]")
+	require.Contains(t, out, "extra sibling fields: [descriptionn]")
 	require.Regexp(t, `at \S+:\d+:\d+`, out)
 }
 

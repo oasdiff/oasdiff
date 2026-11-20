@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequiredRequestPropertyAdded(t *testing.T) {
 		Args:        []any{"description"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -45,7 +43,6 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 			Args:        []any{"description"},
 			Operation:   "POST",
 			Path:        "/products",
-			Source:      load.NewSource("../data/checker/request_property_added_revision2.yaml"),
 			OperationId: "addProduct",
 		},
 		{
@@ -53,7 +50,6 @@ func TestRequiredRequestPropertiesAdded(t *testing.T) {
 			Args:        []any{"info"},
 			Operation:   "POST",
 			Path:        "/products",
-			Source:      load.NewSource("../data/checker/request_property_added_revision2.yaml"),
 			OperationId: "addProduct",
 		}}, errs)
 }
@@ -94,7 +90,6 @@ func TestRequiredOptionalPropertyAdded(t *testing.T) {
 		Args:        []any{"description"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_added_revision.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -114,7 +109,6 @@ func TestRequiredRequestPropertyRemoved(t *testing.T) {
 		Args:        []any{"description"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_added_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -135,7 +129,6 @@ func TestRequiredRequestPropertyAddedWithDefault(t *testing.T) {
 		Comment:     checker.RequiredRequestPropertyWithDefaultCommentId,
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_added_with_default.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -202,8 +195,8 @@ func TestRequestPropertyOneOfWrappedOriginalPreserved(t *testing.T) {
 }
 
 // A property added or deleted inside an unflattened allOf branch is as
-// doubtful as a modified one: another branch may still guarantee what this
-// one dropped. All three now carry the all-of-not-flattened disclaimer and
+// doubtful as a modified one: another branch may already describe it. All
+// three now carry the all-of-not-flattened disclaimer and
 // cap to warning, where previously only the modified property did (#1152).
 func TestRequestProperty_AllOfBranchExistenceCarriesDisclaimer(t *testing.T) {
 	s1, err := open("../data/checker/allof_property_existence_base.yaml")

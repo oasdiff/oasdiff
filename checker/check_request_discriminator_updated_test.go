@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestRequestDiscriminatorUpdatedCheckAdded(t *testing.T) {
 			Id:          checker.RequestBodyDiscriminatorAddedId,
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_added_revision.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -35,7 +33,6 @@ func TestRequestDiscriminatorUpdatedCheckAdded(t *testing.T) {
 			Args:        []any{"oneOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_added_revision.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }
@@ -58,7 +55,6 @@ func TestRequestDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 			Id:          checker.RequestBodyDiscriminatorRemovedId,
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_added_base.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -66,7 +62,6 @@ func TestRequestDiscriminatorUpdatedCheckRemoved(t *testing.T) {
 			Args:        []any{"oneOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_added_base.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }
@@ -90,7 +85,6 @@ func TestRequestDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 			Args:        []any{"petType", "petType2"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_added_property_name_changed.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -98,7 +92,6 @@ func TestRequestDiscriminatorUpdatedCheckPropertyNameChanging(t *testing.T) {
 			Args:        []any{"oneOf[#/components/schemas/Dog]/breed", "name", "name2"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_added_property_name_changed.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }
@@ -122,7 +115,6 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 			Args:        []any{[]string{"cats"}},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_mapping_changed.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -130,7 +122,6 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 			Args:        []any{[]string{"cat"}},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_mapping_changed.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -138,7 +129,6 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 			Args:        []any{[]string{"breed1Code"}, "oneOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_mapping_changed.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -146,7 +136,6 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 			Args:        []any{"breed2", "#/components/schemas/Breed2", "#/components/schemas/Breed3", "oneOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_mapping_changed.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -154,7 +143,6 @@ func TestRequestDiscriminatorUpdatedCheckMappingChanging(t *testing.T) {
 			Args:        []any{[]string{"breed1"}, "oneOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_discriminator_mapping_changed.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }

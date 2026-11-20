@@ -6,25 +6,9 @@ import (
 	"testing"
 	"testing/iotest"
 
-	"github.com/TwiN/go-color"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/stretchr/testify/require"
 )
-
-func TestStringCond_Info(t *testing.T) {
-	level := checker.INFO
-	require.Equal(t, level.PrettyString(), level.StringCond(checker.ColorAlways))
-	require.Equal(t, level.String(), level.StringCond(checker.ColorNever))
-	require.Equal(t, level.String(), level.StringCond(checker.ColorAuto))
-	require.Equal(t, level.String(), level.StringCond(checker.ColorInvalid))
-}
-
-func TestPrettyString(t *testing.T) {
-	require.Equal(t, color.InCyan(checker.INFO.String()), checker.INFO.PrettyString())
-	require.Equal(t, color.InPurple(checker.WARN.String()), checker.WARN.PrettyString())
-	require.Equal(t, color.InRed(checker.ERR.String()), checker.ERR.PrettyString())
-	require.Equal(t, color.InGray(checker.Level(4).String()), checker.Level(4).PrettyString())
-}
 
 func TestProcessSeverityLevels_InvalidFile(t *testing.T) {
 	m, err := checker.ProcessSeverityLevels("../data/invalid.txt")

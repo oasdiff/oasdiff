@@ -38,7 +38,7 @@ Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' 
 	return &cmd
 }
 
-func runUpgrade(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runUpgrade(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()

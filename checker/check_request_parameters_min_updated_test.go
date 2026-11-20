@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequestParameterMinIncreased(t *testing.T) {
 		Args:        []any{"path", "groupId", 1.0, 10.0},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_min_increased_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -44,7 +42,6 @@ func TestRequestParameterMinDecreased(t *testing.T) {
 		Args:        []any{"path", "groupId", 10.0, 1.0},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_min_increased_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

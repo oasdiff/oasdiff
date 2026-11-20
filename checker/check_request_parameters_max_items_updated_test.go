@@ -25,7 +25,6 @@ func TestRequestParameterMaxItemsIncreased(t *testing.T) {
 		Args:        []any{"query", "category", uint64(10), uint64(20)},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_max_items_updated_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -45,7 +44,6 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_parameter_max_items_updated_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -67,7 +65,6 @@ func TestBreaking_RequestParameterMaxItemsPathLevel(t *testing.T) {
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/common_request_parameter_max_items_updated_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -91,7 +88,6 @@ func TestBreaking_RequestParameterMaxItemsWithFlatten(t *testing.T) {
 		Args:        []any{"query", "category", uint64(20), uint64(10)},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/common_request_parameter_max_items_updated_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -111,7 +107,6 @@ func TestRequestParameterArrayMaxItemsDecreased(t *testing.T) {
 		Args:        []any{"query", "ids", uint64(50), uint64(10)},
 		Operation:   "GET",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_array_max_items_revision.yaml"),
 		OperationId: "testOperation",
 	}, errs)
 }

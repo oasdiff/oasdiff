@@ -112,6 +112,19 @@ func (diff *SchemaDiff) Empty() bool {
 	}
 }
 
+// getSchemaDiff returns the diff of a pair of schemas. The schema diff is
+// computed as a graph, so a pair of schema values goes through it rather than
+// straight to getSchemaDiffInternal, which compares one pair and is what the
+// graph calls.
+func getSchemaDiff(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
+	if schema1 == nil || schema2 == nil || schema1.Value == nil || schema2.Value == nil {
+		// a schema missing on one side is not a pair of values, so it has no
+		// node in the graph
+		return getSchemaDiffInternal(config, state, schema1, schema2)
+	}
+	return getSchemaDiffFromGraph(config, state, schema1, schema2)
+}
+
 func getSchemaDiffInternal(config *Config, state *state, schema1, schema2 *openapi3.SchemaRef) (*SchemaDiff, error) {
 
 	if schema1 == nil && schema2 == nil {

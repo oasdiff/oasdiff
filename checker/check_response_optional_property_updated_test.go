@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestResponseOptionalPropertyUpdatedCheck(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_removed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -45,7 +43,6 @@ func TestResponseOptionalPropertyAddedCheck(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_removed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -66,7 +63,6 @@ func TestResponseOptionalWriteOnlyPropertyRemovedCheck(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_removed_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -88,7 +84,6 @@ func TestResponseOptionalWriteOnlyPropertyAddedCheck(t *testing.T) {
 		Args:        []any{"data/id", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_optional_property_removed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

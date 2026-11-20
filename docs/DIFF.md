@@ -11,7 +11,7 @@ oasdiff applies a few opt-out defaults so its diff matches what most users expec
 
 | Flag | Default | What it does | Detail |
 |---|---|---|---|
-| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Matching Inline and `$ref` Subschemas](#matching-inline-and-ref-subschemas) |
+| `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Inline and `$ref` Subschemas](MATCHING-SUBSCHEMAS.md#inline-and-ref-subschemas) |
 | `--case-insensitive-headers` | `true` | Compare header names case-insensitively. `Content-Type` and `content-type` are the same header per RFC 7230 / 9110. | [HEADER-DIFF.md](HEADER-DIFF.md) |
 | `--allow-external-refs` | `true` | Allow the parser to resolve external `$ref`s when loading specs. Disable when processing untrusted specs to prevent SSRF. | (CLI help) |
 
@@ -24,7 +24,7 @@ Additional formats can be generated using the `--format` flag:
 - json: includes all diff details
 - text: designed to be more user-friendly and provide only the most important parts of the diff (same as markdown)
 - markdown: designed to be more user-friendly and provide only the most important parts of the diff (same as text)
-- html: designed to be more user-friendly and provide only the most important parts of the diff (see also [changelog with html](BREAKING-CHANGES.md#output-formats))
+- html: designed to be more user-friendly and provide only the most important parts of the diff (see also [changelog with html](OUTPUT-FORMATS.md))
 
 Notes: 
 - an empty `yaml` or `json` result signifies that the diff is empty, or, in other words, there are no changes.  
@@ -107,6 +107,7 @@ You can use the `--exclude-elements` flag with to exclude one or more of the fol
 - Use `--exclude-elements title` to exclude title fields
 - Use `--exclude-elements summary` to exclude summary fields
 - Use `--exclude-elements endpoints` to exclude the [endpoints section of the diff](#paths-vs-endpoints)
+- Use `--exclude-elements tags` to exclude [Tags](https://swagger.io/specification/#tag-object), both the top-level list and the tags of each operation
 
 For example, this diff excludes descriptions and examples:
 ```
@@ -124,32 +125,9 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
 
-## Matching Inline and `$ref` Subschemas
+## Matching Subschemas
 
-Under `anyOf` and `oneOf`, oasdiff treats an inline subschema and a `$ref` to a validation-equivalent component as the same branch by default. This catches a common codegen pattern where a tool extracts an inline schema (often an enum) into a named component without changing the accepted payloads:
-
-```yaml
-# base
-role:
-  anyOf:
-    - type: string
-      enum: [user, admin]
-    - type: "null"
-
-# revision (UserRole is { type: string, enum: [user, admin] })
-role:
-  anyOf:
-    - $ref: "#/components/schemas/UserRole"
-    - type: "null"
-```
-
-The diff reports no change for the `anyOf` list because the union of accepted payloads is identical. The same behaviour applies to `breaking` and `changelog`, which run on the same diff engine.
-
-To restore the previous behaviour where the inline branch is reported as removed and the `$ref` branch as added, pass `--match-inline-refs=false`.
-
-Annotation-only differences (`title`, `description`, `default`, `example`, `examples`, external docs, `$comment`) are ignored for the equivalence check. Differences that affect validation (including `deprecated`) are not. Component `$ref` renames (both sides `$ref`, e.g. `UserRoleV1` to `UserRole`) and inline-to-inline edits are out of scope by design: only the inline-to-`$ref` form change is treated as no-change.
-
-The matching is pair-based: each deleted branch matches at most one added branch. An added `$ref` that happens to be equivalent to an inline branch already present on the base (a standalone addition that overlaps an existing branch, rather than a refactor) is still reported as added.
+How the branches of an `allOf`, `anyOf` or `oneOf` are paired between base and revision, and how an inline subschema is matched with the `$ref` that replaces it, is described in [How oasdiff compares subschemas](MATCHING-SUBSCHEMAS.md).
 
 ## Usage Examples
 

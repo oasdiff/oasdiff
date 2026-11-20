@@ -13,8 +13,8 @@ import (
 )
 
 // A change compared branch by branch cannot be reported at error, whatever the
-// rule declares, because a sibling branch may still guarantee what this one
-// dropped. Here both branches require id and one drops it, so the merged
+// rule declares, because a sibling branch may already describe what changed
+// here. Here both branches require id and one drops it, so the merged
 // schema is unchanged and the error would be a false positive.
 func TestDisclaimer_AllOfCapsSeverity(t *testing.T) {
 	change := singleChange(t, "../data/checker/disclaimer_allof_base.yaml", "../data/checker/disclaimer_allof_revision.yaml", checker.ResponsePropertyBecameOptionalId)

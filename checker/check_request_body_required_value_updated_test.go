@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +24,6 @@ func TestRequestBodyBecameRequired(t *testing.T) {
 		Id:          checker.RequestBodyBecameRequiredId,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_body_became_required_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -46,7 +44,6 @@ func TestRequestBodyBecameOptional(t *testing.T) {
 		Id:          checker.RequestBodyBecameOptionalId,
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/request_body_became_optional_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

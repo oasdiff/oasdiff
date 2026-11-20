@@ -23,6 +23,8 @@ func MockLocalizer(id string, args ...any) string {
 		return "This is a warning."
 	case "notice_id":
 		return "This is a notice."
+	case "comment_id":
+		return "comment"
 	case "change_two_lines_id":
 		return "This is a breaking change.\nThis is a second line."
 	case "total-errors":

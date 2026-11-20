@@ -8,6 +8,12 @@
       },
       {
         "pattern": "^https://codecov.io/"
+      },
+      {
+        "pattern": "^https://raw.githubusercontent.com/inspect-software/"
+      },
+      {
+        "pattern": "^https://inspect.software/"
       }
     ]
 }

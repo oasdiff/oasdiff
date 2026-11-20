@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,7 +31,6 @@ func TestRequestBodyMaxItemsDecreased(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setTags",
 		Path:        "/tags",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -57,7 +55,6 @@ func TestRequestPropertyMaxItemsDecreased(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -84,7 +81,6 @@ func TestRequestReadOnlyPropertyMaxItemsDecreased(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -109,6 +105,5 @@ func TestRequestPropertyMaxItemsIncreased(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }

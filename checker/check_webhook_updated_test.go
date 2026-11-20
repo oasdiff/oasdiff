@@ -19,7 +19,7 @@ func TestWebhookAddedAndRemoved(t *testing.T) {
 	require.NoError(t, err)
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.WebhookUpdatedCheck), d, osm, checker.INFO)
 	require.Len(t, errs, 2)
-	require.ElementsMatch(t, []checker.ComponentChange{{
+	requireComponentChanges(t, []checker.ComponentChange{{
 		Id:        checker.WebhookRemovedId,
 		Args:      []any{"orderDeleted"},
 		Level:     checker.ERR,

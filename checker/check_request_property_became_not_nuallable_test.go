@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestRequestPropertyBecameNotNullable(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -44,7 +42,6 @@ func TestRequestPropertyBecameNullable(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_revision.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 
@@ -67,7 +64,6 @@ func TestRequestBodyBecameNullable(t *testing.T) {
 		Id:          checker.RequestBodyBecomeNullableId,
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -87,7 +83,6 @@ func TestRequestPropertyBecameNullable31(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_31_revision.yaml"),
 		OperationId: "createProduct",
 	}, errs)
 }
@@ -107,7 +102,6 @@ func TestRequestPropertyBecameNotNullable31(t *testing.T) {
 		Args:        []any{"name"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_31_base.yaml"),
 		OperationId: "createProduct",
 	}, errs)
 }
@@ -142,7 +136,6 @@ func TestRequestBodyBecameNotNullable(t *testing.T) {
 		Id:          checker.RequestBodyBecomeNotNullableId,
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_base.yaml"),
 		OperationId: "addProduct",
 	}, errs)
 }
@@ -162,7 +155,6 @@ func TestResponsePropertyBecameNullable31(t *testing.T) {
 		Args:        []any{"status", "200"},
 		Operation:   "POST",
 		Path:        "/products",
-		Source:      load.NewSource("../data/checker/request_property_became_nullable_31_revision.yaml"),
 		OperationId: "createProduct",
 	}, errs)
 }

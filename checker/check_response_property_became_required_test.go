@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +22,6 @@ func TestResponsePropertyBecameRequiredlCheck(t *testing.T) {
 		Args:        []any{"data/name", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_became_optional_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -64,7 +62,6 @@ func TestResponseWriteOnlyPropertyBecameRequiredCheck(t *testing.T) {
 		Args:        []any{"data/name", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_property_became_optional_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

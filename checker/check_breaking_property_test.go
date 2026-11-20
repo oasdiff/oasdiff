@@ -6,7 +6,6 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -383,7 +382,6 @@ func TestBreaking_ReqBodyDeleteRequiredProperty2(t *testing.T) {
 		Args:      []any{"roleAssignments/items/role"},
 		Operation: "POST",
 		Path:      "/api/roleMappings",
-		Source:    load.NewSource("../data/required-properties/request-property-items-2.yaml"),
 	}, requireChange(t, errs, checker.RequestPropertyRemovedId))
 }
 
@@ -507,6 +505,86 @@ func TestBreaking_WriteOnlyDeleteNonRequiredProperty(t *testing.T) {
 
 	all := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 	requireChange(t, all, checker.ResponseOptionalPropertyRemovedId)
+}
+
+// deleting a deprecated property after its sunset date is not reported
+func TestBreaking_PropertyDeprecationPast(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-past.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Empty(t, errs)
+}
+
+// deleting a deprecated property before its sunset date is breaking
+func TestBreaking_PropertyDeprecationFuture(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.ERR)
+	require.Len(t, errs, 3)
+	require.Equal(t, "removed the request property `created` before the sunset date `9999-08-10`", requireChange(t, errs, checker.RequestPropertyRemovedBeforeSunsetId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed the required property `created` from the response with the `200` status before the sunset date `9999-08-10`", requireChange(t, errs, checker.ResponseRequiredPropertyRemovedBeforeSunsetId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// deleting a deprecated property without a sunset date is not breaking
+func TestBreaking_PropertyDeprecationNoSunset(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+	delete(s1.Spec.Components.Schemas["GroupView"].Value.Properties["created"].Value.Extensions, "x-sunset")
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	require.Empty(t, checker.CheckBackwardCompatibility(allChecksConfig(), d, osm))
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+	require.Equal(t, "removed the deprecated request property `created`", requireChange(t, errs, checker.RequestPropertyRemovedWithDeprecationId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "removed the deprecated required property `created` from the response with the `200` status", requireChange(t, errs, checker.ResponseRequiredPropertyRemovedWithDeprecationId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// deleting a deprecated property with an invalid sunset date is breaking, as if it wasn't deprecated
+func TestBreaking_RemovePropertyWithInvalidSunset(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+	s1.Spec.Components.Schemas["GroupView"].Value.Properties["created"].Value.Extensions["x-sunset"] = "invalid-date"
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	require.Len(t, errs, 3)
+	requireChange(t, errs, checker.RequestPropertyRemovedId)
+	requireChange(t, errs, checker.ResponseRequiredPropertyRemovedId)
+}
+
+// deleting a deprecated write-only property before its sunset date is breaking
+// on the request side only: the property is not in responses
+func TestBreaking_WriteOnlyPropertyDeprecationFuture(t *testing.T) {
+	s1, err := open(deprecationFile("deprecated-property-future.yaml"))
+	require.NoError(t, err)
+	s1.Spec.Components.Schemas["GroupView"].Value.Properties["created"].Value.WriteOnly = true
+
+	s2, err := open(deprecationFile("sunset-property.yaml"))
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibility(allChecksConfig(), d, osm)
+	requireSingleChange(t, errs, checker.RequestPropertyRemovedBeforeSunsetId)
 }
 
 // changing an existing write-only property in response body to optional is not breaking

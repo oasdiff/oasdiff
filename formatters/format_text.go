@@ -48,7 +48,7 @@ func (f TEXTFormatter) RenderChangelog(changes checker.Changes, opts RenderOpts)
 	_, _ = fmt.Fprint(result, getChangelogTitle(changes, f.Localizer, opts.ColorMode))
 
 	for _, c := range changes {
-		_, _ = fmt.Fprintf(result, "%s\n\n", c.MultiLineError(f.Localizer, opts.ColorMode))
+		_, _ = fmt.Fprintf(result, "%s\n\n", multiLineError(c, f.Localizer, opts.ColorMode))
 	}
 
 	return result.Bytes(), nil
@@ -131,9 +131,9 @@ func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 	// command's title (getChangelogTitle).
 	_, _ = fmt.Fprintf(result, "%d findings: %d %s, %d %s, %d %s\n",
 		len(findings),
-		count[checker.ERR], checker.ERR.StringCond(opts.ColorMode),
-		count[checker.WARN], checker.WARN.StringCond(opts.ColorMode),
-		count[checker.INFO], checker.INFO.StringCond(opts.ColorMode),
+		count[checker.ERR], levelText(checker.ERR, opts.ColorMode),
+		count[checker.WARN], levelText(checker.WARN, opts.ColorMode),
+		count[checker.INFO], levelText(checker.INFO, opts.ColorMode),
 	)
 
 	useColor := colorize.IsColorEnabled(opts.ColorMode)
@@ -146,7 +146,7 @@ func (f TEXTFormatter) RenderValidate(findings Findings, opts RenderOpts) ([]byt
 		if useColor {
 			id = color.InYellow(finding.Id)
 		}
-		_, _ = fmt.Fprintf(result, "%s\t[%s] at %s\n", finding.Level.StringCond(opts.ColorMode), id, loc)
+		_, _ = fmt.Fprintf(result, "%s\t[%s] at %s\n", levelText(finding.Level, opts.ColorMode), id, loc)
 
 		msgIndent := "\t"
 		if finding.Operation != "" && finding.Path != "" {

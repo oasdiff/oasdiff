@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,7 +22,6 @@ func TestResponsePropertyBecameNotEnum(t *testing.T) {
 		Comment:     checker.ResponsePropertyBecameNotEnumId + "-comment",
 		Operation:   "POST",
 		Path:        "/pets",
-		Source:      load.NewSource(enumRemovedEntirelyRevision),
 		OperationId: "createPet",
 	}, status)
 	require.Equal(t, checker.ERR, status.GetLevel())

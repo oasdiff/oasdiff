@@ -17,4 +17,6 @@ paths:
                   pattern: "^[ab]$"
                 note:
                   type: string
+                  deprecated: true
+                  x-sunset: "9999-08-10"  # removing a deprecated property is an echo too
       responses: {'200': {description: OK}}

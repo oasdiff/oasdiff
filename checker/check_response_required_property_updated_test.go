@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +24,6 @@ func TestResponseRequiredPropertyAdded(t *testing.T) {
 		Args:        []any{"data/new", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_added_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -46,7 +44,6 @@ func TestResponseRequiredPropertyRemoved(t *testing.T) {
 		Args:        []any{"data/new", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -69,7 +66,6 @@ func TestResponseRequiredWriteOnlyPropertyAdded(t *testing.T) {
 		Args:        []any{"data/new", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_added_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -91,7 +87,6 @@ func TestResponseRequiredWriteOnlyPropertyRemoved(t *testing.T) {
 		Args:        []any{"data/new", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/response_required_property_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

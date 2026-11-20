@@ -16,8 +16,6 @@ paths:
       responses: { "200": { description: ok } }
 components:
   schemas:
-    MultipleOfZero:   { type: integer, multipleOf: 0 }
-    MultipleOfNeg:    { type: integer, multipleOf: -2 }
     BadRange:         { type: integer, minimum: 10, maximum: 5 }
     BadLength:        { type: string, minLength: 10, maxLength: 5 }
     BadItems:         { type: array, items: { type: string }, minItems: 5, maxItems: 2 }
@@ -65,7 +63,6 @@ func findingsByID(t *testing.T, spec string) map[string]int {
 func TestLintSchemaConstraints(t *testing.T) {
 	got := findingsByID(t, schemaConstraintsSpec)
 
-	require.Equal(t, 2, got[MultipleOfNotPositiveID], "zero and negative multipleOf")
 	require.Equal(t, 1, got[MinimumExceedsMaximumID])
 	require.Equal(t, 1, got[MinLengthExceedsMaxLengthID])
 	require.Equal(t, 1, got[MinItemsExceedsMaxItemsID])
@@ -82,7 +79,6 @@ func TestLintSchemaConstraints_Severities(t *testing.T) {
 	for _, f := range lintSchemaConstraints(mustLoad(t, schemaConstraintsSpec), "spec.yaml") {
 		levels[f.Id] = f.Level
 	}
-	require.Equal(t, checker.ERR, levels[MultipleOfNotPositiveID], "multipleOf > 0 is a MUST")
 	require.Equal(t, checker.ERR, levels[SubschemasEmptyID], "non-empty allOf is a MUST")
 	require.Equal(t, checker.WARN, levels[MinimumExceedsMaximumID])
 	require.Equal(t, checker.WARN, levels[EnumEmptyID])

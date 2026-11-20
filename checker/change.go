@@ -1,6 +1,6 @@
 package checker
 
-import "github.com/oasdiff/oasdiff/checker/location"
+import "github.com/oasdiff/oasdiff/checker/internal/location"
 
 // Source is where a change is in a spec. It is defined with the functions
 // that find it, and named here because the change types hold it.
@@ -10,8 +10,11 @@ type Change interface {
 	GetSection() string
 	IsBreaking() bool
 	GetId() string
-	GetText(l Localizer) string
 	GetArgs() []any
+
+	// Text is the change's message, with each argument set apart by format.
+	// GetUncolorizedText is the plain form of it.
+	Text(l Localizer, format ArgFormat) string
 	GetUncolorizedText(l Localizer) string
 	GetComment(l Localizer) string
 	GetLevel() Level
@@ -20,40 +23,15 @@ type Change interface {
 	GetOperation() string
 	GetOperationId() string
 	GetPath() string
-	GetSource() string
+
+	// Subject is what the change is about: the section it is in, and the
+	// element within it, which a report may set apart. The element is empty
+	// for a change about a section as a whole.
+	Subject() (section, element string)
 	GetAttributes() map[string]any
 
 	// Location tracking methods
 	GetBaseSource() *Source
 	GetRevisionSource() *Source
-
-	// DEPRECATED: Will be removed after GitHubActionsFormatter migration
-	GetSourceFile() string
-	GetSourceLine() int
-	GetSourceLineEnd() int
-	GetSourceColumn() int
-	GetSourceColumnEnd() int
 	MatchIgnore(ignorePath, ignoreLine string, l Localizer) bool
-	SingleLineError(l Localizer, colorMode ColorMode) string
-	MultiLineError(l Localizer, colorMode ColorMode) string
-}
-
-type CommonChange struct {
-	// Location information for correlation UI
-	BaseSource     *Source // Location in base (original) file
-	RevisionSource *Source // Location in revision (modified) file
-
-	Attributes map[string]any
-}
-
-func (c CommonChange) GetBaseSource() *Source {
-	return c.BaseSource
-}
-
-func (c CommonChange) GetRevisionSource() *Source {
-	return c.RevisionSource
-}
-
-func (c CommonChange) GetAttributes() map[string]any {
-	return c.Attributes
 }

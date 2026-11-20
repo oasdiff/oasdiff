@@ -3,7 +3,7 @@ package checker
 import (
 	"fmt"
 
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -11,7 +11,7 @@ const (
 	ResponseMediaTypeEnumValueAddedId = "response-mediatype-enum-value-added"
 )
 
-func ResponseMediaTypeEnumValueAddedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func ResponseMediaTypeEnumValueAddedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {

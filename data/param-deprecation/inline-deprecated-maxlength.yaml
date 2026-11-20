@@ -1,0 +1,17 @@
+openapi: 3.0.3
+info:
+  title: Test
+  version: "1"
+paths:
+  /items:
+    get:
+      parameters:
+        - name: q
+          in: query
+          deprecated: true
+          schema:
+            type: string
+            maxLength: 10
+      responses:
+        "200":
+          description: ok

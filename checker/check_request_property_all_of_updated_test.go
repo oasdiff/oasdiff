@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,20 +24,16 @@ func TestRequestPropertyAllOfAdded(t *testing.T) {
 	requireApiChanges(t, []checker.ApiChange{
 		{
 			Id:          checker.RequestBodyAllOfAddedId,
-			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
 			Args:        []any{"#/components/schemas/Rabbit"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_added_revision.yaml"),
 			OperationId: "updatePets",
 		},
 		{
 			Id:          checker.RequestPropertyAllOfAddedId,
-			Disclaimers: []checker.Disclaimer{checker.DisclaimerAllOfNotFlattened},
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_added_revision.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }
@@ -108,7 +103,6 @@ func TestRequestPropertyAllOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_removed_revision.yaml"),
 			OperationId: "updatePets",
 		},
 		{
@@ -117,7 +111,6 @@ func TestRequestPropertyAllOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "allOf[#/components/schemas/Dog]/breed"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/request_property_all_of_removed_revision.yaml"),
 			OperationId: "updatePets",
 		}}, errs)
 }
@@ -145,6 +138,7 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_EmitsInfo(t *testing.T) {
 
 	requireSingleChange(t, errs, checker.RequestBodyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Empty(t, errs[0].GetDisclaimers())
 	// And critically: not the original ERR-level breaking-change ID.
 	require.NotEqual(t, checker.RequestBodyAllOfAddedId, errs[0].GetId())
 }
@@ -164,5 +158,6 @@ func TestRequestPropertyAllOfAdded_AnnotationOnly_AtProperty_EmitsInfo(t *testin
 
 	requireSingleChange(t, errs, checker.RequestPropertyAllOfAddedAnnotationOnlyId)
 	require.Equal(t, checker.INFO, errs[0].GetLevel())
+	require.Empty(t, errs[0].GetDisclaimers())
 	require.NotEqual(t, checker.RequestPropertyAllOfAddedId, errs[0].GetId())
 }

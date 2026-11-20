@@ -1,8 +1,7 @@
 package checker
 
 import (
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -13,19 +12,19 @@ const (
 	RequestParameterPropertyBecameNotNullableId = "request-parameter-property-became-not-nullable"
 )
 
-func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
 
-		if id := nullabilityChangeId(p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "nullable")
+		if id, comment := nullabilityChangeId(nil, p.paramDiff.SchemaDiff, RequestParameterBecameNullableId, RequestParameterBecameNotNullableId); id != "" {
+			baseSource, revisionSource := nullabilitySources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff)
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
-				"",
+				comment,
 			).WithSchema(p.paramDiff.SchemaDiff, p.paramDiff.SchemaDiff, "").WithSources(baseSource, revisionSource))
 		}
 
@@ -35,12 +34,12 @@ func RequestParameterBecameNullableCheck(diffReport *diff.Diff, operationsSource
 				if propertyDiff == nil || propertyDiff.Base == nil || propertyDiff.Revision == nil {
 					return
 				}
-				if id := nullabilityChangeId(propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
-					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "nullable")
+				if id, comment := nullabilityChangeId(parent, propertyDiff, RequestParameterPropertyBecameNullableId, RequestParameterPropertyBecameNotNullableId); id != "" {
+					baseSource, revisionSource := nullabilitySources(operationsSources, p.opInfo.methodDiff, propertyDiff)
 					result = append(result, p.opInfo.NewApiChange(
 						id,
 						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
-						"",
+						comment,
 					).WithSchema(p.paramDiff.SchemaDiff, propertyDiff, schemawalk.PropertyFullName(propertyPath, propertyName)).WithSources(baseSource, revisionSource))
 				}
 			})

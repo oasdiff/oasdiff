@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -24,7 +23,6 @@ func TestAddNewMediaType(t *testing.T) {
 		Args:        []any{"application/xml", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/add_new_media_type_revision.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }
@@ -44,7 +42,6 @@ func TestDeleteNewMediaType(t *testing.T) {
 		Args:        []any{"application/xml", "200"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/add_new_media_type_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
 }

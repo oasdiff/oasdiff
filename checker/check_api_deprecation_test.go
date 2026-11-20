@@ -27,7 +27,7 @@ func TestBreaking_DeprecationWithInvalidSunset(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: invalid`", requireChange(t, errs, checker.APIDeprecatedSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "sunset date doesn't conform with RFC3339: `\"invalid\"`", requireChange(t, errs, checker.APIDeprecatedSunsetParseId).GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // deprecating an operation with a deprecation policy and an invalid stability level is breaking
@@ -45,8 +45,8 @@ func TestBreaking_DeprecationWithInvalidStabilityLevel(t *testing.T) {
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	require.NotEmpty(t, errs)
 	require.Len(t, errs, 1)
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"invalid\"`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/deprecated-with-invalid-stability.yaml", errs[0].GetSource())
+	require.Equal(t, "stability level `\"invalid\"` is not one of `draft`, `alpha`, `beta` or `stable`", requireChange(t, errs, checker.APIInvalidStabilityLevelId).GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "../data/deprecation/deprecated-with-invalid-stability.yaml", errs[0].GetRevisionSource().File)
 }
 
 // deprecating an operation without a deprecation policy but without specifying sunset date is not breaking
@@ -242,8 +242,8 @@ func TestBreaking_InvaidStability(t *testing.T) {
 	require.Equal(t, checker.APIInvalidStabilityLevelId, e0.Id)
 	require.Equal(t, "GET", e0.Operation)
 	require.Equal(t, "/api/test", e0.Path)
-	require.Equal(t, "failed to parse stability level: `value is not one of draft, alpha, beta or stable: \"ga\"`", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
-	require.Equal(t, "../data/deprecation/invalid-stability.yaml", errs[0].GetSource())
+	require.Equal(t, "stability level `\"ga\"` is not one of `draft`, `alpha`, `beta` or `stable`", e0.GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "../data/deprecation/invalid-stability.yaml", errs[0].GetBaseSource().File)
 }
 
 // message includes sunset details when endpoint deprecated with sunset date
@@ -359,7 +359,7 @@ func TestBreaking_DeprecationWithInvalidJsonSunset(t *testing.T) {
 	c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
 	errs := checker.CheckBackwardCompatibility(c, d, osm)
 	requireSingleChange(t, errs, checker.APIDeprecatedSunsetParseId)
-	require.Equal(t, "failed to parse sunset date: `sunset date doesn't conform with RFC3339: {\"invalid\":\"object\"}`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "sunset date doesn't conform with RFC3339: `{\"invalid\":\"object\"}`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // endpoint deprecation message includes sunset date
@@ -390,4 +390,45 @@ func TestEndpointDeprecation_MessageWithSunsetDate(t *testing.T) {
 	}
 	require.NotNil(t, sunsetChange, "expected to find endpoint-deprecated-with-sunset change")
 	require.Equal(t, fmt.Sprintf("endpoint deprecated with sunset date `%s`", sunsetDate.String()), sunsetChange.GetUncolorizedText(checker.NewDefaultLocalizer()))
+}
+
+// a finding about the sunset date points at x-sunset, not at deprecated, in
+// both the unparseable and the too-early case.
+func TestDeprecation_SunsetFindingsPointAtSunset(t *testing.T) {
+	loader := newLoaderWithOriginTracking()
+
+	t.Run("unparseable", func(t *testing.T) {
+		s1, err := open(deprecationFile("base.yaml"), loader)
+		require.NoError(t, err)
+
+		s2, err := open(deprecationFile("deprecated-with-invalid-sunset.yaml"), loader)
+		require.NoError(t, err)
+
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
+		errs := checker.CheckBackwardCompatibility(c, d, osm)
+
+		source := requireChange(t, errs, checker.APIDeprecatedSunsetParseId).GetRevisionSource()
+		require.NotNil(t, source)
+		require.Equal(t, 13, source.Line) // the x-sunset field, not deprecated on 12
+	})
+
+	t.Run("too early", func(t *testing.T) {
+		s1, err := open(deprecationFile("base.yaml"), loader)
+		require.NoError(t, err)
+
+		s2, err := open(deprecationFile("deprecated-future.yaml"), loader)
+		require.NoError(t, err)
+		s2.Spec.Paths.Value("/api/test").Get.Extensions[diff.SunsetExtension] = toJson(t, civil.DateOf(time.Now()).AddDays(9).String())
+
+		d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+		require.NoError(t, err)
+		c := singleCheckConfig(checker.APIDeprecationCheck, checker.WithDeprecation(0, 10))
+		errs := checker.CheckBackwardCompatibility(c, d, osm)
+
+		source := requireChange(t, errs, checker.APISunsetDateTooSmallId).GetRevisionSource()
+		require.NotNil(t, source)
+		require.Equal(t, 13, source.Line) // the x-sunset field, not deprecated on 12
+	})
 }

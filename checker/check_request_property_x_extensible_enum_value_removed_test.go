@@ -24,15 +24,7 @@ func TestRequestPropertyXExtensibleEnumValueRemovedCheck(t *testing.T) {
 
 // the change points at the exact removed x-extensible-enum value in the base spec
 func TestRequestPropertyXExtensibleEnumValueRemoved_WithSources(t *testing.T) {
-	s1, err := open("../data/checker/request_property_extensible_enum_base.yaml", newLoaderWithOriginTracking())
-	require.NoError(t, err)
-
-	s2, err := open("../data/checker/request_property_extensible_enum_revision.yaml", newLoaderWithOriginTracking())
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibility(singleCheckConfig(checker.RequestPropertyXExtensibleEnumValueRemovedCheck), d, osm)
+	errs := checkChangesWithOrigins(t, checker.RequestPropertyXExtensibleEnumValueRemovedCheck, "../data/checker/request_property_extensible_enum_base.yaml", "../data/checker/request_property_extensible_enum_revision.yaml")
 	requireSingleChange(t, errs, checker.RequestPropertyXExtensibleEnumValueRemovedId)
 
 	require.NotEmpty(t, errs[0].GetBaseSource())

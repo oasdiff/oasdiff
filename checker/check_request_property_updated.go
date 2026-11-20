@@ -4,13 +4,16 @@ import (
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
-	"github.com/oasdiff/oasdiff/checker/schemawalk"
+	"github.com/oasdiff/oasdiff/checker/internal/deprecation"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
+	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
 const (
 	RequestPropertyRemovedId                = "request-property-removed"
+	RequestPropertyRemovedWithDeprecationId = "request-property-removed-with-deprecation"
+	RequestPropertyRemovedBeforeSunsetId    = "request-property-removed-before-sunset"
 	NewRequiredRequestPropertyId            = "new-required-request-property"
 	NewRequiredRequestPropertyWithDefaultId = "new-required-request-property-with-default"
 	NewOptionalRequestPropertyId            = "new-optional-request-property"
@@ -33,7 +36,7 @@ const (
 	RequiredRequestPropertyWithDefaultCommentId = "required-request-property-with-default-error-comment"
 )
 
-func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap, config *Config) Changes {
+func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap, config *Config) Changes {
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
@@ -70,12 +73,22 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 					return
 				}
 
+				id, extra, ok := deprecation.Removal(propertyItem.Deprecated, propertyItem.Extensions, deprecation.RemovalIds{
+					Removed:         RequestPropertyRemovedId,
+					WithDeprecation: RequestPropertyRemovedWithDeprecationId,
+					BeforeSunset:    RequestPropertyRemovedBeforeSunsetId,
+				})
+				if !ok {
+					return
+				}
+				args := append([]any{schemawalk.PropertyFullName(propertyPath, propertyName)}, extra...)
+
 				baseSource := location.PropertySource(operationsSources, info.operationItem.Base, propertyItem)
 				result = append(result, info.newChange(
-					RequestPropertyRemovedId,
-					[]any{schemawalk.PropertyFullName(propertyPath, propertyName)},
+					id,
+					args,
 					"",
-				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(baseSource, nil))
+				).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(baseSource, nil))
 			})
 
 		schemawalk.AddedProperties(
@@ -94,20 +107,20 @@ func RequestPropertyUpdatedCheck(diffReport *diff.Diff, operationsSources *diff.
 							NewRequiredRequestPropertyId,
 							[]any{propName},
 							"",
-						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 					} else {
 						result = append(result, info.newChange(
 							NewRequiredRequestPropertyWithDefaultId,
 							[]any{propName},
 							RequiredRequestPropertyWithDefaultCommentId,
-						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+						).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 					}
 				} else {
 					result = append(result, info.newChange(
 						NewOptionalRequestPropertyId,
 						[]any{propName},
 						"",
-					).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithDisclaimers(allOfDisclaimers(underAllOf, nil)).WithSources(nil, revisionSource))
+					).WithSchema(info.schemaDiff, parent, schemawalk.PropertyFullName(propertyPath, propertyName)).WithAllOfDisclaimers(underAllOf, nil).WithSources(nil, revisionSource))
 				}
 			})
 	})

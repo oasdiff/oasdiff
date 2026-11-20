@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,10 +25,9 @@ func TestTagAdded(t *testing.T) {
 		Args:        []any{"newTag"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/tag_added_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
-	require.Equal(t, "api tag `newTag` added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API tag `newTag` added", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
 // removing an existing tag
@@ -50,10 +48,9 @@ func TestTagRemoved(t *testing.T) {
 		Args:        []any{"Test"},
 		Operation:   "POST",
 		Path:        "/api/v1.0/groups",
-		Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
 		OperationId: "createOneGroup",
 	}, errs)
-	require.Equal(t, "api tag `Test` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
+	require.Equal(t, "API tag `Test` removed", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 
 }
 
@@ -79,7 +76,6 @@ func TestTagUpdated(t *testing.T) {
 				Args:        []any{"Test"},
 				Operation:   "POST",
 				Path:        "/api/v1.0/groups",
-				Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
 				OperationId: "createOneGroup",
 			}, errs[cl])
 		}
@@ -90,7 +86,6 @@ func TestTagUpdated(t *testing.T) {
 				Args:        []any{"newTag"},
 				Operation:   "POST",
 				Path:        "/api/v1.0/groups",
-				Source:      load.NewSource("../data/checker/tag_removed_base.yaml"),
 				OperationId: "createOneGroup",
 			}, errs[cl])
 		}

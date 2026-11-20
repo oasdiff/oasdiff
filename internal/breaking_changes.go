@@ -20,12 +20,12 @@ func getBreakingChangesCmd() *cobra.Command {
 	addCommonDiffFlags(&cmd)
 	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
-	enumWithOptions(&cmd, newEnumValue(GetBreakingLevels(), ""), "fail-on", "o", "exit with return code 1 when output includes errors with this level or higher")
+	enumWithOptions(&cmd, newEnumValue(GetBreakingFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")
 	addOpenFlags(&cmd, "breaking changes")
 
 	return &cmd
 }
 
-func runBreakingChanges(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
-	return getChangelog(flags, stdout, checker.WARN, true)
+func runBreakingChanges(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError) {
+	return getChangelog(flags, stdout, stderr, checker.WARN, true)
 }

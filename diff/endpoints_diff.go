@@ -51,9 +51,11 @@ func getEndpointsDiff(config *Config, state *state, paths1, paths2 *openapi3.Pat
 		return nil, nil
 	}
 
-	if err := filterPaths(config.MatchPath, config.UnmatchPath, config.FilterExtension, paths1, paths2); err != nil {
+	filters, err := getFilters(config, state)
+	if err != nil {
 		return nil, err
 	}
+	filterPaths(filters, paths1, paths2)
 
 	diff, err := getEndpointsDiffInternal(config, state, paths1, paths2)
 	if err != nil {

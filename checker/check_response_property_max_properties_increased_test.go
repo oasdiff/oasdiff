@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,7 +29,6 @@ func TestResponseBodyMaxPropertiesIncreased(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -55,6 +53,5 @@ func TestResponsePropertyMaxPropertiesIncreased(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }

@@ -67,14 +67,13 @@ Spec can be a path to a file, a URL, a git ref (e.g. main:openapi.yaml), or '-' 
 	return &cmd
 }
 
-func runValidate(flags *Flags, stdout io.Writer) (bool, *ReturnError) {
+func runValidate(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
 	// Origin tracking lets the typed cluster errors carry an *Origin
 	// pointing at the offending element. Cheap to leave on; consumers
 	// that don't surface line/column simply ignore the extra fields.
-	loader.IncludeOrigin = true
 
 	spec, err := load.NewSpecInfo(loader, flags.getBase())
 	if err != nil {

@@ -127,6 +127,10 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyDeprecatedInvalidId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.deprecated:set", "paths.*.*.requestBody.content.*.schema.x-*:add,change"),
 		newBackwardCompatibilityRule(RequestPropertyReactivatedId, INFO, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.requestBody.content.*.schema.deprecated:unset"),
 		newBackwardCompatibilityRule(RequestPropertySunsetDateTooSmallId, ERR, RequestPropertyDeprecationCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.deprecated:set", "paths.*.*.requestBody.content.*.schema.x-*:add,change"),
+		// RequestPropertySunsetChangedCheck
+		newBackwardCompatibilityRule(RequestPropertySunsetDeletedId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:remove"),
+		newBackwardCompatibilityRule(RequestPropertySunsetDateChangedTooSmallId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
+		newBackwardCompatibilityRule(RequestPropertySunsetDateChangedEarlierId, ERR, RequestPropertySunsetChangedCheck, DirectionRequest, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.x-*:change"),
 		// Response property deprecation checks
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set"),
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedWithSunsetId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set"),
@@ -134,6 +138,10 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyDeprecatedInvalidId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set", "paths.*.*.responses.*.content.*.schema.x-*:add,change"),
 		newBackwardCompatibilityRule(ResponsePropertyReactivatedId, INFO, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectNone, nil, "paths.*.*.responses.*.content.*.schema.deprecated:unset"),
 		newBackwardCompatibilityRule(ResponsePropertySunsetDateTooSmallId, ERR, ResponsePropertyDeprecationCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.deprecated:set", "paths.*.*.responses.*.content.*.schema.x-*:add,change"),
+		// ResponsePropertySunsetChangedCheck
+		newBackwardCompatibilityRule(ResponsePropertySunsetDeletedId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:remove"),
+		newBackwardCompatibilityRule(ResponsePropertySunsetDateChangedTooSmallId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:change"),
+		newBackwardCompatibilityRule(ResponsePropertySunsetDateChangedEarlierId, ERR, ResponsePropertySunsetChangedCheck, DirectionResponse, AreaSchema, KindLifecycle, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.x-*:change"),
 		// APIAddedCheck
 		newBackwardCompatibilityRule(EndpointAddedId, INFO, APIAddedCheck, DirectionNone, AreaPaths, KindExistence, EffectWidens, nil, "paths.*:add", "paths.*.*:add"),
 		// APIComponentsSecurityUpdatedCheck
@@ -162,13 +170,7 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(APIGlobalSecurityScopeRemovedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectWidens, nil, "security.*.*:remove"),
 		newBackwardCompatibilityRule(APISecurityAnonymousAccessRemovedId, ERR, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectNarrows, nil, "paths.*.*.security.*:add,remove"),
 		newBackwardCompatibilityRule(APISecurityAnonymousAccessAddedId, INFO, APISecurityUpdatedCheck, DirectionNone, AreaSecurity, KindExistence, EffectWidens, nil, "paths.*.*.security.*:add,remove"),
-		// Versioning policy: run as part of CheckBackwardCompatibility, after
-		// the checks, since it judges info.version against what they found.
-		// INFO by default so it is quiet for teams that don't version with
-		// semver; raise with --severity-levels to enforce.
-		newBackwardCompatibilityRule(APIVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
-		newBackwardCompatibilityRule(APIVersionDecreasedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
-		newBackwardCompatibilityRule(APIMajorVersionNotBumpedId, INFO, nil, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
+		newBackwardCompatibilityRule(APIVersionChangedId, INFO, APIVersionUpdatedCheck, DirectionNone, AreaInfo, KindLifecycle, EffectNone, nil, "info.version:change"),
 		// Stability checks are run as part of CheckBackwardCompatibility.
 		newBackwardCompatibilityRule(APIStabilityDecreasedId, ERR, nil, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:add,change"),
 		newBackwardCompatibilityRule(APIStabilityIncreasedId, INFO, nil, DirectionNone, AreaPaths, KindLifecycle, EffectNone, nil, "paths.*.*.x-*:add,change"),
@@ -200,9 +202,11 @@ func handWrittenRules() BackwardCompatibilityRules {
 		// APISunsetChangedCheck
 		newBackwardCompatibilityRule(APISunsetDeletedId, ERR, APISunsetChangedCheck, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:remove"),
 		newBackwardCompatibilityRule(APISunsetDateChangedTooSmallId, ERR, APISunsetChangedCheck, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:change"),
+		newBackwardCompatibilityRule(APISunsetDateChangedEarlierId, ERR, APISunsetChangedCheck, DirectionNone, AreaPaths, KindLifecycle, EffectViolation, nil, "paths.*.*.x-*:change"),
 		// RequestParameterSunsetChangedCheck
 		newBackwardCompatibilityRule(RequestParameterSunsetDeletedId, ERR, RequestParameterSunsetChangedCheck, DirectionRequest, AreaParameters, KindLifecycle, EffectViolation, nil, "paths.*.*.parameters.*.x-*:remove"),
 		newBackwardCompatibilityRule(RequestParameterSunsetDateChangedTooSmallId, ERR, RequestParameterSunsetChangedCheck, DirectionRequest, AreaParameters, KindLifecycle, EffectViolation, nil, "paths.*.*.parameters.*.x-*:change"),
+		newBackwardCompatibilityRule(RequestParameterSunsetDateChangedEarlierId, ERR, RequestParameterSunsetChangedCheck, DirectionRequest, AreaParameters, KindLifecycle, EffectViolation, nil, "paths.*.*.parameters.*.x-*:change"),
 		// AddedRequiredRequestBodyCheck
 		newBackwardCompatibilityRule(AddedRequiredRequestBodyId, ERR, AddedRequestBodyCheck, DirectionRequest, AreaRequestBody, KindExistence, EffectNarrows, nil, "paths.*.*.requestBody:set"),
 		newBackwardCompatibilityRule(AddedOptionalRequestBodyId, INFO, AddedRequestBodyCheck, DirectionRequest, AreaRequestBody, KindExistence, EffectNone, nil, "paths.*.*.requestBody:set"),
@@ -451,6 +455,8 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(RequestPropertyTypeChangedId, ERR, RequestPropertyTypeChangedCheck, DirectionRequest, AreaSchema, KindType, EffectIncomparable, nil, "paths.*.*.requestBody.content.*.schema.type:add,remove", "paths.*.*.requestBody.content.*.schema.format:set,unset,change"),
 		// RequestPropertyUpdatedCheck
 		newBackwardCompatibilityRule(RequestPropertyRemovedId, WARN, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, EffectUnknown, nil, "paths.*.*.requestBody.content.*.schema.properties.*:remove"),
+		newBackwardCompatibilityRule(RequestPropertyRemovedWithDeprecationId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, EffectUnknown, []Guard{GuardSanctioned}, "paths.*.*.requestBody.content.*.schema.properties.*:remove"),
+		newBackwardCompatibilityRule(RequestPropertyRemovedBeforeSunsetId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, EffectViolation, nil, "paths.*.*.requestBody.content.*.schema.properties.*:remove"),
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.properties.*:add"),
 		newBackwardCompatibilityRule(NewRequiredRequestPropertyWithDefaultId, ERR, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, EffectNarrows, []Guard{GuardHasDefault}, "paths.*.*.requestBody.content.*.schema.properties.*:add"),
 		newBackwardCompatibilityRule(NewOptionalRequestPropertyId, INFO, RequestPropertyUpdatedCheck, DirectionRequest, AreaSchema, KindExistence, EffectNone, nil, "paths.*.*.requestBody.content.*.schema.properties.*:add"),
@@ -615,6 +621,8 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponsePropertyTypeCompatibleId, INFO, ResponsePropertyTypeChangedCheck, DirectionResponse, AreaSchema, KindType, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.type:add,remove", "paths.*.*.responses.*.content.*.schema.format:set,unset,change"),
 		// ResponseRequiredPropertyUpdatedCheck
 		newBackwardCompatibilityRule(ResponseRequiredPropertyRemovedId, ERR, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
+		newBackwardCompatibilityRule(ResponseRequiredPropertyRemovedWithDeprecationId, INFO, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectWidens, []Guard{GuardSanctioned}, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
+		newBackwardCompatibilityRule(ResponseRequiredPropertyRemovedBeforeSunsetId, ERR, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectViolation, nil, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
 		newBackwardCompatibilityRule(ResponseRequiredWriteOnlyPropertyRemovedId, INFO, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNone, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.properties.*:remove"),
 		newBackwardCompatibilityRule(ResponseRequiredPropertyAddedId, INFO, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.properties.*:add"),
 		newBackwardCompatibilityRule(ResponseRequiredWriteOnlyPropertyAddedId, INFO, ResponseRequiredPropertyUpdatedCheck, DirectionResponse, AreaSchema, KindExistence, EffectNarrows, []Guard{GuardWriteOnly}, "paths.*.*.responses.*.content.*.schema.properties.*:add"),

@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -15,7 +14,6 @@ func TestRequestBodyBecameNotEnum(t *testing.T) {
 		Id:          checker.RequestBodyBecameNotEnumId,
 		Operation:   "PUT",
 		Path:        "/mode",
-		Source:      load.NewSource(enumRemovedEntirelyRevision),
 		OperationId: "setMode",
 	}, changes)
 	require.Equal(t, checker.INFO, changes[0].GetLevel())

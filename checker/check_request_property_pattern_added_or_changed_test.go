@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,7 +25,6 @@ func TestRequestPropertyPatternChanged(t *testing.T) {
 		Args:      []any{"name", "^\\w+$", "^[\\w\\s]+$"},
 		Operation: "POST",
 		Path:      "/test",
-		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
 		Comment:   checker.PatternChangedCommentId,
 	}, errs)
 	require.Equal(t, "This is a warning because adding or changing a pattern may restrict the accepted values and break existing clients. For pattern changes, it is difficult to automatically analyze if the new pattern is a superset of the previous pattern (e.g. changed from '[0-9]+' to '[0-9]*')", errs[0].GetComment(checker.NewDefaultLocalizer()))
@@ -49,7 +47,6 @@ func TestRequestPropertyPatternGeneralized(t *testing.T) {
 		Args:      []any{"name", "^\\w+$", ".*"},
 		Operation: "POST",
 		Path:      "/test",
-		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
 	}, errs)
 }
 
@@ -68,7 +65,6 @@ func TestRequestPropertyPatternAdded(t *testing.T) {
 		Args:      []any{"^\\w+$", "name"},
 		Operation: "POST",
 		Path:      "/test",
-		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_base.yaml"),
 		Comment:   checker.PatternAddedCommentId,
 	}, errs)
 	require.Equal(t, "This is a breaking change because adding a pattern restriction to a previously unrestricted parameter will reject values that were previously accepted, breaking existing clients", errs[0].GetComment(checker.NewDefaultLocalizer()))
@@ -89,6 +85,5 @@ func TestRequestPropertyPatternRemoved(t *testing.T) {
 		Args:      []any{"^\\w+$", "name"},
 		Operation: "POST",
 		Path:      "/test",
-		Source:    load.NewSource("../data/checker/request_property_pattern_added_or_changed_revision.yaml"),
 	}, errs)
 }

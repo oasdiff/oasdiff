@@ -64,9 +64,6 @@ type Diff struct {
 	ParametersContext *ParametersContext `json:"-" yaml:"-"`
 }
 
-// OperationsSourcesMap maps OpenAPI operations to their source file paths
-type OperationsSourcesMap map[*openapi3.Operation]string
-
 func newDiff() *Diff {
 	return &Diff{}
 }
@@ -98,7 +95,7 @@ Note that GetWithOperationsSourcesMap expects OpenAPI References (https://swagge
 References are normally resolved automatically when you load the spec.
 In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
-func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, *OperationsSourcesMap, error) {
+func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, OperationsSourcesMap, error) {
 	diff, err := getDiff(config, newState(), s1.Spec, s2.Spec)
 	if err != nil {
 		return nil, nil, err
@@ -113,10 +110,10 @@ func GetWithOperationsSourcesMap(config *Config, s1, s2 *load.SpecInfo) (*Diff, 
 		return nil, nil, err
 	}
 
-	operationsSources := *operationsSources1
-	maps.Copy(operationsSources, *operationsSources2)
+	operationsSources := operationsSources1
+	maps.Copy(operationsSources, operationsSources2)
 
-	return diff, &operationsSources, nil
+	return diff, operationsSources, nil
 }
 
 /*
@@ -132,7 +129,7 @@ Note that Get expects OpenAPI References (https://swagger.io/docs/specification/
 References are normally resolved automatically when you load the spec.
 In other cases you can resolve refs using https://pkg.go.dev/github.com/getkin/kin-openapi/openapi3#Loader.ResolveRefsIn.
 */
-func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSourcesMap, error) {
+func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, OperationsSourcesMap, error) {
 	state := newState()
 	result := newDiff()
 	var err error
@@ -161,9 +158,9 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, *OperationsSo
 		return nil, nil, err
 	}
 
-	operationsSources := *operationsSources1
-	maps.Copy(operationsSources, *operationsSources2)
-	return result, &operationsSources, nil
+	operationsSources := operationsSources1
+	maps.Copy(operationsSources, operationsSources2)
+	return result, operationsSources, nil
 }
 
 // pathKey returns the key under which mergedPaths matches path: the path
@@ -176,7 +173,7 @@ func pathKey(path string, includePathParams bool) string {
 	return normalized
 }
 
-func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, *OperationsSourcesMap, error) {
+func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, OperationsSourcesMap, error) {
 	result := openapi3.NewPaths()
 	// Looking each path up in result with Paths.Find would scan every path
 	// added so far, which is quadratic in the number of paths.
@@ -196,7 +193,7 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				result.Set(path, p)
 				byKey[key] = p
 				for _, opItem := range pathItem.Operations() {
-					operationsSources[opItem] = s.Url
+					operationsSources[opItem] = s.Source
 					operationPaths[opItem] = path
 				}
 				continue
@@ -208,32 +205,32 @@ func mergedPaths(s1 []*load.SpecInfo, includePathParams bool) (*openapi3.Paths, 
 				oldOperation := p.GetOperation(op)
 				if oldOperation == nil {
 					p.SetOperation(op, opItem)
-					operationsSources[opItem] = s.Url
+					operationsSources[opItem] = s.Source
 					operationPaths[opItem] = path
 					continue
 				}
 
 				oldSince, err := sinceDateFrom(*p, *oldOperation)
 				if err != nil {
-					return nil, nil, invalidSinceDateError(operationsSources[oldOperation], op, operationPaths[oldOperation], err)
+					return nil, nil, invalidSinceDateError(operationsSources[oldOperation].DisplayPath(), op, operationPaths[oldOperation], err)
 				}
 				newSince, err := sinceDateFrom(*pathItem, *opItem)
 				if err != nil {
-					return nil, nil, invalidSinceDateError(s.Url, op, path, err)
+					return nil, nil, invalidSinceDateError(s.Source.DisplayPath(), op, path, err)
 				}
 				if newSince.After(oldSince) {
 					p.SetOperation(op, opItem)
-					operationsSources[opItem] = s.Url
+					operationsSources[opItem] = s.Source
 					operationPaths[opItem] = path
 				}
 
 				if newSince == oldSince {
-					return nil, nil, &DuplicateEndpointError{Method: op, Path1: operationPaths[oldOperation], Source1: operationsSources[oldOperation], Path2: path, Source2: s.Url}
+					return nil, nil, &DuplicateEndpointError{Method: op, Path1: operationPaths[oldOperation], Source1: operationsSources[oldOperation].DisplayPath(), Path2: path, Source2: s.Source.DisplayPath()}
 				}
 			}
 		}
 	}
-	return result, &operationsSources, nil
+	return result, operationsSources, nil
 }
 
 // copyPathItem returns a shallow copy of the path item.
@@ -352,7 +349,9 @@ func getDiffInternal(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, e
 		result.SecurityDiff.RevisionOrigin = s2.Origin
 	}
 	result.ServersDiff = getServersDiff(config, &s1.Servers, &s2.Servers)
-	result.TagsDiff = getTagsDiff(config, s1.Tags, s2.Tags)
+	if !config.IsExcludeTags() {
+		result.TagsDiff = getTagsDiff(config, s1.Tags, s2.Tags)
+	}
 	result.ExternalDocsDiff, err = getExternalDocsDiff(config, s1.ExternalDocs, s2.ExternalDocs)
 	if err != nil {
 		return nil, err

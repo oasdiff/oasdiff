@@ -26,7 +26,7 @@ func WithFlattenAllOf() Option {
 		var err error
 		for _, specInfo := range specInfos {
 			if specInfo.Spec, err = allof.MergeSpec(specInfo.Spec); err != nil {
-				return nil, &FlattenError{Url: specInfo.Url, Err: err}
+				return nil, &FlattenError{Url: specInfo.Source.DisplayPath(), Err: err}
 			}
 		}
 		return specInfos, nil

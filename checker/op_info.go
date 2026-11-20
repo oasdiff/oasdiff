@@ -16,7 +16,7 @@ import (
 type opInfo struct {
 	config            *Config
 	operation         *openapi3.Operation
-	operationsSources *diff.OperationsSourcesMap
+	operationsSources diff.OperationsSourcesMap
 	method            string
 	path              string
 	// methodDiff is the diff record for this operation (base vs
@@ -33,7 +33,7 @@ func (o opInfo) NewApiChange(id string, args []any, comment string) ApiChange {
 	return NewApiChange(id, o.config, args, comment, o.operationsSources, o.operation, o.method, o.path)
 }
 
-func newOpInfo(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method, path string) opInfo {
+func newOpInfo(config *Config, operation *openapi3.Operation, operationsSources diff.OperationsSourcesMap, method, path string) opInfo {
 	return opInfo{
 		config:            config,
 		operation:         operation,
@@ -48,7 +48,7 @@ func newOpInfo(config *Config, operation *openapi3.Operation, operationsSources 
 // *openapi3.Operation (matching the existing convention used by the
 // list-of-types and enum-diff helpers, which always pass
 // operationItem.Revision to NewApiChange).
-func newOpInfoFromDiff(config *Config, methodDiff *diff.MethodDiff, operationsSources *diff.OperationsSourcesMap, method, path string) opInfo {
+func newOpInfoFromDiff(config *Config, methodDiff *diff.MethodDiff, operationsSources diff.OperationsSourcesMap, method, path string) opInfo {
 	return opInfo{
 		config:            config,
 		operation:         methodDiff.Revision,

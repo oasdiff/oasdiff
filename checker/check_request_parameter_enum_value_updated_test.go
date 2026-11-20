@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,7 +24,6 @@ func TestRequestParameterEnumValueRemovedCheck(t *testing.T) {
 		Args:        []any{"available", "query", "status"},
 		Operation:   "GET",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_enum_value_updated_revision.yaml"),
 		OperationId: "getTest",
 	}, errs)
 }
@@ -58,7 +56,6 @@ func TestRequestParameterEnumValueAddedCheck(t *testing.T) {
 		Args:        []any{"available", "query", "status"},
 		Operation:   "GET",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_enum_value_updated_base.yaml"),
 		OperationId: "getTest",
 	}, errs)
 }
@@ -79,7 +76,6 @@ func TestRequestParameterPropertyEnumValueRemovedCheck(t *testing.T) {
 		Args:        []any{"value-b", "origin", "query", "filter"},
 		Operation:   "GET",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_property_enum_value_updated_revision.yaml"),
 		OperationId: "getTest",
 	}, errs)
 }
@@ -101,7 +97,6 @@ func TestRequestParameterPropertyEnumValueAddedCheck(t *testing.T) {
 		Args:        []any{"value-b", "origin", "query", "filter"},
 		Operation:   "GET",
 		Path:        "/test",
-		Source:      load.NewSource("../data/checker/request_parameter_property_enum_value_updated_base.yaml"),
 		OperationId: "getTest",
 	}, errs)
 }

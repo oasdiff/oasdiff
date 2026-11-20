@@ -1,12 +1,10 @@
 package checker
 
 import (
-	"encoding/json"
-	"fmt"
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/oasdiff/oasdiff/checker/location"
+	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
 
@@ -16,7 +14,7 @@ const (
 )
 
 // applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
-func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources *diff.OperationsSourcesMap) Changes {
+func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources diff.OperationsSourcesMap) Changes {
 	filterSecurityContextBelowStabilityThreshold(config, diffReport)
 	filterParametersContextBelowStabilityThreshold(config, diffReport)
 	if diffReport.PathsDiff == nil {
@@ -36,7 +34,7 @@ func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Cha
 }
 
 // checkInvalidStabilityLevels emits change records for unparseable x-stability-level values.
-func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
+func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap) Changes {
 	var result Changes
 
 	for path, pathDiff := range diffReport.PathsDiff.Modified {
@@ -77,7 +75,7 @@ func checkInvalidStabilityLevels(config *Config, diffReport *diff.Diff, operatio
 }
 
 // checkStabilityLevelChanged emits APIStabilityDecreasedId / APIStabilityIncreasedId changes.
-func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operationsSources *diff.OperationsSourcesMap) Changes {
+func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operationsSources diff.OperationsSourcesMap) Changes {
 	var result Changes
 
 	for path, pathDiff := range diffReport.PathsDiff.Modified {
@@ -223,48 +221,16 @@ func belowStabilityThreshold(config *Config, operation *openapi3.Operation) bool
 }
 
 // normalizedStability returns StabilityStable for an empty label, otherwise the label itself.
-func normalizedStability(label string) string {
-	if label == "" {
-		return StabilityStable
-	}
-	return label
-}
 
-func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, operationsSources *diff.OperationsSourcesMap, method string, path string, err error) ApiChange {
+func getAPIInvalidStabilityLevel(config *Config, operation *openapi3.Operation, operationsSources diff.OperationsSourcesMap, method string, path string, err error) ApiChange {
 	return NewApiChange(
 		APIInvalidStabilityLevelId,
 		config,
-		[]any{err},
+		[]any{stabilityValue(err), StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable},
 		"",
 		operationsSources,
 		operation,
 		method,
 		path,
 	)
-}
-
-func getStabilityLevel(i map[string]any) (string, error) {
-	if i == nil || i[diff.XStabilityLevelExtension] == nil {
-		return "", nil
-	}
-	value := i[diff.XStabilityLevelExtension]
-	if jsonStabilityRaw, ok := value.(json.RawMessage); ok {
-		if err := json.Unmarshal(jsonStabilityRaw, &value); err != nil {
-			return "", fmt.Errorf("failed to unmarshal x-stability-level json: %w", err)
-		}
-	}
-
-	stabilityLevel, ok := value.(string)
-	if !ok {
-		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %s", StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable, extensionValueText(value))
-	}
-
-	if stabilityLevel != StabilityDraft &&
-		stabilityLevel != StabilityAlpha &&
-		stabilityLevel != StabilityBeta &&
-		stabilityLevel != StabilityStable {
-		return "", fmt.Errorf("value is not one of %s, %s, %s or %s: %q", StabilityDraft, StabilityAlpha, StabilityBeta, StabilityStable, stabilityLevel)
-	}
-
-	return stabilityLevel, nil
 }

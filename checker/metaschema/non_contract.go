@@ -23,7 +23,7 @@ var NonContracts = []NonContract{
 	{"openapi", "the OpenAPI dialect version governs parsing, not the API contract"},
 	{"jsonSchemaDialect", "schema dialect governs parsing, not the API contract"},
 	{"info", "the info object is required metadata; its presence is a validation concern"},
-	{"info.version:set,unset", "version is required; presence changes are validation errors, value changes are checked (api-version rules)"},
+	{"info.version:set,unset", "version is required; presence changes are validation errors, value changes are reported (api-version-changed)"},
 	{"**.parameters.*.name", "parameters are identified by (name, in); a rename surfaces as parameter remove + add"},
 	{"**.parameters.*.in", "parameters are identified by (name, in); a location change surfaces as parameter remove + add"},
 	// headers share the parameter type, but the spec forbids name and in

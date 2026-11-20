@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func verifyNonBreakingChangeIsChangelogEntry(t *testing.T, d *diff.Diff, osm *diff.OperationsSourcesMap, changeId string) {
+func verifyNonBreakingChangeIsChangelogEntry(t *testing.T, d *diff.Diff, osm diff.OperationsSourcesMap, changeId string) {
 	t.Helper()
 
 	// Check no breaking change is detected

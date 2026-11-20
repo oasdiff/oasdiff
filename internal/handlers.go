@@ -44,7 +44,7 @@ func checkCommonFlags(cmd *cobra.Command) error {
 	return checkTemplate(cmd)
 }
 
-type runner func(flags *Flags, stdout io.Writer) (bool, *ReturnError)
+type runner func(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError)
 
 func getRun(runner runner) cobra.PositionalArgs {
 	return func(cmd *cobra.Command, args []string) error {
@@ -71,7 +71,7 @@ func getRun(runner runner) cobra.PositionalArgs {
 		// by now flags have been parsed successfully so we don't need to show usage on any errors
 		cmd.Root().SilenceUsage = true
 
-		failEmpty, err := runner(flags, cmd.OutOrStdout())
+		failEmpty, err := runner(flags, cmd.OutOrStdout(), cmd.ErrOrStderr())
 		if err != nil {
 			setReturnValue(cmd, err.Code)
 			return err

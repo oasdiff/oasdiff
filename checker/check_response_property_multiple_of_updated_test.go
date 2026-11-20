@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +27,6 @@ func TestResponseBodyMultipleOfUnset(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -51,7 +49,6 @@ func TestResponsePropertyMultipleOfUnset(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -76,7 +73,6 @@ func TestResponseBodyMultipleOfChanged(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -101,7 +97,6 @@ func TestResponsePropertyMultipleOfChanged(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -127,7 +122,6 @@ func TestResponseBodyMultipleOfSpecialized(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setPrice",
 		Path:        "/price",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -153,6 +147,5 @@ func TestResponsePropertyMultipleOfSpecialized(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }

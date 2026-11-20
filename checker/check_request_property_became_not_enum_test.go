@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/oasdiff/oasdiff/checker"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +16,6 @@ func TestRequestPropertyBecameNotEnum(t *testing.T) {
 			Args:        []any{"status"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource(enumRemovedEntirelyRevision),
 			OperationId: "createPet",
 		},
 		{
@@ -25,7 +23,6 @@ func TestRequestPropertyBecameNotEnum(t *testing.T) {
 			Args:        []any{"kind"},
 			Operation:   "POST",
 			Path:        "/pets",
-			Source:      load.NewSource(enumRemovedEntirelyRevision),
 			OperationId: "createPet",
 		},
 	}, changes)

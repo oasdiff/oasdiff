@@ -13,28 +13,54 @@ import (
 // root and each $ref'd file) into it; stdin ignores it, since the review
 // bundle (the capture's only consumer) does not accept stdin sources.
 func from(loader *openapi3.Loader, source *Source, capture *sourceCapture) (*openapi3.T, error) {
+	loader = trackOrigin(loader)
+
 	switch source.Type {
 	case SourceTypeStdin:
 		return loader.LoadFromStdin()
 	case SourceTypeURL:
-		return withCapture(loader, capture).LoadFromURI(source.Uri)
+		return withCapture(loader, capture, source.Uri.String()).LoadFromURI(source.Uri)
 	case SourceTypeGitRevision:
 		return loadFromGitRevision(loader, source.Path, source.Fetch, capture)
 	default:
-		return withCapture(loader, capture).LoadFromFile(source.Path)
+		return withCapture(loader, capture, source.Path).LoadFromFile(source.Path)
 	}
 }
 
-// withCapture returns loader unchanged when capture is nil, otherwise a shallow
-// copy whose ReadFromURIFunc records every file the loader reads. The copy keeps
-// the recorder off the caller's loader while still sharing its visitedDocuments
-// cache (the same reason loadFromGitRevision copies the loader).
-func withCapture(loader *openapi3.Loader, capture *sourceCapture) *openapi3.Loader {
+// trackOrigin records where each element of the document came from. Every
+// spec loaded here gets it, rather than the caller choosing: a change whose
+// file, line and column are unknown cannot be reported anywhere a reader can
+// act on it, and the two commands that only transform a spec pay about a
+// tenth of a second for it on a large one.
+func trackOrigin(loader *openapi3.Loader) *openapi3.Loader {
+	loader.IncludeOrigin = true
+	return loader
+}
+
+// withCapture records the files a load reads and refuses any $ref to a document
+// other than rootDocument while external refs are disallowed.
+func withCapture(loader *openapi3.Loader, capture *sourceCapture, rootDocument string) *openapi3.Loader {
+	return withRecordingReader(loader, capture, refPolicy{root: rootDocument})
+}
+
+// withCaptureInnerEnforcesPolicy is withCapture for a loader whose own
+// ReadFromURIFunc already applies the external-refs policy, so the recorder
+// must not apply it a second time against a root path it does not have.
+func withCaptureInnerEnforcesPolicy(loader *openapi3.Loader, capture *sourceCapture) *openapi3.Loader {
+	return withRecordingReader(loader, capture, refPolicy{innerEnforces: true})
+}
+
+// withRecordingReader returns loader unchanged when capture is nil, otherwise a
+// shallow copy whose ReadFromURIFunc records every file the loader reads and
+// applies policy to each location before reading it. The copy keeps the recorder
+// off the caller's loader while still sharing its visitedDocuments cache (the
+// same reason loadFromGitRevision copies the loader).
+func withRecordingReader(loader *openapi3.Loader, capture *sourceCapture, policy refPolicy) *openapi3.Loader {
 	if capture == nil {
 		return loader
 	}
 	lc := *loader
-	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture)
+	lc.ReadFromURIFunc = recordingReader(lc.ReadFromURIFunc, capture, policy)
 	return &lc
 }
 

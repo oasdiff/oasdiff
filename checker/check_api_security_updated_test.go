@@ -120,7 +120,6 @@ func TestAPISecurityAdded(t *testing.T) {
 		Args:      []any{[]string{"petstore_auth: [read:pets, write:pets]"}},
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_added_revision.yaml"),
 	}, removed)
 	require.Equal(t, "the endpoint no longer allows anonymous access and now only accepts `petstore_auth: [read:pets, write:pets]`", removed.GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -147,7 +146,6 @@ func TestAPISecurityDeleted(t *testing.T) {
 		Id:        checker.APISecurityAnonymousAccessAddedId,
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_added_base.yaml"),
 	}, errs)
 	require.Equal(t, "the endpoint now allows anonymous access", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -167,7 +165,6 @@ func TestAPISecurityScopeRemoved(t *testing.T) {
 		Args:      []any{"read:pets", "petstore_auth"},
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_updated_revision.yaml"),
 	}, errs)
 	require.Equal(t, "the security scope `read:pets` was removed from the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -187,7 +184,6 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 		Args:      []any{"read:pets", "petstore_auth"},
 		Operation: "POST",
 		Path:      "/subscribe",
-		Source:    load.NewSource("../data/checker/api_security_updated_base.yaml"),
 	}, errs)
 	require.Equal(t, "the security scope `read:pets` was added to the endpoint's security scheme `petstore_auth`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
@@ -195,14 +191,7 @@ func TestAPISecurityScopeAdded(t *testing.T) {
 // removing a global security, with source tracking: the change points at the
 // document-root "security" field of the base spec.
 func TestAPIGlobalSecurityDeleted_WithSources(t *testing.T) {
-	s1, err := open("../data/checker/api_security_global_added_revision.yaml", newLoaderWithOriginTracking())
-	require.NoError(t, err)
-	s2, err := open("../data/checker/api_security_global_added_base.yaml", newLoaderWithOriginTracking())
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
+	errs := checkChangesWithOrigins(t, checker.APISecurityUpdatedCheck, "../data/checker/api_security_global_added_revision.yaml", "../data/checker/api_security_global_added_base.yaml")
 	anonymous := requireSingleChange(t, errs, checker.APISecurityAnonymousAccessAddedId)
 	require.NotEmpty(t, anonymous.GetBaseSource())
 	require.Equal(t, "../data/checker/api_security_global_added_revision.yaml", anonymous.GetBaseSource().File)
@@ -213,14 +202,7 @@ func TestAPIGlobalSecurityDeleted_WithSources(t *testing.T) {
 // operation's "security" field of the base spec, and at the operation in the
 // revision, which has no "security" field.
 func TestAPISecurityDeleted_WithSources(t *testing.T) {
-	s1, err := open("../data/checker/api_security_added_revision.yaml", newLoaderWithOriginTracking())
-	require.NoError(t, err)
-	s2, err := open("../data/checker/api_security_added_base.yaml", newLoaderWithOriginTracking())
-	require.NoError(t, err)
-
-	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
-	require.NoError(t, err)
-	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APISecurityUpdatedCheck), d, osm, checker.INFO)
+	errs := checkChangesWithOrigins(t, checker.APISecurityUpdatedCheck, "../data/checker/api_security_added_revision.yaml", "../data/checker/api_security_added_base.yaml")
 	requireSingleChange(t, errs, checker.APISecurityAnonymousAccessAddedId)
 
 	require.NotEmpty(t, errs[0].GetBaseSource())

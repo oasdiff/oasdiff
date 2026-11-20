@@ -17,9 +17,6 @@ import (
 // combination the spec does not forbid outright but that no value can satisfy
 // (or a SHOULD) is a warning.
 const (
-	// MultipleOfNotPositiveID: JSON Schema validation, "multipleOf" MUST be a
-	// number strictly greater than 0.
-	MultipleOfNotPositiveID = "multiple-of-not-positive"
 	// SubschemasEmptyID: allOf / anyOf / oneOf MUST be a non-empty array.
 	SubschemasEmptyID = "subschemas-empty"
 
@@ -36,6 +33,10 @@ const (
 	// ConstNotInEnumID: "const" and "enum" together restrict to their
 	// intersection, so a const outside the enum accepts nothing.
 	ConstNotInEnumID = "const-not-in-enum"
+	// RequiredPropertyForbiddenID: "additionalProperties: false" allows only the
+	// properties the schema declares, so requiring one it does not declare
+	// accepts nothing.
+	RequiredPropertyForbiddenID = "required-property-forbidden"
 )
 
 // lintSchemaConstraints reports every schema whose constraints contradict each
@@ -55,13 +56,10 @@ func lintSchemaConstraints(spec *openapi3.T, source string) formatters.Findings 
 
 func schemaConstraintFindings(s *openapi3.Schema, section, source string) formatters.Findings {
 	var findings formatters.Findings
-	add := func(id string, level checker.Level, field, text string, args ...any) {
-		findings = append(findings, newSchemaConstraintFinding(s, id, level, field, text, section, source, args))
-	}
-
-	if s.MultipleOf != nil && *s.MultipleOf <= 0 {
-		add(MultipleOfNotPositiveID, checker.ERR, "multipleOf",
-			fmt.Sprintf("multipleOf must be greater than 0, got %v", *s.MultipleOf), *s.MultipleOf)
+	// the level comes from RuleLevel, so a finding and `oasdiff checks validate`
+	// cannot disagree about the same rule
+	add := func(id string, field, text string, args ...any) {
+		findings = append(findings, newSchemaConstraintFinding(s, id, RuleLevel(id), field, text, section, source, args))
 	}
 
 	// An explicitly empty allOf / anyOf / oneOf. A nil one is simply absent, so
@@ -75,38 +73,50 @@ func schemaConstraintFindings(s *openapi3.Schema, section, source string) format
 	} {
 		field, subschemas := sub.field, sub.subschemas
 		if subschemas != nil && len(subschemas) == 0 {
-			add(SubschemasEmptyID, checker.ERR, field,
+			add(SubschemasEmptyID, field,
 				fmt.Sprintf("%s must not be empty", field), field)
 		}
 	}
 
 	if s.Min != nil && s.Max != nil && *s.Min > *s.Max {
-		add(MinimumExceedsMaximumID, checker.WARN, "minimum",
+		add(MinimumExceedsMaximumID, "minimum",
 			fmt.Sprintf("minimum %v is greater than maximum %v, so no value can validate", *s.Min, *s.Max), *s.Min, *s.Max)
 	}
 	if s.MaxLength != nil && s.MinLength > *s.MaxLength {
-		add(MinLengthExceedsMaxLengthID, checker.WARN, "minLength",
+		add(MinLengthExceedsMaxLengthID, "minLength",
 			fmt.Sprintf("minLength %d is greater than maxLength %d, so no value can validate", s.MinLength, *s.MaxLength), s.MinLength, *s.MaxLength)
 	}
 	if s.MaxItems != nil && s.MinItems > *s.MaxItems {
-		add(MinItemsExceedsMaxItemsID, checker.WARN, "minItems",
+		add(MinItemsExceedsMaxItemsID, "minItems",
 			fmt.Sprintf("minItems %d is greater than maxItems %d, so no array can validate", s.MinItems, *s.MaxItems), s.MinItems, *s.MaxItems)
 	}
 	if s.MaxProps != nil && s.MinProps > *s.MaxProps {
-		add(MinPropertiesExceedsMaxPropsID, checker.WARN, "minProperties",
+		add(MinPropertiesExceedsMaxPropsID, "minProperties",
 			fmt.Sprintf("minProperties %d is greater than maxProperties %d, so no object can validate", s.MinProps, *s.MaxProps), s.MinProps, *s.MaxProps)
 	}
 	if s.MinContains != nil && s.MaxContains != nil && *s.MinContains > *s.MaxContains {
-		add(MinContainsExceedsMaxContainsID, checker.WARN, "minContains",
+		add(MinContainsExceedsMaxContainsID, "minContains",
 			fmt.Sprintf("minContains %d is greater than maxContains %d, so no array can validate", *s.MinContains, *s.MaxContains), *s.MinContains, *s.MaxContains)
 	}
 
 	if s.Enum != nil && len(s.Enum) == 0 {
-		add(EnumEmptyID, checker.WARN, "enum", "enum is empty, so no value can validate", "enum")
+		add(EnumEmptyID, "enum", "enum is empty, so no value can validate", "enum")
 	}
 	if s.Const != nil && len(s.Enum) > 0 && !enumContains(s.Enum, s.Const) {
-		add(ConstNotInEnumID, checker.WARN, "const",
+		add(ConstNotInEnumID, "const",
 			fmt.Sprintf("const %s is not one of the enum values, so no value can validate", displayEnum(s.Const)), displayEnum(s.Const))
+	}
+
+	// additionalProperties as a schema allows an undeclared property that
+	// validates against it, and a patternProperties entry may allow one too, so
+	// only a plain false with no patterns forbids every undeclared property.
+	if s.AdditionalProperties.Has != nil && !*s.AdditionalProperties.Has && len(s.PatternProperties) == 0 {
+		for _, name := range s.Required {
+			if s.Properties[name] == nil {
+				add(RequiredPropertyForbiddenID, "required",
+					fmt.Sprintf("required property %s is not declared in properties, and additionalProperties is false, so no object can validate", name), name)
+			}
+		}
 	}
 
 	return findings

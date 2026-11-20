@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +27,6 @@ func TestResponsePropertyAnyOfAdded(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_added_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -36,7 +34,6 @@ func TestResponsePropertyAnyOfAdded(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "anyOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_added_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }
@@ -83,7 +80,6 @@ func TestResponsePropertyAnyOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Rabbit", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		},
 		{
@@ -91,7 +87,6 @@ func TestResponsePropertyAnyOfRemoved(t *testing.T) {
 			Args:        []any{"#/components/schemas/Breed3", "anyOf[#/components/schemas/Dog]/breed", "200"},
 			Operation:   "GET",
 			Path:        "/pets",
-			Source:      load.NewSource("../data/checker/response_property_any_of_removed_revision.yaml"),
 			OperationId: "listPets",
 		}}, errs)
 }

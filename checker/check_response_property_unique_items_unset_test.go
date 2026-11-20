@@ -5,7 +5,6 @@ import (
 
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
-	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +26,6 @@ func TestResponseBodyUniqueItemsUnset(t *testing.T) {
 		Operation:   "PUT",
 		OperationId: "setTags",
 		Path:        "/tags",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }
 
@@ -49,6 +47,5 @@ func TestResponsePropertyUniqueItemsUnset(t *testing.T) {
 		Operation:   "POST",
 		OperationId: "createProduct",
 		Path:        "/products",
-		Source:      load.NewSource(constraintKeywordsBase),
 	}, errs)
 }

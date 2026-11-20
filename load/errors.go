@@ -1,6 +1,11 @@
 package load
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/getkin/kin-openapi/openapi3"
+)
 
 // FlattenError reports a failure to merge allOf during WithFlattenAllOf.
 // Returned wrapped so callers can use errors.As to distinguish a flatten
@@ -28,4 +33,20 @@ type ExternalRefError struct {
 
 func (e *ExternalRefError) Error() string {
 	return fmt.Sprintf("external $ref not allowed (enable --allow-external-refs to permit): %s", e.Ref)
+}
+
+// IsExternalRefDisallowed reports whether err is a refusal of an external $ref
+// under IsExternalRefsAllowed=false, from either place that applies the policy:
+// a reader in this package, which returns *ExternalRefError, or kin-openapi
+// itself. Callers that map a refusal to an exit code or a remedy should ask
+// this rather than matching one of the two.
+func IsExternalRefDisallowed(err error) bool {
+	if err == nil {
+		return false
+	}
+	if _, ok := errors.AsType[*ExternalRefError](err); ok {
+		return true
+	}
+	_, ok := errors.AsType[*openapi3.DisallowedExternalRefError](err)
+	return ok
 }

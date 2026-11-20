@@ -34,7 +34,7 @@ func getErrFailedToLoadSpec(what string, source *load.Source, err error) *Return
 		return getErrFailedToFlatten(flatErr)
 	}
 	wrapped := fmt.Errorf("failed to load %s spec from %s: %w", what, source.Out(), err)
-	if isExternalRefError(err) {
+	if load.IsExternalRefDisallowed(err) {
 		return getErrDisallowedExternalRef(wrapped)
 	}
 	return getError(wrapped, 102)
@@ -45,7 +45,7 @@ func getErrFailedToLoadSpecs(what string, path string, err error) *ReturnError {
 		return getErrFailedToFlatten(flatErr)
 	}
 	wrapped := fmt.Errorf("failed to load %s specs from glob %q: %w", what, path, err)
-	if isExternalRefError(err) {
+	if load.IsExternalRefDisallowed(err) {
 		return getErrDisallowedExternalRef(wrapped)
 	}
 	return getError(wrapped, 103)
@@ -132,12 +132,6 @@ func asFlattenError(err error) *load.FlattenError {
 		return flatErr
 	}
 	return nil
-}
-
-// isExternalRefError reports whether err's chain contains a *load.ExternalRefError.
-func isExternalRefError(err error) bool {
-	var extErr *load.ExternalRefError
-	return errors.As(err, &extErr)
 }
 
 func getError(err error, code int) *ReturnError {
