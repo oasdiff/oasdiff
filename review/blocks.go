@@ -52,13 +52,10 @@ const otherChangesKey = "__other__"
 // that side has no sliceable source (e.g. an added or removed block, or a
 // location that did not resolve to a block).
 type Block struct {
-	Key          string   `json:"key" yaml:"key"`                   // stable identity, e.g. "POST /users" or "components/schemas/User"
-	Title        string   `json:"title" yaml:"title"`               // human header
-	ChangeIDs    []string `json:"change_ids" yaml:"change_ids"`     // rule ids of the changes in this block (for display/debug)
-	Fingerprints []string `json:"fingerprints" yaml:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the stable key a consumer joins each change to its block on
-	// References are the changes to this endpoint that are located in another
-	// block, a component the endpoint refers to. A block extracted only for
-	// them has no ChangeIDs.
+	Key           string      `json:"key" yaml:"key"`                   // stable identity, e.g. "POST /users" or "components/schemas/User"
+	Title         string      `json:"title" yaml:"title"`               // human header
+	ChangeIDs     []string    `json:"change_ids" yaml:"change_ids"`     // rule ids of the changes in this block (for display/debug)
+	Fingerprints  []string    `json:"fingerprints" yaml:"fingerprints"` // per-change fingerprints, aligned with ChangeIDs; the stable key a consumer joins each change to its block on
 	References    []Reference `json:"references,omitempty" yaml:"references,omitempty"`
 	BaseFile      string      `json:"base_file,omitempty" yaml:"base_file,omitempty"` // basename of the base slice's source file (a $ref'd file differs from the root)
 	BaseText      string      `json:"base_text" yaml:"base_text"`                     // source slice on the base side ("" if absent)

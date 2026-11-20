@@ -227,10 +227,10 @@ func (g *refGraph) refLine(from, to lineRange, prefer func(line int) bool) int {
 // referenceFinder finds, for a change located outside its endpoint, the
 // endpoint's block and the $ref in it that leads to the change.
 type referenceFinder struct {
-	baseDocs, revDocs   []*openapi3.T
-	baseIdx, revIdx     docIndex
-	baseRefs, revRefs   *refGraph
-	responseDirectionOf map[string]bool
+	baseDocs, revDocs []*openapi3.T
+	baseIdx, revIdx   docIndex
+	baseRefs, revRefs *refGraph
+	partOf            map[string]endpointPart
 }
 
 func newReferenceFinder(baseDocs, revDocs []*openapi3.T, baseIdx, revIdx docIndex) *referenceFinder {
@@ -256,13 +256,13 @@ func (f *referenceFinder) find(c checker.Change, located resolution) (resolution
 	// have no change located outside its endpoint.
 	if f.baseRefs == nil {
 		f.baseRefs, f.revRefs = newRefGraph(f.baseDocs...), newRefGraph(f.revDocs...)
-		f.responseDirectionOf = responseDirection()
+		f.partOf = partsByRule()
 	}
-	responses := f.responseDirectionOf[c.GetId()]
+	part := f.partOf[c.GetId()]
 	reference := Reference{
 		Fingerprint: checker.Fingerprint(c),
-		BaseLine:    refLine(f.baseRefs, f.baseDocs, endpoint.base, located.base, operation, path, responses),
-		RevLine:     refLine(f.revRefs, f.revDocs, endpoint.rev, located.rev, operation, path, responses),
+		BaseLine:    refLine(f.baseRefs, f.baseDocs, endpoint.base, located.base, operation, path, part),
+		RevLine:     refLine(f.revRefs, f.revDocs, endpoint.rev, located.rev, operation, path, part),
 	}
 	if reference.BaseLine == 0 && reference.RevLine == 0 {
 		return resolution{}, Reference{}, false
@@ -279,27 +279,33 @@ func firstFile(spans ...*span) string {
 	return ""
 }
 
+// endpointPart is the part of an endpoint a rule is about.
+type endpointPart int
+
+const (
+	anyPart endpointPart = iota
+	parametersPart
+	requestBodyPart
+	responsesPart
+)
+
 // refLine returns the line of the $ref in the endpoint that leads to where
-// the change is located, on one side. A change to a response prefers a $ref
-// under the endpoint's responses and any other change one outside them, since
-// an endpoint often refers to the same component from both.
-func refLine(refs *refGraph, docs []*openapi3.T, endpoint, located *span, operation, path string, responses bool) int {
+// the change is located, on one side. It prefers a $ref in the part of the
+// endpoint the change is about, since an endpoint often refers to the same
+// component from its parameters, its request body and its responses.
+func refLine(refs *refGraph, docs []*openapi3.T, endpoint, located *span, method, path string, part endpointPart) int {
 	if endpoint == nil || located == nil {
 		return 0
 	}
 	from := lineRange{file: endpoint.file, start: endpoint.start, end: endpoint.end}
 	to := lineRange{file: located.file, start: located.start, end: located.end}
 
-	underResponses := func(int) bool { return false }
-	if start, end, ok := responsesRange(docs, from, operation, path); ok {
-		underResponses = func(line int) bool { return start <= line && line <= end }
-	}
-	return refs.refLine(from, to, func(line int) bool { return underResponses(line) == responses })
+	operation := operationAt(docs, from, method, path)
+	return refs.refLine(from, to, func(line int) bool { return part == anyPart || partAt(operation, line) == part })
 }
 
-// responsesRange returns the lines of the responses of the operation written
-// at the given lines.
-func responsesRange(docs []*openapi3.T, endpoint lineRange, method, path string) (start, end int, ok bool) {
+// operationAt returns the operation written at the given lines.
+func operationAt(docs []*openapi3.T, endpoint lineRange, method, path string) *openapi3.Operation {
 	for _, doc := range docs {
 		if doc == nil || doc.Paths == nil {
 			continue
@@ -309,23 +315,65 @@ func responsesRange(docs []*openapi3.T, endpoint lineRange, method, path string)
 			continue
 		}
 		operation := pathItem.GetOperation(method)
-		if operation == nil || operation.Origin == nil || operation.Origin.Key == nil || operation.Responses == nil {
+		if operation == nil || operation.Origin == nil || operation.Origin.Key == nil {
 			continue
 		}
-		if !endpoint.contains(operation.Origin.Key.File, operation.Origin.Key.Line) {
-			continue
+		if endpoint.contains(operation.Origin.Key.File, operation.Origin.Key.Line) {
+			return operation
 		}
-		return originEndRange(operation.Responses.Origin)
 	}
-	return 0, 0, false
+	return nil
 }
 
-// responseDirection reports, by rule id, whether a rule is about a response.
-func responseDirection() map[string]bool {
+// partAt returns the part of the operation a line is written in. A line
+// outside the request body and the responses is taken as the parameters',
+// the only other part of an operation whose $refs lead to a schema.
+func partAt(operation *openapi3.Operation, line int) endpointPart {
+	if operation == nil {
+		return anyPart
+	}
+	within := func(start, end int, ok bool) bool { return ok && start <= line && line <= end }
+	if operation.Responses != nil && within(originEndRange(operation.Responses.Origin)) {
+		return responsesPart
+	}
+	if within(requestBodyRange(operation.RequestBody)) {
+		return requestBodyPart
+	}
+	return parametersPart
+}
+
+// requestBodyRange returns the lines of an operation's request body: the
+// $ref line when it is a reference, the body's own lines otherwise.
+func requestBodyRange(requestBody *openapi3.RequestBodyRef) (start, end int, ok bool) {
+	if requestBody == nil {
+		return 0, 0, false
+	}
+	if requestBody.Ref != "" {
+		if requestBody.Origin == nil {
+			return 0, 0, false
+		}
+		written, ok := requestBody.Origin.Fields.Lookup("$ref")
+		return written.Line, written.Line, ok && written.Line != 0
+	}
+	if requestBody.Value == nil {
+		return 0, 0, false
+	}
+	return originEndRange(requestBody.Value.Origin)
+}
+
+// partsByRule returns, by rule id, the part of an endpoint a rule is about.
+func partsByRule() map[string]endpointPart {
 	rules := checker.GetAllRules()
-	m := make(map[string]bool, len(rules))
+	m := make(map[string]endpointPart, len(rules))
 	for _, r := range rules {
-		m[r.Id] = r.Direction == checker.DirectionResponse
+		switch {
+		case r.Direction == checker.DirectionResponse:
+			m[r.Id] = responsesPart
+		case r.Area == checker.AreaParameters:
+			m[r.Id] = parametersPart
+		case r.Direction == checker.DirectionRequest:
+			m[r.Id] = requestBodyPart
+		}
 	}
 	return m
 }

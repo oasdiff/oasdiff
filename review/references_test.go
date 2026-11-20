@@ -108,6 +108,97 @@ func TestExtract_ReferenceThroughAnotherComponent(t *testing.T) {
 	require.Equal(t, 13, blocks[1].References[0].RevLine)
 }
 
+// A change to a parameter is tied to the parameter's $ref and a change to the
+// request body to the body's, although both lead to the same component.
+func TestExtract_ReferenceFollowsEndpointPart(t *testing.T) {
+	const spec = `openapi: 3.1.0
+info:
+  title: t
+  version: "1"
+paths:
+  /orders:
+    post:
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/Status"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Status"
+      responses:
+        "200":
+          description: ok
+components:
+  schemas:
+    Status:
+      type: string
+`
+	doc := loadWithOrigin(t, spec)
+	extract := func(id string) []Block {
+		return Extract(checker.Changes{changeAt(id, 24)}, docs(doc), docs(doc), oneFile("", spec), oneFile("", spec))
+	}
+
+	blocks := extract("request-parameter-type-changed")
+	require.Len(t, blocks, 2)
+	require.Equal(t, 12, blocks[1].References[0].RevLine)
+
+	blocks = extract("request-body-type-changed")
+	require.Len(t, blocks, 2)
+	require.Equal(t, 17, blocks[1].References[0].RevLine)
+}
+
+// Components that refer to each other in a cycle are followed once.
+func TestExtract_ReferenceThroughCircularComponents(t *testing.T) {
+	const spec = `openapi: 3.1.0
+info:
+  title: t
+  version: "1"
+paths:
+  /nodes:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Node"
+      responses:
+        "200":
+          description: ok
+components:
+  schemas:
+    Node:
+      type: object
+      properties:
+        child:
+          $ref: "#/components/schemas/Leaf"
+    Leaf:
+      type: object
+      properties:
+        parent:
+          $ref: "#/components/schemas/Node"
+        name:
+          type: string
+`
+	doc := loadWithOrigin(t, spec)
+	change := checker.ApiChange{
+		Id:        "request-property-type-changed",
+		Operation: "POST",
+		Path:      "/nodes",
+		CommonChange: checker.CommonChange{
+			BaseSource:     &checker.Source{Line: 28},
+			RevisionSource: &checker.Source{Line: 28},
+		},
+	}
+	blocks := Extract(checker.Changes{change}, docs(doc), docs(doc), oneFile("", spec), oneFile("", spec))
+	require.Len(t, blocks, 2)
+	require.Equal(t, "components/schemas/Leaf", blocks[0].Key)
+	require.Equal(t, "POST /nodes", blocks[1].Key)
+	require.Equal(t, 12, blocks[1].References[0].RevLine)
+}
+
 // A change located in its own endpoint has no reference.
 func TestExtract_NoReferenceInsideTheEndpoint(t *testing.T) {
 	blocks := extractReferences(t, changeAt("request-property-type-changed", 11))
