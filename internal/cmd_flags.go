@@ -9,7 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func addCommonDiffFlags(cmd *cobra.Command) {
+// addCommonDiffFlags adds the flags shared by every command that compares two
+// specs. caseInsensitiveHeaders is the command's default for
+// --case-insensitive-headers: true for the commands that run the checks, since
+// HTTP header names are case-insensitive, and false for the commands that
+// report the documents as written.
+func addCommonDiffFlags(cmd *cobra.Command, caseInsensitiveHeaders bool) {
 	cmd.PersistentFlags().StringP("match-path", "p", "", "include only paths that match this regular expression")
 	cmd.PersistentFlags().StringP("unmatch-path", "q", "", "exclude paths that match this regular expression")
 	cmd.PersistentFlags().String("filter-extension", "", "exclude paths and operations with an OpenAPI Extension matching this regular expression")
@@ -21,7 +26,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("match-inline-refs", true, "match validation-equivalent inline/$ref subschemas as the same anyOf/oneOf branch")
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
-	cmd.PersistentFlags().Bool("case-insensitive-headers", true, "case-insensitive header name comparison (HTTP headers are case-insensitive per RFC 7230)")
+	cmd.PersistentFlags().Bool("case-insensitive-headers", caseInsensitiveHeaders, "case-insensitive header name comparison (HTTP headers are case-insensitive per RFC 7230)")
 	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 	cmd.PersistentFlags().Bool("auto-upgrade", false, "canonicalize both specs to the latest OpenAPI 3.x before diffing; useful for cross-version comparisons (e.g. 3.0 vs 3.1)")

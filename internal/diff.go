@@ -23,7 +23,7 @@ func getDiffCmd() *cobra.Command {
 		RunE:  getRun(runDiff),
 	}
 
-	addCommonDiffFlags(&cmd)
+	addCommonDiffFlags(&cmd, false)
 	addComposedFlag(&cmd)
 	enumWithOptions(&cmd, newEnumSliceValue(diff.GetExcludeDiffOptions(), nil), "exclude-elements", "e", "elements to exclude")
 	enumWithOptions(&cmd, newEnumValue(formatters.SupportedFormatsByContentType(formatters.OutputDiff), string(formatters.FormatYAML)), "format", "f", "output format")

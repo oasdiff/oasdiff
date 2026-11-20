@@ -23,7 +23,7 @@ func getChangelogCmd() *cobra.Command {
 		RunE:  getRun(runChangelog),
 	}
 
-	addCommonDiffFlags(&cmd)
+	addCommonDiffFlags(&cmd, true)
 	addComposedFlag(&cmd)
 	addCommonBreakingFlags(&cmd)
 	enumWithOptions(&cmd, newEnumValue(GetFailOnValues(), ""), "fail-on", "o", "exit with return code 1 on a change at this severity or higher, or with MISSING-VERSION-BUMP on breaking changes that have no major version increase in info.version")
