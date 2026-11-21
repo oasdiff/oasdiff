@@ -15,6 +15,16 @@ type OperationPair struct {
 	Revision *openapi3.Operation
 }
 
+// BaseAndRevision returns the operation in the base spec and in the revision spec.
+func (pair OperationPair) BaseAndRevision() (base, revision *openapi3.Operation) {
+	return pair.Base, pair.Revision
+}
+
+// RevisionOperation returns the operation in the revision spec.
+func (pair OperationPair) RevisionOperation() *openapi3.Operation {
+	return pair.Revision
+}
+
 // getOperationPairs returns the operations of pathItemPairs, sorted by path
 // and method.
 func getOperationPairs(pathItemPairs pathItemPairs) []OperationPair {

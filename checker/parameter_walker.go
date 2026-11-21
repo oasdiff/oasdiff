@@ -31,10 +31,8 @@ func walkOperationsParameters(diffReport *diff.Diff, operationsSources diff.Oper
 		if operation.Webhook {
 			path = webhookPathPrefix + path
 		}
-		// the source lookups read only Base and Revision
-		methodDiff := &diff.MethodDiff{Base: operation.Base, Revision: operation.Revision}
 		processor(operationParams{
-			opInfo:              newOpInfoFromDiff(config, methodDiff, operationsSources, operation.Method, path),
+			opInfo:              newOpInfoFromDiff(config, operation.OperationPair, operationsSources, operation.Method, path),
 			OperationParameters: operation,
 		})
 	}

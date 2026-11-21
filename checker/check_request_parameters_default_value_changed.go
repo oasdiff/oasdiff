@@ -34,7 +34,7 @@ func RequestParameterDefaultValueChangedCheck(diffReport *diff.Diff, operationsS
 			return
 		}
 
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "default")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "default")
 		appendResultItem := func(messageId string, a ...any) {
 			result = append(result, p.opInfo.NewApiChange(
 				messageId,
