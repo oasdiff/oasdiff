@@ -10,7 +10,8 @@ import (
 // *diff.MethodDiff, or a diff.OperationPair for an operation whose own diff
 // may be empty.
 type Operations interface {
-	Operations() (base, revision *openapi3.Operation)
+	BaseOperation() *openapi3.Operation
+	RevisionOperation() *openapi3.Operation
 }
 
 // specFile names the spec an operation was loaded from, for a location that
@@ -162,7 +163,7 @@ func SequenceItemSource(operationsSources diff.OperationsSourcesMap, op *openapi
 // OperationFieldSources returns source locations from a specific field within operation Origins.
 // Falls back to operation-level sources when the field is not found in origin data.
 func OperationFieldSources(operationsSources diff.OperationsSourcesMap, operations Operations, field string) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	hasOrigin := (base != nil && base.Origin != nil) ||
 		(revision != nil && revision.Origin != nil)
 	if !hasOrigin {
@@ -182,7 +183,7 @@ func OperationFieldSources(operationsSources diff.OperationsSourcesMap, operatio
 // ParameterFieldSources returns source locations from a specific field within parameter Origins.
 // Falls back to parameter-level sources when the field is not found in origin data.
 func ParameterFieldSources(operationsSources diff.OperationsSourcesMap, operations Operations, paramDiff *diff.ParameterDiff, field string) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	if paramDiff == nil {
 		return operationSources(operationsSources, base, revision)
 	}
@@ -206,7 +207,7 @@ func ParameterFieldSources(operationsSources diff.OperationsSourcesMap, operatio
 // schemaSources returns source locations from schema Origins.
 // Falls back to operation-level sources when schema origin data is unavailable.
 func SchemaSources(operationsSources diff.OperationsSourcesMap, operations Operations, schemaDiff *diff.SchemaDiff) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	if schemaDiff == nil {
 		return operationSources(operationsSources, base, revision)
 	}
@@ -230,7 +231,7 @@ func SchemaSources(operationsSources diff.OperationsSourcesMap, operations Opera
 // parameterSources returns source locations from parameter Origins.
 // Falls back to operation-level sources when parameter origin data is unavailable.
 func ParameterSources(operationsSources diff.OperationsSourcesMap, operations Operations, paramDiff *diff.ParameterDiff) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	if paramDiff == nil {
 		return operationSources(operationsSources, base, revision)
 	}
@@ -254,7 +255,7 @@ func ParameterSources(operationsSources diff.OperationsSourcesMap, operations Op
 // responseSources returns source locations from response Origins.
 // Falls back to operation-level sources when response origin data is unavailable.
 func ResponseSources(operationsSources diff.OperationsSourcesMap, operations Operations, responseDiff *diff.ResponseDiff) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	if responseDiff == nil {
 		return operationSources(operationsSources, base, revision)
 	}
@@ -279,7 +280,7 @@ func ResponseSources(operationsSources diff.OperationsSourcesMap, operations Ope
 // A side whose schema does not have the field gets no source. Falls back to
 // operation-level sources when neither schema has origin data.
 func SchemaFieldSources(operationsSources diff.OperationsSourcesMap, operations Operations, schemaDiff *diff.SchemaDiff, field string) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	if schemaDiff == nil {
 		return operationSources(operationsSources, base, revision)
 	}
@@ -318,7 +319,7 @@ func SchemaKeywordSource(operationsSources diff.OperationsSourcesMap, operation 
 // SchemaDeletedItemSources returns source locations for a deleted sequence item.
 // Base source points to the specific deleted item, revision source is nil.
 func SchemaDeletedItemSources(operationsSources diff.OperationsSourcesMap, operations Operations, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
-	base, _ := operations.Operations()
+	base := operations.BaseOperation()
 	if schemaDiff == nil || schemaDiff.Base == nil || base == nil {
 		return nil, nil
 	}
@@ -329,7 +330,7 @@ func SchemaDeletedItemSources(operationsSources diff.OperationsSourcesMap, opera
 // SchemaAddedItemSources returns source locations for an added sequence item.
 // Base source is nil, revision source points to the specific added item.
 func SchemaAddedItemSources(operationsSources diff.OperationsSourcesMap, operations Operations, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
-	_, revision := operations.Operations()
+	revision := operations.RevisionOperation()
 	if schemaDiff == nil || schemaDiff.Revision == nil || revision == nil {
 		return nil, nil
 	}
@@ -354,7 +355,7 @@ func SchemaMapItemSource(operationsSources diff.OperationsSourcesMap, operation 
 // SubschemaSources returns source locations for a specific subschema within an allOf/oneOf/anyOf array.
 // For added subschemas, baseIndex should be -1; for deleted subschemas, revisionIndex should be -1.
 func SubschemaSources(operationsSources diff.OperationsSourcesMap, operations Operations, schemaDiff *diff.SchemaDiff, field string, baseIndex, revisionIndex int) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	if schemaDiff == nil {
 		return operationSources(operationsSources, base, revision)
 	}
@@ -432,7 +433,7 @@ func ParameterSource(operationsSources diff.OperationsSourcesMap, op *openapi3.O
 
 // RequestBodyFieldSources returns source locations from a specific field within request body Origins.
 func RequestBodyFieldSources(operationsSources diff.OperationsSourcesMap, operations Operations, field string) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	var baseOrigin, revisionOrigin *openapi3.Origin
 	if base != nil && base.RequestBody != nil && base.RequestBody.Value != nil {
 		baseOrigin = base.RequestBody.Value.Origin
@@ -492,7 +493,7 @@ func MediaTypeSource(operationsSources diff.OperationsSourcesMap, op *openapi3.O
 // It points to the old media-type line in the base and the new media-type line in the revision.
 // Falls back to response-level sources when media type origin data is unavailable.
 func ResponseMediaTypeNameSources(operationsSources diff.OperationsSourcesMap, operations Operations, responseDiff *diff.ResponseDiff, fromMediaType, toMediaType string) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	baseSource := MediaTypeSource(operationsSources, base, responseDiff.Base, fromMediaType)
 	revisionSource := MediaTypeSource(operationsSources, revision, responseDiff.Revision, toMediaType)
 	if baseSource == nil && revisionSource == nil {
@@ -504,7 +505,7 @@ func ResponseMediaTypeNameSources(operationsSources diff.OperationsSourcesMap, o
 // HeaderSources returns source locations from the base and revision headers within a response.
 // Falls back to response-level sources when header origin data is unavailable.
 func HeaderSources(operationsSources diff.OperationsSourcesMap, operations Operations, responseDiff *diff.ResponseDiff, headerName string) (*Source, *Source) {
-	base, revision := operations.Operations()
+	base, revision := operations.BaseOperation(), operations.RevisionOperation()
 	var baseOrigin, revisionOrigin *openapi3.Origin
 	if responseDiff.Base != nil {
 		if h := responseDiff.Base.Headers[headerName]; h != nil && h.Value != nil {

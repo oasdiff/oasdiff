@@ -98,7 +98,12 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	return result, nil
 }
 
-// Operations returns the operation on each side.
-func (methodDiff *MethodDiff) Operations() (base, revision *openapi3.Operation) {
-	return methodDiff.Base, methodDiff.Revision
+// BaseOperation returns the operation in the base spec.
+func (methodDiff *MethodDiff) BaseOperation() *openapi3.Operation {
+	return methodDiff.Base
+}
+
+// RevisionOperation returns the operation in the revision spec.
+func (methodDiff *MethodDiff) RevisionOperation() *openapi3.Operation {
+	return methodDiff.Revision
 }

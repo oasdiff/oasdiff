@@ -48,10 +48,9 @@ func newOpInfo(config *Config, operation *openapi3.Operation, operationsSources 
 // sides of an operation: a *diff.MethodDiff, or a diff.OperationPair. The
 // revision side is the operation changes are reported on.
 func newOpInfoFromDiff(config *Config, operations location.Operations, operationsSources diff.OperationsSourcesMap, method, path string) opInfo {
-	_, revision := operations.Operations()
 	return opInfo{
 		config:            config,
-		operation:         revision,
+		operation:         operations.RevisionOperation(),
 		operationsSources: operationsSources,
 		method:            method,
 		path:              path,
