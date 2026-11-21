@@ -154,7 +154,7 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, OperationsSou
 		return nil, nil, nil
 	}
 
-	if result.ParametersContext, err = getParametersContext(config, state, getPathItemPairs(config, paths1, paths2), nil); err != nil {
+	if result.ParametersContext, err = getParametersContext(config, state, matchPaths(config, paths1, paths2).pairs, nil); err != nil {
 		return nil, nil, err
 	}
 
@@ -298,7 +298,7 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	diff.BaseOpenAPI, diff.RevisionOpenAPI = s1.OpenAPI, s2.OpenAPI
 	// getDiffInternal has filtered s1.Paths and s2.Paths in place, so the
 	// pairs leave out the operations excluded by the path and extension filters.
-	pathItemPairs := getPathItemPairs(config, s1.Paths, s2.Paths)
+	pathItemPairs := matchPaths(config, s1.Paths, s2.Paths).pairs
 	diff.SecurityContext = &SecurityContext{
 		Base:       s1.Security,
 		Revision:   s2.Security,
