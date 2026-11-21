@@ -20,10 +20,7 @@ type opInfo struct {
 	operationsSources diff.OperationsSourcesMap
 	method            string
 	path              string
-	// operations is the operation on each side, for the source lookups.
-	// Set by newOpInfoFromDiff; nil when the helper is operating on a
-	// single openapi3.Operation.
-	operations location.Operations
+	operations        location.Operations
 }
 
 // NewApiChange builds an ApiChange from the operation context carried by o,
