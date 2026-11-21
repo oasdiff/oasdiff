@@ -22,7 +22,7 @@ func Move(spec *openapi3.T) {
 func Merge(pathParams, opParams openapi3.Parameters) openapi3.Parameters {
 	result := slices.Clone(opParams)
 	for _, pathParam := range pathParams {
-		if opParams.GetByInAndName(pathParam.Value.In, pathParam.Value.Name) == nil {
+		if result.GetByInAndName(pathParam.Value.In, pathParam.Value.Name) == nil {
 			result = append(result, &openapi3.ParameterRef{
 				Value: pathParam.Value,
 			})
