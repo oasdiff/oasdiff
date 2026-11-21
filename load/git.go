@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -169,11 +170,20 @@ func hintMissingObject(gitRef string, err error) error {
 		// rather than leaving a caller to ask git the same question again.
 		return pathNotInRefError{err}
 	}
+	command := "git fetch origin " + ref
+	instruction := "Fetch it yourself with:"
+	if refspec, ok := originBranchRefspec(ref); ok {
+		if !plainFetchArgument.MatchString(refspec) {
+			instruction = "In a POSIX shell, fetch it with:"
+			refspec = "'" + strings.ReplaceAll(refspec, "'", "'\\''") + "'"
+		}
+		command = "git fetch --depth=1 origin " + refspec
+	}
 	return fmt.Errorf("%w\n\n"+
 		"oasdiff reads git revisions from local objects only and does not modify your repository.\n"+
-		"Commit %q is not in this clone. Fetch it yourself with:\n\n"+
-		"    git fetch origin %s\n\n"+
-		"then re-run oasdiff, or re-run with --fetch to let oasdiff fetch it for you", err, ref, ref)
+		"Commit %q is not in this clone. %s\n\n"+
+		"    %s\n\n"+
+		"then re-run oasdiff, or re-run with --fetch to let oasdiff fetch it for you", err, ref, instruction, command)
 }
 
 // refBeforeColon returns the "<ref>" portion of a "<ref>:<path>" git revision,
@@ -223,16 +233,35 @@ func refBeforeColon(gitRef string) string {
 	return gitRef
 }
 
-// gitFetch downloads the named commit/ref from the "origin" remote into the
-// local object store so a subsequent "git show <ref>:<path>" can resolve it. It
-// mutates the repository (adds objects; no local ref or branch is moved), which
-// is why it runs only under the opt-in --fetch flag. It mirrors the manual
-// "git fetch origin <ref>" that hintMissingObject suggests when --fetch is off.
+// Common refs and refspecs can be pasted unquoted in POSIX and Windows shells.
+var plainFetchArgument = regexp.MustCompile(`^[A-Za-z0-9_./:@+=-]+$`)
+
+// originBranchRefspec maps an origin-tracking branch to an explicit fetch
+// destination. A single-branch clone's configured refspec only tracks the
+// branch that was cloned.
+func originBranchRefspec(ref string) (string, bool) {
+	branch, ok := strings.CutPrefix(ref, "origin/")
+	source := "refs/heads/" + branch
+	if !ok || exec.Command("git", "check-ref-format", source).Run() != nil {
+		return "", false
+	}
+	return source + ":refs/remotes/" + ref, true
+}
+
+// gitFetch downloads a missing revision from origin. For an origin/<branch>
+// revision it creates the remote-tracking ref needed by the subsequent git show.
+// It runs only when the caller requests --fetch.
 func gitFetch(ref string) error {
 	if err := checkRef(ref); err != nil {
 		return err
 	}
-	if out, err := exec.Command("git", "fetch", "--end-of-options", "origin", ref).CombinedOutput(); err != nil {
+	args := []string{"fetch"}
+	if refspec, ok := originBranchRefspec(ref); ok {
+		args = append(args, "--depth=1")
+		ref = refspec
+	}
+	args = append(args, "--end-of-options", "origin", ref)
+	if out, err := exec.Command("git", args...).CombinedOutput(); err != nil {
 		return fmt.Errorf("%s", strings.TrimSpace(string(out)))
 	}
 	return nil
