@@ -5,8 +5,10 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/load"
 	"github.com/stretchr/testify/require"
 )
 
@@ -61,4 +63,24 @@ func TestBreaking_CheckDoesNotMutateCallerSecurityContext(t *testing.T) {
 	_ = checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
 
 	require.Equal(t, before, d.SecurityContext.Operations, "the alpha operation was filtered out of the caller's security context")
+}
+
+func TestBreaking_CheckDoesNotMutateCallerParametersContext(t *testing.T) {
+	spec := func(required bool) *load.SpecInfo {
+		s, err := open("../data/checker/parameter_positions.yaml")
+		require.NoError(t, err)
+		pathItem := s.Spec.Paths.Value("/pets")
+		pathItem.Parameters = openapi3.Parameters{{Value: &openapi3.Parameter{Name: "limit", In: openapi3.ParameterInQuery, Required: required, Schema: openapi3.NewIntegerSchema().NewRef()}}}
+		pathItem.Get.Extensions = map[string]any{"x-stability-level": "alpha"}
+		return s
+	}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), spec(false), spec(true))
+	require.NoError(t, err)
+	require.Len(t, d.ParametersContext.Operations, 2)
+	before := slices.Clone(d.ParametersContext.Operations)
+
+	_ = checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	require.Equal(t, before, d.ParametersContext.Operations, "the alpha operation was filtered out of the caller's parameters context")
 }

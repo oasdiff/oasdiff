@@ -58,6 +58,8 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	return filteredResult
 }
 
+const webhookPathPrefix = "webhook:"
+
 // mergeWebhookOperationsIntoPathsDiff merges modified webhooks into PathsDiff.Modified with a "webhook:" prefix.
 // This allows all existing path/operation checker rules to apply to webhooks without code duplication.
 // Only Modified webhooks are merged because each entry in Modified is self-contained with its own Base/Revision data.
@@ -75,6 +77,6 @@ func mergeWebhookOperationsIntoPathsDiff(diffReport *diff.Diff) {
 		diffReport.PathsDiff.Modified = diff.ModifiedPaths{}
 	}
 	for name, pathDiff := range diffReport.WebhooksDiff.Modified {
-		diffReport.PathsDiff.Modified["webhook:"+name] = pathDiff
+		diffReport.PathsDiff.Modified[webhookPathPrefix+name] = pathDiff
 	}
 }

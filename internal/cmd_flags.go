@@ -68,13 +68,16 @@ var deprecatedFlags = map[string]string{
 	"flatten":          "use --flatten-allof instead",
 	"max-circular-dep": "it is no longer needed and is ignored",
 	"include-checks":   "it is now ignored; use --severity-levels to enforce a check as breaking",
+	"flatten-params":   "it is no longer needed: path-level parameters are checked on every operation under the path",
 }
 
 // warnDeprecatedFlags writes a stderr notice for each deprecated flag the user
 // actually set on cmd. Stderr, never stdout, so it can't corrupt machine output.
+// A flag is deprecated only on the commands that hide it: --flatten-params is
+// a regular flag of diff and summary.
 func warnDeprecatedFlags(cmd *cobra.Command) {
 	for name, guidance := range deprecatedFlags {
-		if f := cmd.Flags().Lookup(name); f != nil && f.Changed {
+		if f := cmd.Flags().Lookup(name); f != nil && f.Hidden && f.Changed {
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Flag --%s is deprecated: %s\n", name, guidance)
 		}
 	}
@@ -104,6 +107,9 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
 	enumWithOptions(cmd, newEnumValue(checker.GetSupportedStabilityLevels(), ""), "stability-level", "", "minimum stability level to include")
+	// The checks compare the parameters each operation takes, so the flag that
+	// addCommonDiffFlags registers changes nothing here.
+	hideFlag(cmd, "flatten-params")
 }
 
 // addOpenFlags registers --open and its companion review-upload flags. Kept out
