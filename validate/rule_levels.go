@@ -17,6 +17,8 @@ import "github.com/oasdiff/oasdiff/checker"
 // Deliberately left at ERR despite being downgrade candidates:
 // duplicate-operation-id violates the spec's uniqueness MUST and breaks code
 // generators that key method names off operationId.
+// conflicting-paths and duplicate-parameter violate spec MUST NOTs (identical
+// templated path hierarchies and duplicated parameters within a name+location).
 var ruleLevels = map[string]checker.Level{
 	// INFO: an example that doesn't match its schema is a documentation
 	// accuracy nit; the contract (the schema) is still valid.
@@ -36,8 +38,6 @@ var ruleLevels = map[string]checker.Level{
 	// Fields alongside a $ref are silently ignored in 3.0 rather than breaking
 	// the spec; the author's intent is lost, not the document.
 	"extra-sibling-fields": checker.WARN,
-	"conflicting-paths":    checker.WARN,
-	"duplicate-parameter":  checker.WARN,
 	// http methods are case-sensitive, so an additionalOperations key `Post`
 	// is a method of its own, which the spec allows, but it is easily mistaken
 	// for the POST operation.
