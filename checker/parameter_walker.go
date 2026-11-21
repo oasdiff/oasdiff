@@ -26,18 +26,18 @@ func walkOperationsParameters(diffReport *diff.Diff, operationsSources diff.Oper
 	if parametersContext == nil {
 		return
 	}
-	walk := func(pathPrefix string, operations []diff.OperationParameters) {
-		for _, operation := range operations {
-			// the source lookups read only Base and Revision
-			methodDiff := &diff.MethodDiff{Base: operation.Base, Revision: operation.Revision}
-			processor(operationParams{
-				opInfo:              newOpInfoFromDiff(config, methodDiff, operationsSources, operation.Method, pathPrefix+operation.Path),
-				OperationParameters: operation,
-			})
+	for _, operation := range parametersContext.Operations {
+		path := operation.Path
+		if operation.Webhook {
+			path = webhookPathPrefix + path
 		}
+		// the source lookups read only Base and Revision
+		methodDiff := &diff.MethodDiff{Base: operation.Base, Revision: operation.Revision}
+		processor(operationParams{
+			opInfo:              newOpInfoFromDiff(config, methodDiff, operationsSources, operation.Method, path),
+			OperationParameters: operation,
+		})
 	}
-	walk("", parametersContext.Operations)
-	walk(webhookPathPrefix, parametersContext.Webhooks)
 }
 
 // walkModifiedParameters invokes processor for every modified parameter of

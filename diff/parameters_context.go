@@ -11,10 +11,9 @@ import (
 // PathsDiff compares parameters where they are written, so a parameter moved
 // between a path item and its operations is a change there and none here.
 type ParametersContext struct {
-	// Operations and Webhooks hold the operations present in both specs whose
-	// parameters changed, sorted by path, or webhook name, and method.
+	// Operations holds the operations present in both specs whose parameters
+	// changed: those of paths, then those of webhooks.
 	Operations []OperationParameters
-	Webhooks   []OperationParameters
 }
 
 // OperationParameters compares the parameters an operation has: its own, and
@@ -29,38 +28,34 @@ type OperationParameters struct {
 	ParametersDiff     *ParametersDiffByLocation
 }
 
-// Without returns a copy of the context that leaves out the operations and
-// webhook operations remove reports. The receiver is not modified.
+// Without returns a copy of the context that leaves out the operations remove
+// reports. The receiver is not modified.
 func (parametersContext *ParametersContext) Without(remove func(OperationPair) bool) *ParametersContext {
 	if parametersContext == nil {
 		return nil
 	}
-	without := func(operations []OperationParameters) []OperationParameters {
-		return slices.DeleteFunc(slices.Clone(operations), func(operation OperationParameters) bool {
-			return remove(operation.OperationPair)
-		})
-	}
-	return &ParametersContext{
-		Operations: without(parametersContext.Operations),
-		Webhooks:   without(parametersContext.Webhooks),
-	}
+	result := *parametersContext
+	result.Operations = slices.DeleteFunc(slices.Clone(parametersContext.Operations), func(operation OperationParameters) bool {
+		return remove(operation.OperationPair)
+	})
+	return &result
 }
 
 func getParametersContext(config *Config, state *state, paths, webhooks pathItemPairs) (*ParametersContext, error) {
-	operations, err := getOperationsParameters(config, state, paths)
+	operations, err := getOperationsParameters(config, state, paths, false)
 	if err != nil {
 		return nil, err
 	}
-	webhookOperations, err := getOperationsParameters(config, state, webhooks)
+	webhookOperations, err := getOperationsParameters(config, state, webhooks, true)
 	if err != nil {
 		return nil, err
 	}
-	return &ParametersContext{Operations: operations, Webhooks: webhookOperations}, nil
+	return &ParametersContext{Operations: append(operations, webhookOperations...)}, nil
 }
 
-func getOperationsParameters(config *Config, state *state, pathItemPairs pathItemPairs) ([]OperationParameters, error) {
+func getOperationsParameters(config *Config, state *state, pathItemPairs pathItemPairs, webhook bool) ([]OperationParameters, error) {
 	result := []OperationParameters{}
-	for _, pair := range getOperationPairs(pathItemPairs) {
+	for _, pair := range getOperationPairs(pathItemPairs, webhook) {
 		pathItemPair := pathItemPairs[pair.Path]
 		params1 := commonparams.Merge(pathItemPair.PathItem1.Parameters, pair.Base.Parameters)
 		params2 := commonparams.Merge(pathItemPair.PathItem2.Parameters, pair.Revision.Parameters)

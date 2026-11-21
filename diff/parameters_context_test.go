@@ -54,29 +54,27 @@ func TestParametersContext_Webhook(t *testing.T) {
 	}
 	d, _, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), spec(false), spec(true))
 	require.NoError(t, err)
-	require.Empty(t, d.ParametersContext.Operations)
-	require.Len(t, d.ParametersContext.Webhooks, 1)
-	require.Equal(t, "newPet", d.ParametersContext.Webhooks[0].Path)
-	require.Equal(t, "POST", d.ParametersContext.Webhooks[0].Method)
-	require.NotNil(t, d.ParametersContext.Webhooks[0].ParametersDiff.Modified["query"]["limit"].RequiredDiff)
+	require.Len(t, d.ParametersContext.Operations, 1)
+	operation := d.ParametersContext.Operations[0]
+	require.True(t, operation.Webhook)
+	require.Equal(t, "newPet", operation.Path)
+	require.Equal(t, "POST", operation.Method)
+	require.NotNil(t, operation.ParametersDiff.Modified["query"]["limit"].RequiredDiff)
 }
 
 func TestParametersContextWithout(t *testing.T) {
-	operation := func(path string) diff.OperationParameters {
-		return diff.OperationParameters{OperationPair: diff.OperationPair{Path: path}}
+	operation := func(path string, webhook bool) diff.OperationParameters {
+		return diff.OperationParameters{OperationPair: diff.OperationPair{Path: path, Webhook: webhook}}
 	}
 	parametersContext := &diff.ParametersContext{
-		Operations: []diff.OperationParameters{operation("/a"), operation("/b")},
-		Webhooks:   []diff.OperationParameters{operation("a"), operation("b")},
+		Operations: []diff.OperationParameters{operation("/a", false), operation("/b", false), operation("a", true), operation("b", true)},
 	}
 
 	result := parametersContext.Without(func(pair diff.OperationPair) bool {
 		return strings.HasSuffix(pair.Path, "a")
 	})
 
-	require.Equal(t, []diff.OperationParameters{operation("/b")}, result.Operations)
-	require.Equal(t, []diff.OperationParameters{operation("b")}, result.Webhooks)
-	require.Len(t, parametersContext.Operations, 2)
-	require.Len(t, parametersContext.Webhooks, 2)
+	require.Equal(t, []diff.OperationParameters{operation("/b", false), operation("b", true)}, result.Operations)
+	require.Len(t, parametersContext.Operations, 4)
 	require.Nil(t, (*diff.ParametersContext)(nil).Without(nil))
 }
