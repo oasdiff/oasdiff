@@ -103,11 +103,6 @@ func (methodDiff *MethodDiff) BaseAndRevision() (base, revision *openapi3.Operat
 	return methodDiff.Base, methodDiff.Revision
 }
 
-// BaseOperation returns the operation in the base spec.
-func (methodDiff *MethodDiff) BaseOperation() *openapi3.Operation {
-	return methodDiff.Base
-}
-
 // RevisionOperation returns the operation in the revision spec.
 func (methodDiff *MethodDiff) RevisionOperation() *openapi3.Operation {
 	return methodDiff.Revision

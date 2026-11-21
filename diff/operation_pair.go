@@ -20,11 +20,6 @@ func (pair OperationPair) BaseAndRevision() (base, revision *openapi3.Operation)
 	return pair.Base, pair.Revision
 }
 
-// BaseOperation returns the operation in the base spec.
-func (pair OperationPair) BaseOperation() *openapi3.Operation {
-	return pair.Base
-}
-
 // RevisionOperation returns the operation in the revision spec.
 func (pair OperationPair) RevisionOperation() *openapi3.Operation {
 	return pair.Revision

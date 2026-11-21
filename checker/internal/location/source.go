@@ -11,7 +11,6 @@ import (
 // may be empty.
 type Operations interface {
 	BaseAndRevision() (base, revision *openapi3.Operation)
-	BaseOperation() *openapi3.Operation
 	RevisionOperation() *openapi3.Operation
 }
 
@@ -320,7 +319,7 @@ func SchemaKeywordSource(operationsSources diff.OperationsSourcesMap, operation 
 // SchemaDeletedItemSources returns source locations for a deleted sequence item.
 // Base source points to the specific deleted item, revision source is nil.
 func SchemaDeletedItemSources(operationsSources diff.OperationsSourcesMap, operations Operations, schemaDiff *diff.SchemaDiff, field string, value string) (*Source, *Source) {
-	base := operations.BaseOperation()
+	base, _ := operations.BaseAndRevision()
 	if schemaDiff == nil || schemaDiff.Base == nil || base == nil {
 		return nil, nil
 	}
