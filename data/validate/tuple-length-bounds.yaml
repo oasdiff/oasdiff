@@ -1,0 +1,19 @@
+openapi: 3.1.0
+info: { title: Tuple length constraints, version: "1" }
+paths: {}
+components:
+  schemas:
+    Unreachable:
+      type: array
+      prefixItems: [{type: string}, {type: integer}]
+      maxItems: 1
+    Impossible:
+      type: array
+      prefixItems: [{type: string}]
+      items: false
+      minItems: 2
+    Redundant:
+      type: array
+      prefixItems: [{type: string}]
+      items: false
+      maxItems: 2

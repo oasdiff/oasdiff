@@ -4,6 +4,8 @@
 
 It is not a configurable style linter (like Spectral); findings are spec-defined violations, plus a small set of oasdiff-native lints for constructs that are valid OpenAPI but contradictory or under-specified (duplicate enum values, ambiguous parameter serialization, and a required parameter or property that also declares a default, where the default can never apply). Each finding is classified by severity (error, warning, or info).
 
+For OpenAPI 3.1 and later, `validate` warns when `maxItems` makes trailing `prefixItems` entries unreachable or when `items: false` prevents an array from reaching `minItems`. A closed tuple with a redundant `maxItems` gets an informational finding.
+
 This is distinct from `breaking` / `changelog`, which compare two specs. `validate` looks at one spec and answers "is this a valid OpenAPI document?".
 
 ## Usage
