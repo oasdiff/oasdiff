@@ -98,8 +98,8 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	return result, nil
 }
 
-// Get returns the operation in the base spec and in the revision spec.
-func (methodDiff *MethodDiff) Get() (base, revision *openapi3.Operation) {
+// BaseAndRevision returns the operation in the base spec and in the revision spec.
+func (methodDiff *MethodDiff) BaseAndRevision() (base, revision *openapi3.Operation) {
 	return methodDiff.Base, methodDiff.Revision
 }
 

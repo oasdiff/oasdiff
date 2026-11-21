@@ -15,8 +15,8 @@ type OperationPair struct {
 	Revision *openapi3.Operation
 }
 
-// Get returns the operation in the base spec and in the revision spec.
-func (pair OperationPair) Get() (base, revision *openapi3.Operation) {
+// BaseAndRevision returns the operation in the base spec and in the revision spec.
+func (pair OperationPair) BaseAndRevision() (base, revision *openapi3.Operation) {
 	return pair.Base, pair.Revision
 }
 
