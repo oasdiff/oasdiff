@@ -54,13 +54,13 @@ type Diff struct {
 	BaseOpenAPI     string `json:"-" yaml:"-"`
 	RevisionOpenAPI string `json:"-" yaml:"-"`
 
-	// SecurityContext is context for checkers too, under the same rules as
-	// BaseInfo. It is nil for GetPathsDiff, which compares paths without
-	// their documents' root security.
+	// SecurityContext is the security each operation is subject to, for
+	// checkers. Set and excluded like BaseInfo. It is nil for GetPathsDiff,
+	// which compares paths without their documents' root security.
 	SecurityContext *SecurityContext `json:"-" yaml:"-"`
 
-	// ParametersContext is context for checkers too, under the same rules as
-	// BaseInfo.
+	// ParametersContext is the parameters each operation takes, its own and
+	// its path item's, for checkers. Set and excluded like BaseInfo.
 	ParametersContext *ParametersContext `json:"-" yaml:"-"`
 }
 
