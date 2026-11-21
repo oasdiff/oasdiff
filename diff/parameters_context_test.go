@@ -1,6 +1,7 @@
 package diff_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -58,4 +59,24 @@ func TestParametersContext_Webhook(t *testing.T) {
 	require.Equal(t, "newPet", d.ParametersContext.Webhooks[0].Path)
 	require.Equal(t, "POST", d.ParametersContext.Webhooks[0].Method)
 	require.NotNil(t, d.ParametersContext.Webhooks[0].ParametersDiff.Modified["query"]["limit"].RequiredDiff)
+}
+
+func TestParametersContextWithout(t *testing.T) {
+	operation := func(path string) diff.OperationParameters {
+		return diff.OperationParameters{OperationPair: diff.OperationPair{Path: path}}
+	}
+	parametersContext := &diff.ParametersContext{
+		Operations: []diff.OperationParameters{operation("/a"), operation("/b")},
+		Webhooks:   []diff.OperationParameters{operation("a"), operation("b")},
+	}
+
+	result := parametersContext.Without(func(pair diff.OperationPair) bool {
+		return strings.HasSuffix(pair.Path, "a")
+	})
+
+	require.Equal(t, []diff.OperationParameters{operation("/b")}, result.Operations)
+	require.Equal(t, []diff.OperationParameters{operation("b")}, result.Webhooks)
+	require.Len(t, parametersContext.Operations, 2)
+	require.Len(t, parametersContext.Webhooks, 2)
+	require.Nil(t, (*diff.ParametersContext)(nil).Without(nil))
 }

@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/flatten/commonparams"
 )
@@ -25,6 +27,23 @@ type OperationParameters struct {
 	BaseParameters     openapi3.Parameters
 	RevisionParameters openapi3.Parameters
 	ParametersDiff     *ParametersDiffByLocation
+}
+
+// Without returns a copy of the context that leaves out the operations and
+// webhook operations remove reports. The receiver is not modified.
+func (parametersContext *ParametersContext) Without(remove func(OperationPair) bool) *ParametersContext {
+	if parametersContext == nil {
+		return nil
+	}
+	without := func(operations []OperationParameters) []OperationParameters {
+		return slices.DeleteFunc(slices.Clone(operations), func(operation OperationParameters) bool {
+			return remove(operation.OperationPair)
+		})
+	}
+	return &ParametersContext{
+		Operations: without(parametersContext.Operations),
+		Webhooks:   without(parametersContext.Webhooks),
+	}
 }
 
 func getParametersContext(config *Config, state *state, paths, webhooks pathItemPairs) (*ParametersContext, error) {

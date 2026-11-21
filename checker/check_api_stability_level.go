@@ -1,8 +1,6 @@
 package checker
 
 import (
-	"slices"
-
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
@@ -15,8 +13,7 @@ const (
 
 // applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
 func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources diff.OperationsSourcesMap) Changes {
-	filterSecurityContextBelowStabilityThreshold(config, diffReport)
-	filterParametersContextBelowStabilityThreshold(config, diffReport)
+	filterContextsBelowStabilityThreshold(config, diffReport)
 	if diffReport.PathsDiff == nil {
 		return result
 	}
@@ -191,24 +188,17 @@ func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 	}
 }
 
-func filterSecurityContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
-	if config == nil || diffReport.SecurityContext == nil {
+// filterContextsBelowStabilityThreshold replaces the contexts with copies that
+// leave out the operations below the threshold.
+func filterContextsBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
+	if config == nil {
 		return
 	}
-	diffReport.SecurityContext.Operations = slices.DeleteFunc(diffReport.SecurityContext.Operations, func(pair diff.OperationPair) bool {
+	below := func(pair diff.OperationPair) bool {
 		return belowStabilityThreshold(config, pair.Revision)
-	})
-}
-
-func filterParametersContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
-	if config == nil || diffReport.ParametersContext == nil {
-		return
 	}
-	below := func(operation diff.OperationParameters) bool {
-		return belowStabilityThreshold(config, operation.Revision)
-	}
-	diffReport.ParametersContext.Operations = slices.DeleteFunc(diffReport.ParametersContext.Operations, below)
-	diffReport.ParametersContext.Webhooks = slices.DeleteFunc(diffReport.ParametersContext.Webhooks, below)
+	diffReport.SecurityContext = diffReport.SecurityContext.Without(below)
+	diffReport.ParametersContext = diffReport.ParametersContext.Without(below)
 }
 
 // An operation whose stability level does not parse counts as in scope.

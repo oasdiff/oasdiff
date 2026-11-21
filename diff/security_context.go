@@ -1,6 +1,8 @@
 package diff
 
 import (
+	"slices"
+
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
@@ -16,4 +18,15 @@ type SecurityContext struct {
 	// Operations holds every operation present in both specs, matched and
 	// filtered the same way as PathsDiff, whether or not it changed.
 	Operations []OperationPair
+}
+
+// Without returns a copy of the context that leaves out the operations remove
+// reports. The receiver is not modified.
+func (securityContext *SecurityContext) Without(remove func(OperationPair) bool) *SecurityContext {
+	if securityContext == nil {
+		return nil
+	}
+	result := *securityContext
+	result.Operations = slices.DeleteFunc(slices.Clone(securityContext.Operations), remove)
+	return &result
 }

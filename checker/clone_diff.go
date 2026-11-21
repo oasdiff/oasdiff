@@ -9,37 +9,11 @@ import (
 
 // cloneDiffForCheck returns a copy of diffReport in which every part the
 // check pipeline writes to is a separate allocation from the caller's.
-// Everything else (WebhooksDiff, ComponentsDiff, and the MethodDiff values,
-// which are only read) is shared by reference.
+// Everything else (WebhooksDiff, ComponentsDiff, the MethodDiff values, and
+// the contexts, which are only read or replaced) is shared by reference.
 func cloneDiffForCheck(d *diff.Diff) *diff.Diff {
 	cloned := *d
-	cloned.SecurityContext = cloneSecurityContext(d.SecurityContext)
-	cloned.ParametersContext = cloneParametersContext(d.ParametersContext)
 	cloned.PathsDiff = clonePathsDiff(d.PathsDiff)
-	return &cloned
-}
-
-// cloneSecurityContext copies the Operations slice, which
-// filterSecurityContextBelowStabilityThreshold deletes pairs from in place.
-func cloneSecurityContext(securityContext *diff.SecurityContext) *diff.SecurityContext {
-	if securityContext == nil {
-		return nil
-	}
-	cloned := *securityContext
-	cloned.Operations = slices.Clone(securityContext.Operations)
-	return &cloned
-}
-
-// cloneParametersContext copies the slices, which
-// filterParametersContextBelowStabilityThreshold deletes operations from in
-// place.
-func cloneParametersContext(parametersContext *diff.ParametersContext) *diff.ParametersContext {
-	if parametersContext == nil {
-		return nil
-	}
-	cloned := *parametersContext
-	cloned.Operations = slices.Clone(parametersContext.Operations)
-	cloned.Webhooks = slices.Clone(parametersContext.Webhooks)
 	return &cloned
 }
 
