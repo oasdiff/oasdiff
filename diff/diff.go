@@ -302,7 +302,7 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	diff.SecurityContext = &SecurityContext{
 		Base:       s1.Security,
 		Revision:   s2.Security,
-		Operations: getOperationPairs(pathItemPairs, false),
+		Operations: getOperationPairs(pathItemPairs),
 	}
 	if diff.ParametersContext, err = getParametersContext(config, state, pathItemPairs, getWebhookPairs(s1.Webhooks, s2.Webhooks)); err != nil {
 		return nil, err

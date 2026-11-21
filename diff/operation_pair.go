@@ -9,18 +9,15 @@ import (
 
 // OperationPair is an operation present in both specs.
 type OperationPair struct {
-	// Webhook is true for an operation of a webhook. Path is then the
-	// webhook's name.
-	Webhook  bool
 	Path     string
 	Method   string
 	Base     *openapi3.Operation
 	Revision *openapi3.Operation
 }
 
-// getOperationPairs returns the operations of pathItemPairs, sorted by path, or
-// webhook name, and method.
-func getOperationPairs(pathItemPairs pathItemPairs, webhook bool) []OperationPair {
+// getOperationPairs returns the operations of pathItemPairs, sorted by path
+// and method.
+func getOperationPairs(pathItemPairs pathItemPairs) []OperationPair {
 	result := []OperationPair{}
 	for path, pathItemPair := range pathItemPairs {
 		for _, method := range methodsToCompare(pathItemPair.PathItem1, pathItemPair.PathItem2) {
@@ -30,7 +27,6 @@ func getOperationPairs(pathItemPairs pathItemPairs, webhook bool) []OperationPai
 				continue
 			}
 			result = append(result, OperationPair{
-				Webhook:  webhook,
 				Path:     path,
 				Method:   method,
 				Base:     operation1,

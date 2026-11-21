@@ -64,7 +64,7 @@ func TestParametersContext_Webhook(t *testing.T) {
 
 func TestParametersContextWithout(t *testing.T) {
 	operation := func(path string, webhook bool) diff.OperationParameters {
-		return diff.OperationParameters{OperationPair: diff.OperationPair{Path: path, Webhook: webhook}}
+		return diff.OperationParameters{OperationPair: diff.OperationPair{Path: path}, Webhook: webhook}
 	}
 	parametersContext := &diff.ParametersContext{
 		Operations: []diff.OperationParameters{operation("/a", false), operation("/b", false), operation("a", true), operation("b", true)},

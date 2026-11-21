@@ -23,6 +23,9 @@ type ParametersContext struct {
 // operation.
 type OperationParameters struct {
 	OperationPair
+	// Webhook is true for an operation of a webhook. Path is then the
+	// webhook's name.
+	Webhook            bool
 	BaseParameters     openapi3.Parameters
 	RevisionParameters openapi3.Parameters
 	ParametersDiff     *ParametersDiffByLocation
@@ -55,7 +58,7 @@ func getParametersContext(config *Config, state *state, paths, webhooks pathItem
 
 func getOperationsParameters(config *Config, state *state, pathItemPairs pathItemPairs, webhook bool) ([]OperationParameters, error) {
 	result := []OperationParameters{}
-	for _, pair := range getOperationPairs(pathItemPairs, webhook) {
+	for _, pair := range getOperationPairs(pathItemPairs) {
 		pathItemPair := pathItemPairs[pair.Path]
 		params1 := commonparams.Merge(pathItemPair.PathItem1.Parameters, pair.Base.Parameters)
 		params2 := commonparams.Merge(pathItemPair.PathItem2.Parameters, pair.Revision.Parameters)
@@ -68,6 +71,7 @@ func getOperationsParameters(config *Config, state *state, pathItemPairs pathIte
 		}
 		result = append(result, OperationParameters{
 			OperationPair:      pair,
+			Webhook:            webhook,
 			BaseParameters:     params1,
 			RevisionParameters: params2,
 			ParametersDiff:     paramsDiff,
