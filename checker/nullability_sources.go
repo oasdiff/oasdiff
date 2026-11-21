@@ -44,7 +44,7 @@ func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationIt
 		keywords = []string{"oneOf", "anyOf"}
 	}
 
-	base, revision := operationItem.BaseOperation(), operationItem.RevisionOperation()
+	base, revision := operationItem.Get()
 	return nullabilitySource(operationsSources, base, d.Base, keywords),
 		nullabilitySource(operationsSources, revision, d.Revision, keywords)
 }
