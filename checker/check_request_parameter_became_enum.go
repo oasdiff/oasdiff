@@ -15,7 +15,7 @@ func RequestParameterBecameEnumCheck(diffReport *diff.Diff, operationsSources di
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "enum")
 
 		if enumDiff := p.paramDiff.SchemaDiff.EnumDiff; enumDiff == nil || !enumDiff.EnumAdded {
 			return

@@ -253,12 +253,12 @@ func BoundCheck(diffReport *diff.Diff, operationsSources diff.OperationsSourcesM
 		result = append(result, boundChanges(info, DirectionResponse, operationsSources)...)
 	})
 	walkModifiedParameters(diffReport, operationsSources, config, func(p paramInfo) {
-		result = append(result, boundSchemaChanges(p.paramDiff.SchemaDiff, DirectionRequest, "parameter", operationsSources, p.opInfo.methodDiff,
+		result = append(result, boundSchemaChanges(p.paramDiff.SchemaDiff, DirectionRequest, "parameter", operationsSources, p.opInfo.operations,
 			func(values []any) []any { return append([]any{p.location, p.name}, values...) },
 			p.opInfo.NewApiChange)...)
 	})
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
-		result = append(result, boundSchemaChanges(h.headerDiff.SchemaDiff, DirectionResponse, "header", operationsSources, h.opInfo.methodDiff,
+		result = append(result, boundSchemaChanges(h.headerDiff.SchemaDiff, DirectionResponse, "header", operationsSources, h.opInfo.operations,
 			func(values []any) []any { return append(append([]any{h.name}, values...), h.responseStatus) },
 			h.opInfo.NewApiChange)...)
 	})
@@ -297,7 +297,7 @@ func boundSchemaChanges(
 	direction Direction,
 	scope string,
 	operationsSources diff.OperationsSourcesMap,
-	methodDiff *diff.MethodDiff,
+	operations location.Operations,
 	args func(values []any) []any,
 	newChange func(id string, args []any, comment string) ApiChange,
 ) Changes {
@@ -315,7 +315,7 @@ func boundSchemaChanges(
 			continue
 		}
 		effect, _ := boundEffect(spec.polarity, action)
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, methodDiff, schemaDiff, spec.keyword)
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, operations, schemaDiff, spec.keyword)
 		result = append(result, newChange(
 			id,
 			args(values),
