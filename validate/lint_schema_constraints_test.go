@@ -148,3 +148,31 @@ components:
 `
 	require.Equal(t, map[string]int{MinItemsExceedsPrefixItemsID: 1, PrefixItemsBeyondMaxItemsID: 1}, findingsByID(t, spec))
 }
+
+func TestLintTupleLengthBoundDialects(t *testing.T) {
+	const spec = `
+openapi: 3.1.0
+jsonSchemaDialect: http://json-schema.org/draft-07/schema#
+info: { title: dialects, version: "1" }
+paths: {}
+components:
+  schemas:
+    Old: { prefixItems: [{}], maxItems: 0 }
+    Modern:
+      $schema: 'https://json-schema.org/draft/2020-12/schema#'
+      properties:
+        alias: { $ref: '#/components/schemas/Modern/properties/point' }
+        point: { prefixItems: [{}], maxItems: 0 }
+        old: { $ref: '#/components/schemas/Old' }
+`
+	require.Empty(t, lintSchemaConstraints(mustLoad(t, spec), "spec.yaml"))
+	mixed := strings.NewReplacer(
+		"http://json-schema.org/draft-07/schema#", "https://spec.openapis.org/oas/3.1/dialect/base",
+		"https://json-schema.org/draft/2020-12/schema#", "http://json-schema.org/draft-07/schema#",
+	).Replace(spec)
+	require.Empty(t, lintSchemaConstraints(mustLoad(t, mixed), "spec.yaml"))
+	modern := strings.Replace(spec, "http://json-schema.org/draft-07/schema#", "https://spec.openapis.org/oas/3.1/dialect/base", 1)
+	require.Equal(t, map[string]int{PrefixItemsBeyondMaxItemsID: 2}, findingsByID(t, modern))
+	lateOverride := modern + "    ZLast: { $schema: 'http://json-schema.org/draft-07/schema#', minimum: 5, maximum: 1 }\n"
+	require.Equal(t, map[string]int{MinimumExceedsMaximumID: 1}, findingsByID(t, lateOverride))
+}
