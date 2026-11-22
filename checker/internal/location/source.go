@@ -1,6 +1,10 @@
 package location
 
 import (
+	"maps"
+	"slices"
+	"strings"
+
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
 	"github.com/oasdiff/oasdiff/load"
@@ -502,18 +506,33 @@ func ResponseMediaTypeNameSources(operationsSources diff.OperationsSourcesMap, o
 	return baseSource, revisionSource
 }
 
+// findHeader returns the header with the given name, or failing that the one
+// whose name differs from it only in case: HTTP header names are
+// case-insensitive.
+func findHeader(headers openapi3.Headers, name string) *openapi3.HeaderRef {
+	if header := headers[name]; header != nil {
+		return header
+	}
+	for _, other := range slices.Sorted(maps.Keys(headers)) {
+		if strings.EqualFold(other, name) {
+			return headers[other]
+		}
+	}
+	return nil
+}
+
 // HeaderSources returns source locations from the base and revision headers within a response.
 // Falls back to response-level sources when header origin data is unavailable.
 func HeaderSources(operationsSources diff.OperationsSourcesMap, operations Operations, responseDiff *diff.ResponseDiff, headerName string) (*Source, *Source) {
 	base, revision := operations.BaseAndRevision()
 	var baseOrigin, revisionOrigin *openapi3.Origin
 	if responseDiff.Base != nil {
-		if h := responseDiff.Base.Headers[headerName]; h != nil && h.Value != nil {
+		if h := findHeader(responseDiff.Base.Headers, headerName); h != nil && h.Value != nil {
 			baseOrigin = h.Value.Origin
 		}
 	}
 	if responseDiff.Revision != nil {
-		if h := responseDiff.Revision.Headers[headerName]; h != nil && h.Value != nil {
+		if h := findHeader(responseDiff.Revision.Headers, headerName); h != nil && h.Value != nil {
 			revisionOrigin = h.Value.Origin
 		}
 	}

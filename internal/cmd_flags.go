@@ -21,7 +21,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("match-inline-refs", true, "match validation-equivalent inline/$ref subschemas as the same anyOf/oneOf branch")
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
-	cmd.PersistentFlags().Bool("case-insensitive-headers", true, "case-insensitive header name comparison (HTTP headers are case-insensitive per RFC 7230)")
+	cmd.PersistentFlags().Bool("case-insensitive-headers", false, "lowercase header names before diff (HTTP headers are case-insensitive per RFC 7230)")
 	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 	cmd.PersistentFlags().Bool("auto-upgrade", false, "canonicalize both specs to the latest OpenAPI 3.x before diffing; useful for cross-version comparisons (e.g. 3.0 vs 3.1)")
@@ -69,12 +69,14 @@ var deprecatedFlags = map[string]string{
 	"max-circular-dep": "it is no longer needed and is ignored",
 	"include-checks":   "it is now ignored; use --severity-levels to enforce a check as breaking",
 	"flatten-params":   "it is no longer needed: path-level parameters are checked on every operation under the path",
+
+	"case-insensitive-headers": "it is ignored: the checks always compare header names case-insensitively",
 }
 
 // warnDeprecatedFlags writes a stderr notice for each deprecated flag the user
 // actually set on cmd. Stderr, never stdout, so it can't corrupt machine output.
-// A flag is deprecated only on the commands that hide it: --flatten-params is
-// a regular flag of diff and summary.
+// A flag is deprecated only on the commands that hide it: --flatten-params and
+// --case-insensitive-headers are regular flags of diff and summary.
 func warnDeprecatedFlags(cmd *cobra.Command) {
 	for name, guidance := range deprecatedFlags {
 		if f := cmd.Flags().Lookup(name); f != nil && f.Hidden && f.Changed {
@@ -110,6 +112,9 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	// The checks compare the parameters each operation takes, so the flag that
 	// addCommonDiffFlags registers changes nothing here.
 	hideFlag(cmd, "flatten-params")
+	// The checks compare header names ignoring case, so the flag changes
+	// nothing here either.
+	hideFlag(cmd, "case-insensitive-headers")
 }
 
 // addOpenFlags registers --open and its companion review-upload flags. Kept out

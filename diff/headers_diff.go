@@ -2,6 +2,9 @@ package diff
 
 import (
 	"fmt"
+	"maps"
+	"slices"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -75,6 +78,65 @@ func getHeadersDiffInternal(config *Config, state *state, headers1, headers2 ope
 		if !diff.Empty() {
 			result.Modified[name] = diff
 		}
+	}
+
+	return result, nil
+}
+
+// getHeadersDiffIgnoringCase returns headersDiff with each deleted header that
+// was added under a name differing only in case compared as one header. It
+// returns headersDiff itself when there is none.
+func getHeadersDiffIgnoringCase(config *Config, state *state, headers1, headers2 openapi3.Headers, headersDiff *HeadersDiff) (*HeadersDiff, error) {
+	if headersDiff == nil {
+		return nil, nil
+	}
+
+	result := &HeadersDiff{
+		Added:    slices.Clone(headersDiff.Added),
+		Deleted:  []string{},
+		Modified: maps.Clone(headersDiff.Modified),
+	}
+
+	for _, name1 := range headersDiff.Deleted {
+		i := slices.IndexFunc(result.Added, func(name2 string) bool {
+			return strings.EqualFold(name1, name2)
+		})
+		if i == -1 {
+			result.Deleted = append(result.Deleted, name1)
+			continue
+		}
+		name2 := result.Added[i]
+		result.Added = slices.Delete(result.Added, i, i+1)
+
+		value1, err := derefHeader(headers1[name1])
+		if err != nil {
+			return nil, err
+		}
+
+		value2, err := derefHeader(headers2[name2])
+		if err != nil {
+			return nil, err
+		}
+
+		diff, err := getHeaderDiff(config, state, value1, value2)
+		if err != nil {
+			return nil, err
+		}
+
+		if !diff.Empty() {
+			if result.Modified == nil {
+				result.Modified = ModifiedHeaders{}
+			}
+			result.Modified[name1] = diff
+		}
+	}
+
+	if len(result.Deleted) == len(headersDiff.Deleted) {
+		return headersDiff, nil
+	}
+
+	if result.Empty() {
+		return nil, nil
 	}
 
 	return result, nil
