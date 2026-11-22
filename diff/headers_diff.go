@@ -60,27 +60,38 @@ func getHeadersDiffInternal(config *Config, state *state, headers1, headers2 ope
 	result.Deleted = deleted
 
 	for _, name := range common {
-		value1, err := derefHeader(headers1[name])
-		if err != nil {
+		if err := result.addModified(config, state, name, headers1[name], headers2[name]); err != nil {
 			return nil, err
-		}
-
-		value2, err := derefHeader(headers2[name])
-		if err != nil {
-			return nil, err
-		}
-
-		diff, err := getHeaderDiff(config, state, value1, value2)
-		if err != nil {
-			return nil, err
-		}
-
-		if !diff.Empty() {
-			result.Modified[name] = diff
 		}
 	}
 
 	return result, nil
+}
+
+// addModified compares two headers and records their diff, if any, under name.
+func (headersDiff *HeadersDiff) addModified(config *Config, state *state, name string, header1, header2 *openapi3.HeaderRef) error {
+	value1, err := derefHeader(header1)
+	if err != nil {
+		return err
+	}
+
+	value2, err := derefHeader(header2)
+	if err != nil {
+		return err
+	}
+
+	diff, err := getHeaderDiff(config, state, value1, value2)
+	if err != nil {
+		return err
+	}
+
+	if !diff.Empty() {
+		if headersDiff.Modified == nil {
+			headersDiff.Modified = ModifiedHeaders{}
+		}
+		headersDiff.Modified[name] = diff
+	}
+	return nil
 }
 
 // getHeadersDiffIgnoringCase returns headersDiff with each deleted header that
@@ -108,26 +119,8 @@ func getHeadersDiffIgnoringCase(config *Config, state *state, headers1, headers2
 		name2 := result.Added[i]
 		result.Added = slices.Delete(result.Added, i, i+1)
 
-		value1, err := derefHeader(headers1[name1])
-		if err != nil {
+		if err := result.addModified(config, state, name1, headers1[name1], headers2[name2]); err != nil {
 			return nil, err
-		}
-
-		value2, err := derefHeader(headers2[name2])
-		if err != nil {
-			return nil, err
-		}
-
-		diff, err := getHeaderDiff(config, state, value1, value2)
-		if err != nil {
-			return nil, err
-		}
-
-		if !diff.Empty() {
-			if result.Modified == nil {
-				result.Modified = ModifiedHeaders{}
-			}
-			result.Modified[name1] = diff
 		}
 	}
 
