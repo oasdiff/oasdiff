@@ -856,12 +856,20 @@ response-property-pattern-property-removed: "removed the pattern property %s fro
 # PropertyNames
 request-body-property-names-added: "added 'propertyNames' constraint to the request body"
 request-body-property-names-removed: "removed 'propertyNames' constraint from the request body"
+request-body-additional-properties-narrowed: "narrowed 'additionalProperties' of the request body from '%s' to '%s'"
+request-body-additional-properties-widened: "widened 'additionalProperties' of the request body from '%s' to '%s'"
 request-property-property-names-added: "added 'propertyNames' constraint to the request property %s"
 request-property-property-names-removed: "removed 'propertyNames' constraint from the request property %s"
+request-property-additional-properties-narrowed: "narrowed 'additionalProperties' of the request property %s from '%s' to '%s'"
+request-property-additional-properties-widened: "widened 'additionalProperties' of the request property %s from '%s' to '%s'"
 response-body-property-names-added: "added 'propertyNames' constraint to the response body for the status %s"
 response-body-property-names-removed: "removed 'propertyNames' constraint from the response body for the status %s"
+response-body-additional-properties-narrowed: "narrowed 'additionalProperties' of the response body from '%s' to '%s' for the status %s"
+response-body-additional-properties-widened: "widened 'additionalProperties' of the response body from '%s' to '%s' for the status %s"
 response-property-property-names-added: "added 'propertyNames' constraint to the %s response property for the status %s"
 response-property-property-names-removed: "removed 'propertyNames' constraint from the %s response property for the status %s"
+response-property-additional-properties-narrowed: "narrowed 'additionalProperties' of the %s response property from '%s' to '%s' for the status %s"
+response-property-additional-properties-widened: "widened 'additionalProperties' of the %s response property from '%s' to '%s' for the status %s"
 # Unevaluated
 request-body-unevaluated-items-added: "added 'unevaluatedItems' constraint to the request body"
 request-body-unevaluated-items-removed: "removed 'unevaluatedItems' constraint from the request body"
@@ -984,12 +992,20 @@ response-property-pattern-property-added-description: pattern property added to 
 response-property-pattern-property-removed-description: pattern property removed from response property
 request-body-property-names-added-description: propertyNames constraint added to request body
 request-body-property-names-removed-description: propertyNames constraint removed from request body
+request-body-additional-properties-narrowed-description: "additionalProperties narrowed in request body"
+request-body-additional-properties-widened-description: "additionalProperties widened in request body"
 request-property-property-names-added-description: propertyNames constraint added to request property
 request-property-property-names-removed-description: propertyNames constraint removed from request property
+request-property-additional-properties-narrowed-description: "additionalProperties narrowed in request property"
+request-property-additional-properties-widened-description: "additionalProperties widened in request property"
 response-body-property-names-added-description: propertyNames constraint added to response body
 response-body-property-names-removed-description: propertyNames constraint removed from response body
+response-body-additional-properties-narrowed-description: "additionalProperties narrowed in response body"
+response-body-additional-properties-widened-description: "additionalProperties widened in response body"
 response-property-property-names-added-description: propertyNames constraint added to response property
 response-property-property-names-removed-description: propertyNames constraint removed from response property
+response-property-additional-properties-narrowed-description: "additionalProperties narrowed in response property"
+response-property-additional-properties-widened-description: "additionalProperties widened in response property"
 request-body-unevaluated-items-added-description: unevaluatedItems constraint added to request body
 request-body-unevaluated-items-removed-description: unevaluatedItems constraint removed from request body
 request-body-unevaluated-properties-added-description: unevaluatedProperties constraint added to request body

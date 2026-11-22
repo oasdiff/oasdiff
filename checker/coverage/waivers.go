@@ -61,7 +61,6 @@ var Waivers = []Waiver{
 	{CategoryOpen, "paths.*.*.parameters.*.allowReserved", "allowReserved changes accepted query characters but is unchecked (tracked in #1164)"},
 	{CategoryCoveredAs, "**.discriminator.mapping.*:set,unset", "add/remove: a mapping entry appearing or disappearing is the entry add/remove, which is claimed"},
 	{CategoryCoveredAs, "**.discriminator.propertyName:set,unset", "discriminator set/unset: propertyName is required inside discriminator, so its presence tracks the discriminator's"},
-	{CategoryOpen, "**.schema.additionalProperties", "setting additionalProperties:false narrows accepted request objects (breaking) and is unchecked (tracked in #1054)"},
 	{CategoryOpen, "**.schema.uniqueItems", "response set (narrowing the output) and parameter/header scopes are unchecked; a flag rather than an ordered bound, so outside the generated set/unset rules"},
 	{CategoryOpen, "**.schema.items:set,unset", "an items subschema appearing on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1054)"},
 	{CategoryOpen, "**.schema.not", "a not subschema appearing on a request narrows the accepted set (breaking) and is unchecked (tracked in #1054)"},
