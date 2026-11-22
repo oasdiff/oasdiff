@@ -20,7 +20,7 @@ func RequestParameterPatternAddedOrChangedCheck(diffReport *diff.Diff, operation
 		if p.paramDiff.SchemaDiff == nil {
 			return
 		}
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "pattern")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "pattern")
 		patternDiff := p.paramDiff.SchemaDiff.PatternDiff
 		if patternDiff == nil {
 			return

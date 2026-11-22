@@ -54,10 +54,14 @@ type Diff struct {
 	BaseOpenAPI     string `json:"-" yaml:"-"`
 	RevisionOpenAPI string `json:"-" yaml:"-"`
 
-	// SecurityContext is context for checkers too, under the same rules as
-	// BaseInfo. It is nil for GetPathsDiff, which compares paths without
-	// their documents' root security.
+	// SecurityContext is the security each operation is subject to, for
+	// checkers. Set and excluded like BaseInfo. It is nil for GetPathsDiff,
+	// which compares paths without their documents' root security.
 	SecurityContext *SecurityContext `json:"-" yaml:"-"`
+
+	// ParametersContext is the parameters each operation takes, its own and
+	// its path item's, for checkers. Set and excluded like BaseInfo.
+	ParametersContext *ParametersContext `json:"-" yaml:"-"`
 }
 
 func newDiff() *Diff {
@@ -148,6 +152,10 @@ func GetPathsDiff(config *Config, s1, s2 []*load.SpecInfo) (*Diff, OperationsSou
 
 	if result.Empty() {
 		return nil, nil, nil
+	}
+
+	if result.ParametersContext, err = getParametersContext(config, state, matchPaths(config, paths1, paths2).pairs, nil); err != nil {
+		return nil, nil, err
 	}
 
 	operationsSources := operationsSources1
@@ -290,10 +298,14 @@ func getDiff(config *Config, state *state, s1, s2 *openapi3.T) (*Diff, error) {
 	diff.BaseOpenAPI, diff.RevisionOpenAPI = s1.OpenAPI, s2.OpenAPI
 	// getDiffInternal has filtered s1.Paths and s2.Paths in place, so the
 	// pairs leave out the operations excluded by the path and extension filters.
+	pathItemPairs := matchPaths(config, s1.Paths, s2.Paths).pairs
 	diff.SecurityContext = &SecurityContext{
 		Base:       s1.Security,
 		Revision:   s2.Security,
-		Operations: getOperationPairs(config, s1.Paths, s2.Paths),
+		Operations: getOperationPairs(pathItemPairs),
+	}
+	if diff.ParametersContext, err = getParametersContext(config, state, pathItemPairs, getWebhookPairs(s1.Webhooks, s2.Webhooks)); err != nil {
+		return nil, err
 	}
 
 	return diff, nil

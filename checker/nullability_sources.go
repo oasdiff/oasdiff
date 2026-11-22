@@ -22,7 +22,7 @@ import (
 //     keyword when no single branch changed
 //
 // A side that does not have the keyword is located at the schema itself.
-func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationItem *diff.MethodDiff, d *diff.SchemaDiff) (*Source, *Source) {
+func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationItem location.Operations, d *diff.SchemaDiff) (*Source, *Source) {
 	if d == nil || !hasOrigin(d.Base) && !hasOrigin(d.Revision) {
 		return location.SchemaFieldSources(operationsSources, operationItem, d, "nullable")
 	}
@@ -44,8 +44,9 @@ func nullabilitySources(operationsSources diff.OperationsSourcesMap, operationIt
 		keywords = []string{"oneOf", "anyOf"}
 	}
 
-	return nullabilitySource(operationsSources, operationItem.Base, d.Base, keywords),
-		nullabilitySource(operationsSources, operationItem.Revision, d.Revision, keywords)
+	base, revision := operationItem.BaseAndRevision()
+	return nullabilitySource(operationsSources, base, d.Base, keywords),
+		nullabilitySource(operationsSources, revision, d.Revision, keywords)
 }
 
 func hasOrigin(schema *openapi3.Schema) bool {

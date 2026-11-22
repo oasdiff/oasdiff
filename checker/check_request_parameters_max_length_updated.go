@@ -30,7 +30,7 @@ func RequestParameterMaxLengthUpdatedCheck(diffReport *diff.Diff, operationsSour
 			id = RequestParameterMaxLengthIncreasedId
 		}
 
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "maxLength")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "maxLength")
 		result = append(result, p.opInfo.NewApiChange(
 			id,
 			[]any{p.location, p.name, maxLengthDiff.From, maxLengthDiff.To},

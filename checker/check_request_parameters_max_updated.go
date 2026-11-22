@@ -39,7 +39,7 @@ func RequestParameterMaxUpdatedCheck(diffReport *diff.Diff, operationsSources di
 			if !isDecreasedValue(entry.diff) {
 				id = entry.increasedId
 			}
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, entry.field)
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, entry.field)
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name, entry.diff.From, entry.diff.To},

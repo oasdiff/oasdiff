@@ -48,6 +48,30 @@ func Test_InvalidFlag(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff diff data/openapi-test1.yaml data/openapi-test1.yaml --invalid"), io.Discard, io.Discard))
 }
 
+// --flatten-params is deprecated in the commands that run the checks, and a
+// regular flag in diff.
+func Test_FlattenParamsDeprecatedInChecksOnly(t *testing.T) {
+	const specs = "../data/common-params/params_in_path.yaml ../data/common-params/params_in_op.yaml --flatten-params"
+
+	var stdout, stderr bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking "+specs), &stdout, &stderr))
+	require.Contains(t, stderr.String(), "Flag --flatten-params is deprecated")
+
+	stdout.Reset()
+	stderr.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking --help"), &stdout, &stderr))
+	require.NotContains(t, stdout.String(), "--flatten-params")
+
+	stdout.Reset()
+	stderr.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff "+specs), &stdout, &stderr))
+	require.Empty(t, stderr.String())
+
+	stdout.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff --help"), &stdout, &stderr))
+	require.Contains(t, stdout.String(), "--flatten-params")
+}
+
 // A deprecated hidden flag (e.g. --flatten) still works but warns on stderr,
 // never stdout, so json/yaml output stays clean.
 func Test_DeprecatedFlagWarnsOnStderrOnly(t *testing.T) {

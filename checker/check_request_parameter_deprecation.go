@@ -40,7 +40,7 @@ func RequestParameterDeprecationCheck(diffReport *diff.Diff, operationsSources d
 
 		// Every stage points at the deprecated field, the sunset ones included.
 		// deprecated is a field of the Parameter Object, not of its schema.
-		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, "deprecated")
+		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.operations, p.paramDiff, "deprecated")
 
 		// The details describe the deprecation, so they are left off a finding
 		// about the sunset date.
