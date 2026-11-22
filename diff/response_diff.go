@@ -11,10 +11,6 @@ type ResponseDiff struct {
 	HeadersDiff     *HeadersDiff    `json:"headers,omitempty" yaml:"headers,omitempty"`
 	ContentDiff     *ContentDiff    `json:"content,omitempty" yaml:"content,omitempty"`
 	LinksDiff       *LinksDiff      `json:"links,omitempty" yaml:"links,omitempty"`
-	// HeadersDiffIgnoringCase is HeadersDiff with header names compared
-	// ignoring case, for checkers: HTTP header names are case-insensitive, so
-	// X-Trace and x-trace are one header. A modified header is keyed by its
-	// name in the base.
 	HeadersDiffIgnoringCase *HeadersDiff       `json:"-" yaml:"-"`
 	Base                    *openapi3.Response `json:"-" yaml:"-"`
 	Revision                *openapi3.Response `json:"-" yaml:"-"`
