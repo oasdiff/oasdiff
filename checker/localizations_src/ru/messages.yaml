@@ -937,21 +937,37 @@ response-body-pattern-property-removed-description: шаблонное свой�
 response-property-pattern-property-added-description: шаблонное свойство добавлено в поле ответа
 response-property-pattern-property-removed-description: шаблонное свойство удалено из поля ответа
 request-body-property-names-added: добавлено ограничение 'propertyNames' в тело запроса
+request-body-not-added: добавлено ограничение 'not' в тело запроса
 request-body-property-names-removed: удалено ограничение 'propertyNames' из тела запроса
+request-body-not-removed: удалено ограничение 'not' из тела запроса
 request-property-property-names-added: добавлено ограничение 'propertyNames' в поле запроса %s
+request-property-not-added: добавлено ограничение 'not' в поле запроса %s
 request-property-property-names-removed: удалено ограничение 'propertyNames' из поля запроса %s
+request-property-not-removed: удалено ограничение 'not' из поля запроса %s
 response-body-property-names-added: добавлено ограничение 'propertyNames' в тело ответа для статуса %s
+response-body-not-added: добавлено ограничение 'not' в тело ответа для статуса %s
 response-body-property-names-removed: удалено ограничение 'propertyNames' из тела ответа для статуса %s
+response-body-not-removed: удалено ограничение 'not' из тела ответа для статуса %s
 response-property-property-names-added: добавлено ограничение 'propertyNames' в поле ответа %s для статуса %s
+response-property-not-added: добавлено ограничение 'not' в поле ответа %s для статуса %s
 response-property-property-names-removed: удалено ограничение 'propertyNames' из поля ответа %s для статуса %s
+response-property-not-removed: удалено ограничение 'not' из поля ответа %s для статуса %s
 request-body-property-names-added-description: ограничение 'propertyNames' добавлено в тело запроса
+request-body-not-added-description: ограничение 'not' добавлено в тело запроса
 request-body-property-names-removed-description: ограничение 'propertyNames' удалено из тела запроса
+request-body-not-removed-description: ограничение 'not' удалено из тела запроса
 request-property-property-names-added-description: ограничение 'propertyNames' добавлено в поле запроса
+request-property-not-added-description: ограничение 'not' добавлено в поле запроса
 request-property-property-names-removed-description: ограничение 'propertyNames' удалено из поля запроса
+request-property-not-removed-description: ограничение 'not' удалено из поля запроса
 response-body-property-names-added-description: ограничение 'propertyNames' добавлено в тело ответа
+response-body-not-added-description: ограничение 'not' добавлено в тело ответа
 response-body-property-names-removed-description: ограничение 'propertyNames' удалено из тела ответа
+response-body-not-removed-description: ограничение 'not' удалено из тела ответа
 response-property-property-names-added-description: ограничение 'propertyNames' добавлено в поле ответа
+response-property-not-added-description: ограничение 'not' добавлено в поле ответа
 response-property-property-names-removed-description: ограничение 'propertyNames' удалено из поля ответа
+response-property-not-removed-description: ограничение 'not' удалено из поля ответа
 request-body-unevaluated-items-added: добавлено ограничение 'unevaluatedItems' в тело запроса
 request-body-unevaluated-items-removed: удалено ограничение 'unevaluatedItems' из тела запроса
 request-body-unevaluated-properties-added: добавлено ограничение 'unevaluatedProperties' в тело запроса

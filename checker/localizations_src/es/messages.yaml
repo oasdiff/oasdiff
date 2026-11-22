@@ -933,21 +933,37 @@ response-body-pattern-property-removed-description: propiedad de patrón removid
 response-property-pattern-property-added-description: propiedad de patrón agregada a la propiedad de respuesta
 response-property-pattern-property-removed-description: propiedad de patrón removida de la propiedad de respuesta
 request-body-property-names-added: agregada la restricción 'propertyNames' al cuerpo de solicitud
+request-body-not-added: agregada la restricción 'not' al cuerpo de solicitud
 request-body-property-names-removed: removida la restricción 'propertyNames' del cuerpo de solicitud
+request-body-not-removed: removida la restricción 'not' del cuerpo de solicitud
 request-property-property-names-added: agregada la restricción 'propertyNames' a la propiedad de solicitud %s
+request-property-not-added: agregada la restricción 'not' a la propiedad de solicitud %s
 request-property-property-names-removed: removida la restricción 'propertyNames' de la propiedad de solicitud %s
+request-property-not-removed: removida la restricción 'not' de la propiedad de solicitud %s
 response-body-property-names-added: agregada la restricción 'propertyNames' al cuerpo de respuesta para el estado %s
+response-body-not-added: agregada la restricción 'not' al cuerpo de respuesta para el estado %s
 response-body-property-names-removed: removida la restricción 'propertyNames' del cuerpo de respuesta para el estado %s
+response-body-not-removed: removida la restricción 'not' del cuerpo de respuesta para el estado %s
 response-property-property-names-added: agregada la restricción 'propertyNames' a la propiedad de respuesta %s para el estado %s
+response-property-not-added: agregada la restricción 'not' a la propiedad de respuesta %s para el estado %s
 response-property-property-names-removed: removida la restricción 'propertyNames' de la propiedad de respuesta %s para el estado %s
+response-property-not-removed: removida la restricción 'not' de la propiedad de respuesta %s para el estado %s
 request-body-property-names-added-description: restricción 'propertyNames' agregada al cuerpo de solicitud
+request-body-not-added-description: restricción 'not' agregada al cuerpo de solicitud
 request-body-property-names-removed-description: restricción 'propertyNames' removida del cuerpo de solicitud
+request-body-not-removed-description: restricción 'not' removida del cuerpo de solicitud
 request-property-property-names-added-description: restricción 'propertyNames' agregada a la propiedad de solicitud
+request-property-not-added-description: restricción 'not' agregada a la propiedad de solicitud
 request-property-property-names-removed-description: restricción 'propertyNames' removida de la propiedad de solicitud
+request-property-not-removed-description: restricción 'not' removida de la propiedad de solicitud
 response-body-property-names-added-description: restricción 'propertyNames' agregada al cuerpo de respuesta
+response-body-not-added-description: restricción 'not' agregada al cuerpo de respuesta
 response-body-property-names-removed-description: restricción 'propertyNames' removida del cuerpo de respuesta
+response-body-not-removed-description: restricción 'not' removida del cuerpo de respuesta
 response-property-property-names-added-description: restricción 'propertyNames' agregada a la propiedad de respuesta
+response-property-not-added-description: restricción 'not' agregada a la propiedad de respuesta
 response-property-property-names-removed-description: restricción 'propertyNames' removida de la propiedad de respuesta
+response-property-not-removed-description: restricción 'not' removida de la propiedad de respuesta
 request-body-unevaluated-items-added: agregada la restricción 'unevaluatedItems' al cuerpo de solicitud
 request-body-unevaluated-items-removed: removida la restricción 'unevaluatedItems' del cuerpo de solicitud
 request-body-unevaluated-properties-added: agregada la restricción 'unevaluatedProperties' al cuerpo de solicitud

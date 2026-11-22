@@ -64,7 +64,6 @@ var Waivers = []Waiver{
 	{CategoryOpen, "**.schema.additionalProperties", "setting additionalProperties:false narrows accepted request objects (breaking) and is unchecked (tracked in #1054)"},
 	{CategoryOpen, "**.schema.uniqueItems", "response set (narrowing the output) and parameter/header scopes are unchecked; a flag rather than an ordered bound, so outside the generated set/unset rules"},
 	{CategoryOpen, "**.schema.items:set,unset", "an items subschema appearing on a request narrows accepted arrays (breaking) and is unchecked (tracked in #1054)"},
-	{CategoryOpen, "**.schema.not", "a not subschema appearing on a request narrows the accepted set (breaking) and is unchecked (tracked in #1054)"},
 	{CategoryOpen, "**.schema.unevaluatedItems:change", "switching unevaluatedItems between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 	{CategoryOpen, "**.schema.unevaluatedProperties:change", "switching unevaluatedProperties between boolean and schema form is unchecked; set/unset have rules (tracked in #1054)"},
 }

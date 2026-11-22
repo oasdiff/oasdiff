@@ -933,21 +933,37 @@ response-body-pattern-property-removed-description: propriedade de padrão remov
 response-property-pattern-property-added-description: propriedade de padrão adicionada à propriedade de resposta
 response-property-pattern-property-removed-description: propriedade de padrão removida da propriedade de resposta
 request-body-property-names-added: adicionada a restrição 'propertyNames' ao corpo da requisição
+request-body-not-added: adicionada a restrição 'not' ao corpo da requisição
 request-body-property-names-removed: removida a restrição 'propertyNames' do corpo da requisição
+request-body-not-removed: removida a restrição 'not' do corpo da requisição
 request-property-property-names-added: adicionada a restrição 'propertyNames' à propriedade de requisição %s
+request-property-not-added: adicionada a restrição 'not' à propriedade de requisição %s
 request-property-property-names-removed: removida a restrição 'propertyNames' da propriedade de requisição %s
+request-property-not-removed: removida a restrição 'not' da propriedade de requisição %s
 response-body-property-names-added: adicionada a restrição 'propertyNames' ao corpo da resposta para o status %s
+response-body-not-added: adicionada a restrição 'not' ao corpo da resposta para o status %s
 response-body-property-names-removed: removida a restrição 'propertyNames' do corpo da resposta para o status %s
+response-body-not-removed: removida a restrição 'not' do corpo da resposta para o status %s
 response-property-property-names-added: adicionada a restrição 'propertyNames' à propriedade de resposta %s para o status %s
+response-property-not-added: adicionada a restrição 'not' à propriedade de resposta %s para o status %s
 response-property-property-names-removed: removida a restrição 'propertyNames' da propriedade de resposta %s para o status %s
+response-property-not-removed: removida a restrição 'not' da propriedade de resposta %s para o status %s
 request-body-property-names-added-description: restrição 'propertyNames' adicionada ao corpo da requisição
+request-body-not-added-description: restrição 'not' adicionada ao corpo da requisição
 request-body-property-names-removed-description: restrição 'propertyNames' removida do corpo da requisição
+request-body-not-removed-description: restrição 'not' removida do corpo da requisição
 request-property-property-names-added-description: restrição 'propertyNames' adicionada à propriedade de requisição
+request-property-not-added-description: restrição 'not' adicionada à propriedade de requisição
 request-property-property-names-removed-description: restrição 'propertyNames' removida da propriedade de requisição
+request-property-not-removed-description: restrição 'not' removida da propriedade de requisição
 response-body-property-names-added-description: restrição 'propertyNames' adicionada ao corpo da resposta
+response-body-not-added-description: restrição 'not' adicionada ao corpo da resposta
 response-body-property-names-removed-description: restrição 'propertyNames' removida do corpo da resposta
+response-body-not-removed-description: restrição 'not' removida do corpo da resposta
 response-property-property-names-added-description: restrição 'propertyNames' adicionada à propriedade de resposta
+response-property-not-added-description: restrição 'not' adicionada à propriedade de resposta
 response-property-property-names-removed-description: restrição 'propertyNames' removida da propriedade de resposta
+response-property-not-removed-description: restrição 'not' removida da propriedade de resposta
 request-body-unevaluated-items-added: adicionada a restrição 'unevaluatedItems' ao corpo da requisição
 request-body-unevaluated-items-removed: removida a restrição 'unevaluatedItems' do corpo da requisição
 request-body-unevaluated-properties-added: adicionada a restrição 'unevaluatedProperties' ao corpo da requisição
