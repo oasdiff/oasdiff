@@ -56,20 +56,17 @@ func getPathsDiffInternal(config *Config, state *state, paths1, paths2 *openapi3
 
 	result := newPathsDiff()
 
-	paths1Mod := rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase)
-	paths2Mod := rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision)
+	matched := matchPaths(config, paths1, paths2)
+	result.Added = matched.added
+	result.Deleted = matched.deleted
 
-	added, deleted, common, pairs := getPathItemsDiff(config, paths1Mod, paths2Mod)
-	result.Added = added
-	result.Deleted = deleted
-
-	for _, endpoint := range common {
-		if err := result.addModifiedPath(config, state, endpoint, pairs[endpoint]); err != nil {
+	for _, endpoint := range matched.common {
+		if err := result.addModifiedPath(config, state, endpoint, matched.pairs[endpoint]); err != nil {
 			return nil, err
 		}
 	}
-	result.Base = paths1Mod
-	result.Revision = paths2Mod
+	result.Base = matched.base
+	result.Revision = matched.revision
 
 	return result, nil
 }

@@ -16,32 +16,46 @@ type pathItemPair struct {
 
 type pathItemPairs map[string]*pathItemPair
 
-// getPathItemsDiff matches the paths of two specs. The added and deleted
-// paths are sorted, and so are the base paths of the matched pairs.
-func getPathItemsDiff(config *Config, paths1, paths2 *openapi3.Paths) (added, deleted, common []string, pairs pathItemPairs) {
+// matchedPaths is the result of matching the paths of two specs.
+type matchedPaths struct {
+	// base and revision are the paths after the prefix rewrites in the config.
+	base, revision *openapi3.Paths
+	// added, deleted and common are sorted. common holds the base paths of pairs.
+	added, deleted, common []string
+	pairs                  pathItemPairs
+}
 
-	pairs = pathItemPairs{}
+// matchPaths applies the prefix rewrites in the config and matches the paths
+// of two specs. PathsDiff, EndpointsDiff and the checker contexts all match
+// paths through it.
+func matchPaths(config *Config, paths1, paths2 *openapi3.Paths) *matchedPaths {
 
-	for _, endpoint1 := range slices.Sorted(maps.Keys(paths1.Map())) {
-		if pathItem2, pathParamsMap, ok := findEndpoint(config, endpoint1, paths2); ok {
-			common = append(common, endpoint1)
-			pairs[endpoint1] = &pathItemPair{
-				PathItem1:     paths1.Value(endpoint1),
+	result := &matchedPaths{
+		base:     rewritePrefix(paths1.Map(), config.PathStripPrefixBase, config.PathPrefixBase),
+		revision: rewritePrefix(paths2.Map(), config.PathStripPrefixRevision, config.PathPrefixRevision),
+		pairs:    pathItemPairs{},
+	}
+
+	for _, endpoint1 := range slices.Sorted(maps.Keys(result.base.Map())) {
+		if pathItem2, pathParamsMap, ok := findEndpoint(config, endpoint1, result.revision); ok {
+			result.common = append(result.common, endpoint1)
+			result.pairs[endpoint1] = &pathItemPair{
+				PathItem1:     result.base.Value(endpoint1),
 				PathItem2:     pathItem2,
 				PathParamsMap: pathParamsMap,
 			}
 		} else {
-			deleted = append(deleted, endpoint1)
+			result.deleted = append(result.deleted, endpoint1)
 		}
 	}
 
-	for _, endpoint2 := range slices.Sorted(maps.Keys(paths2.Map())) {
-		if _, _, ok := findEndpoint(config, endpoint2, paths1); !ok {
-			added = append(added, endpoint2)
+	for _, endpoint2 := range slices.Sorted(maps.Keys(result.revision.Map())) {
+		if _, _, ok := findEndpoint(config, endpoint2, result.base); !ok {
+			result.added = append(result.added, endpoint2)
 		}
 	}
 
-	return added, deleted, common, pairs
+	return result
 }
 
 func rewritePrefix(paths map[string]*openapi3.PathItem, strip, prepend string) *openapi3.Paths {

@@ -100,7 +100,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources d
 			return
 		}
 
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "type")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "type")
 		schemaDiff := p.paramDiff.SchemaDiff
 		typeDiff := schemaDiff.TypeDiff
 		formatDiff := schemaDiff.FormatDiff
@@ -137,7 +137,7 @@ func RequestParameterTypeChangedCheck(diffReport *diff.Diff, operationsSources d
 			schemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 
-				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
+				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, propertyDiff, "type")
 				schemaDiff := propertyDiff
 				typeDiff := schemaDiff.TypeDiff
 				formatDiff := schemaDiff.FormatDiff

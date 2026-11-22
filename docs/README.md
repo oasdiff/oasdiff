@@ -112,7 +112,7 @@ How oasdiff pairs up base and revision and what counts as a difference.
 Align each spec before diffing so equivalent things line up.
 
 - [Merge `allOf` schemas](ALLOF.md)
-- [Merge common (path-level) parameters](COMMON-PARAMS.md)
+- [Path-level parameters](COMMON-PARAMS.md): `breaking` and `changelog` check them on every operation under the path; `diff` compares them where they are written, or merged with `--flatten-params`
 - [Path prefix modification](PATH-PREFIX.md): strip or add a prefix so a moved API still matches
 - [Case-insensitive header comparison](HEADER-DIFF.md): treat `Content-Type` and `content-type` as the same header
 

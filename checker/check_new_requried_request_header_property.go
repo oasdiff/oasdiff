@@ -19,7 +19,7 @@ func NewRequiredRequestHeaderPropertyCheck(diffReport *diff.Diff, operationsSour
 		if p.location != "header" {
 			return
 		}
-		baseSource, revisionSource := location.ParameterSources(operationsSources, p.opInfo.methodDiff, p.paramDiff)
+		baseSource, revisionSource := location.ParameterSources(operationsSources, p.opInfo.operations, p.paramDiff)
 		schemawalk.AddedProperties(
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, newPropertyName string, newProperty *openapi3.Schema, parent *diff.SchemaDiff, underAllOf bool) {

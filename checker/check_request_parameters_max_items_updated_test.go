@@ -48,8 +48,8 @@ func TestRequestParameterMaxItemsDecreased(t *testing.T) {
 	}, errs)
 }
 
-// decreasing maxItems of common request parameters without --flatten-params is not breaking
-func TestBreaking_RequestParameterMaxItemsWithoutFlatten(t *testing.T) {
+// decreasing maxItems of a path-level parameter is breaking for the operations under the path
+func TestBreaking_RequestParameterMaxItemsPathLevel(t *testing.T) {
 
 	s1, err := open("../data/checker/common_request_parameter_max_items_updated_revision.yaml")
 	require.NoError(t, err)
@@ -60,7 +60,13 @@ func TestBreaking_RequestParameterMaxItemsWithoutFlatten(t *testing.T) {
 	require.NoError(t, err)
 
 	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.RequestParameterMaxItemsUpdatedCheck), d, osm, checker.ERR)
-	require.Empty(t, errs)
+	requireSingleApiChange(t, checker.ApiChange{
+		Id:          checker.RequestParameterMaxItemsDecreasedId,
+		Args:        []any{"query", "category", uint64(20), uint64(10)},
+		Operation:   "POST",
+		Path:        "/api/v1.0/groups",
+		OperationId: "createOneGroup",
+	}, errs)
 }
 
 // decreasing maxItems of common request parameters with --flatten-params is breaking

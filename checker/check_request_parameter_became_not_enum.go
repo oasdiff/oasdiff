@@ -19,7 +19,7 @@ func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources
 		}
 
 		if becameNotEnum(p.paramDiff.SchemaDiff) {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "enum")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "enum")
 			result = append(result, p.opInfo.NewApiChange(
 				RequestParameterBecameNotEnumId,
 				[]any{p.location, p.name},
@@ -33,7 +33,7 @@ func RequestParameterBecameNotEnumCheck(diffReport *diff.Diff, operationsSources
 				if !becameNotEnum(propertyDiff) {
 					return
 				}
-				baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "enum")
+				baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, propertyDiff, "enum")
 				result = append(result, p.opInfo.NewApiChange(
 					RequestParameterPropertyBecameNotEnumId,
 					[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},

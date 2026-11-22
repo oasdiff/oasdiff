@@ -19,7 +19,7 @@ func ResponseHeaderBecameNullableCheck(diffReport *diff.Diff, operationsSources 
 	result := make(Changes, 0)
 	walkModifiedResponseHeaders(diffReport, operationsSources, config, func(h headerInfo) {
 		if id, comment := nullabilityChangeId(nil, h.headerDiff.SchemaDiff, ResponseHeaderBecameNullableId, ResponseHeaderBecameNotNullableId); id != "" {
-			baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+			baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.operations, h.responseDiff, h.name)
 			result = append(result, h.opInfo.NewApiChange(
 				id,
 				[]any{h.name, h.responseStatus},
