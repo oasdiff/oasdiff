@@ -207,8 +207,11 @@ func checkWireFieldUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecu
 	}
 
 	// the name of a header is case-insensitive (RFC 9110, section 5.1)
-	if nameDiff := updatedSecurity.NameDiff; nameDiff != nil && !(sentInHeader && strings.EqualFold(interfaceToString(nameDiff.From), interfaceToString(nameDiff.To))) {
-		report(APIComponentsSecurityApiKeyNameUpdatedId, ERR, nameDiff)
+	if nameDiff := updatedSecurity.NameDiff; nameDiff != nil {
+		caseOnly := sentInHeader && strings.EqualFold(interfaceToString(nameDiff.From), interfaceToString(nameDiff.To))
+		if !caseOnly {
+			report(APIComponentsSecurityApiKeyNameUpdatedId, ERR, nameDiff)
+		}
 	}
 	report(APIComponentsSecurityApiKeyInUpdatedId, ERR, updatedSecurity.InDiff)
 	// HTTP authentication scheme names are case-insensitive (RFC 9110, section 11.1)
