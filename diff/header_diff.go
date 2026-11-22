@@ -6,19 +6,21 @@ import (
 
 // HeaderDiff describes the changes between a pair of header objects: https://swagger.io/specification/#header-object
 type HeaderDiff struct {
-	ExtensionsDiff  *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
-	DescriptionDiff *ValueDiff      `json:"description,omitempty" yaml:"description,omitempty"`
-	DeprecatedDiff  *ValueDiff      `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
-	RequiredDiff    *ValueDiff      `json:"required,omitempty" yaml:"required,omitempty"`
-	ExampleDiff     *ValueDiff      `json:"example,omitempty" yaml:"example,omitempty"`
-	ExamplesDiff    *ExamplesDiff   `json:"examples,omitempty" yaml:"examples,omitempty"`
-	SchemaDiff      *SchemaDiff     `json:"schema,omitempty" yaml:"schema,omitempty"`
-	ContentDiff     *ContentDiff    `json:"content,omitempty" yaml:"content,omitempty"`
+	ExtensionsDiff  *ExtensionsDiff  `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	DescriptionDiff *ValueDiff       `json:"description,omitempty" yaml:"description,omitempty"`
+	DeprecatedDiff  *ValueDiff       `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
+	RequiredDiff    *ValueDiff       `json:"required,omitempty" yaml:"required,omitempty"`
+	ExampleDiff     *ValueDiff       `json:"example,omitempty" yaml:"example,omitempty"`
+	ExamplesDiff    *ExamplesDiff    `json:"examples,omitempty" yaml:"examples,omitempty"`
+	SchemaDiff      *SchemaDiff      `json:"schema,omitempty" yaml:"schema,omitempty"`
+	ContentDiff     *ContentDiff     `json:"content,omitempty" yaml:"content,omitempty"`
+	Base            *openapi3.Header `json:"-" yaml:"-"`
+	Revision        *openapi3.Header `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
 func (headerDiff *HeaderDiff) Empty() bool {
-	return headerDiff == nil || *headerDiff == HeaderDiff{}
+	return headerDiff == nil || *headerDiff == HeaderDiff{Base: headerDiff.Base, Revision: headerDiff.Revision}
 }
 
 func getHeaderDiff(config *Config, state *state, header1, header2 *openapi3.Header) (*HeaderDiff, error) {
@@ -62,6 +64,8 @@ func getHeaderDiffInternal(config *Config, state *state, header1, header2 *opena
 	if err != nil {
 		return nil, err
 	}
+	result.Base = header1
+	result.Revision = header2
 
 	return &result, nil
 }

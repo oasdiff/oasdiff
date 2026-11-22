@@ -82,6 +82,22 @@ func TestHeaderCase_RenamedResponseHeaderChanged(t *testing.T) {
 	}, errs)
 }
 
+// the renamed header is found on both sides
+func TestHeaderCase_RenamedResponseHeaderSources(t *testing.T) {
+	s1, err := open("../data/header-case/base.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+	s2, err := open("../data/header-case/revision.yaml", newLoaderWithOriginTracking())
+	require.NoError(t, err)
+	s2.Spec.Paths.Value("/test").Get.Responses.Value("200").Value.Headers["x-ratelimit-limit"].Value.Schema.Value.Type = &openapi3.Types{"string"}
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.ResponseHeaderTypeChangedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, 23, errs[0].GetBaseSource().Line)
+	require.Equal(t, 23, errs[0].GetRevisionSource().Line)
+}
+
 // a spec with lowercased header names gives the same result
 func TestHeaderCase_LowercasedSpecs(t *testing.T) {
 	s1, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("../data/header-case/base.yaml"), load.WithLowercaseHeaders())
