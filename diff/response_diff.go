@@ -6,11 +6,11 @@ import (
 
 // ResponseDiff describes the changes between a pair of response objects: https://swagger.io/specification/#response-object
 type ResponseDiff struct {
-	ExtensionsDiff  *ExtensionsDiff `json:"extensions,omitempty" yaml:"extensions,omitempty"`
-	DescriptionDiff *ValueDiff      `json:"description,omitempty" yaml:"description,omitempty"`
-	HeadersDiff     *HeadersDiff    `json:"headers,omitempty" yaml:"headers,omitempty"`
-	ContentDiff     *ContentDiff    `json:"content,omitempty" yaml:"content,omitempty"`
-	LinksDiff       *LinksDiff      `json:"links,omitempty" yaml:"links,omitempty"`
+	ExtensionsDiff          *ExtensionsDiff    `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	DescriptionDiff         *ValueDiff         `json:"description,omitempty" yaml:"description,omitempty"`
+	HeadersDiff             *HeadersDiff       `json:"headers,omitempty" yaml:"headers,omitempty"`
+	ContentDiff             *ContentDiff       `json:"content,omitempty" yaml:"content,omitempty"`
+	LinksDiff               *LinksDiff         `json:"links,omitempty" yaml:"links,omitempty"`
 	HeadersDiffIgnoringCase *HeadersDiff       `json:"-" yaml:"-"`
 	Base                    *openapi3.Response `json:"-" yaml:"-"`
 	Revision                *openapi3.Response `json:"-" yaml:"-"`
