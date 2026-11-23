@@ -178,6 +178,21 @@ func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
 	return schemaDiff.EnumDiff.Deleted
 }
 
+// enclosingSchemaAcceptsOnBothSides reports whether value is valid, before and
+// after the change, for the schema that encloses a sub-schema such as an anyOf
+// branch. An enum in one anyOf branch next to a branch that accepts every
+// string does not restrict the property's values, so adding or removing one of
+// its values changes nothing a client can observe. A named property's parent
+// is the object holding it, which never accepts the value, so the property's
+// own enum is reported as before.
+func enclosingSchemaAcceptsOnBothSides(p propertyInfo, value any) bool {
+	if p.propertyName != "" || p.parent == nil || p.parent.Base == nil || p.parent.Revision == nil {
+		return false
+	}
+
+	return p.parent.Base.VisitJSON(value) == nil && p.parent.Revision.VisitJSON(value) == nil
+}
+
 // addedEnumValues returns the values added to an enum, or none when the enum
 // itself was added, since the schema is then narrowed to them, not widened by them.
 func addedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {

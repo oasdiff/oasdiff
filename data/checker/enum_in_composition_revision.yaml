@@ -1,0 +1,38 @@
+openapi: 3.1.0
+info:
+  title: Pets
+  version: "1.0"
+paths:
+  /pets:
+    post:
+      operationId: createPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        status:
+          description: Known statuses, and any other status a later version adds.
+          anyOf:
+          - type: string
+            enum: [available, sold, adopted]
+          - type: string
+        size:
+          description: Exactly one of the branches matches a valid size.
+          oneOf:
+          - type: string
+            enum: [small, large, medium]
+          - type: string
+            pattern: ^x
