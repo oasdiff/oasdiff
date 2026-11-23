@@ -1,0 +1,28 @@
+openapi: 3.0.0
+info: {title: t, version: "1"}
+paths:
+  /m:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [b]
+                properties:
+                  a: {type: string}
+                  b: {type: string}
+                  closed:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      x: {type: string}
+                      y: {type: string}
+                  open:
+                    type: object
+                    properties:
+                      x: {type: string}
+                      y: {type: string}

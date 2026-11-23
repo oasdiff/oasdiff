@@ -948,6 +948,7 @@ response-property-property-names-added: agregada la restricción 'propertyNames'
 response-property-property-names-removed: removida la restricción 'propertyNames' de la propiedad de respuesta %s para el estado %s
 response-property-additional-properties-narrowed: "restringido 'additionalProperties' de la propiedad de respuesta %s de %s a %s para el estado %s"
 response-property-additional-properties-widened: "ampliado 'additionalProperties' de la propiedad de respuesta %s de %s a %s para el estado %s"
+response-property-added-to-closed-object: "agregada la propiedad %s a la respuesta con estado %s, que tiene 'additionalProperties: false'"
 request-body-property-names-added-description: restricción 'propertyNames' agregada al cuerpo de solicitud
 request-body-property-names-removed-description: restricción 'propertyNames' removida del cuerpo de solicitud
 request-body-additional-properties-narrowed-description: "'additionalProperties' restringido en el cuerpo de solicitud"
@@ -964,6 +965,7 @@ response-property-property-names-added-description: restricción 'propertyNames'
 response-property-property-names-removed-description: restricción 'propertyNames' removida de la propiedad de respuesta
 response-property-additional-properties-narrowed-description: "'additionalProperties' restringido en la propiedad de respuesta"
 response-property-additional-properties-widened-description: "'additionalProperties' ampliado en la propiedad de respuesta"
+response-property-added-to-closed-object-description: "propiedad agregada a un objeto de respuesta cerrado"
 request-body-unevaluated-items-added: agregada la restricción 'unevaluatedItems' al cuerpo de solicitud
 request-body-unevaluated-items-removed: removida la restricción 'unevaluatedItems' del cuerpo de solicitud
 request-body-unevaluated-properties-added: agregada la restricción 'unevaluatedProperties' al cuerpo de solicitud

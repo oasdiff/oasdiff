@@ -870,6 +870,7 @@ response-property-property-names-added: "added 'propertyNames' constraint to the
 response-property-property-names-removed: "removed 'propertyNames' constraint from the %s response property for the status %s"
 response-property-additional-properties-narrowed: "narrowed 'additionalProperties' of the %s response property from %s to %s for the status %s"
 response-property-additional-properties-widened: "widened 'additionalProperties' of the %s response property from %s to %s for the status %s"
+response-property-added-to-closed-object: "added the property %s to the response with the %s status, which has 'additionalProperties: false'"
 # Unevaluated
 request-body-unevaluated-items-added: "added 'unevaluatedItems' constraint to the request body"
 request-body-unevaluated-items-removed: "removed 'unevaluatedItems' constraint from the request body"
@@ -1006,6 +1007,7 @@ response-property-property-names-added-description: propertyNames constraint add
 response-property-property-names-removed-description: propertyNames constraint removed from response property
 response-property-additional-properties-narrowed-description: "additionalProperties narrowed in response property"
 response-property-additional-properties-widened-description: "additionalProperties widened in response property"
+response-property-added-to-closed-object-description: "property added to closed response object"
 request-body-unevaluated-items-added-description: unevaluatedItems constraint added to request body
 request-body-unevaluated-items-removed-description: unevaluatedItems constraint removed from request body
 request-body-unevaluated-properties-added-description: unevaluatedProperties constraint added to request body

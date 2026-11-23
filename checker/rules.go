@@ -799,6 +799,8 @@ func handWrittenRules() BackwardCompatibilityRules {
 		newBackwardCompatibilityRule(ResponseBodyAdditionalPropertiesWidenedId, ERR, ResponsePropertyAdditionalPropertiesUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.additionalProperties:unset,change"),
 		newBackwardCompatibilityRule(ResponsePropertyAdditionalPropertiesNarrowedId, INFO, ResponsePropertyAdditionalPropertiesUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, EffectNarrows, nil, "paths.*.*.responses.*.content.*.schema.additionalProperties:set,change"),
 		newBackwardCompatibilityRule(ResponsePropertyAdditionalPropertiesWidenedId, ERR, ResponsePropertyAdditionalPropertiesUpdatedCheck, DirectionResponse, AreaSchema, KindStructure, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.additionalProperties:unset,change"),
+		// ResponsePropertyAddedToClosedObjectCheck
+		newBackwardCompatibilityRule(ResponsePropertyAddedToClosedObjectId, ERR, ResponsePropertyAddedToClosedObjectCheck, DirectionResponse, AreaSchema, KindExistence, EffectWidens, nil, "paths.*.*.responses.*.content.*.schema.properties.*:add"),
 		// RequestPropertyUnevaluatedUpdatedCheck
 		newBackwardCompatibilityRule(RequestBodyUnevaluatedItemsAddedId, ERR, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, AreaSchema, KindStructure, EffectNarrows, nil, "paths.*.*.requestBody.content.*.schema.unevaluatedItems:set"),
 		newBackwardCompatibilityRule(RequestBodyUnevaluatedItemsRemovedId, INFO, RequestPropertyUnevaluatedUpdatedCheck, DirectionRequest, AreaSchema, KindStructure, EffectWidens, nil, "paths.*.*.requestBody.content.*.schema.unevaluatedItems:unset"),
