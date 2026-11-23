@@ -189,7 +189,6 @@ func derefParam(ref *openapi3.ParameterRef) (*openapi3.Parameter, error) {
 
 // findParam looks for a param that matches param1 in params2 taking into account param renaming through pathParamsMap
 func findParam(param1 *openapi3.Parameter, params2 openapi3.Parameters, pathParamsMap PathParamsMap, headerNames headerNames) (*openapi3.Parameter, error) {
-	// TODO: optimize with a map
 	for _, paramRef2 := range params2 {
 		param2, err := derefParam(paramRef2)
 		if err != nil {
