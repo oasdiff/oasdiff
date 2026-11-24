@@ -18,6 +18,8 @@ That suits anything that already knows which files changed and needs a single ve
 
 ## Behavior
 
+Each comparison runs the same checks as `oasdiff breaking`, so what the docs say about `breaking` applies to `breaking-files` too, unless this page says otherwise.
+
 A spec that is not in the base ref is newly added and is skipped, since a new API has no prior version to break:
 
 ```
