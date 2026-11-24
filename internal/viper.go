@@ -76,9 +76,7 @@ func ignoreKeysWithoutFlag(cmd *cobra.Command, v IViper) {
 	if cmd == nil {
 		return
 	}
-	configType := reflect.TypeFor[Config]()
-	for i := range configType.NumField() {
-		field := configType.Field(i)
+	for field := range reflect.TypeFor[Config]().Fields() {
 		key := field.Tag.Get("mapstructure")
 		if cmd.Flag(key) == nil {
 			v.Set(key, reflect.Zero(field.Type).Interface())
