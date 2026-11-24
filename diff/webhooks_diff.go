@@ -60,14 +60,9 @@ func getWebhooksDiffInternal(config *Config, state *state, webhooks1, webhooks2 
 	result.Added = added
 	result.Deleted = deleted
 
+	pairs := getWebhookPairs(webhooks1, webhooks2)
 	for _, name := range common {
-		// Webhooks don't have path parameters, so we pass an empty PathParamsMap
-		pathItemPair := &pathItemPair{
-			PathItem1:     webhooks1[name],
-			PathItem2:     webhooks2[name],
-			PathParamsMap: PathParamsMap{},
-		}
-		pathDiff, err := getPathDiff(config, state, pathItemPair)
+		pathDiff, err := getPathDiff(config, state, pairs[name])
 		if err != nil {
 			return nil, err
 		}
@@ -80,6 +75,21 @@ func getWebhooksDiffInternal(config *Config, state *state, webhooks1, webhooks2 
 	result.Revision = webhooks2
 
 	return result, nil
+}
+
+// getWebhookPairs pairs the webhooks present in both specs, by name.
+// Webhooks have no path parameters, so PathParamsMap is empty.
+func getWebhookPairs(webhooks1, webhooks2 map[string]*openapi3.PathItem) pathItemPairs {
+	result := pathItemPairs{}
+	_, _, common := keysDiff(webhooks1, webhooks2)
+	for _, name := range common {
+		result[name] = &pathItemPair{
+			PathItem1:     webhooks1[name],
+			PathItem2:     webhooks2[name],
+			PathParamsMap: PathParamsMap{},
+		}
+	}
+	return result
 }
 
 func (webhooksDiff *WebhooksDiff) getSummary() *SummaryDetails {
