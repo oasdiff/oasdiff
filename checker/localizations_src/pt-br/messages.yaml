@@ -948,7 +948,7 @@ response-property-property-names-added: adicionada a restrição 'propertyNames'
 response-property-property-names-removed: removida a restrição 'propertyNames' da propriedade de resposta %s para o status %s
 response-property-additional-properties-narrowed: "restringido 'additionalProperties' da propriedade de resposta %s de %s para %s para o status %s"
 response-property-additional-properties-widened: "ampliado 'additionalProperties' da propriedade de resposta %s de %s para %s para o status %s"
-response-property-added-to-closed-object: "a propriedade %s foi adicionada à resposta com o status %s, que tem 'additionalProperties: false'"
+response-property-added-to-closed-object: "a propriedade %s foi adicionada à resposta com o status %s, que tem '%s'"
 request-body-property-names-added-description: restrição 'propertyNames' adicionada ao corpo da requisição
 request-body-property-names-removed-description: restrição 'propertyNames' removida do corpo da requisição
 request-body-additional-properties-narrowed-description: "'additionalProperties' restringido no corpo da requisição"
