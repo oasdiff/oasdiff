@@ -387,21 +387,71 @@ func Test_BreakingChangesFlattenCommonParams(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking ../data/common-params/params_in_path.yaml ../data/common-params/params_in_op.yaml --flatten-params --fail-on ERR"), io.Discard, io.Discard))
 }
 
-func Test_BreakingChangesCaseInsensitiveHeaders(t *testing.T) {
+// The checks compare header names ignoring case, since HTTP header names are
+// case-insensitive: a header renamed only in case is not a change.
+func Test_ChecksIgnoreHeaderCase(t *testing.T) {
+	for _, command := range []string{"breaking", "changelog"} {
+		var stdout bytes.Buffer
+		require.Zero(t, internal.Run(cmdToArgs("oasdiff "+command+" ../data/header-case/base.yaml ../data/header-case/revision.yaml --fail-on WARN"), &stdout, io.Discard), command)
+		require.NotContains(t, strings.ToLower(stdout.String()), "x-case", command)
+	}
+}
+
+// --case-insensitive-headers is deprecated and ignored in the commands that
+// run the checks, and a regular flag in diff.
+func Test_CaseInsensitiveHeadersDeprecatedInChecksOnly(t *testing.T) {
+	const specs = "../data/header-case/base.yaml ../data/header-case/revision.yaml"
+
+	for _, value := range []string{"", "=false"} {
+		var stdout, stderr bytes.Buffer
+		require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking "+specs+" --fail-on WARN --case-insensitive-headers"+value), &stdout, &stderr), value)
+		require.Contains(t, stderr.String(), "Flag --case-insensitive-headers is deprecated")
+	}
+
+	var stdout, stderr bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff breaking --help"), &stdout, &stderr))
+	require.NotContains(t, stdout.String(), "--case-insensitive-headers")
+
+	stdout.Reset()
+	stderr.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff "+specs+" --case-insensitive-headers"), &stdout, &stderr))
+	require.Empty(t, stderr.String())
+
+	stdout.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff --help"), &stdout, &stderr))
+	require.Contains(t, stdout.String(), "--case-insensitive-headers")
+}
+
+// The checks print a header name as written, with the flag or without it.
+func Test_ChecksPrintHeaderNamesAsWritten(t *testing.T) {
+	for _, flag := range []string{"", " --case-insensitive-headers"} {
+		var stdout bytes.Buffer
+		require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/header-case/base.yaml ../data/header-case/required.yaml"+flag), &stdout, io.Discard), flag)
+		require.Contains(t, stdout.String(), "X-Case", flag)
+	}
+}
+
+// diff and summary report the documents as written, so a header renamed only
+// in case is a deleted and an added header.
+func Test_DiffReportsHeaderCase(t *testing.T) {
+	var stdout bytes.Buffer
+	require.NotZero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --fail-on-diff"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "X-Case")
+	require.Contains(t, stdout.String(), "x-case")
+	require.Contains(t, stdout.String(), "X-RateLimit-Limit")
+
+	stdout.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff summary ../data/header-case/base.yaml ../data/header-case/revision.yaml"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "diff: true")
+}
+
+// --case-insensitive-headers lowercases header names before the diff
+func Test_DiffCaseInsensitiveHeaders(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers --fail-on-diff"), io.Discard, io.Discard))
-}
 
-// Case-insensitive header comparison is now the default; specs that differ
-// only in header case should produce no diff without any flag.
-func Test_BreakingChangesCaseInsensitiveHeadersDefault(t *testing.T) {
-	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --fail-on-diff"), io.Discard, io.Discard))
-}
-
-// --case-insensitive-headers=false restores the previous behaviour: the
-// case-only header difference is reported and --fail-on-diff exits non-zero.
-func Test_DiffCaseSensitiveHeadersOptOut(t *testing.T) {
-	exit := internal.Run(cmdToArgs("oasdiff diff ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers=false --fail-on-diff"), io.Discard, io.Discard)
-	require.NotZero(t, exit, "expected non-zero exit when case-only header differences are surfaced")
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff summary ../data/header-case/base.yaml ../data/header-case/revision.yaml --case-insensitive-headers"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "diff: false")
 }
 
 func Test_FlattenCmdOK(t *testing.T) {

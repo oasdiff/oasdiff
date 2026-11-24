@@ -3,6 +3,7 @@ package checker
 import (
 	"strings"
 
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/diff"
 )
@@ -171,16 +172,26 @@ func APIComponentsSecurityUpdatedCheck(diffReport *diff.Diff, operationsSources 
 		} else {
 			// under a type change, the old type's fields disappear and the new
 			// type's appear; reporting each would repeat the type change
-			result = append(result, checkWireFieldUpdates(updatedSecurity, updatedSecurityName, baseSource, revisionSource)...)
+			sentInHeader := updatedSecurity.InDiff == nil && sentIn(diffReport.ComponentsDiff.SecuritySchemesDiff.Base[updatedSecurityName]) == openapi3.ParameterInHeader
+			result = append(result, checkWireFieldUpdates(updatedSecurity, updatedSecurityName, sentInHeader, baseSource, revisionSource)...)
 		}
 	}
 
 	return result
 }
 
+// sentIn returns where an apiKey security scheme is sent: header, query or cookie.
+func sentIn(scheme *openapi3.SecuritySchemeRef) string {
+	if scheme == nil || scheme.Value == nil {
+		return ""
+	}
+	return scheme.Value.In
+}
+
 // checkWireFieldUpdates reports changes to the fields that tell a client how
-// to send its credentials.
-func checkWireFieldUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string, baseSource, revisionSource *Source) Changes {
+// to send its credentials. sentInHeader is true for an apiKey sent in a header
+// on both sides.
+func checkWireFieldUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecurityName string, sentInHeader bool, baseSource, revisionSource *Source) Changes {
 	result := make(Changes, 0)
 
 	report := func(id string, level Level, valueDiff *diff.ValueDiff) {
@@ -195,7 +206,13 @@ func checkWireFieldUpdates(updatedSecurity *diff.SecuritySchemeDiff, updatedSecu
 		}.WithSources(baseSource, revisionSource))
 	}
 
-	report(APIComponentsSecurityApiKeyNameUpdatedId, ERR, updatedSecurity.NameDiff)
+	// the name of a header is case-insensitive (RFC 9110, section 5.1)
+	if nameDiff := updatedSecurity.NameDiff; nameDiff != nil {
+		caseOnly := sentInHeader && strings.EqualFold(interfaceToString(nameDiff.From), interfaceToString(nameDiff.To))
+		if !caseOnly {
+			report(APIComponentsSecurityApiKeyNameUpdatedId, ERR, nameDiff)
+		}
+	}
 	report(APIComponentsSecurityApiKeyInUpdatedId, ERR, updatedSecurity.InDiff)
 	// HTTP authentication scheme names are case-insensitive (RFC 9110, section 11.1)
 	if schemeDiff := updatedSecurity.SchemeDiff; schemeDiff != nil && !strings.EqualFold(interfaceToString(schemeDiff.From), interfaceToString(schemeDiff.To)) {
