@@ -79,17 +79,3 @@ func getOperationsParameters(config *Config, state *state, pathItemPairs pathIte
 	}
 	return result, nil
 }
-
-// getWebhookPairs matches webhooks by name, as WebhooksDiff does.
-func getWebhookPairs(webhooks1, webhooks2 map[string]*openapi3.PathItem) pathItemPairs {
-	result := pathItemPairs{}
-	_, _, common := keysDiff(webhooks1, webhooks2)
-	for _, name := range common {
-		result[name] = &pathItemPair{
-			PathItem1:     webhooks1[name],
-			PathItem2:     webhooks2[name],
-			PathParamsMap: PathParamsMap{},
-		}
-	}
-	return result
-}
