@@ -66,7 +66,7 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	result.SummaryDiff = getValueDiffConditional(config.IsExcludeSummary(), operation1.Summary, operation2.Summary)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), operation1.Description, operation2.Description)
 	result.OperationIDDiff = getValueDiff(operation1.OperationID, operation2.OperationID)
-	result.ParametersDiff, err = getParametersDiffByLocation(config, state, operation1.Parameters, operation2.Parameters, pathParamsMap)
+	result.ParametersDiff, err = getParametersDiffByLocation(config, state, operation1.Parameters, operation2.Parameters, pathParamsMap, headerNamesAsWritten)
 	if err != nil {
 		return nil, err
 	}

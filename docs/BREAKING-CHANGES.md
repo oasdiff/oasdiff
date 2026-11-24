@@ -84,6 +84,7 @@ How oasdiff pairs up base and revision and what counts as a difference.
 - [Endpoint matching](MATCHING-ENDPOINTS.md): rename a path parameter without it counting as a new endpoint (`--include-path-params` turns this off)
 - [Subschema matching](MATCHING-SUBSCHEMAS.md): move an inline schema into `components` without a false report (`--match-inline-refs=false` turns this off)
 - [Path-level parameters](COMMON-PARAMS.md): a parameter declared once for a whole path is checked on every operation under it, and moving it between the path and its operations is not a change
+- [Case-insensitive header comparison](HEADER-DIFF.md): `Content-Type` and `content-type` are the same header, so renaming a header only in case is not a change
 - [Enum values](EXTENSIBLE-ENUM.md): add a value to an enum that clients receive, with `x-extensible-enum`
 
 ### Normalization
@@ -91,7 +92,6 @@ Align each spec before comparing so equivalent things line up.
 
 - [Merge `allOf` schemas](ALLOF.md): get exact results, not warnings, for schemas that use `allOf`, with `--flatten-allof`
 - [Path prefix modification](PATH-PREFIX.md): compare an API that moved to a new base path, with `--prefix-base`, `--prefix-revision`, `--strip-prefix-base` and `--strip-prefix-revision`
-- [Case-insensitive header comparison](HEADER-DIFF.md): treat `Content-Type` and `content-type` as the same header (`--case-insensitive-headers=false` turns this off)
 
 ### API lifecycle
 Communicate intent across versions.

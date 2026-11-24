@@ -54,6 +54,8 @@ Date:   Thu May 28 15:14:56 2026 +0300
 Added openapi.yaml
 ```
 
+The driver runs the same checks as `oasdiff changelog`, so what the docs say about `changelog` applies to the driver too.
+
 Without `--ext-diff`, git falls back to the raw text diff. To make `--ext-diff` the default for a workflow, set `diff.external` in git config (see git's docs).
 
 ## What's handled

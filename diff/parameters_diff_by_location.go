@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -89,8 +90,16 @@ func (diff *ParametersDiffByLocation) addModifiedParam(param *openapi3.Parameter
 	}
 }
 
-func getParametersDiffByLocation(config *Config, state *state, params1, params2 openapi3.Parameters, pathParamsMap PathParamsMap) (*ParametersDiffByLocation, error) {
-	diff, err := getParametersDiffByLocationInternal(config, state, params1, params2, pathParamsMap)
+// headerNames says how the names of header parameters are compared.
+type headerNames bool
+
+const (
+	headerNamesAsWritten    headerNames = false
+	headerNamesIgnoringCase headerNames = true
+)
+
+func getParametersDiffByLocation(config *Config, state *state, params1, params2 openapi3.Parameters, pathParamsMap PathParamsMap, headerNames headerNames) (*ParametersDiffByLocation, error) {
+	diff, err := getParametersDiffByLocationInternal(config, state, params1, params2, pathParamsMap, headerNames)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +111,7 @@ func getParametersDiffByLocation(config *Config, state *state, params1, params2 
 	return diff, nil
 }
 
-func getParametersDiffByLocationInternal(config *Config, state *state, params1, params2 openapi3.Parameters, pathParamsMap PathParamsMap) (*ParametersDiffByLocation, error) {
+func getParametersDiffByLocationInternal(config *Config, state *state, params1, params2 openapi3.Parameters, pathParamsMap PathParamsMap, headerNames headerNames) (*ParametersDiffByLocation, error) {
 
 	result := newParametersDiffByLocation()
 
@@ -128,7 +137,7 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 			continue
 		}
 
-		param2, err := findParam(param1, params2, pathParamsMap)
+		param2, err := findParam(param1, params2, pathParamsMap, headerNames)
 		if err != nil {
 			return nil, err
 		}
@@ -137,6 +146,9 @@ func getParametersDiffByLocationInternal(config *Config, state *state, params1, 
 			diff, err := getParameterDiff(config, state, param1, param2)
 			if err != nil {
 				return nil, err
+			}
+			if diff != nil && headerNames == headerNamesIgnoringCase && sameHeaderParam(param1, param2) {
+				diff.NameDiff = nil
 			}
 
 			if !diff.Empty() {
@@ -176,8 +188,7 @@ func derefParam(ref *openapi3.ParameterRef) (*openapi3.Parameter, error) {
 }
 
 // findParam looks for a param that matches param1 in params2 taking into account param renaming through pathParamsMap
-func findParam(param1 *openapi3.Parameter, params2 openapi3.Parameters, pathParamsMap PathParamsMap) (*openapi3.Parameter, error) {
-	// TODO: optimize with a map
+func findParam(param1 *openapi3.Parameter, params2 openapi3.Parameters, pathParamsMap PathParamsMap, headerNames headerNames) (*openapi3.Parameter, error) {
 	for _, paramRef2 := range params2 {
 		param2, err := derefParam(paramRef2)
 		if err != nil {
@@ -194,7 +205,26 @@ func findParam(param1 *openapi3.Parameter, params2 openapi3.Parameters, pathPara
 		}
 	}
 
+	if headerNames == headerNamesAsWritten {
+		return nil, nil
+	}
+
+	// a header written with the same case on both sides is matched above
+	for _, paramRef2 := range params2 {
+		if sameHeaderParam(param1, paramRef2.Value) {
+			return paramRef2.Value, nil
+		}
+	}
+
 	return nil, nil
+}
+
+// sameHeaderParam reports whether the two are header parameters whose names
+// differ at most in case: HTTP header names are case-insensitive.
+func sameHeaderParam(param1, param2 *openapi3.Parameter) bool {
+	return param1.In == openapi3.ParameterInHeader &&
+		param2.In == openapi3.ParameterInHeader &&
+		strings.EqualFold(param1.Name, param2.Name)
 }
 
 func equalParams(param1 *openapi3.Parameter, param2 *openapi3.Parameter, pathParamsMap PathParamsMap) (bool, error) {

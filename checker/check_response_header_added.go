@@ -30,11 +30,11 @@ func ResponseHeaderAddedCheck(diffReport *diff.Diff, operationsSources diff.Oper
 			}
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
+				if responseDiff.HeadersDiffIgnoringCase == nil {
 					continue
 				}
 
-				for _, headerName := range responseDiff.HeadersDiff.Added {
+				for _, headerName := range responseDiff.HeadersDiffIgnoringCase.Added {
 					if responseDiff.Revision.Headers[headerName] == nil {
 						continue
 					}
