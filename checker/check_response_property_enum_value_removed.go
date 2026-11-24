@@ -18,7 +18,7 @@ func ResponseParameterEnumValueRemovedCheck(diffReport *diff.Diff, operationsSou
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
 		info.walkProperties(func(p propertyInfo) {
 			for _, enumVal := range deletedEnumValues(p.propertyDiff) {
-				if enclosingSchemaAcceptsOnBothSides(p, enumVal) {
+				if enclosingSchemaAcceptsOnBothSides(diffReport, p, enumVal) {
 					continue
 				}
 

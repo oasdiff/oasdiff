@@ -28,7 +28,7 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 			}
 
 			for _, enumVal := range addedEnumValues(p.propertyDiff) {
-				if enclosingSchemaAcceptsOnBothSides(p, enumVal) {
+				if enclosingSchemaAcceptsOnBothSides(diffReport, p, enumVal) {
 					continue
 				}
 

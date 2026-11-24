@@ -36,3 +36,9 @@ components:
             enum: [small, large]
           - type: string
             pattern: ^x
+        nickname:
+          description: Known nicknames, any other nickname, or none.
+          anyOf:
+          - type: [string, "null"]
+            enum: [available, pending, null]
+          - type: [string, "null"]

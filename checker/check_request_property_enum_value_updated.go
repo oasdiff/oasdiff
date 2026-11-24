@@ -22,7 +22,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
 			for _, enumVal := range deletedEnumValues(p.propertyDiff) {
-				if enclosingSchemaAcceptsOnBothSides(p, enumVal) {
+				if enclosingSchemaAcceptsOnBothSides(diffReport, p, enumVal) {
 					continue
 				}
 
@@ -41,7 +41,7 @@ func RequestPropertyEnumValueUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			}
 
 			for _, enumVal := range addedEnumValues(p.propertyDiff) {
-				if enclosingSchemaAcceptsOnBothSides(p, enumVal) {
+				if enclosingSchemaAcceptsOnBothSides(diffReport, p, enumVal) {
 					continue
 				}
 

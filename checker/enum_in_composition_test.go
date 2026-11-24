@@ -11,9 +11,15 @@ import (
 func enumInCompositionChanges(t *testing.T, check checker.BackwardCompatibilityCheck) checker.Changes {
 	t.Helper()
 
-	s1, err := open("../data/checker/enum_in_composition_base.yaml")
+	return enumInCompositionChangesOf(t, "enum_in_composition", check)
+}
+
+func enumInCompositionChangesOf(t *testing.T, fixture string, check checker.BackwardCompatibilityCheck) checker.Changes {
+	t.Helper()
+
+	s1, err := open("../data/checker/" + fixture + "_base.yaml")
 	require.NoError(t, err)
-	s2, err := open("../data/checker/enum_in_composition_revision.yaml")
+	s2, err := open("../data/checker/" + fixture + "_revision.yaml")
 	require.NoError(t, err)
 
 	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
@@ -47,7 +53,8 @@ func TestResponsePropertyEnumValueAddedInComposition(t *testing.T) {
 }
 
 // a value removed from an enum in an anyOf branch stays valid through the
-// branch that accepts every string
+// branch that accepts every string, null included through a branch whose
+// type list has it
 func TestResponsePropertyEnumValueRemovedInComposition(t *testing.T) {
 	require.Empty(t, enumInCompositionChanges(t, checker.ResponseParameterEnumValueRemovedCheck))
 }
@@ -59,4 +66,45 @@ func TestRequestPropertyEnumValueUpdatedInComposition(t *testing.T) {
 
 	require.Equal(t, []string{checker.RequestPropertyEnumValueAddedId}, changeIds(changes))
 	require.Equal(t, []any{"medium", "size/oneOf[subschema #1]"}, changes[0].GetArgs())
+}
+
+// an enum under items or additionalProperties restricts a different value
+// than the schema holding it, an allOf branch's enum applies to every value,
+// and a const sibling accepts only its own value, so each removal is reported
+func TestResponsePropertyEnumValueRemovedOutsideOpenComposition(t *testing.T) {
+	changes := enumInCompositionChangesOf(t, "enum_in_composition_reported", checker.ResponseParameterEnumValueRemovedCheck)
+
+	require.ElementsMatch(t, [][]any{
+		{"brown", "tags/items", "200"},
+		{"brown", "traits/additionalProperties", "200"},
+		{"bird", "kind/anyOf[subschema #1]", "200"},
+		{"pug", "breed/allOf[subschema #2]", "200"},
+	}, changeArgs(changes))
+}
+
+func TestRequestPropertyEnumValueRemovedOutsideOpenComposition(t *testing.T) {
+	changes := enumInCompositionChangesOf(t, "enum_in_composition_reported", checker.RequestPropertyEnumValueUpdatedCheck)
+
+	require.ElementsMatch(t, [][]any{
+		{"brown", "tags/items"},
+		{"brown", "traits/additionalProperties"},
+		{"bird", "kind/anyOf[subschema #1]"},
+		{"pug", "breed/allOf[subschema #2]"},
+	}, changeArgs(changes))
+}
+
+// OpenAPI 3.0 reads nullable on the sibling branch, so null removed from the
+// enum stays valid
+func TestPropertyEnumValueRemovedInComposition30(t *testing.T) {
+	require.Empty(t, enumInCompositionChangesOf(t, "enum_in_composition_30", checker.ResponseParameterEnumValueRemovedCheck))
+	require.Empty(t, enumInCompositionChangesOf(t, "enum_in_composition_30", checker.RequestPropertyEnumValueUpdatedCheck))
+}
+
+func changeArgs(changes checker.Changes) [][]any {
+	args := make([][]any, 0, len(changes))
+	for _, change := range changes {
+		args = append(args, change.GetArgs())
+	}
+
+	return args
 }
