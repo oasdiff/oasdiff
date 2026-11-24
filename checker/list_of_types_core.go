@@ -47,7 +47,7 @@ func checkPropertyListOfTypesChange(opInfo opInfo, root *diff.SchemaDiff, proper
 		}
 	}
 
-	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, propertyDiff, "type")
+	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.operations, propertyDiff, "type")
 	result = append(result, opInfo.NewApiChange(
 		messageId,
 		args,
@@ -93,7 +93,7 @@ func checkBodyListOfTypesChange(opInfo opInfo, schemaDiff *diff.SchemaDiff, medi
 		}
 	}
 
-	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, schemaDiff, "type")
+	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.operations, schemaDiff, "type")
 	result = append(result, opInfo.NewApiChange(
 		messageId,
 		args,
@@ -126,7 +126,7 @@ func checkParameterListOfTypesChange(opInfo opInfo, paramDiff *diff.ParameterDif
 		args = []any{param.In, param.Name, joinTypes(listDiff.Added)}
 	}
 
-	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, paramDiff.SchemaDiff, "type")
+	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.operations, paramDiff.SchemaDiff, "type")
 	result = append(result, opInfo.NewApiChange(
 		messageId,
 		args,
@@ -160,7 +160,7 @@ func checkParameterPropertyListOfTypesChange(opInfo opInfo, root *diff.SchemaDif
 		args = []any{schemawalk.PropertyFullName(propertyPath, propertyName), param.In, param.Name, joinTypes(listDiff.Added)}
 	}
 
-	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.methodDiff, propertyDiff, "type")
+	baseSource, revisionSource := location.SchemaFieldSources(opInfo.operationsSources, opInfo.operations, propertyDiff, "type")
 	result = append(result, opInfo.NewApiChange(
 		messageId,
 		args,

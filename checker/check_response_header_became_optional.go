@@ -20,7 +20,7 @@ func ResponseHeaderBecameOptionalCheck(diffReport *diff.Diff, operationsSources 
 			return
 		}
 
-		baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+		baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.operations, h.responseDiff, h.headerDiff)
 		result = append(result, h.opInfo.NewApiChange(
 			ResponseHeaderBecameOptionalId,
 			[]any{h.name, h.responseStatus},

@@ -66,7 +66,7 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	result.SummaryDiff = getValueDiffConditional(config.IsExcludeSummary(), operation1.Summary, operation2.Summary)
 	result.DescriptionDiff = getValueDiffConditional(config.IsExcludeDescription(), operation1.Description, operation2.Description)
 	result.OperationIDDiff = getValueDiff(operation1.OperationID, operation2.OperationID)
-	result.ParametersDiff, err = getParametersDiffByLocation(config, state, operation1.Parameters, operation2.Parameters, pathParamsMap)
+	result.ParametersDiff, err = getParametersDiffByLocation(config, state, operation1.Parameters, operation2.Parameters, pathParamsMap, headerNamesAsWritten)
 	if err != nil {
 		return nil, err
 	}
@@ -96,4 +96,14 @@ func getMethodDiffInternal(config *Config, state *state, operation1, operation2 
 	result.Revision = operation2
 
 	return result, nil
+}
+
+// BaseAndRevision returns the operation in the base spec and in the revision spec.
+func (methodDiff *MethodDiff) BaseAndRevision() (base, revision *openapi3.Operation) {
+	return methodDiff.Base, methodDiff.Revision
+}
+
+// RevisionOperation returns the operation in the revision spec.
+func (methodDiff *MethodDiff) RevisionOperation() *openapi3.Operation {
+	return methodDiff.Revision
 }
