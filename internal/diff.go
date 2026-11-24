@@ -38,7 +38,7 @@ func runDiff(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 		flags.addExcludeElements(diff.ExcludeEndpointsOption)
 	}
 
-	diffResult, err := calcDiff(flags)
+	diffResult, err := calcDiff(flags, flags.getCaseInsensitiveHeaders())
 	if err != nil {
 		return false, err
 	}
@@ -69,16 +69,18 @@ func outputDiff(stdout io.Writer, diffReport *diff.Diff, format string) *ReturnE
 	return nil
 }
 
-func calcDiff(flags *Flags) (*diffResult, *ReturnError) {
+// calcDiff loads the specs and compares them. lowercaseHeaders lowercases
+// header names in the specs before the comparison.
+func calcDiff(flags *Flags, lowercaseHeaders bool) (*diffResult, *ReturnError) {
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
 
 	if flags.getComposed() {
-		return composedDiff(loader, flags)
+		return composedDiff(loader, flags, lowercaseHeaders)
 	}
 
-	return normalDiff(loader, flags)
+	return normalDiff(loader, flags, lowercaseHeaders)
 }
 
 type diffResult struct {
@@ -111,11 +113,11 @@ func loaderForOpen[F any](open bool, plain, capture F) F {
 	return plain
 }
 
-func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
+func normalDiff(loader *openapi3.Loader, flags *Flags, lowercaseHeaders bool) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
-	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
+	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), lowercaseHeaders)
 
 	newSpecInfo := loaderForOpen(flags.getOpen(), load.NewSpecInfo, load.NewSpecInfoWithCapture)
 
@@ -150,11 +152,11 @@ func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnErro
 	return r, nil
 }
 
-func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
+func composedDiff(loader *openapi3.Loader, flags *Flags, lowercaseHeaders bool) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
 	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
-	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
+	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), lowercaseHeaders)
 
 	newGlob := loaderForOpen(flags.getOpen(), load.NewSpecInfoFromGlob, load.NewSpecInfoFromGlobWithCapture)
 
