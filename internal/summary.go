@@ -32,7 +32,7 @@ func getSummaryCmd() *cobra.Command {
 
 func runSummary(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
-	diffResult, err := calcDiff(flags, flags.getCaseInsensitiveHeaders())
+	diffResult, err := calcDiff(flags, flags.getDocumentView())
 	if err != nil {
 		return false, err
 	}

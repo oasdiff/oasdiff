@@ -97,7 +97,7 @@ endpoints:
 ```
 
 ## Excluding Specific Kinds of Changes
-Currently available on `diff` and `summary`.
+Available on `diff` and `summary`. `breaking` and `changelog` always compare everything their checks read. To turn a check off, [set its level to `none`](SEVERITY-LEVELS.md).
 
 You can use the `--exclude-elements` flag with to exclude one or more of the following:
 - Use `--exclude-elements examples` to exclude [Examples](https://swagger.io/specification/#example-object)
@@ -123,6 +123,8 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 ```
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
+
+Like `--exclude-elements`, this flag applies to `diff` and `summary`. In `breaking` and `changelog` it is deprecated: it is accepted and ignored.
 
 ## Matching Subschemas
 

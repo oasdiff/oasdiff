@@ -21,10 +21,29 @@ func NewFlags() *Flags {
 	}
 }
 
-func (flags *Flags) toConfig() *diff.Config {
+// documentView holds the options of diff and summary that change the specs
+// or leave parts of them out of the comparison. The checks compare the specs
+// in full and as written, so breaking and changelog use the zero value.
+type documentView struct {
+	lowercaseHeaders  bool
+	flattenParams     bool
+	excludeElements   []string
+	excludeExtensions []string
+}
+
+func (flags *Flags) getDocumentView() documentView {
+	return documentView{
+		lowercaseHeaders:  flags.getCaseInsensitiveHeaders(),
+		flattenParams:     flags.getFlattenParams(),
+		excludeElements:   flags.getExcludeElements(),
+		excludeExtensions: flags.getExcludeExtensions(),
+	}
+}
+
+func (flags *Flags) toConfig(view documentView) *diff.Config {
 	config := diff.NewConfig(
-		diff.WithExcludeElements(flags.getExcludeElements()),
-		diff.WithExcludeExtensions(flags.getExcludeExtensions()),
+		diff.WithExcludeElements(view.excludeElements),
+		diff.WithExcludeExtensions(view.excludeExtensions),
 	)
 	config.MatchPath = flags.v.GetString("match-path")
 	config.UnmatchPath = flags.v.GetString("unmatch-path")
@@ -167,10 +186,6 @@ func (flags *Flags) setBase(source *load.Source) {
 
 func (flags *Flags) setRevision(source *load.Source) {
 	flags.revision = source
-}
-
-func (flags *Flags) addExcludeElements(element string) {
-	flags.v.Set("exclude-elements", append(flags.getExcludeElements(), element))
 }
 
 func (flags *Flags) getSeverity() []string {

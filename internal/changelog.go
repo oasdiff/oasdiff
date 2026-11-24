@@ -49,9 +49,9 @@ func runChangelog(flags *Flags, stdout, stderr io.Writer) (bool, *ReturnError) {
 
 func getChangelog(flags *Flags, stdout, stderr io.Writer, level checker.Level, isBreaking bool) (bool, *ReturnError) {
 
-	// The checks compare header names ignoring case, so the specs keep their
-	// header names as written whatever the flag or the config file says.
-	diffResult, returnErr := calcDiff(flags, false)
+	// The checks compare the specs in full and as written, whatever the flags
+	// or the config file say. To turn a check off, set its level to none.
+	diffResult, returnErr := calcDiff(flags, documentView{})
 	if returnErr != nil {
 		return false, returnErr
 	}

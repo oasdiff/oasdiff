@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 
 	"slices"
@@ -57,6 +58,8 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 		return getErrConfigFileProblem(err)
 	}
 
+	ignoreKeysWithoutFlag(cmd, v)
+
 	// After CLI flags are bound, rewrite path-valued config-file values
 	// to be relative to the config file's directory (vs. cwd). Skips
 	// values where the user explicitly set the corresponding CLI flag —
@@ -64,6 +67,23 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 	resolveConfigRelativePaths(cmd, v)
 
 	return nil
+}
+
+// ignoreKeysWithoutFlag clears the configuration-file keys that are not flags
+// of cmd. One file serves every command, so it can hold keys of other
+// commands, and each command takes from it only what its own flags accept.
+func ignoreKeysWithoutFlag(cmd *cobra.Command, v IViper) {
+	if cmd == nil {
+		return
+	}
+	configType := reflect.TypeFor[Config]()
+	for i := range configType.NumField() {
+		field := configType.Field(i)
+		key := field.Tag.Get("mapstructure")
+		if cmd.Flag(key) == nil {
+			v.Set(key, reflect.Zero(field.Type).Interface())
+		}
+	}
 }
 
 // resolveConfigRelativePaths walks the documented path-valued config

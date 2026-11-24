@@ -71,12 +71,14 @@ var deprecatedFlags = map[string]string{
 	"flatten-params":   "it is no longer needed: path-level parameters are checked on every operation under the path",
 
 	"case-insensitive-headers": "it is ignored: the checks always compare header names case-insensitively",
+	"exclude-extensions":       "it is ignored: the checks always read the extensions they need; to turn a check off, set its level to none with --severity-levels",
 }
 
 // warnDeprecatedFlags writes a stderr notice for each deprecated flag the user
 // actually set on cmd. Stderr, never stdout, so it can't corrupt machine output.
-// A flag is deprecated only on the commands that hide it: --flatten-params and
-// --case-insensitive-headers are regular flags of diff and summary.
+// A flag is deprecated only on the commands that hide it: --flatten-params,
+// --case-insensitive-headers and --exclude-extensions are regular flags of diff
+// and summary.
 func warnDeprecatedFlags(cmd *cobra.Command) {
 	for name, guidance := range deprecatedFlags {
 		if f := cmd.Flags().Lookup(name); f != nil && f.Hidden && f.Changed {
@@ -115,6 +117,9 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	// The checks compare header names ignoring case, so the flag changes
 	// nothing here either.
 	hideFlag(cmd, "case-insensitive-headers")
+	// The checks read the extensions they need, so excluding one from the
+	// comparison is not offered here.
+	hideFlag(cmd, "exclude-extensions")
 }
 
 // addOpenFlags registers --open and its companion review-upload flags. Kept out
