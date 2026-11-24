@@ -23,7 +23,8 @@ type ParametersContext struct {
 // OperationParameters holds the parameters of one operation in both specs, and
 // their diff. The parameters are the operation's own and those of its path
 // item that it doesn't override. Header parameters are matched by name
-// ignoring case, since HTTP header names are case-insensitive.
+// ignoring case, in the override and in the diff, since HTTP header names are
+// case-insensitive.
 type OperationParameters struct {
 	OperationPair
 	// Webhook is true for an operation of a webhook. Path is then the
@@ -63,8 +64,8 @@ func getOperationsParameters(config *Config, state *state, pathItemPairs pathIte
 	result := []OperationParameters{}
 	for _, pair := range getOperationPairs(pathItemPairs) {
 		pathItemPair := pathItemPairs[pair.Path]
-		params1 := commonparams.Merge(pathItemPair.PathItem1.Parameters, pair.Base.Parameters)
-		params2 := commonparams.Merge(pathItemPair.PathItem2.Parameters, pair.Revision.Parameters)
+		params1 := commonparams.MergeIgnoringHeaderCase(pathItemPair.PathItem1.Parameters, pair.Base.Parameters)
+		params2 := commonparams.MergeIgnoringHeaderCase(pathItemPair.PathItem2.Parameters, pair.Revision.Parameters)
 		paramsDiff, err := getParametersDiffByLocation(config, state, params1, params2, pathItemPair.PathParamsMap, headerNamesIgnoringCase)
 		if err != nil {
 			return nil, err

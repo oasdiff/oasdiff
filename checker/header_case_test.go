@@ -109,3 +109,23 @@ func TestHeaderCase_LowercasedSpecs(t *testing.T) {
 	require.NoError(t, err)
 	require.Empty(t, checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO))
 }
+
+// an operation's header parameter overrides the path-level one whose name
+// differs only in case, so dropping the override changes one parameter
+func TestHeaderCase_OperationOverridesPathHeader(t *testing.T) {
+	s1, err := open("../data/header-case/override-base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/header-case/override-revision.yaml")
+	require.NoError(t, err)
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(allChecksConfig(), d, osm, checker.INFO)
+
+	requireSingleApiChange(t, checker.ApiChange{
+		Id:        checker.RequestParameterBecomeRequiredId,
+		Args:      []any{"header", "x-trace"},
+		Operation: "GET",
+		Path:      "/test",
+	}, errs)
+}
