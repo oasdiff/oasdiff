@@ -1,0 +1,73 @@
+openapi: 3.1.0
+info: {title: t, version: "1"}
+paths:
+  /plain:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Plain'}
+  /child:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Child'}
+  /wrapper:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Wrapper'}
+  /record:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Record'}
+components:
+  schemas:
+    Plain:
+      type: object
+      properties:
+        a: {type: string}
+        nested:
+          type: object
+          properties:
+            x: {type: string}
+      unevaluatedProperties: false
+    Parent:
+      type: object
+      properties:
+        p: {type: string}
+    Child:
+      type: object
+      allOf: [{$ref: '#/components/schemas/Parent'}]
+      properties:
+        c: {type: string}
+        shadow: {type: string}
+      unevaluatedProperties: false
+    BranchA:
+      type: object
+      properties:
+        kind: {type: string, const: a}
+    BranchB:
+      type: object
+      properties:
+        kind: {type: string, const: b}
+    Wrapper:
+      oneOf: [{$ref: '#/components/schemas/BranchA'}, {$ref: '#/components/schemas/BranchB'}]
+      unevaluatedProperties: false
+    Record:
+      type: object
+      properties:
+        r: {type: string}
+      unevaluatedProperties: {type: string}
