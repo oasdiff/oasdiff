@@ -3,7 +3,7 @@
 HTTP header names are case-insensitive (RFC 7230, RFC 9110): `Content-Type` and `content-type` are the same header. This applies to header parameters (`in: header`), response headers, and the header an `apiKey` security scheme is sent in (`in: header`). Query parameter and cookie names are case-sensitive.
 
 ## breaking and changelog
-`oasdiff breaking` and `oasdiff changelog` report what changed for clients, so they compare header names ignoring case. A header renamed only in case is not a change:
+`oasdiff breaking` and `oasdiff changelog` report what changed for clients, so they compare header names ignoring case. So do [`oasdiff breaking-files`](BREAKING-FILES.md) and the [git diff driver](GIT-DIFF-DRIVER.md), which run the same checks. A header renamed only in case is not a change:
 
 ```
 oasdiff changelog data/header-case/base.yaml data/header-case/revision.yaml
