@@ -80,8 +80,8 @@ func WithExcludeElements(excludeElements []string) Option {
 }
 
 // WithExcludeExtensions sets specific OpenAPI extension names to omit
-// from the diff (only takes effect when "extensions" is also in
-// ExcludeElements).
+// from the diff. Excluding "extensions" with WithExcludeElements omits all of
+// them.
 func WithExcludeExtensions(excludeExtensions []string) Option {
 	return func(c *Config) {
 		c.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)

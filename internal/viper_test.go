@@ -483,3 +483,18 @@ func TestViper_ConfigFlagWinsOverEnv(t *testing.T) {
 		internal.RunViper(&cmd, viper.New()),
 		"failed to load config file: invalid lang \"invalid\", allowed values: en, ru, pt-br, es")
 }
+
+// A key of the configuration file that is not a flag of the command is
+// ignored: the file serves every command.
+func TestViper_KeyWithoutFlagIsIgnored(t *testing.T) {
+	chdirIsolated(t)
+	writeFile(t, ".oasdiff.yaml", "exclude-elements:\n  - tags\nmatch-path: /api\n")
+
+	cmd := cobra.Command{}
+	cmd.PersistentFlags().String("match-path", "", "")
+
+	v := viper.New()
+	require.Nil(t, internal.RunViper(&cmd, v))
+	require.Empty(t, v.GetStringSlice("exclude-elements"))
+	require.Equal(t, "/api", v.GetString("match-path"))
+}

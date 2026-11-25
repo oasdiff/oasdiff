@@ -669,3 +669,83 @@ func Test_BreakingFiles_RequiresArgs(t *testing.T) {
 	require.Equal(t, 100, internal.Run(cmdToArgs("oasdiff breaking-files openapi.yaml"), io.Discard, &stderr))
 	require.Contains(t, stderr.String(), "please specify --base")
 }
+
+// changelogIds runs changelog on the excluded_elements fixtures with args
+// appended, and returns the ids it reports.
+func changelogIds(t *testing.T, args string) []string {
+	t.Helper()
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/checker/excluded_elements_base.yaml ../data/checker/excluded_elements_revision.yaml --format json"+args), &stdout, io.Discard), args)
+	changes := formatters.Changes{}
+	require.NoError(t, json.Unmarshal(stdout.Bytes(), &changes))
+	ids := []string{}
+	for _, change := range changes {
+		ids = append(ids, change.Id)
+	}
+	return ids
+}
+
+var excludedElementsIds = []string{
+	"api-stability-decreased",
+	"api-sunset-date-changed-earlier",
+	"request-property-x-extensible-enum-value-removed",
+	"api-tag-added",
+	"api-tag-removed",
+}
+
+// Excluding an extension from the diff does not turn off the checks that read
+// it.
+func Test_ChecksIgnoreExcludeExtensions(t *testing.T) {
+	for _, exclude := range []string{
+		"",
+		" --exclude-extensions x-stability-level,x-sunset,x-extensible-enum",
+		" --exclude-extensions x-internal,x-stability-level,x-sunset,x-extensible-enum",
+	} {
+		require.ElementsMatch(t, excludedElementsIds, changelogIds(t, exclude), exclude)
+	}
+}
+
+// exclude-elements is an option of diff and summary. In a configuration file
+// it leaves the checks as they are.
+func Test_ChecksIgnoreExcludeElementsInConfigFile(t *testing.T) {
+	config := filepath.Join(t.TempDir(), "oasdiff.yaml")
+	require.NoError(t, os.WriteFile(config, []byte("exclude-elements:\n  - extensions\n  - tags\nexclude-extensions:\n  - x-sunset\n"), 0o600))
+
+	require.ElementsMatch(t, excludedElementsIds, changelogIds(t, " --config "+config))
+
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff ../data/checker/excluded_elements_base.yaml ../data/checker/excluded_elements_revision.yaml --config "+config), &stdout, io.Discard))
+	require.NotContains(t, stdout.String(), "x-stability-level")
+	require.NotContains(t, stdout.String(), "billing")
+}
+
+// --exclude-extensions is deprecated and ignored in the commands that run the
+// checks, and a regular flag in diff.
+func Test_ExcludeExtensionsDeprecatedInChecksOnly(t *testing.T) {
+	const specs = "../data/checker/excluded_elements_base.yaml ../data/checker/excluded_elements_revision.yaml"
+
+	var stdout, stderr bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog "+specs+" --exclude-extensions x-sunset"), &stdout, &stderr))
+	require.Contains(t, stderr.String(), "Flag --exclude-extensions is deprecated")
+
+	stdout.Reset()
+	stderr.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog --help"), &stdout, &stderr))
+	require.NotContains(t, stdout.String(), "--exclude-extensions")
+
+	stdout.Reset()
+	stderr.Reset()
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff "+specs+" --exclude-extensions x-sunset"), &stdout, &stderr))
+	require.Empty(t, stderr.String())
+	require.NotContains(t, stdout.String(), "x-sunset")
+	require.Contains(t, stdout.String(), "x-stability-level")
+}
+
+// --flatten-params is ignored by the checks, so an operation header still
+// overrides the path-level one whose name differs only in case.
+func Test_ChecksIgnoreFlattenParams(t *testing.T) {
+	var stdout bytes.Buffer
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff changelog ../data/header-case/override-base.yaml ../data/header-case/override-revision.yaml --flatten-params"), &stdout, io.Discard))
+	require.Contains(t, stdout.String(), "request-parameter-became-required")
+	require.NotContains(t, stdout.String(), "request-parameter-removed")
+}
