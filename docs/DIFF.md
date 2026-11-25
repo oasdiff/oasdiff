@@ -107,6 +107,7 @@ You can use the `--exclude-elements` flag with to exclude one or more of the fol
 - Use `--exclude-elements summary` to exclude summary fields
 - Use `--exclude-elements endpoints` to exclude the [endpoints section of the diff](#paths-vs-endpoints)
 - Use `--exclude-elements tags` to exclude [Tags](https://swagger.io/specification/#tag-object), both the top-level list and the tags of each operation
+- Use `--exclude-elements servers` to exclude [Servers](https://swagger.io/specification/#server-object): the top-level list, the servers of each path and operation, and the server of each link
 
 For example, this diff excludes descriptions and examples:
 ```

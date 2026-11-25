@@ -120,6 +120,18 @@ func Test_JsonWithExcludeElements(t *testing.T) {
 	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff --format json --exclude-elements=description,title,summary ../data/description/spec1.yml ../data/description/spec2.yml --fail-on-diff"), io.Discard, io.Discard))
 }
 
+func Test_ExcludeServers(t *testing.T) {
+	const specs = "../data/servers/exclude-base.yaml ../data/servers/exclude-revision.yaml"
+
+	var stdout bytes.Buffer
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff diff "+specs+" --fail-on-diff"), &stdout, io.Discard))
+	for _, url := range []string{"https://www.example.com", "https://www.example.com/users", "https://www.example.com/users/list", "https://www.example.com/next"} {
+		require.Contains(t, stdout.String(), url+"\n")
+	}
+
+	require.Zero(t, internal.Run(cmdToArgs("oasdiff diff "+specs+" --exclude-elements servers --fail-on-diff"), io.Discard, io.Discard))
+}
+
 // Test_ExcludeExtensions tests the --exclude-extensions flag (issue #765)
 func Test_ExcludeExtensions(t *testing.T) {
 	// With --exclude-extensions flag, the x-amazon-apigateway-integration changes should be excluded
