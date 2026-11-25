@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /products:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plain:
+                  $ref: '#/components/schemas/Code'
+                excluded:
+                  type: string
+                  not:
+                    $ref: '#/components/schemas/Code'
+                twice:
+                  type: string
+                  not:
+                    not:
+                      $ref: '#/components/schemas/Reserved'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  excluded:
+                    type: string
+                    not:
+                      $ref: '#/components/schemas/Reserved'
+components:
+  schemas:
+    Code:
+      type: string
+      minLength: 5
+    Reserved:
+      type: string
+      minLength: 5

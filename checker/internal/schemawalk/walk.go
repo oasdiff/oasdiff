@@ -32,14 +32,18 @@ type Walker struct {
 type walkVisit struct {
 	schemaDiff *diff.SchemaDiff
 	underAllOf bool
+	// negated is set under an odd number of `not` keywords, where a change
+	// has the opposite effect on the values the schema accepts. A schema
+	// reached both ways is walked once for each.
+	negated bool
 }
 
 // Walk visits the sub-schemas of schemaDiff, starting from the schema itself.
 func (w Walker) Walk(schemaDiff *diff.SchemaDiff) {
-	w.walk("", "", schemaDiff, nil, false)
+	w.walk("", "", schemaDiff, nil, false, false)
 }
 
-func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool) {
+func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.SchemaDiff, parentDiff *diff.SchemaDiff, underAllOf bool, negated bool) {
 	if w.seen == nil {
 		w.seen = make(map[walkVisit]struct{})
 	}
@@ -48,7 +52,7 @@ func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.
 		nodePath = PropertyFullName(propertyPath, propertyName)
 	}
 
-	visit := walkVisit{schemaDiff: schemaDiff, underAllOf: underAllOf}
+	visit := walkVisit{schemaDiff: schemaDiff, underAllOf: underAllOf, negated: negated}
 	if w.arrive != nil {
 		w.arrive(nodePath, visit)
 	}
@@ -65,24 +69,24 @@ func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.
 
 	if schemaDiff.AllOfDiff != nil {
 		for _, v := range schemaDiff.AllOfDiff.Modified {
-			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("allOf[%s]", v)), "", v.Diff, schemaDiff, true)
+			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("allOf[%s]", v)), "", v.Diff, schemaDiff, true, negated)
 		}
 	}
 
 	if schemaDiff.AnyOfDiff != nil {
 		for _, v := range schemaDiff.AnyOfDiff.Modified {
-			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("anyOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf)
+			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("anyOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf, negated)
 		}
 	}
 
 	if schemaDiff.OneOfDiff != nil {
 		for _, v := range schemaDiff.OneOfDiff.Modified {
-			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("oneOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf)
+			w.walk(PropertyFullName(propertyPath, fmt.Sprintf("oneOf[%s]", v)), "", v.Diff, schemaDiff, underAllOf, negated)
 		}
 	}
 
 	if schemaDiff.ItemsDiff != nil {
-		w.walk(PropertyFullName(propertyPath, "items"), "", schemaDiff.ItemsDiff, schemaDiff, underAllOf)
+		w.walk(PropertyFullName(propertyPath, "items"), "", schemaDiff.ItemsDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.PropertiesDiff != nil {
@@ -91,68 +95,68 @@ func (w Walker) walk(propertyPath string, propertyName string, schemaDiff *diff.
 		}
 		for _, name := range slices.Sorted(maps.Keys(schemaDiff.PropertiesDiff.Modified)) {
 			v := schemaDiff.PropertiesDiff.Modified[name]
-			w.walk(propertyPath, name, v, schemaDiff, underAllOf)
+			w.walk(propertyPath, name, v, schemaDiff, underAllOf, negated)
 		}
 	}
 
 	if schemaDiff.AdditionalPropertiesDiff != nil {
-		w.walk(PropertyFullName(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, underAllOf)
+		w.walk(PropertyFullName(propertyPath, "additionalProperties"), "", schemaDiff.AdditionalPropertiesDiff, schemaDiff, underAllOf, negated)
 	}
 
 	// OpenAPI 3.1 / JSON Schema 2020-12 sub-schema fields
 	if schemaDiff.PrefixItemsDiff != nil {
 		for _, v := range schemaDiff.PrefixItemsDiff.Modified {
-			w.walk(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, schemaDiff, underAllOf)
+			w.walk(fmt.Sprintf("%s/prefixItems[%s]", propertyPath, v), "", v.Diff, schemaDiff, underAllOf, negated)
 		}
 	}
 
 	if schemaDiff.ContainsDiff != nil {
-		w.walk(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/contains", propertyPath), "", schemaDiff.ContainsDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.PropertyNamesDiff != nil {
-		w.walk(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/propertyNames", propertyPath), "", schemaDiff.PropertyNamesDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.UnevaluatedItemsDiff != nil {
-		w.walk(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/unevaluatedItems", propertyPath), "", schemaDiff.UnevaluatedItemsDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.UnevaluatedPropertiesDiff != nil {
-		w.walk(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/unevaluatedProperties", propertyPath), "", schemaDiff.UnevaluatedPropertiesDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.IfDiff != nil {
-		w.walk(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/if", propertyPath), "", schemaDiff.IfDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.ThenDiff != nil {
-		w.walk(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/then", propertyPath), "", schemaDiff.ThenDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.ElseDiff != nil {
-		w.walk(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/else", propertyPath), "", schemaDiff.ElseDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.NotDiff != nil {
-		w.walk(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/not", propertyPath), "", schemaDiff.NotDiff, schemaDiff, underAllOf, !negated)
 	}
 
 	if schemaDiff.ContentSchemaDiff != nil {
-		w.walk(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, schemaDiff, underAllOf)
+		w.walk(fmt.Sprintf("%s/contentSchema", propertyPath), "", schemaDiff.ContentSchemaDiff, schemaDiff, underAllOf, negated)
 	}
 
 	if schemaDiff.PatternPropertiesDiff != nil {
 		for _, i := range slices.Sorted(maps.Keys(schemaDiff.PatternPropertiesDiff.Modified)) {
 			v := schemaDiff.PatternPropertiesDiff.Modified[i]
-			w.walk(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, schemaDiff, underAllOf)
+			w.walk(fmt.Sprintf("%s/patternProperties[%s]", propertyPath, i), "", v, schemaDiff, underAllOf, negated)
 		}
 	}
 
 	if schemaDiff.DependentSchemasDiff != nil {
 		for _, i := range slices.Sorted(maps.Keys(schemaDiff.DependentSchemasDiff.Modified)) {
 			v := schemaDiff.DependentSchemasDiff.Modified[i]
-			w.walk(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, schemaDiff, underAllOf)
+			w.walk(fmt.Sprintf("%s/dependentSchemas[%s]", propertyPath, i), "", v, schemaDiff, underAllOf, negated)
 		}
 	}
 }

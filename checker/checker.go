@@ -47,7 +47,8 @@ func CheckBackwardCompatibilityUntilLevel(config *Config, diffReport *diff.Diff,
 	result = attachSharedSchemas(result)
 
 	// Runs before anything that reads a change's level.
-	result = capByGuards(config, result)
+	result = attachNegations(result)
+	result = levelByGuards(config, result)
 	result = capByDisclaimers(config, result)
 
 	filteredResult := make(Changes, 0)

@@ -17,8 +17,8 @@ func DeriveLevel(effect Effect, direction Direction, guards ...Guard) Level {
 }
 
 // applyGuards requalifies the effect and direction by the document states
-// the guards name: a guard either nullifies the effect on the side it
-// speaks about or changes which side the change is judged on.
+// the guards name: a guard nullifies the effect on the side it speaks about,
+// reverses it, or changes which side the change is judged on.
 func applyGuards(effect Effect, direction Direction, guards []Guard) (Effect, Direction) {
 	for _, g := range guards {
 		switch g {
@@ -43,6 +43,14 @@ func applyGuards(effect Effect, direction Direction, guards []Guard) (Effect, Di
 			// the property was required in requests before the change
 			if direction == DirectionRequest {
 				effect = EffectNone
+			}
+		case GuardNegated:
+			// the schema is under `not`
+			switch effect {
+			case EffectNarrows:
+				effect = EffectWidens
+			case EffectWidens:
+				effect = EffectNarrows
 			}
 		case GuardNegotiated:
 			// the client chooses or relies on the variant

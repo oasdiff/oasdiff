@@ -38,7 +38,7 @@ type ApiChange struct {
 	sharedSchema *SharedSchema
 
 	// guards holds the document states observed at the change's location
-	// (a readOnly or writeOnly property). capByGuards derives the level
+	// (a readOnly or writeOnly property). levelByGuards derives the level
 	// from them and keeps only the ones that changed it, which GetComment
 	// then explains.
 	guards []Guard
