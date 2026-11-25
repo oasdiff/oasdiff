@@ -24,7 +24,6 @@ func TestRuleLevel(t *testing.T) {
 	// Explicit downgrades.
 	require.Equal(t, checker.INFO, RuleLevel("example-violates-schema"))
 	require.Equal(t, checker.WARN, RuleLevel("default-violates-schema"))
-	require.Equal(t, checker.WARN, RuleLevel("conflicting-paths"))
 
 	// The version-gate family is derived from the id, not listed one by one,
 	// so a field gated upstream tomorrow is classified without a change here.
@@ -34,6 +33,8 @@ func TestRuleLevel(t *testing.T) {
 
 	// Everything else is an error, including an id we've never seen: a spec
 	// violation stays an error until someone decides otherwise.
+	require.Equal(t, checker.ERR, RuleLevel("conflicting-paths"))
+	require.Equal(t, checker.ERR, RuleLevel("duplicate-parameter"))
 	require.Equal(t, checker.ERR, RuleLevel("duplicate-operation-id"))
 	require.Equal(t, checker.ERR, RuleLevel("openapi-required"))
 	require.Equal(t, checker.ERR, RuleLevel("no-such-rule"))
@@ -122,6 +123,50 @@ components:
 openapi: 3.0.0
 info: { version: "1" }
 paths: {}
+`,
+		},
+		{
+			name: "conflicting paths violate OpenAPI MUST NOT",
+			id:   "conflicting-paths",
+			want: checker.ERR,
+			spec: `
+openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /users/{id}:
+    get:
+      responses:
+        "200":
+          description: ok
+  /users/{name}:
+    get:
+      responses:
+        "200":
+          description: ok
+`,
+		},
+		{
+			name: "duplicate parameter violates OpenAPI MUST NOT",
+			id:   "duplicate-parameter",
+			want: checker.ERR,
+			spec: `
+openapi: 3.0.0
+info: { title: t, version: "1" }
+paths:
+  /users:
+    get:
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ok
 `,
 		},
 	} {

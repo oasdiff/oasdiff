@@ -30,8 +30,7 @@ loader tracks origins). Output format is selectable: text by default,
 CI annotations that surface each finding inline on the pull request.
 
 Most findings are errors (the spec can't be reliably consumed). A few are
-downgraded: version-portability issues (a 3.1 field in an older doc),
-ambiguity or redundancy (conflicting paths, duplicate parameters), and a
+downgraded: version-portability issues (a 3.1 field in an older doc) and a
 default value that doesn't match its schema are warnings; an example that
 doesn't match its schema is info. Use --fail-on to control which severities
 fail the command.

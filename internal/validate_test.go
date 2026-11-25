@@ -560,18 +560,18 @@ func Test_ValidateCmd_MultipleClusters(t *testing.T) {
 }
 
 // Two path templates that differ only by parameter name → ConflictingPathsError
-// (a warning: the spec parses but routing is ambiguous).
+// (an error: the spec forbids identical templated path hierarchies with a MUST NOT).
 func Test_ValidateCmd_ConflictingPaths(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/conflicting-paths.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/conflicting-paths.yaml"), &stdout, io.Discard))
 	require.Contains(t, stdout.String(), "[conflicting-paths]")
 }
 
 // The same parameter (name + in) declared twice → DuplicateParameterError
-// (a warning: redundant, tools usually take the last).
+// (an error: the spec forbids duplicate parameters with a MUST NOT).
 func Test_ValidateCmd_DuplicateParameter(t *testing.T) {
 	var stdout bytes.Buffer
-	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate --fail-on INFO ../data/validate/duplicate-parameter.yaml"), &stdout, io.Discard))
+	require.Equal(t, 1, internal.Run(cmdToArgs("oasdiff validate ../data/validate/duplicate-parameter.yaml"), &stdout, io.Discard))
 	require.Contains(t, stdout.String(), "[duplicate-parameter]")
 }
 
