@@ -1,9 +1,12 @@
 package load_test
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -65,6 +68,55 @@ paths:
 			require.Error(t, err, "the capture reader must apply the policy")
 			var extErr *load.ExternalRefError
 			require.ErrorAs(t, err, &extErr, "callers map this type to a dedicated exit code")
+		})
+	}
+}
+
+// A URL is not the root document because its path is the root's path. A spec
+// could otherwise name any host, give the URL the path of the spec itself, and
+// have it fetched and captured with external refs disallowed.
+func TestCapture_UrlWithTheRootPathIsExternal(t *testing.T) {
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		_, _ = w.Write([]byte("Leak:\n  type: string\n"))
+	}))
+	defer server.Close()
+
+	dir, err := filepath.EvalSymlinks(t.TempDir())
+	require.NoError(t, err)
+	path := filepath.Join(dir, "openapi.yaml")
+	urlPath := "/" + strings.TrimPrefix(filepath.ToSlash(path), "/")
+	require.NoError(t, os.WriteFile(path, []byte(`openapi: 3.0.0
+info: {title: t, version: "1.0"}
+paths:
+  /a:
+    get:
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: "`+server.URL+urlPath+`#/Leak"
+`), 0o644))
+	t.Chdir(dir)
+
+	for _, tt := range []struct {
+		name   string
+		source string
+	}{
+		{"absolute root", path},
+		{"relative root", "openapi.yaml"},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			loader := openapi3.NewLoader()
+			loader.IsExternalRefsAllowed = false
+			_, err := load.NewSpecInfoWithCapture(loader, load.NewSource(tt.source))
+
+			var extErr *load.ExternalRefError
+			require.ErrorAs(t, err, &extErr)
+			require.Zero(t, requests, "the URL must not be requested")
 		})
 	}
 }

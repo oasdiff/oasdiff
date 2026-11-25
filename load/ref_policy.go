@@ -49,12 +49,19 @@ func (p refPolicy) checkLocation(loader *openapi3.Loader, location *url.URL) err
 	return &ExternalRefError{Ref: location.String()}
 }
 
-// sameLocation reports whether location is the root document. kin-openapi may
-// hand the reader an absolute or a cleaned form of the path it was given, so
-// compare both as given and resolved.
+// sameLocation reports whether location is the root document.
+//
+// A location with a scheme or a host is a URL, and is the root only when it
+// is the root as given: its path alone says nothing, since any host can serve
+// a path equal to the root's. A location with neither is a file path.
+// kin-openapi may hand the reader an absolute or a cleaned form of the path it
+// was given, so file paths are compared both as given and resolved.
 func sameLocation(location *url.URL, root string) bool {
 	if location.String() == root {
 		return true
+	}
+	if location.Scheme != "" || location.Host != "" {
+		return false
 	}
 	lp := filepath.FromSlash(location.Path)
 	if lp == root || filepath.Clean(lp) == filepath.Clean(root) {
