@@ -35,6 +35,16 @@ back to the operation it names, then, for a top-level change with no
 operation, the rule's Area (the OpenAPI object the rule concerns, e.g.
 "security" or "tags"; see checker.Area), then an "other changes" bucket.
 
+# References from an endpoint
+
+A change to an endpoint that is located in a component is listed in the
+component's block, which shows the edit but not the endpoint. So the endpoint's
+block is extracted as well, and records the change under References with the
+line of the $ref in the endpoint that leads to the component, directly or
+through other components. The $ref is taken from the part of the endpoint the
+change is about: its parameters, its request body or its responses. An
+endpoint block extracted only for its references has no ChangeIDs.
+
 # Slicing
 
 Slicing relies on kin-openapi origin end positions
