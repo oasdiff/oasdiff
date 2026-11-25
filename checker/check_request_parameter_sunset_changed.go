@@ -38,7 +38,7 @@ func RequestParameterSunsetChangedCheck(diffReport *diff.Diff, operationsSources
 		}
 		args := append([]any{p.location, p.name}, extra...)
 
-		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff, diff.SunsetExtension)
+		baseSource, revisionSource := location.ParameterFieldSources(operationsSources, p.opInfo.operations, p.paramDiff, diff.SunsetExtension)
 		if id == RequestParameterSunsetParseId {
 			// the revision's value is the one that failed to parse, so the base
 			// is not part of this finding

@@ -52,7 +52,7 @@ func ResponseHeaderTypeChangedCheck(diffReport *diff.Diff, operationsSources dif
 		id, comment := responseTypeChangeId(typeDiff, formatDiff, false, ResponseHeaderTypeCompatibleCommentId, schemaDiff,
 			ResponseHeaderTypeSpecializedId, ResponseHeaderTypeCompatibleId, ResponseHeaderTypeGeneralizedId, ResponseHeaderTypeChangedId)
 
-		baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.methodDiff, h.responseDiff, h.name)
+		baseSource, revisionSource := location.HeaderSources(operationsSources, h.opInfo.operations, h.responseDiff, h.headerDiff)
 		result = append(result, h.opInfo.NewApiChange(
 			id,
 			[]any{h.name, getTypeFormatDimension(schemaDiff), getBaseTypeFormat(schemaDiff), getRevisionTypeFormat(schemaDiff), h.responseStatus},

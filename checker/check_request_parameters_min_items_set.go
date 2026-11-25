@@ -23,7 +23,7 @@ func RequestParameterMinItemsSetCheck(diffReport *diff.Diff, operationsSources d
 			return
 		}
 
-		_, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
+		_, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "minItems")
 		result = append(result, p.opInfo.NewApiChange(
 			RequestParameterMinItemsSetId,
 			[]any{p.location, p.name, minItemsDiff.To},

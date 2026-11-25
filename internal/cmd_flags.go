@@ -21,7 +21,7 @@ func addCommonDiffFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Bool("match-inline-refs", true, "match validation-equivalent inline/$ref subschemas as the same anyOf/oneOf branch")
 	cmd.PersistentFlags().Bool("flatten-allof", false, "merge subschemas under allOf before diff")
 	cmd.PersistentFlags().Bool("flatten-params", false, "merge common parameters at path level with operation parameters")
-	cmd.PersistentFlags().Bool("case-insensitive-headers", true, "case-insensitive header name comparison (HTTP headers are case-insensitive per RFC 7230)")
+	cmd.PersistentFlags().Bool("case-insensitive-headers", false, "lowercase header names before diff (HTTP headers are case-insensitive per RFC 7230)")
 	cmd.PersistentFlags().StringSlice("exclude-extensions", nil, "OpenAPI Extension names to exclude from diff (e.g., x-internal)")
 	cmd.PersistentFlags().Bool("allow-external-refs", true, "allow external $refs in specs; disable to prevent SSRF when processing untrusted specs")
 	cmd.PersistentFlags().Bool("auto-upgrade", false, "canonicalize both specs to the latest OpenAPI 3.x before diffing; useful for cross-version comparisons (e.g. 3.0 vs 3.1)")
@@ -57,6 +57,19 @@ func hideFlag(cmd *cobra.Command, flag string) {
 	}
 }
 
+// ignoredAnnotation marks a flag that a command accepts and ignores.
+const ignoredAnnotation = "oasdiff_ignored"
+
+// ignoreFlag keeps a flag on cmd, so that command lines that pass it still
+// run, hides it from the help, and marks it so that RunViper clears its value.
+func ignoreFlag(cmd *cobra.Command, flag string) {
+	hideFlag(cmd, flag)
+	if err := cmd.PersistentFlags().SetAnnotation(flag, ignoredAnnotation, []string{"true"}); err != nil {
+		// we can ignore this error safely
+		_ = err
+	}
+}
+
 // deprecatedFlags maps a hidden, legacy flag to the guidance shown when it is
 // used. These stay hidden and functional (so existing scripts don't break) but
 // warn the user, via warnDeprecatedFlags, to move off them. We can't use cobra's
@@ -68,13 +81,20 @@ var deprecatedFlags = map[string]string{
 	"flatten":          "use --flatten-allof instead",
 	"max-circular-dep": "it is no longer needed and is ignored",
 	"include-checks":   "it is now ignored; use --severity-levels to enforce a check as breaking",
+	"flatten-params":   "it is no longer needed: path-level parameters are checked on every operation under the path",
+
+	"case-insensitive-headers": "it is ignored: the checks always compare header names case-insensitively",
+	"exclude-extensions":       "it is ignored: the checks always read the extensions they need; to turn a check off, set its level to none with --severity-levels",
 }
 
 // warnDeprecatedFlags writes a stderr notice for each deprecated flag the user
 // actually set on cmd. Stderr, never stdout, so it can't corrupt machine output.
+// A flag is deprecated only on the commands that hide it: --flatten-params,
+// --case-insensitive-headers and --exclude-extensions are regular flags of diff
+// and summary.
 func warnDeprecatedFlags(cmd *cobra.Command) {
 	for name, guidance := range deprecatedFlags {
-		if f := cmd.Flags().Lookup(name); f != nil && f.Changed {
+		if f := cmd.Flags().Lookup(name); f != nil && f.Hidden && f.Changed {
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "Flag --%s is deprecated: %s\n", name, guidance)
 		}
 	}
@@ -104,6 +124,12 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
 	enumWithOptions(cmd, newEnumValue(checker.GetSupportedStabilityLevels(), ""), "stability-level", "", "minimum stability level to include")
+	// The checks compare the specs in full and as written: the parameters each
+	// operation takes, header names ignoring case, and the extensions they
+	// need. So these flags of addCommonDiffFlags change nothing here.
+	ignoreFlag(cmd, "flatten-params")
+	ignoreFlag(cmd, "case-insensitive-headers")
+	ignoreFlag(cmd, "exclude-extensions")
 }
 
 // addOpenFlags registers --open and its companion review-upload flags. Kept out

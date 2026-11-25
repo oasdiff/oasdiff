@@ -28,11 +28,11 @@ func ResponseHeaderRemovedCheck(diffReport *diff.Diff, operationsSources diff.Op
 			}
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
+				if responseDiff.HeadersDiffIgnoringCase == nil {
 					continue
 				}
 
-				for _, headerName := range responseDiff.HeadersDiff.Deleted {
+				for _, headerName := range responseDiff.HeadersDiffIgnoringCase.Deleted {
 					if responseDiff.Base.Headers[headerName] == nil {
 						continue
 					}

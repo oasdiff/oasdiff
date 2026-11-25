@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: Test API
+  version: 1.0.0
+servers:
+  - url: https://www.example.com
+paths:
+  /users:
+    servers:
+      - url: https://www.example.com/users
+    get:
+      servers:
+        - url: https://www.example.com/users/list
+      responses:
+        "200":
+          description: OK
+          links:
+            next:
+              operationId: listUsers
+              server:
+                url: https://www.example.com/next

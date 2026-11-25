@@ -168,7 +168,7 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 		}
 
 		if id := falseSchemaChangeId(p.paramDiff.SchemaDiff, RequestParameterSchemaBecameFalseId, RequestParameterSchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "type")
 			result = append(result, p.opInfo.NewApiChange(
 				id,
 				[]any{p.location, p.name},
@@ -180,7 +180,7 @@ func RequestParameterSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSou
 			p.paramDiff.SchemaDiff,
 			func(propertyPath string, propertyName string, propertyDiff *diff.SchemaDiff, parent *diff.SchemaDiff) {
 				if id := falseSchemaChangeId(propertyDiff, RequestParameterPropertySchemaBecameFalseId, RequestParameterPropertySchemaBecameNotFalseId); id != "" {
-					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, propertyDiff, "type")
+					baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, propertyDiff, "type")
 					result = append(result, p.opInfo.NewApiChange(
 						id,
 						[]any{schemawalk.PropertyFullName(propertyPath, propertyName), p.location, p.name},
@@ -201,7 +201,7 @@ func ResponseHeaderSchemaBecameFalseCheck(diffReport *diff.Diff, operationsSourc
 			return
 		}
 		if id := falseSchemaChangeId(h.headerDiff.SchemaDiff, ResponseHeaderSchemaBecameFalseId, ResponseHeaderSchemaBecameNotFalseId); id != "" {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, h.opInfo.methodDiff, h.headerDiff.SchemaDiff, "type")
+			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, h.opInfo.operations, h.headerDiff.SchemaDiff, "type")
 			result = append(result, h.opInfo.NewApiChange(
 				id,
 				[]any{h.name, h.responseStatus},

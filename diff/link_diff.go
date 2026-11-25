@@ -49,9 +49,11 @@ func getLinkDiffInternal(config *Config, link1, link2 *openapi3.Link) (*LinkDiff
 	if err != nil {
 		return nil, err
 	}
-	result.ServerDiff, err = getServerDiff(config, link1.Server, link2.Server)
-	if err != nil {
-		return nil, err
+	if !config.IsExcludeServers() {
+		result.ServerDiff, err = getServerDiff(config, link1.Server, link2.Server)
+		if err != nil {
+			return nil, err
+		}
 	}
 	result.RequestBodyDiff = getValueDiff(link1.RequestBody, link2.RequestBody)
 

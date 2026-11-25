@@ -25,7 +25,7 @@ func RequestParameterMinItemsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 			return
 		}
 
-		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.methodDiff, p.paramDiff.SchemaDiff, "minItems")
+		baseSource, revisionSource := location.SchemaFieldSources(operationsSources, p.opInfo.operations, p.paramDiff.SchemaDiff, "minItems")
 
 		id := RequestParameterMinItemsIncreasedId
 		if !isIncreasedValue(minItemsDiff) {

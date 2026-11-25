@@ -1,6 +1,7 @@
 package checker
 
 import (
+	"maps"
 	"slices"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -15,13 +16,13 @@ const (
 
 // applyStabilityLevelPolicy is a thin pipeline that validates, detects changes, and filters.
 func applyStabilityLevelPolicy(config *Config, diffReport *diff.Diff, result Changes, operationsSources diff.OperationsSourcesMap) Changes {
-	filterSecurityContextBelowStabilityThreshold(config, diffReport)
+	filterContextsBelowStabilityThreshold(config, diffReport)
 	if diffReport.PathsDiff == nil {
 		return result
 	}
 	result = append(result, checkInvalidStabilityLevels(config, diffReport, operationsSources)...)
 	result = append(result, checkStabilityLevelChanged(config, diffReport, operationsSources)...)
-	filterBelowStabilityThreshold(config, diffReport)
+	diffReport.PathsDiff = withoutBelowStabilityThreshold(config, diffReport.PathsDiff)
 	// Detect property-level stability changes after filtering, so a property
 	// change on an operation below the threshold (already removed from the diff)
 	// is not reported. Unlike an endpoint stability change, a property change
@@ -131,72 +132,69 @@ func checkStabilityLevelChanged(config *Config, diffReport *diff.Diff, operation
 	return result
 }
 
-// filterBelowStabilityThreshold mutates diffReport by removing paths and operations
-// that fall below the configured stability threshold. It emits no Changes.
-func filterBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
+// withoutBelowStabilityThreshold returns a copy of pathsDiff that leaves out
+// the paths and operations below the configured stability threshold.
+func withoutBelowStabilityThreshold(config *Config, pathsDiff *diff.PathsDiff) *diff.PathsDiff {
+	if config == nil {
+		return pathsDiff
+	}
+
+	// A deleted item whose stability level does not parse is left out: it is
+	// reported by checkInvalidStabilityLevels.
+	included := func(operation *openapi3.Operation) bool {
+		stability, err := getStabilityLevel(operation.Extensions)
+		return err == nil && config.StabilityLevel.IsIncluded(stability)
+	}
+
+	result := *pathsDiff
+
+	// a deleted path stays when any of its operations is included
+	result.Deleted = slices.DeleteFunc(slices.Clone(pathsDiff.Deleted), func(path string) bool {
+		for _, operation := range pathsDiff.Base.Value(path).Operations() {
+			if included(operation) {
+				return false
+			}
+		}
+		return true
+	})
+
+	if pathsDiff.Modified == nil {
+		return &result
+	}
+	result.Modified = make(diff.ModifiedPaths, len(pathsDiff.Modified))
+	for path, pathDiff := range pathsDiff.Modified {
+		if pathDiff.OperationsDiff == nil {
+			result.Modified[path] = pathDiff
+			continue
+		}
+		operationsDiff := *pathDiff.OperationsDiff
+		operationsDiff.Deleted = slices.DeleteFunc(slices.Clone(operationsDiff.Deleted), func(method string) bool {
+			return !included(pathDiff.Base.GetOperation(method))
+		})
+		if operationsDiff.Modified != nil {
+			operationsDiff.Modified = maps.Clone(operationsDiff.Modified)
+			maps.DeleteFunc(operationsDiff.Modified, func(method string, _ *diff.MethodDiff) bool {
+				return belowStabilityThreshold(config, pathDiff.Revision.GetOperation(method))
+			})
+		}
+		filtered := *pathDiff
+		filtered.OperationsDiff = &operationsDiff
+		result.Modified[path] = &filtered
+	}
+	return &result
+}
+
+// filterContextsBelowStabilityThreshold replaces the contexts with copies that
+// leave out the operations below the threshold.
+func filterContextsBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
 	if config == nil {
 		return
 	}
-
-	// Filter deleted paths
-	iPath := 0
-	for _, path := range diffReport.PathsDiff.Deleted {
-		keep := false
-		pathVal := diffReport.PathsDiff.Base.Value(path)
-		for operation := range pathVal.Operations() {
-			baseStability, err := getStabilityLevel(pathVal.GetOperation(operation).Extensions)
-			if err != nil {
-				continue
-			}
-			if config.StabilityLevel.IsIncluded(baseStability) {
-				keep = true
-				break
-			}
-		}
-		if keep {
-			diffReport.PathsDiff.Deleted[iPath] = path
-			iPath++
-		}
-	}
-	diffReport.PathsDiff.Deleted = diffReport.PathsDiff.Deleted[:iPath]
-
-	// Filter modified paths → deleted operations and modified operations
-	for _, pathDiff := range diffReport.PathsDiff.Modified {
-		if pathDiff.OperationsDiff == nil {
-			continue
-		}
-
-		// Filter deleted operations
-		iOperation := 0
-		for _, operation := range pathDiff.OperationsDiff.Deleted {
-			operationItem := pathDiff.Base.GetOperation(operation)
-			baseStability, err := getStabilityLevel(operationItem.Extensions)
-			if err != nil {
-				continue
-			}
-			if config.StabilityLevel.IsIncluded(baseStability) {
-				pathDiff.OperationsDiff.Deleted[iOperation] = operation
-				iOperation++
-			}
-		}
-		pathDiff.OperationsDiff.Deleted = pathDiff.OperationsDiff.Deleted[:iOperation]
-
-		// Filter modified operations below threshold
-		for operation := range pathDiff.OperationsDiff.Modified {
-			if belowStabilityThreshold(config, pathDiff.Revision.GetOperation(operation)) {
-				delete(pathDiff.OperationsDiff.Modified, operation)
-			}
-		}
-	}
-}
-
-func filterSecurityContextBelowStabilityThreshold(config *Config, diffReport *diff.Diff) {
-	if config == nil || diffReport.SecurityContext == nil {
-		return
-	}
-	diffReport.SecurityContext.Operations = slices.DeleteFunc(diffReport.SecurityContext.Operations, func(pair diff.OperationPair) bool {
+	below := func(pair diff.OperationPair) bool {
 		return belowStabilityThreshold(config, pair.Revision)
-	})
+	}
+	diffReport.SecurityContext = diffReport.SecurityContext.Without(below)
+	diffReport.ParametersContext = diffReport.ParametersContext.Without(below)
 }
 
 // An operation whose stability level does not parse counts as in scope.
