@@ -34,7 +34,7 @@ func ResponsePropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSo
 			}
 		}
 
-		if info.schemaDiff.UnevaluatedPropertiesDiff != nil {
+		if info.schemaDiff.UnevaluatedPropertiesDiff != nil && !unevaluatedPropertiesClosedOnEitherSide(info.schemaDiff) {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "unevaluatedProperties")
 			if info.schemaDiff.UnevaluatedPropertiesDiff.SchemaAdded {
 				result = append(result, info.newChange(ResponseBodyUnevaluatedPropertiesAddedId, []any{info.responseStatus}, "").
@@ -61,7 +61,7 @@ func ResponsePropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSo
 				}
 			}
 
-			if p.propertyDiff.UnevaluatedPropertiesDiff != nil {
+			if p.propertyDiff.UnevaluatedPropertiesDiff != nil && !unevaluatedPropertiesClosedOnEitherSide(p.propertyDiff) {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "unevaluatedProperties")
 				if p.propertyDiff.UnevaluatedPropertiesDiff.SchemaAdded {
 					result = append(result, p.newChange(ResponsePropertyUnevaluatedPropertiesAddedId, []any{propName, info.responseStatus}, "").

@@ -939,35 +939,51 @@ response-property-pattern-property-removed-description: шаблонное св�
 request-body-property-names-added: добавлено ограничение 'propertyNames' в тело запроса
 request-body-property-names-removed: удалено ограничение 'propertyNames' из тела запроса
 request-body-additional-properties-narrowed: "сужено 'additionalProperties' тела запроса с %s до %s"
+request-body-unevaluated-properties-narrowed: "сужено 'unevaluatedProperties' тела запроса с %s до %s"
 request-body-additional-properties-widened: "расширено 'additionalProperties' тела запроса с %s до %s"
+request-body-unevaluated-properties-widened: "расширено 'unevaluatedProperties' тела запроса с %s до %s"
 request-property-property-names-added: добавлено ограничение 'propertyNames' в поле запроса %s
 request-property-property-names-removed: удалено ограничение 'propertyNames' из поля запроса %s
 request-property-additional-properties-narrowed: "сужено 'additionalProperties' свойства запроса %s с %s до %s"
+request-property-unevaluated-properties-narrowed: "сужено 'unevaluatedProperties' свойства запроса %s с %s до %s"
 request-property-additional-properties-widened: "расширено 'additionalProperties' свойства запроса %s с %s до %s"
+request-property-unevaluated-properties-widened: "расширено 'unevaluatedProperties' свойства запроса %s с %s до %s"
 response-body-property-names-added: добавлено ограничение 'propertyNames' в тело ответа для статуса %s
 response-body-property-names-removed: удалено ограничение 'propertyNames' из тела ответа для статуса %s
 response-body-additional-properties-narrowed: "сужено 'additionalProperties' тела ответа с %s до %s для статуса %s"
+response-body-unevaluated-properties-narrowed: "сужено 'unevaluatedProperties' тела ответа с %s до %s для статуса %s"
 response-body-additional-properties-widened: "расширено 'additionalProperties' тела ответа с %s до %s для статуса %s"
+response-body-unevaluated-properties-widened: "расширено 'unevaluatedProperties' тела ответа с %s до %s для статуса %s"
 response-property-property-names-added: добавлено ограничение 'propertyNames' в поле ответа %s для статуса %s
 response-property-property-names-removed: удалено ограничение 'propertyNames' из поля ответа %s для статуса %s
 response-property-additional-properties-narrowed: "сужено 'additionalProperties' свойства ответа %s с %s до %s для статуса %s"
+response-property-unevaluated-properties-narrowed: "сужено 'unevaluatedProperties' свойства ответа %s с %s до %s для статуса %s"
 response-property-additional-properties-widened: "расширено 'additionalProperties' свойства ответа %s с %s до %s для статуса %s"
+response-property-unevaluated-properties-widened: "расширено 'unevaluatedProperties' свойства ответа %s с %s до %s для статуса %s"
 request-body-property-names-added-description: ограничение 'propertyNames' добавлено в тело запроса
 request-body-property-names-removed-description: ограничение 'propertyNames' удалено из тела запроса
 request-body-additional-properties-narrowed-description: "'additionalProperties' сужено в теле запроса"
+request-body-unevaluated-properties-narrowed-description: "'unevaluatedProperties' сужено в теле запроса"
 request-body-additional-properties-widened-description: "'additionalProperties' расширено в теле запроса"
+request-body-unevaluated-properties-widened-description: "'unevaluatedProperties' расширено в теле запроса"
 request-property-property-names-added-description: ограничение 'propertyNames' добавлено в поле запроса
 request-property-property-names-removed-description: ограничение 'propertyNames' удалено из поля запроса
 request-property-additional-properties-narrowed-description: "'additionalProperties' сужено в свойстве запроса"
+request-property-unevaluated-properties-narrowed-description: "'unevaluatedProperties' сужено в свойстве запроса"
 request-property-additional-properties-widened-description: "'additionalProperties' расширено в свойстве запроса"
+request-property-unevaluated-properties-widened-description: "'unevaluatedProperties' расширено в свойстве запроса"
 response-body-property-names-added-description: ограничение 'propertyNames' добавлено в тело ответа
 response-body-property-names-removed-description: ограничение 'propertyNames' удалено из тела ответа
 response-body-additional-properties-narrowed-description: "'additionalProperties' сужено в теле ответа"
+response-body-unevaluated-properties-narrowed-description: "'unevaluatedProperties' сужено в теле ответа"
 response-body-additional-properties-widened-description: "'additionalProperties' расширено в теле ответа"
+response-body-unevaluated-properties-widened-description: "'unevaluatedProperties' расширено в теле ответа"
 response-property-property-names-added-description: ограничение 'propertyNames' добавлено в поле ответа
 response-property-property-names-removed-description: ограничение 'propertyNames' удалено из поля ответа
 response-property-additional-properties-narrowed-description: "'additionalProperties' сужено в свойстве ответа"
+response-property-unevaluated-properties-narrowed-description: "'unevaluatedProperties' сужено в свойстве ответа"
 response-property-additional-properties-widened-description: "'additionalProperties' расширено в свойстве ответа"
+response-property-unevaluated-properties-widened-description: "'unevaluatedProperties' расширено в свойстве ответа"
 request-body-unevaluated-items-added: добавлено ограничение 'unevaluatedItems' в тело запроса
 request-body-unevaluated-items-removed: удалено ограничение 'unevaluatedItems' из тела запроса
 request-body-unevaluated-properties-added: добавлено ограничение 'unevaluatedProperties' в тело запроса

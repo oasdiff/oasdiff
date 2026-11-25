@@ -935,35 +935,51 @@ response-property-pattern-property-removed-description: propiedad de patrón rem
 request-body-property-names-added: agregada la restricción 'propertyNames' al cuerpo de solicitud
 request-body-property-names-removed: removida la restricción 'propertyNames' del cuerpo de solicitud
 request-body-additional-properties-narrowed: "restringido 'additionalProperties' del cuerpo de solicitud de %s a %s"
+request-body-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' del cuerpo de solicitud de %s a %s"
 request-body-additional-properties-widened: "ampliado 'additionalProperties' del cuerpo de solicitud de %s a %s"
+request-body-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' del cuerpo de solicitud de %s a %s"
 request-property-property-names-added: agregada la restricción 'propertyNames' a la propiedad de solicitud %s
 request-property-property-names-removed: removida la restricción 'propertyNames' de la propiedad de solicitud %s
 request-property-additional-properties-narrowed: "restringido 'additionalProperties' de la propiedad de solicitud %s de %s a %s"
+request-property-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' de la propiedad de solicitud %s de %s a %s"
 request-property-additional-properties-widened: "ampliado 'additionalProperties' de la propiedad de solicitud %s de %s a %s"
+request-property-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' de la propiedad de solicitud %s de %s a %s"
 response-body-property-names-added: agregada la restricción 'propertyNames' al cuerpo de respuesta para el estado %s
 response-body-property-names-removed: removida la restricción 'propertyNames' del cuerpo de respuesta para el estado %s
 response-body-additional-properties-narrowed: "restringido 'additionalProperties' del cuerpo de respuesta de %s a %s para el estado %s"
+response-body-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' del cuerpo de respuesta de %s a %s para el estado %s"
 response-body-additional-properties-widened: "ampliado 'additionalProperties' del cuerpo de respuesta de %s a %s para el estado %s"
+response-body-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' del cuerpo de respuesta de %s a %s para el estado %s"
 response-property-property-names-added: agregada la restricción 'propertyNames' a la propiedad de respuesta %s para el estado %s
 response-property-property-names-removed: removida la restricción 'propertyNames' de la propiedad de respuesta %s para el estado %s
 response-property-additional-properties-narrowed: "restringido 'additionalProperties' de la propiedad de respuesta %s de %s a %s para el estado %s"
+response-property-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' de la propiedad de respuesta %s de %s a %s para el estado %s"
 response-property-additional-properties-widened: "ampliado 'additionalProperties' de la propiedad de respuesta %s de %s a %s para el estado %s"
+response-property-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' de la propiedad de respuesta %s de %s a %s para el estado %s"
 request-body-property-names-added-description: restricción 'propertyNames' agregada al cuerpo de solicitud
 request-body-property-names-removed-description: restricción 'propertyNames' removida del cuerpo de solicitud
 request-body-additional-properties-narrowed-description: "'additionalProperties' restringido en el cuerpo de solicitud"
+request-body-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido en el cuerpo de solicitud"
 request-body-additional-properties-widened-description: "'additionalProperties' ampliado en el cuerpo de solicitud"
+request-body-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado en el cuerpo de solicitud"
 request-property-property-names-added-description: restricción 'propertyNames' agregada a la propiedad de solicitud
 request-property-property-names-removed-description: restricción 'propertyNames' removida de la propiedad de solicitud
 request-property-additional-properties-narrowed-description: "'additionalProperties' restringido en la propiedad de solicitud"
+request-property-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido en la propiedad de solicitud"
 request-property-additional-properties-widened-description: "'additionalProperties' ampliado en la propiedad de solicitud"
+request-property-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado en la propiedad de solicitud"
 response-body-property-names-added-description: restricción 'propertyNames' agregada al cuerpo de respuesta
 response-body-property-names-removed-description: restricción 'propertyNames' removida del cuerpo de respuesta
 response-body-additional-properties-narrowed-description: "'additionalProperties' restringido en el cuerpo de respuesta"
+response-body-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido en el cuerpo de respuesta"
 response-body-additional-properties-widened-description: "'additionalProperties' ampliado en el cuerpo de respuesta"
+response-body-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado en el cuerpo de respuesta"
 response-property-property-names-added-description: restricción 'propertyNames' agregada a la propiedad de respuesta
 response-property-property-names-removed-description: restricción 'propertyNames' removida de la propiedad de respuesta
 response-property-additional-properties-narrowed-description: "'additionalProperties' restringido en la propiedad de respuesta"
+response-property-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido en la propiedad de respuesta"
 response-property-additional-properties-widened-description: "'additionalProperties' ampliado en la propiedad de respuesta"
+response-property-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado en la propiedad de respuesta"
 request-body-unevaluated-items-added: agregada la restricción 'unevaluatedItems' al cuerpo de solicitud
 request-body-unevaluated-items-removed: removida la restricción 'unevaluatedItems' del cuerpo de solicitud
 request-body-unevaluated-properties-added: agregada la restricción 'unevaluatedProperties' al cuerpo de solicitud

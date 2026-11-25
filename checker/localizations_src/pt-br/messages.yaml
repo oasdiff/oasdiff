@@ -935,35 +935,51 @@ response-property-pattern-property-removed-description: propriedade de padrão r
 request-body-property-names-added: adicionada a restrição 'propertyNames' ao corpo da requisição
 request-body-property-names-removed: removida a restrição 'propertyNames' do corpo da requisição
 request-body-additional-properties-narrowed: "restringido 'additionalProperties' do corpo da requisição de %s para %s"
+request-body-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' do corpo da requisição de %s para %s"
 request-body-additional-properties-widened: "ampliado 'additionalProperties' do corpo da requisição de %s para %s"
+request-body-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' do corpo da requisição de %s para %s"
 request-property-property-names-added: adicionada a restrição 'propertyNames' à propriedade de requisição %s
 request-property-property-names-removed: removida a restrição 'propertyNames' da propriedade de requisição %s
 request-property-additional-properties-narrowed: "restringido 'additionalProperties' da propriedade de requisição %s de %s para %s"
+request-property-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' da propriedade de requisição %s de %s para %s"
 request-property-additional-properties-widened: "ampliado 'additionalProperties' da propriedade de requisição %s de %s para %s"
+request-property-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' da propriedade de requisição %s de %s para %s"
 response-body-property-names-added: adicionada a restrição 'propertyNames' ao corpo da resposta para o status %s
 response-body-property-names-removed: removida a restrição 'propertyNames' do corpo da resposta para o status %s
 response-body-additional-properties-narrowed: "restringido 'additionalProperties' do corpo da resposta de %s para %s para o status %s"
+response-body-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' do corpo da resposta de %s para %s para o status %s"
 response-body-additional-properties-widened: "ampliado 'additionalProperties' do corpo da resposta de %s para %s para o status %s"
+response-body-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' do corpo da resposta de %s para %s para o status %s"
 response-property-property-names-added: adicionada a restrição 'propertyNames' à propriedade de resposta %s para o status %s
 response-property-property-names-removed: removida a restrição 'propertyNames' da propriedade de resposta %s para o status %s
 response-property-additional-properties-narrowed: "restringido 'additionalProperties' da propriedade de resposta %s de %s para %s para o status %s"
+response-property-unevaluated-properties-narrowed: "restringido 'unevaluatedProperties' da propriedade de resposta %s de %s para %s para o status %s"
 response-property-additional-properties-widened: "ampliado 'additionalProperties' da propriedade de resposta %s de %s para %s para o status %s"
+response-property-unevaluated-properties-widened: "ampliado 'unevaluatedProperties' da propriedade de resposta %s de %s para %s para o status %s"
 request-body-property-names-added-description: restrição 'propertyNames' adicionada ao corpo da requisição
 request-body-property-names-removed-description: restrição 'propertyNames' removida do corpo da requisição
 request-body-additional-properties-narrowed-description: "'additionalProperties' restringido no corpo da requisição"
+request-body-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido no corpo da requisição"
 request-body-additional-properties-widened-description: "'additionalProperties' ampliado no corpo da requisição"
+request-body-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado no corpo da requisição"
 request-property-property-names-added-description: restrição 'propertyNames' adicionada à propriedade de requisição
 request-property-property-names-removed-description: restrição 'propertyNames' removida da propriedade de requisição
 request-property-additional-properties-narrowed-description: "'additionalProperties' restringido na propriedade de requisição"
+request-property-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido na propriedade de requisição"
 request-property-additional-properties-widened-description: "'additionalProperties' ampliado na propriedade de requisição"
+request-property-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado na propriedade de requisição"
 response-body-property-names-added-description: restrição 'propertyNames' adicionada ao corpo da resposta
 response-body-property-names-removed-description: restrição 'propertyNames' removida do corpo da resposta
 response-body-additional-properties-narrowed-description: "'additionalProperties' restringido no corpo da resposta"
+response-body-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido no corpo da resposta"
 response-body-additional-properties-widened-description: "'additionalProperties' ampliado no corpo da resposta"
+response-body-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado no corpo da resposta"
 response-property-property-names-added-description: restrição 'propertyNames' adicionada à propriedade de resposta
 response-property-property-names-removed-description: restrição 'propertyNames' removida da propriedade de resposta
 response-property-additional-properties-narrowed-description: "'additionalProperties' restringido na propriedade de resposta"
+response-property-unevaluated-properties-narrowed-description: "'unevaluatedProperties' restringido na propriedade de resposta"
 response-property-additional-properties-widened-description: "'additionalProperties' ampliado na propriedade de resposta"
+response-property-unevaluated-properties-widened-description: "'unevaluatedProperties' ampliado na propriedade de resposta"
 request-body-unevaluated-items-added: adicionada a restrição 'unevaluatedItems' ao corpo da requisição
 request-body-unevaluated-items-removed: removida a restrição 'unevaluatedItems' do corpo da requisição
 request-body-unevaluated-properties-added: adicionada a restrição 'unevaluatedProperties' ao corpo da requisição
