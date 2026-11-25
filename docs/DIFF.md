@@ -12,10 +12,9 @@ oasdiff applies a few opt-out defaults so its diff matches what most users expec
 | Flag | Default | What it does | Detail |
 |---|---|---|---|
 | `--match-inline-refs` | `true` | Match validation-equivalent inline / `$ref` subschemas under `anyOf` / `oneOf` as the same branch. Codegen refactors that pull an inline enum into a named component report no change. | [Inline and `$ref` Subschemas](MATCHING-SUBSCHEMAS.md#inline-and-ref-subschemas) |
-| `--case-insensitive-headers` | `true` | Compare header names case-insensitively. `Content-Type` and `content-type` are the same header per RFC 7230 / 9110. | [HEADER-DIFF.md](HEADER-DIFF.md) |
 | `--allow-external-refs` | `true` | Allow the parser to resolve external `$ref`s when loading specs. Disable when processing untrusted specs to prevent SSRF. | (CLI help) |
 
-All other comparison-tuning flags (`--flatten-allof`, `--flatten-params`, `--include-path-params`, `--auto-upgrade`, ...) are opt-in (default `false`) because they transform the input or change matching semantics in ways that not every spec wants.
+All other comparison-tuning flags (`--flatten-allof`, `--flatten-params`, [`--case-insensitive-headers`](HEADER-DIFF.md), `--include-path-params`, `--auto-upgrade`, ...) are opt-in (default `false`) because they transform the input or change matching semantics in ways that not every spec wants.
 
 ## Output Formats
 The default diff output format is `yaml`.  
@@ -98,7 +97,7 @@ endpoints:
 ```
 
 ## Excluding Specific Kinds of Changes
-Currently available on `diff` and `summary`.
+Available on `diff` and `summary`. `breaking` and `changelog` always compare everything their checks read. To turn a check off, [set its level to `none`](SEVERITY-LEVELS.md).
 
 You can use the `--exclude-elements` flag with to exclude one or more of the following:
 - Use `--exclude-elements examples` to exclude [Examples](https://swagger.io/specification/#example-object)
@@ -108,6 +107,7 @@ You can use the `--exclude-elements` flag with to exclude one or more of the fol
 - Use `--exclude-elements summary` to exclude summary fields
 - Use `--exclude-elements endpoints` to exclude the [endpoints section of the diff](#paths-vs-endpoints)
 - Use `--exclude-elements tags` to exclude [Tags](https://swagger.io/specification/#tag-object), both the top-level list and the tags of each operation
+- Use `--exclude-elements servers` to exclude [Servers](https://swagger.io/specification/#server-object): the top-level list, the servers of each path and operation, and the server of each link
 
 For example, this diff excludes descriptions and examples:
 ```
@@ -124,6 +124,8 @@ oasdiff diff base.yaml revision.yaml --exclude-extensions x-internal,x-ignore
 ```
 
 This is useful when you have extensions that are only used internally or for tooling purposes (e.g., `x-codegen-ignore`, `x-internal`) and you don't want changes to these extensions to appear in the diff.
+
+Like `--exclude-elements`, this flag applies to `diff` and `summary`. In `breaking` and `changelog` it is deprecated: it is accepted and ignored.
 
 ## Matching Subschemas
 

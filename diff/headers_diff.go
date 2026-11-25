@@ -2,6 +2,9 @@ package diff
 
 import (
 	"fmt"
+	"maps"
+	"slices"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 )
@@ -57,24 +60,76 @@ func getHeadersDiffInternal(config *Config, state *state, headers1, headers2 ope
 	result.Deleted = deleted
 
 	for _, name := range common {
-		value1, err := derefHeader(headers1[name])
-		if err != nil {
+		if err := result.addModified(config, state, name, headers1[name], headers2[name]); err != nil {
 			return nil, err
 		}
+	}
 
-		value2, err := derefHeader(headers2[name])
-		if err != nil {
+	return result, nil
+}
+
+// addModified compares two headers and records their diff, if any, under name.
+func (headersDiff *HeadersDiff) addModified(config *Config, state *state, name string, header1, header2 *openapi3.HeaderRef) error {
+	value1, err := derefHeader(header1)
+	if err != nil {
+		return err
+	}
+
+	value2, err := derefHeader(header2)
+	if err != nil {
+		return err
+	}
+
+	diff, err := getHeaderDiff(config, state, value1, value2)
+	if err != nil {
+		return err
+	}
+
+	if !diff.Empty() {
+		if headersDiff.Modified == nil {
+			headersDiff.Modified = ModifiedHeaders{}
+		}
+		headersDiff.Modified[name] = diff
+	}
+	return nil
+}
+
+// getHeadersDiffIgnoringCase returns headersDiff with each deleted header that
+// was added under a name differing only in case compared as one header. It
+// returns headersDiff itself when there is none.
+func getHeadersDiffIgnoringCase(config *Config, state *state, headers1, headers2 openapi3.Headers, headersDiff *HeadersDiff) (*HeadersDiff, error) {
+	if headersDiff == nil {
+		return nil, nil
+	}
+
+	result := &HeadersDiff{
+		Added:    slices.Clone(headersDiff.Added),
+		Deleted:  []string{},
+		Modified: maps.Clone(headersDiff.Modified),
+	}
+
+	for _, name1 := range headersDiff.Deleted {
+		i := slices.IndexFunc(result.Added, func(name2 string) bool {
+			return strings.EqualFold(name1, name2)
+		})
+		if i == -1 {
+			result.Deleted = append(result.Deleted, name1)
+			continue
+		}
+		name2 := result.Added[i]
+		result.Added = slices.Delete(result.Added, i, i+1)
+
+		if err := result.addModified(config, state, name1, headers1[name1], headers2[name2]); err != nil {
 			return nil, err
 		}
+	}
 
-		diff, err := getHeaderDiff(config, state, value1, value2)
-		if err != nil {
-			return nil, err
-		}
+	if len(result.Deleted) == len(headersDiff.Deleted) {
+		return headersDiff, nil
+	}
 
-		if !diff.Empty() {
-			result.Modified[name] = diff
-		}
+	if result.Empty() {
+		return nil, nil
 	}
 
 	return result, nil

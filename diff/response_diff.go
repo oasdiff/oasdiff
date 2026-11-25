@@ -6,13 +6,14 @@ import (
 
 // ResponseDiff describes the changes between a pair of response objects: https://swagger.io/specification/#response-object
 type ResponseDiff struct {
-	ExtensionsDiff  *ExtensionsDiff    `json:"extensions,omitempty" yaml:"extensions,omitempty"`
-	DescriptionDiff *ValueDiff         `json:"description,omitempty" yaml:"description,omitempty"`
-	HeadersDiff     *HeadersDiff       `json:"headers,omitempty" yaml:"headers,omitempty"`
-	ContentDiff     *ContentDiff       `json:"content,omitempty" yaml:"content,omitempty"`
-	LinksDiff       *LinksDiff         `json:"links,omitempty" yaml:"links,omitempty"`
-	Base            *openapi3.Response `json:"-" yaml:"-"`
-	Revision        *openapi3.Response `json:"-" yaml:"-"`
+	ExtensionsDiff          *ExtensionsDiff    `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	DescriptionDiff         *ValueDiff         `json:"description,omitempty" yaml:"description,omitempty"`
+	HeadersDiff             *HeadersDiff       `json:"headers,omitempty" yaml:"headers,omitempty"`
+	ContentDiff             *ContentDiff       `json:"content,omitempty" yaml:"content,omitempty"`
+	LinksDiff               *LinksDiff         `json:"links,omitempty" yaml:"links,omitempty"`
+	HeadersDiffIgnoringCase *HeadersDiff       `json:"-" yaml:"-"`
+	Base                    *openapi3.Response `json:"-" yaml:"-"`
+	Revision                *openapi3.Response `json:"-" yaml:"-"`
 }
 
 // Empty indicates whether a change was found in this element
@@ -44,6 +45,11 @@ func diffResponseValuesInternal(config *Config, state *state, response1, respons
 
 	result.DescriptionDiff = getStringRefDiffConditional(config.IsExcludeDescription(), response1.Description, response2.Description)
 	result.HeadersDiff, err = getHeadersDiff(config, state, response1.Headers, response2.Headers)
+	if err != nil {
+		return nil, err
+	}
+
+	result.HeadersDiffIgnoringCase, err = getHeadersDiffIgnoringCase(config, state, response1.Headers, response2.Headers, result.HeadersDiff)
 	if err != nil {
 		return nil, err
 	}

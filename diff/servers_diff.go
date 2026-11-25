@@ -34,6 +34,10 @@ func newServersDiff() *ServersDiff {
 }
 
 func getServersDiff(config *Config, pServers1, pServers2 *openapi3.Servers) *ServersDiff {
+	if config.IsExcludeServers() {
+		return nil
+	}
+
 	diff := getServersDiffInternal(config, pServers1, pServers2)
 
 	if diff.Empty() {

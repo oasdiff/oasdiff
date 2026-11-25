@@ -504,18 +504,14 @@ func ResponseMediaTypeNameSources(operationsSources diff.OperationsSourcesMap, o
 
 // HeaderSources returns source locations from the base and revision headers within a response.
 // Falls back to response-level sources when header origin data is unavailable.
-func HeaderSources(operationsSources diff.OperationsSourcesMap, operations Operations, responseDiff *diff.ResponseDiff, headerName string) (*Source, *Source) {
+func HeaderSources(operationsSources diff.OperationsSourcesMap, operations Operations, responseDiff *diff.ResponseDiff, headerDiff *diff.HeaderDiff) (*Source, *Source) {
 	base, revision := operations.BaseAndRevision()
 	var baseOrigin, revisionOrigin *openapi3.Origin
-	if responseDiff.Base != nil {
-		if h := responseDiff.Base.Headers[headerName]; h != nil && h.Value != nil {
-			baseOrigin = h.Value.Origin
-		}
+	if headerDiff.Base != nil {
+		baseOrigin = headerDiff.Base.Origin
 	}
-	if responseDiff.Revision != nil {
-		if h := responseDiff.Revision.Headers[headerName]; h != nil && h.Value != nil {
-			revisionOrigin = h.Value.Origin
-		}
+	if headerDiff.Revision != nil {
+		revisionOrigin = headerDiff.Revision.Origin
 	}
 
 	hasOrigin := baseOrigin != nil || revisionOrigin != nil

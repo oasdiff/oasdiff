@@ -29,10 +29,10 @@ func walkModifiedResponseHeaders(diffReport *diff.Diff, operationsSources diff.O
 			}
 			opInfo := newOpInfoFromDiff(config, operationItem, operationsSources, operation, path)
 			for responseStatus, responseDiff := range operationItem.ResponsesDiff.Modified {
-				if responseDiff.HeadersDiff == nil {
+				if responseDiff.HeadersDiffIgnoringCase == nil {
 					continue
 				}
-				for name, headerDiff := range responseDiff.HeadersDiff.Modified {
+				for name, headerDiff := range responseDiff.HeadersDiffIgnoringCase.Modified {
 					processor(headerInfo{
 						opInfo:         opInfo,
 						responseStatus: responseStatus,

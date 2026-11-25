@@ -27,6 +27,7 @@ const (
 	ExcludeSummaryOption     = "summary"
 	ExcludeExtensionsOption  = "extensions"
 	ExcludeTagsOption        = "tags"
+	ExcludeServersOption     = "servers"
 )
 
 func GetExcludeDiffOptions() []string {
@@ -38,6 +39,7 @@ func GetExcludeDiffOptions() []string {
 		ExcludeSummaryOption,
 		ExcludeExtensionsOption,
 		ExcludeTagsOption,
+		ExcludeServersOption,
 	}
 }
 
@@ -80,8 +82,8 @@ func WithExcludeElements(excludeElements []string) Option {
 }
 
 // WithExcludeExtensions sets specific OpenAPI extension names to omit
-// from the diff (only takes effect when "extensions" is also in
-// ExcludeElements).
+// from the diff. Excluding "extensions" with WithExcludeElements omits all of
+// them.
 func WithExcludeExtensions(excludeExtensions []string) Option {
 	return func(c *Config) {
 		c.ExcludeExtensions = utils.StringSetFromSlice(excludeExtensions)
@@ -114,6 +116,10 @@ func (config *Config) IsExcludeExtensions() bool {
 
 func (config *Config) IsExcludeTags() bool {
 	return config.ExcludeElements.Contains(ExcludeTagsOption)
+}
+
+func (config *Config) IsExcludeServers() bool {
+	return config.ExcludeElements.Contains(ExcludeServersOption)
 }
 
 // IsExcludedExtension checks if a specific extension name should be excluded from diff

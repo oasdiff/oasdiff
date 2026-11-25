@@ -234,6 +234,32 @@ func TestComponentSecurityApiKeyNameUpdated(t *testing.T) {
 	require.Equal(t, "the component security scheme `api_key` API key name changed from `X-API-Key` to `X-Token`", errs[0].GetUncolorizedText(checker.NewDefaultLocalizer()))
 }
 
+// the name of a header is case-insensitive (RFC 9110, section 5.1)
+func TestComponentSecurityApiKeyHeaderNameCaseChanged(t *testing.T) {
+	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
+		schemes["api_key"].Value.Name = "x-api-key"
+	})
+	require.Empty(t, errs)
+}
+
+// the name of a query parameter is case-sensitive
+func TestComponentSecurityApiKeyQueryNameCaseChanged(t *testing.T) {
+	s1, err := open("../data/checker/component_security_wire_fields_base.yaml")
+	require.NoError(t, err)
+	s2, err := open("../data/checker/component_security_wire_fields_base.yaml")
+	require.NoError(t, err)
+
+	s1.Spec.Components.SecuritySchemes["api_key"].Value.In = "query"
+	s2.Spec.Components.SecuritySchemes["api_key"].Value.In = "query"
+	s2.Spec.Components.SecuritySchemes["api_key"].Value.Name = "x-api-key"
+
+	d, osm, err := diff.GetWithOperationsSourcesMap(diff.NewConfig(), s1, s2)
+	require.NoError(t, err)
+	errs := checker.CheckBackwardCompatibilityUntilLevel(singleCheckConfig(checker.APIComponentsSecurityUpdatedCheck), d, osm, checker.INFO)
+	require.Len(t, errs, 1)
+	require.Equal(t, checker.APIComponentsSecurityApiKeyNameUpdatedId, errs[0].GetId())
+}
+
 // changing the apiKey location moves the key, e.g. from a header to the query
 func TestComponentSecurityApiKeyInUpdated(t *testing.T) {
 	errs := checkWireFields(t, func(schemes openapi3.SecuritySchemes) {
