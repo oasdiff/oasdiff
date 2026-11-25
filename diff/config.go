@@ -27,6 +27,7 @@ const (
 	ExcludeSummaryOption     = "summary"
 	ExcludeExtensionsOption  = "extensions"
 	ExcludeTagsOption        = "tags"
+	ExcludeServersOption     = "servers"
 )
 
 func GetExcludeDiffOptions() []string {
@@ -38,6 +39,7 @@ func GetExcludeDiffOptions() []string {
 		ExcludeSummaryOption,
 		ExcludeExtensionsOption,
 		ExcludeTagsOption,
+		ExcludeServersOption,
 	}
 }
 
@@ -114,6 +116,10 @@ func (config *Config) IsExcludeExtensions() bool {
 
 func (config *Config) IsExcludeTags() bool {
 	return config.ExcludeElements.Contains(ExcludeTagsOption)
+}
+
+func (config *Config) IsExcludeServers() bool {
+	return config.ExcludeElements.Contains(ExcludeServersOption)
 }
 
 // IsExcludedExtension checks if a specific extension name should be excluded from diff
