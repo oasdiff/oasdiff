@@ -72,7 +72,9 @@ func TestSameLocation(t *testing.T) {
 		{"file root in its absolute form", file(absRoot), "openapi.yaml", true},
 		{"file root uncleaned", file("./openapi.yaml"), "openapi.yaml", true},
 		{"another file", file("other.yaml"), "openapi.yaml", false},
-		{"file url of the file root", parse("file://" + urlPath(absRoot)), "openapi.yaml", true},
+		// on a path with a drive letter the URL path is "/C:/...", which is
+		// not the root's path, and kin-openapi does not load it either
+		{"file url of the file root", parse("file://" + urlPath(absRoot)), "openapi.yaml", filepath.VolumeName(absRoot) == ""},
 		{"file url of another file", parse("file://" + urlPath(absRoot) + ".other"), "openapi.yaml", false},
 		{"file url with a host", parse("file://other.example.com" + urlPath(absRoot)), absRoot, false},
 		{"url root as given", parse(urlRoot), urlRoot, true},
