@@ -58,7 +58,7 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 		return getErrConfigFileProblem(err)
 	}
 
-	ignoreKeysWithoutFlag(cmd, v)
+	clearKeysNotUsed(cmd, v)
 
 	// After CLI flags are bound, rewrite path-valued config-file values
 	// to be relative to the config file's directory (vs. cwd). Skips
@@ -69,16 +69,17 @@ func RunViper(cmd *cobra.Command, v IViper) *ReturnError {
 	return nil
 }
 
-// ignoreKeysWithoutFlag clears the configuration-file keys that are not flags
-// of cmd. One file serves every command, so it can hold keys of other
+// clearKeysNotUsed clears the keys that cmd does not use: keys that are not
+// its flags, and flags it accepts and ignores (see ignoreFlag). One
+// configuration file serves every command, so it can hold keys of other
 // commands, and each command takes from it only what its own flags accept.
-func ignoreKeysWithoutFlag(cmd *cobra.Command, v IViper) {
+func clearKeysNotUsed(cmd *cobra.Command, v IViper) {
 	if cmd == nil {
 		return
 	}
 	for field := range reflect.TypeFor[Config]().Fields() {
 		key := field.Tag.Get("mapstructure")
-		if cmd.Flag(key) == nil {
+		if flag := cmd.Flag(key); flag == nil || flag.Annotations[ignoredAnnotation] != nil {
 			v.Set(key, reflect.Zero(field.Type).Interface())
 		}
 	}

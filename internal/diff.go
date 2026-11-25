@@ -34,12 +34,11 @@ func getDiffCmd() *cobra.Command {
 
 func runDiff(flags *Flags, stdout io.Writer, _ io.Writer) (bool, *ReturnError) {
 
-	view := flags.getDocumentView()
 	if flags.getFormat() == string(formatters.FormatJSON) {
-		view.excludeElements = append(view.excludeElements, diff.ExcludeEndpointsOption)
+		flags.addExcludeElements(diff.ExcludeEndpointsOption)
 	}
 
-	diffResult, err := calcDiff(flags, view)
+	diffResult, err := calcDiff(flags)
 	if err != nil {
 		return false, err
 	}
@@ -71,16 +70,16 @@ func outputDiff(stdout io.Writer, diffReport *diff.Diff, format string) *ReturnE
 }
 
 // calcDiff loads the specs and compares them.
-func calcDiff(flags *Flags, view documentView) (*diffResult, *ReturnError) {
+func calcDiff(flags *Flags) (*diffResult, *ReturnError) {
 
 	loader := openapi3.NewLoader()
 	loader.IsExternalRefsAllowed = flags.getAllowExternalRefs()
 
 	if flags.getComposed() {
-		return composedDiff(loader, flags, view)
+		return composedDiff(loader, flags)
 	}
 
-	return normalDiff(loader, flags, view)
+	return normalDiff(loader, flags)
 }
 
 type diffResult struct {
@@ -113,11 +112,11 @@ func loaderForOpen[F any](open bool, plain, capture F) F {
 	return plain
 }
 
-func normalDiff(loader *openapi3.Loader, flags *Flags, view documentView) (*diffResult, *ReturnError) {
+func normalDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
-	flattenParams := load.GetOption(load.WithFlattenParams(), view.flattenParams)
-	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), view.lowercaseHeaders)
+	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
+	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
 	newSpecInfo := loaderForOpen(flags.getOpen(), load.NewSpecInfo, load.NewSpecInfoWithCapture)
 
@@ -142,7 +141,7 @@ func normalDiff(loader *openapi3.Loader, flags *Flags, view documentView) (*diff
 
 	autoUpgradeSpecs(flags.getAutoUpgrade(), s1, s2)
 
-	diffReport, operationsSources, err := diff.GetWithOperationsSourcesMap(flags.toConfig(view), s1, s2)
+	diffReport, operationsSources, err := diff.GetWithOperationsSourcesMap(flags.toConfig(), s1, s2)
 	if err != nil {
 		return nil, getErrDiffFailed(err)
 	}
@@ -152,11 +151,11 @@ func normalDiff(loader *openapi3.Loader, flags *Flags, view documentView) (*diff
 	return r, nil
 }
 
-func composedDiff(loader *openapi3.Loader, flags *Flags, view documentView) (*diffResult, *ReturnError) {
+func composedDiff(loader *openapi3.Loader, flags *Flags) (*diffResult, *ReturnError) {
 
 	flattenAllOf := load.GetOption(load.WithFlattenAllOf(), flags.getFlattenAllOf())
-	flattenParams := load.GetOption(load.WithFlattenParams(), view.flattenParams)
-	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), view.lowercaseHeaders)
+	flattenParams := load.GetOption(load.WithFlattenParams(), flags.getFlattenParams())
+	lowerHeaderNames := load.GetOption(load.WithLowercaseHeaders(), flags.getCaseInsensitiveHeaders())
 
 	newGlob := loaderForOpen(flags.getOpen(), load.NewSpecInfoFromGlob, load.NewSpecInfoFromGlobWithCapture)
 
@@ -175,7 +174,7 @@ func composedDiff(loader *openapi3.Loader, flags *Flags, view documentView) (*di
 		autoUpgradeSpecs(true, s2...)
 	}
 
-	diffReport, operationsSources, err := diff.GetPathsDiff(flags.toConfig(view), s1, s2)
+	diffReport, operationsSources, err := diff.GetPathsDiff(flags.toConfig(), s1, s2)
 	if err != nil {
 		return nil, getErrDiffFailed(err)
 	}

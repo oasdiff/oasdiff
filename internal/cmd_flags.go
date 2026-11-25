@@ -57,6 +57,19 @@ func hideFlag(cmd *cobra.Command, flag string) {
 	}
 }
 
+// ignoredAnnotation marks a flag that a command accepts and ignores.
+const ignoredAnnotation = "oasdiff_ignored"
+
+// ignoreFlag keeps a flag on cmd, so that command lines that pass it still
+// run, hides it from the help, and marks it so that RunViper clears its value.
+func ignoreFlag(cmd *cobra.Command, flag string) {
+	hideFlag(cmd, flag)
+	if err := cmd.PersistentFlags().SetAnnotation(flag, ignoredAnnotation, []string{"true"}); err != nil {
+		// we can ignore this error safely
+		_ = err
+	}
+}
+
 // deprecatedFlags maps a hidden, legacy flag to the guidance shown when it is
 // used. These stay hidden and functional (so existing scripts don't break) but
 // warn the user, via warnDeprecatedFlags, to move off them. We can't use cobra's
@@ -111,15 +124,12 @@ func addCommonBreakingFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringSlice("attributes", nil, "OpenAPI Extensions to include in json or yaml output")
 	cmd.PersistentFlags().String("template", "", "path to custom template file for changelog generation")
 	enumWithOptions(cmd, newEnumValue(checker.GetSupportedStabilityLevels(), ""), "stability-level", "", "minimum stability level to include")
-	// The checks compare the parameters each operation takes, so the flag that
-	// addCommonDiffFlags registers changes nothing here.
-	hideFlag(cmd, "flatten-params")
-	// The checks compare header names ignoring case, so the flag changes
-	// nothing here either.
-	hideFlag(cmd, "case-insensitive-headers")
-	// The checks read the extensions they need, so excluding one from the
-	// comparison is not offered here.
-	hideFlag(cmd, "exclude-extensions")
+	// The checks compare the specs in full and as written: the parameters each
+	// operation takes, header names ignoring case, and the extensions they
+	// need. So these flags of addCommonDiffFlags change nothing here.
+	ignoreFlag(cmd, "flatten-params")
+	ignoreFlag(cmd, "case-insensitive-headers")
+	ignoreFlag(cmd, "exclude-extensions")
 }
 
 // addOpenFlags registers --open and its companion review-upload flags. Kept out
