@@ -1,10 +1,6 @@
 package checker
 
-import (
-	"github.com/oasdiff/oasdiff/checker/internal/location"
-	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
-	"github.com/oasdiff/oasdiff/diff"
-)
+import "github.com/oasdiff/oasdiff/diff"
 
 const (
 	ResponseBodyPropertyNamesAddedId       = "response-body-property-names-added"
@@ -17,33 +13,7 @@ func ResponsePropertyPropertyNamesUpdatedCheck(diffReport *diff.Diff, operations
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if info.schemaDiff.PropertyNamesDiff != nil {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "propertyNames")
-			if info.schemaDiff.PropertyNamesDiff.SchemaAdded {
-				result = append(result, info.newChange(ResponseBodyPropertyNamesAddedId, []any{info.responseStatus}, "").
-					WithSources(nil, revisionSource))
-			}
-			if info.schemaDiff.PropertyNamesDiff.SchemaDeleted {
-				result = append(result, info.newChange(ResponseBodyPropertyNamesRemovedId, []any{info.responseStatus}, "").
-					WithSources(baseSource, nil))
-			}
-		}
-
-		info.walkProperties(func(p propertyInfo) {
-			if p.propertyDiff.PropertyNamesDiff == nil {
-				return
-			}
-			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
-			propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "propertyNames")
-			if p.propertyDiff.PropertyNamesDiff.SchemaAdded {
-				result = append(result, p.newChange(ResponsePropertyPropertyNamesAddedId, []any{propName, info.responseStatus}, "").
-					WithSources(nil, propRevisionSource))
-			}
-			if p.propertyDiff.PropertyNamesDiff.SchemaDeleted {
-				result = append(result, p.newChange(ResponsePropertyPropertyNamesRemovedId, []any{propName, info.responseStatus}, "").
-					WithSources(propBaseSource, nil))
-			}
-		})
+		result = append(result, subschemaKeywordChanges(info, DirectionResponse, propertyNamesKeyword)...)
 	})
 
 	return result

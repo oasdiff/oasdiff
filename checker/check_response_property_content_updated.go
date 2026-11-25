@@ -22,17 +22,7 @@ func ResponsePropertyContentUpdatedCheck(diffReport *diff.Diff, operationsSource
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if info.schemaDiff.ContentSchemaDiff != nil {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contentSchema")
-			if info.schemaDiff.ContentSchemaDiff.SchemaAdded {
-				result = append(result, info.newChange(ResponseBodyContentSchemaAddedId, []any{info.responseStatus}, "").
-					WithSources(nil, revisionSource))
-			}
-			if info.schemaDiff.ContentSchemaDiff.SchemaDeleted {
-				result = append(result, info.newChange(ResponseBodyContentSchemaRemovedId, []any{info.responseStatus}, "").
-					WithSources(baseSource, nil))
-			}
-		}
+		result = append(result, bodySubschemaKeywordChanges(info, DirectionResponse, contentSchemaKeyword)...)
 
 		if info.schemaDiff.ContentMediaTypeDiff != nil {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contentMediaType")
@@ -51,17 +41,7 @@ func ResponsePropertyContentUpdatedCheck(diffReport *diff.Diff, operationsSource
 		info.walkProperties(func(p propertyInfo) {
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
-			if p.propertyDiff.ContentSchemaDiff != nil {
-				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contentSchema")
-				if p.propertyDiff.ContentSchemaDiff.SchemaAdded {
-					result = append(result, p.newChange(ResponsePropertyContentSchemaAddedId, []any{propName, info.responseStatus}, "").
-						WithSources(nil, propRevisionSource))
-				}
-				if p.propertyDiff.ContentSchemaDiff.SchemaDeleted {
-					result = append(result, p.newChange(ResponsePropertyContentSchemaRemovedId, []any{propName, info.responseStatus}, "").
-						WithSources(propBaseSource, nil))
-				}
-			}
+			result = append(result, propertySubschemaKeywordChanges(p, DirectionResponse, contentSchemaKeyword)...)
 
 			if p.propertyDiff.ContentMediaTypeDiff != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contentMediaType")

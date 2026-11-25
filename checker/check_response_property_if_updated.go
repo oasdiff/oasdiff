@@ -1,10 +1,6 @@
 package checker
 
-import (
-	"github.com/oasdiff/oasdiff/checker/internal/location"
-	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
-	"github.com/oasdiff/oasdiff/diff"
-)
+import "github.com/oasdiff/oasdiff/diff"
 
 const (
 	ResponseBodyIfAddedId       = "response-body-if-added"
@@ -26,57 +22,7 @@ func ResponsePropertyIfUpdatedCheck(diffReport *diff.Diff, operationsSources dif
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		for _, entry := range []struct {
-			schemaDiff *diff.SchemaDiff
-			addedId    string
-			removedId  string
-			field      string
-		}{
-			{info.schemaDiff.IfDiff, ResponseBodyIfAddedId, ResponseBodyIfRemovedId, "if"},
-			{info.schemaDiff.ThenDiff, ResponseBodyThenAddedId, ResponseBodyThenRemovedId, "then"},
-			{info.schemaDiff.ElseDiff, ResponseBodyElseAddedId, ResponseBodyElseRemovedId, "else"},
-		} {
-			if entry.schemaDiff == nil {
-				continue
-			}
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, entry.field)
-			if entry.schemaDiff.SchemaAdded {
-				result = append(result, info.newChange(entry.addedId, []any{info.responseStatus}, "").
-					WithSources(nil, revisionSource))
-			}
-			if entry.schemaDiff.SchemaDeleted {
-				result = append(result, info.newChange(entry.removedId, []any{info.responseStatus}, "").
-					WithSources(baseSource, nil))
-			}
-		}
-
-		info.walkProperties(func(p propertyInfo) {
-			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
-
-			for _, entry := range []struct {
-				schemaDiff *diff.SchemaDiff
-				addedId    string
-				removedId  string
-				field      string
-			}{
-				{p.propertyDiff.IfDiff, ResponsePropertyIfAddedId, ResponsePropertyIfRemovedId, "if"},
-				{p.propertyDiff.ThenDiff, ResponsePropertyThenAddedId, ResponsePropertyThenRemovedId, "then"},
-				{p.propertyDiff.ElseDiff, ResponsePropertyElseAddedId, ResponsePropertyElseRemovedId, "else"},
-			} {
-				if entry.schemaDiff == nil {
-					continue
-				}
-				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, entry.field)
-				if entry.schemaDiff.SchemaAdded {
-					result = append(result, p.newChange(entry.addedId, []any{propName, info.responseStatus}, "").
-						WithSources(nil, propRevisionSource))
-				}
-				if entry.schemaDiff.SchemaDeleted {
-					result = append(result, p.newChange(entry.removedId, []any{propName, info.responseStatus}, "").
-						WithSources(propBaseSource, nil))
-				}
-			}
-		})
+		result = append(result, subschemaKeywordChanges(info, DirectionResponse, ifKeyword, thenKeyword, elseKeyword)...)
 	})
 
 	return result

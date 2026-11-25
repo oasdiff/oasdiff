@@ -25,17 +25,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		if containsDiff := info.schemaDiff.ContainsDiff; containsDiff != nil {
-			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contains")
-			if containsDiff.SchemaAdded {
-				result = append(result, info.newChange(ResponseBodyContainsAddedId, []any{info.responseStatus}, "").
-					WithSources(nil, revisionSource))
-			}
-			if containsDiff.SchemaDeleted {
-				result = append(result, info.newChange(ResponseBodyContainsRemovedId, []any{info.responseStatus}, "").
-					WithSources(baseSource, nil))
-			}
-		}
+		result = append(result, bodySubschemaKeywordChanges(info, DirectionResponse, containsKeyword)...)
 
 		if d := info.schemaDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
@@ -64,17 +54,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		info.walkProperties(func(p propertyInfo) {
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
-			if containsDiff := p.propertyDiff.ContainsDiff; containsDiff != nil {
-				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contains")
-				if containsDiff.SchemaAdded {
-					result = append(result, p.newChange(ResponsePropertyContainsAddedId, []any{propName, info.responseStatus}, "").
-						WithSources(nil, propRevisionSource))
-				}
-				if containsDiff.SchemaDeleted {
-					result = append(result, p.newChange(ResponsePropertyContainsRemovedId, []any{propName, info.responseStatus}, "").
-						WithSources(propBaseSource, nil))
-				}
-			}
+			result = append(result, propertySubschemaKeywordChanges(p, DirectionResponse, containsKeyword)...)
 
 			if d := p.propertyDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")
