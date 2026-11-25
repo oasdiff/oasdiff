@@ -13,7 +13,7 @@ func ResponsePropertyPropertyNamesUpdatedCheck(diffReport *diff.Diff, operations
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, subschemaKeywordChanges(info, DirectionResponse, propertyNamesKeyword)...)
+		result = append(result, singleSchemaKeywordChanges(info, DirectionResponse, propertyNamesKeyword)...)
 	})
 
 	return result

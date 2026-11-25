@@ -18,7 +18,7 @@ func ResponsePropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSo
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, subschemaKeywordChanges(info, DirectionResponse, unevaluatedItemsKeyword, unevaluatedPropertiesKeyword)...)
+		result = append(result, singleSchemaKeywordChanges(info, DirectionResponse, unevaluatedItemsKeyword, unevaluatedPropertiesKeyword)...)
 	})
 
 	return result

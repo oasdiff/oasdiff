@@ -18,7 +18,7 @@ func RequestPropertyUnevaluatedUpdatedCheck(diffReport *diff.Diff, operationsSou
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, subschemaKeywordChanges(info, DirectionRequest, unevaluatedItemsKeyword, unevaluatedPropertiesKeyword)...)
+		result = append(result, singleSchemaKeywordChanges(info, DirectionRequest, unevaluatedItemsKeyword, unevaluatedPropertiesKeyword)...)
 	})
 
 	return result

@@ -25,7 +25,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, bodySubschemaKeywordChanges(info, DirectionResponse, containsKeyword)...)
+		result = append(result, bodySingleSchemaKeywordChanges(info, DirectionResponse, containsKeyword)...)
 
 		if d := info.schemaDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "minContains")
@@ -54,7 +54,7 @@ func ResponsePropertyContainsUpdatedCheck(diffReport *diff.Diff, operationsSourc
 		info.walkProperties(func(p propertyInfo) {
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
-			result = append(result, propertySubschemaKeywordChanges(p, DirectionResponse, containsKeyword)...)
+			result = append(result, propertySingleSchemaKeywordChanges(p, DirectionResponse, containsKeyword)...)
 
 			if d := p.propertyDiff.MinContainsDiff; d != nil && d.From != nil && d.To != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "minContains")

@@ -22,7 +22,7 @@ func RequestPropertyContentUpdatedCheck(diffReport *diff.Diff, operationsSources
 	result := make(Changes, 0)
 
 	walkModifiedRequestBodySchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, bodySubschemaKeywordChanges(info, DirectionRequest, contentSchemaKeyword)...)
+		result = append(result, bodySingleSchemaKeywordChanges(info, DirectionRequest, contentSchemaKeyword)...)
 
 		if info.schemaDiff.ContentMediaTypeDiff != nil {
 			baseSource, revisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, info.schemaDiff, "contentMediaType")
@@ -41,7 +41,7 @@ func RequestPropertyContentUpdatedCheck(diffReport *diff.Diff, operationsSources
 		info.walkProperties(func(p propertyInfo) {
 			propName := schemawalk.PropertyFullName(p.propertyPath, p.propertyName)
 
-			result = append(result, propertySubschemaKeywordChanges(p, DirectionRequest, contentSchemaKeyword)...)
+			result = append(result, propertySingleSchemaKeywordChanges(p, DirectionRequest, contentSchemaKeyword)...)
 
 			if p.propertyDiff.ContentMediaTypeDiff != nil {
 				propBaseSource, propRevisionSource := location.SchemaFieldSources(operationsSources, info.operationItem, p.propertyDiff, "contentMediaType")

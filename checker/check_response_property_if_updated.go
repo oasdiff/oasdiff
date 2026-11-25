@@ -22,7 +22,7 @@ func ResponsePropertyIfUpdatedCheck(diffReport *diff.Diff, operationsSources dif
 	result := make(Changes, 0)
 
 	walkModifiedResponseSchemas(diffReport, operationsSources, config, func(info mediaTypeInfo) {
-		result = append(result, subschemaKeywordChanges(info, DirectionResponse, ifKeyword, thenKeyword, elseKeyword)...)
+		result = append(result, singleSchemaKeywordChanges(info, DirectionResponse, ifKeyword, thenKeyword, elseKeyword)...)
 	})
 
 	return result
