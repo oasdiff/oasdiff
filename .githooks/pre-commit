@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-STAGED_GO_FILES=$(git diff --cached --name-only | grep ".go$")
+echo "==> Running pre-commit hook"
 
-echo "Running pre-commit hook"
-
-make localize
-
-for FILE in ${STAGED_GO_FILES}
-do
-    gofmt -w -s "${FILE}"
-    goimports -w "${FILE}"
-    git add "${FILE}"
-done
-
-set -o errexit
+before=$(git diff --name-only)
+make lint
 make test
-set +o errexit
+after=$(git diff --name-only)
+
+if [ "$before" != "$after" ]; then
+    echo "make changed files; review and stage them, then commit again:"
+    comm -13 <(echo "$before") <(echo "$after")
+    exit 1
+fi
