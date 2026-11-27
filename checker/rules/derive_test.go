@@ -56,6 +56,11 @@ func TestDeriveLevelGuards(t *testing.T) {
 		{"sanctioned is info even for a violation", rules.EffectViolation, rules.DirectionRequest, rules.GuardSanctioned, rules.INFO},
 		{"negotiated gives a response narrowing request polarity", rules.EffectNarrows, rules.DirectionResponse, rules.GuardNegotiated, rules.ERR},
 		{"negotiated makes a response widening safe", rules.EffectWidens, rules.DirectionResponse, rules.GuardNegotiated, rules.INFO},
+		{"negated makes a request narrowing safe", rules.EffectNarrows, rules.DirectionRequest, rules.GuardNegated, rules.INFO},
+		{"negated makes a request widening breaking", rules.EffectWidens, rules.DirectionRequest, rules.GuardNegated, rules.ERR},
+		{"negated makes a response narrowing breaking", rules.EffectNarrows, rules.DirectionResponse, rules.GuardNegated, rules.ERR},
+		{"negated makes a response widening safe", rules.EffectWidens, rules.DirectionResponse, rules.GuardNegated, rules.INFO},
+		{"negated leaves an unknown effect a warning", rules.EffectUnknown, rules.DirectionRequest, rules.GuardNegated, rules.WARN},
 	} {
 		require.Equal(t, tc.level, rules.DeriveLevel(tc.effect, tc.direction, tc.guard), tc.name)
 	}

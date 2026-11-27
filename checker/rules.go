@@ -63,6 +63,7 @@ const (
 	GuardHasDefault         = rules.GuardHasDefault
 	GuardNegotiated         = rules.GuardNegotiated
 	GuardRequiredInRequests = rules.GuardRequiredInRequests
+	GuardNegated            = rules.GuardNegated
 )
 
 // BackwardCompatibilityRule binds the rule metadata to the check function

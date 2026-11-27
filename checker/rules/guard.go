@@ -41,7 +41,14 @@ const (
 	// requests, so the request-side effect of a change that requires it
 	// there is nullified.
 	GuardRequiredInRequests Guard = "required-in-requests"
+	// GuardNegated: the changed schema is under an odd number of `not`
+	// keywords. A value is valid against `not` when it is invalid against
+	// the schema inside, so narrowing that schema widens what the payload
+	// accepts and widening it narrows. No rule declares this guard: it is
+	// observed at the location of a change.
+	GuardNegated Guard = "negated"
 )
 
-// Guards lists every guard, in declaration order.
+// Guards lists every guard a rule declares, in declaration order. GuardNegated
+// is not one of them.
 var Guards = []Guard{GuardReadOnly, GuardWriteOnly, GuardSanctioned, GuardNonSuccess, GuardHasDefault, GuardNegotiated, GuardRequiredInRequests}
