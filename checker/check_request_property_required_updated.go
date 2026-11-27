@@ -1,6 +1,9 @@
 package checker
 
 import (
+	"slices"
+
+	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker/internal/location"
 	"github.com/oasdiff/oasdiff/checker/internal/schemawalk"
 	"github.com/oasdiff/oasdiff/diff"
@@ -24,12 +27,13 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 				return info.newChange(id, args, comment).WithSchema(info.schemaDiff, schemaDiff, schemawalk.PropertyFullName(propertyPath, propertyName))
 			}
 			for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Added {
-				if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
+				property, relevant := changedRequiredProperty(schemaDiff, changedRequiredPropertyName, true)
+				if !relevant {
 					continue
 				}
 				srcBase, srcRevision := location.SchemaAddedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
 				args := []any{schemawalk.PropertyFullName(propertyPath, schemawalk.PropertyFullName(propertyName, changedRequiredPropertyName))}
-				if schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.Default == nil {
+				if !property.hasDefault {
 					result = append(result, newChange(RequestPropertyBecameRequiredId, args, "").
 						WithSources(srcBase, srcRevision))
 				} else {
@@ -43,7 +47,7 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 				}
 			}
 			for _, changedRequiredPropertyName := range schemaDiff.RequiredDiff.Deleted {
-				if !changedRequiredPropertyRelevant(schemaDiff, changedRequiredPropertyName) {
+				if _, relevant := changedRequiredProperty(schemaDiff, changedRequiredPropertyName, false); !relevant {
 					continue
 				}
 				srcBase, srcRevision := location.SchemaDeletedItemSources(operationsSources, info.operationItem, schemaDiff, "required", changedRequiredPropertyName)
@@ -63,19 +67,86 @@ func RequestPropertyRequiredUpdatedCheck(diffReport *diff.Diff, operationsSource
 	return result
 }
 
-func changedRequiredPropertyRelevant(schemaDiff *diff.SchemaDiff, changedRequiredPropertyName string) bool {
-	if schemaDiff.Base.Properties[changedRequiredPropertyName] == nil {
-		// it is a new property, checked by the new-required-request-property check
-		return false
+func changedRequiredProperty(schemaDiff *diff.SchemaDiff, name string, added bool) (requestProperty, bool) {
+	property, relevant := effectiveRequiredChange(schemaDiff, name, added)
+	if !relevant || schemaDiff.AllOfDiff == nil {
+		return property, relevant
 	}
-	if schemaDiff.Revision.Properties[changedRequiredPropertyName] == nil {
-		// property was removed, checked by request-property-removed
-		return false
-	}
-	if schemaDiff.Revision.Properties[changedRequiredPropertyName].Value.ReadOnly {
-		// property is read-only, not relevant in requests
-		return false
-	}
+	// Prefer the branch's more specific location when it will report the
+	// same edit. A sibling branch may own the declaration instead, in which
+	// case only the outer schema has enough information to report it.
+	return property, !branchReportsRequiredChange(schemaDiff, name, added, map[*diff.SchemaDiff]bool{})
+}
 
-	return true
+func branchReportsRequiredChange(schemaDiff *diff.SchemaDiff, name string, added bool, seen map[*diff.SchemaDiff]bool) bool {
+	if schemaDiff.AllOfDiff == nil || seen[schemaDiff] {
+		return false
+	}
+	seen[schemaDiff] = true
+	for _, branch := range schemaDiff.AllOfDiff.Modified {
+		d := branch.Diff
+		if d.RequiredDiff != nil {
+			names := d.RequiredDiff.Added
+			if !added {
+				names = d.RequiredDiff.Deleted
+			}
+			if slices.Contains(names, name) {
+				if _, relevant := effectiveRequiredChange(d, name, added); relevant {
+					return true
+				}
+			}
+		}
+		if branchReportsRequiredChange(d, name, added, seen) {
+			return true
+		}
+	}
+	return false
+}
+
+func effectiveRequiredChange(schemaDiff *diff.SchemaDiff, name string, added bool) (requestProperty, bool) {
+	base := lookupRequestProperty(schemaDiff.Base, name)
+	revision := lookupRequestProperty(schemaDiff.Revision, name)
+	// Property additions and removals have their own checks. A change to an
+	// outer required list can also repeat a requirement from an allOf branch.
+	if !base.declared || !revision.declared || revision.readOnly {
+		return revision, false
+	}
+	if added {
+		return revision, !base.requiredByAllOf
+	}
+	return revision, !revision.requiredByAllOf
+}
+
+type requestProperty struct {
+	declared, requiredByAllOf, readOnly, hasDefault bool
+}
+
+// Every allOf branch applies to the same object. A property's declaration,
+// annotations and required list can therefore live in different branches.
+func lookupRequestProperty(schema *openapi3.Schema, name string) (property requestProperty) {
+	seen := map[*openapi3.Schema]bool{}
+	pending := []*openapi3.Schema{schema}
+	for len(pending) > 0 {
+		last := len(pending) - 1
+		current := pending[last]
+		pending = pending[:last]
+		if current == nil || seen[current] {
+			continue
+		}
+		seen[current] = true
+		if current != schema && slices.Contains(current.Required, name) {
+			property.requiredByAllOf = true
+		}
+		if ref := current.Properties[name]; ref != nil && ref.Value != nil {
+			property.declared = true
+			property.readOnly = property.readOnly || ref.Value.ReadOnly
+			property.hasDefault = property.hasDefault || ref.Value.Default != nil
+		}
+		for _, branch := range current.AllOf {
+			if branch != nil {
+				pending = append(pending, branch.Value)
+			}
+		}
+	}
+	return property
 }
