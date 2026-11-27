@@ -114,3 +114,47 @@ func TestLoadInfo_GitRevisionFetchNoOrigin(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "fetch")
 }
+
+func TestLoadInfo_GitRevisionFetchRemoteBranch(t *testing.T) {
+	origin := t.TempDir()
+	gitRun(t, origin, "git", "init", "-b", "main")
+	gitRun(t, origin, "git", "config", "user.name", "Test")
+	gitRun(t, origin, "git", "config", "user.email", "test@test.com")
+	specPath := filepath.Join(origin, "openapi.yaml")
+	require.NoError(t, os.WriteFile(specPath, []byte(specV1), 0644))
+	gitRun(t, origin, "git", "add", "openapi.yaml")
+	gitRun(t, origin, "git", "commit", "-m", "base")
+	gitRun(t, origin, "git", "checkout", "-b", "release/v1")
+	require.NoError(t, os.WriteFile(specPath, []byte(strings.Replace(specV1, "1.0", "1.1", 1)), 0644))
+	gitRun(t, origin, "git", "commit", "-am", "release")
+	gitRun(t, origin, "git", "checkout", "-b", "topic", "main")
+	require.NoError(t, os.WriteFile(specPath, []byte(specV2), 0644))
+	gitRun(t, origin, "git", "commit", "-am", "topic")
+
+	clone := t.TempDir()
+	// --no-local makes Git honor --depth even though the remote is on disk.
+	gitRun(t, origin, "git", "clone", "--no-local", "--single-branch", "--depth=1", "--branch", "topic", origin, clone)
+	t.Chdir(clone)
+	for branch, version := range map[string]string{"main": "1.0", "release/v1": "1.1"} {
+		t.Run(branch, func(t *testing.T) {
+			ref := "origin/" + branch
+			src := load.NewSource(ref + ":openapi.yaml")
+			_, missing := load.NewSpecInfo(openapi3.NewLoader(), src)
+			require.ErrorContains(t, missing, "--fetch")
+			require.Error(t, exec.Command("git", "show-ref", "--verify", "--quiet", "refs/remotes/"+ref).Run())
+
+			src.Fetch = true
+			info, err := load.NewSpecInfo(openapi3.NewLoader(), src)
+			require.NoError(t, err)
+			require.Equal(t, version, info.GetVersion())
+			require.Equal(t, gitRun(t, origin, "git", "rev-parse", branch),
+				gitRun(t, clone, "git", "rev-parse", "refs/remotes/"+ref))
+			require.Equal(t, "topic", gitRun(t, clone, "git", "branch", "--show-current"))
+			require.ErrorContains(t, missing, "git fetch --depth=1 origin refs/heads/"+branch+":refs/remotes/"+ref)
+		})
+	}
+
+	_, err := load.NewSpecInfo(openapi3.NewLoader(), load.NewSource("origin/docs/reader's-guide:openapi.yaml"))
+	require.ErrorContains(t, err, "In a POSIX shell")
+	require.ErrorContains(t, err, `git fetch --depth=1 origin 'refs/heads/docs/reader'\''s-guide:refs/remotes/origin/docs/reader'\''s-guide'`)
+}

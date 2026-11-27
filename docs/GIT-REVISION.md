@@ -47,19 +47,14 @@ The command must be run from within the git repository that contains the spec.
 
 ## Fetching missing commits (`--fetch`)
 
-oasdiff reads git revisions from your local object store only; it does not modify your repository by default. If the commit you reference is not in the local clone (a common case when reviewing someone else's PR commit, or in a shallow clone), `git show` fails and oasdiff prints the exact command to fetch it:
-
-```
-git fetch origin <ref>
-```
-
-Pass `--fetch` to let oasdiff run that fetch for you, against the `origin` remote, before reading the spec:
+By default, oasdiff reads Git revisions from the local object store. When a revision is missing, the error shows the command to fetch it. Use `--fetch` to load a missing revision from the configured `origin` remote.
 
 ```bash
 oasdiff changelog --fetch <base-sha>:openapi.yaml <revision-sha>:openapi.yaml
+oasdiff changelog --fetch origin/main:openapi.yaml HEAD:openapi.yaml
 ```
 
-`--fetch` downloads the missing git objects into your local repository (it does not move any branch or ref). Because it mutates the repository, it is opt-in. Only revisions whose commit is genuinely missing trigger a fetch; commits already present are read directly.
+For a missing `origin/<branch>`, oasdiff fetches the branch tip with `--depth=1` into `refs/remotes/origin/<branch>`. It reads locally available revisions directly. A missing path in a local revision is reported as a file error.
 
 ## GitHub Actions
 
@@ -76,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: git fetch --depth=1 origin ${{ github.base_ref }}
+      - run: git fetch --depth=1 origin "refs/heads/$GITHUB_BASE_REF:refs/remotes/origin/$GITHUB_BASE_REF"
 
       - uses: oasdiff/oasdiff-action/breaking@v0
         with:
@@ -86,13 +81,11 @@ jobs:
 
 `actions/checkout` makes a shallow clone that holds only the pull request's commit, so the base branch has to be fetched before `origin/<branch>` resolves. Fetching that one branch is enough, and `fetch-depth: 0` is not required.
 
-When you run the CLI yourself in a workflow, [`--fetch`](#fetching-missing-commits---fetch) can do the fetch, given the base commit and not a branch name:
+A CLI step can compare the base branch with the checked-out pull request commit using `--fetch`.
 
 ```bash
-oasdiff breaking --fetch ${{ github.event.pull_request.base.sha }}:openapi.yaml openapi.yaml
+oasdiff breaking --fetch "origin/$GITHUB_BASE_REF:openapi.yaml" HEAD:openapi.yaml
 ```
-
-`--fetch` runs `git fetch origin <ref>`, which downloads a commit or branch but does not create `origin/<branch>` in a shallow clone, so `origin/main:openapi.yaml` still fails with it.
 
 ## See also
 
