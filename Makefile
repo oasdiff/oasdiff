@@ -56,6 +56,10 @@ localize: ## Compile localized changelog messages
 	go install github.com/m1/go-localize@latest
 	go-localize -input checker/localizations_src -output checker/localizations 
 	go fmt ./checker/localizations
+	@# go-localize stamps the generation time on line 3; drop a timestamp-only change
+	@if git diff --quiet -I'^// [0-9][0-9][0-9][0-9]-' -- checker/localizations/localizations.go; then \
+		git checkout -- checker/localizations/localizations.go; \
+	fi
 
 .PHONY: devtools
 devtools:  ## Install dev tools
