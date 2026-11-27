@@ -2,6 +2,7 @@ package validate
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/checker"
@@ -10,8 +11,8 @@ import (
 
 // Schema-constraint coherence lints: a single schema whose own keywords
 // contradict each other or violate a JSON Schema MUST. The parser accepts all
-// of these (they are well-formed), but no instance can ever satisfy them, so
-// they are authoring mistakes rather than choices. See oasdiff/oasdiff#927.
+// of these (they are well-formed). A combination can rule out all instances
+// or make part of a constraint unreachable. See oasdiff/oasdiff#927 and #1181.
 //
 // Severity follows the spec text. A literal MUST violation is an error; a
 // combination the spec does not forbid outright but that no value can satisfy
@@ -20,13 +21,18 @@ const (
 	// SubschemasEmptyID: allOf / anyOf / oneOf MUST be a non-empty array.
 	SubschemasEmptyID = "subschemas-empty"
 
-	// The remaining rules describe unsatisfiable bounds: min above max means no
+	// These rules describe unsatisfiable bounds: min above max means no
 	// instance can validate.
 	MinimumExceedsMaximumID         = "minimum-exceeds-maximum"
 	MinLengthExceedsMaxLengthID     = "min-length-exceeds-max-length"
 	MinItemsExceedsMaxItemsID       = "min-items-exceeds-max-items"
 	MinPropertiesExceedsMaxPropsID  = "min-properties-exceeds-max-properties"
 	MinContainsExceedsMaxContainsID = "min-contains-exceeds-max-contains"
+
+	// Tuple bounds can make a position unreachable, an array impossible or a bound redundant.
+	PrefixItemsBeyondMaxItemsID  = "prefix-items-beyond-max-items"
+	MinItemsExceedsPrefixItemsID = "min-items-exceeds-prefix-items"
+	MaxItemsExceedsClosedTupleID = "max-items-exceeds-closed-tuple"
 	// EnumEmptyID: JSON Schema says an "enum" array SHOULD have at least one
 	// element; an empty one accepts nothing.
 	EnumEmptyID = "enum-empty"
@@ -45,13 +51,36 @@ const (
 // JSON Pointer, matching the other native lints.
 func lintSchemaConstraints(spec *openapi3.T, source string) formatters.Findings {
 	var findings formatters.Findings
+	var tuples formatters.Findings
+	checkTuples := spec.IsOpenAPI31OrLater() && isTupleDialect(spec.JSONSchemaDialect)
 	// The callback never errors, so WalkSchemas never returns one.
 	_ = spec.WalkSchemas(func(jsonPointer string, schema *openapi3.SchemaRef) error {
 		s := schema.Value // WalkSchemas guarantees schema and schema.Value are non-nil
 		findings = append(findings, schemaConstraintFindings(s, jsonPointer, source)...)
+		// A resolved $ref can combine its target and sibling assertions. When
+		// their dialects differ, kin does not retain their individual dialects.
+		if !isTupleDialect(s.SchemaDialect) {
+			checkTuples = false
+		}
+		if checkTuples && s.Type.Permits(openapi3.TypeArray) {
+			tuples = append(tuples, tupleLengthFindings(s, jsonPointer, source)...)
+		}
 		return nil
 	})
+	if checkTuples {
+		findings = append(findings, tuples...)
+	}
 	return findings
+}
+
+// The OpenAPI base dialects and JSON Schema 2020-12 define prefixItems.
+func isTupleDialect(uri string) bool {
+	switch strings.TrimSuffix(uri, "#") {
+	case "", "https://json-schema.org/draft/2020-12/schema",
+		"https://spec.openapis.org/oas/3.1/dialect/base", "https://spec.openapis.org/oas/3.2/dialect/base":
+		return true
+	}
+	return false
 }
 
 func schemaConstraintFindings(s *openapi3.Schema, section, source string) formatters.Findings {
@@ -119,6 +148,29 @@ func schemaConstraintFindings(s *openapi3.Schema, section, source string) format
 		}
 	}
 
+	return findings
+}
+
+func tupleLengthFindings(s *openapi3.Schema, section, source string) formatters.Findings {
+	var findings formatters.Findings
+	add := func(id, field, text string, args ...any) {
+		findings = append(findings, newSchemaConstraintFinding(s, id, RuleLevel(id), field, text, section, source, args))
+	}
+	prefixLen := uint64(len(s.PrefixItems))
+	if s.MaxItems != nil && *s.MaxItems < prefixLen {
+		add(PrefixItemsBeyondMaxItemsID, "maxItems",
+			fmt.Sprintf("maxItems is %d, so the remaining prefixItems entries are unreachable", *s.MaxItems), *s.MaxItems, prefixLen)
+	}
+	if s.Items != nil && s.Items.Value != nil && s.Items.Value.Always != nil && !*s.Items.Value.Always {
+		if s.MinItems > prefixLen {
+			add(MinItemsExceedsPrefixItemsID, "minItems",
+				fmt.Sprintf("minItems is %d, but items: false permits at most %d items, so no array can validate", s.MinItems, prefixLen), s.MinItems, prefixLen)
+		}
+		if s.MaxItems != nil && *s.MaxItems > prefixLen {
+			add(MaxItemsExceedsClosedTupleID, "maxItems",
+				fmt.Sprintf("maxItems is %d, but items: false already limits arrays to %d items", *s.MaxItems, prefixLen), *s.MaxItems, prefixLen)
+		}
+	}
 	return findings
 }
 
