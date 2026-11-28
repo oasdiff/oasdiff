@@ -114,3 +114,91 @@ func TestLoadInfo_GitRevisionFetchNoOrigin(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "fetch")
 }
+
+// TestLoadInfo_GitRevisionFetch_OriginBranch verifies that --fetch works with
+// origin/<branch> refs in a shallow clone that lacks the remote-tracking ref.
+func TestLoadInfo_GitRevisionFetch_OriginBranch(t *testing.T) {
+	origin := t.TempDir()
+	gitRun(t, origin, "git", "init", "-b", "main")
+	gitRun(t, origin, "git", "config", "user.email", "test@test.com")
+	gitRun(t, origin, "git", "config", "user.name", "Test")
+
+	require.NoError(t, os.WriteFile(filepath.Join(origin, "openapi.yaml"), []byte(specV1), 0644))
+	gitRun(t, origin, "git", "add", "openapi.yaml")
+	gitRun(t, origin, "git", "commit", "-m", "v1 on main")
+
+	// Advance a feature branch to v2
+	gitRun(t, origin, "git", "checkout", "-b", "feat")
+	require.NoError(t, os.WriteFile(filepath.Join(origin, "openapi.yaml"), []byte(specV2), 0644))
+	gitRun(t, origin, "git", "add", "openapi.yaml")
+	gitRun(t, origin, "git", "commit", "-m", "v2 on feat")
+
+	// Shallow clone only the feature branch via file:// URL so it mimics CI (actions/checkout)
+	clone := t.TempDir()
+	gitRun(t, filepath.Dir(clone), "git", "clone", "--depth=1", "--branch=feat", "file://"+origin, clone)
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(clone))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	require.Error(t, exec.Command("git", "cat-file", "-e", "origin/main").Run(),
+		"precondition: shallow clone must not already have origin/main")
+
+	ref := "origin/main:openapi.yaml"
+
+	// Without --fetch: origin/main is missing, so load fails with hint pointing to fetch
+	_, err = load.NewSpecInfo(openapi3.NewLoader(), load.NewSource(ref))
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "--fetch")
+	require.Contains(t, err.Error(), "git fetch --depth=1 origin main:refs/remotes/origin/main")
+
+	// With --fetch: oasdiff fetches main into refs/remotes/origin/main and loads it
+	src := load.NewSource(ref)
+	src.Fetch = true
+	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), src)
+	require.NoError(t, err)
+	require.Equal(t, "1.0", specInfo.GetVersion())
+
+	// The fetch populated the remote-tracking ref
+	require.NoError(t, exec.Command("git", "cat-file", "-e", "origin/main").Run())
+}
+
+// TestLoadInfo_GitRevisionFetch_OriginBranch_Nested verifies that --fetch works
+// with branch names containing slashes (e.g. origin/release/v1.0).
+func TestLoadInfo_GitRevisionFetch_OriginBranch_Nested(t *testing.T) {
+	origin := t.TempDir()
+	gitRun(t, origin, "git", "init", "-b", "main")
+	gitRun(t, origin, "git", "config", "user.email", "test@test.com")
+	gitRun(t, origin, "git", "config", "user.name", "Test")
+
+	gitRun(t, origin, "git", "checkout", "-b", "release/v1.0")
+	require.NoError(t, os.WriteFile(filepath.Join(origin, "openapi.yaml"), []byte(specV1), 0644))
+	gitRun(t, origin, "git", "add", "openapi.yaml")
+	gitRun(t, origin, "git", "commit", "-m", "v1 on release/v1.0")
+
+	gitRun(t, origin, "git", "checkout", "-b", "feat")
+	require.NoError(t, os.WriteFile(filepath.Join(origin, "openapi.yaml"), []byte(specV2), 0644))
+	gitRun(t, origin, "git", "add", "openapi.yaml")
+	gitRun(t, origin, "git", "commit", "-m", "v2 on feat")
+
+	clone := t.TempDir()
+	gitRun(t, filepath.Dir(clone), "git", "clone", "--depth=1", "--branch=feat", "file://"+origin, clone)
+
+	oldDir, err := os.Getwd()
+	require.NoError(t, err)
+	require.NoError(t, os.Chdir(clone))
+	defer os.Chdir(oldDir) //nolint:errcheck
+
+	require.Error(t, exec.Command("git", "cat-file", "-e", "origin/release/v1.0").Run(),
+		"precondition: shallow clone must not already have origin/release/v1.0")
+
+	ref := "origin/release/v1.0:openapi.yaml"
+	src := load.NewSource(ref)
+	src.Fetch = true
+	specInfo, err := load.NewSpecInfo(openapi3.NewLoader(), src)
+	require.NoError(t, err)
+	require.Equal(t, "1.0", specInfo.GetVersion())
+
+	require.NoError(t, exec.Command("git", "cat-file", "-e", "origin/release/v1.0").Run())
+}
