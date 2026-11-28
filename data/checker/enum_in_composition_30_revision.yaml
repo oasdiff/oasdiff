@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: Pets
+  version: "1.0"
+paths:
+  /pets:
+    post:
+      operationId: createPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        nickname:
+          description: Known nicknames, any other nickname, or none.
+          anyOf:
+          - type: string
+            nullable: true
+            enum: [rex]
+          - type: string
+            nullable: true

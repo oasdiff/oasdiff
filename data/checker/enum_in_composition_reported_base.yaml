@@ -1,0 +1,46 @@
+openapi: 3.1.0
+info:
+  title: Pets
+  version: "1.0"
+paths:
+  /pets:
+    post:
+      operationId: createPet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pet'
+components:
+  schemas:
+    Pet:
+      type: object
+      properties:
+        tags:
+          description: The enum applies to each item, not to the array.
+          items:
+            type: string
+            enum: [black, white, brown]
+        traits:
+          description: The enum applies to each value, not to the object.
+          additionalProperties:
+            type: string
+            enum: [black, white, brown]
+        kind:
+          description: A known kind, or the placeholder.
+          anyOf:
+          - type: string
+            enum: [cat, dog, bird]
+          - const: unknown
+        breed:
+          description: Every branch applies, so the enum restricts the breed.
+          allOf:
+          - type: string
+          - enum: [beagle, poodle, pug]

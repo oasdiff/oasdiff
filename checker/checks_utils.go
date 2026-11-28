@@ -2,10 +2,12 @@ package checker
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/oasdiff/oasdiff/diff"
+	"github.com/oasdiff/oasdiff/internal/oasversion"
 )
 
 func commentId(id string) string {
@@ -176,6 +178,44 @@ func deletedEnumValues(schemaDiff *diff.SchemaDiff) diff.EnumValues {
 		return nil
 	}
 	return schemaDiff.EnumDiff.Deleted
+}
+
+// enclosingSchemaAcceptsOnBothSides reports whether value is valid, before and
+// after the change, for the schema whose allOf, anyOf or oneOf branch holds
+// the enum. Those branches validate the same instance as that schema, so an
+// enum in one anyOf branch next to a branch that accepts every string does not
+// restrict the property's values, and adding or removing one of its values
+// changes nothing a client can observe. Any other enum, a named property's own
+// or one under items or additionalProperties, is reported as before.
+func enclosingSchemaAcceptsOnBothSides(diffReport *diff.Diff, p propertyInfo, value any) bool {
+	if p.propertyName != "" || p.parent == nil || p.parent.Base == nil || p.parent.Revision == nil || !isCompositionBranch(p.parent, p.propertyDiff) {
+		return false
+	}
+
+	return p.parent.Base.VisitJSON(value, schemaValidationOptions(diffReport.BaseOpenAPI)...) == nil &&
+		p.parent.Revision.VisitJSON(value, schemaValidationOptions(diffReport.RevisionOpenAPI)...) == nil
+}
+
+// isCompositionBranch reports whether branch is one of parent's allOf, anyOf
+// or oneOf branches.
+func isCompositionBranch(parent, branch *diff.SchemaDiff) bool {
+	isBranch := func(m *diff.ModifiedSubschema) bool { return m.Diff == branch }
+
+	return (parent.AllOfDiff != nil && slices.ContainsFunc(parent.AllOfDiff.Modified, isBranch)) ||
+		(parent.AnyOfDiff != nil && slices.ContainsFunc(parent.AnyOfDiff.Modified, isBranch)) ||
+		(parent.OneOfDiff != nil && slices.ContainsFunc(parent.OneOfDiff.Modified, isBranch))
+}
+
+// schemaValidationOptions returns the options that validate a document's
+// schemas the way its OpenAPI version reads them: as JSON Schema 2020-12 for
+// OpenAPI 3.1 and later, so keywords such as const and if/then/else apply, and
+// with the OpenAPI 3.0 rules otherwise, so nullable applies.
+func schemaValidationOptions(version string) []openapi3.SchemaValidationOption {
+	if oasversion.Of(version) == oasversion.OpenAPI31 {
+		return []openapi3.SchemaValidationOption{openapi3.EnableJSONSchema2020()}
+	}
+
+	return nil
 }
 
 // addedEnumValues returns the values added to an enum, or none when the enum

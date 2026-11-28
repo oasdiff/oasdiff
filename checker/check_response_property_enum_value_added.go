@@ -28,6 +28,10 @@ func ResponsePropertyEnumValueAddedCheck(diffReport *diff.Diff, operationsSource
 			}
 
 			for _, enumVal := range addedEnumValues(p.propertyDiff) {
+				if enclosingSchemaAcceptsOnBothSides(diffReport, p, enumVal) {
+					continue
+				}
+
 				baseSource, revisionSource := location.SchemaAddedItemSources(operationsSources, info.operationItem, p.propertyDiff, "enum", fmt.Sprintf("%v", enumVal))
 				result = append(result, p.newChange(
 					id,
