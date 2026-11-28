@@ -169,11 +169,15 @@ func hintMissingObject(gitRef string, err error) error {
 		// rather than leaving a caller to ask git the same question again.
 		return pathNotInRefError{err}
 	}
+	fetchCmd := "git fetch origin " + ref
+	if branch, ok := parseOriginBranch(ref); ok {
+		fetchCmd = fmt.Sprintf("git fetch --depth=1 origin %s:refs/remotes/origin/%s", branch, branch)
+	}
 	return fmt.Errorf("%w\n\n"+
 		"oasdiff reads git revisions from local objects only and does not modify your repository.\n"+
 		"Commit %q is not in this clone. Fetch it yourself with:\n\n"+
-		"    git fetch origin %s\n\n"+
-		"then re-run oasdiff, or re-run with --fetch to let oasdiff fetch it for you", err, ref, ref)
+		"    %s\n\n"+
+		"then re-run oasdiff, or re-run with --fetch to let oasdiff fetch it for you", err, ref, fetchCmd)
 }
 
 // refBeforeColon returns the "<ref>" portion of a "<ref>:<path>" git revision,
@@ -213,7 +217,31 @@ func checkRef(ref string) error {
 	if strings.HasPrefix(ref, "-") {
 		return fmt.Errorf("%w: %q", ErrRefLooksLikeOption, ref)
 	}
+	if branch, ok := parseOriginBranch(ref); ok && strings.HasPrefix(branch, "-") {
+		return fmt.Errorf("%w: %q", ErrRefLooksLikeOption, ref)
+	}
 	return nil
+}
+
+// parseOriginBranch returns the remote branch name if ref refers to a remote-tracking
+// branch under origin (e.g. "origin/main", "remotes/origin/main", or
+// "refs/remotes/origin/main").
+func parseOriginBranch(ref string) (string, bool) {
+	var branch string
+	switch {
+	case strings.HasPrefix(ref, "refs/remotes/origin/"):
+		branch = strings.TrimPrefix(ref, "refs/remotes/origin/")
+	case strings.HasPrefix(ref, "remotes/origin/"):
+		branch = strings.TrimPrefix(ref, "remotes/origin/")
+	case strings.HasPrefix(ref, "origin/"):
+		branch = strings.TrimPrefix(ref, "origin/")
+	default:
+		return "", false
+	}
+	if branch == "" || strings.ContainsAny(branch, ": \t\n\r") {
+		return "", false
+	}
+	return branch, true
 }
 
 func refBeforeColon(gitRef string) string {
@@ -225,14 +253,21 @@ func refBeforeColon(gitRef string) string {
 
 // gitFetch downloads the named commit/ref from the "origin" remote into the
 // local object store so a subsequent "git show <ref>:<path>" can resolve it. It
-// mutates the repository (adds objects; no local ref or branch is moved), which
+// mutates the repository (adds objects or updates remote-tracking refs), which
 // is why it runs only under the opt-in --fetch flag. It mirrors the manual
-// "git fetch origin <ref>" that hintMissingObject suggests when --fetch is off.
+// fetch command that hintMissingObject suggests when --fetch is off.
 func gitFetch(ref string) error {
 	if err := checkRef(ref); err != nil {
 		return err
 	}
-	if out, err := exec.Command("git", "fetch", "--end-of-options", "origin", ref).CombinedOutput(); err != nil {
+	var cmd *exec.Cmd
+	if branch, ok := parseOriginBranch(ref); ok {
+		refspec := fmt.Sprintf("%s:refs/remotes/origin/%s", branch, branch)
+		cmd = exec.Command("git", "fetch", "--depth=1", "--end-of-options", "origin", refspec)
+	} else {
+		cmd = exec.Command("git", "fetch", "--end-of-options", "origin", ref)
+	}
+	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("%s", strings.TrimSpace(string(out)))
 	}
 	return nil

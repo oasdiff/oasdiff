@@ -86,13 +86,13 @@ jobs:
 
 `actions/checkout` makes a shallow clone that holds only the pull request's commit, so the base branch has to be fetched before `origin/<branch>` resolves. Fetching that one branch is enough, and `fetch-depth: 0` is not required.
 
-When you run the CLI yourself in a workflow, [`--fetch`](#fetching-missing-commits---fetch) can do the fetch, given the base commit and not a branch name:
+When you run the CLI yourself in a workflow, [`--fetch`](#fetching-missing-commits---fetch) can do the fetch directly:
 
 ```bash
-oasdiff breaking --fetch ${{ github.event.pull_request.base.sha }}:openapi.yaml openapi.yaml
+oasdiff breaking --fetch origin/${{ github.base_ref }}:openapi.yaml openapi.yaml
 ```
 
-`--fetch` runs `git fetch origin <ref>`, which downloads a commit or branch but does not create `origin/<branch>` in a shallow clone, so `origin/main:openapi.yaml` still fails with it.
+When comparing against an `origin/<branch>` ref that is not in the local clone, `--fetch` runs `git fetch --depth=1 origin <branch>:refs/remotes/origin/<branch>` to populate the remote-tracking ref so the comparison succeeds.
 
 ## See also
 
